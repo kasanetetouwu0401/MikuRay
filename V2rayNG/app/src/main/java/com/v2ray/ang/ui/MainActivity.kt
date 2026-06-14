@@ -435,10 +435,6 @@ class MainActivity : HelperBaseActivity(),
         badge.post { badge.requestLayout() }
     }
 
-    /**
-     * Tampilkan custom icon pada tab view. Jika iconName null/blank atau
-     * resource tidak ditemukan, ImageView disembunyikan.
-     */
     private fun setTabIcon(iconView: android.widget.ImageView?, iconName: String?) {
         iconView ?: return
         if (iconName.isNullOrBlank()) {

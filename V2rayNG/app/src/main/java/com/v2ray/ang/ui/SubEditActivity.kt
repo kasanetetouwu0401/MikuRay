@@ -42,10 +42,8 @@ class SubEditActivity : BaseActivity() {
 
     private lateinit var softInputAssist: SoftInputAssist
 
-    // ── Tab icon ────────────────────────────────────────────────────────────
     private var selectedIconDrawable: String? = null
 
-    /** Semua drawable filter_* yang tersedia sebagai opsi icon tab. */
     private val tabIcons: List<String> = listOf(
         "filter_all_solar",
         "filter_airplane_solar",
@@ -100,10 +98,7 @@ class SubEditActivity : BaseActivity() {
         }
     }
 
-    // ── Tab icon field ──────────────────────────────────────────────────────
-
     private fun setupTabIconField() {
-        // Seluruh field (EditText + endIcon) membuka picker
         binding.etTabIcon.setOnClickListener { showIconPickerDialog() }
         binding.tilTabIcon.setEndIconOnClickListener { showIconPickerDialog() }
     }
@@ -114,7 +109,6 @@ class SubEditActivity : BaseActivity() {
         val checkNone  = dialogView.findViewById<ImageView>(R.id.check_none)
         val rv         = dialogView.findViewById<RecyclerView>(R.id.rv_icons)
 
-        // Setup RecyclerView grid — 5 kolom
         val adapter = TabIconPickerAdapter(
             context     = this,
             icons       = tabIcons,
@@ -127,7 +121,6 @@ class SubEditActivity : BaseActivity() {
         rv.layoutManager = GridLayoutManager(this, 5)
         rv.adapter = adapter
 
-        // "None" row
         fun refreshNoneCheck() {
             val noneSelected = selectedIconDrawable == null
             checkNone.visibility = if (noneSelected) android.view.View.VISIBLE else android.view.View.GONE
@@ -153,7 +146,6 @@ class SubEditActivity : BaseActivity() {
 
     private var dialog: androidx.appcompat.app.AlertDialog? = null
 
-    /** Terapkan pilihan icon: update state, field text, dan startIcon preview. */
     private fun applyIconSelection(iconName: String?) {
         selectedIconDrawable = iconName
         if (iconName == null) {
@@ -164,7 +156,6 @@ class SubEditActivity : BaseActivity() {
             )
         } else {
             val resId = resources.getIdentifier(iconName, "drawable", packageName)
-            // Label: nama file diformat jadi human-readable, e.g. "filter_work_solar" → "Work"
             val label = iconName
                 .removePrefix("filter_")
                 .removeSuffix("_solar")
@@ -178,8 +169,6 @@ class SubEditActivity : BaseActivity() {
             }
         }
     }
-
-    // ── binding / clear ─────────────────────────────────────────────────────
 
     private fun bindingServer(subItem: SubscriptionItem): Boolean {
         binding.etRemarks.setText(Utils.getEditable(subItem.remarks))

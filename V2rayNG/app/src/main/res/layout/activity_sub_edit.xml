@@ -85,7 +85,6 @@
                         android:inputType="text" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Tab Icon Picker — tap untuk buka grid dialog -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/til_tab_icon"
                     app:shapeAppearance="?shapeAppearanceCornerMedium"
