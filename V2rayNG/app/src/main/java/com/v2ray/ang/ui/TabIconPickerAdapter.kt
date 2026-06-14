@@ -14,15 +14,17 @@ import com.v2ray.ang.util.getColorAttr
 /**
  * Grid adapter untuk tab icon picker dialog.
  * Tiap item menampilkan satu vector drawable dari daftar [icons].
- * Selected item mendapat background [colorPrimaryContainer] dan tint
- * [colorOnPrimaryContainer]; unselected pakai [colorOnSurfaceVariant].
+ * Item dengan nilai `null` merepresentasikan opsi "tanpa icon" — cell
+ * ditampilkan kosong tanpa drawable.
+ * Selected item mendapat background [colorPrimary] dan tint
+ * [colorOnPrimary] (icon & check); unselected pakai [colorOnSurfaceVariant].
  */
 class TabIconPickerAdapter(
     private val context: Context,
-    /** List nama drawable resource tanpa ".xml", e.g. "filter_cloud_solar" */
-    val icons: List<String>,
+    /** List nama drawable resource tanpa ".xml" (e.g. "filter_cloud_solar"), atau null untuk opsi "tanpa icon". */
+    val icons: List<String?>,
     private var selectedIcon: String?,
-    private val onSelect: (String) -> Unit,
+    private val onSelect: (String?) -> Unit,
 ) : RecyclerView.Adapter<TabIconPickerAdapter.VH>() {
 
     inner class VH(view: View) : RecyclerView.ViewHolder(view) {
@@ -41,10 +43,10 @@ class TabIconPickerAdapter(
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val name     = icons[position]
-        val resId    = context.resources.getIdentifier(name, "drawable", context.packageName)
+        val resId    = if (name != null) context.resources.getIdentifier(name, "drawable", context.packageName) else 0
         val selected = name == selectedIcon
 
-        // Icon drawable
+        // Icon drawable — kosong jika item ini adalah opsi "tanpa icon" atau resource tidak ditemukan
         if (resId != 0) {
             holder.icon.setImageResource(resId)
         } else {
@@ -54,9 +56,9 @@ class TabIconPickerAdapter(
         // Tint & background
         val (bgColor, iconTint, checkTint) = if (selected) {
             Triple(
-                context.getColorAttr("colorPrimaryContainer"),
-                context.getColorAttr("colorOnPrimaryContainer"),
                 context.getColorAttr("colorPrimary"),
+                context.getColorAttr("colorOnPrimary"),
+                context.getColorAttr("colorOnPrimary"),
             )
         } else {
             Triple(
