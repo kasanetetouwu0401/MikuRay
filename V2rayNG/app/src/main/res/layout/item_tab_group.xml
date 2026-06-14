@@ -7,6 +7,19 @@
     android:orientation="horizontal"
     android:gravity="center_vertical">
 
+    <!--
+        Tab icon — ditampilkan hanya jika subscription punya custom tabIcon.
+        Ukuran 18dp mengikuti konvensi icon inline Material3.
+    -->
+    <ImageView
+        android:id="@+id/tab_icon"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_marginEnd="5dp"
+        android:visibility="gone"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no" />
+
     <TextView
         android:id="@+id/tab_label"
         android:layout_width="wrap_content"

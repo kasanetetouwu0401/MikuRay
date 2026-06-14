@@ -126,6 +126,7 @@ class MainActivity : HelperBaseActivity(),
 
         SubscriptionUpdater.sync()
         mainViewModel.reloadServerList()
+        refreshGroupTabTitles(true)
 
         checkAndRequestPermission(PermissionType.POST_NOTIFICATIONS) {}
     }
@@ -434,6 +435,25 @@ class MainActivity : HelperBaseActivity(),
         badge.post { badge.requestLayout() }
     }
 
+    /**
+     * Tampilkan custom icon pada tab view. Jika iconName null/blank atau
+     * resource tidak ditemukan, ImageView disembunyikan.
+     */
+    private fun setTabIcon(iconView: android.widget.ImageView?, iconName: String?) {
+        iconView ?: return
+        if (iconName.isNullOrBlank()) {
+            iconView.visibility = android.view.View.GONE
+            return
+        }
+        val resId = resources.getIdentifier(iconName, "drawable", packageName)
+        if (resId == 0) {
+            iconView.visibility = android.view.View.GONE
+            return
+        }
+        iconView.setImageResource(resId)
+        iconView.visibility = android.view.View.VISIBLE
+    }
+
     private fun applyTabSelectedStyle(
         tab: com.google.android.material.tabs.TabLayout.Tab?,
         selected: Boolean,
@@ -441,17 +461,20 @@ class MainActivity : HelperBaseActivity(),
         tabCount: Int = binding.tabGroup.tabCount
     ) {
         val view = tab?.customView ?: return
+        val icon = view.findViewById<android.widget.ImageView>(R.id.tab_icon)
         val label = view.findViewById<TextView>(R.id.tab_label) ?: return
         val badge = view.findViewById<TextView>(R.id.tab_badge) ?: return
 
+        val tintColor = if (selected) getColorAttr("colorOnPrimary") else getColorAttr("colorOnSurfaceVariant")
+        label.setTextColor(tintColor)
+        icon?.imageTintList = android.content.res.ColorStateList.valueOf(tintColor)
+
         if (selected) {
-            label.setTextColor(getColorAttr("colorOnPrimary"))
             badge.setTextColor(getColorAttr("colorPrimary"))
             badge.backgroundTintList = android.content.res.ColorStateList.valueOf(
                 getColorAttr("colorOnPrimary")
             )
         } else {
-            label.setTextColor(getColorAttr("colorOnSurfaceVariant"))
             badge.setTextColor(getColorAttr("colorOnPrimary"))
             badge.backgroundTintList = android.content.res.ColorStateList.valueOf(
                 getColorAttr("colorPrimary")
@@ -468,9 +491,11 @@ class MainActivity : HelperBaseActivity(),
             groupPagerAdapter.groups.getOrNull(position)?.let { group ->
                 tab.tag = group.id
                 val tabView = LayoutInflater.from(this).inflate(R.layout.item_tab_group, null)
+                val tabIcon = tabView.findViewById<android.widget.ImageView>(R.id.tab_icon)
                 val tabLabel = tabView.findViewById<TextView>(R.id.tab_label)
                 val tabBadge = tabView.findViewById<TextView>(R.id.tab_badge)
                 tabLabel.text = group.remarks
+                setTabIcon(tabIcon, group.icon)
                 setBadgeVisibility(tabBadge, tabLabel, group.serverCount)
                 tab.customView = tabView
             }
@@ -498,8 +523,6 @@ class MainActivity : HelperBaseActivity(),
         binding.layoutTabWrapper.isVisible = hasAnyGroup
         binding.tabGroup.isVisible = hasAnyGroup
         (binding.tabGroup.parent as? View)?.isVisible = hasAnyGroup
-        
-        refreshGroupTabTitles(true)
     }
 
     fun refreshGroupTabTitles(refreshAll: Boolean = false) {

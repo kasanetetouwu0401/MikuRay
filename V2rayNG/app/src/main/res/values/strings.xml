@@ -699,4 +699,8 @@ you need."</string>
     <string name="title_blur_settings">Blur Settings</string>
     <string name="title_blur_warning">High iterations (10+) may cause FPS drops. Recommended: 2-5 iterations with radius 25-40</string>
 
+    <string name="sub_setting_tab_icon">Tab icon</string>
+    <string name="sub_setting_tab_icon_hint">Shown next to the group name in the tab bar</string>
+    <string name="sub_tab_icon_none">None</string>
+
 </resources>

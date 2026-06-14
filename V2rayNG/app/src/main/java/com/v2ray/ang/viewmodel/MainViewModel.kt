@@ -303,7 +303,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 GroupMapItem(
                     id = sub.guid,
                     remarks = sub.subscription.remarks,
-                    serverCount = MmkvManager.decodeServerList(sub.guid).size
+                    serverCount = MmkvManager.decodeServerList(sub.guid).size,
+                    icon = sub.subscription.tabIcon,
                 )
             )
         }
