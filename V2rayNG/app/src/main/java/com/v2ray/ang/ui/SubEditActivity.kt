@@ -10,7 +10,6 @@ import android.widget.AutoCompleteTextView
 import android.widget.ImageView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.v2ray.ang.util.showDeleteConfirmDialog
 import androidx.lifecycle.lifecycleScope
@@ -28,6 +27,7 @@ import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.SubscriptionUpdater
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.util.WindowBlurUtils
+import com.v2ray.ang.util.getColorAttr
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.v2ray.ang.util.SoftInputAssist
@@ -131,9 +131,7 @@ class SubEditActivity : BaseActivity() {
         fun refreshNoneCheck() {
             val noneSelected = selectedIconDrawable == null
             checkNone.visibility = if (noneSelected) android.view.View.VISIBLE else android.view.View.GONE
-            val tint = if (noneSelected)
-                MaterialColors.getColor(this, com.google.android.material.R.attr.colorPrimary, 0)
-            else 0
+            val tint = if (noneSelected) getColorAttr("colorPrimary") else 0
             checkNone.imageTintList = ColorStateList.valueOf(tint)
         }
         refreshNoneCheck()
@@ -153,7 +151,7 @@ class SubEditActivity : BaseActivity() {
         dialog!!.show()
     }
 
-    private var dialog: android.app.AlertDialog? = null
+    private var dialog: androidx.appcompat.app.AlertDialog? = null
 
     /** Terapkan pilihan icon: update state, field text, dan startIcon preview. */
     private fun applyIconSelection(iconName: String?) {
@@ -162,9 +160,7 @@ class SubEditActivity : BaseActivity() {
             binding.etTabIcon.setText(getString(R.string.sub_tab_icon_none))
             binding.tilTabIcon.setStartIconDrawable(R.drawable.filter_all)
             binding.tilTabIcon.setStartIconTintList(
-                ColorStateList.valueOf(
-                    MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant, 0)
-                )
+                ColorStateList.valueOf(getColorAttr("colorOnSurfaceVariant"))
             )
         } else {
             val resId = resources.getIdentifier(iconName, "drawable", packageName)
@@ -177,9 +173,7 @@ class SubEditActivity : BaseActivity() {
             if (resId != 0) {
                 binding.tilTabIcon.setStartIconDrawable(resId)
                 binding.tilTabIcon.setStartIconTintList(
-                    ColorStateList.valueOf(
-                        MaterialColors.getColor(this, com.google.android.material.R.attr.colorPrimary, 0)
-                    )
+                    ColorStateList.valueOf(getColorAttr("colorPrimary"))
                 )
             }
         }

@@ -8,8 +8,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.color.MaterialColors
 import com.v2ray.ang.R
+import com.v2ray.ang.util.getColorAttr
 
 /**
  * Grid adapter untuk tab icon picker dialog.
@@ -54,14 +54,14 @@ class TabIconPickerAdapter(
         // Tint & background
         val (bgColor, iconTint, checkTint) = if (selected) {
             Triple(
-                MaterialColors.getColor(context, com.google.android.material.R.attr.colorPrimaryContainer, 0),
-                MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnPrimaryContainer, 0),
-                MaterialColors.getColor(context, com.google.android.material.R.attr.colorPrimary, 0),
+                context.getColorAttr("colorPrimaryContainer"),
+                context.getColorAttr("colorOnPrimaryContainer"),
+                context.getColorAttr("colorPrimary"),
             )
         } else {
             Triple(
                 0, // transparent
-                MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurfaceVariant, 0),
+                context.getColorAttr("colorOnSurfaceVariant"),
                 0,
             )
         }
