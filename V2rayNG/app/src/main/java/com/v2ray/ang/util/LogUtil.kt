@@ -55,6 +55,8 @@ object LogUtil {
     private fun log(priority: Int, tag: String, message: String, throwable: Throwable? = null) {
         if (!isEnabled(priority)) return
 
+        val fullMessage = if (throwable != null) "$message\n${throwable.stackTraceToString()}" else message
+
         when {
             throwable == null -> Log.println(priority, tag, message)
             priority >= Log.ERROR -> Log.e(tag, message, throwable)
@@ -63,6 +65,10 @@ object LogUtil {
             priority == Log.DEBUG -> Log.d(tag, message, throwable)
             else -> Log.v(tag, message, throwable)
         }
+
+        // Feed into in-process buffer as fallback for devices (e.g. MIUI/HyperOS)
+        // where logcat exec is blocked for third-party apps.
+        InProcessLogBuffer.append(priority, tag, fullMessage)
     }
 
     fun d(tag: String = AppConfig.TAG, message: String) = log(Log.DEBUG, tag, message)
