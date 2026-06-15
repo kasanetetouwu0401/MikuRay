@@ -63,12 +63,11 @@ object TabIconHelper {
             val parser = Xml.newPullParser()
             FileInputStream(file).use { stream ->
                 parser.setInput(stream, null)
-                // advance ke START_TAG pertama
                 var event = parser.eventType
                 while (event != org.xmlpull.v1.XmlPullParser.START_TAG) {
                     event = parser.next()
                 }
-                VectorDrawableCompat.createFromXml(context.resources, parser)
+                VectorDrawableCompat.createFromXml(context.resources, parser) as? VectorDrawableCompat
             }
         } catch (e: Exception) {
             null
