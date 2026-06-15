@@ -307,7 +307,6 @@
     <string name="logcat_share">Share log</string>
     <string name="logcat_copy">Copy</string>
     <string name="logcat_clear">Clear</string>
-    <string name="logcat_fallback_notice">logcat blocked by system — displays app internal logs</string>
     <string name="title_service_restart">Service restart</string>
     <string name="title_del_all_config">Delete all config</string>
     <string name="title_del_duplicate_config">Delete duplicate config</string>

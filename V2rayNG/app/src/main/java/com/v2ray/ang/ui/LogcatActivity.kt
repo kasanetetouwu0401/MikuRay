@@ -165,9 +165,6 @@ class LogcatActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
             withContext(Dispatchers.Main) {
                 binding.refreshLayout.isRefreshing = false
                 refreshData()
-                if (viewModel.usedFallback) {
-                    toast(getString(R.string.logcat_fallback_notice))
-                }
             }
         }
     }
