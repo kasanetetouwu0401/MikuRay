@@ -1,7 +1,6 @@
 package com.v2ray.ang.ui
 
 import android.content.res.ColorStateList
-import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.Menu
@@ -9,7 +8,6 @@ import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.ImageView
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -27,7 +25,6 @@ import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.SubscriptionUpdater
-import com.v2ray.ang.util.TabIconHelper
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.util.WindowBlurUtils
 import com.v2ray.ang.util.getColorAttr
@@ -46,32 +43,6 @@ class SubEditActivity : BaseActivity() {
     private lateinit var softInputAssist: SoftInputAssist
 
     private var selectedIconDrawable: String? = null
-
-    /** Launcher untuk memilih file XML vector drawable dari storage. */
-    private val pickXmlLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri ?: return@registerForActivityResult
-        try {
-            val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                ?: return@registerForActivityResult
-            // Validasi minimal: harus ada tag <vector
-            val preview = bytes.decodeToString(throwOnInvalidSequence = false)
-            if (!preview.contains("<vector")) {
-                alertError(getString(R.string.sub_tab_icon_invalid_xml), title = getString(R.string.title_alerter_error))
-                return@registerForActivityResult
-            }
-            if (TabIconHelper.isCustom(selectedIconDrawable)) {
-                TabIconHelper.deleteIcon(this, selectedIconDrawable)
-            }
-            val iconName = TabIconHelper.saveXml(
-                this,
-                editSubId.ifEmpty { System.currentTimeMillis().toString() },
-                bytes
-            )
-            applyIconSelection(iconName)
-        } catch (e: Exception) {
-            alertError("Gagal memuat file: ${e.message}", title = getString(R.string.title_alerter_error))
-        }
-    }
 
     private val tabIcons: List<String> = listOf(
         "filter_all_solar",
@@ -166,9 +137,6 @@ class SubEditActivity : BaseActivity() {
         dialog = MaterialAlertDialogBuilder(this)
             .setTitle(R.string.sub_setting_tab_icon)
             .setView(dialogView)
-            .setNeutralButton(R.string.sub_tab_icon_pick_gallery) { _, _ ->
-                pickXmlLauncher.launch("*/*")
-            }
             .setNegativeButton(android.R.string.cancel, null)
             .create()
 
@@ -186,15 +154,6 @@ class SubEditActivity : BaseActivity() {
             binding.tilTabIcon.setStartIconTintList(
                 ColorStateList.valueOf(getColorAttr("colorOnSurfaceVariant"))
             )
-        } else if (TabIconHelper.isCustom(iconName)) {
-            val drawable = TabIconHelper.loadVector(this, iconName)
-            if (drawable != null) {
-                binding.tilTabIcon.startIconDrawable = drawable
-                binding.tilTabIcon.setStartIconTintList(
-                    ColorStateList.valueOf(getColorAttr("colorOnSurfaceVariant"))
-                )
-            }
-            binding.etTabIcon.setText(R.string.sub_tab_icon_custom_image)
         } else {
             val resId = resources.getIdentifier(iconName, "drawable", packageName)
             val label = iconName
@@ -205,7 +164,7 @@ class SubEditActivity : BaseActivity() {
             if (resId != 0) {
                 binding.tilTabIcon.setStartIconDrawable(resId)
                 binding.tilTabIcon.setStartIconTintList(
-                    ColorStateList.valueOf(getColorAttr("colorPrimary"))
+                    ColorStateList.valueOf(getColorAttr("colorOnSurfaceVariant"))
                 )
             }
         }
@@ -336,20 +295,18 @@ class SubEditActivity : BaseActivity() {
 
     private fun deleteServer(): Boolean {
         if (editSubId.isNotEmpty()) {
-            val doDelete: () -> Unit = {
-                lifecycleScope.launch(Dispatchers.IO) {
-                    // Hapus custom icon dari storage sebelum subscription dihapus
-                    if (TabIconHelper.isCustom(selectedIconDrawable)) {
-                        TabIconHelper.deleteIcon(this@SubEditActivity, selectedIconDrawable)
+            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_CONFIRM_REMOVE)) {
+                showDeleteConfirmDialog(context = this, messageRes = R.string.del_sub_dialog_comfirm_message) {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        SettingsManager.removeSubscriptionWithDefault(editSubId)
+                        launch(Dispatchers.Main) { finish() }
                     }
+                }
+            } else {
+                lifecycleScope.launch(Dispatchers.IO) {
                     SettingsManager.removeSubscriptionWithDefault(editSubId)
                     launch(Dispatchers.Main) { finish() }
                 }
-            }
-            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_CONFIRM_REMOVE)) {
-                showDeleteConfirmDialog(context = this, messageRes = R.string.del_sub_dialog_comfirm_message) { doDelete() }
-            } else {
-                doDelete()
             }
         }
         return true

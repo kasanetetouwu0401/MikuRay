@@ -435,16 +435,10 @@ class MainActivity : HelperBaseActivity(),
         badge.post { badge.requestLayout() }
     }
 
-    private fun setTabIcon(iconView: android.widget.ImageView?, iconName: String?, tintColor: Int? = null) {
+    private fun setTabIcon(iconView: android.widget.ImageView?, iconName: String?) {
         iconView ?: return
         if (iconName.isNullOrBlank()) {
             iconView.visibility = android.view.View.GONE
-            return
-        }
-        if (com.v2ray.ang.util.TabIconHelper.isCustom(iconName)) {
-            val color = tintColor ?: getColorAttr("colorOnSurfaceVariant")
-            val ok = com.v2ray.ang.util.TabIconHelper.applyToImageView(this, iconName, iconView, color)
-            iconView.visibility = if (ok) android.view.View.VISIBLE else android.view.View.GONE
             return
         }
         val resId = resources.getIdentifier(iconName, "drawable", packageName)
@@ -452,7 +446,6 @@ class MainActivity : HelperBaseActivity(),
             iconView.visibility = android.view.View.GONE
             return
         }
-        com.v2ray.ang.util.TabIconHelper.clearTint(iconView)
         iconView.setImageResource(resId)
         iconView.visibility = android.view.View.VISIBLE
     }
@@ -470,7 +463,6 @@ class MainActivity : HelperBaseActivity(),
 
         val tintColor = if (selected) getColorAttr("colorOnPrimary") else getColorAttr("colorOnSurfaceVariant")
         label.setTextColor(tintColor)
-        icon?.clearColorFilter()
         icon?.imageTintList = android.content.res.ColorStateList.valueOf(tintColor)
 
         if (selected) {
