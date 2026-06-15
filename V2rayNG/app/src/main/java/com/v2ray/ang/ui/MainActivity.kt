@@ -470,14 +470,8 @@ class MainActivity : HelperBaseActivity(),
 
         val tintColor = if (selected) getColorAttr("colorOnPrimary") else getColorAttr("colorOnSurfaceVariant")
         label.setTextColor(tintColor)
-        if (icon != null) {
-            if (icon.drawable is android.graphics.drawable.BitmapDrawable) {
-                icon.colorFilter = android.graphics.PorterDuffColorFilter(tintColor, android.graphics.PorterDuff.Mode.SRC_IN)
-            } else {
-                icon.clearColorFilter()
-                icon.imageTintList = android.content.res.ColorStateList.valueOf(tintColor)
-            }
-        }
+        icon?.clearColorFilter()
+        icon?.imageTintList = android.content.res.ColorStateList.valueOf(tintColor)
 
         if (selected) {
             badge.setTextColor(getColorAttr("colorPrimary"))

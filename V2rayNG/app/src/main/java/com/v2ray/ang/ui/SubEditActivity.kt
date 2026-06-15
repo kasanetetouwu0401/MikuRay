@@ -1,13 +1,6 @@
 package com.v2ray.ang.ui
 
 import android.content.res.ColorStateList
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
@@ -54,22 +47,29 @@ class SubEditActivity : BaseActivity() {
 
     private var selectedIconDrawable: String? = null
 
-    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    /** Launcher untuk memilih file XML vector drawable dari storage. */
+    private val pickXmlLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri ?: return@registerForActivityResult
         try {
-            val stream = contentResolver.openInputStream(uri) ?: return@registerForActivityResult
-            val bmp = BitmapFactory.decodeStream(stream)
-            stream.close()
-            bmp ?: return@registerForActivityResult
-
+            val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                ?: return@registerForActivityResult
+            // Validasi minimal: harus ada tag <vector
+            val preview = bytes.decodeToString(throwOnInvalidSequence = false)
+            if (!preview.contains("<vector")) {
+                alertError(getString(R.string.sub_tab_icon_invalid_xml), title = getString(R.string.title_alerter_error))
+                return@registerForActivityResult
+            }
             if (TabIconHelper.isCustom(selectedIconDrawable)) {
                 TabIconHelper.deleteIcon(this, selectedIconDrawable)
             }
-
-            val iconName = TabIconHelper.saveBitmap(this, editSubId.ifEmpty { System.currentTimeMillis().toString() }, bmp)
+            val iconName = TabIconHelper.saveXml(
+                this,
+                editSubId.ifEmpty { System.currentTimeMillis().toString() },
+                bytes
+            )
             applyIconSelection(iconName)
         } catch (e: Exception) {
-            alertError("Failed to load image: ${e.message}", title = getString(R.string.title_alerter_error))
+            alertError("Gagal memuat file: ${e.message}", title = getString(R.string.title_alerter_error))
         }
     }
 
@@ -153,7 +153,7 @@ class SubEditActivity : BaseActivity() {
         fun refreshNoneCheck() {
             val noneSelected = selectedIconDrawable == null
             checkNone.visibility = if (noneSelected) android.view.View.VISIBLE else android.view.View.GONE
-            val tint = if (noneSelected) getColorAttr("colorOnSurfaceVariant") else 0
+            val tint = if (noneSelected) getColorAttr("colorPrimary") else 0
             checkNone.imageTintList = ColorStateList.valueOf(tint)
         }
         refreshNoneCheck()
@@ -167,7 +167,7 @@ class SubEditActivity : BaseActivity() {
             .setTitle(R.string.sub_setting_tab_icon)
             .setView(dialogView)
             .setNeutralButton(R.string.sub_tab_icon_pick_gallery) { _, _ ->
-                pickImageLauncher.launch("image/*")
+                pickXmlLauncher.launch("*/*")
             }
             .setNegativeButton(android.R.string.cancel, null)
             .create()
@@ -187,22 +187,12 @@ class SubEditActivity : BaseActivity() {
                 ColorStateList.valueOf(getColorAttr("colorOnSurfaceVariant"))
             )
         } else if (TabIconHelper.isCustom(iconName)) {
-            val file = TabIconHelper.iconFile(this, iconName)
-            if (file.exists()) {
-                val raw = BitmapFactory.decodeFile(file.absolutePath)
-                if (raw != null) {
-                    val px = (24 * resources.displayMetrics.density).toInt()
-                    val scaled = Bitmap.createScaledBitmap(raw, px, px, true)
-                    val tintColor = getColorAttr("colorOnSurfaceVariant")
-                    val tinted = scaled.copy(Bitmap.Config.ARGB_8888, true)
-                    val canvas = Canvas(tinted)
-                    val paint = Paint().apply {
-                        colorFilter = PorterDuffColorFilter(tintColor, PorterDuff.Mode.SRC_IN)
-                    }
-                    canvas.drawBitmap(scaled, 0f, 0f, paint)
-                    binding.tilTabIcon.startIconDrawable = BitmapDrawable(resources, tinted)
-                    binding.tilTabIcon.setStartIconTintList(null)
-                }
+            val drawable = TabIconHelper.loadVector(this, iconName)
+            if (drawable != null) {
+                binding.tilTabIcon.startIconDrawable = drawable
+                binding.tilTabIcon.setStartIconTintList(
+                    ColorStateList.valueOf(getColorAttr("colorOnSurfaceVariant"))
+                )
             }
             binding.etTabIcon.setText(R.string.sub_tab_icon_custom_image)
         } else {
@@ -251,6 +241,8 @@ class SubEditActivity : BaseActivity() {
         return true
     }
 
+    // ── Profile remark autocomplete ─────────────────────────────────────────
+
     private fun setupProfileRemarkInputs() {
         val suggestions = SettingsManager.getProfileRemarks(
             excludeConfigTypes = setOf(
@@ -270,6 +262,8 @@ class SubEditActivity : BaseActivity() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, suggestions)
         input.setAdapter(adapter)
     }
+
+    // ── Save ────────────────────────────────────────────────────────────────
 
     private fun saveServer(): Boolean {
         val subItem = MmkvManager.decodeSubscription(editSubId) ?: SubscriptionItem()
@@ -338,10 +332,13 @@ class SubEditActivity : BaseActivity() {
         return true
     }
 
+    // ── Delete ──────────────────────────────────────────────────────────────
+
     private fun deleteServer(): Boolean {
         if (editSubId.isNotEmpty()) {
             val doDelete: () -> Unit = {
                 lifecycleScope.launch(Dispatchers.IO) {
+                    // Hapus custom icon dari storage sebelum subscription dihapus
                     if (TabIconHelper.isCustom(selectedIconDrawable)) {
                         TabIconHelper.deleteIcon(this@SubEditActivity, selectedIconDrawable)
                     }
@@ -358,6 +355,8 @@ class SubEditActivity : BaseActivity() {
         return true
     }
 
+    // ── Menu ────────────────────────────────────────────────────────────────
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.action_server, menu)
         del_config = menu.findItem(R.id.del_config)
@@ -370,6 +369,8 @@ class SubEditActivity : BaseActivity() {
         R.id.save_config -> { saveServer(); true }
         else -> super.onOptionsItemSelected(item)
     }
+
+    // ── Lifecycle ───────────────────────────────────────────────────────────
 
     override fun onResume() {
         if (::softInputAssist.isInitialized) softInputAssist.onResume()
