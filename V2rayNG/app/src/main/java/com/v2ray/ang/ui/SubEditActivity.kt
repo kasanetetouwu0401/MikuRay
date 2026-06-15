@@ -1,6 +1,9 @@
 package com.v2ray.ang.ui
 
 import android.content.res.ColorStateList
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.Menu
@@ -8,6 +11,7 @@ import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.ImageView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -25,6 +29,7 @@ import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.SubscriptionUpdater
+import com.v2ray.ang.util.TabIconHelper
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.util.WindowBlurUtils
 import com.v2ray.ang.util.getColorAttr
@@ -43,6 +48,25 @@ class SubEditActivity : BaseActivity() {
     private lateinit var softInputAssist: SoftInputAssist
 
     private var selectedIconDrawable: String? = null
+
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri ?: return@registerForActivityResult
+        try {
+            val stream = contentResolver.openInputStream(uri) ?: return@registerForActivityResult
+            val bmp = BitmapFactory.decodeStream(stream)
+            stream.close()
+            bmp ?: return@registerForActivityResult
+
+            if (TabIconHelper.isCustom(selectedIconDrawable)) {
+                TabIconHelper.deleteIcon(this, selectedIconDrawable)
+            }
+
+            val iconName = TabIconHelper.saveBitmap(this, editSubId.ifEmpty { System.currentTimeMillis().toString() }, bmp)
+            applyIconSelection(iconName)
+        } catch (e: Exception) {
+            alertError("Failed to load image: ${e.message}", title = getString(R.string.title_alerter_error))
+        }
+    }
 
     private val tabIcons: List<String> = listOf(
         "filter_all_solar",
@@ -137,6 +161,9 @@ class SubEditActivity : BaseActivity() {
         dialog = MaterialAlertDialogBuilder(this)
             .setTitle(R.string.sub_setting_tab_icon)
             .setView(dialogView)
+            .setNeutralButton(R.string.sub_tab_icon_pick_gallery) { _, _ ->
+                pickImageLauncher.launch("image/*")
+            }
             .setNegativeButton(android.R.string.cancel, null)
             .create()
 
@@ -154,6 +181,16 @@ class SubEditActivity : BaseActivity() {
             binding.tilTabIcon.setStartIconTintList(
                 ColorStateList.valueOf(getColorAttr("colorOnSurfaceVariant"))
             )
+        } else if (TabIconHelper.isCustom(iconName)) {
+            binding.etTabIcon.setText(R.string.sub_tab_icon_custom_image)
+            val file = TabIconHelper.iconFile(this, iconName)
+            if (file.exists()) {
+                val bmp = BitmapFactory.decodeFile(file.absolutePath)
+                if (bmp != null) {
+                    binding.tilTabIcon.startIconDrawable = BitmapDrawable(resources, bmp)
+                    binding.tilTabIcon.setStartIconTintList(null) // no tint — tampilkan warna asli
+                }
+            }
         } else {
             val resId = resources.getIdentifier(iconName, "drawable", packageName)
             val label = iconName
@@ -200,8 +237,6 @@ class SubEditActivity : BaseActivity() {
         return true
     }
 
-    // ── Profile remark autocomplete ─────────────────────────────────────────
-
     private fun setupProfileRemarkInputs() {
         val suggestions = SettingsManager.getProfileRemarks(
             excludeConfigTypes = setOf(
@@ -221,8 +256,6 @@ class SubEditActivity : BaseActivity() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, suggestions)
         input.setAdapter(adapter)
     }
-
-    // ── Save ────────────────────────────────────────────────────────────────
 
     private fun saveServer(): Boolean {
         val subItem = MmkvManager.decodeSubscription(editSubId) ?: SubscriptionItem()
@@ -291,28 +324,25 @@ class SubEditActivity : BaseActivity() {
         return true
     }
 
-    // ── Delete ──────────────────────────────────────────────────────────────
-
     private fun deleteServer(): Boolean {
         if (editSubId.isNotEmpty()) {
-            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_CONFIRM_REMOVE)) {
-                showDeleteConfirmDialog(context = this, messageRes = R.string.del_sub_dialog_comfirm_message) {
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        SettingsManager.removeSubscriptionWithDefault(editSubId)
-                        launch(Dispatchers.Main) { finish() }
-                    }
-                }
-            } else {
+            val doDelete: () -> Unit = {
                 lifecycleScope.launch(Dispatchers.IO) {
+                    if (TabIconHelper.isCustom(selectedIconDrawable)) {
+                        TabIconHelper.deleteIcon(this@SubEditActivity, selectedIconDrawable)
+                    }
                     SettingsManager.removeSubscriptionWithDefault(editSubId)
                     launch(Dispatchers.Main) { finish() }
                 }
             }
+            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_CONFIRM_REMOVE)) {
+                showDeleteConfirmDialog(context = this, messageRes = R.string.del_sub_dialog_comfirm_message) { doDelete() }
+            } else {
+                doDelete()
+            }
         }
         return true
     }
-
-    // ── Menu ────────────────────────────────────────────────────────────────
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.action_server, menu)
@@ -326,8 +356,6 @@ class SubEditActivity : BaseActivity() {
         R.id.save_config -> { saveServer(); true }
         else -> super.onOptionsItemSelected(item)
     }
-
-    // ── Lifecycle ───────────────────────────────────────────────────────────
 
     override fun onResume() {
         if (::softInputAssist.isInitialized) softInputAssist.onResume()
