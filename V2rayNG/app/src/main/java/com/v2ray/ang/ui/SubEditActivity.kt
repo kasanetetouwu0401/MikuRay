@@ -1,7 +1,12 @@
 package com.v2ray.ang.ui
 
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
@@ -182,15 +187,24 @@ class SubEditActivity : BaseActivity() {
                 ColorStateList.valueOf(getColorAttr("colorOnSurfaceVariant"))
             )
         } else if (TabIconHelper.isCustom(iconName)) {
-            binding.etTabIcon.setText(R.string.sub_tab_icon_custom_image)
             val file = TabIconHelper.iconFile(this, iconName)
             if (file.exists()) {
-                val bmp = BitmapFactory.decodeFile(file.absolutePath)
-                if (bmp != null) {
-                    binding.tilTabIcon.startIconDrawable = BitmapDrawable(resources, bmp)
-                    binding.tilTabIcon.setStartIconTintList(null) // no tint — tampilkan warna asli
+                val raw = BitmapFactory.decodeFile(file.absolutePath)
+                if (raw != null) {
+                    val px = (24 * resources.displayMetrics.density).toInt()
+                    val scaled = Bitmap.createScaledBitmap(raw, px, px, true)
+                    val tintColor = getColorAttr("colorOnSurfaceVariant")
+                    val tinted = scaled.copy(Bitmap.Config.ARGB_8888, true)
+                    val canvas = Canvas(tinted)
+                    val paint = Paint().apply {
+                        colorFilter = PorterDuffColorFilter(tintColor, PorterDuff.Mode.SRC_IN)
+                    }
+                    canvas.drawBitmap(scaled, 0f, 0f, paint)
+                    binding.tilTabIcon.startIconDrawable = BitmapDrawable(resources, tinted)
+                    binding.tilTabIcon.setStartIconTintList(null)
                 }
             }
+            binding.etTabIcon.setText(R.string.sub_tab_icon_custom_image)
         } else {
             val resId = resources.getIdentifier(iconName, "drawable", packageName)
             val label = iconName
