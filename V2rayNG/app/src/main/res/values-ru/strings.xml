@@ -691,5 +691,9 @@
     <string name="uwu_welcome_page1_desc">Бесплатный клиент V2Ray/Xray с открытым исходным кодом.</string>
     <string name="uwu_welcome_page2_desc">Поддерживает VLESS, VMess, Trojan, Shadowsocks и другие.</string>
     <string name="uwu_welcome_page3_desc">Ощутите быстрый и безопасный интернет в милом дизайне в стиле Мику.</string>
+    
+    <string name="sub_setting_tab_icon">Иконка вкладки</string>
+    <string name="sub_setting_tab_icon_hint">Отображается рядом с названием группы на панели вкладок</string>
+    <string name="sub_tab_icon_none">Нет</string>
 
 </resources>

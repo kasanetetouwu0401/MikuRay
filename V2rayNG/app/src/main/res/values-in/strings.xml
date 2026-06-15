@@ -672,5 +672,9 @@ yang kamu butuhin."</string>
     <string name="uwu_welcome_page1_desc">Klien V2Ray/Xray Android gratis dan open source.</string>
     <string name="uwu_welcome_page2_desc">Mendukung VLESS, VMess, Trojan, Shadowsocks, dan lainnya.</string>
     <string name="uwu_welcome_page3_desc">Nikmatin internet cepet dan aman dengan balutan desain imut ala Miku.</string>
+    
+    <string name="sub_setting_tab_icon">Ikon tab</string>
+    <string name="sub_setting_tab_icon_hint">Ditampilin di sebelah nama grup di tab bar</string>
+    <string name="sub_tab_icon_none">Nggak ada</string>
 
 </resources>

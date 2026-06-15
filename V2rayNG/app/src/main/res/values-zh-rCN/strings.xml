@@ -670,5 +670,9 @@
     <string name="uwu_welcome_page1_desc">免费开源的 Android V2Ray/Xray 客户端。</string>
     <string name="uwu_welcome_page2_desc">支持 VLESS、VMess、Trojan、Shadowsocks 等协议。</string>
     <string name="uwu_welcome_page3_desc">在可爱的 Miku 风格设计中，体验快速且安全的网络连接。</string>
+    
+    <string name="sub_setting_tab_icon">标签页图标</string>
+    <string name="sub_setting_tab_icon_hint">在标签栏的分组名称旁边显示</string>
+    <string name="sub_tab_icon_none">无</string>
 
 </resources>
