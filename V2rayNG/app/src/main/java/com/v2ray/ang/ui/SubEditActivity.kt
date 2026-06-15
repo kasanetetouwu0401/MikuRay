@@ -153,7 +153,7 @@ class SubEditActivity : BaseActivity() {
         fun refreshNoneCheck() {
             val noneSelected = selectedIconDrawable == null
             checkNone.visibility = if (noneSelected) android.view.View.VISIBLE else android.view.View.GONE
-            val tint = if (noneSelected) getColorAttr("colorPrimary") else 0
+            val tint = if (noneSelected) getColorAttr("colorOnSurfaceVariant") else 0
             checkNone.imageTintList = ColorStateList.valueOf(tint)
         }
         refreshNoneCheck()
