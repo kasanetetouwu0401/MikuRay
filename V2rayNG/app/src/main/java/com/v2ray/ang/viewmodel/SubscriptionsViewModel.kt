@@ -35,13 +35,18 @@ class SubscriptionsViewModel : ViewModel() {
         }
     }
 
+    /** Called on every drag step — only updates in-memory list, does NOT persist. */
     fun swap(fromPosition: Int, toPosition: Int) {
         if (fromPosition in subscriptions.indices && toPosition in subscriptions.indices) {
             val item = subscriptions.removeAt(fromPosition)
             subscriptions.add(toPosition, item)
-            SettingsManager.swapSubscriptions(fromPosition, toPosition)
-            SettingsChangeManager.makeSetupGroupTab()
         }
+    }
+
+    /** Called once when drag is finished — persists the final order to MMKV. */
+    fun commitOrder() {
+        SettingsManager.saveSubscriptionsOrder(subscriptions.map { it.guid })
+        SettingsChangeManager.makeSetupGroupTab()
     }
 }
 

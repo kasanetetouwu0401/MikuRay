@@ -223,11 +223,22 @@ object SettingsManager {
      * @param fromPosition The position to swap from.
      * @param toPosition The position to swap to.
      */
+    fun saveSubscriptionsOrder(orderedGuids: List<String>) {
+        val subsList = decodeSubsList()
+        if (subsList.isEmpty()) return
+        val reordered = orderedGuids.filter { it in subsList }.toMutableList()
+        // append any guids not covered (safety net)
+        subsList.filterNot { it in reordered }.forEach { reordered.add(it) }
+        MmkvManager.encodeSubsList(reordered)
+    }
+
+    @Deprecated("Use saveSubscriptionsOrder for drag reorder; this only swaps two positions")
     fun swapSubscriptions(fromPosition: Int, toPosition: Int) {
         val subsList = decodeSubsList()
         if (subsList.isEmpty()) return
 
-        Collections.swap(subsList, fromPosition, toPosition)
+        val item = subsList.removeAt(fromPosition)
+        subsList.add(toPosition, item)
         MmkvManager.encodeSubsList(subsList)
     }
 
@@ -619,7 +630,7 @@ object SettingsManager {
     private fun ensureDefaultSubscription() {
         if (decodeSubscription(DEFAULT_SUBSCRIPTION_ID) == null) {
             val defaultSub = SubscriptionItem(
-                remarks = "Bawaan",
+                remarks = "Miku",
             )
             encodeSubscription(DEFAULT_SUBSCRIPTION_ID, defaultSub)
 

@@ -91,6 +91,7 @@ class SubSettingRecyclerAdapter(
     }
 
     override fun onItemMoveCompleted() {
+        viewModel.commitOrder()
         adapterListener?.onRefreshData()
     }
 
