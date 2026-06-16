@@ -8,6 +8,7 @@ import android.os.Build
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
+import androidx.annotation.StyleRes
 import androidx.core.content.ContextCompat
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
@@ -20,7 +21,6 @@ import com.v2ray.ang.handler.MmkvManager
 object ThemeManager {
 
     fun applyTheme(activity: Activity) {
-
         val isDynamic   = MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, false)
         val useCustom   = MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_CUSTOM_COLOR, false)
         val customColor = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_COLOR, 0)
@@ -52,13 +52,38 @@ object ThemeManager {
                 }
                 else -> {
                     val key = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "9"
-                    applyCustomColorTheme(activity, themeSeedColorFor(activity, key))
+                    activity.setTheme(getThemeStyleRes(key))
                 }
             }
         }
 
         if (isTrueBlack && !themeApplied) {
             activity.theme.applyStyle(R.style.ThemeOverlay_App_TrueBlack, true)
+        }
+    }
+
+    @StyleRes
+    fun getThemeStyleRes(key: String): Int {
+        return when (key) {
+            "1"  -> R.style.AppTheme_Red
+            "2"  -> R.style.AppTheme_Pink
+            "3"  -> R.style.AppTheme_Purple
+            "4"  -> R.style.AppTheme_DeepPurple
+            "5"  -> R.style.AppTheme_Indigo
+            "6"  -> R.style.AppTheme_Blue
+            "7"  -> R.style.AppTheme_LightBlue
+            "8"  -> R.style.AppTheme_Cyan
+            "9"  -> R.style.AppTheme_Teal
+            "10" -> R.style.AppTheme_Green
+            "11" -> R.style.AppTheme_LightGreen
+            "12" -> R.style.AppTheme_Lime
+            "13" -> R.style.AppTheme_Yellow
+            "14" -> R.style.AppTheme_Amber
+            "15" -> R.style.AppTheme_Orange
+            "16" -> R.style.AppTheme_DeepOrange
+            "17" -> R.style.AppTheme_Brown
+            "18" -> R.style.AppTheme_BlueGrey
+            else -> R.style.AppTheme_Teal
         }
     }
 
@@ -102,32 +127,6 @@ object ThemeManager {
         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_COLOR, 0)
         activity.recreate()
     }
-
-    @ColorInt
-    fun themeSeedColorFor(context: Context, key: String): Int {
-        val colorRes = when (key) {
-            "1"  -> R.color.palette_red
-            "2"  -> R.color.palette_pink
-            "3"  -> R.color.palette_purple
-            "4"  -> R.color.palette_deep_purple
-            "5"  -> R.color.palette_indigo
-            "6"  -> R.color.palette_blue
-            "7"  -> R.color.palette_light_blue
-            "8"  -> R.color.palette_cyan
-            "9"  -> R.color.palette_teal
-            "10" -> R.color.palette_green
-            "11" -> R.color.palette_light_green
-            "12" -> R.color.palette_lime
-            "13" -> R.color.palette_yellow
-            "14" -> R.color.palette_amber
-            "15" -> R.color.palette_orange
-            "16" -> R.color.palette_deep_orange
-            "17" -> R.color.palette_brown
-            "18" -> R.color.palette_blue_grey
-            else -> R.color.palette_teal
-        }
-        return ContextCompat.getColor(context, colorRes)
-    }
 }
 
 fun Context.getColorAttr(@AttrRes resId: Int): Int {
@@ -153,8 +152,6 @@ fun Context.getColorAttr(attrName: String): Int {
     }
 
     val resId = resources.getIdentifier(finalAttrName, "attr", packageNameToUse)
-    
     if (resId == 0) return Color.TRANSPARENT
-
     return getColorAttr(resId)
 }
