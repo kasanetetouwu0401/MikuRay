@@ -3,9 +3,6 @@
     <color name="color_fab_active">#f97910</color>
     <color name="color_fab_inactive">#646464</color>
     
-    <!-- ========================================== -->
-    <!-- THEME 1: RED PALETTE -->
-    <!-- ========================================== -->
     <color name="red_primary">#FFB4A9</color>
     <color name="red_onPrimary">#561E18</color>
     <color name="red_primaryContainer">#73342C</color>
@@ -53,9 +50,6 @@
     <color name="red_surfaceContainerHigh">#322826</color>
     <color name="red_surfaceContainerHighest">#3D3231</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 2: PINK PALETTE -->
-    <!-- ========================================== -->
     <color name="pink_primary">#FFB2BE</color>
     <color name="pink_onPrimary">#561D2A</color>
     <color name="pink_primaryContainer">#71333F</color>
@@ -103,9 +97,6 @@
     <color name="pink_surfaceContainerHigh">#312829</color>
     <color name="pink_surfaceContainerHighest">#3C3233</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 3: PURPLE PALETTE -->
-    <!-- ========================================== -->
     <color name="purple_primary">#EBB5ED</color>
     <color name="purple_onPrimary">#49204E</color>
     <color name="purple_primaryContainer">#613766</color>
@@ -153,9 +144,6 @@
     <color name="purple_surfaceContainerHigh">#2E282D</color>
     <color name="purple_surfaceContainerHighest">#393338</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 4: DEEPPURPLE PALETTE -->
-    <!-- ========================================== -->
     <color name="deepPurple_primary">#D3BCFD</color>
     <color name="deepPurple_onPrimary">#38265C</color>
     <color name="deepPurple_primaryContainer">#4F3D74</color>
@@ -203,9 +191,6 @@
     <color name="deepPurple_surfaceContainerHigh">#2C292F</color>
     <color name="deepPurple_surfaceContainerHighest">#36343A</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 5: INDIGO PALETTE -->
-    <!-- ========================================== -->
     <color name="indigo_primary">#BAC3FF</color>
     <color name="indigo_onPrimary">#222C61</color>
     <color name="indigo_primaryContainer">#394379</color>
@@ -253,9 +238,6 @@
     <color name="indigo_surfaceContainerHigh">#29292F</color>
     <color name="indigo_surfaceContainerHighest">#34343A</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 6: BLUE PALETTE -->
-    <!-- ========================================== -->
     <color name="blue_primary">#A0CAFD</color>
     <color name="blue_onPrimary">#003258</color>
     <color name="blue_primaryContainer">#194975</color>
@@ -303,59 +285,6 @@
     <color name="blue_surfaceContainerHigh">#272A2F</color>
     <color name="blue_surfaceContainerHighest">#32353A</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 7: LIGHTBLUE PALETTE -->
-    <!-- ========================================== -->
-    <color name="lightBlue_primary">#96CDF8</color>
-    <color name="lightBlue_onPrimary">#00344F</color>
-    <color name="lightBlue_primaryContainer">#004B70</color>
-    <color name="lightBlue_onPrimaryContainer">#CAE6FF</color>
-    <color name="lightBlue_secondary">#B7C9D9</color>
-    <color name="lightBlue_onSecondary">#22323F</color>
-    <color name="lightBlue_secondaryContainer">#384956</color>
-    <color name="lightBlue_onSecondaryContainer">#D3E5F5</color>
-    <color name="lightBlue_tertiary">#CFC0E8</color>
-    <color name="lightBlue_onTertiary">#362B4B</color>
-    <color name="lightBlue_tertiaryContainer">#4D4162</color>
-    <color name="lightBlue_onTertiaryContainer">#EBDDFF</color>
-    <color name="lightBlue_error">#FFB4AB</color>
-    <color name="lightBlue_onError">#690005</color>
-    <color name="lightBlue_errorContainer">#93000A</color>
-    <color name="lightBlue_onErrorContainer">#FFDAD6</color>
-    <color name="lightBlue_background">#101417</color>
-    <color name="lightBlue_onBackground">#E0E3E8</color>
-    <color name="lightBlue_surface">#101417</color>
-    <color name="lightBlue_onSurface">#E0E3E8</color>
-    <color name="lightBlue_surfaceVariant">#41474D</color>
-    <color name="lightBlue_onSurfaceVariant">#C1C7CE</color>
-    <color name="lightBlue_outline">#8B9198</color>
-    <color name="lightBlue_outlineVariant">#41474D</color>
-    <color name="lightBlue_inverseSurface">#E0E3E8</color>
-    <color name="lightBlue_inverseOnSurface">#2D3135</color>
-    <color name="lightBlue_inversePrimary">#27638A</color>
-    <color name="lightBlue_primaryFixed">#CAE6FF</color>
-    <color name="lightBlue_onPrimaryFixed">#001E30</color>
-    <color name="lightBlue_primaryFixedDim">#96CDF8</color>
-    <color name="lightBlue_onPrimaryFixedVariant">#004B70</color>
-    <color name="lightBlue_secondaryFixed">#D3E5F5</color>
-    <color name="lightBlue_onSecondaryFixed">#0C1D29</color>
-    <color name="lightBlue_secondaryFixedDim">#B7C9D9</color>
-    <color name="lightBlue_onSecondaryFixedVariant">#384956</color>
-    <color name="lightBlue_tertiaryFixed">#EBDDFF</color>
-    <color name="lightBlue_onTertiaryFixed">#201634</color>
-    <color name="lightBlue_tertiaryFixedDim">#CFC0E8</color>
-    <color name="lightBlue_onTertiaryFixedVariant">#4D4162</color>
-    <color name="lightBlue_surfaceDim">#101417</color>
-    <color name="lightBlue_surfaceBright">#363A3E</color>
-    <color name="lightBlue_surfaceContainerLowest">#0B0F12</color>
-    <color name="lightBlue_surfaceContainerLow">#181C20</color>
-    <color name="lightBlue_surfaceContainer">#1C2024</color>
-    <color name="lightBlue_surfaceContainerHigh">#262A2E</color>
-    <color name="lightBlue_surfaceContainerHighest">#313539</color>
-
-    <!-- ========================================== -->
-    <!-- THEME 8: CYAN PALETTE -->
-    <!-- ========================================== -->
     <color name="cyan_primary">#83D3E3</color>
     <color name="cyan_onPrimary">#00363E</color>
     <color name="cyan_primaryContainer">#004E59</color>
@@ -403,9 +332,6 @@
     <color name="cyan_surfaceContainerHigh">#252B2C</color>
     <color name="cyan_surfaceContainerHighest">#303637</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 9: TEAL PALETTE -->
-    <!-- ========================================== -->
     <color name="teal_primary">#82D5C8</color>
     <color name="teal_onPrimary">#003731</color>
     <color name="teal_primaryContainer">#005048</color>
@@ -453,9 +379,6 @@
     <color name="teal_surfaceContainerHigh">#252B2A</color>
     <color name="teal_surfaceContainerHighest">#303635</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 10: GREEN PALETTE -->
-    <!-- ========================================== -->
     <color name="green_primary">#A1D39A</color>
     <color name="green_onPrimary">#0A390F</color>
     <color name="green_primaryContainer">#235024</color>
@@ -503,9 +426,6 @@
     <color name="green_surfaceContainerHigh">#272B25</color>
     <color name="green_surfaceContainerHighest">#323630</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 11: LIGHTGREEN PALETTE -->
-    <!-- ========================================== -->
     <color name="lightGreen_primary">#B1D18A</color>
     <color name="lightGreen_onPrimary">#1F3701</color>
     <color name="lightGreen_primaryContainer">#344E16</color>
@@ -553,9 +473,6 @@
     <color name="lightGreen_surfaceContainerHigh">#282B24</color>
     <color name="lightGreen_surfaceContainerHighest">#33362E</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 12: LIME PALETTE -->
-    <!-- ========================================== -->
     <color name="lime_primary">#C5CD7A</color>
     <color name="lime_onPrimary">#2F3300</color>
     <color name="lime_primaryContainer">#444B04</color>
@@ -603,9 +520,6 @@
     <color name="lime_surfaceContainerHigh">#2A2A22</color>
     <color name="lime_surfaceContainerHighest">#35352D</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 13: YELLOW PALETTE -->
-    <!-- ========================================== -->
     <color name="yellow_primary">#D4C871</color>
     <color name="yellow_onPrimary">#363100</color>
     <color name="yellow_primaryContainer">#4F4800</color>
@@ -653,9 +567,6 @@
     <color name="yellow_surfaceContainerHigh">#2C2A21</color>
     <color name="yellow_surfaceContainerHighest">#37352C</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 14: AMBER PALETTE -->
-    <!-- ========================================== -->
     <color name="amber_primary">#E9C16C</color>
     <color name="amber_onPrimary">#3F2E00</color>
     <color name="amber_primaryContainer">#5B4300</color>
@@ -703,9 +614,6 @@
     <color name="amber_surfaceContainerHigh">#2E2921</color>
     <color name="amber_surfaceContainerHighest">#39342B</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 15: ORANGE PALETTE -->
-    <!-- ========================================== -->
     <color name="orange_primary">#FDB975</color>
     <color name="orange_onPrimary">#4A2800</color>
     <color name="orange_primaryContainer">#693C00</color>
@@ -753,59 +661,6 @@
     <color name="orange_surfaceContainerHigh">#302822</color>
     <color name="orange_surfaceContainerHighest">#3C332C</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 16: DEEPORANGE PALETTE -->
-    <!-- ========================================== -->
-    <color name="deepOrange_primary">#FFB5A0</color>
-    <color name="deepOrange_onPrimary">#561F0F</color>
-    <color name="deepOrange_primaryContainer">#723523</color>
-    <color name="deepOrange_onPrimaryContainer">#FFDBD1</color>
-    <color name="deepOrange_secondary">#E7BDB2</color>
-    <color name="deepOrange_onSecondary">#442A22</color>
-    <color name="deepOrange_secondaryContainer">#5D4037</color>
-    <color name="deepOrange_onSecondaryContainer">#FFDBD1</color>
-    <color name="deepOrange_tertiary">#D8C58D</color>
-    <color name="deepOrange_onTertiary">#3B2F05</color>
-    <color name="deepOrange_tertiaryContainer">#534619</color>
-    <color name="deepOrange_onTertiaryContainer">#F5E1A7</color>
-    <color name="deepOrange_error">#FFB4AB</color>
-    <color name="deepOrange_onError">#690005</color>
-    <color name="deepOrange_errorContainer">#93000A</color>
-    <color name="deepOrange_onErrorContainer">#FFDAD6</color>
-    <color name="deepOrange_background">#1A110F</color>
-    <color name="deepOrange_onBackground">#F1DFDA</color>
-    <color name="deepOrange_surface">#1A110F</color>
-    <color name="deepOrange_onSurface">#F1DFDA</color>
-    <color name="deepOrange_surfaceVariant">#53433F</color>
-    <color name="deepOrange_onSurfaceVariant">#D8C2BC</color>
-    <color name="deepOrange_outline">#A08C87</color>
-    <color name="deepOrange_outlineVariant">#53433F</color>
-    <color name="deepOrange_inverseSurface">#F1DFDA</color>
-    <color name="deepOrange_inverseOnSurface">#392E2B</color>
-    <color name="deepOrange_inversePrimary">#8F4C38</color>
-    <color name="deepOrange_primaryFixed">#FFDBD1</color>
-    <color name="deepOrange_onPrimaryFixed">#3A0B01</color>
-    <color name="deepOrange_primaryFixedDim">#FFB5A0</color>
-    <color name="deepOrange_onPrimaryFixedVariant">#723523</color>
-    <color name="deepOrange_secondaryFixed">#FFDBD1</color>
-    <color name="deepOrange_onSecondaryFixed">#2C150F</color>
-    <color name="deepOrange_secondaryFixedDim">#E7BDB2</color>
-    <color name="deepOrange_onSecondaryFixedVariant">#5D4037</color>
-    <color name="deepOrange_tertiaryFixed">#F5E1A7</color>
-    <color name="deepOrange_onTertiaryFixed">#231B00</color>
-    <color name="deepOrange_tertiaryFixedDim">#D8C58D</color>
-    <color name="deepOrange_onTertiaryFixedVariant">#534619</color>
-    <color name="deepOrange_surfaceDim">#1A110F</color>
-    <color name="deepOrange_surfaceBright">#423734</color>
-    <color name="deepOrange_surfaceContainerLowest">#140C0A</color>
-    <color name="deepOrange_surfaceContainerLow">#231917</color>
-    <color name="deepOrange_surfaceContainer">#271D1B</color>
-    <color name="deepOrange_surfaceContainerHigh">#322825</color>
-    <color name="deepOrange_surfaceContainerHighest">#3D322F</color>
-
-    <!-- ========================================== -->
-    <!-- THEME 17: BROWN PALETTE -->
-    <!-- ========================================== -->
     <color name="brown_primary">#FFB59A</color>
     <color name="brown_onPrimary">#55200A</color>
     <color name="brown_primaryContainer">#72361E</color>
@@ -853,9 +708,6 @@
     <color name="brown_surfaceContainerHigh">#322824</color>
     <color name="brown_surfaceContainerHighest">#3D322F</color>
 
-    <!-- ========================================== -->
-    <!-- THEME 18: BLUEGREY PALETTE -->
-    <!-- ========================================== -->
     <color name="blueGrey_primary">#ADCBDA</color>
     <color name="blueGrey_onPrimary">#163440</color>
     <color name="blueGrey_primaryContainer">#7895A3</color>

@@ -27,7 +27,7 @@ class ThemeColorDialog : DialogFragment() {
     companion object {
         const val TAG = "ThemeColorDialog"
 
-        val THEME_KEYS = (1..18).map { it.toString() }
+        val THEME_KEYS = (1..16).map { it.toString() }
 
         fun show(
             fragmentManager: androidx.fragment.app.FragmentManager,
@@ -54,7 +54,7 @@ class ThemeColorDialog : DialogFragment() {
 
         val useCustom   = MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_CUSTOM_COLOR, false)
         val savedColor  = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_COLOR, 0)
-        val currentKey  = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "9"
+        val currentKey  = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "8"
 
         THEME_KEYS.forEach { key ->
             val itemView = LayoutInflater.from(requireContext())
