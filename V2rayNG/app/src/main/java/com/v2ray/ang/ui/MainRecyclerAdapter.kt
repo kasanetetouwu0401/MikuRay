@@ -62,7 +62,7 @@ class MainRecyclerAdapter(
             holder.itemMainBinding.tvStatistics.text = getAddress(profile)
             holder.itemMainBinding.tvType.text = getProtocolName(profile)
 
-            // Network & security icon+text di bawah alamat
+            // Network & security icon+text di bawah alamat (TCP Fix ada di fungsi ini)
             val isNetSecEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_NETWORK_SECURITY_ENABLED) == true
             bindNetworkSecurity(holder, profile, isNetSecEnabled)
 
@@ -85,8 +85,30 @@ class MainRecyclerAdapter(
                 holder.itemMainBinding.tvTraffic.visibility = View.GONE
             }
 
+            val isSelectedServer = (guid == MmkvManager.getSelectServer())
+            val isVpnConnected = mainViewModel.isRunning.value == true 
+
+            if (isSelectedServer && isVpnConnected) {
+                holder.itemMainBinding.vStatusDot.setBackgroundResource(R.drawable.blink_color)
+                
+                val blinkAnimDrawable = holder.itemMainBinding.vStatusDot.background
+                if (blinkAnimDrawable is android.graphics.drawable.AnimationDrawable) {
+                    holder.itemMainBinding.vStatusDot.visibility = View.VISIBLE
+                    if (!blinkAnimDrawable.isRunning) {
+                        blinkAnimDrawable.start()
+                    }
+                }
+            } else {
+                val blinkAnimDrawable = holder.itemMainBinding.vStatusDot.background
+                if (blinkAnimDrawable is android.graphics.drawable.AnimationDrawable) {
+                    blinkAnimDrawable.stop()
+                }
+                holder.itemMainBinding.vStatusDot.visibility = View.GONE
+                holder.itemMainBinding.vStatusDot.background = null
+            }
+
             //layoutIndicator & Card Background (Transparent when selected)
-            if (guid == MmkvManager.getSelectServer()) {
+            if (isSelectedServer) {
                 val styleName = MmkvManager.decodeSettingsString(
                     AppConfig.PREF_INDICATOR_STYLE,
                     IndicatorStyle.STYLE_0.name
@@ -176,7 +198,7 @@ class MainRecyclerAdapter(
         }
 
         val isComplex = profile.configType.isComplexType()
-        val network = profile.network?.takeIf { it.isNotBlank() && !it.equals("tcp", ignoreCase = true) }
+        val network = profile.network?.takeIf { it.isNotBlank() }
         
         val security = profile.security?.takeIf { it.isNotBlank() }?.let { sec ->
             if (profile.insecure == true && sec.equals("tls", ignoreCase = true)) {

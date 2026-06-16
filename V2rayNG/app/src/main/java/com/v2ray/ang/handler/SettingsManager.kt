@@ -491,6 +491,13 @@ object SettingsManager {
     }
 
     /**
+     * Whether to append the Android device ID (HWID) as an HTTP header when updating subscriptions.
+     */
+    fun isSendHwidEnabled(): Boolean {
+        return MmkvManager.decodeSettingsBool(AppConfig.PREF_SEND_HWID, false)
+    }
+
+    /**
      * Check if VPN mode is enabled.
      * @return True if VPN mode is enabled, false otherwise.
      */

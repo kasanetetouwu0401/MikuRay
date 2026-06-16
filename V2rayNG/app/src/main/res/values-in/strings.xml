@@ -252,6 +252,7 @@
 
     <string name="title_pref_group_all_display">Tampilin semua grup</string>
     <string name="summary_pref_group_all_display">Nambahin tab ekstra "Semua Tab"</string>
+    <string name="title_pref_group_all_tab_icon">Ikon tab "Semua"</string>
 
     <string name="title_pref_feedback">Kasih Masukan</string>
     <string name="summary_pref_feedback">Laporin bug atau ngasih ide ke GitHub kuy</string>
@@ -553,6 +554,8 @@
     <string name="pref_traffic_enabled_summary">Tampilin jumlah upload dan download di tiap server</string>
     <string name="pref_network_security_enabled_title">Tampilin Jaringan dan Keamanan</string>
     <string name="pref_network_security_enabled_summary">Tampilin info transport dan keamanan di tiap server</string>
+    <string name="title_pref_send_hwid">Kirim HWID</string>
+    <string name="summary_pref_send_hwid">Kirim ID perangkat pas lagi update langganan</string>
 
      <string name="uwu_banner_settings_title">Halo disana…</string>
     <string name="uwu_banner_settings_summary">"Met dateng di menu
