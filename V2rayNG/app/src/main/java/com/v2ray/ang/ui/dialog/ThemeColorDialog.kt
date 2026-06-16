@@ -54,7 +54,7 @@ class ThemeColorDialog : DialogFragment() {
 
         val useCustom   = MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_CUSTOM_COLOR, false)
         val savedColor  = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_COLOR, 0)
-        val currentKey  = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "8"
+        val currentKey  = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "9"
 
         THEME_KEYS.forEach { key ->
             val itemView = LayoutInflater.from(requireContext())
@@ -67,7 +67,7 @@ class ThemeColorDialog : DialogFragment() {
             
             val styleRes = ThemeManager.getThemeStyleRes(key)
             val wrappedContext = ContextThemeWrapper(requireContext(), styleRes)
-            val m3PrimaryColor = wrappedContext.getColorAttr(android.R.attr.colorPrimary)
+            val m3PrimaryColor = wrappedContext.getColorAttr("colorPrimary")
 
             applyCircleDrawable(circle, m3PrimaryColor, isSelected)
             
@@ -90,7 +90,7 @@ class ThemeColorDialog : DialogFragment() {
             val customIcon   = customItemView.findViewById<ImageView>(R.id.iv_check)
 
             val isCustomSelected = useCustom && savedColor != 0
-            val rawCustomColor   = if (savedColor != 0) savedColor else ContextCompat.getColor(requireContext(), R.color.palette_purple)
+            val rawCustomColor   = if (savedColor != 0) savedColor else ContextCompat.getColor(requireContext(), R.color.teal_primary)
             
             val customOptions = DynamicColorsOptions.Builder()
                 .setContentBasedSource(rawCustomColor)
