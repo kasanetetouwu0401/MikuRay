@@ -35,6 +35,8 @@ class MainRecyclerAdapter(
     }
 
     private var data: MutableList<ServersCache> = mutableListOf()
+    
+    private var isRunningObserver: androidx.lifecycle.Observer<Boolean>? = null
 
     @SuppressLint("NotifyDataSetChanged")
     fun setData(newData: MutableList<ServersCache>?, position: Int = -1) {
@@ -44,6 +46,28 @@ class MainRecyclerAdapter(
             notifyItemChanged(position)
         } else {
             notifyDataSetChanged()
+        }
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        val lifecycleOwner = recyclerView.context as? androidx.lifecycle.LifecycleOwner
+        if (lifecycleOwner != null) {
+            isRunningObserver = androidx.lifecycle.Observer { _ ->
+                val selectedGuid = MmkvManager.getSelectServer()
+                val position = data.indexOfFirst { it.guid == selectedGuid }
+                if (position >= 0) {
+                    notifyItemChanged(position)
+                }
+            }
+            mainViewModel.isRunning.observe(lifecycleOwner, isRunningObserver!!)
+        }
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        isRunningObserver?.let {
+            mainViewModel.isRunning.removeObserver(it)
         }
     }
 
@@ -62,7 +86,7 @@ class MainRecyclerAdapter(
             holder.itemMainBinding.tvStatistics.text = getAddress(profile)
             holder.itemMainBinding.tvType.text = getProtocolName(profile)
 
-            // Network & security icon+text di bawah alamat (TCP Fix ada di fungsi ini)
+            // Network & security icon+text (TCP Fix)
             val isNetSecEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_NETWORK_SECURITY_ENABLED) == true
             bindNetworkSecurity(holder, profile, isNetSecEnabled)
 
@@ -90,12 +114,14 @@ class MainRecyclerAdapter(
 
             if (isSelectedServer && isVpnConnected) {
                 holder.itemMainBinding.vStatusDot.setBackgroundResource(R.drawable.blink_color)
-                
                 val blinkAnimDrawable = holder.itemMainBinding.vStatusDot.background
+                
                 if (blinkAnimDrawable is android.graphics.drawable.AnimationDrawable) {
                     holder.itemMainBinding.vStatusDot.visibility = View.VISIBLE
-                    if (!blinkAnimDrawable.isRunning) {
-                        blinkAnimDrawable.start()
+                    holder.itemMainBinding.vStatusDot.post {
+                        if (!blinkAnimDrawable.isRunning) {
+                            blinkAnimDrawable.start()
+                        }
                     }
                 }
             } else {
@@ -107,7 +133,7 @@ class MainRecyclerAdapter(
                 holder.itemMainBinding.vStatusDot.background = null
             }
 
-            //layoutIndicator & Card Background (Transparent when selected)
+            //layoutIndicator & Card Background
             if (isSelectedServer) {
                 val styleName = MmkvManager.decodeSettingsString(
                     AppConfig.PREF_INDICATOR_STYLE,
@@ -180,11 +206,10 @@ class MainRecyclerAdapter(
         enabled: Boolean
     ) {
         val context = holder.itemView.context
-        
         val iconSize = (14 * context.resources.displayMetrics.density).toInt()
 
         fun makeIcon(drawableRes: Int): android.graphics.drawable.Drawable? {
-            val d = androidx.core.content.ContextCompat.getDrawable(context, drawableRes) ?: return null
+            val d = ContextCompat.getDrawable(context, drawableRes) ?: return null
             val wrapped = androidx.core.graphics.drawable.DrawableCompat.wrap(d.mutate())
             androidx.core.graphics.drawable.DrawableCompat.setTint(
                 wrapped,
@@ -212,7 +237,6 @@ class MainRecyclerAdapter(
         holder.itemMainBinding.layoutNetworkSecurity.visibility =
             if (showAny) View.VISIBLE else View.GONE
 
-        // tv_network
         if (enabled && !isComplex && network != null) {
             holder.itemMainBinding.tvNetwork.text = network
             holder.itemMainBinding.tvNetwork.setCompoundDrawables(makeIcon(R.drawable.ic_thumb_up_outline), null, null, null)
@@ -221,16 +245,9 @@ class MainRecyclerAdapter(
             holder.itemMainBinding.tvNetwork.visibility = View.GONE
         }
 
-        // tv_security
         if (enabled && !isComplex && security != null) {
             holder.itemMainBinding.tvSecurity.text = security
-            
-            val iconRes = if (security == "none") {
-                R.drawable.ic_unlock_24dp
-            } else {
-                R.drawable.ic_lock_24dp
-            }
-            
+            val iconRes = if (security == "none") R.drawable.ic_unlock_24dp else R.drawable.ic_lock_24dp
             holder.itemMainBinding.tvSecurity.setCompoundDrawables(makeIcon(iconRes), null, null, null)
             holder.itemMainBinding.tvSecurity.visibility = View.VISIBLE
         } else {
@@ -256,18 +273,13 @@ class MainRecyclerAdapter(
         return when (viewType) {
             VIEW_TYPE_ITEM ->
                 MainViewHolder(ItemRecyclerMainBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-
             else ->
                 FooterViewHolder(ItemRecyclerFooterBinding.inflate(LayoutInflater.from(parent.context), parent, false))
         }
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (position == data.size) {
-            VIEW_TYPE_FOOTER
-        } else {
-            VIEW_TYPE_ITEM
-        }
+        return if (position == data.size) VIEW_TYPE_FOOTER else VIEW_TYPE_ITEM
     }
 
     open class BaseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), ItemTouchHelperViewHolder {
@@ -277,14 +289,12 @@ class MainRecyclerAdapter(
 
     class MainViewHolder(val itemMainBinding: ItemRecyclerMainBinding) :
         BaseViewHolder(itemMainBinding.root) {
-        
         override fun onItemSelected() {
             val context = itemView.context
             val typedValue = TypedValue()
             context.theme.resolveAttribute(com.google.android.material.R.attr.colorSurfaceVariant, typedValue, true)
             itemMainBinding.layoutCard.setCardBackgroundColor(typedValue.data)
         }
-
         override fun onItemClear() {
             val context = itemView.context
             val typedValue = TypedValue()
@@ -305,10 +315,6 @@ class MainRecyclerAdapter(
         return true
     }
 
-    override fun onItemMoveCompleted() {
-        // do nothing
-    }
-
-    override fun onItemDismiss(position: Int) {
-    }
+    override fun onItemMoveCompleted() {}
+    override fun onItemDismiss(position: Int) {}
 }
