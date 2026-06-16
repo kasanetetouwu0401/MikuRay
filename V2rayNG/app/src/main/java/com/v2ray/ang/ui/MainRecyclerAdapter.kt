@@ -35,8 +35,6 @@ class MainRecyclerAdapter(
     }
 
     private var data: MutableList<ServersCache> = mutableListOf()
-    
-    private var isRunningObserver: androidx.lifecycle.Observer<Boolean>? = null
 
     @SuppressLint("NotifyDataSetChanged")
     fun setData(newData: MutableList<ServersCache>?, position: Int = -1) {
@@ -46,28 +44,6 @@ class MainRecyclerAdapter(
             notifyItemChanged(position)
         } else {
             notifyDataSetChanged()
-        }
-    }
-
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
-        val lifecycleOwner = recyclerView.context as? androidx.lifecycle.LifecycleOwner
-        if (lifecycleOwner != null) {
-            isRunningObserver = androidx.lifecycle.Observer { _ ->
-                val selectedGuid = MmkvManager.getSelectServer()
-                val position = data.indexOfFirst { it.guid == selectedGuid }
-                if (position >= 0) {
-                    notifyItemChanged(position)
-                }
-            }
-            mainViewModel.isRunning.observe(lifecycleOwner, isRunningObserver!!)
-        }
-    }
-
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        super.onDetachedFromRecyclerView(recyclerView)
-        isRunningObserver?.let {
-            mainViewModel.isRunning.removeObserver(it)
         }
     }
 
@@ -86,7 +62,7 @@ class MainRecyclerAdapter(
             holder.itemMainBinding.tvStatistics.text = getAddress(profile)
             holder.itemMainBinding.tvType.text = getProtocolName(profile)
 
-            // Network & security icon+text (TCP Fix)
+            // Network & security icon+text di bawah alamat (TCP Fix aman)
             val isNetSecEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_NETWORK_SECURITY_ENABLED) == true
             bindNetworkSecurity(holder, profile, isNetSecEnabled)
 
@@ -109,22 +85,22 @@ class MainRecyclerAdapter(
                 holder.itemMainBinding.tvTraffic.visibility = View.GONE
             }
 
+            // --- LOGIKA TITIK KELAP KELIP CUKUP SAAT SELECTED ---
             val isSelectedServer = (guid == MmkvManager.getSelectServer())
-            val isVpnConnected = mainViewModel.isRunning.value == true 
 
-            if (isSelectedServer && isVpnConnected) {
+            if (isSelectedServer) {
+                // Pasang background animasi warna blink_color.xml
                 holder.itemMainBinding.vStatusDot.setBackgroundResource(R.drawable.blink_color)
                 val blinkAnimDrawable = holder.itemMainBinding.vStatusDot.background
                 
                 if (blinkAnimDrawable is android.graphics.drawable.AnimationDrawable) {
                     holder.itemMainBinding.vStatusDot.visibility = View.VISIBLE
-                    holder.itemMainBinding.vStatusDot.post {
-                        if (!blinkAnimDrawable.isRunning) {
-                            blinkAnimDrawable.start()
-                        }
+                    if (!blinkAnimDrawable.isRunning) {
+                        blinkAnimDrawable.start()
                     }
                 }
             } else {
+                // Hentikan animasi dan sembunyikan jika beralih ke profil lain
                 val blinkAnimDrawable = holder.itemMainBinding.vStatusDot.background
                 if (blinkAnimDrawable is android.graphics.drawable.AnimationDrawable) {
                     blinkAnimDrawable.stop()
@@ -132,8 +108,9 @@ class MainRecyclerAdapter(
                 holder.itemMainBinding.vStatusDot.visibility = View.GONE
                 holder.itemMainBinding.vStatusDot.background = null
             }
+            // -----------------------------------------------------
 
-            //layoutIndicator & Card Background
+            //layoutIndicator & Card Background (Transparent when selected)
             if (isSelectedServer) {
                 val styleName = MmkvManager.decodeSettingsString(
                     AppConfig.PREF_INDICATOR_STYLE,
