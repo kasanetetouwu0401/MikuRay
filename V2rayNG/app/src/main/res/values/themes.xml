@@ -318,55 +318,6 @@
         <item name="colorSurfaceContainerHighest">@color/blue_surfaceContainerHighest</item>
     </style>
 
-    <style name="AppTheme_LightBlue" parent="AppThemeBase">
-        <item name="colorPrimary">@color/lightBlue_primary</item>
-        <item name="colorOnPrimary">@color/lightBlue_onPrimary</item>
-        <item name="colorPrimaryContainer">@color/lightBlue_primaryContainer</item>
-        <item name="colorOnPrimaryContainer">@color/lightBlue_onPrimaryContainer</item>
-        <item name="colorSecondary">@color/lightBlue_secondary</item>
-        <item name="colorOnSecondary">@color/lightBlue_onSecondary</item>
-        <item name="colorSecondaryContainer">@color/lightBlue_secondaryContainer</item>
-        <item name="colorOnSecondaryContainer">@color/lightBlue_onSecondaryContainer</item>
-        <item name="colorTertiary">@color/lightBlue_tertiary</item>
-        <item name="colorOnTertiary">@color/lightBlue_onTertiary</item>
-        <item name="colorTertiaryContainer">@color/lightBlue_tertiaryContainer</item>
-        <item name="colorOnTertiaryContainer">@color/lightBlue_onTertiaryContainer</item>
-        <item name="colorError">@color/lightBlue_error</item>
-        <item name="colorOnError">@color/lightBlue_onError</item>
-        <item name="colorErrorContainer">@color/lightBlue_errorContainer</item>
-        <item name="colorOnErrorContainer">@color/lightBlue_onErrorContainer</item>
-        <item name="android:colorBackground">@color/lightBlue_background</item>
-        <item name="colorOnBackground">@color/lightBlue_onBackground</item>
-        <item name="colorSurface">@color/lightBlue_surface</item>
-        <item name="colorOnSurface">@color/lightBlue_onSurface</item>
-        <item name="colorSurfaceVariant">@color/lightBlue_surfaceVariant</item>
-        <item name="colorOnSurfaceVariant">@color/lightBlue_onSurfaceVariant</item>
-        <item name="colorOutline">@color/lightBlue_outline</item>
-        <item name="colorOutlineVariant">@color/lightBlue_outlineVariant</item>
-        <item name="colorSurfaceInverse">@color/lightBlue_inverseSurface</item>
-        <item name="colorOnSurfaceInverse">@color/lightBlue_inverseOnSurface</item>
-        <item name="colorPrimaryInverse">@color/lightBlue_inversePrimary</item>
-        <item name="colorPrimaryFixed">@color/lightBlue_primaryFixed</item>
-        <item name="colorOnPrimaryFixed">@color/lightBlue_onPrimaryFixed</item>
-        <item name="colorPrimaryFixedDim">@color/lightBlue_primaryFixedDim</item>
-        <item name="colorOnPrimaryFixedVariant">@color/lightBlue_onPrimaryFixedVariant</item>
-        <item name="colorSecondaryFixed">@color/lightBlue_secondaryFixed</item>
-        <item name="colorOnSecondaryFixed">@color/lightBlue_onSecondaryFixed</item>
-        <item name="colorSecondaryFixedDim">@color/lightBlue_secondaryFixedDim</item>
-        <item name="colorOnSecondaryFixedVariant">@color/lightBlue_onSecondaryFixedVariant</item>
-        <item name="colorTertiaryFixed">@color/lightBlue_tertiaryFixed</item>
-        <item name="colorOnTertiaryFixed">@color/lightBlue_onTertiaryFixed</item>
-        <item name="colorTertiaryFixedDim">@color/lightBlue_tertiaryFixedDim</item>
-        <item name="colorOnTertiaryFixedVariant">@color/lightBlue_onTertiaryFixedVariant</item>
-        <item name="colorSurfaceDim">@color/lightBlue_surfaceDim</item>
-        <item name="colorSurfaceBright">@color/lightBlue_surfaceBright</item>
-        <item name="colorSurfaceContainerLowest">@color/lightBlue_surfaceContainerLowest</item>
-        <item name="colorSurfaceContainerLow">@color/lightBlue_surfaceContainerLow</item>
-        <item name="colorSurfaceContainer">@color/lightBlue_surfaceContainer</item>
-        <item name="colorSurfaceContainerHigh">@color/lightBlue_surfaceContainerHigh</item>
-        <item name="colorSurfaceContainerHighest">@color/lightBlue_surfaceContainerHighest</item>
-    </style>
-
     <style name="AppTheme_Cyan" parent="AppThemeBase">
         <item name="colorPrimary">@color/cyan_primary</item>
         <item name="colorOnPrimary">@color/cyan_onPrimary</item>
@@ -758,56 +709,7 @@
         <item name="colorSurfaceContainerHigh">@color/orange_surfaceContainerHigh</item>
         <item name="colorSurfaceContainerHighest">@color/orange_surfaceContainerHighest</item>
     </style>
-
-    <style name="AppTheme_DeepOrange" parent="AppThemeBase">
-        <item name="colorPrimary">@color/deepOrange_primary</item>
-        <item name="colorOnPrimary">@color/deepOrange_onPrimary</item>
-        <item name="colorPrimaryContainer">@color/deepOrange_primaryContainer</item>
-        <item name="colorOnPrimaryContainer">@color/deepOrange_onPrimaryContainer</item>
-        <item name="colorSecondary">@color/deepOrange_secondary</item>
-        <item name="colorOnSecondary">@color/deepOrange_onSecondary</item>
-        <item name="colorSecondaryContainer">@color/deepOrange_secondaryContainer</item>
-        <item name="colorOnSecondaryContainer">@color/deepOrange_onSecondaryContainer</item>
-        <item name="colorTertiary">@color/deepOrange_tertiary</item>
-        <item name="colorOnTertiary">@color/deepOrange_onTertiary</item>
-        <item name="colorTertiaryContainer">@color/deepOrange_tertiaryContainer</item>
-        <item name="colorOnTertiaryContainer">@color/deepOrange_onTertiaryContainer</item>
-        <item name="colorError">@color/deepOrange_error</item>
-        <item name="colorOnError">@color/deepOrange_onError</item>
-        <item name="colorErrorContainer">@color/deepOrange_errorContainer</item>
-        <item name="colorOnErrorContainer">@color/deepOrange_onErrorContainer</item>
-        <item name="android:colorBackground">@color/deepOrange_background</item>
-        <item name="colorOnBackground">@color/deepOrange_onBackground</item>
-        <item name="colorSurface">@color/deepOrange_surface</item>
-        <item name="colorOnSurface">@color/deepOrange_onSurface</item>
-        <item name="colorSurfaceVariant">@color/deepOrange_surfaceVariant</item>
-        <item name="colorOnSurfaceVariant">@color/deepOrange_onSurfaceVariant</item>
-        <item name="colorOutline">@color/deepOrange_outline</item>
-        <item name="colorOutlineVariant">@color/deepOrange_outlineVariant</item>
-        <item name="colorSurfaceInverse">@color/deepOrange_inverseSurface</item>
-        <item name="colorOnSurfaceInverse">@color/deepOrange_inverseOnSurface</item>
-        <item name="colorPrimaryInverse">@color/deepOrange_inversePrimary</item>
-        <item name="colorPrimaryFixed">@color/deepOrange_primaryFixed</item>
-        <item name="colorOnPrimaryFixed">@color/deepOrange_onPrimaryFixed</item>
-        <item name="colorPrimaryFixedDim">@color/deepOrange_primaryFixedDim</item>
-        <item name="colorOnPrimaryFixedVariant">@color/deepOrange_onPrimaryFixedVariant</item>
-        <item name="colorSecondaryFixed">@color/deepOrange_secondaryFixed</item>
-        <item name="colorOnSecondaryFixed">@color/deepOrange_onSecondaryFixed</item>
-        <item name="colorSecondaryFixedDim">@color/deepOrange_secondaryFixedDim</item>
-        <item name="colorOnSecondaryFixedVariant">@color/deepOrange_onSecondaryFixedVariant</item>
-        <item name="colorTertiaryFixed">@color/deepOrange_tertiaryFixed</item>
-        <item name="colorOnTertiaryFixed">@color/deepOrange_onTertiaryFixed</item>
-        <item name="colorTertiaryFixedDim">@color/deepOrange_tertiaryFixedDim</item>
-        <item name="colorOnTertiaryFixedVariant">@color/deepOrange_onTertiaryFixedVariant</item>
-        <item name="colorSurfaceDim">@color/deepOrange_surfaceDim</item>
-        <item name="colorSurfaceBright">@color/deepOrange_surfaceBright</item>
-        <item name="colorSurfaceContainerLowest">@color/deepOrange_surfaceContainerLowest</item>
-        <item name="colorSurfaceContainerLow">@color/deepOrange_surfaceContainerLow</item>
-        <item name="colorSurfaceContainer">@color/deepOrange_surfaceContainer</item>
-        <item name="colorSurfaceContainerHigh">@color/deepOrange_surfaceContainerHigh</item>
-        <item name="colorSurfaceContainerHighest">@color/deepOrange_surfaceContainerHighest</item>
-    </style>
-
+    
     <style name="AppTheme_Brown" parent="AppThemeBase">
         <item name="colorPrimary">@color/brown_primary</item>
         <item name="colorOnPrimary">@color/brown_onPrimary</item>
@@ -905,8 +807,6 @@
         <item name="colorSurfaceContainerHigh">@color/blueGrey_surfaceContainerHigh</item>
         <item name="colorSurfaceContainerHighest">@color/blueGrey_surfaceContainerHighest</item>
     </style>
-
-
     
     <style name="Theme.App.Splash" parent="@style/AppThemeBase">
         <item name="android:windowSplashScreenBackground">?colorBg</item>
