@@ -69,10 +69,7 @@ class DynamicColorCardView @JvmOverloads constructor(
         if (isRandomColorEnabled) {
             val identity = findIconIdentity()
             if (identity != null) {
-                val isDark = (context.resources.configuration.uiMode and
-                    android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
-                    android.content.res.Configuration.UI_MODE_NIGHT_YES
-                return RandomIconColor.forIdentity(identity, isDark)
+                return RandomIconColor.forIdentity(context, identity)
             }
         }
         return context.getColorAttr(AppCompatR.attr.colorPrimary)
