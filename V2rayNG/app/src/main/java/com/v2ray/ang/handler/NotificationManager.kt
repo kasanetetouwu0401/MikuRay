@@ -36,6 +36,7 @@ object NotificationManager {
 
     private var lastQueryTime = 0L
     private var connectStartTime = 0L
+    fun getConnectStartTime() = connectStartTime
     private var mBuilder: NotificationCompat.Builder? = null
     private var speedNotificationJob: Job? = null
     private var timerNotificationJob: Job? = null
@@ -45,6 +46,7 @@ object NotificationManager {
     @Volatile private var lastSpeedText: String = ""
     @Volatile private var lastProxyTraffic: Long = 0L
     @Volatile private var lastDirectTraffic: Long = 0L
+    @Volatile private var lastDataUsageText: String = ""
 
     fun startSpeedNotification() {
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) != true) return
@@ -75,6 +77,7 @@ object NotificationManager {
         lastSpeedText = ""
         lastProxyTraffic = 0L
         lastDirectTraffic = 0L
+        lastDataUsageText = ""
 
         val flags = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 
@@ -202,8 +205,20 @@ object NotificationManager {
         val s = elapsed % 60
         val timeStr = if (h > 0) "%02d:%02d:%02d".format(h, m, s) else "%02d:%02d".format(m, s)
         val timerLine = service.getString(R.string.notification_connect_time, timeStr)
-        val combined = if (lastSpeedText.isNotEmpty()) "$lastSpeedText$timerLine" else timerLine
+        val combined = buildString {
+            if (lastSpeedText.isNotEmpty()) append(lastSpeedText)
+            if (lastDataUsageText.isNotEmpty()) append("$lastDataUsageText\n")
+            append(timerLine)
+        }
         updateNotification(combined, lastProxyTraffic, lastDirectTraffic)
+    }
+
+    private fun formatBytes(bytes: Long): String {
+        val units = arrayOf("B", "KB", "MB", "GB", "TB")
+        var size = bytes.toDouble()
+        var i = 0
+        while (size >= 1024 && i < units.size - 1) { size /= 1024; i++ }
+        return String.format(java.util.Locale.getDefault(), "%.1f %s", size, units[i])
     }
 
     private fun updateSpeedNotificationOnce(lastZeroSpeed: Boolean): Boolean {
@@ -258,6 +273,19 @@ object NotificationManager {
             lastSpeedText = text.toString()
             lastProxyTraffic = proxyTotal
             lastDirectTraffic = directTotal
+
+            val guid = MmkvManager.getSelectServer()
+            if (!guid.isNullOrEmpty()) {
+                val aff = MmkvManager.decodeServerAffiliationInfo(guid)
+                lastDataUsageText = if (aff != null && (aff.uplinkTotal > 0L || aff.downlinkTotal > 0L)) {
+                    val service = getService()
+                    service?.getString(
+                        R.string.notification_data_usage,
+                        formatBytes(aff.uplinkTotal),
+                        formatBytes(aff.downlinkTotal)
+                    ) ?: ""
+                } else ""
+            }
         }
         lastQueryTime = queryTime
         return zeroSpeed
