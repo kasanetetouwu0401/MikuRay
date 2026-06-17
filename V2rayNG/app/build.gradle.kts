@@ -174,6 +174,7 @@ dependencies {
     // Background Task Libraries
     implementation(libs.work.runtime.ktx)
     implementation(libs.work.multiprocess)
+    implementation(libs.multidex)
 
     // Testing Libraries
     testImplementation(libs.junit)
