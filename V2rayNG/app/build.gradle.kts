@@ -2,7 +2,6 @@ import com.android.build.api.variant.FilterConfiguration
 
 plugins {
     alias(libs.plugins.android.application)
-    id("com.jaredsburrows.license")
 }
 
 val appVersionName = "2.2.4"
@@ -69,7 +68,7 @@ android {
 
     sourceSets {
         getByName("main") {
-            jniLibs.srcDir("libs")
+            jniLibs.srcDirs = setOf("libs")
         }
     }
 
@@ -88,6 +87,7 @@ android {
     buildFeatures {
         viewBinding = true
         buildConfig = true
+        resValues = true
     }
 
     packaging {
