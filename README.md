@@ -28,6 +28,8 @@ A preview of MikuRay themes.
 
 ![ScreenshotLight4](https://raw.githubusercontent.com/HatsuneMikuUwU/MikuRay/master/image/uwu_screenshot_light_4.png)
 
+![ScreenshotLight5](https://raw.githubusercontent.com/HatsuneMikuUwU/MikuRay/master/image/uwu_screenshot_light_5.png)
+
 
 </details>
 
@@ -43,6 +45,8 @@ A preview of MikuRay themes.
 ![ScreenshotNight3](https://raw.githubusercontent.com/HatsuneMikuUwU/MikuRay/master/image/uwu_screenshot_night_3.png)
 
 ![ScreenshotNight4](https://raw.githubusercontent.com/HatsuneMikuUwU/MikuRay/master/image/uwu_screenshot_night_4.png)
+
+![ScreenshotNight5](https://raw.githubusercontent.com/HatsuneMikuUwU/MikuRay/master/image/uwu_screenshot_night_5.png)
 
 </details>
 
