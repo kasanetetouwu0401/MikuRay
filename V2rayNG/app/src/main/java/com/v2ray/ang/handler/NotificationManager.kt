@@ -47,6 +47,8 @@ object NotificationManager {
     @Volatile private var lastProxyTraffic: Long = 0L
     @Volatile private var lastDirectTraffic: Long = 0L
     @Volatile private var lastDataUsageText: String = ""
+    @Volatile private var sessionUplink: Long = 0L
+    @Volatile private var sessionDownlink: Long = 0L
 
     fun startSpeedNotification() {
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) != true) return
@@ -78,6 +80,8 @@ object NotificationManager {
         lastProxyTraffic = 0L
         lastDirectTraffic = 0L
         lastDataUsageText = ""
+        sessionUplink = 0L
+        sessionDownlink = 0L
 
         val flags = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 
@@ -274,18 +278,14 @@ object NotificationManager {
             lastProxyTraffic = proxyTotal
             lastDirectTraffic = directTotal
 
-            val guid = MmkvManager.getSelectServer()
-            if (!guid.isNullOrEmpty()) {
-                val aff = MmkvManager.decodeServerAffiliationInfo(guid)
-                lastDataUsageText = if (aff != null && (aff.uplinkTotal > 0L || aff.downlinkTotal > 0L)) {
-                    val service = getService()
-                    service?.getString(
-                        R.string.notification_data_usage,
-                        formatBytes(aff.uplinkTotal),
-                        formatBytes(aff.downlinkTotal)
-                    ) ?: ""
-                } else ""
-            }
+            sessionUplink += proxyUplink + directUplink
+            sessionDownlink += proxyDownlink + directDownlink
+            val service = getService()
+            lastDataUsageText = service?.getString(
+                R.string.notification_data_usage,
+                formatBytes(sessionUplink),
+                formatBytes(sessionDownlink)
+            ) ?: ""
         }
         lastQueryTime = queryTime
         return zeroSpeed
