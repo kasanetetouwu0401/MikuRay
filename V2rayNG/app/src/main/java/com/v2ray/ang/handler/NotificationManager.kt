@@ -35,14 +35,17 @@ object NotificationManager {
     private const val QUERY_INTERVAL_MS = 3000L
 
     private var lastQueryTime = 0L
+    private var connectStartTime = 0L
     private var mBuilder: NotificationCompat.Builder? = null
     private var speedNotificationJob: Job? = null
+    private var timerNotificationJob: Job? = null
     private var mNotificationManager: NotificationManager? = null
 
-    /**
-     * Starts the speed notification.
-     * @param currentConfig The current profile configuration.
-     */
+    // Last known values from each loop, combined on every notify
+    @Volatile private var lastSpeedText: String = ""
+    @Volatile private var lastProxyTraffic: Long = 0L
+    @Volatile private var lastDirectTraffic: Long = 0L
+
     fun startSpeedNotification() {
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) != true) return
         if (speedNotificationJob != null || CoreServiceManager.isRunning() == false) return
@@ -55,17 +58,23 @@ object NotificationManager {
                 delay(QUERY_INTERVAL_MS)
             }
         }
+
+        timerNotificationJob = CoroutineScope(Dispatchers.IO).launch {
+            while (isActive) {
+                updateTimerNotification()
+                delay(1000L)
+            }
+        }
     }
 
-    /**
-     * Shows the notification.
-     * @param currentConfig The current profile configuration.
-     */
     fun showNotification(currentConfig: ProfileItem?) {
         val service = getService() ?: return
 
-        // Reset last query time to avoid querying stats too soon after showing the notification
         lastQueryTime = System.currentTimeMillis()
+        connectStartTime = System.currentTimeMillis()
+        lastSpeedText = ""
+        lastProxyTraffic = 0L
+        lastDirectTraffic = 0L
 
         val flags = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 
@@ -86,8 +95,6 @@ object NotificationManager {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 createNotificationChannel()
             } else {
-                // If earlier version channel ID is not used
-                // https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html#NotificationCompat.Builder(android.content.Context)
                 ""
             }
 
@@ -96,9 +103,7 @@ object NotificationManager {
             .setContentTitle(currentConfig?.remarks)
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .setOngoing(true)
-            .setShowWhen(true)
-            .setUsesChronometer(true)
-            .setWhen(System.currentTimeMillis())
+            .setShowWhen(false)
             .setOnlyAlertOnce(true)
             .setContentIntent(contentPendingIntent)
             .addAction(
@@ -112,39 +117,34 @@ object NotificationManager {
                 restartV2RayPendingIntent
             )
 
-        //mBuilder?.setDefaults(NotificationCompat.FLAG_ONLY_ALERT_ONCE)
-
         service.startForeground(NOTIFICATION_ID, mBuilder?.build())
     }
 
-    /**
-     * Cancels the notification.
-     */
     fun cancelNotification() {
         val service = getService() ?: return
         service.stopForeground(Service.STOP_FOREGROUND_REMOVE)
 
         mBuilder = null
+        connectStartTime = 0L
         speedNotificationJob?.cancel()
         speedNotificationJob = null
+        timerNotificationJob?.cancel()
+        timerNotificationJob = null
         mNotificationManager = null
     }
 
-    /**
-     * Stops the speed notification.
-     */
     fun stopSpeedNotification() {
         speedNotificationJob?.let {
             it.cancel()
             speedNotificationJob = null
-            updateNotification("", 0, 0)
         }
+        timerNotificationJob?.let {
+            it.cancel()
+            timerNotificationJob = null
+        }
+        updateNotification("", 0, 0)
     }
 
-    /**
-     * Creates a notification channel for Android O and above.
-     * @return The channel ID.
-     */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(): String {
         val channelId = AppConfig.RAY_NG_CHANNEL_ID
@@ -160,12 +160,6 @@ object NotificationManager {
         return channelId
     }
 
-    /**
-     * Updates the notification with the given content text and traffic data.
-     * @param contentText The content text.
-     * @param proxyTraffic The proxy traffic.
-     * @param directTraffic The direct traffic.
-     */
     private fun updateNotification(contentText: String?, proxyTraffic: Long, directTraffic: Long) {
         if (mBuilder != null) {
             if (proxyTraffic < NOTIFICATION_ICON_THRESHOLD && directTraffic < NOTIFICATION_ICON_THRESHOLD) {
@@ -181,10 +175,6 @@ object NotificationManager {
         }
     }
 
-    /**
-     * Gets the notification manager.
-     * @return The notification manager.
-     */
     private fun getNotificationManager(): NotificationManager? {
         if (mNotificationManager == null) {
             val service = getService() ?: return null
@@ -193,13 +183,6 @@ object NotificationManager {
         return mNotificationManager
     }
 
-    /**
-     * Appends the speed string to the given text.
-     * @param text The text to append to.
-     * @param name The name of the tag.
-     * @param up The uplink speed.
-     * @param down The downlink speed.
-     */
     private fun appendSpeedString(text: StringBuilder, name: String?, up: Double, down: Double) {
         var n = name ?: "no tag"
         n = n.take(min(n.length, 6))
@@ -210,17 +193,23 @@ object NotificationManager {
         text.append("•  ${up.toLong().toSpeedString()}↑  ${down.toLong().toSpeedString()}↓\n")
     }
 
-    /**
-     * Updates the speed notification once.
-     * Queries traffic stats, separates proxy and direct, and updates the notification.
-     * @param lastZeroSpeed The previous zero speed state.
-     * @return The current zero speed state.
-     */
+    private fun updateTimerNotification() {
+        if (connectStartTime == 0L) return
+        val service = getService() ?: return
+        val elapsed = (System.currentTimeMillis() - connectStartTime) / 1000
+        val h = elapsed / 3600
+        val m = (elapsed % 3600) / 60
+        val s = elapsed % 60
+        val timeStr = if (h > 0) "%02d:%02d:%02d".format(h, m, s) else "%02d:%02d".format(m, s)
+        val timerLine = service.getString(R.string.notification_connect_time, timeStr)
+        val combined = if (lastSpeedText.isNotEmpty()) "$lastSpeedText$timerLine" else timerLine
+        updateNotification(combined, lastProxyTraffic, lastDirectTraffic)
+    }
+
     private fun updateSpeedNotificationOnce(lastZeroSpeed: Boolean): Boolean {
         val queryTime = System.currentTimeMillis()
         val sinceLastQueryIn = (queryTime - lastQueryTime)
 
-        // If the query interval is too short, skip this round to avoid excessive CPU usage
         if (sinceLastQueryIn < QUERY_INTERVAL_MS) {
             LogUtil.w(AppConfig.TAG, "Query interval too short: ${sinceLastQueryIn}ms, skipping")
             lastQueryTime = queryTime
@@ -261,23 +250,19 @@ object NotificationManager {
                 proxyUplink / sinceLastQueryInSeconds,
                 proxyDownlink / sinceLastQueryInSeconds
             )
-
             appendSpeedString(
                 text, AppConfig.TAG_DIRECT,
                 directUplink / sinceLastQueryInSeconds,
                 directDownlink / sinceLastQueryInSeconds
             )
-
-            updateNotification(text.toString(), proxyTotal, directTotal)
+            lastSpeedText = text.toString()
+            lastProxyTraffic = proxyTotal
+            lastDirectTraffic = directTotal
         }
         lastQueryTime = queryTime
         return zeroSpeed
     }
 
-    /**
-     * Gets the service instance.
-     * @return The service instance.
-     */
     private fun getService(): Service? {
         return CoreServiceManager.serviceControl?.get()?.getService()
     }
