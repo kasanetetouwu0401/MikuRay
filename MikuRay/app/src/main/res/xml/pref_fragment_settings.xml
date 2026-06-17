@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.miku.ray.ui.widget.UwuPreferenceCategory android:title="@string/title_fragment_settings"
+        app:sectionIcon="@drawable/ic_description_24dp">
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:icon="@drawable/ic_toggle_switch"
+            app:layout="@layout/uwu_top_switch"
+            app:widgetLayout="@layout/uwu_widget_material_switch"
+            android:key="pref_fragment_enabled"
+            android:title="@string/title_pref_fragment_enabled" />
+
+        <EditTextPreference
+            android:icon="@drawable/ic_numeric"
+            app:layout="@layout/uwu_mid"
+            android:key="pref_fragment_length"
+            android:summary="50-100"
+            android:title="@string/title_pref_fragment_length" />
+
+        <EditTextPreference
+            android:icon="@drawable/ic_numeric"
+            app:layout="@layout/uwu_mid"
+            android:key="pref_fragment_interval"
+            android:summary="10-20"
+            android:title="@string/title_pref_fragment_interval" />
+
+        <ListPreference
+            android:icon="@drawable/ic_currency_eth"
+            app:layout="@layout/uwu_bot"
+            android:defaultValue="tlshello"
+            android:entries="@array/fragment_packets"
+            android:entryValues="@array/fragment_packets"
+            android:key="pref_fragment_packets"
+            android:summary="%s"
+            android:title="@string/title_pref_fragment_packets" />
+
+    </com.miku.ray.ui.widget.UwuPreferenceCategory>
+
+</PreferenceScreen>
