@@ -108,7 +108,7 @@ object NotificationManager {
         mBuilder = NotificationCompat.Builder(service, channelId)
             .setSmallIcon(R.drawable.ic_stat_name)
             .setContentTitle(currentConfig?.remarks)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_LOW) // Disesuaikan ke LOW agar sinkron dengan channel
             .setOngoing(true)
             .setShowWhen(false)
             .setOnlyAlertOnce(true)

@@ -320,6 +320,9 @@
     <string name="title_update_config_count">Nge-update %d konfig</string>
     <string name="title_update_subscription_result">Berhasil update %1$d konfig (Sukses %2$d, Gagal %3$d, Di-skip %4$d)</string>
     <string name="title_update_subscription_no_subscription">Yah, ga ada langganan nih</string>
+    <string name="title_sub_update_diff">Perubahan langganan (%s)</string>
+    <string name="sub_update_diff_added">Ditambahin:\n%s</string>
+    <string name="sub_update_diff_deleted">Dihapus:\n%s</string>
     <string name="toast_server_not_found_in_group">Server yang lu pilih ga ada di grup ini euy</string>
     <string name="toast_fragment_not_available">Waduh, ga nemu nih tampilan yang lagi lu buka</string>
     <string name="title_locate_selected_config">Cari lokasi konfig yang dipilih</string>

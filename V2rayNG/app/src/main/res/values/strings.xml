@@ -341,6 +341,9 @@
     <string name="title_update_config_count">Update %d configs</string>
     <string name="title_update_subscription_result">Updated %1$d configs (%2$d success, %3$d failed, %4$d skipped)</string>
     <string name="title_update_subscription_no_subscription">No subscriptions</string>
+    <string name="title_sub_update_diff">Subscription changes (%s)</string>
+    <string name="sub_update_diff_added">Added:\n%s</string>
+    <string name="sub_update_diff_deleted">Deleted:\n%s</string>
     <string name="toast_server_not_found_in_group">Selected server not found in current group</string>
     <string name="toast_fragment_not_available">Unable to locate current view</string>
     <string name="title_locate_selected_config">Locate the selected config</string>
@@ -707,7 +710,5 @@ you need."</string>
     <string name="sub_setting_tab_icon">Tab icon</string>
     <string name="sub_setting_tab_icon_hint">Shown next to the group name in the tab bar</string>
     <string name="sub_tab_icon_none">None</string>
-    <string name="title_pref_random_icon_color">Random Icon Colors</string>
-    <string name="summary_pref_random_icon_color">Give each settings icon a unique, consistent background color</string>
 
 </resources>

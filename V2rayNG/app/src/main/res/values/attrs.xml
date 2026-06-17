@@ -49,11 +49,6 @@
     
     <declare-styleable name="DynamicShapeImageView">
         <attr name="shapeBackgroundColor" format="color|reference" />
-        <attr name="randomColorBackground" format="boolean" />
-    </declare-styleable>
-
-    <declare-styleable name="DynamicColorCardView">
-        <attr name="randomColorBackground" />
     </declare-styleable>
     
     <declare-styleable name="UwuHeaderIconView">

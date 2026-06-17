@@ -144,15 +144,6 @@
             android:summary="%s"
             android:title="@string/title_pref_icon_shape" />
 
-        <androidx.preference.SwitchPreferenceCompat
-            android:icon="@drawable/ic_palette_24"
-            app:layout="@layout/uwu_mid_switch"
-            app:widgetLayout="@layout/uwu_widget_material_switch"
-            android:defaultValue="false"
-            android:key="pref_random_icon_color"
-            android:summary="@string/summary_pref_random_icon_color"
-            android:title="@string/title_pref_random_icon_color" />
-
         <com.v2ray.ang.ui.dialog.DpiSliderDialog
             android:icon="@drawable/ic_cellphone_screenshot"
             app:layout="@layout/uwu_mid"

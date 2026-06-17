@@ -52,6 +52,7 @@ import com.v2ray.ang.util.QRCodeDecoder
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.util.showBlur
 import com.v2ray.ang.util.showDeleteConfirmDialog
+import com.v2ray.ang.util.showSubUpdateDiffDialog
 import com.v2ray.ang.viewmodel.MainViewModel
 import io.github.g00fy2.quickie.QRResult
 import io.github.g00fy2.quickie.ScanCustomCode
@@ -765,6 +766,9 @@ class MainActivity : HelperBaseActivity(),
                 if (result.configCount > 0) {
                     mainViewModel.reloadServerList()
                     refreshGroupTabTitles()
+                }
+                if (result.addedProfiles.isNotEmpty() || result.deletedProfiles.isNotEmpty()) {
+                    showSubUpdateDiffDialog(this@MainActivity, result)
                 }
                 hideLoading()
             }

@@ -14,6 +14,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import com.v2ray.ang.util.showBlur
 import com.v2ray.ang.util.showDeleteConfirmDialog
+import com.v2ray.ang.util.showSubUpdateDiffDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -115,6 +116,9 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
                             ),
                             title = getString(R.string.title_sub_update)
                         )
+                    }
+                    if (result.addedProfiles.isNotEmpty() || result.deletedProfiles.isNotEmpty()) {
+                        showSubUpdateDiffDialog(this@SubSettingActivity, result)
                     }
                     hideLoading()
                     refreshData()

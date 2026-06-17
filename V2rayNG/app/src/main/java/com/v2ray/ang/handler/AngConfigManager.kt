@@ -8,6 +8,7 @@ import com.v2ray.ang.AngApplication
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.core.CoreConfigManager
+import com.v2ray.ang.dto.ProfileDiffEntry
 import com.v2ray.ang.dto.SubscriptionUpdateResult
 import com.v2ray.ang.dto.UrlContentRequest
 import com.v2ray.ang.dto.entities.ProfileItem
@@ -550,6 +551,10 @@ object AngConfigManager {
                     return SubscriptionUpdateResult(failureCount = 1)
                 }
             }
+            // Snapshot profile names belonging to this subscription before it gets replaced,
+            // so we can report which profiles were added/deleted once the update finishes.
+            val oldProfileNames = snapshotProfileNames(it.guid)
+
             LogUtil.i(AppConfig.TAG, url)
             val userAgent = it.subscription.userAgent
             val proxyUsername = SettingsManager.getSocksUsername()
@@ -601,9 +606,19 @@ object AngConfigManager {
                 it.subscription.lastUpdated = System.currentTimeMillis()
                 MmkvManager.encodeSubscription(it.guid, it.subscription)
                 LogUtil.i(AppConfig.TAG, "Subscription updated: ${it.subscription.remarks}, $count configs")
+
+                val newProfileNames = snapshotProfileNames(it.guid)
+                val subName = it.subscription.remarks
+                val added = (newProfileNames - oldProfileNames)
+                    .map { name -> ProfileDiffEntry(subName, name) }
+                val deleted = (oldProfileNames - newProfileNames)
+                    .map { name -> ProfileDiffEntry(subName, name) }
+
                 return SubscriptionUpdateResult(
                     configCount = count,
-                    successCount = 1
+                    successCount = 1,
+                    addedProfiles = added,
+                    deletedProfiles = deleted
                 )
             } else {
                 // Got response but no valid configs parsed
@@ -613,6 +628,20 @@ object AngConfigManager {
             LogUtil.e(AppConfig.TAG, "Failed to update config via subscription", e)
             return SubscriptionUpdateResult(failureCount = 1)
         }
+    }
+
+    /**
+     * Snapshots the set of distinct profile remarks currently stored under a subscription,
+     * used to diff "added"/"deleted" profiles around a subscription update.
+     *
+     * @param subId The subscription ID.
+     * @return Set of profile remarks (display names) currently belonging to the subscription.
+     */
+    private fun snapshotProfileNames(subId: String): Set<String> {
+        return MmkvManager.decodeServerList(subId)
+            .mapNotNull { guid -> MmkvManager.decodeServerConfig(guid)?.remarks }
+            .filter { it.isNotBlank() }
+            .toSet()
     }
 
     /**

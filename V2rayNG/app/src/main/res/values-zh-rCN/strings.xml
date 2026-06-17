@@ -320,6 +320,9 @@
     <string name="title_update_config_count">更新 %d 个配置</string>
     <string name="title_update_subscription_result">更新了 %1$d 个配置（%2$d 个成功，%3$d 个失败，%4$d 个跳过）</string>
     <string name="title_update_subscription_no_subscription">无订阅</string>
+    <string name="title_sub_update_diff">订阅变化（%s）</string>
+    <string name="sub_update_diff_added">已添加：\n%s</string>
+    <string name="sub_update_diff_deleted">已删除：\n%s</string>
     <string name="toast_server_not_found_in_group">当前分组中未找到选中的服务器</string>
     <string name="toast_fragment_not_available">无法定位当前视图</string>
     <string name="title_locate_selected_config">定位所选配置</string>
