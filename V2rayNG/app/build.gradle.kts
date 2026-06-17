@@ -113,9 +113,7 @@ androidComponents {
 
             if (versionCodes.containsKey(abi)) {
                 val multiplier = versionCodes[abi]!!
-                output.versionCode.set(output.versionCode.map { baseCode ->
-                    (1000000 * multiplier) + (baseCode ?: 0)
-                })
+                output.versionCode.set((1000000 * multiplier) + appVersionCode)
             }
         }
     }
@@ -176,9 +174,6 @@ dependencies {
     // Background Task Libraries
     implementation(libs.work.runtime.ktx)
     implementation(libs.work.multiprocess)
-
-    // Multidex Support
-    implementation(libs.multidex)
 
     // Testing Libraries
     testImplementation(libs.junit)
