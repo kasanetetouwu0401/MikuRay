@@ -15,6 +15,8 @@ base {
 android {
     namespace = "com.v2ray.ang"
     compileSdk = 37
+    
+    ndkVersion = "29.0.14206865"
 
     defaultConfig {
         applicationId = "com.miku.ray"
@@ -67,7 +69,7 @@ android {
 
     sourceSets {
         getByName("main") {
-            jniLibs.srcDirs("libs")
+            jniLibs.srcDir("libs")
         }
     }
 
