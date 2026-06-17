@@ -2,7 +2,6 @@ import com.android.build.api.variant.FilterConfiguration
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     id("com.jaredsburrows.license")
 }
 
@@ -23,7 +22,7 @@ android {
         targetSdk = 37
         versionCode = appVersionCode
         versionName = appVersionName
-        multiDexEnabled = false
+        multiDexEnabled = true
         
         resValue("string", "uwu_version_name", appVersionName)
         resValue("string", "uwu_version_code", appVersionCode.toString())
