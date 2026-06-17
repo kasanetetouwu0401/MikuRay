@@ -193,7 +193,7 @@ object NotificationManager {
         for (i in n.length..6 step 2) {
             text.append("\t")
         }
-        text.append("•  ${up.toLong().toSpeedString()}↑  ${down.toLong().toSpeedString()}↓\n")
+        text.append(":  ${up.toLong().toSpeedString()}↑  ${down.toLong().toSpeedString()}↓\n")
     }
 
     private fun updateTimerNotification() {
