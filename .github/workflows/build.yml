@@ -1,4 +1,4 @@
-name: Build APK
+Name: Build APK
 
 on:
   workflow_dispatch:
@@ -98,12 +98,12 @@ jobs:
         cd ${{ github.workspace }}/V2rayNG
         echo "sdk.dir=${ANDROID_HOME}" > local.properties
         chmod 755 gradlew
-        ./gradlew licenseReleaseReport
-        ./gradlew assembleRelease -Pandroid.injected.signing.store.file=${{ steps.android_keystore.outputs.filePath }} -Pandroid.injected.signing.store.password=${{ secrets.APP_KEYSTORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.APP_KEYSTORE_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.APP_KEY_PASSWORD }}
+        ./gradlew licenseReleaseReport --no-daemon --console=plain
+        ./gradlew assembleRelease --no-daemon --console=plain -Pandroid.injected.signing.store.file=${{ steps.android_keystore.outputs.filePath }} -Pandroid.injected.signing.store.password=${{ secrets.APP_KEYSTORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.APP_KEYSTORE_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.APP_KEY_PASSWORD }}
 
     - name: Sign APKs with v1, v2, and v3
       run: |
-        BUILD_TOOLS_DIR="$ANDROID_HOME/build-tools/36.1.0"
+        BUILD_TOOLS_DIR="$ANDROID_HOME/build-tools/37.0.0"
         
         for apk in ${{ github.workspace }}/V2rayNG/app/build/outputs/apk/release/*.apk; do
           if [ -f "$apk" ]; then
