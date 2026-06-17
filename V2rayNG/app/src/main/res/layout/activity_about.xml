@@ -323,7 +323,7 @@
                                         android:layout_marginStart="8dp">
 
                                         <com.neko.widget.DynamicShapeImageView
-                                            app:shapeBackgroundColor="?colorPrimary"
+                                            app:randomColorBackground="true"
                                             android:layout_width="45dp"
                                             android:layout_height="45dp"
                                             android:scaleType="centerCrop" />
@@ -429,7 +429,7 @@
                                         android:layout_marginStart="8dp">
 
                                         <com.neko.widget.DynamicShapeImageView
-                                            app:shapeBackgroundColor="?colorPrimary"
+                                            app:randomColorBackground="true"
                                             android:layout_width="45dp"
                                             android:layout_height="45dp"
                                             android:scaleType="centerCrop" />
@@ -535,7 +535,7 @@
                                         android:layout_marginStart="8dp">
 
                                         <com.neko.widget.DynamicShapeImageView
-                                            app:shapeBackgroundColor="?colorPrimary"
+                                            app:randomColorBackground="true"
                                             android:layout_width="45dp"
                                             android:layout_height="45dp"
                                             android:scaleType="centerCrop" />
@@ -641,7 +641,7 @@
                                         android:layout_marginStart="8dp">
 
                                         <com.neko.widget.DynamicShapeImageView
-                                            app:shapeBackgroundColor="?colorPrimary"
+                                            app:randomColorBackground="true"
                                             android:layout_width="45dp"
                                             android:layout_height="45dp"
                                             android:scaleType="centerCrop" />
@@ -747,7 +747,7 @@
                                         android:layout_marginStart="8dp">
 
                                         <com.neko.widget.DynamicShapeImageView
-                                            app:shapeBackgroundColor="?colorPrimary"
+                                            app:randomColorBackground="true"
                                             android:layout_width="45dp"
                                             android:layout_height="45dp"
                                             android:scaleType="centerCrop" />
@@ -973,7 +973,7 @@
                                 android:paddingStart="3dp"
                                 android:scrollbars="horizontal">
 
-                                <com.google.android.material.card.MaterialCardView
+                                <com.neko.widget.DynamicColorCardView
                                     android:layout_width="38dp"
                                     android:layout_height="48dp"
                                     android:layout_gravity="bottom|center"
@@ -983,7 +983,8 @@
                                     app:cardBackgroundColor="?colorPrimary"
                                     app:cardCornerRadius="8dp"
                                     app:cardElevation="0dp"
-                                    app:strokeWidth="0dp">
+                                    app:strokeWidth="0dp"
+                                    app:randomColorBackground="true">
 
                                     <ImageView
                                         android:layout_width="24dp"
@@ -1006,7 +1007,7 @@
                                         app:cardCornerRadius="2dp"
                                         app:cardElevation="0dp"
                                         app:strokeWidth="0dp" />
-                                </com.google.android.material.card.MaterialCardView>
+                                </com.neko.widget.DynamicColorCardView>
                             </LinearLayout>
 
                             <LinearLayout
@@ -1070,7 +1071,7 @@
                                 android:paddingStart="3dp"
                                 android:scrollbars="horizontal">
 
-                                <com.google.android.material.card.MaterialCardView
+                                <com.neko.widget.DynamicColorCardView
                                     android:layout_width="38dp"
                                     android:layout_height="48dp"
                                     android:layout_gravity="bottom|center"
@@ -1080,7 +1081,8 @@
                                     app:cardBackgroundColor="?colorPrimary"
                                     app:cardCornerRadius="8dp"
                                     app:cardElevation="0dp"
-                                    app:strokeWidth="0dp">
+                                    app:strokeWidth="0dp"
+                                    app:randomColorBackground="true">
 
                                     <ImageView
                                         android:layout_width="24dp"
@@ -1103,7 +1105,7 @@
                                         app:cardCornerRadius="2dp"
                                         app:cardElevation="0dp"
                                         app:strokeWidth="0dp" />
-                                </com.google.android.material.card.MaterialCardView>
+                                </com.neko.widget.DynamicColorCardView>
                             </LinearLayout>
 
                             <LinearLayout
@@ -1167,7 +1169,7 @@
                                 android:paddingStart="3dp"
                                 android:scrollbars="horizontal">
 
-                                <com.google.android.material.card.MaterialCardView
+                                <com.neko.widget.DynamicColorCardView
                                     android:layout_width="38dp"
                                     android:layout_height="48dp"
                                     android:layout_gravity="bottom|center"
@@ -1177,7 +1179,8 @@
                                     app:cardBackgroundColor="?colorPrimary"
                                     app:cardCornerRadius="8dp"
                                     app:cardElevation="0dp"
-                                    app:strokeWidth="0dp">
+                                    app:strokeWidth="0dp"
+                                    app:randomColorBackground="true">
 
                                     <ImageView
                                         android:layout_width="24dp"
@@ -1200,7 +1203,7 @@
                                         app:cardCornerRadius="2dp"
                                         app:cardElevation="0dp"
                                         app:strokeWidth="0dp" />
-                                </com.google.android.material.card.MaterialCardView>
+                                </com.neko.widget.DynamicColorCardView>
                             </LinearLayout>
 
                             <LinearLayout
@@ -1264,7 +1267,7 @@
                                 android:paddingStart="3dp"
                                 android:scrollbars="horizontal">
 
-                                <com.google.android.material.card.MaterialCardView
+                                <com.neko.widget.DynamicColorCardView
                                     android:layout_width="38dp"
                                     android:layout_height="48dp"
                                     android:layout_gravity="bottom|center"
@@ -1274,7 +1277,8 @@
                                     app:cardBackgroundColor="?colorPrimary"
                                     app:cardCornerRadius="8dp"
                                     app:cardElevation="0dp"
-                                    app:strokeWidth="0dp">
+                                    app:strokeWidth="0dp"
+                                    app:randomColorBackground="true">
 
                                     <ImageView
                                         android:layout_width="24dp"
@@ -1297,7 +1301,7 @@
                                         app:cardCornerRadius="2dp"
                                         app:cardElevation="0dp"
                                         app:strokeWidth="0dp" />
-                                </com.google.android.material.card.MaterialCardView>
+                                </com.neko.widget.DynamicColorCardView>
                             </LinearLayout>
 
                             <LinearLayout
@@ -1361,7 +1365,7 @@
                                 android:paddingStart="3dp"
                                 android:scrollbars="horizontal">
 
-                                <com.google.android.material.card.MaterialCardView
+                                <com.neko.widget.DynamicColorCardView
                                     android:layout_width="38dp"
                                     android:layout_height="48dp"
                                     android:layout_gravity="bottom|center"
@@ -1371,7 +1375,8 @@
                                     app:cardBackgroundColor="?colorPrimary"
                                     app:cardCornerRadius="8dp"
                                     app:cardElevation="0dp"
-                                    app:strokeWidth="0dp">
+                                    app:strokeWidth="0dp"
+                                    app:randomColorBackground="true">
 
                                     <ImageView
                                         android:layout_width="24dp"
@@ -1394,7 +1399,7 @@
                                         app:cardCornerRadius="2dp"
                                         app:cardElevation="0dp"
                                         app:strokeWidth="0dp" />
-                                </com.google.android.material.card.MaterialCardView>
+                                </com.neko.widget.DynamicColorCardView>
                             </LinearLayout>
 
                             <LinearLayout
@@ -1457,7 +1462,7 @@
                                 android:paddingStart="3dp"
                                 android:scrollbars="horizontal">
 
-                                <com.google.android.material.card.MaterialCardView
+                                <com.neko.widget.DynamicColorCardView
                                     android:layout_width="38dp"
                                     android:layout_height="48dp"
                                     android:layout_gravity="bottom|center"
@@ -1467,7 +1472,8 @@
                                     app:cardBackgroundColor="?colorPrimary"
                                     app:cardCornerRadius="8dp"
                                     app:cardElevation="0dp"
-                                    app:strokeWidth="0dp">
+                                    app:strokeWidth="0dp"
+                                    app:randomColorBackground="true">
 
                                     <ImageView
                                         android:layout_width="24dp"
@@ -1490,7 +1496,7 @@
                                         app:cardCornerRadius="2dp"
                                         app:cardElevation="0dp"
                                         app:strokeWidth="0dp" />
-                                </com.google.android.material.card.MaterialCardView>
+                                </com.neko.widget.DynamicColorCardView>
                             </LinearLayout>
 
                             <LinearLayout

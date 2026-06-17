@@ -707,5 +707,7 @@ you need."</string>
     <string name="sub_setting_tab_icon">Tab icon</string>
     <string name="sub_setting_tab_icon_hint">Shown next to the group name in the tab bar</string>
     <string name="sub_tab_icon_none">None</string>
+    <string name="title_pref_random_icon_color">Random Icon Colors</string>
+    <string name="summary_pref_random_icon_color">Give each settings icon a unique, consistent background color</string>
 
 </resources>

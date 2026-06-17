@@ -237,7 +237,7 @@
                                         android:layout_marginStart="8.0dip">
 
                                         <com.neko.widget.DynamicShapeImageView
-                                            app:shapeBackgroundColor="?colorPrimary"
+                                            app:randomColorBackground="true"
                                             android:layout_width="45.0dip"
                                             android:layout_height="45.0dip"
                                             android:scaleType="centerCrop" />
@@ -351,7 +351,7 @@
                                             android:layout_marginStart="8.0dip">
 
                                             <com.neko.widget.DynamicShapeImageView
-                                                app:shapeBackgroundColor="?colorPrimary"
+                                                app:randomColorBackground="true"
                                                 android:layout_width="45.0dip"
                                                 android:layout_height="45.0dip"
                                                 android:scaleType="centerCrop" />
@@ -457,7 +457,7 @@
                                             android:layout_marginStart="8.0dip">
 
                                             <com.neko.widget.DynamicShapeImageView
-                                                app:shapeBackgroundColor="?colorPrimary"
+                                                app:randomColorBackground="true"
                                                 android:layout_width="45.0dip"
                                                 android:layout_height="45.0dip"
                                                 android:scaleType="centerCrop" />
@@ -563,7 +563,7 @@
                                             android:layout_marginStart="8.0dip">
 
                                             <com.neko.widget.DynamicShapeImageView
-                                                app:shapeBackgroundColor="?colorPrimary"
+                                                app:randomColorBackground="true"
                                                 android:layout_width="45.0dip"
                                                 android:layout_height="45.0dip"
                                                 android:scaleType="centerCrop" />
@@ -669,7 +669,7 @@
                                             android:layout_marginStart="8.0dip">
 
                                             <com.neko.widget.DynamicShapeImageView
-                                                app:shapeBackgroundColor="?colorPrimary"
+                                                app:randomColorBackground="true"
                                                 android:layout_width="45.0dip"
                                                 android:layout_height="45.0dip"
                                                 android:scaleType="centerCrop" />
@@ -775,7 +775,7 @@
                                             android:layout_marginStart="8.0dip">
 
                                             <com.neko.widget.DynamicShapeImageView
-                                                app:shapeBackgroundColor="?colorPrimary"
+                                                app:randomColorBackground="true"
                                                 android:layout_width="45.0dip"
                                                 android:layout_height="45.0dip"
                                                 android:scaleType="centerCrop" />
@@ -882,7 +882,7 @@
                                         android:layout_marginStart="8.0dip">
 
                                         <com.neko.widget.DynamicShapeImageView
-                                            app:shapeBackgroundColor="?colorPrimary"
+                                            app:randomColorBackground="true"
                                             android:layout_width="45.0dip"
                                             android:layout_height="45.0dip"
                                             android:scaleType="centerCrop" />
@@ -996,7 +996,7 @@
                                             android:layout_marginStart="8.0dip">
 
                                             <com.neko.widget.DynamicShapeImageView
-                                                app:shapeBackgroundColor="?colorPrimary"
+                                                app:randomColorBackground="true"
                                                 android:layout_width="45.0dip"
                                                 android:layout_height="45.0dip"
                                                 android:scaleType="centerCrop" />
@@ -1102,7 +1102,7 @@
                                             android:layout_marginStart="8.0dip">
 
                                             <com.neko.widget.DynamicShapeImageView
-                                                app:shapeBackgroundColor="?colorPrimary"
+                                                app:randomColorBackground="true"
                                                 android:layout_width="45.0dip"
                                                 android:layout_height="45.0dip"
                                                 android:scaleType="centerCrop" />
@@ -1208,7 +1208,7 @@
                                             android:layout_marginStart="8.0dip">
 
                                             <com.neko.widget.DynamicShapeImageView
-                                                app:shapeBackgroundColor="?colorPrimary"
+                                                app:randomColorBackground="true"
                                                 android:layout_width="45.0dip"
                                                 android:layout_height="45.0dip"
                                                 android:scaleType="centerCrop" />
@@ -1314,7 +1314,7 @@
                                             android:layout_marginStart="8.0dip">
 
                                             <com.neko.widget.DynamicShapeImageView
-                                                app:shapeBackgroundColor="?colorPrimary"
+                                                app:randomColorBackground="true"
                                                 android:layout_width="45.0dip"
                                                 android:layout_height="45.0dip"
                                                 android:scaleType="centerCrop" />
@@ -1549,7 +1549,7 @@
                                 android:layout_marginStart="16.0dip">
 
                                 <com.neko.widget.DynamicShapeImageView
-                                    app:shapeBackgroundColor="?colorPrimary"
+                                    app:randomColorBackground="true"
                                     android:layout_width="45.0dip"
                                     android:layout_height="45.0dip"
                                     android:scaleType="centerCrop" />
@@ -1595,7 +1595,7 @@
                                 android:layout_marginStart="16.0dip">
 
                                 <com.neko.widget.DynamicShapeImageView
-                                    app:shapeBackgroundColor="?colorPrimary"
+                                    app:randomColorBackground="true"
                                     android:layout_width="45.0dip"
                                     android:layout_height="45.0dip"
                                     android:scaleType="centerCrop" />
@@ -1641,7 +1641,7 @@
                                 android:layout_marginStart="16.0dip">
 
                                 <com.neko.widget.DynamicShapeImageView
-                                    app:shapeBackgroundColor="?colorPrimary"
+                                    app:randomColorBackground="true"
                                     android:layout_width="45.0dip"
                                     android:layout_height="45.0dip"
                                     android:scaleType="centerCrop" />

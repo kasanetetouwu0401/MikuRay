@@ -99,7 +99,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp">
                                 <com.neko.widget.DynamicShapeImageView
-                                    app:shapeBackgroundColor="?colorPrimary"
+                                    app:randomColorBackground="true"
                                     android:layout_width="45dp"
                                     android:layout_height="45dp"
                                     android:scaleType="centerCrop" />
@@ -197,7 +197,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp">
                                 <com.neko.widget.DynamicShapeImageView
-                                    app:shapeBackgroundColor="?colorPrimary"
+                                    app:randomColorBackground="true"
                                     android:layout_width="45dp"
                                     android:layout_height="45dp"
                                     android:scaleType="centerCrop" />
@@ -295,7 +295,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp">
                                 <com.neko.widget.DynamicShapeImageView
-                                    app:shapeBackgroundColor="?colorPrimary"
+                                    app:randomColorBackground="true"
                                     android:layout_width="45dp"
                                     android:layout_height="45dp"
                                     android:scaleType="centerCrop" />
@@ -393,7 +393,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp">
                                 <com.neko.widget.DynamicShapeImageView
-                                    app:shapeBackgroundColor="?colorPrimary"
+                                    app:randomColorBackground="true"
                                     android:layout_width="45dp"
                                     android:layout_height="45dp"
                                     android:scaleType="centerCrop" />

@@ -7,6 +7,9 @@ import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.AttributeSet
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import com.neko.shapeimageview.ShaderImageView
 import com.neko.shapeimageview.shader.ShaderHelper
@@ -15,6 +18,7 @@ import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import androidx.appcompat.R as AppCompatR
 import com.v2ray.ang.handler.MmkvManager
+import com.v2ray.ang.util.RandomIconColor
 import com.v2ray.ang.util.getColorAttr
 
 class DynamicShapeImageView @JvmOverloads constructor(
@@ -27,12 +31,23 @@ class DynamicShapeImageView @JvmOverloads constructor(
     
     private var customBgColor: Int? = null
 
+    /** Whether this particular view instance is allowed to use random colors (set via XML). */
+    private var randomColorEligible: Boolean = false
+
+    private var lastIconIdentity: Int? = null
+
     private val shapeChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
-            if (intent?.action == AppConfig.BROADCAST_ACTION_ICON_SHAPE_CHANGED) {
-                val newKey = MmkvManager.decodeSettingsString(AppConfig.PREF_ICON_SHAPE)
-                    ?: AppConfig.PREF_ICON_SHAPE_DEFAULT
-                applyShape(newKey)
+            when (intent?.action) {
+                AppConfig.BROADCAST_ACTION_ICON_SHAPE_CHANGED -> {
+                    val newKey = MmkvManager.decodeSettingsString(AppConfig.PREF_ICON_SHAPE)
+                        ?: AppConfig.PREF_ICON_SHAPE_DEFAULT
+                    applyShape(newKey)
+                }
+                AppConfig.BROADCAST_ACTION_RANDOM_ICON_COLOR_CHANGED -> {
+                    lastIconIdentity = null
+                    loadColorBitmap()
+                }
             }
         }
     }
@@ -56,6 +71,11 @@ class DynamicShapeImageView @JvmOverloads constructor(
                     0
                 )
             }
+
+            randomColorEligible = typedArray.getBoolean(
+                R.styleable.DynamicShapeImageView_randomColorBackground,
+                false
+            )
             
             typedArray.recycle()
         }
@@ -66,7 +86,7 @@ class DynamicShapeImageView @JvmOverloads constructor(
 
     private fun loadColorBitmap() {
         try {
-            val color = customBgColor ?: context.getColorAttr(androidx.appcompat.R.attr.colorPrimary)
+            val color = resolveBackgroundColor()
             
             val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
@@ -78,6 +98,110 @@ class DynamicShapeImageView @JvmOverloads constructor(
         }
     }
 
+    /** True only when this view is eligible (via XML) AND the user has enabled the feature. */
+    private val isRandomColorEnabled: Boolean
+        get() = randomColorEligible && MmkvManager.decodeSettingsBool(AppConfig.PREF_RANDOM_ICON_COLOR, false)
+
+    private fun resolveBackgroundColor(): Int {
+        customBgColor?.let { return it }
+
+        if (isRandomColorEnabled) {
+            val identity = findSiblingIconIdentity()
+            if (identity != null) {
+                val isDark = (context.resources.configuration.uiMode and
+                    android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                    android.content.res.Configuration.UI_MODE_NIGHT_YES
+                return RandomIconColor.forIdentity(identity, isDark)
+            }
+        }
+
+        return context.getColorAttr(AppCompatR.attr.colorPrimary)
+    }
+
+    /**
+     * Finds the sibling icon ImageView and nearby title text within the row, and derives
+     * a stable identity combining both, so the same row always maps to the same color even
+     * when several rows share the same icon resource. Works both for Preference rows (which
+     * use `@android:id/icon` / `@android:id/title`) and bottom sheet menu items (which use
+     * plain, unidentified ImageView/TextView siblings).
+     */
+    private fun findSiblingIconIdentity(): Int? {
+        val parentView = parent as? ViewGroup ?: return null
+        val siblingIcon = findSiblingImageView(parentView) ?: return null
+        val drawable = siblingIcon.drawable ?: return null
+        val iconIdentity = drawable.constantState?.hashCode() ?: drawable.hashCode()
+
+        // Walk up to the row's root to find the title text, since title/icon may not share
+        // the same immediate parent depending on the layout (preference vs bottom sheet).
+        val rootView = rootViewUpTo(parentView, maxLevels = 4)
+        val titleText = rootView?.let { findRowTitleText(it) }
+
+        return if (titleText != null) {
+            31 * iconIdentity + titleText.hashCode()
+        } else {
+            iconIdentity
+        }
+    }
+
+    /** Finds the icon ImageView sibling: the other child of our immediate FrameLayout parent. */
+    private fun findSiblingImageView(parentView: ViewGroup): ImageView? {
+        for (i in 0 until parentView.childCount) {
+            val child = parentView.getChildAt(i)
+            if (child !== this && child is ImageView) return child
+        }
+        return null
+    }
+
+    /** Finds the first non-empty title-like TextView under the row root, preferring @android:id/title. */
+    private fun findRowTitleText(root: ViewGroup): String? {
+        root.findViewById<View>(android.R.id.title)?.let {
+            (it as? android.widget.TextView)?.text?.toString()?.let { text -> if (text.isNotEmpty()) return text }
+        }
+        return firstNonEmptyTextView(root)
+    }
+
+    private fun firstNonEmptyTextView(viewGroup: ViewGroup): String? {
+        for (i in 0 until viewGroup.childCount) {
+            val child = viewGroup.getChildAt(i)
+            if (child is android.widget.TextView) {
+                val text = child.text?.toString()
+                if (!text.isNullOrEmpty()) return text
+            } else if (child is ViewGroup) {
+                firstNonEmptyTextView(child)?.let { return it }
+            }
+        }
+        return null
+    }
+
+    private fun rootViewUpTo(start: ViewGroup, maxLevels: Int): ViewGroup? {
+        var current: ViewGroup = start
+        repeat(maxLevels) {
+            val nextParent = current.parent as? ViewGroup ?: return current
+            current = nextParent
+        }
+        return current
+    }
+
+    /**
+     * Re-checks the sibling icon and refreshes the background color if it changed
+     * (e.g. when this view/holder gets recycled and rebound to a different preference).
+     */
+    private fun refreshRandomColorIfNeeded() {
+        if (!isRandomColorEnabled || customBgColor != null) return
+        val identity = findSiblingIconIdentity() ?: return
+        if (identity != lastIconIdentity) {
+            lastIconIdentity = identity
+            loadColorBitmap()
+        }
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        if (randomColorEligible) {
+            refreshRandomColorIfNeeded()
+        }
+        super.onDraw(canvas)
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         if (!isInEditMode) {
@@ -85,7 +209,14 @@ class DynamicShapeImageView @JvmOverloads constructor(
                 ?: AppConfig.PREF_ICON_SHAPE_DEFAULT
             applyShape(savedKey)
 
-            val filter = IntentFilter(AppConfig.BROADCAST_ACTION_ICON_SHAPE_CHANGED)
+            if (randomColorEligible) {
+                lastIconIdentity = null
+                loadColorBitmap()
+            }
+
+            val filter = IntentFilter(AppConfig.BROADCAST_ACTION_ICON_SHAPE_CHANGED).apply {
+                addAction(AppConfig.BROADCAST_ACTION_RANDOM_ICON_COLOR_CHANGED)
+            }
             ContextCompat.registerReceiver(
                 context, shapeChangeReceiver, filter,
                 ContextCompat.RECEIVER_NOT_EXPORTED
