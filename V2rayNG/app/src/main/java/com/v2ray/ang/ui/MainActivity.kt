@@ -34,6 +34,7 @@ import com.v2ray.ang.extension.alert
 import com.v2ray.ang.extension.alertError
 import com.v2ray.ang.extension.alertSuccess
 import com.v2ray.ang.extension.toast
+import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.extension.toastError
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
@@ -748,18 +749,17 @@ class MainActivity : HelperBaseActivity(),
             withContext(Dispatchers.Main) {
                 when {
                     result.successCount + result.failureCount + result.skipCount == 0 -> {
-                        alert(getString(R.string.title_update_subscription_no_subscription), title = getString(R.string.title_sub_update))
+                        toast(getString(R.string.title_update_subscription_no_subscription))
                     }
                     result.successCount > 0 && result.failureCount + result.skipCount == 0 -> {
-                        alertSuccess(getString(R.string.title_update_config_count, result.configCount), title = getString(R.string.title_sub_update))
+                        toastSuccess(getString(R.string.title_update_config_count, result.configCount))
                     }
                     else -> {
-                        alert(
+                        toast(
                             getString(
                                 R.string.title_update_subscription_result,
                                 result.configCount, result.successCount, result.failureCount, result.skipCount
-                            ),
-                            title = getString(R.string.title_sub_update)
+                            )
                         )
                     }
                 }

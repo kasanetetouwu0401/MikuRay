@@ -24,9 +24,10 @@ import com.v2ray.ang.R
 import com.v2ray.ang.contracts.BaseAdapterListener
 import com.v2ray.ang.databinding.ActivitySubSettingBinding
 import com.v2ray.ang.databinding.ItemQrcodeBinding
-import com.v2ray.ang.extension.alert
 import com.v2ray.ang.extension.alertSuccess
 import com.v2ray.ang.extension.alertError
+import com.v2ray.ang.extension.toast
+import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
@@ -99,22 +100,15 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
                 delay(500L)
                 launch(Dispatchers.Main) {
                     if (result.successCount + result.failureCount + result.skipCount == 0) {
-                        alert(
-                            getString(R.string.title_update_subscription_no_subscription),
-                            title = getString(R.string.title_sub_update)
-                        )
+                        toast(getString(R.string.title_update_subscription_no_subscription))
                     } else if (result.successCount > 0 && result.failureCount + result.skipCount == 0) {
-                        alertSuccess(
-                            getString(R.string.title_update_config_count, result.configCount),
-                            title = getString(R.string.title_sub_update)
-                        )
+                        toastSuccess(getString(R.string.title_update_config_count, result.configCount))
                     } else {
-                        alert(
+                        toast(
                             getString(
                                 R.string.title_update_subscription_result,
                                 result.configCount, result.successCount, result.failureCount, result.skipCount
-                            ),
-                            title = getString(R.string.title_sub_update)
+                            )
                         )
                     }
                     if (result.addedProfiles.isNotEmpty() || result.deletedProfiles.isNotEmpty()) {
