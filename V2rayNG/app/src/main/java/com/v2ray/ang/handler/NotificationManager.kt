@@ -35,6 +35,7 @@ object NotificationManager {
     private const val QUERY_INTERVAL_MS = 3000L
 
     private var lastQueryTime = 0L
+    private var connectStartTime = 0L
     private var mBuilder: NotificationCompat.Builder? = null
     private var speedNotificationJob: Job? = null
     private var mNotificationManager: NotificationManager? = null
@@ -66,6 +67,7 @@ object NotificationManager {
 
         // Reset last query time to avoid querying stats too soon after showing the notification
         lastQueryTime = System.currentTimeMillis()
+        connectStartTime = System.currentTimeMillis()
 
         val flags = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 
@@ -123,6 +125,7 @@ object NotificationManager {
         service.stopForeground(Service.STOP_FOREGROUND_REMOVE)
 
         mBuilder = null
+        connectStartTime = 0L
         speedNotificationJob?.cancel()
         speedNotificationJob = null
         mNotificationManager = null
@@ -265,6 +268,21 @@ object NotificationManager {
                 directUplink / sinceLastQueryInSeconds,
                 directDownlink / sinceLastQueryInSeconds
             )
+
+            if (connectStartTime > 0L) {
+                val elapsed = (System.currentTimeMillis() - connectStartTime) / 1000
+                val h = elapsed / 3600
+                val m = (elapsed % 3600) / 60
+                val s = elapsed % 60
+                val timeStr = if (h > 0) "%02d:%02d:%02d".format(h, m, s) else "%02d:%02d".format(m, s)
+                val service = getService()
+                if (service != null) {
+                    text.append(service.getString(R.string.notification_connect_time, timeStr))
+                } else {
+                    text.append("timer:$timeStr")
+                }
+            }
+
             updateNotification(text.toString(), proxyTotal, directTotal)
         }
         lastQueryTime = queryTime
