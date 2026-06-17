@@ -50,6 +50,11 @@ class TabIconPickerAdapter(
             "filter_unmuted_solar",
             "filter_unread_solar",
             "filter_work_solar",
+            "filter_ghost_solar",
+            "filter_gift_solar",
+            "filter_premium_solar",
+            "filter_roll_solar",
+            "filter_wallet_solar",
         )
 
         fun labelFor(iconName: String): String = iconName
