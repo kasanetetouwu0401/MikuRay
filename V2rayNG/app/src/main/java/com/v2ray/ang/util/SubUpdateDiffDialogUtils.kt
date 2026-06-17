@@ -1,6 +1,11 @@
 package com.v2ray.ang.util
 
 import android.content.Context
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.ListView
+import android.widget.TextView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.v2ray.ang.R
 import com.v2ray.ang.dto.ProfileDiffEntry
@@ -10,45 +15,63 @@ import com.v2ray.ang.dto.SubscriptionUpdateResult
  * Shows a dialog listing which server profiles were added and/or deleted by a subscription
  * update, mirroring the "group diff" dialog from MikuBox so the user can see at a glance what
  * changed right after a subscription refresh finishes.
- *
- * No-op if the update produced no added/deleted profiles (e.g. nothing changed, or the update
- * failed before any diff could be computed).
- *
- * @param context The context to show the dialog in (should be an Activity context).
- * @param result The subscription update result containing the added/deleted profile diff.
  */
 fun showSubUpdateDiffDialog(context: Context, result: SubscriptionUpdateResult) {
     if (result.addedProfiles.isEmpty() && result.deletedProfiles.isEmpty()) return
 
-    // Collect the distinct subscription names involved, so we know whether this update
-    // touched a single subscription (e.g. manual per-item update) or several at once
-    // (e.g. "Update all subscriptions").
     val subNames = (result.addedProfiles.asSequence().map { it.subscriptionName } +
             result.deletedProfiles.asSequence().map { it.subscriptionName })
         .distinct()
         .toList()
     val multipleSubs = subNames.size > 1
 
-    fun format(entries: List<ProfileDiffEntry>): String = entries.joinToString("\n") { entry ->
-        if (multipleSubs) "[${entry.subscriptionName}] ${entry.profileName}" else "• ${entry.profileName}"
-    }
-
     val titleSubject = if (subNames.size == 1) subNames.first() else context.getString(R.string.title_sub_update)
     val title = context.getString(R.string.title_sub_update_diff, titleSubject)
 
-    val message = buildString {
-        if (result.addedProfiles.isNotEmpty()) {
-            append(context.getString(R.string.sub_update_diff_added, format(result.addedProfiles)))
+    val listItems = mutableListOf<String>()
+
+    fun formatEntry(entry: ProfileDiffEntry): String {
+        return if (multipleSubs) "  • [${entry.subscriptionName}] ${entry.profileName}" else "  • ${entry.profileName}"
+    }
+
+    if (result.addedProfiles.isNotEmpty()) {
+        val addedHeader = context.getString(R.string.sub_update_diff_added, "").trim()
+        listItems.add(addedHeader) 
+        result.addedProfiles.forEach { listItems.add(formatEntry(it)) }
+    }
+
+    if (result.deletedProfiles.isNotEmpty()) {
+        if (listItems.isNotEmpty()) listItems.add("")
+        val deletedHeader = context.getString(R.string.sub_update_diff_deleted, "").trim()
+        listItems.add(deletedHeader)
+        result.deletedProfiles.forEach { listItems.add(formatEntry(it)) }
+    }
+
+    val listView = ListView(context).apply {
+        adapter = object : ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, listItems) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent) as TextView
+                val text = getItem(position) ?: ""
+                
+                view.text = text
+                view.textSize = 14f
+                view.setPadding(64, 12, 64, 12)
+                
+                if (!text.startsWith("  •") && text.isNotBlank()) {
+                    view.setTypeface(null, android.graphics.Typeface.BOLD)
+                } else {
+                    view.setTypeface(null, android.graphics.Typeface.NORMAL)
+                }
+                return view
+            }
         }
-        if (result.deletedProfiles.isNotEmpty()) {
-            if (isNotEmpty()) append("\n\n")
-            append(context.getString(R.string.sub_update_diff_deleted, format(result.deletedProfiles)))
-        }
+        divider = null
+        dividerHeight = 0
     }
 
     MaterialAlertDialogBuilder(context)
         .setTitle(title)
-        .setMessage(message)
+        .setView(listView)
         .setPositiveButton(android.R.string.ok, null)
         .showBlur()
 }
