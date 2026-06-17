@@ -67,7 +67,7 @@ android {
     }
 
     sourceSets {
-        getByName("master") {
+        getByName("main") {
             jniLibs.srcDirs("libs")
         }
     }
