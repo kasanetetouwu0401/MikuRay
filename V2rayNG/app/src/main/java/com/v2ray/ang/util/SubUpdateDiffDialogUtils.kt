@@ -18,7 +18,7 @@ import com.v2ray.ang.dto.SubscriptionUpdateResult
  * @param result The subscription update result containing the added/deleted profile diff.
  */
 fun showSubUpdateDiffDialog(context: Context, result: SubscriptionUpdateResult) {
-    // if (result.addedProfiles.isEmpty() && result.deletedProfiles.isEmpty()) return
+    if (result.addedProfiles.isEmpty() && result.deletedProfiles.isEmpty()) return
 
     // Collect the distinct subscription names involved, so we know whether this update
     // touched a single subscription (e.g. manual per-item update) or several at once
