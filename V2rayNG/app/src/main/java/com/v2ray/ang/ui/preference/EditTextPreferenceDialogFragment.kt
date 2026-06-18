@@ -51,7 +51,18 @@ class EditTextPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
 
         b.editText.setText(editTextValue)
         b.editText.setSelection(b.editText.text?.length ?: 0)
-        pref?.onBindEditTextListener?.onBindEditText(b.editText)
+        
+        if (pref != null) {
+            try {
+                val method = EditTextPreference::class.java.getDeclaredMethod("getOnBindEditTextListener")
+                method.isAccessible = true
+                val listener = method.invoke(pref) as? EditTextPreference.OnBindEditTextListener
+                listener?.onBindEditText(b.editText)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
         if (b.editText.inputType == InputType.TYPE_CLASS_TEXT) {
             b.editText.setSingleLine()
         }
