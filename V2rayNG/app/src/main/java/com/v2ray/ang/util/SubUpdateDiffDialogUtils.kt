@@ -56,7 +56,7 @@ fun showSubUpdateDiffDialog(context: Context, result: SubscriptionUpdateResult) 
                 
                 view.text = text
                 view.textSize = 14f 
-                view.setPadding(0, 12, 0, 12)
+                view.setPadding(24, 5, 24, 5)
                 
                 if (!text.startsWith("  •") && text.isNotBlank()) {
                     view.setTypeface(null, android.graphics.Typeface.BOLD)
