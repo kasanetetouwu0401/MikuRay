@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.TextView
+import androidx.core.widget.TextViewCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.v2ray.ang.R
 import com.v2ray.ang.dto.ProfileDiffEntry
@@ -32,7 +33,7 @@ fun showSubUpdateDiffDialog(context: Context, result: SubscriptionUpdateResult) 
     val listItems = mutableListOf<String>()
 
     fun formatEntry(entry: ProfileDiffEntry): String {
-        return if (multipleSubs) "  • [${entry.subscriptionName}] ${entry.profileName}" else "  • ${entry.profileName}"
+        return if (multipleSubs) "• [${entry.subscriptionName}] ${entry.profileName}" else "• ${entry.profileName}"
     }
 
     if (result.addedProfiles.isNotEmpty()) {
@@ -42,7 +43,7 @@ fun showSubUpdateDiffDialog(context: Context, result: SubscriptionUpdateResult) 
     }
 
     if (result.deletedProfiles.isNotEmpty()) {
-        if (listItems.isNotEmpty()) listItems.add("") // Spacer kosong pemisah
+        if (listItems.isNotEmpty()) listItems.add("")
         val deletedHeader = context.getString(R.string.sub_update_diff_deleted, "").trim()
         listItems.add(deletedHeader)
         result.deletedProfiles.forEach { listItems.add(formatEntry(it)) }
@@ -55,14 +56,13 @@ fun showSubUpdateDiffDialog(context: Context, result: SubscriptionUpdateResult) 
                 val text = getItem(position) ?: ""
                 
                 view.text = text
-                view.textSize = 14f 
                 view.setPadding(24, 5, 24, 5)
                 
-                if (!text.startsWith("  •") && text.isNotBlank()) {
-                    view.setTypeface(null, android.graphics.Typeface.BOLD)
+                if (!text.startsWith("• ") && text.isNotBlank()) {
+                    TextViewCompat.setTextAppearance(view, com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
                     view.setTextColor(context.getColorAttr("colorPrimary"))
                 } else {
-                    view.setTypeface(null, android.graphics.Typeface.NORMAL)
+                    TextViewCompat.setTextAppearance(view, com.google.android.material.R.style.TextAppearance_Material3_TitleSmall)
                     view.setTextColor(context.getColorAttr("colorOnSurfaceVariant"))
                 }
                 return view
