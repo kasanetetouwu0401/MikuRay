@@ -9,7 +9,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
+import com.v2ray.ang.ui.preference.BasePreferenceFragmentCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.material.appbar.MaterialToolbar
@@ -46,7 +46,7 @@ class SettingsActivity : BaseActivity() {
         }
     }
 
-    class SettingsFragment : PreferenceFragmentCompat() {
+    class SettingsFragment : BasePreferenceFragmentCompat() {
 
         private val navigateUiSettings by lazy { findPreference<Preference>(AppConfig.PREF_NAVIGATE_UI_SETTINGS) }
         private val navigateVpnSettings by lazy { findPreference<Preference>(AppConfig.PREF_NAVIGATE_VPN_SETTINGS) }

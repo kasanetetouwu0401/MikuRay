@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.skydoves.colorpickerview.ColorPickerView
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
@@ -43,6 +44,9 @@ class CustomColorPickerDialog : DialogFragment() {
         val view = layoutInflater.inflate(R.layout.dialog_custom_color_picker, null)
 
         val colorPickerView = view.findViewById<ColorPickerView>(R.id.color_picker_view)
+        val positiveButton = view.findViewById<MaterialButton>(R.id.positive_button)
+        val negativeButton = view.findViewById<MaterialButton>(R.id.negative_button)
+        val neutralButton = view.findViewById<MaterialButton>(R.id.neutral_button)
 
         colorPickerView.post {
             colorPickerView.selectByHsvColor(initialColor)
@@ -52,18 +56,27 @@ class CustomColorPickerDialog : DialogFragment() {
             selectedColor = envelope.color
         })
 
-        return MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.pref_custom_color_title)
+        val dialog = MaterialAlertDialogBuilder(requireContext())
             .setView(view)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                activity?.let { ThemeManager.saveCustomColor(it, selectedColor) }
-                onAppliedCallback()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .setNeutralButton(R.string.pref_custom_color_reset) { _, _ ->
-                activity?.let { ThemeManager.clearCustomColor(it) }
-                onAppliedCallback()
-            }
+            .setCancelable(true)
             .create()
+
+        positiveButton.setOnClickListener {
+            activity?.let { ThemeManager.saveCustomColor(it, selectedColor) }
+            onAppliedCallback()
+            dismiss()
+        }
+
+        negativeButton.setOnClickListener {
+            dismiss()
+        }
+
+        neutralButton.setOnClickListener {
+            activity?.let { ThemeManager.clearCustomColor(it) }
+            onAppliedCallback()
+            dismiss()
+        }
+
+        return dialog
     }
 }

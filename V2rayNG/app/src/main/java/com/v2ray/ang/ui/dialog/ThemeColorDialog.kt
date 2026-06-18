@@ -12,6 +12,7 @@ import androidx.annotation.ColorInt
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -51,6 +52,7 @@ class ThemeColorDialog : DialogFragment() {
             .inflate(R.layout.dialog_theme_color, null)
 
         val grid = view.findViewById<android.widget.GridLayout>(R.id.grid_theme_colors)
+        val negativeButton = view.findViewById<MaterialButton>(R.id.negative_button)
 
         val useCustom   = MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_CUSTOM_COLOR, false)
         val savedColor  = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_COLOR, 0)
@@ -119,10 +121,12 @@ class ThemeColorDialog : DialogFragment() {
         }
 
         return MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.pref_theme_color_title)
             .setView(view)
-            .setNegativeButton(android.R.string.cancel) { _, _ -> dismiss() }
+            .setCancelable(true)
             .create()
+            .also { dialog ->
+                negativeButton.setOnClickListener { dialog.dismiss() }
+            }
     }
 
     private fun applyCircleDrawable(view: ImageView, @ColorInt color: Int, selected: Boolean) {

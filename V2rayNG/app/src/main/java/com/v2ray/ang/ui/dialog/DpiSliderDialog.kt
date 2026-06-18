@@ -6,8 +6,8 @@ import android.content.ContextWrapper
 import android.content.res.Resources
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
 import com.v2ray.ang.AppConfig
@@ -40,32 +40,44 @@ class DpiSliderDialog @JvmOverloads constructor(
 
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_dpi_slider, null)
         val slider = dialogView.findViewById<Slider>(R.id.slider_dpi)
+        val iconView = dialogView.findViewById<android.widget.ImageView>(R.id.dialog_icon)
+        val titleView = dialogView.findViewById<android.widget.TextView>(R.id.dialog_title)
+        val positiveButton = dialogView.findViewById<MaterialButton>(R.id.positive_button)
+        val negativeButton = dialogView.findViewById<MaterialButton>(R.id.negative_button)
+        val neutralButton = dialogView.findViewById<MaterialButton>(R.id.neutral_button)
+
+        icon?.let { iconView.setImageDrawable(it) }
+        titleView.text = title
 
         slider.value = currentDpi.toFloat().coerceIn(160f, 640f)
 
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.pref_custom_dpi)
             .setView(dialogView)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                val clamped = slider.value.toInt()
-                val valueToSave = if (clamped == systemDpi) 0 else clamped
-                
-                MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_DPI, valueToSave)
-                summary = if (valueToSave == 0) systemDpi.toString() else clamped.toString()
-                
-                DPIController.applyDpi(activity.applicationContext, clamped)
-                
-                activity.recreate()
-            }
-            .setNeutralButton(R.string.reset, null)
-            .setNegativeButton(android.R.string.cancel, null)
+            .setCancelable(true)
             .create()
+
+        positiveButton.setOnClickListener {
+            val clamped = slider.value.toInt()
+            val valueToSave = if (clamped == systemDpi) 0 else clamped
+
+            MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_DPI, valueToSave)
+            summary = if (valueToSave == 0) systemDpi.toString() else clamped.toString()
+
+            DPIController.applyDpi(activity.applicationContext, clamped)
+
+            dialog.dismiss()
+            activity.recreate()
+        }
+
+        negativeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        neutralButton.setOnClickListener {
+            slider.value = systemDpi.toFloat().coerceIn(160f, 640f)
+        }
 
         WindowBlurUtils.applyWindowBlur(dialog.window)
         dialog.show()
-
-        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-            slider.value = systemDpi.toFloat().coerceIn(160f, 640f)
-        }
     }
 }

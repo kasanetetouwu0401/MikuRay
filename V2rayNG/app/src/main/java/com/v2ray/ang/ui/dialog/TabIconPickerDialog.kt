@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.ImageView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.v2ray.ang.R
 import com.v2ray.ang.ui.TabIconPickerAdapter
@@ -23,6 +24,7 @@ class TabIconPickerDialog(
         val rowNone   = dialogView.findViewById<View>(R.id.row_none)
         val checkNone = dialogView.findViewById<ImageView>(R.id.check_none)
         val rv        = dialogView.findViewById<RecyclerView>(R.id.rv_icons)
+        val negativeButton = dialogView.findViewById<MaterialButton>(R.id.negative_button)
 
         lateinit var dialog: androidx.appcompat.app.AlertDialog
 
@@ -50,10 +52,13 @@ class TabIconPickerDialog(
         }
 
         dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.sub_setting_tab_icon)
             .setView(dialogView)
-            .setNegativeButton(android.R.string.cancel, null)
+            .setCancelable(true)
             .create()
+
+        negativeButton.setOnClickListener {
+            dialog.dismiss()
+        }
 
         WindowBlurUtils.applyWindowBlur(dialog.window)
         dialog.show()

@@ -5,8 +5,8 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
 import com.v2ray.ang.AppConfig
@@ -43,32 +43,45 @@ class HeaderTopRowPaddingDialog @JvmOverloads constructor(
         val dialogView = LayoutInflater.from(context)
             .inflate(R.layout.dialog_header_top_row_padding_slider, null)
         val slider = dialogView.findViewById<Slider>(R.id.slider_header_top_row_padding)
+        val iconView = dialogView.findViewById<android.widget.ImageView>(R.id.dialog_icon)
+        val titleView = dialogView.findViewById<android.widget.TextView>(R.id.dialog_title)
+        val positiveButton = dialogView.findViewById<MaterialButton>(R.id.positive_button)
+        val negativeButton = dialogView.findViewById<MaterialButton>(R.id.negative_button)
+        val neutralButton = dialogView.findViewById<MaterialButton>(R.id.neutral_button)
+
+        icon?.let { iconView.setImageDrawable(it) }
+        titleView.text = title
+
         slider.value = current.toFloat()
 
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.pref_header_top_row_padding_title)
             .setView(dialogView)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                val newPadding = slider.value.toInt()
-                MmkvManager.encodeSettings(AppConfig.PREF_HEADER_TOP_ROW_PADDING, newPadding)
-                summary = context.getString(
-                    R.string.pref_header_top_row_padding_summary_value, newPadding
-                )
-                val intent = android.content.Intent(
-                    AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED
-                )
-                activity.sendBroadcast(intent)
-            }
-            .setNeutralButton(R.string.reset, null)
-            .setNegativeButton(android.R.string.cancel, null)
+            .setCancelable(true)
             .create()
+
+        positiveButton.setOnClickListener {
+            val newPadding = slider.value.toInt()
+            MmkvManager.encodeSettings(AppConfig.PREF_HEADER_TOP_ROW_PADDING, newPadding)
+            summary = context.getString(
+                R.string.pref_header_top_row_padding_summary_value, newPadding
+            )
+            val intent = android.content.Intent(
+                AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED
+            )
+            activity.sendBroadcast(intent)
+            dialog.dismiss()
+        }
+
+        negativeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        neutralButton.setOnClickListener {
+            slider.value = AppConfig.HEADER_TOP_ROW_PADDING_DEFAULT.toFloat()
+        }
 
         WindowBlurUtils.applyWindowBlur(dialog.window)
         dialog.show()
-
-        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-            slider.value = AppConfig.HEADER_TOP_ROW_PADDING_DEFAULT.toFloat()
-        }
 
         updateSummary()
     }

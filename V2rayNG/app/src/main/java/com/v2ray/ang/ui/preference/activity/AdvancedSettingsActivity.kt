@@ -7,7 +7,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
-import androidx.preference.PreferenceFragmentCompat
+import com.v2ray.ang.ui.preference.BasePreferenceFragmentCompat
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
@@ -45,7 +45,7 @@ class AdvancedSettingsActivity : BaseActivity() {
         }
     }
 
-    class AdvancedSettingsFragment : PreferenceFragmentCompat() {
+    class AdvancedSettingsFragment : BasePreferenceFragmentCompat() {
 
         private val mode by lazy { findPreference<ListPreference>(AppConfig.PREF_MODE) }
 
