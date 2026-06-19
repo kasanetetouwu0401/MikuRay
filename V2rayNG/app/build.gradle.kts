@@ -163,7 +163,7 @@ dependencies {
     implementation(libs.core)
 
     // Image loading & cropping
-    implementation(libs.glide)
+    implementation(libs.coil.android)
     implementation(libs.ucrop)
 
     // AndroidX Lifecycle and Architecture Components
