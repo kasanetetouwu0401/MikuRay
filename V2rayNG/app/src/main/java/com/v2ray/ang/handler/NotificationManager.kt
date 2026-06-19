@@ -46,6 +46,7 @@ object NotificationManager {
     @Volatile private var lastProxyTraffic: Long = 0L
     @Volatile private var lastDirectTraffic: Long = 0L
     @Volatile private var lastDataUsageText: String = ""
+    
     @Volatile private var sessionUplink: Long = 0L
     @Volatile private var sessionDownlink: Long = 0L
 
@@ -74,13 +75,10 @@ object NotificationManager {
         val service = getService() ?: return
 
         lastQueryTime = System.currentTimeMillis()
-        connectStartTime = System.currentTimeMillis()
-        lastSpeedText = ""
-        lastProxyTraffic = 0L
-        lastDirectTraffic = 0L
-        lastDataUsageText = ""
-        sessionUplink = 0L
-        sessionDownlink = 0L
+        
+        if (connectStartTime == 0L) {
+            connectStartTime = System.currentTimeMillis()
+        }
 
         val flags = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 
@@ -137,6 +135,7 @@ object NotificationManager {
         timerNotificationJob?.cancel()
         timerNotificationJob = null
         mNotificationManager = null
+
         lastSpeedText = ""
         lastProxyTraffic = 0L
         lastDirectTraffic = 0L
@@ -160,7 +159,8 @@ object NotificationManager {
         lastDirectTraffic = 0L
         lastDataUsageText = ""
         sessionUplink = 0L
-        sessionDownlink = 0L    
+        sessionDownlink = 0L
+        
         updateNotification("", 0, 0)
     }
 
@@ -260,8 +260,8 @@ object NotificationManager {
                 AppConfig.UPLINK -> {
                     when (stat.tag) {
                         AppConfig.TAG_DIRECT -> directUplink += stat.value
-                        AppConfig.TAG_BLOCKED -> {}
-                        else -> proxyUplink += stat.value
+                        AppConfig.TAG_BLOCKED -> {} 
+                        else -> proxyUplink += stat.value 
                     }
                 }
                 AppConfig.DOWNLINK -> {
