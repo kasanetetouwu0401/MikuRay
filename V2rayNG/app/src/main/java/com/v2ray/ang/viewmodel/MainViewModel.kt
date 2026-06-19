@@ -37,13 +37,13 @@ import java.util.Collections
 import java.util.regex.PatternSyntaxException
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-    private var serverList = mutableListOf<String>()
+    private var serverList = mutableListOf<String>() 
     var subscriptionId: String = MmkvManager.decodeSettingsString(AppConfig.CACHE_SUBSCRIPTION_ID, "").orEmpty()
     var keywordFilter = ""
     val serversCache = mutableListOf<ServersCache>()
     
     val isRunning by lazy { MutableLiveData<Boolean>() }
-    val activeTrafficText by lazy { MutableLiveData<String?>() }
+    val activeSessionTraffic by lazy { MutableLiveData<Pair<Long, Long>?>() } // LiveData penampung byte dari Notifikasi
     val updateListAction by lazy { MutableLiveData<Int>() }
     val updateTestResultAction by lazy { MutableLiveData<String>() }
     val updateIpResultAction by lazy { MutableLiveData<String>() }
@@ -101,10 +101,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (subscriptionId.isEmpty()) {
             return
         }
-
         Collections.swap(serverList, fromPosition, toPosition)
         Collections.swap(serversCache, fromPosition, toPosition)
-
         MmkvManager.encodeServerList(serverList, subscriptionId)
     }
 
@@ -141,7 +139,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val order = MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)
         when (order) {
             1 -> serversCache.sortWith(compareBy { it.profile.remarks.lowercase() })
-            2 -> serversCache.sortWith(compareBy {
+            2 -> serversCache.sortWith(compareBy { 
                 val delay = MmkvManager.decodeServerAffiliationInfo(it.guid)?.testDelayMillis ?: 0L
                 if (delay <= 0L) Long.MAX_VALUE else delay
             })
@@ -430,7 +428,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 AppConfig.MSG_STATE_NOT_RUNNING -> {
                     isRunning.value = false
-                    activeTrafficText.postValue(null)
+                    activeSessionTraffic.postValue(null)
                 }
 
                 AppConfig.MSG_STATE_START_SUCCESS -> {
@@ -454,7 +452,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 AppConfig.MSG_STATE_STOP_SUCCESS -> {
                     isRunning.value = false
-                    activeTrafficText.postValue(null)
+                    activeSessionTraffic.postValue(null)
                 }
 
                 AppConfig.MSG_MEASURE_DELAY_SUCCESS -> {
@@ -483,10 +481,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 AppConfig.MSG_TRAFFIC_UPDATED -> {
-                    val guid = intent.getStringExtra("content") ?: return
-                    val trafficStr = MmkvManager.getProfileTrafficString(guid)
-                    if (trafficStr != null) {
-                        activeTrafficText.postValue(trafficStr)
+                    val guid = intent.getStringExtra("content")
+                    if (guid != null) {
+                        updateListAction.postValue(getPosition(guid))
+                    } else {
+                        // Menangkap byte mentah yang dipancarkan oleh NotificationManager
+                        val up = intent.getLongExtra("sessionUp", 0L)
+                        val down = intent.getLongExtra("sessionDown", 0L)
+                        activeSessionTraffic.postValue(Pair(up, down))
                     }
                 }
             }
