@@ -33,7 +33,6 @@ import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.CustomDividerItemDecoration
 import com.v2ray.ang.util.DPIController
 import com.v2ray.ang.util.MyContextWrapper
-import com.v2ray.ang.util.PillToolbarController
 import com.v2ray.ang.util.ThemeManager
 import com.v2ray.ang.util.WindowBlurUtils
 import com.v2ray.ang.util.ThemeStateManager
@@ -43,11 +42,6 @@ abstract class BaseActivity : AppCompatActivity() {
     private var loadingOverlay: FrameLayout? = null
 
     private lateinit var themeStateManager: ThemeStateManager
-
-    private var pillToolbarRef: MaterialToolbar? = null
-    private var pillToolbarTitle: CharSequence? = null
-    private var pillToolbarShowHomeAsUp: Boolean = true
-    private var pillToolbarChangeReceiver: android.content.BroadcastReceiver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         themeStateManager = ThemeStateManager(this)
@@ -96,12 +90,6 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         themeStateManager.checkThemeChangedAndRecreate()
-        if (pillToolbarChangeReceiver == null) {
-            pillToolbarChangeReceiver = PillToolbarController.registerChangeReceiver(this) {
-                applyPillToolbarState()
-            }
-        }
-        applyPillToolbarState()
     }
 
     override fun onContentChanged() {
@@ -118,15 +106,6 @@ abstract class BaseActivity : AppCompatActivity() {
             )
             insets
         }
-    }
-
-    override fun onPrepareOptionsMenu(menu: android.view.Menu): Boolean {
-        val result = super.onPrepareOptionsMenu(menu)
-        // The system (re)populates the toolbar's menu after onCreateOptionsMenu,
-        // which can override the pill toolbar's "hide native menu icons" state,
-        // so it needs to be reapplied here.
-        applyPillToolbarState()
-        return result
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
@@ -222,11 +201,6 @@ abstract class BaseActivity : AppCompatActivity() {
             supportActionBar?.setDisplayHomeAsUpEnabled(showHomeAsUp)
             title?.let { t -> this.title = t }
         }
-
-        pillToolbarRef = tb as? MaterialToolbar
-        pillToolbarTitle = title ?: this.title
-        pillToolbarShowHomeAsUp = showHomeAsUp
-        applyPillToolbarState()
     }
 
     protected fun setContentViewWithToolbar(layoutResId: Int, showHomeAsUp: Boolean = true, title: CharSequence? = null) {
@@ -252,37 +226,6 @@ abstract class BaseActivity : AppCompatActivity() {
             supportActionBar?.setDisplayHomeAsUpEnabled(showHomeAsUp)
             title?.let { t -> supportActionBar?.title = t }
         }
-
-        pillToolbarRef = toolbar
-        pillToolbarTitle = title ?: this.title
-        pillToolbarShowHomeAsUp = showHomeAsUp
-        applyPillToolbarState()
-    }
-
-    private fun applyPillToolbarState() {
-        val toolbar = pillToolbarRef ?: return
-        val showHomeAsUp = pillToolbarShowHomeAsUp
-        PillToolbarController.applyState(
-            toolbar = toolbar,
-            title = pillToolbarTitle,
-            onBack = {
-                if (showHomeAsUp) onBackPressedDispatcher.onBackPressed()
-            },
-            onMenu = { anchor -> openOptionsMenuFallback(anchor) }
-        )
-
-        val appBar = findViewById<com.google.android.material.appbar.AppBarLayout>(R.id.app_bar)
-        val collapsingToolbar = findViewById<CollapsingToolbarLayout>(R.id.collapsing_toolbar)
-        PillToolbarController.adjustCollapsingAppBar(appBar, collapsingToolbar)
-    }
-
-    private fun openOptionsMenuFallback(anchor: View) {
-        // Reuses the activity's standard options menu (set via onCreateOptionsMenu)
-        // so existing per-activity menu items keep working with the pill toolbar.
-        val popup = androidx.appcompat.widget.PopupMenu(this, anchor)
-        onCreateOptionsMenu(popup.menu)
-        popup.setOnMenuItemClickListener { item -> onOptionsItemSelected(item) }
-        if (popup.menu.size() > 0) popup.show()
     }
 
     private fun getOrCreateLoadingOverlay(): FrameLayout {
@@ -360,8 +303,6 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        PillToolbarController.unregisterChangeReceiver(this, pillToolbarChangeReceiver)
-        pillToolbarChangeReceiver = null
         loadingOverlay?.let {
             (it.parent as? ViewGroup)?.removeView(it)
         }

@@ -7,8 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
+import coil3.dispose
+import coil3.load
+import coil3.request.error
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
@@ -74,13 +75,11 @@ class RoutingMenuBottomSheet : BaseBottomSheetFragment() {
         val targetTag = if (uriString.isNullOrBlank()) TAG_SHEET_DEFAULT else uriString
         if (bannerImageView.tag != targetTag) {
             if (!uriString.isNullOrBlank()) {
-                Glide.with(this)
-                    .load(Uri.parse(uriString))
-                    .diskCacheStrategy(DiskCacheStrategy.DATA)
-                    .error(R.drawable.uwu_banner_image_about)
-                    .into(bannerImageView)
+                bannerImageView.load(Uri.parse(uriString)) {
+                    error(R.drawable.uwu_banner_image_about)
+                }
             } else {
-                Glide.with(this).clear(bannerImageView)
+                bannerImageView.dispose()
                 bannerImageView.setImageResource(R.drawable.uwu_banner_image_about)
             }
             bannerImageView.tag = targetTag

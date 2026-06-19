@@ -145,7 +145,6 @@ object AppConfig {
     const val HEADER_TOP_ROW_PADDING_DEFAULT = 16
     const val HEADER_TOP_ROW_PADDING_MIN = 0
     const val HEADER_TOP_ROW_PADDING_MAX = 100
-    const val PREF_PILL_TOOLBAR_STYLE = "pref_pill_toolbar_style"
 
     /** Cache keys. */
     const val CACHE_SUBSCRIPTION_ID = "cache_subscription_id"
@@ -162,7 +161,6 @@ object AppConfig {
     const val BROADCAST_ACTION_HOME_BANNER_CHANGED = "$ANG_PACKAGE.action.home_banner_changed"
     const val BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED = "$ANG_PACKAGE.action.header_top_row_padding_changed"
     const val BROADCAST_ACTION_CATEGORY_STYLE_CHANGED = "$ANG_PACKAGE.action.category_style_changed"
-    const val BROADCAST_ACTION_PILL_TOOLBAR_STYLE_CHANGED = "$ANG_PACKAGE.action.pill_toolbar_style_changed"
 
     /** Tasker extras. */
     const val TASKER_EXTRA_BUNDLE = "com.twofortyfouram.locale.intent.extra.BUNDLE"

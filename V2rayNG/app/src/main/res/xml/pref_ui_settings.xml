@@ -179,21 +179,12 @@
             
         <androidx.preference.SwitchPreferenceCompat
             android:icon="@drawable/ic_toggle_switch"
-            app:layout="@layout/uwu_mid_switch"
+            app:layout="@layout/uwu_bot_switch"
             app:widgetLayout="@layout/uwu_widget_material_switch"
             android:defaultValue="false"
             android:key="pref_show_splash_screen"
             android:title="@string/pref_show_splash_title"
             android:summary="@string/pref_show_splash_summary" />
-            
-        <androidx.preference.SwitchPreferenceCompat
-            android:icon="@drawable/ic_cards_variant"
-            app:layout="@layout/uwu_bot_switch"
-            app:widgetLayout="@layout/uwu_widget_material_switch"
-            android:key="pref_pill_toolbar_style"
-            android:title="@string/pill_toolbar_show_title"
-            android:summary="@string/pill_toolbar_show_summary"
-            android:defaultValue="false" />
 
     </com.neko.widget.UwuPreferenceCategory>
 
@@ -277,7 +268,7 @@
             android:summary="@string/home_banner_delete_summary" />
 
     </com.neko.widget.UwuPreferenceCategory>
-
+    
     <com.neko.widget.UwuPreferenceCategory android:title="@string/sheet_banner_category"
         app:sectionIcon="@drawable/ic_sparkles_24dp">
 

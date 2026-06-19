@@ -8,11 +8,9 @@ import android.net.Uri
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DecodeFormat
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
-import com.bumptech.glide.request.target.Target
+import coil3.dispose
+import coil3.load
+import coil3.request.error
 import com.neko.shapeimageview.ShaderImageView
 import com.neko.shapeimageview.shader.ShaderHelper
 import com.neko.shapeimageview.shader.SvgShader
@@ -118,13 +116,9 @@ class ProfileBannerImageView @JvmOverloads constructor(
             if (this.tag != targetTag) {
                 if (!uriString.isNullOrEmpty()) {
                     val savedUri = Uri.parse(uriString)
-                    Glide.with(this)
-                        .asBitmap()
-                        .load(savedUri)
-                        .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .dontAnimate()
-                        .error(R.drawable.uwu_banner_profile)
-                        .into(this)
+                    this.load(savedUri) {
+                        error(R.drawable.uwu_banner_profile)
+                    }
                 } else {
                     loadDefault()
                 }
@@ -140,7 +134,7 @@ class ProfileBannerImageView @JvmOverloads constructor(
     }
 
     private fun loadDefault() {
-        Glide.with(this).clear(this)
+        this.dispose()
         setImageResource(R.drawable.uwu_banner_profile)
     }
 }
