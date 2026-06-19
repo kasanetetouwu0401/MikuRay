@@ -1,10 +1,8 @@
 package com.v2ray.ang.util
 
 import android.content.Context
-import android.view.LayoutInflater
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.v2ray.ang.R
-import com.v2ray.ang.databinding.DialogSubUpdateDiffBinding
 import com.v2ray.ang.dto.ProfileDiffEntry
 import com.v2ray.ang.dto.SubscriptionUpdateResult
 
@@ -48,18 +46,9 @@ fun showSubUpdateDiffDialog(context: Context, result: SubscriptionUpdateResult) 
         }
     }
 
-    val binding = DialogSubUpdateDiffBinding.inflate(LayoutInflater.from(context))
-    binding.dialogTitle.text = title
-    binding.dialogMessage.text = message
-
-    val dialog = MaterialAlertDialogBuilder(context)
-        .setView(binding.root)
-        .create()
-    WindowBlurUtils.applyWindowBlur(dialog.window)
-
-    binding.positiveButton.setOnClickListener {
-        dialog.dismiss()
-    }
-    dialog.show()
+    MaterialAlertDialogBuilder(context)
+        .setTitle(title)
+        .setMessage(message)
+        .setPositiveButton(android.R.string.ok, null)
+        .showBlur()
 }
-

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:start="0dp">
+        <ripple android:color="?android:attr/colorControlHighlight">
+            <item>
+        <shape>
+            <size android:width="40dp" android:height="40dp" />
+            <solid android:color="?attr/colorCard" />
+            <corners
+                android:radius="100dp"/>
+        </shape>
+        </item>
+        </ripple>
+    </item>
+    <item
+        android:width="20dp"
+        android:height="20dp"
+        android:gravity="center"
+        android:start="0dp">
+        <vector
+            android:width="20dp"
+            android:height="20dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24"
+            android:tint="?attr/colorOnSurfaceVariant">
+            <path
+                android:fillColor="@android:color/white"
+                android:pathData="M12,8c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM12,10c-1.1,0 -2,0.9 -2,2s0.9,2 2,2 2,-0.9 2,-2 -0.9,-2 -2,-2zM12,16c-1.1,0 -2,0.9 -2,2s0.9,2 2,2 2,-0.9 2,-2 -0.9,-2 -2,-2z" />
+        </vector>
+    </item>
+</layer-list>

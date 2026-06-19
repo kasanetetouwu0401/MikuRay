@@ -679,6 +679,16 @@ you need."</string>
     <string name="pref_home_banner_height_summary_value">%1$ddp</string>
     <string name="pref_header_top_row_padding_title">Header top padding</string>
     <string name="pref_header_top_row_padding_summary_value">%1$ddp</string>
+
+    <!-- Pill toolbar settings -->
+    <string name="pill_toolbar_category">Pill Toolbar</string>
+    <string name="pill_toolbar_show_title">Use pill-style toolbar</string>
+    <string name="pill_toolbar_show_summary">Show a rounded profile pill toolbar (Telegram-style) on every screen instead of the default toolbar</string>
+    <string name="pill_toolbar_subtitle_title">Toolbar subtitle</string>
+    <string name="pill_toolbar_subtitle_dialog">Custom text shown under the title, leave empty to hide</string>
+    <string name="pill_toolbar_back_desc">Back</string>
+    <string name="pill_toolbar_menu_desc">More options</string>
+    <string name="pill_toolbar_welcome_prefix">Welcome to %1$s</string>
     
     <!-- Sheet banner settings -->   	
     <string name="sheet_banner_category">Bottomsheet Banner</string>

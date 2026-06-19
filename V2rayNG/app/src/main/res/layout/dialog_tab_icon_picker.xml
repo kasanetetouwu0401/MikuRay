@@ -7,29 +7,6 @@
     android:paddingTop="8dp"
     android:paddingBottom="12dp">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/dialog_icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_gravity="center_horizontal"
-        android:scaleType="fitCenter"
-        android:src="@drawable/filter_all_solar"
-        app:tint="?attr/colorPrimary" />
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/dialog_title"
-        style="?attr/textAppearanceTitleMedium"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        android:paddingHorizontal="16dp"
-        android:textSize="24.0sp"
-        android:maxLines="4"
-        android:textAlignment="center"
-        android:textColor="?attr/colorOnSurface"
-        android:text="@string/sub_setting_tab_icon" />
-
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/row_none"
         android:layout_width="match_parent"
@@ -83,16 +60,5 @@
         android:paddingEnd="12dp"
         android:clipToPadding="false"
         android:overScrollMode="never" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/negative_button"
-        style="@style/Widget.Material3Expressive.Button.TonalButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:text="@android:string/cancel"
-        android:textColor="?attr/colorOnSecondaryContainer" />
 
 </LinearLayout>

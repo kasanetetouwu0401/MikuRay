@@ -5,8 +5,8 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
 import com.v2ray.ang.AppConfig
@@ -35,24 +35,22 @@ class BlurBottomIntensityDialog @JvmOverloads constructor(
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_blur_intensity, null)
         val sliderRadius = dialogView.findViewById<Slider>(R.id.slider_blur_radius)
         val sliderRounds = dialogView.findViewById<Slider>(R.id.slider_blur_rounds)
-        val iconView = dialogView.findViewById<android.widget.ImageView>(R.id.dialog_icon)
-        val titleView = dialogView.findViewById<android.widget.TextView>(R.id.dialog_title)
-        val positiveButton = dialogView.findViewById<MaterialButton>(R.id.positive_button)
-        val negativeButton = dialogView.findViewById<MaterialButton>(R.id.negative_button)
-        val neutralButton = dialogView.findViewById<MaterialButton>(R.id.neutral_button)
-
-        icon?.let { iconView.setImageDrawable(it) }
-        titleView.text = title
 
         sliderRadius.value = originalRadius.toFloat().coerceIn(2f, 100f)
         sliderRounds.value = originalRounds.toFloat().coerceIn(1f, 15f)
 
         val dialog = MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.pref_blur_bottom_intensity)
             .setView(dialogView)
-            .setCancelable(true)
+            .setPositiveButton(android.R.string.ok, null)
+            .setNeutralButton(R.string.reset, null)
+            .setNegativeButton(android.R.string.cancel, null)
             .create()
 
-        positiveButton.setOnClickListener {
+        WindowBlurUtils.applyWindowBlur(dialog.window)
+        dialog.show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val radius = sliderRadius.value.toInt()
             val rounds = sliderRounds.value.toInt()
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_RADIUS, radius)
@@ -61,20 +59,17 @@ class BlurBottomIntensityDialog @JvmOverloads constructor(
             dialog.dismiss()
         }
 
-        negativeButton.setOnClickListener {
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_RADIUS, originalRadius)
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, originalRounds)
             updateSummary(originalRadius, originalRounds)
             dialog.dismiss()
         }
 
-        neutralButton.setOnClickListener {
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
             sliderRadius.value = AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS.toFloat()
             sliderRounds.value = AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS.toFloat()
         }
-
-        WindowBlurUtils.applyWindowBlur(dialog.window)
-        dialog.show()
     }
 
     fun updateSummary(radius: Int, rounds: Int) {

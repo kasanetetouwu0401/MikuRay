@@ -104,6 +104,7 @@ class SubEditActivity : BaseActivity() {
         }
 
         dialog = MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.sub_setting_tab_icon)
             .setView(dialogView)
             .setNegativeButton(android.R.string.cancel, null)
             .create()

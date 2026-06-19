@@ -6,10 +6,8 @@ import android.os.Bundle
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.v2ray.ang.util.showBlur
-import com.v2ray.ang.util.WindowBlurUtils
 import com.tencent.mmkv.MMKV
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.WEBDAV_BACKUP_FILE_NAME
@@ -440,31 +438,23 @@ class BackupActivity : HelperBaseActivity() {
             dialogBinding.etWebdavRemotePath.setText(cfg.remoteBasePath ?: "/")
         }
 
-        val dialog = MaterialAlertDialogBuilder(this)
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.title_webdav_config_setting)
             .setView(dialogBinding.root)
-            .setCancelable(true)
-            .create()
-
-        dialogBinding.root.findViewById<MaterialButton>(R.id.positive_button).setOnClickListener {
-            val url = dialogBinding.etWebdavUrl.text.toString().trim()
-            val user = dialogBinding.etWebdavUser.text.toString().trim().ifEmpty { null }
-            val pass = dialogBinding.etWebdavPass.text.toString()
-            val remotePath = dialogBinding.etWebdavRemotePath.text.toString().trim().ifEmpty { AppConfig.WEBDAV_BACKUP_DIR }
-            val cfg = WebDavConfig(baseUrl = url, username = user, password = pass, remoteBasePath = remotePath)
-            MmkvManager.encodeWebDavConfig(cfg)
-
-            alertSuccess(
-                getString(R.string.title_webdav_config_setting), 
-                title = getString(R.string.title_alerter_success)
-            )
-            dialog.dismiss()
-        }
-
-        dialogBinding.root.findViewById<MaterialButton>(R.id.negative_button).setOnClickListener {
-            dialog.dismiss()
-        }
-
-        WindowBlurUtils.applyWindowBlur(dialog.window)
-        dialog.show()
+            .setPositiveButton(R.string.menu_item_save_config) { _, _ ->
+                val url = dialogBinding.etWebdavUrl.text.toString().trim()
+                val user = dialogBinding.etWebdavUser.text.toString().trim().ifEmpty { null }
+                val pass = dialogBinding.etWebdavPass.text.toString()
+                val remotePath = dialogBinding.etWebdavRemotePath.text.toString().trim().ifEmpty { AppConfig.WEBDAV_BACKUP_DIR }
+                val cfg = WebDavConfig(baseUrl = url, username = user, password = pass, remoteBasePath = remotePath)
+                MmkvManager.encodeWebDavConfig(cfg)
+                
+                alertSuccess(
+                    getString(R.string.title_webdav_config_setting), 
+                    title = getString(R.string.title_alerter_success)
+                )
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .showBlur()
     }
 }
