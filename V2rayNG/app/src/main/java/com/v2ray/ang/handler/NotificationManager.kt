@@ -45,7 +45,7 @@ object NotificationManager {
     @Volatile private var lastSpeedText: String = ""
     @Volatile private var lastProxyTraffic: Long = 0L
     @Volatile private var lastDirectTraffic: Long = 0L
-    @Volatile private var lastDataUsageText: String = ""  
+    @Volatile private var lastDataUsageText: String = ""
     @Volatile private var sessionUplink: Long = 0L
     @Volatile private var sessionDownlink: Long = 0L
 
@@ -256,17 +256,19 @@ object NotificationManager {
         var directDownlink = 0L
 
         CoreServiceManager.queryAllOutboundTrafficStats().forEach { stat ->
-            when {
-                stat.tag == AppConfig.TAG_DIRECT -> {
-                    when (stat.direction) {
-                        AppConfig.UPLINK -> directUplink += stat.value
-                        AppConfig.DOWNLINK -> directDownlink += stat.value
+            when (stat.direction) {
+                AppConfig.UPLINK -> {
+                    when (stat.tag) {
+                        AppConfig.TAG_DIRECT -> directUplink += stat.value
+                        AppConfig.TAG_BLOCKED -> {}
+                        else -> proxyUplink += stat.value
                     }
                 }
-                stat.tag.startsWith(AppConfig.TAG_PROXY) -> {
-                    when (stat.direction) {
-                        AppConfig.UPLINK -> proxyUplink += stat.value
-                        AppConfig.DOWNLINK -> proxyDownlink += stat.value
+                AppConfig.DOWNLINK -> {
+                    when (stat.tag) {
+                        AppConfig.TAG_DIRECT -> directDownlink += stat.value
+                        AppConfig.TAG_BLOCKED -> {} // Routing yang diblok diabaikan
+                        else -> proxyDownlink += stat.value // Sisa tag masuk hitungan proxy
                     }
                 }
             }
