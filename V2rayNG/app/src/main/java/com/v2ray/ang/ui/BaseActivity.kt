@@ -120,6 +120,15 @@ abstract class BaseActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPrepareOptionsMenu(menu: android.view.Menu): Boolean {
+        val result = super.onPrepareOptionsMenu(menu)
+        // The system (re)populates the toolbar's menu after onCreateOptionsMenu,
+        // which can override the pill toolbar's "hide native menu icons" state,
+        // so it needs to be reapplied here.
+        applyPillToolbarState()
+        return result
+    }
+
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         android.R.id.home -> {
             onBackPressedDispatcher.onBackPressed()

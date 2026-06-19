@@ -48,6 +48,17 @@ object PillToolbarController {
         toolbar ?: return
 
         if (isEnabled()) {
+            if (toolbar.getTag(R.id.tag_pill_original_nav_icon) == null) {
+                toolbar.setTag(R.id.tag_pill_original_nav_icon, toolbar.navigationIcon ?: NO_ICON)
+            }
+            toolbar.navigationIcon = null
+            if (toolbar.getTag(R.id.tag_pill_original_content_inset) == null) {
+                toolbar.setTag(R.id.tag_pill_original_content_inset, toolbar.contentInsetStartWithNavigation)
+            }
+            toolbar.contentInsetStartWithNavigation = 0
+            toolbar.setContentInsetsAbsolute(0, toolbar.contentInsetEnd)
+            setToolbarMenuItemsVisible(toolbar, false)
+
             val pillView = getOrInflatePillView(toolbar)
             bindPillContent(pillView, title, onBack, onMenu)
             pillView.visibility = View.VISIBLE
@@ -55,6 +66,33 @@ object PillToolbarController {
             toolbar.subtitle = null
         } else {
             findPillView(toolbar)?.visibility = View.GONE
+
+            val original = toolbar.getTag(R.id.tag_pill_original_nav_icon)
+            if (original != null) {
+                toolbar.navigationIcon = if (original == NO_ICON) null else original as? android.graphics.drawable.Drawable
+            }
+            val originalInset = toolbar.getTag(R.id.tag_pill_original_content_inset) as? Int
+            if (originalInset != null) {
+                toolbar.contentInsetStartWithNavigation = originalInset
+                toolbar.setContentInsetsAbsolute(originalInset, toolbar.contentInsetEnd)
+            }
+            setToolbarMenuItemsVisible(toolbar, true)
+        }
+    }
+
+    private val NO_ICON = android.graphics.drawable.ColorDrawable(0)
+
+    /**
+     * Hides (or restores) every item in the toolbar's own options menu. While
+     * the pill toolbar is active, all menu actions are surfaced exclusively
+     * through the pill's own overflow button (which opens a popup built from
+     * the same menu), so the toolbar's native action icons / overflow button
+     * must not be shown at the same time.
+     */
+    private fun setToolbarMenuItemsVisible(toolbar: MaterialToolbar, visible: Boolean) {
+        val menu = toolbar.menu ?: return
+        for (i in 0 until menu.size()) {
+            menu.getItem(i).isVisible = visible
         }
     }
 
@@ -76,15 +114,21 @@ object PillToolbarController {
             if (collapsingToolbar.getTag(R.id.tag_pill_original_scroll_flags) == null) {
                 collapsingToolbar.setTag(R.id.tag_pill_original_scroll_flags, params.scrollFlags)
             }
+            if (collapsingToolbar.getTag(R.id.tag_pill_original_appbar_height) == null) {
+                collapsingToolbar.setTag(R.id.tag_pill_original_appbar_height, params.height)
+            }
             params.scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
+            params.height = android.view.ViewGroup.LayoutParams.WRAP_CONTENT
             collapsingToolbar.layoutParams = params
             collapsingToolbar.title = null
             collapsingToolbar.isTitleEnabled = false
             appBar.setExpanded(false, false)
         } else {
             val originalFlags = collapsingToolbar.getTag(R.id.tag_pill_original_scroll_flags) as? Int
-            if (originalFlags != null) {
-                params.scrollFlags = originalFlags
+            val originalHeight = collapsingToolbar.getTag(R.id.tag_pill_original_appbar_height) as? Int
+            if (originalFlags != null) params.scrollFlags = originalFlags
+            if (originalHeight != null) params.height = originalHeight
+            if (originalFlags != null || originalHeight != null) {
                 collapsingToolbar.layoutParams = params
             }
             collapsingToolbar.isTitleEnabled = true
@@ -141,6 +185,10 @@ object PillToolbarController {
 
         btnBack?.setOnClickListener { onBack() }
         btnMenu?.setOnClickListener { onMenu(it) }
+
+        val toolbar = pillView.parent as? MaterialToolbar
+        val hasMenuItems = (toolbar?.menu?.size() ?: 0) > 0
+        btnMenu?.visibility = if (hasMenuItems) View.VISIBLE else View.GONE
     }
 
     /**
