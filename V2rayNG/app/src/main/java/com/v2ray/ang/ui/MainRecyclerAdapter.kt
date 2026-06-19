@@ -37,7 +37,6 @@ class MainRecyclerAdapter(
     private var data: MutableList<ServersCache> = mutableListOf()
     
     private var isRunningObserver: androidx.lifecycle.Observer<Boolean>? = null
-    private var trafficObserver: androidx.lifecycle.Observer<String>? = null
 
     @SuppressLint("NotifyDataSetChanged")
     fun setData(newData: MutableList<ServersCache>?, position: Int = -1) {
@@ -62,28 +61,6 @@ class MainRecyclerAdapter(
                 }
             }
             mainViewModel.isRunning.observe(lifecycleOwner, isRunningObserver!!)
-
-            trafficObserver = androidx.lifecycle.Observer { guid ->
-                if (guid.isNullOrEmpty()) return@Observer
-                val position = data.indexOfFirst { it.guid == guid }
-                
-                if (position >= 0) {
-                    val holder = recyclerView.findViewHolderForAdapterPosition(position) as? MainViewHolder
-                    if (holder != null) {
-                        val isTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
-                        if (!isTrafficEnabled) return@Observer
-
-                        val trafficStr = MmkvManager.getProfileTrafficString(guid)
-                        if (!trafficStr.isNullOrEmpty()) {
-                            holder.itemMainBinding.tvTraffic.text = trafficStr
-                            holder.itemMainBinding.tvTraffic.visibility = View.VISIBLE
-                        } else {
-                            holder.itemMainBinding.tvTraffic.visibility = View.GONE
-                        }
-                    }
-                }
-            }
-            mainViewModel.activeTrafficGuid.observe(lifecycleOwner, trafficObserver!!)
         }
     }
 
@@ -91,9 +68,6 @@ class MainRecyclerAdapter(
         super.onDetachedFromRecyclerView(recyclerView)
         isRunningObserver?.let {
             mainViewModel.isRunning.removeObserver(it)
-        }
-        trafficObserver?.let {
-            mainViewModel.activeTrafficGuid.removeObserver(it)
         }
     }
 

@@ -17,7 +17,6 @@ import com.v2ray.ang.core.CoreServiceManager
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.extension.toSpeedString
 import com.v2ray.ang.ui.MainActivity
-import com.v2ray.ang.util.LogUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -26,19 +25,16 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
-object NotificationManager {
+object NotificationManager : TrafficController.Listener {
     private const val NOTIFICATION_ID = 1
     private const val NOTIFICATION_PENDING_INTENT_CONTENT = 0
     private const val NOTIFICATION_PENDING_INTENT_STOP_V2RAY = 1
     private const val NOTIFICATION_PENDING_INTENT_RESTART_V2RAY = 2
     private const val NOTIFICATION_ICON_THRESHOLD = 3000
-    private const val QUERY_INTERVAL_MS = 1000L
 
-    private var lastQueryTime = 0L
     private var connectStartTime = 0L
     fun getConnectStartTime() = connectStartTime
     private var mBuilder: NotificationCompat.Builder? = null
-    private var speedNotificationJob: Job? = null
     private var timerNotificationJob: Job? = null
     private var mNotificationManager: NotificationManager? = null
 
@@ -52,16 +48,12 @@ object NotificationManager {
 
     fun startSpeedNotification() {
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) != true) return
-        if (speedNotificationJob != null || CoreServiceManager.isRunning() == false) return
+        if (CoreServiceManager.isRunning() == false) return
 
-        var lastZeroSpeed = false
-
-        speedNotificationJob = CoroutineScope(Dispatchers.IO).launch {
-            while (isActive) {
-                lastZeroSpeed = updateSpeedNotificationOnce(lastZeroSpeed)
-                delay(QUERY_INTERVAL_MS)
-            }
-        }
+        // Subscribe to TrafficController's single query loop instead of polling the core
+        // independently — the core's stat query resets its counters on every call, so two
+        // independent pollers would race for the same delta.
+        TrafficController.setListener(this)
 
         timerNotificationJob = CoroutineScope(Dispatchers.IO).launch {
             while (isActive) {
@@ -71,10 +63,47 @@ object NotificationManager {
         }
     }
 
+    override fun onTraffic(
+        proxyUplink: Long,
+        proxyDownlink: Long,
+        directUplink: Long,
+        directDownlink: Long,
+        intervalMs: Long,
+    ) {
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) != true) return
+
+        val sinceLastQueryInSeconds = intervalMs / 1000.0
+        val proxyTotal = proxyUplink + proxyDownlink
+        val directTotal = directUplink + directDownlink
+
+        val text = StringBuilder()
+        appendSpeedString(
+            text, AppConfig.TAG_PROXY,
+            proxyUplink / sinceLastQueryInSeconds,
+            proxyDownlink / sinceLastQueryInSeconds
+        )
+        appendSpeedString(
+            text, AppConfig.TAG_DIRECT,
+            directUplink / sinceLastQueryInSeconds,
+            directDownlink / sinceLastQueryInSeconds
+        )
+        lastSpeedText = text.toString()
+        lastProxyTraffic = proxyTotal
+        lastDirectTraffic = directTotal
+
+        sessionUplink += proxyUplink + directUplink
+        sessionDownlink += proxyDownlink + directDownlink
+        val service = getService()
+        lastDataUsageText = service?.getString(
+            R.string.notification_data_usage,
+            formatBytes(sessionUplink),
+            formatBytes(sessionDownlink)
+        ) ?: ""
+    }
+
     fun showNotification(currentConfig: ProfileItem?) {
         val service = getService() ?: return
 
-        lastQueryTime = System.currentTimeMillis()
         connectStartTime = System.currentTimeMillis()
         lastSpeedText = ""
         lastProxyTraffic = 0L
@@ -133,18 +162,14 @@ object NotificationManager {
 
         mBuilder = null
         connectStartTime = 0L
-        speedNotificationJob?.cancel()
-        speedNotificationJob = null
+        TrafficController.setListener(null)
         timerNotificationJob?.cancel()
         timerNotificationJob = null
         mNotificationManager = null
     }
 
     fun stopSpeedNotification() {
-        speedNotificationJob?.let {
-            it.cancel()
-            speedNotificationJob = null
-        }
+        TrafficController.setListener(null)
         timerNotificationJob?.let {
             it.cancel()
             timerNotificationJob = null
@@ -225,72 +250,6 @@ object NotificationManager {
         var i = 0
         while (size >= 1024 && i < units.size - 1) { size /= 1024; i++ }
         return String.format(java.util.Locale.getDefault(), "%.2f %s", size, units[i])
-    }
-
-    private fun updateSpeedNotificationOnce(lastZeroSpeed: Boolean): Boolean {
-        val queryTime = System.currentTimeMillis()
-        val sinceLastQueryIn = (queryTime - lastQueryTime)
-
-        if (sinceLastQueryIn < QUERY_INTERVAL_MS) {
-            LogUtil.w(AppConfig.TAG, "Query interval too short: ${sinceLastQueryIn}ms, skipping")
-            lastQueryTime = queryTime
-            return lastZeroSpeed
-        }
-        val sinceLastQueryInSeconds = sinceLastQueryIn / 1000.0
-
-        var proxyUplink = 0L
-        var proxyDownlink = 0L
-        var directUplink = 0L
-        var directDownlink = 0L
-
-        CoreServiceManager.queryAllOutboundTrafficStats().forEach { stat ->
-            when {
-                stat.tag == AppConfig.TAG_DIRECT -> {
-                    when (stat.direction) {
-                        AppConfig.UPLINK -> directUplink += stat.value
-                        AppConfig.DOWNLINK -> directDownlink += stat.value
-                    }
-                }
-
-                stat.tag.startsWith(AppConfig.TAG_PROXY) -> {
-                    when (stat.direction) {
-                        AppConfig.UPLINK -> proxyUplink += stat.value
-                        AppConfig.DOWNLINK -> proxyDownlink += stat.value
-                    }
-                }
-            }
-        }
-
-        val proxyTotal = proxyUplink + proxyDownlink
-        val directTotal = directUplink + directDownlink
-        val zeroSpeed = proxyTotal + directTotal == 0L
-        if (!zeroSpeed || !lastZeroSpeed) {
-            val text = StringBuilder()
-            appendSpeedString(
-                text, AppConfig.TAG_PROXY,
-                proxyUplink / sinceLastQueryInSeconds,
-                proxyDownlink / sinceLastQueryInSeconds
-            )
-            appendSpeedString(
-                text, AppConfig.TAG_DIRECT,
-                directUplink / sinceLastQueryInSeconds,
-                directDownlink / sinceLastQueryInSeconds
-            )
-            lastSpeedText = text.toString()
-            lastProxyTraffic = proxyTotal
-            lastDirectTraffic = directTotal
-
-            sessionUplink += proxyUplink + directUplink
-            sessionDownlink += proxyDownlink + directDownlink
-            val service = getService()
-            lastDataUsageText = service?.getString(
-                R.string.notification_data_usage,
-                formatBytes(sessionUplink),
-                formatBytes(sessionDownlink)
-            ) ?: ""
-        }
-        lastQueryTime = queryTime
-        return zeroSpeed
     }
 
     private fun getService(): Service? {

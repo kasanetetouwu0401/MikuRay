@@ -16,10 +16,34 @@ object TrafficController {
 
     private const val QUERY_INTERVAL_MS = 3000L
 
+    /**
+     * The core's queryAllOutboundTrafficStats() resets its counters on every call, so only
+     * one place in the app may call it. NotificationManager subscribes here instead of
+     * querying independently, otherwise both consumers race for the same delta and each
+     * one ends up with incomplete/inaccurate numbers.
+     */
+    interface Listener {
+        fun onTraffic(
+            proxyUplink: Long,
+            proxyDownlink: Long,
+            directUplink: Long,
+            directDownlink: Long,
+            intervalMs: Long,
+        )
+    }
+
+    @Volatile private var listener: Listener? = null
+    @Volatile private var lastTickTime: Long = 0L
+
     private var job: Job? = null
+
+    fun setListener(listener: Listener?) {
+        this.listener = listener
+    }
 
     fun start() {
         if (job != null) return
+        lastTickTime = System.currentTimeMillis()
         job = CoroutineScope(Dispatchers.IO).launch {
             while (isActive) {
                 tick()
@@ -32,25 +56,47 @@ object TrafficController {
     fun stop() {
         job?.cancel()
         job = null
+        lastTickTime = 0L
         LogUtil.i(AppConfig.TAG, "TrafficController: stopped")
     }
 
     private fun tick() {
+        val now = System.currentTimeMillis()
+        val intervalMs = if (lastTickTime == 0L) QUERY_INTERVAL_MS else (now - lastTickTime)
+        lastTickTime = now
+
         var proxyUplink = 0L
         var proxyDownlink = 0L
+        var directUplink = 0L
+        var directDownlink = 0L
 
         runCatching {
             CoreServiceManager.queryAllOutboundTrafficStats().forEach { stat ->
-                if (stat.tag.startsWith(AppConfig.TAG_PROXY)) {
-                    when (stat.direction) {
-                        AppConfig.UPLINK -> proxyUplink += stat.value
-                        AppConfig.DOWNLINK -> proxyDownlink += stat.value
+                when {
+                    stat.tag == AppConfig.TAG_DIRECT -> {
+                        when (stat.direction) {
+                            AppConfig.UPLINK -> directUplink += stat.value
+                            AppConfig.DOWNLINK -> directDownlink += stat.value
+                        }
+                    }
+
+                    stat.tag.startsWith(AppConfig.TAG_PROXY) -> {
+                        when (stat.direction) {
+                            AppConfig.UPLINK -> proxyUplink += stat.value
+                            AppConfig.DOWNLINK -> proxyDownlink += stat.value
+                        }
                     }
                 }
             }
         }.onFailure { e ->
             LogUtil.e(AppConfig.TAG, "TrafficController: queryAllOutboundTrafficStats failed", e)
             return
+        }
+
+        runCatching {
+            listener?.onTraffic(proxyUplink, proxyDownlink, directUplink, directDownlink, intervalMs)
+        }.onFailure { e ->
+            LogUtil.e(AppConfig.TAG, "TrafficController: listener failed", e)
         }
 
         if (proxyUplink + proxyDownlink <= 0L) return
