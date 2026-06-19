@@ -39,7 +39,6 @@ class MainRecyclerAdapter(
     private var isRunningObserver: androidx.lifecycle.Observer<Boolean>? = null
     private var trafficObserver: androidx.lifecycle.Observer<Pair<Long, Long>?>? = null
 
-    // Helper untuk mengubah byte jadi tulisan KB/MB/GB
     private fun formatTrafficBytes(bytes: Long): String {
         val units = arrayOf("B", "KB", "MB", "GB", "TB")
         var size = bytes.toDouble()
@@ -84,7 +83,6 @@ class MainRecyclerAdapter(
                         val isTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
                         if (!isTrafficEnabled) return@Observer
 
-                        // Otak Penggabungan (Historis + Live Session)
                         val aff = MmkvManager.decodeServerAffiliationInfo(selectedGuid)
                         val histUp = aff?.uplinkTotal ?: 0L
                         val histDown = aff?.downlinkTotal ?: 0L
@@ -149,7 +147,6 @@ class MainRecyclerAdapter(
 
             var trafficStr = MmkvManager.getProfileTrafficString(guid)
 
-            // Injeksi Akumulasi ke UI
             if (isSelectedServer && isVpnConnected) {
                 val sessionData = mainViewModel.activeSessionTraffic.value
                 val currentAff = MmkvManager.decodeServerAffiliationInfo(guid)

@@ -32,9 +32,7 @@ object NotificationManager {
     private const val NOTIFICATION_PENDING_INTENT_STOP_V2RAY = 1
     private const val NOTIFICATION_PENDING_INTENT_RESTART_V2RAY = 2
     private const val NOTIFICATION_ICON_THRESHOLD = 3000
-    
-    // Polling rate ditarik lebih cepat jadi 1 detik
-    private const val QUERY_INTERVAL_MS = 1000L
+    private const val QUERY_INTERVAL_MS = 3000L
 
     private var lastQueryTime = 0L
     private var connectStartTime = 0L
@@ -44,6 +42,7 @@ object NotificationManager {
     private var timerNotificationJob: Job? = null
     private var mNotificationManager: NotificationManager? = null
 
+    // Last known values from each loop, combined on every notify
     @Volatile private var lastSpeedText: String = ""
     @Volatile private var lastProxyTraffic: Long = 0L
     @Volatile private var lastDirectTraffic: Long = 0L
@@ -140,7 +139,6 @@ object NotificationManager {
         timerNotificationJob = null
         mNotificationManager = null
 
-        // Paksa reset semua hitungan jadi 0 saat diskonek
         lastSpeedText = ""
         lastProxyTraffic = 0L
         lastDirectTraffic = 0L
@@ -159,7 +157,6 @@ object NotificationManager {
             timerNotificationJob = null
         }
         
-        // Bersihkan cache memori saat servis mati
         lastSpeedText = ""
         lastProxyTraffic = 0L
         lastDirectTraffic = 0L
@@ -269,7 +266,6 @@ object NotificationManager {
                         AppConfig.DOWNLINK -> directDownlink += stat.value
                     }
                 }
-
                 stat.tag.startsWith(AppConfig.TAG_PROXY) -> {
                     when (stat.direction) {
                         AppConfig.UPLINK -> proxyUplink += stat.value
@@ -309,14 +305,12 @@ object NotificationManager {
                 formatBytes(sessionDownlink)
             ) ?: ""
 
-            // --- INJEKSI BROADCAST MENTAHAN BYTE ---
             val intent = Intent(AppConfig.BROADCAST_ACTION_ACTIVITY).apply {
                 putExtra("key", AppConfig.MSG_TRAFFIC_UPDATED)
                 putExtra("sessionUp", sessionUplink)
                 putExtra("sessionDown", sessionDownlink)
             }
             service?.sendBroadcast(intent)
-            // ---------------------------------------
         }
         lastQueryTime = queryTime
         return zeroSpeed

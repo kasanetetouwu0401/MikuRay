@@ -485,7 +485,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     if (guid != null) {
                         updateListAction.postValue(getPosition(guid))
                     } else {
-                        // Menangkap byte mentah yang dipancarkan oleh NotificationManager
                         val up = intent.getLongExtra("sessionUp", 0L)
                         val down = intent.getLongExtra("sessionDown", 0L)
                         activeSessionTraffic.postValue(Pair(up, down))
