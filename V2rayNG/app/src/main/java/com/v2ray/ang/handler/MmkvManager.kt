@@ -350,7 +350,7 @@ object MmkvManager {
         var size = bytes.toDouble()
         var i = 0
         while (size >= 1024 && i < units.size - 1) { size /= 1024; i++ }
-        return String.format(java.util.Locale.getDefault(), "%.1f %s", size, units[i])
+        return String.format(java.util.Locale.getDefault(), "%.2f %s", size, units[i])
     }
 
     /**
