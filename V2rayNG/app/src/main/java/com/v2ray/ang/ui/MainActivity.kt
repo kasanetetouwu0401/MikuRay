@@ -208,6 +208,11 @@ class MainActivity : HelperBaseActivity(),
             )
         }
 
+        fun loadDefaultBannerImage() {
+            headerImage.dispose()
+            headerImage.setImageResource(R.drawable.uwu_banner_image_about)
+        }
+
         fun loadBannerImage() {
             if (isDestroyed || isFinishing) return
 
@@ -219,8 +224,7 @@ class MainActivity : HelperBaseActivity(),
                     error(R.drawable.uwu_banner_image_about)
                 }
             } else {
-                headerImage.dispose()
-                headerImage.setImageResource(R.drawable.uwu_banner_image_about)
+                loadDefaultBannerImage()
             }
             headerImage.tag = targetTag
         }

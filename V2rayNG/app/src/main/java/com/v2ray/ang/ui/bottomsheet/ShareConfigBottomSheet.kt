@@ -83,6 +83,12 @@ class ShareConfigBottomSheet : BaseBottomSheetFragment() {
     private fun loadBanner(view: View) {
         val bannerImageView = view.findViewById<ImageView>(R.id.img_banner_sheet) ?: return
         bannerImageView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
+        fun loadDefaultBannerImage() {
+            bannerImageView.dispose()
+            bannerImageView.setImageResource(R.drawable.uwu_banner_image_about)
+        }
+
         val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI)
         val targetTag = if (uriString.isNullOrBlank()) TAG_SHEET_DEFAULT else uriString
         if (bannerImageView.tag != targetTag) {
@@ -91,8 +97,7 @@ class ShareConfigBottomSheet : BaseBottomSheetFragment() {
                     error(R.drawable.uwu_banner_image_about)
                 }
             } else {
-                bannerImageView.dispose()
-                bannerImageView.setImageResource(R.drawable.uwu_banner_image_about)
+                loadDefaultBannerImage()
             }
             bannerImageView.tag = targetTag
         }
