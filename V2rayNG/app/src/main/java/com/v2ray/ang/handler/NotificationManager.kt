@@ -32,7 +32,7 @@ object NotificationManager {
     private const val NOTIFICATION_PENDING_INTENT_STOP_V2RAY = 1
     private const val NOTIFICATION_PENDING_INTENT_RESTART_V2RAY = 2
     private const val NOTIFICATION_ICON_THRESHOLD = 3000
-    private const val QUERY_INTERVAL_MS = 3000L
+    private const val QUERY_INTERVAL_MS = 1000L
 
     private var lastQueryTime = 0L
     private var connectStartTime = 0L
@@ -160,7 +160,7 @@ object NotificationManager {
         lastDirectTraffic = 0L
         lastDataUsageText = ""
         sessionUplink = 0L
-        sessionDownlink = 0L
+        sessionDownlink = 0L    
         updateNotification("", 0, 0)
     }
 
@@ -267,8 +267,8 @@ object NotificationManager {
                 AppConfig.DOWNLINK -> {
                     when (stat.tag) {
                         AppConfig.TAG_DIRECT -> directDownlink += stat.value
-                        AppConfig.TAG_BLOCKED -> {} // Routing yang diblok diabaikan
-                        else -> proxyDownlink += stat.value // Sisa tag masuk hitungan proxy
+                        AppConfig.TAG_BLOCKED -> {}
+                        else -> proxyDownlink += stat.value
                     }
                 }
             }
