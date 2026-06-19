@@ -9,10 +9,8 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
 import coil3.dispose
-import coil3.imageLoader
-import coil3.request.ImageRequest
-import coil3.request.allowHardware
-import coil3.toBitmap
+import coil3.load
+import coil3.request.error
 import com.neko.shapeimageview.ShaderImageView
 import com.neko.shapeimageview.shader.ShaderHelper
 import com.neko.shapeimageview.shader.SvgShader
@@ -94,10 +92,10 @@ class ProfileBannerImageView @JvmOverloads constructor(
         "uwu_shape_octagon"        -> R.raw.uwu_shape_octagon
         "uwu_shape_rounded_square" -> R.raw.uwu_shape_rounded_square
         "uwu_shape_squircle"       -> R.raw.uwu_shape_squircle
-        "uwu_shape_heart"          -> R.raw.uwu_shape_heart
-        "uwu_shape_hive"           -> R.raw.uwu_shape_hive
-        "uwu_shape_pill"           -> R.raw.uwu_shape_pill
-        "uwu_shape_scallop"        -> R.raw.uwu_shape_scallop
+        "uwu_shape_heart"       -> R.raw.uwu_shape_heart
+        "uwu_shape_hive"       -> R.raw.uwu_shape_hive
+        "uwu_shape_pill"       -> R.raw.uwu_shape_pill
+        "uwu_shape_scallop"       -> R.raw.uwu_shape_scallop
         else                       -> R.raw.uwu_shape_cookie
     }
 
@@ -118,23 +116,9 @@ class ProfileBannerImageView @JvmOverloads constructor(
             if (this.tag != targetTag) {
                 if (!uriString.isNullOrEmpty()) {
                     val savedUri = Uri.parse(uriString)
-                    
-                    val request = ImageRequest.Builder(context)
-                        .data(savedUri)
-                        .allowHardware(false)
-                        .target(
-                            onSuccess = { image ->
-                                val bitmap = image.toBitmap()
-                                this@ProfileBannerImageView.setImageBitmap(bitmap)
-                            },
-                            onError = {
-                                loadDefault()
-                            }
-                        )
-                        .build()
-
-                    context.imageLoader.enqueue(request)
-
+                    this.load(savedUri) {
+                        error(R.drawable.uwu_banner_profile)
+                    }
                 } else {
                     loadDefault()
                 }
@@ -151,21 +135,6 @@ class ProfileBannerImageView @JvmOverloads constructor(
 
     private fun loadDefault() {
         this.dispose()
-       
-        val request = ImageRequest.Builder(context)
-            .data(R.drawable.uwu_banner_profile)
-            .allowHardware(false)
-            .target(
-                onSuccess = { image ->
-                    val bitmap = image.toBitmap()
-                    this@ProfileBannerImageView.setImageBitmap(bitmap)
-                },
-                onError = {
-                    this@ProfileBannerImageView.setImageResource(R.drawable.uwu_banner_profile)
-                }
-            )
-            .build()
-            
-        context.imageLoader.enqueue(request)
+        setImageResource(R.drawable.uwu_banner_profile)
     }
 }
