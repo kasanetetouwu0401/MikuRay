@@ -42,11 +42,11 @@ object NotificationManager {
     private var timerNotificationJob: Job? = null
     private var mNotificationManager: NotificationManager? = null
 
+    // Last known values from each loop, combined on every notify
     @Volatile private var lastSpeedText: String = ""
     @Volatile private var lastProxyTraffic: Long = 0L
     @Volatile private var lastDirectTraffic: Long = 0L
     @Volatile private var lastDataUsageText: String = ""
-    
     @Volatile private var sessionUplink: Long = 0L
     @Volatile private var sessionDownlink: Long = 0L
 
@@ -75,10 +75,13 @@ object NotificationManager {
         val service = getService() ?: return
 
         lastQueryTime = System.currentTimeMillis()
-        
-        if (connectStartTime == 0L) {
-            connectStartTime = System.currentTimeMillis()
-        }
+        connectStartTime = System.currentTimeMillis()
+        lastSpeedText = ""
+        lastProxyTraffic = 0L
+        lastDirectTraffic = 0L
+        lastDataUsageText = ""
+        sessionUplink = 0L
+        sessionDownlink = 0L
 
         val flags = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 
@@ -105,7 +108,7 @@ object NotificationManager {
         mBuilder = NotificationCompat.Builder(service, channelId)
             .setSmallIcon(R.drawable.ic_stat_name)
             .setContentTitle(currentConfig?.remarks)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_LOW) // Disesuaikan ke LOW agar sinkron dengan channel
             .setOngoing(true)
             .setShowWhen(false)
             .setOnlyAlertOnce(true)
@@ -135,13 +138,6 @@ object NotificationManager {
         timerNotificationJob?.cancel()
         timerNotificationJob = null
         mNotificationManager = null
-
-        lastSpeedText = ""
-        lastProxyTraffic = 0L
-        lastDirectTraffic = 0L
-        lastDataUsageText = ""
-        sessionUplink = 0L
-        sessionDownlink = 0L
     }
 
     fun stopSpeedNotification() {
@@ -153,14 +149,6 @@ object NotificationManager {
             it.cancel()
             timerNotificationJob = null
         }
-        
-        lastSpeedText = ""
-        lastProxyTraffic = 0L
-        lastDirectTraffic = 0L
-        lastDataUsageText = ""
-        sessionUplink = 0L
-        sessionDownlink = 0L
-        
         updateNotification("", 0, 0)
     }
 
@@ -256,19 +244,18 @@ object NotificationManager {
         var directDownlink = 0L
 
         CoreServiceManager.queryAllOutboundTrafficStats().forEach { stat ->
-            when (stat.direction) {
-                AppConfig.UPLINK -> {
-                    when (stat.tag) {
-                        AppConfig.TAG_DIRECT -> directUplink += stat.value
-                        AppConfig.TAG_BLOCKED -> {} 
-                        else -> proxyUplink += stat.value 
+            when {
+                stat.tag == AppConfig.TAG_DIRECT -> {
+                    when (stat.direction) {
+                        AppConfig.UPLINK -> directUplink += stat.value
+                        AppConfig.DOWNLINK -> directDownlink += stat.value
                     }
                 }
-                AppConfig.DOWNLINK -> {
-                    when (stat.tag) {
-                        AppConfig.TAG_DIRECT -> directDownlink += stat.value
-                        AppConfig.TAG_BLOCKED -> {}
-                        else -> proxyDownlink += stat.value
+
+                stat.tag.startsWith(AppConfig.TAG_PROXY) -> {
+                    when (stat.direction) {
+                        AppConfig.UPLINK -> proxyUplink += stat.value
+                        AppConfig.DOWNLINK -> proxyDownlink += stat.value
                     }
                 }
             }
@@ -277,7 +264,6 @@ object NotificationManager {
         val proxyTotal = proxyUplink + proxyDownlink
         val directTotal = directUplink + directDownlink
         val zeroSpeed = proxyTotal + directTotal == 0L
-        
         if (!zeroSpeed || !lastZeroSpeed) {
             val text = StringBuilder()
             appendSpeedString(
@@ -293,26 +279,10 @@ object NotificationManager {
             lastSpeedText = text.toString()
             lastProxyTraffic = proxyTotal
             lastDirectTraffic = directTotal
-            
+
+            sessionUplink += proxyUplink + directUplink
+            sessionDownlink += proxyDownlink + directDownlink
             val service = getService()
-            val activeGuid = MmkvManager.getSelectServer()
-
-            val upToAdd = proxyUplink + directUplink
-            val downToAdd = proxyDownlink + directDownlink
-
-            if (activeGuid != null && (upToAdd > 0L || downToAdd > 0L)) {
-                MmkvManager.addProfileTraffic(activeGuid, upToAdd, downToAdd)
-                
-                val intent = Intent(AppConfig.BROADCAST_ACTION_ACTIVITY).apply {
-                    putExtra("key", AppConfig.MSG_TRAFFIC_UPDATED)
-                    putExtra("content", activeGuid)
-                }
-                service?.sendBroadcast(intent)
-            }
-
-            sessionUplink += upToAdd
-            sessionDownlink += downToAdd
-
             lastDataUsageText = service?.getString(
                 R.string.notification_data_usage,
                 formatBytes(sessionUplink),
