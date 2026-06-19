@@ -43,7 +43,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val serversCache = mutableListOf<ServersCache>()
     
     val isRunning by lazy { MutableLiveData<Boolean>() }
-    val activeTrafficGuid by lazy { MutableLiveData<String>() } // LiveData baru untuk update halus
+    val activeTrafficGuid by lazy { MutableLiveData<String>() }
     val updateListAction by lazy { MutableLiveData<Int>() }
     val updateTestResultAction by lazy { MutableLiveData<String>() }
     val updateIpResultAction by lazy { MutableLiveData<String>() }

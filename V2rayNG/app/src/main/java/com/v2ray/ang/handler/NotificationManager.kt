@@ -46,8 +46,6 @@ object NotificationManager {
     @Volatile private var lastProxyTraffic: Long = 0L
     @Volatile private var lastDirectTraffic: Long = 0L
     @Volatile private var lastDataUsageText: String = ""
-    @Volatile private var sessionUplink: Long = 0L
-    @Volatile private var sessionDownlink: Long = 0L
 
     fun startSpeedNotification() {
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) != true) return
@@ -79,8 +77,6 @@ object NotificationManager {
         lastProxyTraffic = 0L
         lastDirectTraffic = 0L
         lastDataUsageText = ""
-        sessionUplink = 0L
-        sessionDownlink = 0L
 
         val flags = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 
@@ -142,8 +138,6 @@ object NotificationManager {
         lastProxyTraffic = 0L
         lastDirectTraffic = 0L
         lastDataUsageText = ""
-        sessionUplink = 0L
-        sessionDownlink = 0L
     }
 
     fun stopSpeedNotification() {
@@ -160,8 +154,6 @@ object NotificationManager {
         lastProxyTraffic = 0L
         lastDirectTraffic = 0L
         lastDataUsageText = ""
-        sessionUplink = 0L
-        sessionDownlink = 0L
         
         updateNotification("", 0, 0)
     }
@@ -293,27 +285,35 @@ object NotificationManager {
             lastSpeedText = text.toString()
             lastProxyTraffic = proxyTotal
             lastDirectTraffic = directTotal
-
-            sessionUplink += proxyUplink + directUplink
-            sessionDownlink += proxyDownlink + directDownlink
             
             val service = getService()
-            lastDataUsageText = service?.getString(
-                R.string.notification_data_usage,
-                formatBytes(sessionUplink),
-                formatBytes(sessionDownlink)
-            ) ?: ""
+            val activeGuid = MmkvManager.getSelectServer()
 
-            if (proxyUplink > 0L || proxyDownlink > 0L) {
-                MmkvManager.getSelectServer()?.let { guid ->
-                    MmkvManager.addProfileTraffic(guid, proxyUplink, proxyDownlink)
+            if (activeGuid != null) {
+                val upToAdd = proxyUplink + directUplink
+                val downToAdd = proxyDownlink + directDownlink
+
+                if (upToAdd > 0L || downToAdd > 0L) {
+                    MmkvManager.addProfileTraffic(activeGuid, upToAdd, downToAdd)
                     
                     val intent = Intent(AppConfig.BROADCAST_ACTION_ACTIVITY).apply {
                         putExtra("key", AppConfig.MSG_TRAFFIC_UPDATED)
-                        putExtra("content", guid)
+                        putExtra("content", activeGuid)
                     }
                     service?.sendBroadcast(intent)
                 }
+
+                val aff = MmkvManager.decodeServerAffiliationInfo(activeGuid)
+                val totalUp = aff?.uplinkTotal ?: 0L
+                val totalDown = aff?.downlinkTotal ?: 0L
+
+                lastDataUsageText = service?.getString(
+                    R.string.notification_data_usage,
+                    formatBytes(totalUp),
+                    formatBytes(totalDown)
+                ) ?: ""
+            } else {
+                lastDataUsageText = ""
             }
         }
         lastQueryTime = queryTime
