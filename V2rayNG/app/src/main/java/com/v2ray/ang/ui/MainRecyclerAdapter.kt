@@ -65,6 +65,9 @@ class MainRecyclerAdapter(
 
             trafficObserver = androidx.lifecycle.Observer { trafficText ->
                 val selectedGuid = MmkvManager.getSelectServer()
+                
+                if (selectedGuid.isNullOrEmpty()) return@Observer
+
                 val position = data.indexOfFirst { it.guid == selectedGuid }
                 
                 if (position >= 0) {
