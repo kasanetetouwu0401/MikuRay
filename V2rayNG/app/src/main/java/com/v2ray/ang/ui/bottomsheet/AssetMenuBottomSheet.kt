@@ -7,9 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import coil3.dispose
-import coil3.load
-import coil3.request.error
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
@@ -69,21 +68,18 @@ class AssetMenuBottomSheet : BaseBottomSheetFragment() {
     private fun loadBanner(view: View) {
         val bannerImageView = view.findViewById<ImageView>(R.id.img_banner_sheet) ?: return
         bannerImageView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
-
-        fun loadDefaultBannerImage() {
-            bannerImageView.dispose()
-            bannerImageView.setImageResource(R.drawable.uwu_banner_image_about)
-        }
-
         val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI)
         val targetTag = if (uriString.isNullOrBlank()) TAG_SHEET_DEFAULT else uriString
         if (bannerImageView.tag != targetTag) {
             if (!uriString.isNullOrBlank()) {
-                bannerImageView.load(Uri.parse(uriString)) {
-                    error(R.drawable.uwu_banner_image_about)
-                }
+                Glide.with(this)
+                    .load(Uri.parse(uriString))
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
+                    .error(R.drawable.uwu_banner_image_about)
+                    .into(bannerImageView)
             } else {
-                loadDefaultBannerImage()
+                Glide.with(this).clear(bannerImageView)
+                bannerImageView.setImageResource(R.drawable.uwu_banner_image_about)
             }
             bannerImageView.tag = targetTag
         }

@@ -19,9 +19,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
-import coil3.dispose
-import coil3.load
-import coil3.request.error
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
 import com.v2ray.ang.AppConfig
@@ -208,11 +207,6 @@ class MainActivity : HelperBaseActivity(),
             )
         }
 
-        fun loadDefaultBannerImage() {
-            headerImage.dispose()
-            headerImage.setImageResource(R.drawable.uwu_banner_image_about)
-        }
-
         fun loadBannerImage() {
             if (isDestroyed || isFinishing) return
 
@@ -220,11 +214,14 @@ class MainActivity : HelperBaseActivity(),
             val targetTag = if (uriString.isNullOrBlank()) TAG_HOME_BANNER_DEFAULT else uriString
             if (headerImage.tag == targetTag) return
             if (!uriString.isNullOrBlank()) {
-                headerImage.load(Uri.parse(uriString)) {
-                    error(R.drawable.uwu_banner_image_about)
-                }
+                Glide.with(this@MainActivity)
+                    .load(Uri.parse(uriString))
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
+                    .error(R.drawable.uwu_banner_image_about)
+                    .into(headerImage)
             } else {
-                loadDefaultBannerImage()
+                Glide.with(this@MainActivity).clear(headerImage)
+                headerImage.setImageResource(R.drawable.uwu_banner_image_about)
             }
             headerImage.tag = targetTag
         }

@@ -37,12 +37,13 @@ import java.util.Collections
 import java.util.regex.PatternSyntaxException
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-    private var serverList = mutableListOf<String>() // MmkvManager.decodeServerList()
+    private var serverList = mutableListOf<String>()
     var subscriptionId: String = MmkvManager.decodeSettingsString(AppConfig.CACHE_SUBSCRIPTION_ID, "").orEmpty()
     var keywordFilter = ""
     val serversCache = mutableListOf<ServersCache>()
     
     val isRunning by lazy { MutableLiveData<Boolean>() }
+    val activeTrafficText by lazy { MutableLiveData<String?>() }
     val updateListAction by lazy { MutableLiveData<Int>() }
     val updateTestResultAction by lazy { MutableLiveData<String>() }
     val updateIpResultAction by lazy { MutableLiveData<String>() }
@@ -50,10 +51,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val updateGroupBadgeAction by lazy { MutableLiveData<Unit>() }
     private val tcpingTestScope by lazy { CoroutineScope(Dispatchers.IO) }
 
-    /**
-     * Refer to the official documentation for [registerReceiver](https://developer.android.com/reference/androidx/core/content/ContextCompat#registerReceiver(android.content.Context,android.content.BroadcastReceiver,android.content.IntentFilter,int):\
-     * `registerReceiver(Context, BroadcastReceiver, IntentFilter, int)`.
-     */
     fun startListenBroadcast() {
         isRunning.value = false
         val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
@@ -61,9 +58,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
-    /**
-     * Called when the ViewModel is cleared.
-     */
     override fun onCleared() {
         getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
         tcpingTestScope.coroutineContext[Job]?.cancelChildren()
@@ -72,11 +66,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         super.onCleared()
     }
 
-    /**
-     * Reloads the server list based on current subscription filter.
-     */
     fun reloadServerList() {
-        // If ORDER_ORIGIN is selected and a pre-sort snapshot exists, restore it first (per active group)
         val subId = subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
         val order = MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)
         if (order == 0) {
@@ -97,10 +87,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         updateListAction.value = -1
     }
 
-    /**
-     * Removes a server by its GUID.
-     * @param guid The GUID of the server to remove.
-     */
     fun removeServer(guid: String) {
         serverList.remove(guid)
         MmkvManager.removeServer(guid)
@@ -111,11 +97,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         updateGroupBadgeAction.postValue(Unit)
     }
 
-    /**
-     * Swaps the positions of two servers.
-     * @param fromPosition The initial position of the server.
-     * @param toPosition The target position of the server.
-     */
     fun swapServer(fromPosition: Int, toPosition: Int) {
         if (subscriptionId.isEmpty()) {
             return
@@ -127,9 +108,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         MmkvManager.encodeServerList(serverList, subscriptionId)
     }
 
-    /**
-     * Updates the cache of servers.
-     */
     @Synchronized
     fun updateCache() {
         serversCache.clear()
@@ -159,23 +137,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        // Apply server order (per subscription group)
         val subId = subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
         val order = MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)
         when (order) {
-            1 -> serversCache.sortWith(compareBy { it.profile.remarks.lowercase() }) // ORDER_BY_NAME
-            2 -> serversCache.sortWith(compareBy { // ORDER_BY_DELAY
+            1 -> serversCache.sortWith(compareBy { it.profile.remarks.lowercase() })
+            2 -> serversCache.sortWith(compareBy {
                 val delay = MmkvManager.decodeServerAffiliationInfo(it.guid)?.testDelayMillis ?: 0L
                 if (delay <= 0L) Long.MAX_VALUE else delay
             })
-            // 0 = ORDER_ORIGIN: no sort, keep storage order
         }
     }
 
-    /**
-     * Updates the configuration via subscription for all servers.
-     * @return Detailed result of the subscription update operation.
-     */
     fun updateConfigViaSubAll(): SubscriptionUpdateResult {
         if (subscriptionId.isEmpty()) {
             return AngConfigManager.updateConfigViaSubAll()
@@ -185,10 +157,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /**
-     * Exports all servers.
-     * @return The number of exported servers.
-     */
     fun exportAllServer(): Int {
         val serverListCopy =
             if (subscriptionId.isEmpty() && keywordFilter.isEmpty()) {
@@ -204,9 +172,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return ret
     }
 
-    /**
-     * Tests the TCP ping for all servers.
-     */
     fun testAllTcping() {
         tcpingTestScope.coroutineContext[Job]?.cancelChildren()
         SpeedtestManager.closeAllTcpSockets()
@@ -230,9 +195,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /**
-     * Tests the real ping for all servers.
-     */
     fun testAllRealPing() {
         MessageUtil.sendMsg2TestService(
             getApplication(),
@@ -256,17 +218,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /**
-     * Tests the real ping for the current server.
-     */
     fun testCurrentServerRealPing() {
         MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_MEASURE_DELAY, "")
     }
 
-    /**
-     * Changes the subscription ID.
-     * @param id The new subscription ID.
-     */
     fun subscriptionIdChanged(id: String) {
         if (subscriptionId != id) {
             subscriptionId = id
@@ -275,11 +230,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         reloadServerList()
     }
 
-    /**
-     * Gets the subscriptions.
-     * @param context The context.
-     * @return A pair of lists containing the subscription IDs and remarks.
-     */
     fun getSubscriptions(context: Context): List<GroupMapItem> {
         val subscriptions = MmkvManager.decodeSubscriptions()
         if (subscriptionId.isNotEmpty()
@@ -312,11 +262,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return groups
     }
 
-    /**
-     * Gets the position of a server by its GUID.
-     * @param guid The GUID of the server.
-     * @return The position of the server.
-     */
     fun getPosition(guid: String): Int {
         serversCache.forEachIndexed { index, it ->
             if (it.guid == guid)
@@ -325,18 +270,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return -1
     }
 
-    /**
-     * Removes duplicate servers.
-     * Excludes servers with complex types (Custom, PolicyGroup, or ProxyChain) from duplicate comparison.
-     * @return The number of removed servers.
-     */
     fun removeDuplicateServer(): Int {
         val serversCacheCopy = serversCache.toList().toMutableList()
         val deleteServer = mutableListOf<String>()
 
         serversCacheCopy.forEachIndexed { index, sc ->
             val profile = sc.profile
-            // Skip if this profile has a complex config type
             if (profile.configType.isComplexType()) {
                 return@forEachIndexed
             }
@@ -344,7 +283,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             serversCacheCopy.forEachIndexed { index2, sc2 ->
                 if (index2 > index) {
                     val profile2 = sc2.profile
-                    // Skip if the second profile has a complex config type
                     if (profile2.configType.isComplexType()) {
                         return@forEachIndexed
                     }
@@ -362,10 +300,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return deleteServer.count()
     }
 
-    /**
-     * Removes all servers.
-     * @return The number of removed servers.
-     */
     fun removeAllServer(): Int {
         val count =
             if (subscriptionId.isEmpty() && keywordFilter.isEmpty()) {
@@ -380,10 +314,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return count
     }
 
-    /**
-     * Removes invalid servers.
-     * @return The number of removed servers.
-     */
     fun removeInvalidServer(): Int {
         var count = 0
         if (subscriptionId.isEmpty() && keywordFilter.isEmpty()) {
@@ -397,9 +327,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return count
     }
 
-    /**
-     * Sorts servers by their test results.
-     */
     fun sortByTestResults() {
         if (subscriptionId.isEmpty()) {
             MmkvManager.decodeSubsList().forEach { guid ->
@@ -410,10 +337,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /**
-     * Sorts servers by their test results for a specific subscription.
-     * @param subId The subscription ID to sort servers for.
-     */
     private fun sortByTestResultsForSub(subId: String) {
         data class ServerDelay(var guid: String, var testDelayMillis: Long)
 
@@ -427,26 +350,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         serverDelays.sortBy { it.testDelayMillis }
 
         val sortedServerList = serverDelays.map { it.guid }.toMutableList()
-
-        // Save the sorted list for this subscription
         MmkvManager.encodeServerList(sortedServerList, subId)
     }
 
-
-    /**
-     * Initializes assets.
-     * @param assets The asset manager.
-     */
     fun initAssets(assets: AssetManager) {
         viewModelScope.launch(Dispatchers.Default) {
             SettingsManager.initAssets(getApplication<AngApplication>(), assets)
         }
     }
 
-    /**
-     * Filters the configuration by a keyword.
-     * @param keyword The keyword to filter by.
-     */
     fun filterConfig(keyword: String) {
         if (keyword == keywordFilter) {
             return
@@ -456,7 +368,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun findSubscriptionIdBySelect(): String? {
-        // Get the selected server GUID
         val selectedGuid = MmkvManager.getSelectServer()
         if (selectedGuid.isNullOrEmpty()) {
             return null
@@ -493,10 +404,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /**
-     * Clears the cumulative traffic for the currently selected profile and
-     * refreshes the display.
-     */
     fun resetCurrentProfileTraffic() {
         MmkvManager.getSelectServer()?.let { guid ->
             MmkvManager.resetProfileTraffic(guid)
@@ -504,17 +411,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /**
-     * Clears the cumulative traffic for the currently selected group.
-     */
     fun resetGroupTraffic() {
         MmkvManager.resetGroupTraffic(subscriptionId)
         updateListAction.postValue(-1)
     }
 
-    /**
-     * Clears the cumulative traffic for all profiles.
-     */
     fun resetAllTraffic() {
         MmkvManager.resetAllTraffic()
         updateListAction.postValue(-1)
@@ -529,6 +430,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 AppConfig.MSG_STATE_NOT_RUNNING -> {
                     isRunning.value = false
+                    activeTrafficText.postValue(null)
                 }
 
                 AppConfig.MSG_STATE_START_SUCCESS -> {
@@ -552,6 +454,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 AppConfig.MSG_STATE_STOP_SUCCESS -> {
                     isRunning.value = false
+                    activeTrafficText.postValue(null)
                 }
 
                 AppConfig.MSG_MEASURE_DELAY_SUCCESS -> {
@@ -581,7 +484,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 AppConfig.MSG_TRAFFIC_UPDATED -> {
                     val guid = intent.getStringExtra("content") ?: return
-                    updateListAction.postValue(getPosition(guid))
+                    val trafficStr = MmkvManager.getProfileTrafficString(guid)
+                    if (trafficStr != null) {
+                        activeTrafficText.postValue(trafficStr)
+                    }
                 }
             }
         }

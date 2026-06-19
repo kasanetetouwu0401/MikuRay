@@ -37,6 +37,7 @@ class MainRecyclerAdapter(
     private var data: MutableList<ServersCache> = mutableListOf()
     
     private var isRunningObserver: androidx.lifecycle.Observer<Boolean>? = null
+    private var trafficObserver: androidx.lifecycle.Observer<String?>? = null
 
     @SuppressLint("NotifyDataSetChanged")
     fun setData(newData: MutableList<ServersCache>?, position: Int = -1) {
@@ -61,6 +62,28 @@ class MainRecyclerAdapter(
                 }
             }
             mainViewModel.isRunning.observe(lifecycleOwner, isRunningObserver!!)
+
+            trafficObserver = androidx.lifecycle.Observer { trafficText ->
+                val selectedGuid = MmkvManager.getSelectServer()
+                val position = data.indexOfFirst { it.guid == selectedGuid }
+                
+                if (position >= 0) {
+                    val holder = recyclerView.findViewHolderForAdapterPosition(position) as? MainViewHolder
+                    if (holder != null) {
+                        val isTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
+                        if (!isTrafficEnabled) return@Observer
+
+                        val displayStr = trafficText ?: MmkvManager.getProfileTrafficString(selectedGuid)
+                        if (!displayStr.isNullOrEmpty()) {
+                            holder.itemMainBinding.tvTraffic.text = displayStr
+                            holder.itemMainBinding.tvTraffic.visibility = View.VISIBLE
+                        } else {
+                            holder.itemMainBinding.tvTraffic.visibility = View.GONE
+                        }
+                    }
+                }
+            }
+            mainViewModel.activeTrafficText.observe(lifecycleOwner, trafficObserver!!)
         }
     }
 
@@ -68,6 +91,9 @@ class MainRecyclerAdapter(
         super.onDetachedFromRecyclerView(recyclerView)
         isRunningObserver?.let {
             mainViewModel.isRunning.removeObserver(it)
+        }
+        trafficObserver?.let {
+            mainViewModel.activeTrafficText.removeObserver(it)
         }
     }
 
@@ -100,7 +126,17 @@ class MainRecyclerAdapter(
             }
 
             val isTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
-            val trafficStr = MmkvManager.getProfileTrafficString(guid)
+            val isSelectedServer = (guid == MmkvManager.getSelectServer())
+            val isVpnConnected = mainViewModel.isRunning.value == true 
+            
+            var trafficStr = MmkvManager.getProfileTrafficString(guid)
+
+            if (isSelectedServer && isVpnConnected) {
+                val realtimeTraffic = mainViewModel.activeTrafficText.value
+                if (!realtimeTraffic.isNullOrEmpty()) {
+                    trafficStr = realtimeTraffic
+                }
+            }
             
             if (isTrafficEnabled && !trafficStr.isNullOrEmpty()) {
                 holder.itemMainBinding.tvTraffic.text = trafficStr
@@ -108,9 +144,6 @@ class MainRecyclerAdapter(
             } else {
                 holder.itemMainBinding.tvTraffic.visibility = View.GONE
             }
-
-            val isSelectedServer = (guid == MmkvManager.getSelectServer())
-            val isVpnConnected = mainViewModel.isRunning.value == true 
 
             if (isSelectedServer && isVpnConnected) {
                 holder.itemMainBinding.vStatusDot.setBackgroundResource(R.drawable.blink_color)
