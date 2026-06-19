@@ -32,7 +32,6 @@ object NotificationManager {
     private const val NOTIFICATION_PENDING_INTENT_STOP_V2RAY = 1
     private const val NOTIFICATION_PENDING_INTENT_RESTART_V2RAY = 2
     private const val NOTIFICATION_ICON_THRESHOLD = 3000
-    private const val QUERY_INTERVAL_MS = 3000L
 
     private var lastQueryTime = 0L
     private var connectStartTime = 0L
@@ -59,7 +58,7 @@ object NotificationManager {
         speedNotificationJob = CoroutineScope(Dispatchers.IO).launch {
             while (isActive) {
                 lastZeroSpeed = updateSpeedNotificationOnce(lastZeroSpeed)
-                delay(QUERY_INTERVAL_MS)
+                delay(1000L)
             }
         }
 
