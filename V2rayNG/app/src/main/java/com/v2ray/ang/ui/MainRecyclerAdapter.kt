@@ -37,15 +37,7 @@ class MainRecyclerAdapter(
     private var data: MutableList<ServersCache> = mutableListOf()
     
     private var isRunningObserver: androidx.lifecycle.Observer<Boolean>? = null
-    private var trafficObserver: androidx.lifecycle.Observer<Pair<Long, Long>?>? = null
-
-    private fun formatTrafficBytes(bytes: Long): String {
-        val units = arrayOf("B", "KB", "MB", "GB", "TB")
-        var size = bytes.toDouble()
-        var i = 0
-        while (size >= 1024 && i < units.size - 1) { size /= 1024; i++ }
-        return String.format(java.util.Locale.getDefault(), "%.2f %s", size, units[i])
-    }
+    private var trafficObserver: androidx.lifecycle.Observer<String>? = null
 
     @SuppressLint("NotifyDataSetChanged")
     fun setData(newData: MutableList<ServersCache>?, position: Int = -1) {
@@ -71,11 +63,9 @@ class MainRecyclerAdapter(
             }
             mainViewModel.isRunning.observe(lifecycleOwner, isRunningObserver!!)
 
-            trafficObserver = androidx.lifecycle.Observer { sessionData ->
-                val selectedGuid = MmkvManager.getSelectServer()
-                if (selectedGuid.isNullOrEmpty()) return@Observer
-
-                val position = data.indexOfFirst { it.guid == selectedGuid }
+            trafficObserver = androidx.lifecycle.Observer { guid ->
+                if (guid.isNullOrEmpty()) return@Observer
+                val position = data.indexOfFirst { it.guid == guid }
                 
                 if (position >= 0) {
                     val holder = recyclerView.findViewHolderForAdapterPosition(position) as? MainViewHolder
@@ -83,15 +73,9 @@ class MainRecyclerAdapter(
                         val isTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
                         if (!isTrafficEnabled) return@Observer
 
-                        val aff = MmkvManager.decodeServerAffiliationInfo(selectedGuid)
-                        val histUp = aff?.uplinkTotal ?: 0L
-                        val histDown = aff?.downlinkTotal ?: 0L
-                        
-                        val totalUp = histUp + (sessionData?.first ?: 0L)
-                        val totalDown = histDown + (sessionData?.second ?: 0L)
-                        
-                        if (totalUp > 0L || totalDown > 0L) {
-                            holder.itemMainBinding.tvTraffic.text = "↑ ${formatTrafficBytes(totalUp)}  ↓ ${formatTrafficBytes(totalDown)}"
+                        val trafficStr = MmkvManager.getProfileTrafficString(guid)
+                        if (!trafficStr.isNullOrEmpty()) {
+                            holder.itemMainBinding.tvTraffic.text = trafficStr
                             holder.itemMainBinding.tvTraffic.visibility = View.VISIBLE
                         } else {
                             holder.itemMainBinding.tvTraffic.visibility = View.GONE
@@ -99,7 +83,7 @@ class MainRecyclerAdapter(
                     }
                 }
             }
-            mainViewModel.activeSessionTraffic.observe(lifecycleOwner, trafficObserver!!)
+            mainViewModel.activeTrafficGuid.observe(lifecycleOwner, trafficObserver!!)
         }
     }
 
@@ -109,7 +93,7 @@ class MainRecyclerAdapter(
             mainViewModel.isRunning.removeObserver(it)
         }
         trafficObserver?.let {
-            mainViewModel.activeSessionTraffic.removeObserver(it)
+            mainViewModel.activeTrafficGuid.removeObserver(it)
         }
     }
 
@@ -142,31 +126,17 @@ class MainRecyclerAdapter(
             }
 
             val isTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
-            val isSelectedServer = (guid == MmkvManager.getSelectServer())
-            val isVpnConnected = mainViewModel.isRunning.value == true 
-
-            var trafficStr = MmkvManager.getProfileTrafficString(guid)
-
-            if (isSelectedServer && isVpnConnected) {
-                val sessionData = mainViewModel.activeSessionTraffic.value
-                val currentAff = MmkvManager.decodeServerAffiliationInfo(guid)
-                val histUp = currentAff?.uplinkTotal ?: 0L
-                val histDown = currentAff?.downlinkTotal ?: 0L
-                
-                val totalUp = histUp + (sessionData?.first ?: 0L)
-                val totalDown = histDown + (sessionData?.second ?: 0L)
-                
-                if (totalUp > 0L || totalDown > 0L) {
-                    trafficStr = "↑ ${formatTrafficBytes(totalUp)}  ↓ ${formatTrafficBytes(totalDown)}"
-                }
-            }
-
+            val trafficStr = MmkvManager.getProfileTrafficString(guid)
+            
             if (isTrafficEnabled && !trafficStr.isNullOrEmpty()) {
                 holder.itemMainBinding.tvTraffic.text = trafficStr
                 holder.itemMainBinding.tvTraffic.visibility = View.VISIBLE
             } else {
                 holder.itemMainBinding.tvTraffic.visibility = View.GONE
             }
+
+            val isSelectedServer = (guid == MmkvManager.getSelectServer())
+            val isVpnConnected = mainViewModel.isRunning.value == true 
 
             if (isSelectedServer && isVpnConnected) {
                 holder.itemMainBinding.vStatusDot.setBackgroundResource(R.drawable.blink_color)

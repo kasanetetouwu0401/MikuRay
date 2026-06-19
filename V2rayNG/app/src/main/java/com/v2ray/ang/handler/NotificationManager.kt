@@ -42,7 +42,6 @@ object NotificationManager {
     private var timerNotificationJob: Job? = null
     private var mNotificationManager: NotificationManager? = null
 
-    // Last known values from each loop, combined on every notify
     @Volatile private var lastSpeedText: String = ""
     @Volatile private var lastProxyTraffic: Long = 0L
     @Volatile private var lastDirectTraffic: Long = 0L
@@ -305,12 +304,17 @@ object NotificationManager {
                 formatBytes(sessionDownlink)
             ) ?: ""
 
-            val intent = Intent(AppConfig.BROADCAST_ACTION_ACTIVITY).apply {
-                putExtra("key", AppConfig.MSG_TRAFFIC_UPDATED)
-                putExtra("sessionUp", sessionUplink)
-                putExtra("sessionDown", sessionDownlink)
+            if (proxyUplink > 0L || proxyDownlink > 0L) {
+                MmkvManager.getSelectServer()?.let { guid ->
+                    MmkvManager.addProfileTraffic(guid, proxyUplink, proxyDownlink)
+                    
+                    val intent = Intent(AppConfig.BROADCAST_ACTION_ACTIVITY).apply {
+                        putExtra("key", AppConfig.MSG_TRAFFIC_UPDATED)
+                        putExtra("content", guid)
+                    }
+                    service?.sendBroadcast(intent)
+                }
             }
-            service?.sendBroadcast(intent)
         }
         lastQueryTime = queryTime
         return zeroSpeed

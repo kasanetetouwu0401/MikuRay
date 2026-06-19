@@ -43,7 +43,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val serversCache = mutableListOf<ServersCache>()
     
     val isRunning by lazy { MutableLiveData<Boolean>() }
-    val activeSessionTraffic by lazy { MutableLiveData<Pair<Long, Long>?>() } // LiveData penampung byte dari Notifikasi
+    val activeTrafficGuid by lazy { MutableLiveData<String>() } // LiveData baru untuk update halus
     val updateListAction by lazy { MutableLiveData<Int>() }
     val updateTestResultAction by lazy { MutableLiveData<String>() }
     val updateIpResultAction by lazy { MutableLiveData<String>() }
@@ -101,8 +101,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (subscriptionId.isEmpty()) {
             return
         }
+
         Collections.swap(serverList, fromPosition, toPosition)
         Collections.swap(serversCache, fromPosition, toPosition)
+
         MmkvManager.encodeServerList(serverList, subscriptionId)
     }
 
@@ -428,7 +430,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 AppConfig.MSG_STATE_NOT_RUNNING -> {
                     isRunning.value = false
-                    activeSessionTraffic.postValue(null)
                 }
 
                 AppConfig.MSG_STATE_START_SUCCESS -> {
@@ -452,7 +453,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 AppConfig.MSG_STATE_STOP_SUCCESS -> {
                     isRunning.value = false
-                    activeSessionTraffic.postValue(null)
                 }
 
                 AppConfig.MSG_MEASURE_DELAY_SUCCESS -> {
@@ -481,14 +481,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 AppConfig.MSG_TRAFFIC_UPDATED -> {
-                    val guid = intent.getStringExtra("content")
-                    if (guid != null) {
-                        updateListAction.postValue(getPosition(guid))
-                    } else {
-                        val up = intent.getLongExtra("sessionUp", 0L)
-                        val down = intent.getLongExtra("sessionDown", 0L)
-                        activeSessionTraffic.postValue(Pair(up, down))
-                    }
+                    val guid = intent.getStringExtra("content") ?: return
+                    activeTrafficGuid.postValue(guid)
                 }
             }
         }
