@@ -299,6 +299,7 @@ object NotificationManager {
 
             sessionUplink += proxyUplink + directUplink
             sessionDownlink += proxyDownlink + directDownlink
+            
             val service = getService()
             lastDataUsageText = service?.getString(
                 R.string.notification_data_usage,
@@ -307,10 +308,19 @@ object NotificationManager {
             ) ?: ""
 
             MmkvManager.getSelectServer()?.let { activeGuid ->
+                val aff = MmkvManager.decodeServerAffiliationInfo(activeGuid)
+                val historicalUp = aff?.uplinkTotal ?: 0L
+                val historicalDown = aff?.downlinkTotal ?: 0L
+
+                val totalUp = historicalUp + sessionUplink
+                val totalDown = historicalDown + sessionDownlink
+
+                val combinedTrafficStr = "↑ ${formatBytes(totalUp)}  ↓ ${formatBytes(totalDown)}"
+
                 val intent = Intent(AppConfig.BROADCAST_ACTION_ACTIVITY).apply {
                     putExtra("key", AppConfig.MSG_TRAFFIC_UPDATED)
                     putExtra("content", activeGuid)
-                    putExtra("trafficStr", lastDataUsageText) 
+                    putExtra("trafficStr", combinedTrafficStr) 
                 }
                 service?.sendBroadcast(intent)
             }
