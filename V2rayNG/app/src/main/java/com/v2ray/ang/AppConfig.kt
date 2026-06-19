@@ -145,10 +145,7 @@ object AppConfig {
     const val HEADER_TOP_ROW_PADDING_DEFAULT = 16
     const val HEADER_TOP_ROW_PADDING_MIN = 0
     const val HEADER_TOP_ROW_PADDING_MAX = 100
-
-    // Pill toolbar style (Telegram-style profile pill toolbar)
     const val PREF_PILL_TOOLBAR_STYLE = "pref_pill_toolbar_style"
-    const val PREF_PILL_TOOLBAR_SUBTITLE = "pref_pill_toolbar_subtitle"
 
     /** Cache keys. */
     const val CACHE_SUBSCRIPTION_ID = "cache_subscription_id"

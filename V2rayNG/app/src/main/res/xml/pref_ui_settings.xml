@@ -179,12 +179,21 @@
             
         <androidx.preference.SwitchPreferenceCompat
             android:icon="@drawable/ic_toggle_switch"
-            app:layout="@layout/uwu_bot_switch"
+            app:layout="@layout/uwu_mid_switch"
             app:widgetLayout="@layout/uwu_widget_material_switch"
             android:defaultValue="false"
             android:key="pref_show_splash_screen"
             android:title="@string/pref_show_splash_title"
             android:summary="@string/pref_show_splash_summary" />
+            
+        <androidx.preference.SwitchPreferenceCompat
+            android:icon="@drawable/ic_cards_variant"
+            app:layout="@layout/uwu_bot_switch"
+            app:widgetLayout="@layout/uwu_widget_material_switch"
+            android:key="pref_pill_toolbar_style"
+            android:title="@string/pill_toolbar_show_title"
+            android:summary="@string/pill_toolbar_show_summary"
+            android:defaultValue="false" />
 
     </com.neko.widget.UwuPreferenceCategory>
 
@@ -332,29 +341,6 @@
             android:key="action_delete_profile_banner_image"
             android:title="@string/delete_custom_banner_profile"
             android:summary="@string/delete_custom_banner_profile_summary" />
-
-    </com.neko.widget.UwuPreferenceCategory>
-
-    <com.neko.widget.UwuPreferenceCategory android:title="@string/pill_toolbar_category"
-        app:sectionIcon="@drawable/ic_cards_variant">
-
-        <SwitchPreferenceCompat
-            android:icon="@drawable/ic_cards_variant"
-            app:layout="@layout/uwu_top_switch"
-            app:widgetLayout="@layout/uwu_widget_material_switch"
-            android:key="pref_pill_toolbar_style"
-            android:title="@string/pill_toolbar_show_title"
-            android:summary="@string/pill_toolbar_show_summary"
-            android:defaultValue="false" />
-
-        <EditTextPreference
-            android:icon="@drawable/ic_edit_24dp"
-            app:layout="@layout/uwu_bot"
-            android:key="pref_pill_toolbar_subtitle"
-            android:title="@string/pill_toolbar_subtitle_title"
-            android:dialogTitle="@string/pill_toolbar_subtitle_dialog"
-            android:singleLine="true"
-            app:dependency="pref_pill_toolbar_style" />
 
     </com.neko.widget.UwuPreferenceCategory>
 
