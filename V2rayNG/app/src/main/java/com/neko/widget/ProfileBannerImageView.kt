@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import coil3.dispose
 import coil3.load
 import coil3.request.error
+import coil3.toBitmap
 import com.neko.shapeimageview.ShaderImageView
 import com.neko.shapeimageview.shader.ShaderHelper
 import com.neko.shapeimageview.shader.SvgShader
@@ -117,6 +118,7 @@ class ProfileBannerImageView @JvmOverloads constructor(
                 if (!uriString.isNullOrEmpty()) {
                     val savedUri = Uri.parse(uriString)
                     this.load(savedUri) {
+                    	toBitmap
                         error(R.drawable.uwu_banner_profile)
                     }
                 } else {
@@ -135,6 +137,7 @@ class ProfileBannerImageView @JvmOverloads constructor(
 
     private fun loadDefault() {
         this.dispose()
+        toBitmap
         setImageResource(R.drawable.uwu_banner_profile)
     }
 }
