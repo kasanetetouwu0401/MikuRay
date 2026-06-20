@@ -259,7 +259,7 @@
             android:title="@string/home_banner_custom_title"
             android:summary="@string/home_banner_custom_summary" />
 
-        <Preference
+        <EditTextPreference
             android:icon="@drawable/ic_web_24dp"
             app:layout="@layout/uwu_mid"
             android:key="action_home_banner_from_url"
@@ -296,7 +296,7 @@
             android:title="@string/sheet_banner_custom_title"
             android:summary="@string/sheet_banner_custom_summary" />
 
-        <Preference
+        <EditTextPreference
             android:icon="@drawable/ic_web_24dp"
             app:layout="@layout/uwu_mid"
             android:key="action_sheet_banner_from_url"
@@ -331,7 +331,7 @@
             android:title="@string/banner_profile_custom_title"
             android:summary="@string/banner_profile_custom_summary" />
 
-        <Preference
+        <EditTextPreference
             android:icon="@drawable/ic_web_24dp"
             app:layout="@layout/uwu_mid"
             android:key="action_profile_banner_from_url"
