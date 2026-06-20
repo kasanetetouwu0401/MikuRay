@@ -15,7 +15,7 @@
         android:clickable="true"
         android:focusable="true"
         app:cardBackgroundColor="?attr/colorCard"
-        app:cardCornerRadius="14dp"
+        app:cardCornerRadius="16dp"
         app:cardElevation="0dp"
         app:strokeWidth="0dp">
 
@@ -25,84 +25,92 @@
             android:layout_height="wrap_content"
             android:padding="12dp">
 
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/chk_enable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:thumbIcon="@drawable/mtrl_ic_check" />
+
             <TextView
                 android:id="@+id/remarks"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="?attr/colorOnSurface"
                 android:textSize="17sp"
                 app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toBottomOf="@id/chk_enable"
                 app:layout_constraintEnd_toStartOf="@id/img_locked"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintHorizontal_chainStyle="packed"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="@id/chk_enable" />
 
             <ImageView
                 android:id="@+id/img_locked"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
-                android:layout_marginEnd="12dp"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="8dp"
                 android:importantForAccessibility="no"
                 app:layout_constraintBottom_toBottomOf="@id/remarks"
-                app:layout_constraintEnd_toStartOf="@id/layout_edit"
+                app:layout_constraintEnd_toStartOf="@id/chk_enable"
                 app:layout_constraintStart_toEndOf="@id/remarks"
                 app:layout_constraintTop_toTopOf="@id/remarks"
                 app:srcCompat="@drawable/ic_lock_24dp"
                 app:tint="?attr/colorOnSurfaceVariant" />
 
-            <androidx.appcompat.widget.AppCompatImageButton
-                android:id="@+id/layout_edit"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:contentDescription="@string/menu_item_edit_config"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_edit_color"
-                android:background="?selectableItemBackgroundBorderless"
-                android:focusable="true"
-                app:tint="@null" />
-
             <TextView
                 android:id="@+id/domainIp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginTop="12dp"
                 android:ellipsize="end"
                 android:lines="1"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="?attr/colorOnSurfaceVariant"
-                app:layout_constraintEnd_toStartOf="@id/chk_enable"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/remarks" />
+                app:layout_constraintTop_toBottomOf="@id/chk_enable" />
 
-            <TextView
+            <com.google.android.material.chip.Chip
                 android:id="@+id/outboundTag"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="8dp"
+                android:checkable="false"
+                android:clickable="false"
                 android:ellipsize="end"
-                android:lines="1"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                app:layout_constraintEnd_toStartOf="@id/chk_enable"
+                android:focusable="false"
+                android:textAppearance="?attr/textAppearanceTitleSmall"
+                android:textColor="?attr/colorOnSecondaryContainer"
+                android:textSize="12sp"
+                app:chipBackgroundColor="?attr/colorSecondaryContainer"
+                app:chipMinTouchTargetSize="0dp"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/layout_edit"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/domainIp" />
 
-            <com.google.android.material.materialswitch.MaterialSwitch
-                app:thumbIcon="@drawable/mtrl_ic_check"
-                android:id="@+id/chk_enable"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toBottomOf="parent"
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/layout_edit"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/menu_item_edit_config"
+                android:focusable="true"
+                app:layout_constraintBottom_toBottomOf="@id/outboundTag"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/layout_edit" />
+                app:layout_constraintTop_toTopOf="@id/outboundTag"
+                app:srcCompat="@drawable/ic_edit_color"
+                app:tint="@null" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
