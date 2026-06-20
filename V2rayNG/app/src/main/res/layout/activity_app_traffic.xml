@@ -107,11 +107,9 @@
             app:tabMode="fixed">
 
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/tab_total"
                 android:text="@string/app_traffic_tab_total" />
 
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/tab_active"
                 android:text="@string/app_traffic_tab_active" />
 
         </com.google.android.material.tabs.TabLayout>
