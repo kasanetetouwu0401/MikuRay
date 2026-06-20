@@ -2,10 +2,6 @@ package com.v2ray.ang.util
 
 import android.content.Context
 import android.net.Uri
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.model.GlideUrl
-import com.bumptech.glide.load.model.LazyHeaders
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -96,34 +92,33 @@ object BannerUrlDownloader {
 
                 val tempFile = File(context.cacheDir, "${prefix}download_temp_${System.currentTimeMillis()}.jpg")
 
-                val loadTarget: Any = if (resolved.referer != null) {
-                    GlideUrl(
-                        resolved.imageUrl,
-                        LazyHeaders.Builder()
-                            .addHeader("Referer", resolved.referer)
-                            .addHeader("User-Agent", USER_AGENT)
-                            .build()
-                    )
-                } else {
-                    resolved.imageUrl
+                val urlConnection = URL(resolved.imageUrl).openConnection() as HttpURLConnection
+                urlConnection.connectTimeout = 15_000
+                urlConnection.readTimeout = 15_000
+                urlConnection.instanceFollowRedirects = true
+                urlConnection.setRequestProperty("User-Agent", USER_AGENT)
+                
+                if (resolved.referer != null) {
+                    urlConnection.setRequestProperty("Referer", resolved.referer)
                 }
 
-                val bitmap = Glide.with(context.applicationContext)
-                    .asBitmap()
-                    .load(loadTarget)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
-                    .submit()
-                    .get()
-
-                tempFile.outputStream().use { out ->
-                    bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 95, out)
+                val responseCode = urlConnection.responseCode
+                if (responseCode !in 200..299) {
+                    urlConnection.disconnect()
+                    return@withContext Result.Error("HTTP Error $responseCode: Failed to download image")
                 }
+
+                urlConnection.inputStream.use { input ->
+                    tempFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                urlConnection.disconnect()
 
                 Result.Success(Uri.fromFile(tempFile))
             } catch (e: Exception) {
                 e.printStackTrace()
-                Result.Error("Failed to download image: ${e.localizedMessage ?: "Unknown error"}")
+                Result.Error("Error: ${e.localizedMessage ?: e.javaClass.simpleName}")
             }
         }
     }
