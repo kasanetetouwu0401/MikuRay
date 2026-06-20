@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckedTextView
 import android.widget.ImageView
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
@@ -15,6 +14,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
+import com.google.android.material.card.MaterialCardView
 
 private const val TRANSITION_DURATION = 300L
 
@@ -38,7 +38,6 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
 
     private var mListener: OnMoreOptionClickListener? = null
 
-    // Current server sort order; default = ORIGIN (0)
     private var currentOrder: Int = ORDER_ORIGIN
     private var subscriptionId: String = ""
 
@@ -84,41 +83,37 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
         }
         loadBanner(view)
 
-        // ── Expandable: Quick Actions ───────────────────────────────────────
         val qaHeader  = view.findViewById<View>(R.id.quick_actions_expand_header)
         val qaContent = view.findViewById<View>(R.id.quick_actions_expand_content)
         val qaArrow   = view.findViewById<ImageView>(R.id.quick_actions_expand_arrow)
         setupExpandable(rootContainer, qaHeader, qaContent, qaArrow)
 
-        // ── Expandable: Management ──────────────────────────────────────────
         val managementHeader  = view.findViewById<View>(R.id.management_expand_header)
         val managementContent = view.findViewById<View>(R.id.management_expand_content)
         val managementArrow   = view.findViewById<ImageView>(R.id.management_expand_arrow)
         setupExpandable(rootContainer, managementHeader, managementContent, managementArrow)
 
-        // ── CheckedTextView state (Order always visible) ───────────────────
-        val checkOrigin = view.findViewById<CheckedTextView>(R.id.action_order_origin)
-        val checkName   = view.findViewById<CheckedTextView>(R.id.action_order_by_name)
-        val checkDelay  = view.findViewById<CheckedTextView>(R.id.action_order_by_delay)
+        val cardOrigin = view.findViewById<MaterialCardView>(R.id.action_order_origin)
+        val cardName   = view.findViewById<MaterialCardView>(R.id.action_order_by_name)
+        val cardDelay  = view.findViewById<MaterialCardView>(R.id.action_order_by_delay)
+
+        val strokeWidthPx = (3 * resources.displayMetrics.density).toInt()
 
         fun updateChecks(order: Int) {
-            checkOrigin?.isChecked = order == ORDER_ORIGIN
-            checkName?.isChecked   = order == ORDER_BY_NAME
-            checkDelay?.isChecked  = order == ORDER_BY_DELAY
+            cardOrigin?.strokeWidth = if (order == ORDER_ORIGIN) strokeWidthPx else 0
+            cardName?.strokeWidth   = if (order == ORDER_BY_NAME) strokeWidthPx else 0
+            cardDelay?.strokeWidth  = if (order == ORDER_BY_DELAY) strokeWidthPx else 0
         }
         updateChecks(currentOrder)
 
-        // ── Hide/Show Reset Traffic ─────────────────────────────────────────
         val isTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
         view.findViewById<View>(R.id.reset_traffic)?.visibility = if (isTrafficEnabled) View.VISIBLE else View.GONE
 
-        // ── Click listeners ─────────────────────────────────────────────────
         val clickListener = View.OnClickListener { v ->
             mListener?.onMoreOptionClicked(v.id)
             dismiss()
         }
 
-        // Order items update the check state and persist before dismiss
         val orderClickListener = View.OnClickListener { v ->
             val newOrder = when (v.id) {
                 R.id.action_order_origin   -> ORDER_ORIGIN
@@ -147,7 +142,6 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
             R.id.del_duplicate_config,
             R.id.del_invalid_config,
             R.id.export_all,
-            R.id.ping_all,
             R.id.real_ping_all,
             R.id.locate_selected_config,
             R.id.sub_update,

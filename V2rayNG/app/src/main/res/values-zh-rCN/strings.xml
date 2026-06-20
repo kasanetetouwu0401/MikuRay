@@ -306,7 +306,6 @@
     <string name="sub_setting_pre_profile_tip">请确保配置别名存在并唯一</string>
     <string name="toast_invalid_update_interval">更新间隔无效，最小值为 15 分钟。</string>
     <string name="title_sub_update">更新订阅</string>
-    <string name="title_ping_all_server">测试配置 Tcping</string>
     <string name="title_real_ping_all_server">测试配置真连接</string>
     <string name="title_user_asset_setting">资源文件</string>
     <string name="title_sort_by_test_results">按测试结果排序</string>
@@ -682,22 +681,5 @@
     <string name="sub_setting_tab_icon">标签页图标</string>
     <string name="sub_setting_tab_icon_hint">在标签栏的分组名称旁边显示</string>
     <string name="sub_tab_icon_none">无</string>
-
-    <!-- App Traffic -->
-    <string name="title_app_traffic">应用流量</string>
-    <string name="summary_navigate_app_traffic_settings">查看每个应用使用了多少流量</string>
-    <string name="app_traffic_tab_total">总计</string>
-    <string name="app_traffic_tab_active">实时</string>
-    <string name="app_traffic_subtitle_total">最近30天全设备的流量使用情况，不只是经过代理的流量</string>
-    <string name="app_traffic_subtitle_active">当前正在通过代理传输数据的应用，每2秒更新</string>
-    <string name="app_traffic_permission_title">需要使用情况访问权限</string>
-    <string name="app_traffic_permission_summary">请授予\"使用情况访问权限\"，让 MikuRay 读取系统的应用流量数据</string>
-    <string name="app_traffic_permission_action">授予权限</string>
-    <string name="app_traffic_active_badge">活跃</string>
-    <string name="app_traffic_rx_tx_format">↓ %1$s  ↑ %2$s</string>
-    <string name="app_traffic_live_rate_label">最近2秒</string>
-    <string name="app_traffic_per_interval_format">%1$s</string>
-    <string name="app_traffic_sort_by_usage">按用量排序</string>
-    <string name="app_traffic_sort_by_name">按名称排序</string>
 
 </resources>
