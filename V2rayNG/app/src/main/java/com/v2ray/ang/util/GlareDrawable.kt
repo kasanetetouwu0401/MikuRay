@@ -10,9 +10,11 @@ import android.graphics.Shader
 import android.graphics.drawable.Drawable
 
 /**
- * Draws a subtle "glass glare" highlight on top of a View:
- *  - a soft diagonal specular sweep across the upper portion
- *  - a thin bright stroke that fades along the top edge
+ * Draws a subtle "glass glare" highlight on top of a View: a soft top-lit
+ * gradient that's brightest at the very top edge and fades out by roughly
+ * the vertical midpoint — mimicking a light source above the surface
+ * (Telegram-style rounded pill/avatar highlight), rather than a hard
+ * directional sweep or a distinct stroke line.
  *
  * Meant to be used as a View's foreground (setForeground), so it never
  * affects the view's background/ripple, layout, or touch handling.
@@ -26,8 +28,7 @@ import android.graphics.drawable.Drawable
  * actual current rounded shape.
  */
 class GlareDrawable(
-    private val highlightAlpha: Int = 70,
-    private val strokeAlpha: Int = 90,
+    private val highlightAlpha: Int = 90,
     private val cornerRadiusProvider: () -> Float = { 0f }
 ) : Drawable() {
 
@@ -35,14 +36,7 @@ class GlareDrawable(
         style = Paint.Style.FILL
     }
 
-    private val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeWidth = 2f.dp()
-    }
-
     private val clipRect = RectF()
-
-    private fun Float.dp(): Float = this
 
     override fun onBoundsChange(bounds: android.graphics.Rect) {
         super.onBoundsChange(bounds)
@@ -50,30 +44,19 @@ class GlareDrawable(
         val h = bounds.height().toFloat()
         clipRect.set(0f, 0f, w, h)
 
-        // Diagonal sweep highlight, brightest near the top-left, fading out
-        // a bit past the vertical midpoint. Mimics light glancing off glass.
+        // Soft top-lit highlight: brightest at the very top edge, fading
+        // out smoothly by roughly the vertical midpoint. Purely vertical
+        // (no diagonal bias) so it reads as ambient light from above
+        // rather than a directional shine sweep.
         highlightPaint.shader = LinearGradient(
             0f, 0f,
-            w * 0.65f, h * 0.9f,
+            0f, h * 0.55f,
             intArrayOf(
                 argbWithAlpha(highlightAlpha),
                 argbWithAlpha((highlightAlpha * 0.35f).toInt()),
                 argbWithAlpha(0)
             ),
-            floatArrayOf(0f, 0.35f, 0.85f),
-            Shader.TileMode.CLAMP
-        )
-
-        // Thin bright edge along the top, fading toward the sides.
-        strokePaint.shader = LinearGradient(
-            0f, 0f, w, 0f,
-            intArrayOf(
-                argbWithAlpha(0),
-                argbWithAlpha(strokeAlpha),
-                argbWithAlpha((strokeAlpha * 0.4f).toInt()),
-                argbWithAlpha(0)
-            ),
-            floatArrayOf(0f, 0.15f, 0.55f, 1f),
+            floatArrayOf(0f, 0.45f, 1f),
             Shader.TileMode.CLAMP
         )
     }
@@ -102,22 +85,16 @@ class GlareDrawable(
         canvas.translate(bounds.left.toFloat(), bounds.top.toFloat())
         canvas.drawRect(clipRect, highlightPaint)
 
-        // Top edge highlight stroke (inset slightly so it isn't clipped).
-        val inset = strokePaint.strokeWidth / 2f
-        canvas.drawLine(inset, inset, clipRect.width() - inset, inset, strokePaint)
-
         canvas.restoreToCount(saveCount)
     }
 
     override fun setAlpha(alpha: Int) {
         highlightPaint.alpha = alpha
-        strokePaint.alpha = alpha
     }
 
     override fun getOpacity(): Int = PixelFormat.TRANSLUCENT
 
     override fun setColorFilter(colorFilter: ColorFilter?) {
         highlightPaint.colorFilter = colorFilter
-        strokePaint.colorFilter = colorFilter
     }
 }
