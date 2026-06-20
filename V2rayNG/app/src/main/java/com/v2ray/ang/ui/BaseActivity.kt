@@ -90,6 +90,7 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         themeStateManager.checkThemeChangedAndRecreate()
+        GlareEffectController.applyToRoot(findViewById(R.id.main_content))
     }
 
     override fun onContentChanged() {
@@ -106,6 +107,7 @@ abstract class BaseActivity : AppCompatActivity() {
             )
             insets
         }
+        GlareEffectController.applyToRoot(root)
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {

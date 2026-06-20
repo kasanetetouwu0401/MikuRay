@@ -657,6 +657,8 @@
     <string name="summary_pref_enable_blur">开启窗口背景模糊效果</string>
     <string name="title_pref_blur_bottom_status">底部状态卡片模糊</string>
     <string name="summary_pref_blur_bottom_status">开启底部状态卡片的模糊效果</string>
+    <string name="title_pref_glare_effect">玻璃光泽效果</string>
+    <string name="summary_pref_glare_effect">为按钮和卡片添加玻璃质感的高光</string>
     <string name="pref_blur_intensity">模糊强度</string>
     <string name="blur_intensity_radius_label">模糊半径 (2–100)</string>
     <string name="blur_intensity_rounds_label">模糊迭代次数 (1–15)</string>

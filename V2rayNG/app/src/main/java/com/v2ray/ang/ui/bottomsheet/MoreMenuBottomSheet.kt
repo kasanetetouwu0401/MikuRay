@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckedTextView
 import android.widget.ImageView
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
@@ -14,7 +15,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
-import com.google.android.material.card.MaterialCardView
 
 private const val TRANSITION_DURATION = 300L
 
@@ -93,21 +93,29 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
         val managementArrow   = view.findViewById<ImageView>(R.id.management_expand_arrow)
         setupExpandable(rootContainer, managementHeader, managementContent, managementArrow)
 
-        val cardOrigin = view.findViewById<MaterialCardView>(R.id.action_order_origin)
-        val cardName   = view.findViewById<MaterialCardView>(R.id.action_order_by_name)
-        val cardDelay  = view.findViewById<MaterialCardView>(R.id.action_order_by_delay)
-
-        val strokeWidthPx = (1.5f * resources.displayMetrics.density).toInt()
+        val checkOrigin = view.findViewById<CheckedTextView>(R.id.action_order_origin)
+        val checkName   = view.findViewById<CheckedTextView>(R.id.action_order_by_name)
+        val checkDelay  = view.findViewById<CheckedTextView>(R.id.action_order_by_delay)
 
         fun updateChecks(order: Int) {
-            cardOrigin?.strokeWidth = if (order == ORDER_ORIGIN) strokeWidthPx else 0
-            cardName?.strokeWidth   = if (order == ORDER_BY_NAME) strokeWidthPx else 0
-            cardDelay?.strokeWidth  = if (order == ORDER_BY_DELAY) strokeWidthPx else 0
+            checkOrigin?.isChecked = order == ORDER_ORIGIN
+            checkName?.isChecked   = order == ORDER_BY_NAME
+            checkDelay?.isChecked  = order == ORDER_BY_DELAY
         }
         updateChecks(currentOrder)
 
         val isTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
         view.findViewById<View>(R.id.reset_traffic)?.visibility = if (isTrafficEnabled) View.VISIBLE else View.GONE
+
+        view.findViewById<View>(R.id.card_order_origin)?.setOnClickListener {
+            view.findViewById<View>(R.id.action_order_origin)?.performClick()
+        }
+        view.findViewById<View>(R.id.card_order_by_name)?.setOnClickListener {
+            view.findViewById<View>(R.id.action_order_by_name)?.performClick()
+        }
+        view.findViewById<View>(R.id.card_order_by_delay)?.setOnClickListener {
+            view.findViewById<View>(R.id.action_order_by_delay)?.performClick()
+        }
 
         val clickListener = View.OnClickListener { v ->
             mListener?.onMoreOptionClicked(v.id)
