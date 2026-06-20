@@ -80,9 +80,15 @@ object BannerUrlDownloader {
     suspend fun download(context: Context, inputUrl: String, prefix: String = "banner_url_"): Result {
         return withContext(Dispatchers.IO) {
             try {
-                val trimmed = inputUrl.trim()
+                var trimmed = inputUrl.trim()
                 if (trimmed.isEmpty()) {
                     return@withContext Result.Error("URL kosong")
+                }
+
+                if (!trimmed.startsWith("http://", ignoreCase = true) &&
+                    !trimmed.startsWith("https://", ignoreCase = true)
+                ) {
+                    trimmed = "https://$trimmed"
                 }
 
                 val resolved = resolve(trimmed)
@@ -102,7 +108,7 @@ object BannerUrlDownloader {
                     resolved.imageUrl
                 }
 
-                val bitmap = Glide.with(context)
+                val bitmap = Glide.with(context.applicationContext)
                     .asBitmap()
                     .load(loadTarget)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
