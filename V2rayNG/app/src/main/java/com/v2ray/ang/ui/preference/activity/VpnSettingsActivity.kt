@@ -16,6 +16,7 @@ import com.v2ray.ang.AppConfig.VPN
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
+import com.v2ray.ang.ui.AppTrafficActivity
 import com.v2ray.ang.ui.BaseActivity
 import com.v2ray.ang.ui.PerAppProxyActivity
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
@@ -62,6 +63,7 @@ class VpnSettingsActivity : BaseActivity() {
         private val hevTunLogLevel by lazy { findPreference<ListPreference>(AppConfig.PREF_HEV_TUNNEL_LOGLEVEL) }
         private val hevTunRwTimeout by lazy { findPreference<EditTextPreference>(AppConfig.PREF_HEV_TUNNEL_RW_TIMEOUT) }
         private val navigatePerAppProxy by lazy { findPreference<Preference>(AppConfig.PREF_NAVIGATE_PER_APP_PROXY_SETTINGS) }
+        private val navigateAppTraffic by lazy { findPreference<Preference>(AppConfig.PREF_NAVIGATE_APP_TRAFFIC_SETTINGS) }
         private val keepAwake by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_KEEP_AWAKE) }
 
         override fun onCreatePreferences(bundle: Bundle?, s: String?) {
@@ -82,6 +84,11 @@ class VpnSettingsActivity : BaseActivity() {
 
             navigatePerAppProxy?.setOnPreferenceClickListener {
                 startActivity(android.content.Intent(requireContext(), PerAppProxyActivity::class.java))
+                true
+            }
+
+            navigateAppTraffic?.setOnPreferenceClickListener {
+                startActivity(android.content.Intent(requireContext(), AppTrafficActivity::class.java))
                 true
             }
         }
