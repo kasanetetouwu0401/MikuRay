@@ -97,7 +97,7 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
         val cardName   = view.findViewById<MaterialCardView>(R.id.action_order_by_name)
         val cardDelay  = view.findViewById<MaterialCardView>(R.id.action_order_by_delay)
 
-        val strokeWidthPx = (3 * resources.displayMetrics.density).toInt()
+        val strokeWidthPx = (1.5f * resources.displayMetrics.density).toInt()
 
         fun updateChecks(order: Int) {
             cardOrigin?.strokeWidth = if (order == ORDER_ORIGIN) strokeWidthPx else 0
