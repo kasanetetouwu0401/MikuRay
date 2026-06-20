@@ -260,6 +260,14 @@
             android:summary="@string/home_banner_custom_summary" />
 
         <Preference
+            android:icon="@drawable/ic_web_24dp"
+            app:layout="@layout/uwu_mid"
+            android:key="action_home_banner_from_url"
+            app:dependency="pref_show_home_banner"
+            android:title="@string/home_banner_url_title"
+            android:summary="@string/home_banner_url_summary" />
+
+        <Preference
             android:icon="@drawable/ic_delete_24dp"
             app:layout="@layout/uwu_bot"
             android:key="action_delete_home_banner_image"
@@ -289,6 +297,13 @@
             android:summary="@string/sheet_banner_custom_summary" />
 
         <Preference
+            android:icon="@drawable/ic_web_24dp"
+            app:layout="@layout/uwu_mid"
+            android:key="action_sheet_banner_from_url"
+            android:title="@string/sheet_banner_url_title"
+            android:summary="@string/sheet_banner_url_summary" />
+
+        <Preference
             android:icon="@drawable/ic_delete_24dp"
             app:layout="@layout/uwu_bot"
             android:key="action_delete_sheet_banner_image"
@@ -315,6 +330,13 @@
             android:key="action_change_profile_banner_image"
             android:title="@string/banner_profile_custom_title"
             android:summary="@string/banner_profile_custom_summary" />
+
+        <Preference
+            android:icon="@drawable/ic_web_24dp"
+            app:layout="@layout/uwu_mid"
+            android:key="action_profile_banner_from_url"
+            android:title="@string/profile_banner_url_title"
+            android:summary="@string/profile_banner_url_summary" />
 
         <ListPreference
             android:icon="@drawable/ic_shape_outline"

@@ -622,6 +622,8 @@
    <string name="profile_name_custom_dialog">更改显示名称</string>
    <string name="banner_profile_custom_title">更改个人资料横幅</string>
    <string name="banner_profile_custom_summary">为个人资料头部选择自定义图片</string>
+   <string name="profile_banner_url_title">来自 URL 的配置横幅</string>
+    <string name="profile_banner_url_summary">Pixiv、Twitter/X、Danbooru、Gelbooru、Zerochan、Imgur、Reddit 等，或直接的图片链接</string>
    <string name="title_profile_banner_shape">头像形状</string>
    <string name="delete_custom_banner_profile">删除自定义横幅</string>
    <string name="delete_custom_banner_profile_summary">恢复为默认横幅</string>
@@ -633,6 +635,8 @@
     <string name="home_banner_show_summary">在主屏幕顶部显示横幅图片</string>
     <string name="home_banner_custom_title">更改主页横幅</string>
     <string name="home_banner_custom_summary">为主页头部选择自定义图片</string>
+    <string name="home_banner_url_title">来自 URL 的横幅</string>
+    <string name="home_banner_url_summary">Pixiv、Twitter/X、Danbooru、Gelbooru、Zerochan、Imgur、Reddit 等，或直接的图片链接</string>
     <string name="home_banner_delete_title">删除自定义主页横幅</string>
     <string name="home_banner_delete_summary">恢复为默认主页横幅</string>
     <string name="home_banner_updated">主页横幅更新成功。</string>
@@ -643,6 +647,8 @@
     <string name="sheet_banner_category">底部面板横幅</string>
     <string name="sheet_banner_custom_title">更改底部横幅</string>
     <string name="sheet_banner_custom_summary">为底部面板选择自定义图片</string>
+    <string name="sheet_banner_url_title">来自 URL 的面板横幅</string>
+    <string name="sheet_banner_url_summary">Pixiv、Twitter/X、Danbooru、Gelbooru、Zerochan、Imgur、Reddit 等，或直接的图片链接</string>
     <string name="sheet_banner_delete_title">删除自定义底部横幅</string>
     <string name="sheet_banner_delete_summary">恢复为默认底部横幅</string>
     <string name="sheet_banner_updated">底部横幅更新成功。</string>
@@ -682,5 +688,11 @@
     <string name="sub_setting_tab_icon">标签页图标</string>
     <string name="sub_setting_tab_icon_hint">在标签栏的分组名称旁边显示</string>
     <string name="sub_tab_icon_none">无</string>
+    
+    <string name="banner_url_dialog_title">来自 URL 的横幅</string>
+    <string name="banner_url_hint">图片链接或 Pixiv/Twitter/Booru 等链接</string>
+    <string name="banner_url_loading">正在下载图片…</string>
+    <string name="banner_url_error_invalid">URL 无效或无法下载图片</string>
+    <string name="banner_url_error_download">下载图片失败，请检查你的网络连接</string>
 
 </resources>
