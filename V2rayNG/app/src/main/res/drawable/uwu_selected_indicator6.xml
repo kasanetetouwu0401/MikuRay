@@ -6,7 +6,7 @@
             <solid
                 android:color="?colorCard" />
             <corners
-                android:radius="14.0dip" />
+                android:radius="16.0dip" />
             <stroke
                 android:width="3.0dip"
                 android:color="?colorPrimary" />

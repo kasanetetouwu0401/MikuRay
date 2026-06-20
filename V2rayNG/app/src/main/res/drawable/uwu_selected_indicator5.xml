@@ -11,7 +11,7 @@
                 android:angle="45.0"
                 android:type="linear" />
             <corners
-                android:radius="14.0dip" />
+                android:radius="16.0dip" />
         </shape>
     </item>
     <item
@@ -24,7 +24,7 @@
                 android:angle="45.0"
                 android:type="linear" />
             <corners
-                android:radius="14.0dip" />
+                android:radius="16.0dip" />
         </shape>
     </item>
     <item
@@ -36,7 +36,7 @@
                 <solid
                     android:color="?colorCard" />
                 <corners
-                    android:radius="14.0dip" />
+                    android:radius="16.0dip" />
             </shape>
         </inset>
     </item>

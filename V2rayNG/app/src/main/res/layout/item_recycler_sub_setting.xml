@@ -51,7 +51,6 @@
                 android:id="@+id/tv_url"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:ellipsize="end"
                 android:lines="2"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
