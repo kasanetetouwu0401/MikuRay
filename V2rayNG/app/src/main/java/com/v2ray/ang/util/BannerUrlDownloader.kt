@@ -191,6 +191,7 @@ object BannerUrlDownloader {
                 .replace("://twitter.com", "://api.vxtwitter.com")
                 .replace("://x.com", "://api.vxtwitter.com")
             val json = HttpUtil2.fetchText(fixedUrl)
+            
             if (json != null) {
                 try {
                     val root = JSONObject(json)
@@ -201,7 +202,10 @@ object BannerUrlDownloader {
                         if (mediaUrl.isNotBlank()) return ResolvedImage(mediaUrl)
                     }
                 } catch (_: Exception) {
+                    // Ignore exception
+                }
             }
+
             return GenericOgImageResolver.resolve(url)
         }
     }
