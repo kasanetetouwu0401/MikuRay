@@ -222,36 +222,45 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_weight="1"
                 app:cardBackgroundColor="?colorCard"
                 app:cardCornerRadius="28dp"
                 app:cardElevation="0dp"
-                app:contentPadding="0dp"
+                app:contentPadding="5dp"
                 app:strokeWidth="0dp">
 
-                <com.google.android.material.tabs.TabLayout
-                    android:id="@+id/tab_group"
-                    android:background="@android:color/transparent"
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:padding="5dp"
-                    app:tabIndicator="@drawable/uwu_tabs_rounded_indicator"
-                    app:tabGravity="fill"
-                    app:tabIndicatorAnimationMode="elastic"
-                    app:tabIndicatorColor="?colorPrimary"
-                    app:tabIndicatorFullWidth="true"
-                    app:tabIndicatorGravity="stretch"
-                    app:tabIndicatorHeight="40dp"
-                    app:tabMinWidth="0dp"
-                    app:tabMode="scrollable"
-                    app:tabPaddingEnd="0dp"
-                    app:tabPaddingStart="0dp"
-                    app:tabRippleColor="@android:color/transparent"
-                    app:tabSelectedTextAppearance="?textAppearanceTitleSmall"
-                    app:tabSelectedTextColor="?colorSurface"
-                    app:tabTextAppearance="?textAppearanceTitleSmall"
-                    app:tabTextColor="?colorOnSurfaceVariant" />
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardCornerRadius="23dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp"
+                    android:clipToOutline="true"
+                    android:clipChildren="true">
+
+                    <com.google.android.material.tabs.TabLayout
+                        android:id="@+id/tab_group"
+                        android:background="@android:color/transparent"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:tabIndicator="@drawable/uwu_tabs_rounded_indicator"
+                        app:tabIndicatorAnimationMode="elastic"
+                        app:tabIndicatorColor="?colorPrimary"
+                        app:tabIndicatorFullWidth="true"
+                        app:tabIndicatorHeight="40dp"
+                        app:tabMinWidth="0dp"
+                        app:tabMode="scrollable"
+                        app:tabPaddingEnd="0dp"
+                        app:tabPaddingStart="0dp"
+                        app:tabRippleColor="@android:color/transparent"
+                        app:tabSelectedTextAppearance="?textAppearanceTitleSmall"
+                        app:tabSelectedTextColor="?colorSurface"
+                        app:tabTextAppearance="?textAppearanceTitleSmall"
+                        app:tabTextColor="?colorOnSurfaceVariant" />
+
+                </com.google.android.material.card.MaterialCardView>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.button.MaterialButton
