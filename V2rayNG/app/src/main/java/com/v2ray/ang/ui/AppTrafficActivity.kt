@@ -15,6 +15,7 @@ import com.v2ray.ang.databinding.ActivityAppTrafficBinding
 import com.v2ray.ang.dto.AppTrafficInfo
 import com.v2ray.ang.util.AppTrafficUtil
 import com.v2ray.ang.util.LogUtil
+import com.v2ray.ang.util.UidActivityTracker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -29,9 +30,6 @@ class AppTrafficActivity : BaseActivity() {
         // How far back "Total" mode looks for usage, to keep the query reasonably fast.
         private const val TOTAL_LOOKBACK_MILLIS = 30L * 24 * 60 * 60 * 1000 // 30 days
         private const val LIVE_POLL_INTERVAL_MILLIS = 2000L
-
-        // Minimum bytes transferred within one poll interval to be considered "active now".
-        private const val ACTIVE_THRESHOLD_BYTES = 2048L
 
         private const val MODE_TOTAL = 0
         private const val MODE_ACTIVE = 1
@@ -243,7 +241,9 @@ class AppTrafficActivity : BaseActivity() {
             val now = snapshot[app.uid] ?: 0L
             val before = lastLiveSnapshot[app.uid] ?: now
             val delta = (now - before).coerceAtLeast(0L)
-            val isActive = lastLiveSnapshot.isNotEmpty() && delta >= ACTIVE_THRESHOLD_BYTES
+            // "Active" is reported by Xray core's ProcessFinder (real proxied connections),
+            // not guessed from the OS-wide byte delta. The delta is only used for the byte count.
+            val isActive = UidActivityTracker.isActive(app.uid)
             app.copy(rxBytes = delta, txBytes = 0L, isActiveNow = isActive)
         }
 

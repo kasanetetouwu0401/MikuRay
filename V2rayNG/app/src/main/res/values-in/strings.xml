@@ -685,4 +685,21 @@ yang kamu butuhin."</string>
     <string name="sub_setting_tab_icon_hint">Ditampilin di sebelah nama grup di tab bar</string>
     <string name="sub_tab_icon_none">Nggak ada</string>
 
+    <!-- App Traffic -->
+    <string name="title_app_traffic">Traffic per Aplikasi</string>
+    <string name="summary_navigate_app_traffic_settings">Lihat berapa data yang udah dipakai tiap aplikasi</string>
+    <string name="app_traffic_tab_total">Total</string>
+    <string name="app_traffic_tab_active">Live</string>
+    <string name="app_traffic_subtitle_total">Pemakaian data seluruh device 30 hari terakhir, bukan cuma traffic yang lewat proxy</string>
+    <string name="app_traffic_subtitle_active">Aplikasi yang lagi transfer data lewat proxy sekarang, update tiap 2 detik</string>
+    <string name="app_traffic_permission_title">Butuh izin Usage Access</string>
+    <string name="app_traffic_permission_summary">Kasih izin \"Usage access\" biar MikuRay bisa baca pemakaian network per-aplikasi dari sistem</string>
+    <string name="app_traffic_permission_action">Kasih izin</string>
+    <string name="app_traffic_active_badge">Aktif</string>
+    <string name="app_traffic_rx_tx_format">↓ %1$s  ↑ %2$s</string>
+    <string name="app_traffic_live_rate_label">2 detik terakhir</string>
+    <string name="app_traffic_per_interval_format">%1$s</string>
+    <string name="app_traffic_sort_by_usage">Urutkan berdasarkan pemakaian</string>
+    <string name="app_traffic_sort_by_name">Urutkan berdasarkan nama</string>
+
 </resources>

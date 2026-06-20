@@ -34,6 +34,7 @@ import com.v2ray.ang.service.DialerWebviewService
 import com.v2ray.ang.service.IDialerService
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.MessageUtil
+import com.v2ray.ang.util.UidActivityTracker
 import com.v2ray.ang.util.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -328,6 +329,8 @@ object CoreServiceManager {
             browserDialer = null
         }
 
+        UidActivityTracker.clear()
+
         MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_STOP_SUCCESS, "")
         NotificationManager.cancelNotification()
 
@@ -492,6 +495,7 @@ object CoreServiceManager {
                 LogUtil.d(AppConfig.TAG, "ProcessFinder: Find $network connection from $srcIP:$srcPort to $destIP:$destPort, uid=$uid")
                 //LogUtil.d(AppConfig.TAG, "ProcessFinder: Find $network connection from $srcIP:$srcPort to $destIP:$destPort, uid=$uid,${PackageUidResolver.uidToPackageName(uid.toString())}")
 
+                UidActivityTracker.markActive(uid)
                 uid
             } catch (_: Exception) {
                 -1L

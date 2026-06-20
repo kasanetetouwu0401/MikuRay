@@ -704,4 +704,21 @@
     <string name="sub_setting_tab_icon_hint">Отображается рядом с названием группы на панели вкладок</string>
     <string name="sub_tab_icon_none">Нет</string>
 
+    <!-- App Traffic -->
+    <string name="title_app_traffic">Трафик приложений</string>
+    <string name="summary_navigate_app_traffic_settings">Сколько данных использовало каждое приложение</string>
+    <string name="app_traffic_tab_total">Всего</string>
+    <string name="app_traffic_tab_active">Сейчас</string>
+    <string name="app_traffic_subtitle_total">Использование данных за последние 30 дней по всему устройству, не только через прокси</string>
+    <string name="app_traffic_subtitle_active">Приложения, которые сейчас передают данные через прокси, обновление каждые 2 секунды</string>
+    <string name="app_traffic_permission_title">Нужен доступ к статистике использования</string>
+    <string name="app_traffic_permission_summary">Разрешите \"Доступ к использованию\", чтобы MikuRay мог читать сетевую статистику по приложениям</string>
+    <string name="app_traffic_permission_action">Дать доступ</string>
+    <string name="app_traffic_active_badge">Активно</string>
+    <string name="app_traffic_rx_tx_format">↓ %1$s  ↑ %2$s</string>
+    <string name="app_traffic_live_rate_label">Последние 2 секунды</string>
+    <string name="app_traffic_per_interval_format">%1$s</string>
+    <string name="app_traffic_sort_by_usage">Сортировать по использованию</string>
+    <string name="app_traffic_sort_by_name">Сортировать по имени</string>
+
 </resources>
