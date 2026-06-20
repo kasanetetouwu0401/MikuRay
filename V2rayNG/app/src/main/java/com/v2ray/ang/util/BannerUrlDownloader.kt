@@ -2,6 +2,9 @@ package com.v2ray.ang.util
 
 import android.content.Context
 import android.net.Uri
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -78,7 +81,7 @@ object BannerUrlDownloader {
             try {
                 var trimmed = inputUrl.trim()
                 if (trimmed.isEmpty()) {
-                    return@withContext Result.Error("URL kosong")
+                    return@withContext Result.Error("Empty URL")
                 }
 
                 if (!trimmed.startsWith("http://", ignoreCase = true) &&
@@ -90,35 +93,31 @@ object BannerUrlDownloader {
                 val resolved = resolve(trimmed)
                     ?: return@withContext Result.Error("Cannot find image from this URL")
 
+                val loadTarget: Any = if (resolved.referer != null) {
+                    GlideUrl(
+                        resolved.imageUrl,
+                        LazyHeaders.Builder()
+                            .addHeader("Referer", resolved.referer)
+                            .addHeader("User-Agent", USER_AGENT)
+                            .build()
+                    )
+                } else {
+                    resolved.imageUrl
+                }
+
+                val glideCacheFile = Glide.with(context.applicationContext)
+                    .downloadOnly()
+                    .load(loadTarget)
+                    .submit()
+                    .get()
+
                 val tempFile = File(context.cacheDir, "${prefix}download_temp_${System.currentTimeMillis()}.jpg")
-
-                val urlConnection = URL(resolved.imageUrl).openConnection() as HttpURLConnection
-                urlConnection.connectTimeout = 15_000
-                urlConnection.readTimeout = 15_000
-                urlConnection.instanceFollowRedirects = true
-                urlConnection.setRequestProperty("User-Agent", USER_AGENT)
-                
-                if (resolved.referer != null) {
-                    urlConnection.setRequestProperty("Referer", resolved.referer)
-                }
-
-                val responseCode = urlConnection.responseCode
-                if (responseCode !in 200..299) {
-                    urlConnection.disconnect()
-                    return@withContext Result.Error("HTTP Error $responseCode: Failed to download image")
-                }
-
-                urlConnection.inputStream.use { input ->
-                    tempFile.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
-                }
-                urlConnection.disconnect()
+                glideCacheFile.copyTo(tempFile, overwrite = true)
 
                 Result.Success(Uri.fromFile(tempFile))
             } catch (e: Exception) {
                 e.printStackTrace()
-                Result.Error("Error: ${e.localizedMessage ?: e.javaClass.simpleName}")
+                Result.Error("Glide failed to load image: ${e.localizedMessage ?: "Unknown Error"}")
             }
         }
     }
