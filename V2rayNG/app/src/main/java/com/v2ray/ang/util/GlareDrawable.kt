@@ -16,11 +16,19 @@ import android.graphics.drawable.Drawable
  *
  * Meant to be used as a View's foreground (setForeground), so it never
  * affects the view's background/ripple, layout, or touch handling.
+ *
+ * [cornerRadiusProvider] is re-evaluated on every [draw] call instead of
+ * being baked in once at construction time. This matters because the
+ * drawable is usually attached to the view (via GlareEffectController)
+ * before the view has gone through its first layout pass, so a radius
+ * captured up-front (e.g. from `view.height`) would often be stale/zero.
+ * Reading it live at draw-time guarantees it always matches the view's
+ * actual current rounded shape.
  */
 class GlareDrawable(
-    private val cornerRadiusPx: Float = 0f,
     private val highlightAlpha: Int = 70,
-    private val strokeAlpha: Int = 90
+    private val strokeAlpha: Int = 90,
+    private val cornerRadiusProvider: () -> Float = { 0f }
 ) : Drawable() {
 
     private val highlightPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -78,6 +86,7 @@ class GlareDrawable(
         if (bounds.isEmpty) return
 
         val saveCount = canvas.save()
+        val cornerRadiusPx = cornerRadiusProvider()
         if (cornerRadiusPx > 0f) {
             val path = android.graphics.Path().apply {
                 addRoundRect(

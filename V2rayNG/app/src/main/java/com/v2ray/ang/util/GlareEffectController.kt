@@ -2,6 +2,8 @@ package com.v2ray.ang.util
 
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
@@ -64,8 +66,7 @@ object GlareEffectController {
         }
         if (view.getTag(R.id.tag_glare_applied_key) == true) return
 
-        val cornerRadiusPx = resolveCornerRadiusPx(view)
-        view.foreground = GlareDrawable(cornerRadiusPx)
+        view.foreground = GlareDrawable(cornerRadiusProvider = { resolveCornerRadiusPx(view) })
         view.setTag(R.id.tag_glare_applied_key, true)
     }
 
@@ -74,6 +75,32 @@ object GlareEffectController {
             view.foreground = null
         }
         view.setTag(R.id.tag_glare_applied_key, null)
+    }
+
+    /**
+     * Tags and applies (or removes) the glare effect on a Toolbar's
+     * navigation/up icon (the back arrow, e.g. `uwu_back_arrow`).
+     *
+     * This view is created internally by AppCompat/Toolbar at runtime — it's
+     * never declared in any layout XML, so it can't be opted in via
+     * `android:tag="glare"` like a normal Button/CardView. Call this once
+     * right after `setSupportActionBar()` / `setDisplayHomeAsUpEnabled()`,
+     * after which the regular [applyToRoot] walk (onResume, settings toggle,
+     * etc.) will keep picking it up automatically since it's now tagged.
+     */
+    fun applyToToolbarNavigationIcon(toolbar: Toolbar?) {
+        val navButton = findToolbarNavigationIcon(toolbar) ?: return
+        navButton.tag = GLARE_TAG
+        applyToView(navButton)
+    }
+
+    private fun findToolbarNavigationIcon(toolbar: Toolbar?): View? {
+        toolbar ?: return null
+        for (i in 0 until toolbar.childCount) {
+            val child = toolbar.getChildAt(i)
+            if (child is ImageButton) return child
+        }
+        return null
     }
 
     private fun applyRecursive(view: View) {
@@ -101,12 +128,23 @@ object GlareEffectController {
     /** Only views explicitly tagged "glare" in XML are targeted — no more blanket type matching. */
     private fun isGlareTarget(view: View): Boolean = view.tag == GLARE_TAG
 
+    /**
+     * Resolved live (called fresh on every draw via [GlareDrawable]'s
+     * provider), so it's safe even before the view has been laid out.
+     *
+     * MaterialButton styles that get their rounding from a `shapeAppearance`
+     * (e.g. M3 Expressive's fully-rounded icon buttons) instead of an
+     * explicit `app:cornerRadius` report a [MaterialButton.getCornerRadius]
+     * of 0 — in that case we fall back to the pill-shape half-height, which
+     * matches what's actually rendered.
+     */
     private fun resolveCornerRadiusPx(view: View): Float {
-        return when (view) {
+        val typedRadius = when (view) {
             is MaterialCardView -> view.radius
             is CardView -> view.radius
             is MaterialButton -> view.cornerRadius.toFloat()
-            else -> view.height / 2f // pill-shaped buttons fall back to half height
+            else -> 0f
         }
+        return if (typedRadius > 0f) typedRadius else view.height / 2f
     }
 }
