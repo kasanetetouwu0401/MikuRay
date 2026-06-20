@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.tabs.TabLayout
@@ -50,6 +53,18 @@ class AppTrafficActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.mainContent) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
+            view.updatePadding(
+                top    = maxOf(systemBars.top,    displayCutout.top),
+                bottom = maxOf(systemBars.bottom,    displayCutout.bottom),
+                left   = maxOf(systemBars.left,   displayCutout.left),
+                right  = maxOf(systemBars.right,  displayCutout.right)
+            )
+            insets
+        }
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_app_traffic))
