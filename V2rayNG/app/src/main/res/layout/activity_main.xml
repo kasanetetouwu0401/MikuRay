@@ -242,7 +242,7 @@
                     app:tabIndicatorHeight="40dp"
                     app:tabMinWidth="0dp"
                     app:tabMode="scrollable"
-                    app:tabPadding="5dp"
+                    android:padding="5dp"
                     app:tabRippleColor="@android:color/transparent"
                     app:tabSelectedTextAppearance="?textAppearanceTitleSmall"
                     app:tabSelectedTextColor="?colorSurface"
