@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmdeve.blurview.widget.BlurView
 import com.v2ray.ang.AppConfig
+import com.v2ray.ang.extension.DialogWindowTracker
 import com.v2ray.ang.handler.MmkvManager
 
 object WindowBlurUtils {
@@ -20,7 +21,12 @@ object WindowBlurUtils {
 
     fun applyWindowBlur(window: Window?) {
         if (window == null) return
-        
+
+        // Every blurred Dialog/BottomSheet in the app routes through here, so this is
+        // the single place we need to register it as the topmost window for Snackbar
+        // purposes (see DialogWindowTracker for why).
+        DialogWindowTracker.register(window)
+
         val isBlurEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
         if (!isBlurEnabled) {
             window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)

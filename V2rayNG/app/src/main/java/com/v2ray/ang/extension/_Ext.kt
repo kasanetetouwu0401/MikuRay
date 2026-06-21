@@ -8,12 +8,14 @@ import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.app.Activity
+import android.app.Application
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -37,16 +39,147 @@ import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.util.getColorAttr
 import java.io.Serializable
+import java.lang.ref.WeakReference
 import java.net.URI
 import java.util.Locale
 
 val Context.v2RayApplication: AngApplication?
     get() = applicationContext as? AngApplication
 
+/**
+ * Keeps a weak reference to the Activity that is currently in the foreground (resumed).
+ *
+ * This allows non-UI callers (Services, BroadcastReceivers, etc.) to still show a
+ * Snackbar by borrowing the currently visible Activity's window, instead of having
+ * to fall back to a plain Toast.
+ *
+ * Registered once from [com.v2ray.ang.AngApplication.onCreate].
+ */
+object ForegroundActivityTracker : Application.ActivityLifecycleCallbacks {
+
+    private var resumedActivity: WeakReference<Activity>? = null
+
+    /**
+     * The currently resumed Activity, or null if the app has no Activity in the foreground
+     * (e.g. fully backgrounded, or only a Service is running).
+     */
+    val currentActivity: Activity?
+        get() = resumedActivity?.get()?.takeIf { !it.isFinishing && !it.isDestroyed }
+
+    fun register(application: Application) {
+        application.registerActivityLifecycleCallbacks(this)
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        resumedActivity = WeakReference(activity)
+    }
+
+    override fun onActivityPaused(activity: Activity) {
+        if (resumedActivity?.get() === activity) {
+            resumedActivity = null
+        }
+    }
+
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+    override fun onActivityStarted(activity: Activity) {}
+    override fun onActivityStopped(activity: Activity) {}
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+    override fun onActivityDestroyed(activity: Activity) {}
+}
+
+/**
+ * Keeps a weak reference to the topmost currently-shown Dialog window (BottomSheetDialog,
+ * AlertDialog, etc).
+ *
+ * The custom Snackbar normally attaches itself to the Activity's decorView. That's fine
+ * on its own, but a Dialog (and its blur overlay) lives in a separate Window stacked on
+ * top of the Activity's Window, so a Snackbar hosted by the Activity will always render
+ * *underneath* any currently-visible Dialog. By tracking the topmost Dialog window here,
+ * the Snackbar can attach itself there instead and actually be visible.
+ *
+ * [register] is called once from [com.v2ray.ang.util.WindowBlurUtils.applyWindowBlur],
+ * which is the common entry point every blurred Dialog/BottomSheet in the app goes
+ * through, so no per-screen wiring is needed.
+ */
+object DialogWindowTracker {
+
+    private var topWindow: WeakReference<Window>? = null
+
+    /** The topmost tracked Dialog window, or null if none is currently shown/attached. */
+    val currentDialogWindow: Window?
+        get() = topWindow?.get()?.takeIf { it.decorView.isAttachedToWindow }
+
+    fun register(window: Window) {
+        topWindow = WeakReference(window)
+        window.decorView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {}
+            override fun onViewDetachedFromWindow(v: View) {
+                if (topWindow?.get() === window) {
+                    topWindow = null
+                }
+                window.decorView.removeOnAttachStateChangeListener(this)
+            }
+        })
+    }
+}
+
 private fun Context.findSnackbarParent(): View? {
+    // If a Dialog/BottomSheet is currently showing, it lives in its own Window stacked
+    // above the Activity's Window — attach there instead, or the Snackbar would render
+    // underneath it (and underneath its blur overlay) and look "ketutupan".
+    DialogWindowTracker.currentDialogWindow?.let { return it.decorView }
+
     val activity = this as? Activity ?: ForegroundActivityTracker.currentActivity ?: return null
-    return activity.window?.decorView?.findViewById(android.R.id.content) as? View
-        ?: activity.window?.decorView
+    return activity.window?.decorView
+}
+
+/**
+ * If [hostActivity] gets paused (e.g. because it just called finish()) while [snackbar]
+ * is still showing, the Snackbar would otherwise be torn down along with the Activity's
+ * window before the user even gets to read it. This re-hosts it on whichever Activity
+ * becomes the new foreground Activity instead of just letting it disappear.
+ */
+private fun rehostSnackbarOnNextActivityIfPaused(
+    hostActivity: Activity,
+    snackbar: Snackbar,
+    title: CharSequence,
+    message: CharSequence,
+    @DrawableRes iconRes: Int,
+    backgroundColorAttrName: String?,
+    textColorAttrName: String?,
+    duration: Int
+) {
+    val app = hostActivity.application
+    val callbacks = object : Application.ActivityLifecycleCallbacks {
+        override fun onActivityPaused(activity: Activity) {
+            if (activity !== hostActivity) return
+            app.unregisterActivityLifecycleCallbacks(this)
+
+            if (!snackbar.isShownOrQueued) return
+            snackbar.dismiss()
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                val nextActivity = ForegroundActivityTracker.currentActivity
+                if (nextActivity != null && nextActivity !== hostActivity) {
+                    showSnackbar(
+                        nextActivity, title, message, iconRes,
+                        backgroundColorAttrName, textColorAttrName, duration
+                    )
+                }
+            }, 250L)
+        }
+
+        override fun onActivityDestroyed(activity: Activity) {
+            if (activity === hostActivity) app.unregisterActivityLifecycleCallbacks(this)
+        }
+
+        override fun onActivityResumed(activity: Activity) {}
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+        override fun onActivityStarted(activity: Activity) {}
+        override fun onActivityStopped(activity: Activity) {}
+        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+    }
+    app.registerActivityLifecycleCallbacks(callbacks)
 }
 
 private fun showSnackbar(
@@ -107,6 +240,14 @@ private fun showSnackbar(
     }
 
     snackbarLayout.addView(contentView, 0)
+
+    // The blur overlay (when enabled) is added as a sibling view inside the same
+    // parent/decorView, on top of everything else. Make sure the Snackbar itself stays
+    // above that overlay rather than rendering underneath it.
+    (snackbarLayout.parent as? ViewGroup)?.bringChildToFront(snackbarLayout)
+    snackbarLayout.elevation = (snackbarLayout.elevation).coerceAtLeast(
+        24f * parent.context.resources.displayMetrics.density
+    )
 
     val layoutParams = snackbarLayout.layoutParams
     when (layoutParams) {
@@ -181,6 +322,14 @@ private fun showSnackbar(
     }
 
     snackbar.show()
+
+    val hostActivity = (context as? Activity) ?: ForegroundActivityTracker.currentActivity
+    if (hostActivity != null) {
+        rehostSnackbarOnNextActivityIfPaused(
+            hostActivity, snackbar, title, message, iconRes,
+            backgroundColorAttrName, textColorAttrName, duration
+        )
+    }
 }
 
 /**
