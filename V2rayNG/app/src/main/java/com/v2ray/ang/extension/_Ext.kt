@@ -154,7 +154,7 @@ private object SnackbarRelocationRegistry : Application.ActivityLifecycleCallbac
             if (nextActivity != null && nextActivity !== activity) {
                 showSnackbar(
                     nextActivity, pending.title, pending.message, pending.iconRes,
-                    pending.backgroundColorAttrName, pending.textColorAttrName, pending.duration
+                    pending.backgroundColorAttrName, pending.textColorAttrName, pending.duration, true
                 )
             }
         }, 250L)
@@ -178,11 +178,12 @@ private fun showSnackbar(
     @DrawableRes iconRes: Int,
     backgroundColorAttrName: String?,
     textColorAttrName: String?,
-    duration: Int
+    duration: Int,
+    relocateOnFinish: Boolean = false // <-- MODIFIKASI: Parameter ditambahkan
 ) {
     if (Looper.myLooper() != Looper.getMainLooper()) {
         Handler(Looper.getMainLooper()).post {
-            showSnackbar(context, title, message, iconRes, backgroundColorAttrName, textColorAttrName, duration)
+            showSnackbar(context, title, message, iconRes, backgroundColorAttrName, textColorAttrName, duration, relocateOnFinish) // <-- MODIFIKASI: Diteruskan ke sini
         }
         return
     }
@@ -230,11 +231,6 @@ private fun showSnackbar(
 
     snackbarLayout.addView(contentView, 0)
 
-    // The blur overlay (when enabled) is added as a sibling view inside the same
-    // parent/decorView. It's always created with elevation = 0f, so simply reordering
-    // the Snackbar to the front here is enough to keep it visually on top — no need to
-    // boost its elevation, which only adds an unwanted heavy shadow that can look like
-    // a blur effect even when the blur setting itself is off.
     (snackbarLayout.parent as? ViewGroup)?.bringChildToFront(snackbarLayout)
 
     val layoutParams = snackbarLayout.layoutParams
@@ -312,7 +308,7 @@ private fun showSnackbar(
     snackbar.show()
 
     val hostActivity = (context as? Activity) ?: ForegroundActivityTracker.currentActivity
-    if (hostActivity != null) {
+    if (hostActivity != null && relocateOnFinish) {
         SnackbarRelocationRegistry.track(
             hostActivity, snackbar, title, message, iconRes,
             backgroundColorAttrName, textColorAttrName, duration
@@ -322,85 +318,71 @@ private fun showSnackbar(
 
 /**
  * Shows a neutral Snackbar with the given resource ID, and an optional title.
- *
- * @param message The resource ID of the message to show.
- * @param title Optional title shown bold above the message.
  */
-fun Context.snackbarDefault(message: Int, title: CharSequence = "") {
-    showSnackbar(this, title, getString(message), R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_LONG)
+fun Context.snackbarDefault(message: Int, title: CharSequence = "", relocateOnFinish: Boolean = false) {
+    showSnackbar(this, title, getString(message), R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_LONG, relocateOnFinish)
 }
 
 /**
  * Shows a neutral Snackbar with the given text, and an optional title.
- *
- * @param message The text of the message to show.
- * @param title Optional title shown bold above the message.
  */
-fun Context.snackbarDefault(message: CharSequence, title: CharSequence = "") {
-    showSnackbar(this, title, message, R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_LONG)
+fun Context.snackbarDefault(message: CharSequence, title: CharSequence = "", relocateOnFinish: Boolean = false) {
+    showSnackbar(this, title, message, R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_LONG, relocateOnFinish)
 }
 
 /**
  * Shows a success Snackbar (colorPrimary background, colorOnPrimary text) with the
  * given resource ID, and an optional title.
- *
- * @param message The resource ID of the message to show.
- * @param title Optional title shown bold above the message.
  */
-fun Context.snackbarSuccess(message: Int, title: CharSequence = "") {
+fun Context.snackbarSuccess(message: Int, title: CharSequence = "", relocateOnFinish: Boolean = false) {
     showSnackbar(
         this, title, getString(message), R.drawable.ic_check_circle,
         "colorPrimary",
         "colorOnPrimary",
-        Snackbar.LENGTH_LONG
+        Snackbar.LENGTH_LONG,
+        relocateOnFinish
     )
 }
 
 /**
  * Shows a success Snackbar (colorPrimary background, colorOnPrimary text) with the
  * given text, and an optional title.
- *
- * @param message The text of the message to show.
- * @param title Optional title shown bold above the message.
  */
-fun Context.snackbarSuccess(message: CharSequence, title: CharSequence = "") {
+fun Context.snackbarSuccess(message: CharSequence, title: CharSequence = "", relocateOnFinish: Boolean = false) {
     showSnackbar(
         this, title, message, R.drawable.ic_check_circle,
         "colorPrimary",
         "colorOnPrimary",
-        Snackbar.LENGTH_LONG
+        Snackbar.LENGTH_LONG,
+        relocateOnFinish
     )
 }
 
 /**
  * Shows an error Snackbar (colorError background, colorOnError text) with the
  * given resource ID, and an optional title.
- *
- * @param message The resource ID of the message to show.
- * @param title Optional title shown bold above the message.
  */
-fun Context.snackbarError(message: Int, title: CharSequence = "") {
+fun Context.snackbarError(message: Int, title: CharSequence = "", relocateOnFinish: Boolean = false) {
     showSnackbar(
         this, title, getString(message), R.drawable.ic_warning,
         "colorError",
         "colorOnError",
-        Snackbar.LENGTH_LONG
+        Snackbar.LENGTH_LONG,
+        relocateOnFinish
     )
 }
 
 /**
  * Shows an error Snackbar (colorError background, colorOnError text) with the
  * given text, and an optional title.
- *
- * @param message The text of the message to show.
- * @param title Optional title shown bold above the message.
  */
-fun Context.snackbarError(message: CharSequence, title: CharSequence = "") {
+fun Context.snackbarError(message: CharSequence, title: CharSequence = "", relocateOnFinish: Boolean = false) {
     showSnackbar(
         this, title, message, R.drawable.ic_warning,
         "colorError",
         "colorOnError",
-        Snackbar.LENGTH_LONG
+        Snackbar.LENGTH_LONG,
+        relocateOnFinish
     )
 }
 
@@ -456,10 +438,6 @@ fun String.toLongEx(): Long = toLongOrNull() ?: 0
 
 /**
  * Listens for package changes and executes a callback when a change occurs.
- *
- * @param onetime Whether to unregister the receiver after the first callback.
- * @param callback The callback to execute when a package change occurs.
- * @return The BroadcastReceiver that was registered.
  */
 fun Context.listenForPackageChanges(onetime: Boolean = true, callback: () -> Unit) =
     object : BroadcastReceiver() {
@@ -485,9 +463,6 @@ fun Context.listenForPackageChanges(onetime: Boolean = true, callback: () -> Uni
 
 /**
  * Retrieves a serializable object from the Bundle.
- *
- * @param key The key of the serializable object.
- * @return The serializable object, or null if not found.
  */
 inline fun <reified T : Serializable> Bundle.serializable(key: String): T? = when {
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getSerializable(key, T::class.java)
@@ -496,9 +471,6 @@ inline fun <reified T : Serializable> Bundle.serializable(key: String): T? = whe
 
 /**
  * Retrieves a serializable object from the Intent.
- *
- * @param key The key of the serializable object.
- * @return The serializable object, or null if not found.
  */
 inline fun <reified T : Serializable> Intent.serializable(key: String): T? = when {
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getSerializableExtra(key, T::class.java)
@@ -507,8 +479,6 @@ inline fun <reified T : Serializable> Intent.serializable(key: String): T? = whe
 
 /**
  * Checks if the CharSequence is not null and not empty.
- *
- * @return True if the CharSequence is not null and not empty, false otherwise.
  */
 fun CharSequence?.isNotNullEmpty(): Boolean = !this.isNullOrBlank()
 
@@ -538,8 +508,6 @@ fun String.matchesPattern(regex: Regex?, keyword: String?, ignoreCase: Boolean =
 
 /**
  * Checks if the config type is a group type (PolicyGroup or ProxyChain).
- *
- * @return True if the config type is PolicyGroup or ProxyChain, false otherwise.
  */
 fun EConfigType.isGroupType(): Boolean {
     return this == EConfigType.POLICYGROUP || this == EConfigType.PROXYCHAIN
@@ -547,8 +515,6 @@ fun EConfigType.isGroupType(): Boolean {
 
 /**
  * Checks if the config type is a complex type (Custom, PolicyGroup, or ProxyChain).
- *
- * @return True if the config type is Custom, PolicyGroup, or ProxyChain, false otherwise.
  */
 fun EConfigType.isComplexType(): Boolean {
     return this == EConfigType.CUSTOM || this == EConfigType.POLICYGROUP || this == EConfigType.PROXYCHAIN
