@@ -145,8 +145,14 @@ private fun showSnackbar(
 
     ViewCompat.setOnApplyWindowInsetsListener(snackbarLayout) { view, insets ->
         val statusBarTop = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+        
+        val margin5dp = (5f * view.context.resources.displayMetrics.density).toInt()
+
         view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            topMargin = statusBarTop
+            topMargin = statusBarTop + margin5dp
+            bottomMargin = margin5dp
+            leftMargin = margin5dp
+            rightMargin = margin5dp
         }
         insets
     }
@@ -191,12 +197,16 @@ private fun showSnackbar(
     // The default Snackbar style only gets a 4dp corner radius (or none at all on
     // phones, which use the edge-to-edge full-width style), so we build our own
     // rounded background instead of relying on snackbar.setBackgroundTint().
-    val cornerRadiusPx = AppConfig.SNACKBAR_CORNER_RADIUS_DP * parent.context.resources.displayMetrics.density
+    val cornerRadiusPx = 10f * parent.context.resources.displayMetrics.density
     val backgroundColor = if (backgroundColorAttrName != null) {
         parent.context.getColorAttr(backgroundColorAttrName)
     } else {
         parent.context.getColorAttr("colorSurfaceInverse")
     }
+    
+    snackbarLayout.backgroundTintList = null
+    snackbarLayout.backgroundTintMode = null
+
     snackbarLayout.background = MaterialShapeDrawable(
         ShapeAppearanceModel.builder().setAllCornerSizes(cornerRadiusPx).build()
     ).apply {
