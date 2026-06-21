@@ -148,8 +148,7 @@ private fun showSnackbar(
         }
         snackbarLayout.animate()
             .translationX(snackbarLayout.width.toFloat())
-            .alpha(0f)
-            .setDuration(250L)
+            .setDuration(300L)
             .setInterpolator(AccelerateInterpolator())
             .withEndAction { snackbar.dismiss() }
             .start()
@@ -164,7 +163,7 @@ private fun showSnackbar(
         Handler(Looper.getMainLooper()).postDelayed(::slideRightThenDismiss, it)
     }
 
-    val cornerRadiusPx = 10f * parent.context.resources.displayMetrics.density
+    val cornerRadiusPx = 28f * parent.context.resources.displayMetrics.density
     val backgroundColor = if (backgroundColorAttrName != null) {
         parent.context.getColorAttr(backgroundColorAttrName)
     } else {

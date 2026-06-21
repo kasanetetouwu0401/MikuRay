@@ -4,17 +4,14 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="4dp"
-    android:paddingEnd="4dp"
-    android:paddingTop="6dp"
-    android:paddingBottom="6dp">
+    android:paddingHorizontal="20.0dip"
+    android:paddingVertical="25.0dip">
 
     <ImageView
         android:id="@+id/iv_snackbar_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="35.0dip"
+        android:layout_height="35.0dip"
         android:layout_marginEnd="12dp"
-        android:scaleType="fitCenter"
         android:contentDescription="@null" />
 
     <LinearLayout
@@ -27,11 +24,10 @@
             android:id="@+id/tv_snackbar_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="15sp"
-            android:textStyle="bold"
+            android:textSize="17sp"
             android:maxLines="1"
             android:ellipsize="end"
-            android:textAppearance="?textAppearanceTitleSmall"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
             android:visibility="gone" />
 
         <TextView
@@ -40,7 +36,8 @@
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:maxLines="4"
-            android:textAppearance="?textAppearanceBodyMedium" />
+            android:alpha="0.8"
+            android:textAppearance="?attr/textAppearanceTitleSmall" />
 
     </LinearLayout>
 
