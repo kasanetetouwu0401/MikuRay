@@ -41,6 +41,7 @@ import java.io.Serializable
 import java.lang.ref.WeakReference
 import java.net.URI
 import java.util.Locale
+import java.util.WeakHashMap
 
 val Context.v2RayApplication: AngApplication?
     get() = applicationContext as? AngApplication
@@ -92,60 +93,82 @@ private fun Context.findSnackbarParent(): View? {
 }
 
 /**
- * If [hostActivity] gets paused (e.g. because it just called finish()) while [snackbar]
+ * If an Activity gets paused because it just called finish() while one of its Snackbars
  * is still showing, the Snackbar would otherwise be torn down along with the Activity's
- * window before the user even gets to read it. This re-hosts it on whichever Activity
+ * window before the user even gets to read it. This relocates it onto whichever Activity
  * becomes the new foreground Activity instead of just letting it disappear.
+ *
+ * Registered lazily, once, instead of once-per-Snackbar-call: only the latest pending
+ * Snackbar for a given Activity is kept (overwriting any earlier one), so finishing an
+ * Activity that showed several Snackbars in a row doesn't replay all of them on the next
+ * screen — that was causing the duplicate-Snackbar issue.
  */
-private fun rehostSnackbarOnNextActivityIfPaused(
-    hostActivity: Activity,
-    snackbar: Snackbar,
-    title: CharSequence,
-    message: CharSequence,
-    @DrawableRes iconRes: Int,
-    backgroundColorAttrName: String?,
-    textColorAttrName: String?,
-    duration: Int
-) {
-    val app = hostActivity.application
-    val callbacks = object : Application.ActivityLifecycleCallbacks {
-        override fun onActivityPaused(activity: Activity) {
-            if (activity !== hostActivity) return
+private object SnackbarRelocationRegistry : Application.ActivityLifecycleCallbacks {
 
-            // Only relocate the Snackbar if the Activity is actually closing for good.
-            // A plain onPause (opening a file picker, a system dialog, multitasking,
-            // etc.) is not "finish()" — the user will likely come right back to this
-            // same Activity, and we don't want the Snackbar to vanish then reappear on
-            // it again once it resumes.
-            if (!hostActivity.isFinishing) return
+    private class Pending(
+        val snackbar: Snackbar,
+        val title: CharSequence,
+        val message: CharSequence,
+        @DrawableRes val iconRes: Int,
+        val backgroundColorAttrName: String?,
+        val textColorAttrName: String?,
+        val duration: Int
+    )
 
-            app.unregisterActivityLifecycleCallbacks(this)
+    private val pendingByActivity = WeakHashMap<Activity, Pending>()
+    private var isRegistered = false
 
-            if (!snackbar.isShownOrQueued) return
-            snackbar.dismiss()
-
-            Handler(Looper.getMainLooper()).postDelayed({
-                val nextActivity = ForegroundActivityTracker.currentActivity
-                if (nextActivity != null && nextActivity !== hostActivity) {
-                    showSnackbar(
-                        nextActivity, title, message, iconRes,
-                        backgroundColorAttrName, textColorAttrName, duration
-                    )
-                }
-            }, 250L)
+    fun track(
+        hostActivity: Activity,
+        snackbar: Snackbar,
+        title: CharSequence,
+        message: CharSequence,
+        @DrawableRes iconRes: Int,
+        backgroundColorAttrName: String?,
+        textColorAttrName: String?,
+        duration: Int
+    ) {
+        if (!isRegistered) {
+            hostActivity.application.registerActivityLifecycleCallbacks(this)
+            isRegistered = true
         }
-
-        override fun onActivityDestroyed(activity: Activity) {
-            if (activity === hostActivity) app.unregisterActivityLifecycleCallbacks(this)
-        }
-
-        override fun onActivityResumed(activity: Activity) {}
-        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
-        override fun onActivityStarted(activity: Activity) {}
-        override fun onActivityStopped(activity: Activity) {}
-        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+        pendingByActivity[hostActivity] = Pending(
+            snackbar, title, message, iconRes, backgroundColorAttrName, textColorAttrName, duration
+        )
     }
-    app.registerActivityLifecycleCallbacks(callbacks)
+
+    override fun onActivityPaused(activity: Activity) {
+        // Only relocate the Snackbar if the Activity is actually closing for good.
+        // A plain onPause (opening a file picker, a system dialog, multitasking, etc.)
+        // is not "finish()" — the user will likely come right back to this same
+        // Activity, and we don't want the Snackbar to vanish then reappear on it again
+        // once it resumes.
+        if (!activity.isFinishing) return
+
+        val pending = pendingByActivity.remove(activity) ?: return
+        if (!pending.snackbar.isShownOrQueued) return
+        pending.snackbar.dismiss()
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            val nextActivity = ForegroundActivityTracker.currentActivity
+            if (nextActivity != null && nextActivity !== activity) {
+                showSnackbar(
+                    nextActivity, pending.title, pending.message, pending.iconRes,
+                    pending.backgroundColorAttrName, pending.textColorAttrName, pending.duration
+                )
+            }
+        }, 250L)
+    }
+
+    override fun onActivityDestroyed(activity: Activity) {
+        pendingByActivity.remove(activity)
+    }
+
+    override fun onActivityResumed(activity: Activity) {}
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+    override fun onActivityStarted(activity: Activity) {}
+    override fun onActivityStopped(activity: Activity) {}
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 }
 
 private fun showSnackbar(
@@ -290,7 +313,7 @@ private fun showSnackbar(
 
     val hostActivity = (context as? Activity) ?: ForegroundActivityTracker.currentActivity
     if (hostActivity != null) {
-        rehostSnackbarOnNextActivityIfPaused(
+        SnackbarRelocationRegistry.track(
             hostActivity, snackbar, title, message, iconRes,
             backgroundColorAttrName, textColorAttrName, duration
         )
