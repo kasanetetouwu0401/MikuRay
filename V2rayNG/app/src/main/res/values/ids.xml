@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Used by GlareEffectController as a View.setTag key to avoid re-applying
+         the glare foreground drawable multiple times on the same view. -->
+    <item name="tag_glare_applied_key" type="id" />
+</resources>

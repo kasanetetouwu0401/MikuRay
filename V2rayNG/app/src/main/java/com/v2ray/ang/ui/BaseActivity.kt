@@ -32,6 +32,7 @@ import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.CustomDividerItemDecoration
 import com.v2ray.ang.util.DPIController
+import com.v2ray.ang.util.GlareEffectController
 import com.v2ray.ang.util.MyContextWrapper
 import com.v2ray.ang.util.ThemeManager
 import com.v2ray.ang.util.WindowBlurUtils
@@ -90,6 +91,7 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         themeStateManager.checkThemeChangedAndRecreate()
+        GlareEffectController.applyToRoot(findViewById(R.id.main_content))
     }
 
     override fun onContentChanged() {
@@ -106,6 +108,7 @@ abstract class BaseActivity : AppCompatActivity() {
             )
             insets
         }
+        GlareEffectController.applyToRoot(root)
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
@@ -200,6 +203,7 @@ abstract class BaseActivity : AppCompatActivity() {
             setSupportActionBar(it)
             supportActionBar?.setDisplayHomeAsUpEnabled(showHomeAsUp)
             title?.let { t -> this.title = t }
+            GlareEffectController.applyToToolbarNavigationIcon(it)
         }
     }
 
@@ -225,6 +229,7 @@ abstract class BaseActivity : AppCompatActivity() {
             setSupportActionBar(it)
             supportActionBar?.setDisplayHomeAsUpEnabled(showHomeAsUp)
             title?.let { t -> supportActionBar?.title = t }
+            GlareEffectController.applyToToolbarNavigationIcon(it)
         }
     }
 
