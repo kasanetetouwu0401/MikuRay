@@ -41,7 +41,6 @@ import java.io.Serializable
 import java.lang.ref.WeakReference
 import java.net.URI
 import java.util.Locale
-import java.util.WeakHashMap
 
 val Context.v2RayApplication: AngApplication?
     get() = applicationContext as? AngApplication
@@ -92,85 +91,6 @@ private fun Context.findSnackbarParent(): View? {
     return activity.window?.decorView
 }
 
-/**
- * If an Activity gets paused because it just called finish() while one of its Snackbars
- * is still showing, the Snackbar would otherwise be torn down along with the Activity's
- * window before the user even gets to read it. This relocates it onto whichever Activity
- * becomes the new foreground Activity instead of just letting it disappear.
- *
- * Registered lazily, once, instead of once-per-Snackbar-call: only the latest pending
- * Snackbar for a given Activity is kept (overwriting any earlier one), so finishing an
- * Activity that showed several Snackbars in a row doesn't replay all of them on the next
- * screen — that was causing the duplicate-Snackbar issue.
- */
-private object SnackbarRelocationRegistry : Application.ActivityLifecycleCallbacks {
-
-    private class Pending(
-        val snackbar: Snackbar,
-        val title: CharSequence,
-        val message: CharSequence,
-        @DrawableRes val iconRes: Int,
-        val backgroundColorAttrName: String?,
-        val textColorAttrName: String?,
-        val duration: Int
-    )
-
-    private val pendingByActivity = WeakHashMap<Activity, Pending>()
-    private var isRegistered = false
-
-    fun track(
-        hostActivity: Activity,
-        snackbar: Snackbar,
-        title: CharSequence,
-        message: CharSequence,
-        @DrawableRes iconRes: Int,
-        backgroundColorAttrName: String?,
-        textColorAttrName: String?,
-        duration: Int
-    ) {
-        if (!isRegistered) {
-            hostActivity.application.registerActivityLifecycleCallbacks(this)
-            isRegistered = true
-        }
-        pendingByActivity[hostActivity] = Pending(
-            snackbar, title, message, iconRes, backgroundColorAttrName, textColorAttrName, duration
-        )
-    }
-
-    override fun onActivityPaused(activity: Activity) {
-        // Only relocate the Snackbar if the Activity is actually closing for good.
-        // A plain onPause (opening a file picker, a system dialog, multitasking, etc.)
-        // is not "finish()" — the user will likely come right back to this same
-        // Activity, and we don't want the Snackbar to vanish then reappear on it again
-        // once it resumes.
-        if (!activity.isFinishing) return
-
-        val pending = pendingByActivity.remove(activity) ?: return
-        if (!pending.snackbar.isShownOrQueued) return
-        pending.snackbar.dismiss()
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            val nextActivity = ForegroundActivityTracker.currentActivity
-            if (nextActivity != null && nextActivity !== activity) {
-                showSnackbar(
-                    nextActivity, pending.title, pending.message, pending.iconRes,
-                    pending.backgroundColorAttrName, pending.textColorAttrName, pending.duration, true
-                )
-            }
-        }, 250L)
-    }
-
-    override fun onActivityDestroyed(activity: Activity) {
-        pendingByActivity.remove(activity)
-    }
-
-    override fun onActivityResumed(activity: Activity) {}
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
-    override fun onActivityStarted(activity: Activity) {}
-    override fun onActivityStopped(activity: Activity) {}
-    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
-}
-
 private fun showSnackbar(
     context: Context,
     title: CharSequence,
@@ -178,12 +98,11 @@ private fun showSnackbar(
     @DrawableRes iconRes: Int,
     backgroundColorAttrName: String?,
     textColorAttrName: String?,
-    duration: Int,
-    relocateOnFinish: Boolean = false // <-- MODIFIKASI: Parameter ditambahkan
+    duration: Int
 ) {
     if (Looper.myLooper() != Looper.getMainLooper()) {
         Handler(Looper.getMainLooper()).post {
-            showSnackbar(context, title, message, iconRes, backgroundColorAttrName, textColorAttrName, duration, relocateOnFinish) // <-- MODIFIKASI: Diteruskan ke sini
+            showSnackbar(context, title, message, iconRes, backgroundColorAttrName, textColorAttrName, duration)
         }
         return
     }
@@ -306,41 +225,32 @@ private fun showSnackbar(
     }
 
     snackbar.show()
-
-    val hostActivity = (context as? Activity) ?: ForegroundActivityTracker.currentActivity
-    if (hostActivity != null && relocateOnFinish) {
-        SnackbarRelocationRegistry.track(
-            hostActivity, snackbar, title, message, iconRes,
-            backgroundColorAttrName, textColorAttrName, duration
-        )
-    }
 }
 
 /**
  * Shows a neutral Snackbar with the given resource ID, and an optional title.
  */
-fun Context.snackbarDefault(message: Int, title: CharSequence = "", relocateOnFinish: Boolean = false) {
-    showSnackbar(this, title, getString(message), R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_LONG, relocateOnFinish)
+fun Context.snackbarDefault(message: Int, title: CharSequence = "") {
+    showSnackbar(this, title, getString(message), R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_LONG)
 }
 
 /**
  * Shows a neutral Snackbar with the given text, and an optional title.
  */
-fun Context.snackbarDefault(message: CharSequence, title: CharSequence = "", relocateOnFinish: Boolean = false) {
-    showSnackbar(this, title, message, R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_LONG, relocateOnFinish)
+fun Context.snackbarDefault(message: CharSequence, title: CharSequence = "") {
+    showSnackbar(this, title, message, R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_LONG)
 }
 
 /**
  * Shows a success Snackbar (colorPrimary background, colorOnPrimary text) with the
  * given resource ID, and an optional title.
  */
-fun Context.snackbarSuccess(message: Int, title: CharSequence = "", relocateOnFinish: Boolean = false) {
+fun Context.snackbarSuccess(message: Int, title: CharSequence = "") {
     showSnackbar(
         this, title, getString(message), R.drawable.ic_check_circle,
         "colorPrimary",
         "colorOnPrimary",
-        Snackbar.LENGTH_LONG,
-        relocateOnFinish
+        Snackbar.LENGTH_LONG
     )
 }
 
@@ -348,13 +258,12 @@ fun Context.snackbarSuccess(message: Int, title: CharSequence = "", relocateOnFi
  * Shows a success Snackbar (colorPrimary background, colorOnPrimary text) with the
  * given text, and an optional title.
  */
-fun Context.snackbarSuccess(message: CharSequence, title: CharSequence = "", relocateOnFinish: Boolean = false) {
+fun Context.snackbarSuccess(message: CharSequence, title: CharSequence = "") {
     showSnackbar(
         this, title, message, R.drawable.ic_check_circle,
         "colorPrimary",
         "colorOnPrimary",
-        Snackbar.LENGTH_LONG,
-        relocateOnFinish
+        Snackbar.LENGTH_LONG
     )
 }
 
@@ -362,13 +271,12 @@ fun Context.snackbarSuccess(message: CharSequence, title: CharSequence = "", rel
  * Shows an error Snackbar (colorError background, colorOnError text) with the
  * given resource ID, and an optional title.
  */
-fun Context.snackbarError(message: Int, title: CharSequence = "", relocateOnFinish: Boolean = false) {
+fun Context.snackbarError(message: Int, title: CharSequence = "") {
     showSnackbar(
         this, title, getString(message), R.drawable.ic_warning,
         "colorError",
         "colorOnError",
-        Snackbar.LENGTH_LONG,
-        relocateOnFinish
+        Snackbar.LENGTH_LONG
     )
 }
 
@@ -376,15 +284,143 @@ fun Context.snackbarError(message: Int, title: CharSequence = "", relocateOnFini
  * Shows an error Snackbar (colorError background, colorOnError text) with the
  * given text, and an optional title.
  */
-fun Context.snackbarError(message: CharSequence, title: CharSequence = "", relocateOnFinish: Boolean = false) {
+fun Context.snackbarError(message: CharSequence, title: CharSequence = "") {
     showSnackbar(
         this, title, message, R.drawable.ic_warning,
         "colorError",
         "colorOnError",
-        Snackbar.LENGTH_LONG,
-        relocateOnFinish
+        Snackbar.LENGTH_LONG
     )
 }
+
+// ==============================================================================
+// CUSTOM TOAST IMPLEMENTATION
+// Digunakan khusus untuk menahan pesan agar tidak hilang saat Activity di-finish
+// ==============================================================================
+
+private fun showCustomToast(
+    context: Context,
+    title: CharSequence,
+    message: CharSequence,
+    @DrawableRes iconRes: Int,
+    backgroundColorAttrName: String?,
+    textColorAttrName: String?,
+    duration: Int
+) {
+    if (Looper.myLooper() != Looper.getMainLooper()) {
+        Handler(Looper.getMainLooper()).post {
+            showCustomToast(context, title, message, iconRes, backgroundColorAttrName, textColorAttrName, duration)
+        }
+        return
+    }
+
+    val appContext = context.applicationContext
+    val inflater = LayoutInflater.from(appContext)
+    val contentView = inflater.inflate(R.layout.layout_snackbar_custom, null)
+
+    val resolvedTextColor = if (textColorAttrName != null) {
+        appContext.getColorAttr(textColorAttrName)
+    } else {
+        appContext.getColorAttr("colorOnSurfaceInverse")
+    }
+
+    contentView.findViewById<ImageView>(R.id.iv_snackbar_icon)?.apply {
+        setImageResource(iconRes)
+        DrawableCompat.setTint(drawable.mutate(), resolvedTextColor)
+    }
+    
+    contentView.findViewById<TextView>(R.id.tv_snackbar_title)?.apply {
+        if (title.isNotNullEmpty()) {
+            text = title
+            visibility = View.VISIBLE
+            setTextColor(resolvedTextColor)
+        } else {
+            visibility = View.GONE
+        }
+    }
+    
+    contentView.findViewById<TextView>(R.id.tv_snackbar_message)?.apply {
+        text = message
+        setTextColor(resolvedTextColor)
+    }
+
+    // Mengaplikasikan padding 5dp di sisi atas, bawah, kanan, dan kiri
+    val padding5dp = (5f * appContext.resources.displayMetrics.density).toInt()
+    contentView.setPadding(padding5dp, padding5dp, padding5dp, padding5dp)
+
+    val cornerRadiusPx = 28f * appContext.resources.displayMetrics.density
+    val backgroundColor = if (backgroundColorAttrName != null) {
+        appContext.getColorAttr(backgroundColorAttrName)
+    } else {
+        appContext.getColorAttr("colorSurfaceInverse")
+    }
+
+    contentView.background = MaterialShapeDrawable(
+        ShapeAppearanceModel.builder().setAllCornerSizes(cornerRadiusPx).build()
+    ).apply {
+        fillColor = ColorStateList.valueOf(backgroundColor)
+        elevation = 6f * appContext.resources.displayMetrics.density
+    }
+
+    val toast = Toast(appContext)
+    val yOffset = (48f * appContext.resources.displayMetrics.density).toInt()
+    toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, yOffset)
+    toast.duration = if (duration == Toast.LENGTH_SHORT) Toast.LENGTH_SHORT else Toast.LENGTH_LONG
+    
+    @Suppress("DEPRECATION")
+    toast.view = contentView
+
+    toast.show()
+}
+
+/**
+ * Shows a neutral Custom Toast.
+ */
+fun Context.toastDefault(message: Int, title: CharSequence = "") {
+    showCustomToast(this, title, getString(message), R.drawable.ic_about_24dp, null, null, Toast.LENGTH_LONG)
+}
+
+fun Context.toastDefault(message: CharSequence, title: CharSequence = "") {
+    showCustomToast(this, title, message, R.drawable.ic_about_24dp, null, null, Toast.LENGTH_LONG)
+}
+
+/**
+ * Shows a success Custom Toast.
+ */
+fun Context.toastSuccess(message: Int, title: CharSequence = "") {
+    showCustomToast(
+        this, title, getString(message), R.drawable.ic_check_circle,
+        "colorPrimary", "colorOnPrimary", Toast.LENGTH_LONG
+    )
+}
+
+fun Context.toastSuccess(message: CharSequence, title: CharSequence = "") {
+    showCustomToast(
+        this, title, message, R.drawable.ic_check_circle,
+        "colorPrimary", "colorOnPrimary", Toast.LENGTH_LONG
+    )
+}
+
+/**
+ * Shows an error Custom Toast.
+ */
+fun Context.toastError(message: Int, title: CharSequence = "") {
+    showCustomToast(
+        this, title, getString(message), R.drawable.ic_warning,
+        "colorError", "colorOnError", Toast.LENGTH_LONG
+    )
+}
+
+fun Context.toastError(message: CharSequence, title: CharSequence = "") {
+    showCustomToast(
+        this, title, message, R.drawable.ic_warning,
+        "colorError", "colorOnError", Toast.LENGTH_LONG
+    )
+}
+
+// ==============================================================================
+// UTILS & MISC
+// ==============================================================================
 
 const val THRESHOLD = 1000L
 const val DIVISOR = 1024.0
