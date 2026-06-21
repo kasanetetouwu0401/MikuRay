@@ -15,7 +15,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -87,48 +86,7 @@ object ForegroundActivityTracker : Application.ActivityLifecycleCallbacks {
     override fun onActivityDestroyed(activity: Activity) {}
 }
 
-/**
- * Keeps a weak reference to the topmost currently-shown Dialog window (BottomSheetDialog,
- * AlertDialog, etc).
- *
- * The custom Snackbar normally attaches itself to the Activity's decorView. That's fine
- * on its own, but a Dialog (and its blur overlay) lives in a separate Window stacked on
- * top of the Activity's Window, so a Snackbar hosted by the Activity will always render
- * *underneath* any currently-visible Dialog. By tracking the topmost Dialog window here,
- * the Snackbar can attach itself there instead and actually be visible.
- *
- * [register] is called once from [com.v2ray.ang.util.WindowBlurUtils.applyWindowBlur],
- * which is the common entry point every blurred Dialog/BottomSheet in the app goes
- * through, so no per-screen wiring is needed.
- */
-object DialogWindowTracker {
-
-    private var topWindow: WeakReference<Window>? = null
-
-    /** The topmost tracked Dialog window, or null if none is currently shown/attached. */
-    val currentDialogWindow: Window?
-        get() = topWindow?.get()?.takeIf { it.decorView.isAttachedToWindow }
-
-    fun register(window: Window) {
-        topWindow = WeakReference(window)
-        window.decorView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-            override fun onViewAttachedToWindow(v: View) {}
-            override fun onViewDetachedFromWindow(v: View) {
-                if (topWindow?.get() === window) {
-                    topWindow = null
-                }
-                window.decorView.removeOnAttachStateChangeListener(this)
-            }
-        })
-    }
-}
-
 private fun Context.findSnackbarParent(): View? {
-    // If a Dialog/BottomSheet is currently showing, it lives in its own Window stacked
-    // above the Activity's Window — attach there instead, or the Snackbar would render
-    // underneath it (and underneath its blur overlay) and look "ketutupan".
-    DialogWindowTracker.currentDialogWindow?.let { return it.decorView }
-
     val activity = this as? Activity ?: ForegroundActivityTracker.currentActivity ?: return null
     return activity.window?.decorView
 }
@@ -153,6 +111,14 @@ private fun rehostSnackbarOnNextActivityIfPaused(
     val callbacks = object : Application.ActivityLifecycleCallbacks {
         override fun onActivityPaused(activity: Activity) {
             if (activity !== hostActivity) return
+
+            // Only relocate the Snackbar if the Activity is actually closing for good.
+            // A plain onPause (opening a file picker, a system dialog, multitasking,
+            // etc.) is not "finish()" — the user will likely come right back to this
+            // same Activity, and we don't want the Snackbar to vanish then reappear on
+            // it again once it resumes.
+            if (!hostActivity.isFinishing) return
+
             app.unregisterActivityLifecycleCallbacks(this)
 
             if (!snackbar.isShownOrQueued) return
@@ -242,12 +208,11 @@ private fun showSnackbar(
     snackbarLayout.addView(contentView, 0)
 
     // The blur overlay (when enabled) is added as a sibling view inside the same
-    // parent/decorView, on top of everything else. Make sure the Snackbar itself stays
-    // above that overlay rather than rendering underneath it.
+    // parent/decorView. It's always created with elevation = 0f, so simply reordering
+    // the Snackbar to the front here is enough to keep it visually on top — no need to
+    // boost its elevation, which only adds an unwanted heavy shadow that can look like
+    // a blur effect even when the blur setting itself is off.
     (snackbarLayout.parent as? ViewGroup)?.bringChildToFront(snackbarLayout)
-    snackbarLayout.elevation = (snackbarLayout.elevation).coerceAtLeast(
-        24f * parent.context.resources.displayMetrics.density
-    )
 
     val layoutParams = snackbarLayout.layoutParams
     when (layoutParams) {
