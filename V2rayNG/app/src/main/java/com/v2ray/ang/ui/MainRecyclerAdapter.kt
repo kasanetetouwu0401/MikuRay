@@ -23,6 +23,7 @@ import com.v2ray.ang.helper.ItemTouchHelperViewHolder
 import com.v2ray.ang.viewmodel.MainViewModel
 import java.util.Collections
 import com.v2ray.ang.util.IndicatorStyle
+import com.v2ray.ang.util.GlareEffectController
 import com.v2ray.ang.AppConfig
 
 class MainRecyclerAdapter(
@@ -144,11 +145,14 @@ class MainRecyclerAdapter(
                 }.getOrDefault(IndicatorStyle.STYLE_0)
                 holder.itemMainBinding.layoutIndicator.setBackgroundResource(indicatorStyle.drawableRes)
                 holder.itemMainBinding.layoutCard.setCardBackgroundColor(Color.TRANSPARENT)
+                GlareEffectController.removeFrom(holder.itemMainBinding.layoutCard)
             } else {
                 holder.itemMainBinding.layoutIndicator.setBackgroundResource(0)
                 val typedValue = TypedValue()
                 context.theme.resolveAttribute(R.attr.colorCard, typedValue, true)
                 holder.itemMainBinding.layoutCard.setCardBackgroundColor(typedValue.data)
+                holder.itemMainBinding.layoutCard.tag = GlareEffectController.GLARE_TAG
+                GlareEffectController.applyToView(holder.itemMainBinding.layoutCard)
             }
 
             //subscription remarks

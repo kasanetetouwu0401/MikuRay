@@ -203,7 +203,6 @@ abstract class BaseActivity : AppCompatActivity() {
             setSupportActionBar(it)
             supportActionBar?.setDisplayHomeAsUpEnabled(showHomeAsUp)
             title?.let { t -> this.title = t }
-            GlareEffectController.applyToToolbarNavigationIcon(it)
         }
     }
 
@@ -229,7 +228,6 @@ abstract class BaseActivity : AppCompatActivity() {
             setSupportActionBar(it)
             supportActionBar?.setDisplayHomeAsUpEnabled(showHomeAsUp)
             title?.let { t -> supportActionBar?.title = t }
-            GlareEffectController.applyToToolbarNavigationIcon(it)
         }
     }
 
