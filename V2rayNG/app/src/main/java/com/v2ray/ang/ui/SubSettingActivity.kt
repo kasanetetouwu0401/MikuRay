@@ -24,10 +24,9 @@ import com.v2ray.ang.R
 import com.v2ray.ang.contracts.BaseAdapterListener
 import com.v2ray.ang.databinding.ActivitySubSettingBinding
 import com.v2ray.ang.databinding.ItemQrcodeBinding
-import com.v2ray.ang.extension.alertSuccess
-import com.v2ray.ang.extension.alertError
-import com.v2ray.ang.extension.toast
-import com.v2ray.ang.extension.toastSuccess
+import com.v2ray.ang.extension.snackbarSuccess
+import com.v2ray.ang.extension.snackbarError
+import com.v2ray.ang.extension.snackbarDefault
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
@@ -100,11 +99,11 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
                 delay(500L)
                 launch(Dispatchers.Main) {
                     if (result.successCount + result.failureCount + result.skipCount == 0) {
-                        toastSuccess(getString(R.string.title_update_subscription_no_subscription))
+                        snackbarSuccess(getString(R.string.title_update_subscription_no_subscription))
                     } else if (result.successCount > 0 && result.failureCount + result.skipCount == 0) {
-                        toastSuccess(getString(R.string.title_update_config_count, result.configCount))
+                        snackbarSuccess(getString(R.string.title_update_config_count, result.configCount))
                     } else {
-                        toastSuccess(
+                        snackbarSuccess(
                             getString(
                                 R.string.title_update_subscription_result,
                                 result.configCount, result.successCount, result.failureCount, result.skipCount
@@ -141,7 +140,7 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
                 }
                 R.id.share_clipboard -> {
                     Utils.setClipboard(this, url)
-                    alertSuccess(
+                    snackbarSuccess(
                         getString(R.string.menu_item_export_proxy_app),
                         title = getString(R.string.title_alerter_success)
                     )
@@ -149,7 +148,7 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
             }
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Share subscription failed", e)
-            alertError(
+            snackbarError(
                 getString(R.string.menu_item_export_proxy_app),
                 title = getString(R.string.title_alerter_error)
             )

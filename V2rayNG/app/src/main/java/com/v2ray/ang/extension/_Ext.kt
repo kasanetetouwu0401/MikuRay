@@ -17,11 +17,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.core.graphics.drawable.DrawableCompat
-import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
 import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.AngApplication
 import com.v2ray.ang.R
+import com.v2ray.ang.util.getColorAttr
 import java.io.Serializable
 import java.net.URI
 import java.util.Locale
@@ -52,8 +52,8 @@ private fun Context.findSnackbarParent(): View? {
  * @param title Optional title, shown bold above the message. Hidden entirely when blank.
  * @param message The message text to display.
  * @param iconRes Drawable resource ID for the leading icon.
- * @param backgroundColorAttr Theme color attribute for the Snackbar background, or null for default styling.
- * @param textColorAttr Theme color attribute for the Snackbar text/icon, or null for default styling.
+ * @param backgroundColorAttrName Theme color attribute name for the Snackbar background, or null for default styling.
+ * @param textColorAttrName Theme color attribute name for the Snackbar text/icon, or null for default styling.
  * @param duration Snackbar duration constant (e.g. Snackbar.LENGTH_SHORT).
  */
 private fun showSnackbar(
@@ -61,13 +61,13 @@ private fun showSnackbar(
     title: CharSequence,
     message: CharSequence,
     @DrawableRes iconRes: Int,
-    backgroundColorAttr: Int?,
-    textColorAttr: Int?,
+    backgroundColorAttrName: String?,
+    textColorAttrName: String?,
     duration: Int
 ) {
     if (Looper.myLooper() != Looper.getMainLooper()) {
         Handler(Looper.getMainLooper()).post {
-            showSnackbar(context, title, message, iconRes, backgroundColorAttr, textColorAttr, duration)
+            showSnackbar(context, title, message, iconRes, backgroundColorAttrName, textColorAttrName, duration)
         }
         return
     }
@@ -87,13 +87,13 @@ private fun showSnackbar(
     snackbarLayout.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
         ?.visibility = View.INVISIBLE
 
-    val contentView = LayoutInflater.from(context)
+    val contentView = LayoutInflater.from(parent.context)
         .inflate(R.layout.layout_snackbar_custom, snackbarLayout, false)
 
-    val resolvedTextColor = if (textColorAttr != null) {
-        MaterialColors.getColor(parent, textColorAttr)
+    val resolvedTextColor = if (textColorAttrName != null) {
+        parent.context.getColorAttr(textColorAttrName)
     } else {
-        MaterialColors.getColor(parent, com.google.android.material.R.attr.colorOnSurface)
+        parent.context.getColorAttr("colorOnSurface")
     }
 
     contentView.findViewById<ImageView>(R.id.iv_snackbar_icon)?.apply {
@@ -116,127 +116,93 @@ private fun showSnackbar(
 
     snackbarLayout.addView(contentView, 0)
 
-    if (backgroundColorAttr != null) {
-        snackbar.setBackgroundTint(MaterialColors.getColor(parent, backgroundColorAttr))
+    if (backgroundColorAttrName != null) {
+        snackbar.setBackgroundTint(parent.context.getColorAttr(backgroundColorAttrName))
     }
 
     snackbar.show()
 }
 
 /**
- * Shows a neutral toast message with the given resource ID.
+ * Shows a neutral Snackbar with the given resource ID, and an optional title.
  *
  * @param message The resource ID of the message to show.
+ * @param title Optional title shown bold above the message.
  */
-fun Context.toast(message: Int) {
-    showSnackbar(this, "", getString(message), R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_SHORT)
-}
-
-fun Context.alert(message: Int, title: CharSequence = "") {
+fun Context.snackbarDefault(message: Int, title: CharSequence = "") {
     showSnackbar(this, title, getString(message), R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_LONG)
 }
 
 /**
- * Shows a neutral toast message with the given text.
+ * Shows a neutral Snackbar with the given text, and an optional title.
  *
  * @param message The text of the message to show.
+ * @param title Optional title shown bold above the message.
  */
-fun Context.toast(message: CharSequence) {
-    showSnackbar(this, "", message, R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_SHORT)
-}
-
-fun Context.alert(message: CharSequence, title: CharSequence = "") {
+fun Context.snackbarDefault(message: CharSequence, title: CharSequence = "") {
     showSnackbar(this, title, message, R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_LONG)
 }
 
 /**
- * Shows a success toast message with the given resource ID.
+ * Shows a success Snackbar (colorPrimary background, colorOnPrimary text) with the
+ * given resource ID, and an optional title.
  *
  * @param message The resource ID of the message to show.
+ * @param title Optional title shown bold above the message.
  */
-fun Context.toastSuccess(message: Int) {
-    showSnackbar(
-        this, "", getString(message), R.drawable.ic_check_circle,
-        com.google.android.material.R.attr.colorPrimary,
-        com.google.android.material.R.attr.colorOnPrimary,
-        Snackbar.LENGTH_SHORT
-    )
-}
-
-fun Context.alertSuccess(message: Int, title: CharSequence = "") {
+fun Context.snackbarSuccess(message: Int, title: CharSequence = "") {
     showSnackbar(
         this, title, getString(message), R.drawable.ic_check_circle,
-        com.google.android.material.R.attr.colorPrimary,
-        com.google.android.material.R.attr.colorOnPrimary,
+        "colorPrimary",
+        "colorOnPrimary",
         Snackbar.LENGTH_LONG
     )
 }
 
 /**
- * Shows a success toast message with the given text.
+ * Shows a success Snackbar (colorPrimary background, colorOnPrimary text) with the
+ * given text, and an optional title.
  *
  * @param message The text of the message to show.
+ * @param title Optional title shown bold above the message.
  */
-fun Context.toastSuccess(message: CharSequence) {
-    showSnackbar(
-        this, "", message, R.drawable.ic_check_circle,
-        com.google.android.material.R.attr.colorPrimary,
-        com.google.android.material.R.attr.colorOnPrimary,
-        Snackbar.LENGTH_SHORT
-    )
-}
-
-fun Context.alertSuccess(message: CharSequence, title: CharSequence = "") {
+fun Context.snackbarSuccess(message: CharSequence, title: CharSequence = "") {
     showSnackbar(
         this, title, message, R.drawable.ic_check_circle,
-        com.google.android.material.R.attr.colorPrimary,
-        com.google.android.material.R.attr.colorOnPrimary,
+        "colorPrimary",
+        "colorOnPrimary",
         Snackbar.LENGTH_LONG
     )
 }
 
 /**
- * Shows an error toast message with the given resource ID.
+ * Shows an error Snackbar (colorError background, colorOnError text) with the
+ * given resource ID, and an optional title.
  *
  * @param message The resource ID of the message to show.
+ * @param title Optional title shown bold above the message.
  */
-fun Context.toastError(message: Int) {
-    showSnackbar(
-        this, "", getString(message), R.drawable.ic_warning,
-        com.google.android.material.R.attr.colorError,
-        com.google.android.material.R.attr.colorOnError,
-        Snackbar.LENGTH_SHORT
-    )
-}
-
-fun Context.alertError(message: Int, title: CharSequence = "") {
+fun Context.snackbarError(message: Int, title: CharSequence = "") {
     showSnackbar(
         this, title, getString(message), R.drawable.ic_warning,
-        com.google.android.material.R.attr.colorError,
-        com.google.android.material.R.attr.colorOnError,
+        "colorError",
+        "colorOnError",
         Snackbar.LENGTH_LONG
     )
 }
 
 /**
- * Shows an error toast message with the given text.
+ * Shows an error Snackbar (colorError background, colorOnError text) with the
+ * given text, and an optional title.
  *
  * @param message The text of the message to show.
+ * @param title Optional title shown bold above the message.
  */
-fun Context.toastError(message: CharSequence) {
-    showSnackbar(
-        this, "", message, R.drawable.ic_warning,
-        com.google.android.material.R.attr.colorError,
-        com.google.android.material.R.attr.colorOnError,
-        Snackbar.LENGTH_SHORT
-    )
-}
-
-fun Context.alertError(message: CharSequence, title: CharSequence = "") {
+fun Context.snackbarError(message: CharSequence, title: CharSequence = "") {
     showSnackbar(
         this, title, message, R.drawable.ic_warning,
-        com.google.android.material.R.attr.colorError,
-        com.google.android.material.R.attr.colorOnError,
+        "colorError",
+        "colorOnError",
         Snackbar.LENGTH_LONG
     )
 }

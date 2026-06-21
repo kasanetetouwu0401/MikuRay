@@ -20,9 +20,9 @@ import com.v2ray.ang.R
 import com.v2ray.ang.contracts.BaseAdapterListener
 import com.v2ray.ang.databinding.ActivityUserAssetBinding
 import com.v2ray.ang.dto.entities.AssetUrlItem
-import com.v2ray.ang.extension.toast
-import com.v2ray.ang.extension.alertError
-import com.v2ray.ang.extension.alertSuccess
+import com.v2ray.ang.extension.snackbarDefault
+import com.v2ray.ang.extension.snackbarError
+import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.ui.bottomsheet.AssetMenuBottomSheet
@@ -112,13 +112,13 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
 
                 val assetList = MmkvManager.decodeAssetUrls()
                 if (assetList.any { it.assetUrl.remarks == assetItem.remarks && it.guid != assetId }) {
-                    toast(R.string.msg_remark_is_duplicate)
+                    snackbarDefault(R.string.msg_remark_is_duplicate)
                 } else {
                     MmkvManager.encodeAsset(assetId, assetItem)
                     copyFile(uri)
                 }
             }.onFailure {
-                alertError(
+                snackbarError(
                     getString(R.string.toast_asset_copy_failed),
                     title = getString(R.string.title_alerter_error)
                 )
@@ -132,7 +132,7 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
         contentResolver.openInputStream(uri).use { inputStream ->
             targetFile.outputStream().use { fileOut ->
                 inputStream?.copyTo(fileOut)
-                alertSuccess(
+                snackbarSuccess(
                     getString(R.string.menu_item_add_file),
                     title = getString(R.string.title_alerter_success)
                 )
@@ -166,7 +166,7 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
     private fun importAsset(url: String?): Boolean {
         try {
             if (!Utils.isValidUrl(url)) {
-                toast(R.string.toast_invalid_url)
+                snackbarDefault(R.string.toast_invalid_url)
                 return false
             }
             startActivity(
@@ -183,7 +183,7 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
     private fun downloadGeoFiles() {
         refreshData()
         showLoading()
-        toast(R.string.msg_downloading_content)
+        snackbarDefault(R.string.msg_downloading_content)
 
         val proxyUsername = SettingsManager.getSocksUsername()
         val proxyPassword = SettingsManager.getSocksPassword()
@@ -192,12 +192,12 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
             val result = viewModel.downloadGeoFiles(extDir, httpPort, proxyUsername, proxyPassword)
             withContext(Dispatchers.Main) {
                 if (result.successCount > 0) {
-                    alertSuccess(
+                    snackbarSuccess(
                         getString(R.string.title_update_config_count, result.successCount),
                         title = getString(R.string.title_alerter_success)
                     )
                 } else {
-                    alertError(
+                    snackbarError(
                         getString(R.string.menu_item_download_file),
                         title = getString(R.string.title_alerter_error)
                     )

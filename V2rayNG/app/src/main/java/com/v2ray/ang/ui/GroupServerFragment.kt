@@ -17,8 +17,7 @@ import com.v2ray.ang.contracts.MainAdapterListener
 import com.v2ray.ang.databinding.FragmentGroupServerBinding
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.enums.EConfigType
-import com.v2ray.ang.extension.toast
-import com.v2ray.ang.extension.alert
+import com.v2ray.ang.extension.snackbarDefault
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
 import com.v2ray.ang.viewmodel.MainViewModel
@@ -100,7 +99,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
 
     private fun removeServer(guid: String, position: Int) {
         if (guid == MmkvManager.getSelectServer()) {
-            ownerActivity.alert(getString(R.string.toast_action_not_allowed), title = getString(R.string.title_alerter_info))
+            ownerActivity.snackbarDefault(getString(R.string.toast_action_not_allowed), title = getString(R.string.title_alerter_info))
             return
         }
 
@@ -167,7 +166,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
     fun scrollToSelectedServer() {
         val selectedGuid = MmkvManager.getSelectServer()
         if (selectedGuid.isNullOrEmpty()) {
-            ownerActivity.alert(getString(R.string.title_file_chooser), title = getString(R.string.title_alerter_info))
+            ownerActivity.snackbarDefault(getString(R.string.title_file_chooser), title = getString(R.string.title_alerter_info))
             return
         }
 
@@ -186,7 +185,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
                 recyclerView.smoothScrollToPosition(position)
             }
         } else {
-            ownerActivity.alert(getString(R.string.toast_server_not_found_in_group), title = getString(R.string.title_alerter_info))
+            ownerActivity.snackbarDefault(getString(R.string.toast_server_not_found_in_group), title = getString(R.string.title_alerter_info))
         }
     }
 }

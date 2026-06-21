@@ -16,8 +16,8 @@ import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ActivityBackupBinding
 import com.v2ray.ang.databinding.DialogWebdavBinding
 import com.v2ray.ang.dto.entities.WebDavConfig
-import com.v2ray.ang.extension.alertError
-import com.v2ray.ang.extension.alertSuccess
+import com.v2ray.ang.extension.snackbarError
+import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
 import com.v2ray.ang.handler.SettingsManager
@@ -75,7 +75,7 @@ class BackupActivity : HelperBaseActivity() {
                     )
                 )
             } else {
-                alertError(
+                snackbarError(
                     getString(R.string.title_configuration_share), 
                     title = getString(R.string.title_alerter_error)
                 )
@@ -232,19 +232,19 @@ class BackupActivity : HelperBaseActivity() {
                     }
                 }
                 if (restoreConfiguration(targetFile)) {
-                    alertSuccess(
+                    snackbarSuccess(
                         getString(R.string.title_configuration_restore), 
                         title = getString(R.string.title_alerter_success)
                     )
                 } else {
-                    alertError(
+                    snackbarError(
                         getString(R.string.title_configuration_restore), 
                         title = getString(R.string.title_alerter_error)
                     )
                 }
             } catch (e: Exception) {
                 LogUtil.e(AppConfig.TAG, "Error during file restore", e)
-                alertError(
+                snackbarError(
                     getString(R.string.title_configuration_restore), 
                     title = getString(R.string.title_alerter_error)
                 )
@@ -272,19 +272,19 @@ class BackupActivity : HelperBaseActivity() {
                         }
                         // Clean up cache file
                         File(ret.second).delete()
-                        alertSuccess(
+                        snackbarSuccess(
                             getString(R.string.title_configuration_backup), 
                             title = getString(R.string.title_alerter_success)
                         )
                     } else {
-                        alertError(
+                        snackbarError(
                             getString(R.string.title_configuration_backup), 
                             title = getString(R.string.title_alerter_error)
                         )
                     }
                 } catch (e: Exception) {
                     LogUtil.e(AppConfig.TAG, "Failed to backup configuration", e)
-                    alertError(
+                    snackbarError(
                         getString(R.string.title_configuration_backup), 
                         title = getString(R.string.title_alerter_error)
                     )
@@ -300,7 +300,7 @@ class BackupActivity : HelperBaseActivity() {
     private fun backupViaWebDav() {
         val saved = MmkvManager.decodeWebDavConfig()
         if (saved == null || saved.baseUrl.isEmpty()) {
-            alertError(
+            snackbarError(
                 getString(R.string.title_webdav_config_setting_unknown), 
                 title = getString(R.string.title_alerter_error)
             )
@@ -315,7 +315,7 @@ class BackupActivity : HelperBaseActivity() {
                 val ret = backupConfigurationToCache()
                 if (!ret.first) {
                     withContext(Dispatchers.Main) {
-                        alertError(
+                        snackbarError(
                             getString(R.string.title_configuration_backup), 
                             title = getString(R.string.title_alerter_error)
                         )
@@ -335,12 +335,12 @@ class BackupActivity : HelperBaseActivity() {
 
                 withContext(Dispatchers.Main) {
                     if (ok) {
-                        alertSuccess(
+                        snackbarSuccess(
                             getString(R.string.title_configuration_backup), 
                             title = getString(R.string.title_alerter_success)
                         )
                     } else {
-                        alertError(
+                        snackbarError(
                             getString(R.string.title_configuration_backup), 
                             title = getString(R.string.title_alerter_error)
                         )
@@ -349,7 +349,7 @@ class BackupActivity : HelperBaseActivity() {
             } catch (e: Exception) {
                 LogUtil.e(AppConfig.TAG, "WebDAV backup error", e)
                 withContext(Dispatchers.Main) {
-                    alertError(
+                    snackbarError(
                         getString(R.string.title_configuration_backup), 
                         title = getString(R.string.title_alerter_error)
                     )
@@ -369,7 +369,7 @@ class BackupActivity : HelperBaseActivity() {
     private fun restoreViaWebDav() {
         val saved = MmkvManager.decodeWebDavConfig()
         if (saved == null || saved.baseUrl.isEmpty()) {
-            alertError(
+            snackbarError(
                 getString(R.string.title_webdav_config_setting_unknown), 
                 title = getString(R.string.title_alerter_error)
             )
@@ -386,7 +386,7 @@ class BackupActivity : HelperBaseActivity() {
                 val ok = WebDavManager.downloadFile(WEBDAV_BACKUP_FILE_NAME, target)
                 if (!ok) {
                     withContext(Dispatchers.Main) {
-                        alertError(
+                        snackbarError(
                             getString(R.string.title_configuration_restore), 
                             title = getString(R.string.title_alerter_error)
                         )
@@ -397,12 +397,12 @@ class BackupActivity : HelperBaseActivity() {
                 val restored = restoreConfiguration(target)
                 withContext(Dispatchers.Main) {
                     if (restored) {
-                        alertSuccess(
+                        snackbarSuccess(
                             getString(R.string.title_configuration_restore), 
                             title = getString(R.string.title_alerter_success)
                         )
                     } else {
-                        alertError(
+                        snackbarError(
                             getString(R.string.title_configuration_restore), 
                             title = getString(R.string.title_alerter_error)
                         )
@@ -411,7 +411,7 @@ class BackupActivity : HelperBaseActivity() {
             } catch (e: Exception) {
                 LogUtil.e(AppConfig.TAG, "WebDAV download error", e)
                 withContext(Dispatchers.Main) { 
-                    alertError(
+                    snackbarError(
                         getString(R.string.title_configuration_restore), 
                         title = getString(R.string.title_alerter_error)
                     ) 
@@ -449,7 +449,7 @@ class BackupActivity : HelperBaseActivity() {
                 val cfg = WebDavConfig(baseUrl = url, username = user, password = pass, remoteBasePath = remotePath)
                 MmkvManager.encodeWebDavConfig(cfg)
                 
-                alertSuccess(
+                snackbarSuccess(
                     getString(R.string.title_webdav_config_setting), 
                     title = getString(R.string.title_alerter_success)
                 )

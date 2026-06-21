@@ -10,8 +10,8 @@ import com.v2ray.ang.BuildConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ActivityCheckUpdateBinding
 import com.v2ray.ang.dto.CheckUpdateResult
-import com.v2ray.ang.extension.alertError
-import com.v2ray.ang.extension.alertSuccess
+import com.v2ray.ang.extension.snackbarError
+import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.UpdateCheckerManager
 import com.v2ray.ang.core.CoreNativeManager
@@ -56,14 +56,14 @@ class CheckUpdateActivity : BaseActivity() {
                 if (result.hasUpdate) {
                     showUpdateDialog(result)
                 } else {
-                    alertSuccess(
+                    snackbarSuccess(
                         getString(R.string.update_already_latest_version),
                         title = getString(R.string.title_alerter_success)
                     )
                 }
             } catch (e: Exception) {
                 LogUtil.e(AppConfig.TAG, "Failed to check for updates: ${e.message}")
-                alertError(
+                snackbarError(
                     e.message ?: getString(R.string.update_check_for_update),
                     title = getString(R.string.title_alerter_error)
                 )

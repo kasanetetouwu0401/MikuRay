@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.v2ray.ang.R
 import com.v2ray.ang.enums.PermissionType
-import com.v2ray.ang.extension.toast
+import com.v2ray.ang.extension.snackbarDefault
 
 /**
  * Helper for requesting permissions.
@@ -37,7 +37,7 @@ class PermissionHelper(private val activity: AppCompatActivity) {
                     onGranted()
                 } else {
                     val message = "${activity.getString(R.string.toast_permission_denied)}  ${permissionType.getLabel()}"
-                    activity.toast(message)
+                    activity.snackbarDefault(message)
                 }
             }
             permissionLauncher.launch(permission)

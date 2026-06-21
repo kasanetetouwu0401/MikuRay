@@ -25,9 +25,8 @@ import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.enums.NetworkType
 import com.v2ray.ang.extension.isNotNullEmpty
 import com.v2ray.ang.extension.nullIfBlank
-import com.v2ray.ang.extension.alertError
-import com.v2ray.ang.extension.alertSuccess
-import com.v2ray.ang.extension.toastSuccess
+import com.v2ray.ang.extension.snackbarError
+import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.CertificateFingerprintManager
 import com.v2ray.ang.handler.MmkvManager
@@ -432,14 +431,14 @@ class ServerActivity : BaseActivity() {
 
     private fun saveServer(): Boolean {
         if (TextUtils.isEmpty(et_remarks.text.toString())) {
-            alertError(
+            snackbarError(
                 getString(R.string.server_lab_remarks), 
                 title = getString(R.string.title_alerter_error)
             )
             return false
         }
         if (TextUtils.isEmpty(et_address.text.toString())) {
-            alertError(
+            snackbarError(
                 getString(R.string.server_lab_address), 
                 title = getString(R.string.title_alerter_error)
             )
@@ -447,7 +446,7 @@ class ServerActivity : BaseActivity() {
         }
         if (createConfigType != EConfigType.HYSTERIA2) {
             if (Utils.parseInt(et_port.text.toString()) <= 0) {
-                alertError(
+                snackbarError(
                     getString(R.string.server_lab_port), 
                     title = getString(R.string.title_alerter_error)
                 )
@@ -464,12 +463,12 @@ class ServerActivity : BaseActivity() {
                 || config.configType == EConfigType.SHADOWSOCKS
                 || config.configType == EConfigType.HYSTERIA2
             ) {
-                alertError(
+                snackbarError(
                     getString(R.string.server_lab_id3), 
                     title = getString(R.string.title_alerter_error)
                 )
             } else {
-                alertError(
+                snackbarError(
                     getString(R.string.server_lab_id), 
                     title = getString(R.string.title_alerter_error)
                 )
@@ -479,7 +478,7 @@ class ServerActivity : BaseActivity() {
         sp_stream_security?.let {
             val secPos = Utils.arrayFind(streamSecuritys, it.text.toString())
             if (config.configType == EConfigType.TROJAN && (secPos < 0 || TextUtils.isEmpty(streamSecuritys[secPos]))) {
-                alertError(
+                snackbarError(
                     getString(R.string.server_lab_stream_security), 
                     title = getString(R.string.title_alerter_error)
                 )
@@ -488,7 +487,7 @@ class ServerActivity : BaseActivity() {
         }
         if (et_extra?.text?.toString().isNotNullEmpty()) {
             if (JsonUtil.parseString(et_extra?.text?.toString()) == null) {
-                alertError(
+                snackbarError(
                     getString(R.string.server_lab_xhttp_extra), 
                     title = getString(R.string.title_alerter_error)
                 )
@@ -498,7 +497,7 @@ class ServerActivity : BaseActivity() {
 
         if (et_fm?.text?.toString().isNotNullEmpty()) {
             if (JsonUtil.parseString(et_fm?.text?.toString()) == null) {
-                alertError(
+                snackbarError(
                     getString(R.string.server_lab_final_mask), 
                     title = getString(R.string.title_alerter_error)
                 )
@@ -516,7 +515,7 @@ class ServerActivity : BaseActivity() {
             config.subscriptionId = subscriptionId.orEmpty()
         }
         MmkvManager.encodeServerConfig(editGuid, config)
-        toastSuccess(R.string.toast_success)
+        snackbarSuccess(R.string.toast_success)
         finish()
         return true
     }
@@ -644,13 +643,13 @@ class ServerActivity : BaseActivity() {
                     CertificateFingerprintManager.fetchForManualFill(config)
                 }
                 if (sha256.isNullOrBlank()) {
-                    alertError(
+                    snackbarError(
                         getString(R.string.toast_fetch_cert_sha256_failed),
                         title = getString(R.string.title_alerter_error)
                     )
                 } else {
                     et_pinned_ca256?.text = Utils.getEditable(sha256)
-                    alertSuccess(
+                    snackbarSuccess(
                         getString(R.string.toast_fetch_cert_sha256_success),
                         title = getString(R.string.title_alerter_success)
                     )
@@ -663,7 +662,7 @@ class ServerActivity : BaseActivity() {
 
     private fun buildCurrentProfileForCertificateFetch(): ProfileItem? {
         if (TextUtils.isEmpty(et_address.text.toString())) {
-            alertError(
+            snackbarError(
                 getString(R.string.server_lab_address),
                 title = getString(R.string.title_alerter_error)
             )
@@ -672,7 +671,7 @@ class ServerActivity : BaseActivity() {
 
         val configType = MmkvManager.decodeServerConfig(editGuid)?.configType ?: createConfigType
         if (configType != EConfigType.HYSTERIA2 && Utils.parseInt(et_port.text.toString()) <= 0) {
-            alertError(
+            snackbarError(
                 getString(R.string.server_lab_port),
                 title = getString(R.string.title_alerter_error)
             )
@@ -711,7 +710,7 @@ class ServerActivity : BaseActivity() {
                     finish()
                 }
             } else {
-                alertError(
+                snackbarError(
                     getString(R.string.toast_action_not_allowed), 
                     title = getString(R.string.title_alerter_error)
                 )

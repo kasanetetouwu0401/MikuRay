@@ -19,8 +19,8 @@ import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.contracts.BaseAdapterListener
 import com.v2ray.ang.databinding.ActivityRoutingSettingBinding
-import com.v2ray.ang.extension.alertError
-import com.v2ray.ang.extension.alertSuccess
+import com.v2ray.ang.extension.snackbarError
+import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
@@ -111,7 +111,7 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
                             SettingsManager.resetRoutingRulesetsFromPresets(this@RoutingSettingActivity, i)
                             launch(Dispatchers.Main) {
                                 refreshData()
-                                alertSuccess(
+                                snackbarSuccess(
                                     getString(R.string.routing_settings_import_predefined_rulesets),
                                     title = getString(R.string.title_alerter_success)
                                 )
@@ -135,7 +135,7 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
                     Utils.getClipboard(this)
                 } catch (e: Exception) {
                     LogUtil.e(AppConfig.TAG, "Failed to get clipboard content", e)
-                    alertError(
+                    snackbarError(
                         getString(R.string.routing_settings_import_rulesets_from_clipboard),
                         title = getString(R.string.title_alerter_error)
                     )
@@ -146,12 +146,12 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
                     withContext(Dispatchers.Main) {
                         if (result) {
                             refreshData()
-                            alertSuccess(
+                            snackbarSuccess(
                                 getString(R.string.routing_settings_import_rulesets_from_clipboard),
                                 title = getString(R.string.title_alerter_success)
                             )
                         } else {
-                            alertError(
+                            snackbarError(
                                 getString(R.string.routing_settings_import_rulesets_from_clipboard),
                                 title = getString(R.string.title_alerter_error)
                             )
@@ -177,13 +177,13 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
     private fun export2Clipboard() {
         val rulesetList = MmkvManager.decodeRoutingRulesets()
         if (rulesetList.isNullOrEmpty()) {
-            alertError(
+            snackbarError(
                 getString(R.string.routing_settings_export_rulesets_to_clipboard),
                 title = getString(R.string.title_alerter_error)
             )
         } else {
             Utils.setClipboard(this, JsonUtil.toJson(rulesetList))
-            alertSuccess(
+            snackbarSuccess(
                 getString(R.string.routing_settings_export_rulesets_to_clipboard),
                 title = getString(R.string.title_alerter_success)
             )
@@ -199,12 +199,12 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
                     withContext(Dispatchers.Main) {
                         if (result) {
                             refreshData()
-                            alertSuccess(
+                            snackbarSuccess(
                                 getString(R.string.routing_settings_import_rulesets_from_qrcode),
                                 title = getString(R.string.title_alerter_success)
                             )
                         } else {
-                            alertError(
+                            snackbarError(
                                 getString(R.string.routing_settings_import_rulesets_from_qrcode),
                                 title = getString(R.string.title_alerter_error)
                             )

@@ -14,8 +14,8 @@ import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ActivityRoutingEditBinding
 import com.v2ray.ang.dto.entities.RulesetItem
 import com.v2ray.ang.extension.nullIfBlank
-import com.v2ray.ang.extension.alertError
-import com.v2ray.ang.extension.toastSuccess
+import com.v2ray.ang.extension.snackbarError
+import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.util.Utils
 import kotlinx.coroutines.Dispatchers
@@ -138,7 +138,7 @@ class RoutingEditActivity : BaseActivity() {
         }
 
         if (rulesetItem.remarks.isNullOrEmpty()) {
-            alertError(
+            snackbarError(
                 getString(R.string.sub_setting_remarks),
                 title = getString(R.string.title_alerter_error)
             )
@@ -146,7 +146,7 @@ class RoutingEditActivity : BaseActivity() {
         }
 
         SettingsManager.saveRoutingRuleset(position, rulesetItem)
-        toastSuccess(R.string.toast_success)
+        snackbarSuccess(R.string.toast_success)
         finish()
         return true
     }

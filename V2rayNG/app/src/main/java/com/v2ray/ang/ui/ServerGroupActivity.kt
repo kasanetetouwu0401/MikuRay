@@ -12,9 +12,9 @@ import com.v2ray.ang.databinding.ActivityServerGroupBinding
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.extension.isNotNullEmpty
-import com.v2ray.ang.extension.toast
-import com.v2ray.ang.extension.alertError
-import com.v2ray.ang.extension.toastSuccess
+import com.v2ray.ang.extension.snackbarDefault
+import com.v2ray.ang.extension.snackbarError
+import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.util.SoftInputAssist
@@ -111,7 +111,7 @@ class ServerGroupActivity : BaseActivity() {
      */
     private fun saveServer(): Boolean {
         if (TextUtils.isEmpty(binding.etRemarks.text.toString())) {
-            alertError(
+            snackbarError(
                 getString(R.string.server_lab_remarks),
                 title = getString(R.string.title_alerter_error)
             )
@@ -137,7 +137,7 @@ class ServerGroupActivity : BaseActivity() {
         config.description = "$selectedTypeStr - $selectedSubStr - ${config.policyGroupFilter}"
 
         MmkvManager.encodeServerConfig(editGuid, config)
-        toastSuccess(R.string.toast_success)
+        snackbarSuccess(R.string.toast_success)
         finish()
         return true
     }

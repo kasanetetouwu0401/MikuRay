@@ -17,12 +17,10 @@ import com.v2ray.ang.contracts.ServiceControl
 import com.v2ray.ang.dto.OutboundTrafficStat
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.enums.EConfigType
-import com.v2ray.ang.extension.alert
-import com.v2ray.ang.extension.alertError
-import com.v2ray.ang.extension.alertSuccess
+import com.v2ray.ang.extension.snackbarDefault
+import com.v2ray.ang.extension.snackbarError
+import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.extension.isComplexType
-import com.v2ray.ang.extension.toast
-import com.v2ray.ang.extension.toastError
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.NotificationManager
 import com.v2ray.ang.handler.SettingsManager
@@ -66,21 +64,21 @@ object CoreServiceManager {
     private fun showFeedback(context: Context, message: String, type: Int = 0) {
         if (context is Activity) {
             when (type) {
-                1 -> context.alertSuccess(
+                1 -> context.snackbarSuccess(
                     message, 
                     title = context.getString(R.string.title_alerter_success)
                 )
-                2 -> context.alertError(
+                2 -> context.snackbarError(
                     message, 
                     title = context.getString(R.string.title_alerter_error)
                 )
-                else -> context.alert(
+                else -> context.snackbarDefault(
                     message, 
                     title = context.getString(R.string.title_alerter_info)
                 )
             }
         } else {
-            context.toast(message)
+            context.snackbarDefault(message)
         }
     }
 
@@ -186,7 +184,7 @@ object CoreServiceManager {
 //        if (!result.status) error(result.errorMessage.ifBlank { "Failed to get V2Ray config" })
 
         if (config.insecure == true) {
-            context.toastError(
+            context.snackbarError(
                 context.getString(R.string.toast_allow_insecure_deprecated)
             )
         }

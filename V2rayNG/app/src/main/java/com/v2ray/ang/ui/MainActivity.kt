@@ -30,12 +30,9 @@ import com.v2ray.ang.databinding.ActivityMainBinding
 import com.v2ray.ang.databinding.ItemQrcodeBinding
 import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.enums.PermissionType
-import com.v2ray.ang.extension.alert
-import com.v2ray.ang.extension.alertError
-import com.v2ray.ang.extension.alertSuccess
-import com.v2ray.ang.extension.toast
-import com.v2ray.ang.extension.toastSuccess
-import com.v2ray.ang.extension.toastError
+import com.v2ray.ang.extension.snackbarDefault
+import com.v2ray.ang.extension.snackbarError
+import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
@@ -338,7 +335,7 @@ class MainActivity : HelperBaseActivity(),
         when (viewId) {
             R.id.export_all -> exportAll()
             R.id.real_ping_all -> {
-                alert(getString(R.string.connection_test_testing_count, mainViewModel.serversCache.count()), title = getString(R.string.title_real_ping_all_server))
+                snackbarDefault(getString(R.string.connection_test_testing_count, mainViewModel.serversCache.count()), title = getString(R.string.title_real_ping_all_server))
                 mainViewModel.testAllRealPing()
             }
             R.id.service_restart -> restartV2Ray()
@@ -413,9 +410,9 @@ class MainActivity : HelperBaseActivity(),
         
         mainViewModel.alertAction.observe(this) { (isSuccess, message) ->
             if (isSuccess) {
-                alertSuccess(message, title = getString(R.string.title_alerter_success))
+                snackbarSuccess(message, title = getString(R.string.title_alerter_success))
             } else {
-                alertError(message, title = getString(R.string.title_alerter_error))
+                snackbarError(message, title = getString(R.string.title_alerter_error))
             }
         }
 
@@ -560,7 +557,7 @@ class MainActivity : HelperBaseActivity(),
 
     private fun startV2Ray() {
         if (MmkvManager.getSelectServer().isNullOrEmpty()) {
-            alertError(getString(R.string.title_file_chooser), title = getString(R.string.title_alerter_error)) 
+            snackbarError(getString(R.string.title_file_chooser), title = getString(R.string.title_alerter_error)) 
             applyRunningState(isLoading = false, isRunning = false) 
             return
         }
@@ -676,13 +673,13 @@ class MainActivity : HelperBaseActivity(),
 
                 val text = QRCodeDecoder.syncDecodeQRCode(bitmap)
                 if (text.isNullOrEmpty()) {
-                    toast(R.string.toast_decoding_failed)
+                    snackbarDefault(R.string.toast_decoding_failed)
                 } else {
                     importBatchConfig(text)
                 }
             } catch (e: Exception) {
                 LogUtil.e(AppConfig.TAG, "Failed to decode QR code from file", e)
-                toast(R.string.toast_decoding_failed)
+                snackbarDefault(R.string.toast_decoding_failed)
             }
         }
     }
@@ -708,18 +705,18 @@ class MainActivity : HelperBaseActivity(),
                 withContext(Dispatchers.Main) {
                     when {
                         count > 0 -> {
-                            alertSuccess(getString(R.string.title_import_config_count, count), title = getString(R.string.title_alerter_success))
+                            snackbarSuccess(getString(R.string.title_import_config_count, count), title = getString(R.string.title_alerter_success))
                             mainViewModel.reloadServerList()
                             refreshGroupTabTitles()
                         }
                         countSub > 0 -> setupGroupTab()
-                        else -> alertError(getString(R.string.import_configuration), title = getString(R.string.title_alerter_error))
+                        else -> snackbarError(getString(R.string.import_configuration), title = getString(R.string.title_alerter_error))
                     }
                     hideLoading()
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    alertError(getString(R.string.import_configuration), title = getString(R.string.title_alerter_error))
+                    snackbarError(getString(R.string.import_configuration), title = getString(R.string.title_alerter_error))
                     hideLoading()
                 }
                 LogUtil.e(AppConfig.TAG, "Failed to import batch config", e)
@@ -745,13 +742,13 @@ class MainActivity : HelperBaseActivity(),
             withContext(Dispatchers.Main) {
                 when {
                     result.successCount + result.failureCount + result.skipCount == 0 -> {
-                        toast(getString(R.string.title_update_subscription_no_subscription))
+                        snackbarDefault(getString(R.string.title_update_subscription_no_subscription))
                     }
                     result.successCount > 0 && result.failureCount + result.skipCount == 0 -> {
-                        toastSuccess(getString(R.string.title_update_config_count, result.configCount))
+                        snackbarSuccess(getString(R.string.title_update_config_count, result.configCount))
                     }
                     else -> {
-                        toast(
+                        snackbarDefault(
                             getString(
                                 R.string.title_update_subscription_result,
                                 result.configCount, result.successCount, result.failureCount, result.skipCount
@@ -777,8 +774,8 @@ class MainActivity : HelperBaseActivity(),
         lifecycleScope.launch(Dispatchers.IO) {
             val ret = mainViewModel.exportAllServer()
             withContext(Dispatchers.Main) {
-                if (ret > 0) alertSuccess(getString(R.string.title_export_config_count, ret), title = getString(R.string.title_alerter_success))
-                else alertError(getString(R.string.action_export), title = getString(R.string.title_alerter_error))
+                if (ret > 0) snackbarSuccess(getString(R.string.title_export_config_count, ret), title = getString(R.string.title_alerter_success))
+                else snackbarError(getString(R.string.action_export), title = getString(R.string.title_alerter_error))
                 hideLoading()
             }
         }
@@ -792,7 +789,7 @@ class MainActivity : HelperBaseActivity(),
                 withContext(Dispatchers.Main) {
                     mainViewModel.reloadServerList()
                     refreshGroupTabTitles()
-                    alertSuccess(getString(R.string.title_del_config_count, ret), title = getString(R.string.title_alerter_success))
+                    snackbarSuccess(getString(R.string.title_del_config_count, ret), title = getString(R.string.title_alerter_success))
                     hideLoading()
                 }
             }
@@ -807,7 +804,7 @@ class MainActivity : HelperBaseActivity(),
                 withContext(Dispatchers.Main) {
                     mainViewModel.reloadServerList()
                     refreshGroupTabTitles()
-                    alertSuccess(getString(R.string.title_del_duplicate_config_count, ret), title = getString(R.string.title_alerter_success))
+                    snackbarSuccess(getString(R.string.title_del_duplicate_config_count, ret), title = getString(R.string.title_alerter_success))
                     hideLoading()
                 }
             }
@@ -822,7 +819,7 @@ class MainActivity : HelperBaseActivity(),
                 withContext(Dispatchers.Main) {
                     mainViewModel.reloadServerList()
                     refreshGroupTabTitles()
-                    alertSuccess(getString(R.string.title_del_config_count, ret), title = getString(R.string.title_alerter_success))
+                    snackbarSuccess(getString(R.string.title_del_config_count, ret), title = getString(R.string.title_alerter_success))
                     hideLoading()
                 }
             }
@@ -848,13 +845,13 @@ class MainActivity : HelperBaseActivity(),
     private fun locateSelectedServer() {
         val targetSubscriptionId = mainViewModel.findSubscriptionIdBySelect()
         if (targetSubscriptionId.isNullOrEmpty()) {
-            alert(getString(R.string.title_file_chooser), title = getString(R.string.title_alerter_info))
+            snackbarDefault(getString(R.string.title_file_chooser), title = getString(R.string.title_alerter_info))
             return
         }
 
         val targetGroupIndex = groupPagerAdapter.groups.indexOfFirst { it.id == targetSubscriptionId }
             if (targetGroupIndex < 0) {
-            alert(getString(R.string.toast_server_not_found_in_group), title = getString(R.string.title_alerter_info))
+            snackbarDefault(getString(R.string.toast_server_not_found_in_group), title = getString(R.string.title_alerter_info))
             return
         }
 
@@ -873,7 +870,7 @@ class MainActivity : HelperBaseActivity(),
         if (fragment?.isAdded == true && fragment.view != null) {
             fragment.scrollToSelectedServer()
         } else {
-            alert(getString(R.string.toast_fragment_not_available), title = getString(R.string.title_alerter_info))
+            snackbarDefault(getString(R.string.toast_fragment_not_available), title = getString(R.string.title_alerter_info))
         }
     }
 
@@ -895,17 +892,17 @@ class MainActivity : HelperBaseActivity(),
             }
             R.id.share_clipboard -> {
                 if (AngConfigManager.share2Clipboard(this, guid) == 0) {
-                    alertSuccess(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_success))
+                    snackbarSuccess(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_success))
                 } else {
-                    alertError(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_error))
+                    snackbarError(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_error))
                 }
             }
             R.id.share_full_clipboard -> {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val result = AngConfigManager.shareFullContent2Clipboard(this@MainActivity, guid)
                     withContext(Dispatchers.Main) {
-                        if (result == 0) alertSuccess(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_success))
-                        else alertError(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_error))
+                        if (result == 0) snackbarSuccess(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_success))
+                        else snackbarError(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_error))
                     }
                 }
             }

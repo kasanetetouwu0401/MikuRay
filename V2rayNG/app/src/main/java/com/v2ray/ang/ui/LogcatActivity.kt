@@ -19,8 +19,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ActivityLogcatBinding
-import com.v2ray.ang.extension.toast
-import com.v2ray.ang.extension.alertSuccess
+import com.v2ray.ang.extension.snackbarDefault
+import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.viewmodel.LogcatViewModel
 import kotlinx.coroutines.Dispatchers
@@ -48,7 +48,7 @@ class LogcatActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
 
         binding.refreshLayout.setOnRefreshListener(this)
 
-        toast(getString(R.string.pull_down_to_refresh))
+        snackbarDefault(getString(R.string.pull_down_to_refresh))
     }
 
     private fun onLogLongClick(log: String): Boolean {
@@ -80,7 +80,7 @@ class LogcatActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
                 uri to logFile.name
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    toast(e.localizedMessage ?: e.toString())
+                    snackbarDefault(e.localizedMessage ?: e.toString())
                 }
                 return@launch
             }
@@ -134,7 +134,7 @@ class LogcatActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
         R.id.copy_all -> {
             val all = viewModel.getAll().joinToString("\n")
             Utils.setClipboard(this, all)
-            alertSuccess(
+            snackbarSuccess(
                 getString(R.string.logcat_copy),
                 title = getString(R.string.title_alerter_success)
             )

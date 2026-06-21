@@ -16,9 +16,8 @@ import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ActivityBypassListBinding
 import com.v2ray.ang.dto.AppInfo
 import com.v2ray.ang.dto.UrlContentRequest
-import com.v2ray.ang.extension.alert
-import com.v2ray.ang.extension.toast
-import com.v2ray.ang.extension.alertSuccess
+import com.v2ray.ang.extension.snackbarDefault
+import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.extension.v2RayApplication
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
@@ -117,7 +116,7 @@ class PerAppProxyActivity : BaseActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_tips -> {
-            alert(
+            snackbarDefault(
                 getString(R.string.summary_pref_per_app_proxy),
                 title = getString(R.string.title_alerter_info)
             )
@@ -167,7 +166,7 @@ class PerAppProxyActivity : BaseActivity() {
     }
 
     private fun selectProxyAppAuto() {
-        toast(R.string.msg_downloading_content)
+        snackbarDefault(R.string.msg_downloading_content)
         showLoading()
 
         val url = AppConfig.ANDROID_PACKAGE_NAME_LIST_URL
@@ -195,7 +194,7 @@ class PerAppProxyActivity : BaseActivity() {
             launch(Dispatchers.Main) {
                 //LogUtil.i(AppConfig.TAG, content)
                 selectProxyApp(content, true)
-                alertSuccess(
+                snackbarSuccess(
                     getString(R.string.toast_success),
                     title = getString(R.string.title_alerter_success)
                 )
@@ -208,7 +207,7 @@ class PerAppProxyActivity : BaseActivity() {
         val content = Utils.getClipboard(applicationContext)
         if (!content.isNullOrEmpty()) {
             selectProxyApp(content, false)
-            alertSuccess(
+            snackbarSuccess(
                 getString(R.string.menu_item_import_proxy_app),
                 title = getString(R.string.title_alerter_success)
             )
@@ -221,7 +220,7 @@ class PerAppProxyActivity : BaseActivity() {
             lst += System.lineSeparator() + pkg
         }
         Utils.setClipboard(applicationContext, lst)
-        alertSuccess(
+        snackbarSuccess(
             getString(R.string.menu_item_export_proxy_app),
             title = getString(R.string.title_alerter_success)
         )

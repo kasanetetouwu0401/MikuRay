@@ -7,8 +7,8 @@ import androidx.lifecycle.lifecycleScope
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ActivityLogcatBinding
-import com.v2ray.ang.extension.toast
-import com.v2ray.ang.extension.toastError
+import com.v2ray.ang.extension.snackbarDefault
+import com.v2ray.ang.extension.snackbarError
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.util.LogUtil
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +46,7 @@ class UrlSchemeActivity : BaseActivity() {
                         }
 
                         else -> {
-                            toastError(R.string.toast_failure)
+                            snackbarError(R.string.toast_failure)
                         }
                     }
                 }
@@ -76,9 +76,9 @@ class UrlSchemeActivity : BaseActivity() {
                 val (count, countSub) = AngConfigManager.importBatchConfig(decodedUrl, "", false)
                 withContext(Dispatchers.Main) {
                     if (count + countSub > 0) {
-                        toast(R.string.import_subscription_success)
+                        snackbarDefault(R.string.import_subscription_success)
                     } else {
-                        toast(R.string.import_subscription_failure)
+                        snackbarDefault(R.string.import_subscription_failure)
                     }
                 }
             }
