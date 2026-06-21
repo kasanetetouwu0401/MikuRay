@@ -669,7 +669,7 @@
     <string name="particles_disable_title">Отключить анимацию частиц</string>
     <string name="particles_disable_summary">Скрыть эффект частиц на нижней панели</string>
 
-    <!-- Alerter notification titles -->
+    <!-- Snackbar notification titles -->
     <string name="title_alerter_info">Информация</string>
     <string name="title_alerter_success">Успешно</string>
     <string name="title_alerter_error">Ошибка</string>

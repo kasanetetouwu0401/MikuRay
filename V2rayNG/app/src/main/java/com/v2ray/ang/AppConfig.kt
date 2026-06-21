@@ -110,7 +110,6 @@ object AppConfig {
     const val PREF_BLUR_BOTTOM_ROUNDS = "pref_blur_bottom_rounds"
     const val DEFAULT_BLUR_BOTTOM_RADIUS = 20
     const val DEFAULT_BLUR_BOTTOM_ROUNDS = 3
-    const val PREF_GLARE_EFFECT_ENABLED = "pref_glare_effect_enabled"
     const val PREF_ICON_SHAPE = "pref_icon_shape"
     const val PREF_ICON_SHAPE_DEFAULT = "uwu_shape_cookie"
     const val PREF_INDICATOR_STYLE = "pref_indicator_style"

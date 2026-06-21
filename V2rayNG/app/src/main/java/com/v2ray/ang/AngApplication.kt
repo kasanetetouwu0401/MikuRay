@@ -6,6 +6,7 @@ import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.tencent.mmkv.MMKV
 import com.v2ray.ang.AppConfig.ANG_PACKAGE
+import com.v2ray.ang.extension.ForegroundActivityTracker
 import com.v2ray.ang.handler.SettingsManager
 import com.neko.crashlog.CrashHandler
 
@@ -35,6 +36,8 @@ class AngApplication : MultiDexApplication() {
 
         MMKV.initialize(this)
 
+        ForegroundActivityTracker.register(this)
+
         // Initialize WorkManager with the custom configuration
         WorkManager.initialize(this, workManagerConfiguration)
 
@@ -42,9 +45,5 @@ class AngApplication : MultiDexApplication() {
         SettingsManager.initApp(this)
         SettingsManager.setNightMode()     
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler(this))
-
-        es.dmoral.toasty.Toasty.Config.getInstance()
-            .setGravity(android.view.Gravity.BOTTOM, 0, 300)
-            .apply()
     }
 }

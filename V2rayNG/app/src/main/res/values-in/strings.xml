@@ -650,7 +650,7 @@ yang kamu butuhin."</string>
     <string name="particles_disable_title">Matiin animasi partikel</string>
     <string name="particles_disable_summary">Sembunyiin efek partikel di bottomsheet</string>
 
-    <!-- Alerter notification titles -->
+    <!-- Snackbar notification titles -->
     <string name="title_alerter_info">Info</string>
     <string name="title_alerter_success">Mantap Berhasil</string>
     <string name="title_alerter_error">Yah Gagal</string>

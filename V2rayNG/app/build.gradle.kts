@@ -137,8 +137,6 @@ dependencies {
 
     // UI Libraries
     implementation(libs.material)
-    implementation(libs.toasty)
-    implementation(libs.alerter)
     implementation(libs.editorkit)
     implementation(libs.flexbox)
     implementation(libs.skydoves.colorpickerview)

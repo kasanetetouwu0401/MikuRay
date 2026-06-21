@@ -648,7 +648,7 @@
     <string name="particles_disable_title">禁用粒子动画</string>
     <string name="particles_disable_summary">隐藏底部面板中的粒子效果</string>
 
-    <!-- Alerter notification titles -->
+    <!-- Snackbar notification titles -->
     <string name="title_alerter_info">提示</string>
     <string name="title_alerter_success">成功</string>
     <string name="title_alerter_error">错误</string>

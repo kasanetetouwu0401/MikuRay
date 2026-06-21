@@ -7,15 +7,21 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.app.Activity
+import android.os.Handler
+import android.os.Looper
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.DrawableRes
-import com.tapadoo.alerter.Alerter
-import com.v2ray.ang.enums.EConfigType
-import es.dmoral.toasty.Toasty
 import android.widget.Toast
-import com.v2ray.ang.R
+import androidx.annotation.DrawableRes
+import androidx.core.graphics.drawable.DrawableCompat
+import com.google.android.material.color.MaterialColors
+import com.google.android.material.snackbar.Snackbar
+import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.AngApplication
+import com.v2ray.ang.R
 import java.io.Serializable
 import java.net.URI
 import java.util.Locale
@@ -24,133 +30,215 @@ val Context.v2RayApplication: AngApplication?
     get() = applicationContext as? AngApplication
 
 /**
- * Internal helper to show Alerter with custom layout.
+ * Finds the most suitable root view to anchor a Snackbar to.
  *
- * @param activity The activity to show the alert in.
- * @param title The title text to display.
- * @param message The message text to display.
- * @param iconRes Drawable resource ID for the icon.
- * @param backgroundColor Background color int for the alert.
- * @param duration Duration in milliseconds.
+ * If this Context is itself an Activity, its window's decor view is used.
+ * Otherwise (e.g. a Service or BroadcastReceiver context), this falls back to
+ * whichever Activity is currently in the foreground via [ForegroundActivityTracker].
+ *
+ * @return The root View to show a Snackbar on, or null if no Activity is available
+ * (e.g. the app is fully backgrounded), in which case callers should fall back to a Toast.
  */
-private fun showAlerter(
-    activity: Activity,
-    title: CharSequence,
-    message: CharSequence,
-    @DrawableRes iconRes: Int,
-    backgroundColor: Int,
-    duration: Long
-) {
-    Alerter.create(activity, R.layout.layout_alerter_custom)
-        .setBackgroundColorInt(backgroundColor)
-        .setDuration(duration)
-        .also { alerter ->
-            alerter.getLayoutContainer()?.apply {
-                findViewById<ImageView>(R.id.iv_alerter_icon)
-                    ?.setImageResource(iconRes)
-                findViewById<TextView>(R.id.tv_alerter_title)
-                    ?.text = title
-                findViewById<TextView>(R.id.tv_alerter_message)
-                    ?.text = message
-            }
-        }
-        .show()
+private fun Context.findSnackbarParent(): View? {
+    val activity = this as? Activity ?: ForegroundActivityTracker.currentActivity ?: return null
+    return activity.window?.decorView?.findViewById(android.R.id.content) as? View
+        ?: activity.window?.decorView
 }
 
 /**
- * Shows a toast message with the given resource ID.
+ * Internal helper to show a Material Snackbar with an icon, optional title, and message.
+ *
+ * @param context The context to resolve theme colors and fall back to Toast from.
+ * @param title Optional title, shown bold above the message. Hidden entirely when blank.
+ * @param message The message text to display.
+ * @param iconRes Drawable resource ID for the leading icon.
+ * @param backgroundColorAttr Theme color attribute for the Snackbar background, or null for default styling.
+ * @param textColorAttr Theme color attribute for the Snackbar text/icon, or null for default styling.
+ * @param duration Snackbar duration constant (e.g. Snackbar.LENGTH_SHORT).
+ */
+private fun showSnackbar(
+    context: Context,
+    title: CharSequence,
+    message: CharSequence,
+    @DrawableRes iconRes: Int,
+    backgroundColorAttr: Int?,
+    textColorAttr: Int?,
+    duration: Int
+) {
+    if (Looper.myLooper() != Looper.getMainLooper()) {
+        Handler(Looper.getMainLooper()).post {
+            showSnackbar(context, title, message, iconRes, backgroundColorAttr, textColorAttr, duration)
+        }
+        return
+    }
+
+    val parent = context.findSnackbarParent()
+    if (parent == null) {
+        val fallbackMessage = if (title.isNotNullEmpty()) "$title: $message" else message
+        Toast.makeText(context, fallbackMessage, Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    val snackbar = Snackbar.make(parent, "", duration)
+    val snackbarLayout = snackbar.view as ViewGroup
+    snackbarLayout.contentDescription = if (title.isNotNullEmpty()) "$title: $message" else message
+
+    // Hide the default Snackbar text view; we render our own icon + title + message instead.
+    snackbarLayout.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
+        ?.visibility = View.INVISIBLE
+
+    val contentView = LayoutInflater.from(context)
+        .inflate(R.layout.layout_snackbar_custom, snackbarLayout, false)
+
+    val resolvedTextColor = if (textColorAttr != null) {
+        MaterialColors.getColor(parent, textColorAttr)
+    } else {
+        MaterialColors.getColor(parent, com.google.android.material.R.attr.colorOnSurface)
+    }
+
+    contentView.findViewById<ImageView>(R.id.iv_snackbar_icon)?.apply {
+        setImageResource(iconRes)
+        DrawableCompat.setTint(drawable.mutate(), resolvedTextColor)
+    }
+    contentView.findViewById<TextView>(R.id.tv_snackbar_title)?.apply {
+        if (title.isNotNullEmpty()) {
+            text = title
+            visibility = View.VISIBLE
+            setTextColor(resolvedTextColor)
+        } else {
+            visibility = View.GONE
+        }
+    }
+    contentView.findViewById<TextView>(R.id.tv_snackbar_message)?.apply {
+        text = message
+        setTextColor(resolvedTextColor)
+    }
+
+    snackbarLayout.addView(contentView, 0)
+
+    if (backgroundColorAttr != null) {
+        snackbar.setBackgroundTint(MaterialColors.getColor(parent, backgroundColorAttr))
+    }
+
+    snackbar.show()
+}
+
+/**
+ * Shows a neutral toast message with the given resource ID.
  *
  * @param message The resource ID of the message to show.
  */
 fun Context.toast(message: Int) {
-    Toasty.normal(this, message).show()
+    showSnackbar(this, "", getString(message), R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_SHORT)
 }
 
 fun Context.alert(message: Int, title: CharSequence = "") {
-    (this as? Activity)?.let {
-        showAlerter(it, title, getString(message),
-            R.drawable.ic_about_24dp, 0xFF323232.toInt(), 3000L)
-    }
+    showSnackbar(this, title, getString(message), R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_LONG)
 }
 
 /**
- * Shows a toast message with the given text.
+ * Shows a neutral toast message with the given text.
  *
  * @param message The text of the message to show.
  */
 fun Context.toast(message: CharSequence) {
-    Toasty.normal(this, message).show()
+    showSnackbar(this, "", message, R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_SHORT)
 }
 
 fun Context.alert(message: CharSequence, title: CharSequence = "") {
-    (this as? Activity)?.let {
-        showAlerter(it, title, message,
-            R.drawable.ic_about_24dp, 0xFF323232.toInt(), 3000L)
-    }
+    showSnackbar(this, title, message, R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_LONG)
 }
 
 /**
- * Shows a toast message with the given resource ID.
+ * Shows a success toast message with the given resource ID.
  *
  * @param message The resource ID of the message to show.
  */
 fun Context.toastSuccess(message: Int) {
-    Toasty.success(this, message, Toast.LENGTH_SHORT, true).show()
+    showSnackbar(
+        this, "", getString(message), R.drawable.ic_check_circle,
+        com.google.android.material.R.attr.colorPrimary,
+        com.google.android.material.R.attr.colorOnPrimary,
+        Snackbar.LENGTH_SHORT
+    )
 }
 
 fun Context.alertSuccess(message: Int, title: CharSequence = "") {
-    (this as? Activity)?.let {
-        showAlerter(it, title, getString(message),
-            R.drawable.ic_check, 0xFF388E3C.toInt(), 2000L)
-    }
+    showSnackbar(
+        this, title, getString(message), R.drawable.ic_check_circle,
+        com.google.android.material.R.attr.colorPrimary,
+        com.google.android.material.R.attr.colorOnPrimary,
+        Snackbar.LENGTH_LONG
+    )
 }
 
 /**
- * Shows a toast message with the given text.
+ * Shows a success toast message with the given text.
  *
  * @param message The text of the message to show.
  */
 fun Context.toastSuccess(message: CharSequence) {
-    Toasty.success(this, message, Toast.LENGTH_SHORT, true).show()
+    showSnackbar(
+        this, "", message, R.drawable.ic_check_circle,
+        com.google.android.material.R.attr.colorPrimary,
+        com.google.android.material.R.attr.colorOnPrimary,
+        Snackbar.LENGTH_SHORT
+    )
 }
 
 fun Context.alertSuccess(message: CharSequence, title: CharSequence = "") {
-    (this as? Activity)?.let {
-        showAlerter(it, title, message,
-            R.drawable.ic_check, 0xFF388E3C.toInt(), 2000L)
-    }
+    showSnackbar(
+        this, title, message, R.drawable.ic_check_circle,
+        com.google.android.material.R.attr.colorPrimary,
+        com.google.android.material.R.attr.colorOnPrimary,
+        Snackbar.LENGTH_LONG
+    )
 }
 
 /**
- * Shows a toast message with the given resource ID.
+ * Shows an error toast message with the given resource ID.
  *
  * @param message The resource ID of the message to show.
  */
 fun Context.toastError(message: Int) {
-    Toasty.error(this, message, Toast.LENGTH_SHORT, true).show()
+    showSnackbar(
+        this, "", getString(message), R.drawable.ic_warning,
+        com.google.android.material.R.attr.colorError,
+        com.google.android.material.R.attr.colorOnError,
+        Snackbar.LENGTH_SHORT
+    )
 }
 
 fun Context.alertError(message: Int, title: CharSequence = "") {
-    (this as? Activity)?.let {
-        showAlerter(it, title, getString(message),
-            R.drawable.ic_uncheck, 0xFFD32F2F.toInt(), 2000L)
-    }
+    showSnackbar(
+        this, title, getString(message), R.drawable.ic_warning,
+        com.google.android.material.R.attr.colorError,
+        com.google.android.material.R.attr.colorOnError,
+        Snackbar.LENGTH_LONG
+    )
 }
 
 /**
- * Shows a toast message with the given text.
+ * Shows an error toast message with the given text.
  *
  * @param message The text of the message to show.
  */
 fun Context.toastError(message: CharSequence) {
-    Toasty.error(this, message, Toast.LENGTH_SHORT, true).show()
+    showSnackbar(
+        this, "", message, R.drawable.ic_warning,
+        com.google.android.material.R.attr.colorError,
+        com.google.android.material.R.attr.colorOnError,
+        Snackbar.LENGTH_SHORT
+    )
 }
 
 fun Context.alertError(message: CharSequence, title: CharSequence = "") {
-    (this as? Activity)?.let {
-        showAlerter(it, title, message,
-            R.drawable.ic_uncheck, 0xFFD32F2F.toInt(), 2000L)
-    }
+    showSnackbar(
+        this, title, message, R.drawable.ic_warning,
+        com.google.android.material.R.attr.colorError,
+        com.google.android.material.R.attr.colorOnError,
+        Snackbar.LENGTH_LONG
+    )
 }
 
 const val THRESHOLD = 1000L
