@@ -516,7 +516,7 @@ class ServerActivity : BaseActivity() {
             config.subscriptionId = subscriptionId.orEmpty()
         }
         MmkvManager.encodeServerConfig(editGuid, config)
-        toastSuccess(R.string.toast_success, title = getString(R.string.title_alerter_success))
+        toastSuccess(R.string.toast_success)
         finish()
         return true
     }

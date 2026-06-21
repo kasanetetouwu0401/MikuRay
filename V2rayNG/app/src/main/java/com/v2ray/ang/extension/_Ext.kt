@@ -1,5 +1,7 @@
 package com.v2ray.ang.extension
 
+import android.app.Activity
+import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -7,8 +9,6 @@ import android.content.IntentFilter
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
-import android.app.Activity
-import android.app.Application
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
@@ -32,11 +32,11 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
-import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.AngApplication
-import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
+import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.util.getColorAttr
+import es.dmoral.toasty.Toasty
 import java.io.Serializable
 import java.lang.ref.WeakReference
 import java.net.URI
@@ -47,21 +47,11 @@ val Context.v2RayApplication: AngApplication?
 
 /**
  * Keeps a weak reference to the Activity that is currently in the foreground (resumed).
- *
- * This allows non-UI callers (Services, BroadcastReceivers, etc.) to still show a
- * Snackbar by borrowing the currently visible Activity's window, instead of having
- * to fall back to a plain Toast.
- *
- * Registered once from [com.v2ray.ang.AngApplication.onCreate].
  */
 object ForegroundActivityTracker : Application.ActivityLifecycleCallbacks {
 
     private var resumedActivity: WeakReference<Activity>? = null
 
-    /**
-     * The currently resumed Activity, or null if the app has no Activity in the foreground
-     * (e.g. fully backgrounded, or only a Service is running).
-     */
     val currentActivity: Activity?
         get() = resumedActivity?.get()?.takeIf { !it.isFinishing && !it.isDestroyed }
 
@@ -84,6 +74,30 @@ object ForegroundActivityTracker : Application.ActivityLifecycleCallbacks {
     override fun onActivityStopped(activity: Activity) {}
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
     override fun onActivityDestroyed(activity: Activity) {}
+}
+
+fun Context.toast(message: Int) {
+    Toasty.normal(this, message).show()
+}
+
+fun Context.toast(message: CharSequence) {
+    Toasty.normal(this, message).show()
+}
+
+fun Context.toastSuccess(message: Int) {
+    Toasty.success(this, message, Toast.LENGTH_SHORT, true).show()
+}
+
+fun Context.toastSuccess(message: CharSequence) {
+    Toasty.success(this, message, Toast.LENGTH_SHORT, true).show()
+}
+
+fun Context.toastError(message: Int) {
+    Toasty.error(this, message, Toast.LENGTH_SHORT, true).show()
+}
+
+fun Context.toastError(message: CharSequence) {
+    Toasty.error(this, message, Toast.LENGTH_SHORT, true).show()
 }
 
 private fun Context.findSnackbarParent(): View? {
@@ -227,24 +241,14 @@ private fun showSnackbar(
     snackbar.show()
 }
 
-/**
- * Shows a neutral Snackbar with the given resource ID, and an optional title.
- */
 fun Context.snackbarDefault(message: Int, title: CharSequence = "") {
     showSnackbar(this, title, getString(message), R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_LONG)
 }
 
-/**
- * Shows a neutral Snackbar with the given text, and an optional title.
- */
 fun Context.snackbarDefault(message: CharSequence, title: CharSequence = "") {
     showSnackbar(this, title, message, R.drawable.ic_about_24dp, null, null, Snackbar.LENGTH_LONG)
 }
 
-/**
- * Shows a success Snackbar (colorPrimary background, colorOnPrimary text) with the
- * given resource ID, and an optional title.
- */
 fun Context.snackbarSuccess(message: Int, title: CharSequence = "") {
     showSnackbar(
         this, title, getString(message), R.drawable.ic_check_circle,
@@ -254,10 +258,6 @@ fun Context.snackbarSuccess(message: Int, title: CharSequence = "") {
     )
 }
 
-/**
- * Shows a success Snackbar (colorPrimary background, colorOnPrimary text) with the
- * given text, and an optional title.
- */
 fun Context.snackbarSuccess(message: CharSequence, title: CharSequence = "") {
     showSnackbar(
         this, title, message, R.drawable.ic_check_circle,
@@ -267,10 +267,6 @@ fun Context.snackbarSuccess(message: CharSequence, title: CharSequence = "") {
     )
 }
 
-/**
- * Shows an error Snackbar (colorError background, colorOnError text) with the
- * given resource ID, and an optional title.
- */
 fun Context.snackbarError(message: Int, title: CharSequence = "") {
     showSnackbar(
         this, title, getString(message), R.drawable.ic_warning,
@@ -280,10 +276,6 @@ fun Context.snackbarError(message: Int, title: CharSequence = "") {
     )
 }
 
-/**
- * Shows an error Snackbar (colorError background, colorOnError text) with the
- * given text, and an optional title.
- */
 fun Context.snackbarError(message: CharSequence, title: CharSequence = "") {
     showSnackbar(
         this, title, message, R.drawable.ic_warning,
@@ -293,150 +285,15 @@ fun Context.snackbarError(message: CharSequence, title: CharSequence = "") {
     )
 }
 
-// ==============================================================================
-// CUSTOM TOAST IMPLEMENTATION
-// Digunakan khusus untuk menahan pesan agar tidak hilang saat Activity di-finish
-// ==============================================================================
-
-private fun showCustomToast(
-    context: Context,
-    title: CharSequence,
-    message: CharSequence,
-    @DrawableRes iconRes: Int,
-    backgroundColorAttrName: String?,
-    textColorAttrName: String?,
-    duration: Int
-) {
-    if (Looper.myLooper() != Looper.getMainLooper()) {
-        Handler(Looper.getMainLooper()).post {
-            showCustomToast(context, title, message, iconRes, backgroundColorAttrName, textColorAttrName, duration)
-        }
-        return
-    }
-
-    val appContext = context.applicationContext
-    val inflater = LayoutInflater.from(appContext)
-    val contentView = inflater.inflate(R.layout.layout_snackbar_custom, null)
-
-    val resolvedTextColor = if (textColorAttrName != null) {
-        appContext.getColorAttr(textColorAttrName)
-    } else {
-        appContext.getColorAttr("colorOnSurfaceInverse")
-    }
-
-    contentView.findViewById<ImageView>(R.id.iv_snackbar_icon)?.apply {
-        setImageResource(iconRes)
-        DrawableCompat.setTint(drawable.mutate(), resolvedTextColor)
-    }
-    
-    contentView.findViewById<TextView>(R.id.tv_snackbar_title)?.apply {
-        if (title.isNotNullEmpty()) {
-            text = title
-            visibility = View.VISIBLE
-            setTextColor(resolvedTextColor)
-        } else {
-            visibility = View.GONE
-        }
-    }
-    
-    contentView.findViewById<TextView>(R.id.tv_snackbar_message)?.apply {
-        text = message
-        setTextColor(resolvedTextColor)
-    }
-
-    // Mengaplikasikan padding 5dp di sisi atas, bawah, kanan, dan kiri
-    val padding5dp = (5f * appContext.resources.displayMetrics.density).toInt()
-    contentView.setPadding(padding5dp, padding5dp, padding5dp, padding5dp)
-
-    val cornerRadiusPx = 28f * appContext.resources.displayMetrics.density
-    val backgroundColor = if (backgroundColorAttrName != null) {
-        appContext.getColorAttr(backgroundColorAttrName)
-    } else {
-        appContext.getColorAttr("colorSurfaceInverse")
-    }
-
-    contentView.background = MaterialShapeDrawable(
-        ShapeAppearanceModel.builder().setAllCornerSizes(cornerRadiusPx).build()
-    ).apply {
-        fillColor = ColorStateList.valueOf(backgroundColor)
-        elevation = 6f * appContext.resources.displayMetrics.density
-    }
-
-    val toast = Toast(appContext)
-    val yOffset = (48f * appContext.resources.displayMetrics.density).toInt()
-    toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, yOffset)
-    toast.duration = if (duration == Toast.LENGTH_SHORT) Toast.LENGTH_SHORT else Toast.LENGTH_LONG
-    
-    @Suppress("DEPRECATION")
-    toast.view = contentView
-
-    toast.show()
-}
-
-/**
- * Shows a neutral Custom Toast.
- */
-fun Context.toastDefault(message: Int, title: CharSequence = "") {
-    showCustomToast(this, title, getString(message), R.drawable.ic_about_24dp, null, null, Toast.LENGTH_LONG)
-}
-
-fun Context.toastDefault(message: CharSequence, title: CharSequence = "") {
-    showCustomToast(this, title, message, R.drawable.ic_about_24dp, null, null, Toast.LENGTH_LONG)
-}
-
-/**
- * Shows a success Custom Toast.
- */
-fun Context.toastSuccess(message: Int, title: CharSequence = "") {
-    showCustomToast(
-        this, title, getString(message), R.drawable.ic_check_circle,
-        "colorPrimary", "colorOnPrimary", Toast.LENGTH_LONG
-    )
-}
-
-fun Context.toastSuccess(message: CharSequence, title: CharSequence = "") {
-    showCustomToast(
-        this, title, message, R.drawable.ic_check_circle,
-        "colorPrimary", "colorOnPrimary", Toast.LENGTH_LONG
-    )
-}
-
-/**
- * Shows an error Custom Toast.
- */
-fun Context.toastError(message: Int, title: CharSequence = "") {
-    showCustomToast(
-        this, title, getString(message), R.drawable.ic_warning,
-        "colorError", "colorOnError", Toast.LENGTH_LONG
-    )
-}
-
-fun Context.toastError(message: CharSequence, title: CharSequence = "") {
-    showCustomToast(
-        this, title, message, R.drawable.ic_warning,
-        "colorError", "colorOnError", Toast.LENGTH_LONG
-    )
-}
-
-// ==============================================================================
-// UTILS & MISC
-// ==============================================================================
+// ============================================================================
+// UTILITIES
+// ============================================================================
 
 const val THRESHOLD = 1000L
 const val DIVISOR = 1024.0
 
-/**
- * Converts a Long value to a speed string.
- *
- * @return The speed string.
- */
 fun Long.toSpeedString(): String = this.toTrafficString() + "/s"
 
-/**
- * Converts a Long value to a traffic string.
- *
- * @return The traffic string.
- */
 fun Long.toTrafficString(): String {
     val units = arrayOf("B", "KB", "MB", "GB", "TB", "PB")
     var size = this.toDouble()
@@ -451,30 +308,12 @@ fun Long.toTrafficString(): String {
 val URI.idnHost: String
     get() = host?.replace("[", "")?.replace("]", "").orEmpty()
 
-/**
- * Removes all whitespace from the string.
- *
- * @return The string without whitespace.
- */
 fun String?.removeWhiteSpace(): String? = this?.replace(" ", "")
 
-/**
- * Returns null if the string is null or blank, otherwise returns the string itself.
- *
- * @return The string or null.
- */
 fun String?.nullIfBlank(): String? = this?.takeIf { it.isNotBlank() }
 
-/**
- * Converts the string to a Long value, or returns 0 if the conversion fails.
- *
- * @return The Long value.
- */
 fun String.toLongEx(): Long = toLongOrNull() ?: 0
 
-/**
- * Listens for package changes and executes a callback when a change occurs.
- */
 fun Context.listenForPackageChanges(onetime: Boolean = true, callback: () -> Unit) =
     object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -497,25 +336,16 @@ fun Context.listenForPackageChanges(onetime: Boolean = true, callback: () -> Uni
         }
     }
 
-/**
- * Retrieves a serializable object from the Bundle.
- */
 inline fun <reified T : Serializable> Bundle.serializable(key: String): T? = when {
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getSerializable(key, T::class.java)
     else -> @Suppress("DEPRECATION") getSerializable(key) as? T
 }
 
-/**
- * Retrieves a serializable object from the Intent.
- */
 inline fun <reified T : Serializable> Intent.serializable(key: String): T? = when {
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getSerializableExtra(key, T::class.java)
     else -> @Suppress("DEPRECATION") getSerializableExtra(key) as? T
 }
 
-/**
- * Checks if the CharSequence is not null and not empty.
- */
 fun CharSequence?.isNotNullEmpty(): Boolean = !this.isNullOrBlank()
 
 fun String.concatUrl(vararg paths: String): String {
@@ -531,9 +361,6 @@ fun String.concatUrl(vararg paths: String): String {
     return builder.toString()
 }
 
-/**
- * Helper function to match text either by Regex or literal string.
- */
 fun String.matchesPattern(regex: Regex?, keyword: String?, ignoreCase: Boolean = true): Boolean {
     if (keyword.isNullOrEmpty()) {
         return true
@@ -542,16 +369,10 @@ fun String.matchesPattern(regex: Regex?, keyword: String?, ignoreCase: Boolean =
         ?: this.contains(keyword, ignoreCase = ignoreCase)
 }
 
-/**
- * Checks if the config type is a group type (PolicyGroup or ProxyChain).
- */
 fun EConfigType.isGroupType(): Boolean {
     return this == EConfigType.POLICYGROUP || this == EConfigType.PROXYCHAIN
 }
 
-/**
- * Checks if the config type is a complex type (Custom, PolicyGroup, or ProxyChain).
- */
 fun EConfigType.isComplexType(): Boolean {
     return this == EConfigType.CUSTOM || this == EConfigType.POLICYGROUP || this == EConfigType.PROXYCHAIN
 }
