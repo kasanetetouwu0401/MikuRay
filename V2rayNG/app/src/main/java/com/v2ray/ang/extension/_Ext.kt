@@ -43,33 +43,12 @@ import java.util.Locale
 val Context.v2RayApplication: AngApplication?
     get() = applicationContext as? AngApplication
 
-/**
- * Finds the most suitable root view to anchor a Snackbar to.
- *
- * If this Context is itself an Activity, its window's decor view is used.
- * Otherwise (e.g. a Service or BroadcastReceiver context), this falls back to
- * whichever Activity is currently in the foreground via [ForegroundActivityTracker].
- *
- * @return The root View to show a Snackbar on, or null if no Activity is available
- * (e.g. the app is fully backgrounded), in which case callers should fall back to a Toast.
- */
 private fun Context.findSnackbarParent(): View? {
     val activity = this as? Activity ?: ForegroundActivityTracker.currentActivity ?: return null
     return activity.window?.decorView?.findViewById(android.R.id.content) as? View
         ?: activity.window?.decorView
 }
 
-/**
- * Internal helper to show a Material Snackbar with an icon, optional title, and message.
- *
- * @param context The context to resolve theme colors and fall back to Toast from.
- * @param title Optional title, shown bold above the message. Hidden entirely when blank.
- * @param message The message text to display.
- * @param iconRes Drawable resource ID for the leading icon.
- * @param backgroundColorAttrName Theme color attribute name for the Snackbar background, or null for default styling.
- * @param textColorAttrName Theme color attribute name for the Snackbar text/icon, or null for default styling.
- * @param duration Snackbar duration constant (e.g. Snackbar.LENGTH_SHORT).
- */
 private fun showSnackbar(
     context: Context,
     title: CharSequence,
@@ -92,14 +71,11 @@ private fun showSnackbar(
         Toast.makeText(context, fallbackMessage, Toast.LENGTH_SHORT).show()
         return
     }
-
-    // We drive show/hide timing and animation ourselves (see below), so the
-    // Snackbar itself never auto-dismisses on its own.
+    
     val snackbar = Snackbar.make(parent, "", Snackbar.LENGTH_INDEFINITE)
     val snackbarLayout = snackbar.view as ViewGroup
     snackbarLayout.contentDescription = if (title.isNotNullEmpty()) "$title: $message" else message
 
-    // Hide the default Snackbar text view; we render our own icon + title + message instead.
     snackbarLayout.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
         ?.visibility = View.INVISIBLE
 
@@ -109,8 +85,6 @@ private fun showSnackbar(
     val resolvedTextColor = if (textColorAttrName != null) {
         parent.context.getColorAttr(textColorAttrName)
     } else {
-        // Default Snackbar background is Material's inverse surface, so the
-        // fallback text color must pair with it, not with colorOnSurface.
         parent.context.getColorAttr("colorOnSurfaceInverse")
     }
 
@@ -134,8 +108,6 @@ private fun showSnackbar(
 
     snackbarLayout.addView(contentView, 0)
 
-    // Reposition the Snackbar to the top of the screen, just below the status bar,
-    // instead of Material's default bottom anchor.
     val layoutParams = snackbarLayout.layoutParams
     when (layoutParams) {
         is CoordinatorLayout.LayoutParams -> layoutParams.gravity = Gravity.TOP
@@ -147,20 +119,17 @@ private fun showSnackbar(
         val statusBarTop = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
         
         val margin5dp = (5f * view.context.resources.displayMetrics.density).toInt()
+        val margin16dp = (16f * view.context.resources.displayMetrics.density).toInt()
 
         view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             topMargin = statusBarTop + margin5dp
             bottomMargin = margin5dp
-            leftMargin = margin5dp
-            rightMargin = margin5dp
+            leftMargin = margin16dp
+            rightMargin = margin16dp
         }
         insets
     }
 
-    // Material's built-in animation modes only know how to slide from/to the
-    // bottom of the screen, which looks wrong now that the Snackbar sits at
-    // the top. We let Material handle alpha only (FADE), and drive the actual
-    // vertical motion ourselves: slide down to enter, slide back up to exit.
     snackbar.animationMode = BaseTransientBottomBar.ANIMATION_MODE_FADE
 
     snackbarLayout.doOnPreDraw { view ->
@@ -172,13 +141,14 @@ private fun showSnackbar(
             .start()
     }
 
-    fun slideUpThenDismiss() {
+    fun slideRightThenDismiss() {
         if (!snackbarLayout.isAttachedToWindow) {
             snackbar.dismiss()
             return
         }
         snackbarLayout.animate()
-            .translationY(-snackbarLayout.height.toFloat())
+            .translationX(snackbarLayout.width.toFloat())
+            .alpha(0f)
             .setDuration(250L)
             .setInterpolator(AccelerateInterpolator())
             .withEndAction { snackbar.dismiss() }
@@ -188,22 +158,19 @@ private fun showSnackbar(
     val autoDismissDelayMs = when (duration) {
         Snackbar.LENGTH_INDEFINITE -> null
         Snackbar.LENGTH_SHORT -> 1500L
-        else -> 2750L // LENGTH_LONG and any other custom value
+        else -> 2750L
     }
     autoDismissDelayMs?.let {
-        Handler(Looper.getMainLooper()).postDelayed(::slideUpThenDismiss, it)
+        Handler(Looper.getMainLooper()).postDelayed(::slideRightThenDismiss, it)
     }
 
-    // The default Snackbar style only gets a 4dp corner radius (or none at all on
-    // phones, which use the edge-to-edge full-width style), so we build our own
-    // rounded background instead of relying on snackbar.setBackgroundTint().
     val cornerRadiusPx = 10f * parent.context.resources.displayMetrics.density
     val backgroundColor = if (backgroundColorAttrName != null) {
         parent.context.getColorAttr(backgroundColorAttrName)
     } else {
         parent.context.getColorAttr("colorSurfaceInverse")
     }
-    
+
     snackbarLayout.backgroundTintList = null
     snackbarLayout.backgroundTintMode = null
 
