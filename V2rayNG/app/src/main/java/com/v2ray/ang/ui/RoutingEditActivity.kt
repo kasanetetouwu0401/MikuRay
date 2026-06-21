@@ -146,7 +146,7 @@ class RoutingEditActivity : BaseActivity() {
         }
 
         SettingsManager.saveRoutingRuleset(position, rulesetItem)
-        snackbarSuccess(R.string.toast_success)
+        snackbarSuccess(R.string.toast_success, title = getString(R.string.title_alerter_success))
         finish()
         return true
     }

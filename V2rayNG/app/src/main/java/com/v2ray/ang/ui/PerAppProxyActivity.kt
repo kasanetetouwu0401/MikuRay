@@ -166,7 +166,7 @@ class PerAppProxyActivity : BaseActivity() {
     }
 
     private fun selectProxyAppAuto() {
-        snackbarDefault(R.string.msg_downloading_content)
+        snackbarDefault(R.string.msg_downloading_content, title = getString(R.string.title_alerter_info))
         showLoading()
 
         val url = AppConfig.ANDROID_PACKAGE_NAME_LIST_URL

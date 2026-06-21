@@ -115,11 +115,11 @@ class ServerProxyChainActivity : BaseActivity() {
 
         val chainMembers = memberAdapter.getMembers().map { it.trim() }.filter { it.isNotEmpty() }
         if (chainMembers.size != memberAdapter.getMembers().size) {
-            snackbarDefault(R.string.server_proxy_chain_members_unselected)
+            snackbarDefault(R.string.server_proxy_chain_members_unselected, title = getString(R.string.title_alerter_info))
             return false
         }
         if (chainMembers.size < 2) {
-            snackbarDefault(R.string.server_proxy_chain_members_insufficient)
+            snackbarDefault(R.string.server_proxy_chain_members_insufficient, title = getString(R.string.title_alerter_info))
             return false
         }
 
@@ -128,7 +128,7 @@ class ServerProxyChainActivity : BaseActivity() {
             profile == null || profile.configType.isComplexType()
         }
         if (invalidMembers.isNotEmpty()) {
-            snackbarDefault(getString(R.string.server_proxy_chain_members_invalid, invalidMembers.joinToString(", ")))
+            snackbarDefault(getString(R.string.server_proxy_chain_members_invalid, invalidMembers.joinToString(", ")), title = getString(R.string.title_alerter_info))
             return false
         }
 
@@ -145,7 +145,7 @@ class ServerProxyChainActivity : BaseActivity() {
         if (isRunning) {
             SettingsChangeManager.makeRestartService()
         }
-        snackbarSuccess(R.string.toast_success)
+        snackbarSuccess(R.string.toast_success, title = getString(R.string.title_alerter_success))
         finish()
         return true
     }
@@ -163,7 +163,7 @@ class ServerProxyChainActivity : BaseActivity() {
                     finish()
                 }
             } else {
-                snackbarDefault(R.string.toast_action_not_allowed)
+                snackbarDefault(R.string.toast_action_not_allowed, title = getString(R.string.title_alerter_info))
             }
         }
         return true
@@ -171,7 +171,7 @@ class ServerProxyChainActivity : BaseActivity() {
 
     private fun addMemberRow() {
         if (allRemarks.isEmpty()) {
-            snackbarDefault(R.string.toast_none_data)
+            snackbarDefault(R.string.toast_none_data, title = getString(R.string.title_alerter_info))
             return
         }
         memberAdapter.addRow()

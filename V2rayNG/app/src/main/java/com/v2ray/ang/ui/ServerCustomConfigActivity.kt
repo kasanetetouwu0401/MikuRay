@@ -94,7 +94,7 @@ class ServerCustomConfigActivity : BaseActivity() {
             CustomFmt.parse(binding.editor.text.toString())
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to parse custom configuration", e)
-            snackbarDefault("${getString(R.string.toast_malformed_josn)} ${e.cause?.message}")
+            snackbarDefault("${getString(R.string.toast_malformed_josn)} ${e.cause?.message}", title = getString(R.string.title_alerter_info))
             return false
         }
 
@@ -108,7 +108,7 @@ class ServerCustomConfigActivity : BaseActivity() {
 
         MmkvManager.encodeServerConfig(editGuid, config)
         MmkvManager.encodeServerRaw(editGuid, binding.editor.text.toString())
-        snackbarSuccess(R.string.toast_success)
+        snackbarSuccess(R.string.toast_success, title = getString(R.string.title_alerter_success))
         finish()
         return true
     }

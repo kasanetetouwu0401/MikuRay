@@ -48,7 +48,7 @@ class LogcatActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
 
         binding.refreshLayout.setOnRefreshListener(this)
 
-        snackbarDefault(getString(R.string.pull_down_to_refresh))
+        snackbarDefault(getString(R.string.pull_down_to_refresh), title = getString(R.string.title_alerter_info))
     }
 
     private fun onLogLongClick(log: String): Boolean {
@@ -80,7 +80,7 @@ class LogcatActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
                 uri to logFile.name
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    snackbarDefault(e.localizedMessage ?: e.toString())
+                    snackbarDefault(e.localizedMessage ?: e.toString(), title = getString(R.string.title_alerter_info))
                 }
                 return@launch
             }

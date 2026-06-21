@@ -21,9 +21,9 @@ class ScScannerActivity : HelperBaseActivity() {
                 val (count, countSub) = AngConfigManager.importBatchConfig(scanResult, "", false)
 
                 if (count + countSub > 0) {
-                    snackbarSuccess(R.string.toast_success)
+                    snackbarSuccess(R.string.toast_success, title = getString(R.string.title_alerter_success))
                 } else {
-                    snackbarError(R.string.toast_failure)
+                    snackbarError(R.string.toast_failure, title = getString(R.string.title_alerter_error))
                 }
 
                 startActivity(Intent(this, MainActivity::class.java))

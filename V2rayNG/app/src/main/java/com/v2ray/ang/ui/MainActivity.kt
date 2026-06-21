@@ -673,13 +673,13 @@ class MainActivity : HelperBaseActivity(),
 
                 val text = QRCodeDecoder.syncDecodeQRCode(bitmap)
                 if (text.isNullOrEmpty()) {
-                    snackbarDefault(R.string.toast_decoding_failed)
+                    snackbarDefault(R.string.toast_decoding_failed, title = getString(R.string.title_alerter_info))
                 } else {
                     importBatchConfig(text)
                 }
             } catch (e: Exception) {
                 LogUtil.e(AppConfig.TAG, "Failed to decode QR code from file", e)
-                snackbarDefault(R.string.toast_decoding_failed)
+                snackbarDefault(R.string.toast_decoding_failed, title = getString(R.string.title_alerter_info))
             }
         }
     }
@@ -742,17 +742,18 @@ class MainActivity : HelperBaseActivity(),
             withContext(Dispatchers.Main) {
                 when {
                     result.successCount + result.failureCount + result.skipCount == 0 -> {
-                        snackbarDefault(getString(R.string.title_update_subscription_no_subscription))
+                        snackbarDefault(getString(R.string.title_update_subscription_no_subscription), title = getString(R.string.title_alerter_info))
                     }
                     result.successCount > 0 && result.failureCount + result.skipCount == 0 -> {
-                        snackbarSuccess(getString(R.string.title_update_config_count, result.configCount))
+                        snackbarSuccess(getString(R.string.title_update_config_count, result.configCount), title = getString(R.string.title_alerter_success))
                     }
                     else -> {
                         snackbarDefault(
                             getString(
                                 R.string.title_update_subscription_result,
                                 result.configCount, result.successCount, result.failureCount, result.skipCount
-                            )
+                            ),
+                            title = getString(R.string.title_alerter_info)
                         )
                     }
                 }

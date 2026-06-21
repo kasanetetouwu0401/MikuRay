@@ -78,7 +78,7 @@ object CoreServiceManager {
                 )
             }
         } else {
-            context.snackbarDefault(message)
+            context.snackbarDefault(message, title = context.getString(R.string.title_alerter_info))
         }
     }
 
@@ -185,7 +185,8 @@ object CoreServiceManager {
 
         if (config.insecure == true) {
             context.snackbarError(
-                context.getString(R.string.toast_allow_insecure_deprecated)
+                context.getString(R.string.toast_allow_insecure_deprecated),
+                title = context.getString(R.string.title_alerter_error)
             )
         }
 

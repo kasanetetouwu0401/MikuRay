@@ -99,15 +99,16 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
                 delay(500L)
                 launch(Dispatchers.Main) {
                     if (result.successCount + result.failureCount + result.skipCount == 0) {
-                        snackbarSuccess(getString(R.string.title_update_subscription_no_subscription))
+                        snackbarSuccess(getString(R.string.title_update_subscription_no_subscription), title = getString(R.string.title_alerter_success))
                     } else if (result.successCount > 0 && result.failureCount + result.skipCount == 0) {
-                        snackbarSuccess(getString(R.string.title_update_config_count, result.configCount))
+                        snackbarSuccess(getString(R.string.title_update_config_count, result.configCount), title = getString(R.string.title_alerter_success))
                     } else {
                         snackbarSuccess(
                             getString(
                                 R.string.title_update_subscription_result,
                                 result.configCount, result.successCount, result.failureCount, result.skipCount
-                            )
+                            ),
+                            title = getString(R.string.title_alerter_success)
                         )
                     }
                     if (result.addedProfiles.isNotEmpty() || result.deletedProfiles.isNotEmpty()) {

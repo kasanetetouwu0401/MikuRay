@@ -59,7 +59,7 @@ class FileChooserHelper(private val activity: AppCompatActivity) {
             )
         } catch (ex: ActivityNotFoundException) {
             LogUtil.e(AppConfig.TAG, "File chooser activity not found", ex)
-            activity.snackbarDefault(R.string.toast_require_file_manager)
+            activity.snackbarDefault(R.string.toast_require_file_manager, title = activity.getString(R.string.title_alerter_info))
             fileChooserCallback?.invoke(null)
             fileChooserCallback = null
         }
@@ -80,7 +80,7 @@ class FileChooserHelper(private val activity: AppCompatActivity) {
             documentCreateLauncher.launch(fileName)
         } catch (ex: ActivityNotFoundException) {
             LogUtil.e(AppConfig.TAG, "Document creator activity not found", ex)
-            activity.snackbarDefault(R.string.toast_require_file_manager)
+            activity.snackbarDefault(R.string.toast_require_file_manager, title = activity.getString(R.string.title_alerter_info))
             documentCreateCallback?.invoke(null)
             documentCreateCallback = null
         }

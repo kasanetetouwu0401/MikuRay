@@ -46,7 +46,7 @@ class UrlSchemeActivity : BaseActivity() {
                         }
 
                         else -> {
-                            snackbarError(R.string.toast_failure)
+                            snackbarError(R.string.toast_failure, title = getString(R.string.title_alerter_error))
                         }
                     }
                 }
@@ -76,9 +76,9 @@ class UrlSchemeActivity : BaseActivity() {
                 val (count, countSub) = AngConfigManager.importBatchConfig(decodedUrl, "", false)
                 withContext(Dispatchers.Main) {
                     if (count + countSub > 0) {
-                        snackbarDefault(R.string.import_subscription_success)
+                        snackbarDefault(R.string.import_subscription_success, title = getString(R.string.title_alerter_info))
                     } else {
-                        snackbarDefault(R.string.import_subscription_failure)
+                        snackbarDefault(R.string.import_subscription_failure, title = getString(R.string.title_alerter_info))
                     }
                 }
             }

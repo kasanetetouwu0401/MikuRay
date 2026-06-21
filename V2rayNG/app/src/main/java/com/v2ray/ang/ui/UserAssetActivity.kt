@@ -112,7 +112,7 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
 
                 val assetList = MmkvManager.decodeAssetUrls()
                 if (assetList.any { it.assetUrl.remarks == assetItem.remarks && it.guid != assetId }) {
-                    snackbarDefault(R.string.msg_remark_is_duplicate)
+                    snackbarDefault(R.string.msg_remark_is_duplicate, title = getString(R.string.title_alerter_info))
                 } else {
                     MmkvManager.encodeAsset(assetId, assetItem)
                     copyFile(uri)
@@ -166,7 +166,7 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
     private fun importAsset(url: String?): Boolean {
         try {
             if (!Utils.isValidUrl(url)) {
-                snackbarDefault(R.string.toast_invalid_url)
+                snackbarDefault(R.string.toast_invalid_url, title = getString(R.string.title_alerter_info))
                 return false
             }
             startActivity(
@@ -183,7 +183,7 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
     private fun downloadGeoFiles() {
         refreshData()
         showLoading()
-        snackbarDefault(R.string.msg_downloading_content)
+        snackbarDefault(R.string.msg_downloading_content, title = getString(R.string.title_alerter_info))
 
         val proxyUsername = SettingsManager.getSocksUsername()
         val proxyPassword = SettingsManager.getSocksPassword()

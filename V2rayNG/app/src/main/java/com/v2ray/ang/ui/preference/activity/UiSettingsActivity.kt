@@ -129,7 +129,7 @@ class UiSettingsActivity : BaseActivity() {
                         
                         extractAndSaveBannerColor(savedUri)
                         broadcastHomeBannerChanged()
-                        requireContext().snackbarSuccess(getString(R.string.home_banner_updated))
+                        requireContext().snackbarSuccess(getString(R.string.home_banner_updated), title = getString(R.string.title_alerter_success))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -148,7 +148,7 @@ class UiSettingsActivity : BaseActivity() {
                         val savedUri = saveToCache(cacheUri, "profile_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_PROFILE_BANNER_URI, savedUri.toString())
                         broadcastProfileChanged()
-                        requireContext().snackbarSuccess(getString(R.string.custom_banner_profile_set))
+                        requireContext().snackbarSuccess(getString(R.string.custom_banner_profile_set), title = getString(R.string.title_alerter_success))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -166,7 +166,7 @@ class UiSettingsActivity : BaseActivity() {
                         deleteOldFile(oldUri)
                         val savedUri = saveToCache(cacheUri, "sheet_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, savedUri.toString())
-                        requireContext().snackbarSuccess(getString(R.string.sheet_banner_updated))
+                        requireContext().snackbarSuccess(getString(R.string.sheet_banner_updated), title = getString(R.string.title_alerter_success))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -346,7 +346,7 @@ class UiSettingsActivity : BaseActivity() {
                         .setPositiveButton(android.R.string.ok) { _, _ ->
                             deleteOldFile(savedUri)
                             MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, "")
-                            requireContext().snackbarSuccess(getString(R.string.sheet_banner_delete_summary))
+                            requireContext().snackbarSuccess(getString(R.string.sheet_banner_delete_summary), title = getString(R.string.title_alerter_success))
                         }
                         .setNegativeButton(android.R.string.cancel, null)
                         .showBlur()
@@ -401,7 +401,7 @@ class UiSettingsActivity : BaseActivity() {
                             deleteOldFile(savedUri)
                             MmkvManager.encodeSettings(AppConfig.PREF_PROFILE_BANNER_URI, "")
                             broadcastProfileChanged()
-                            requireContext().snackbarSuccess(getString(R.string.delete_custom_banner_profile_summary))
+                            requireContext().snackbarSuccess(getString(R.string.delete_custom_banner_profile_summary), title = getString(R.string.title_alerter_success))
                         }
                         .setNegativeButton(android.R.string.cancel, null)
                         .showBlur()
@@ -464,7 +464,7 @@ class UiSettingsActivity : BaseActivity() {
                                 activity?.recreate()
                             }
                             broadcastHomeBannerChanged()
-                            requireContext().snackbarSuccess(getString(R.string.home_banner_delete_summary))
+                            requireContext().snackbarSuccess(getString(R.string.home_banner_delete_summary), title = getString(R.string.title_alerter_success))
                         }
                         .setNegativeButton(android.R.string.cancel, null)
                         .showBlur()

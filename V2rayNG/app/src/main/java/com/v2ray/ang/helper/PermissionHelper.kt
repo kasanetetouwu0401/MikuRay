@@ -37,7 +37,7 @@ class PermissionHelper(private val activity: AppCompatActivity) {
                     onGranted()
                 } else {
                     val message = "${activity.getString(R.string.toast_permission_denied)}  ${permissionType.getLabel()}"
-                    activity.snackbarDefault(message)
+                    activity.snackbarDefault(message, title = activity.getString(R.string.title_alerter_info))
                 }
             }
             permissionLauncher.launch(permission)
