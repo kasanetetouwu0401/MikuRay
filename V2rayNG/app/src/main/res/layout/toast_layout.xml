@@ -7,6 +7,8 @@
     android:fitsSystemWindows="false"
     android:gravity="center"
     android:orientation="horizontal"
+    android:paddingHorizontal="16.0dip"
+    android:paddingVertical="25.0dip"
     tools:ignore="UseCompoundDrawables">
 
     <ImageView
