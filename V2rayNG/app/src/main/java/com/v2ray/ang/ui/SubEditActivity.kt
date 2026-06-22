@@ -21,6 +21,7 @@ import com.v2ray.ang.dto.entities.SubscriptionItem
 import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.extension.snackbarError
 import com.v2ray.ang.extension.snackbarSuccess
+import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
 import com.v2ray.ang.handler.SettingsManager
@@ -252,7 +253,7 @@ class SubEditActivity : BaseActivity() {
 
         MmkvManager.encodeSubscription(editSubId, subItem)
         SubscriptionUpdater.syncOne(subId = editSubId)
-        snackbarSuccess(R.string.toast_success, title = getString(R.string.title_alerter_success))
+        toastSuccess(R.string.toast_success)
         finish()
         return true
     }

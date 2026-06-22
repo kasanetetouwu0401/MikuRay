@@ -23,6 +23,7 @@ import com.v2ray.ang.dto.entities.AssetUrlItem
 import com.v2ray.ang.extension.snackbarDefault
 import com.v2ray.ang.extension.snackbarError
 import com.v2ray.ang.extension.snackbarSuccess
+import com.v2ray.ang.extension.toastInfo
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.ui.bottomsheet.AssetMenuBottomSheet
@@ -183,7 +184,7 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
     private fun downloadGeoFiles() {
         refreshData()
         showLoading()
-        snackbarDefault(R.string.msg_downloading_content, title = getString(R.string.title_alerter_info))
+        toastInfo(R.string.msg_downloading_content)
 
         val proxyUsername = SettingsManager.getSocksUsername()
         val proxyPassword = SettingsManager.getSocksPassword()

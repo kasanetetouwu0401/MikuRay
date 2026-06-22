@@ -18,6 +18,7 @@ import com.v2ray.ang.extension.isComplexType
 import com.v2ray.ang.extension.snackbarDefault
 import com.v2ray.ang.extension.snackbarError
 import com.v2ray.ang.extension.snackbarSuccess
+import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
@@ -145,7 +146,7 @@ class ServerProxyChainActivity : BaseActivity() {
         if (isRunning) {
             SettingsChangeManager.makeRestartService()
         }
-        snackbarSuccess(R.string.toast_success, title = getString(R.string.title_alerter_success))
+        toastSuccess(R.string.toast_success)
         finish()
         return true
     }

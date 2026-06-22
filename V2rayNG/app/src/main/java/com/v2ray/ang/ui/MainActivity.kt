@@ -33,6 +33,9 @@ import com.v2ray.ang.enums.PermissionType
 import com.v2ray.ang.extension.snackbarDefault
 import com.v2ray.ang.extension.snackbarError
 import com.v2ray.ang.extension.snackbarSuccess
+import com.v2ray.ang.extension.toastInfo
+import com.v2ray.ang.extension.toastSuccess
+import com.v2ray.ang.extension.toastError
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
@@ -742,18 +745,17 @@ class MainActivity : HelperBaseActivity(),
             withContext(Dispatchers.Main) {
                 when {
                     result.successCount + result.failureCount + result.skipCount == 0 -> {
-                        snackbarDefault(getString(R.string.title_update_subscription_no_subscription), title = getString(R.string.title_alerter_info))
+                        toastInfo(getString(R.string.title_update_subscription_no_subscription))
                     }
                     result.successCount > 0 && result.failureCount + result.skipCount == 0 -> {
-                        snackbarSuccess(getString(R.string.title_update_config_count, result.configCount), title = getString(R.string.title_alerter_success))
+                        toastSuccess(getString(R.string.title_update_config_count, result.configCount))
                     }
                     else -> {
-                        snackbarDefault(
+                        toastInfo(
                             getString(
                                 R.string.title_update_subscription_result,
                                 result.configCount, result.successCount, result.failureCount, result.skipCount
-                            ),
-                            title = getString(R.string.title_alerter_info)
+                            )
                         )
                     }
                 }

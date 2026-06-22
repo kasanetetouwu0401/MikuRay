@@ -36,7 +36,7 @@ import com.v2ray.ang.AngApplication
 import com.v2ray.ang.R
 import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.util.getColorAttr
-import es.dmoral.toasty.Toasty
+import com.neko.toasty.Toasty
 import java.io.Serializable
 import java.lang.ref.WeakReference
 import java.net.URI
@@ -98,6 +98,22 @@ fun Context.toastError(message: Int) {
 
 fun Context.toastError(message: CharSequence) {
     Toasty.error(this, message, Toast.LENGTH_SHORT, true).show()
+}
+
+fun Context.toastInfo(message: Int) {
+    Toasty.info(this, message, Toast.LENGTH_SHORT, true).show()
+}
+
+fun Context.toastInfo(message: CharSequence) {
+    Toasty.info(this, message, Toast.LENGTH_SHORT, true).show()
+}
+
+fun Context.toastWarning(message: Int) {
+    Toasty.warning(this, message, Toast.LENGTH_SHORT, true).show()
+}
+
+fun Context.toastWarning(message: CharSequence) {
+    Toasty.warning(this, message, Toast.LENGTH_SHORT, true).show()
 }
 
 private fun Context.findSnackbarParent(): View? {
