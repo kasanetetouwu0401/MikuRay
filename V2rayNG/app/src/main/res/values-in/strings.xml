@@ -523,7 +523,7 @@
     <string name="del_routing_dialog_comfirm_message">Yakin mau hapus settingan routing ini? Kalau udah dihapus, datanya bakal hilang permanen dan nggak bisa dibalikin lagi lho.</string>
     <string name="del_file_asset_dialog_comfirm_message">Yakin mau hapus file aset ini? Kalau udah dihapus, datanya bakal hilang permanen dan nggak bisa dibalikin lagi lho.</string>
     <string name="del_button_dialog_comfirm">Hapus</string>
-    <string name="menu_item_search_main">Cari konfig</string>
+    <string name="menu_item_search_main">Cari konfig...</string>
     <string name="pref_show_weather_chip_title">Tampilin info cuaca</string>
     <string name="pref_show_weather_chip_summary">Tampilin suhu sekarang di sebelah bar pencarian sesuai sama lokasi kamu</string>
     <string name="title_vpn_sound_settings">Suara</string>
