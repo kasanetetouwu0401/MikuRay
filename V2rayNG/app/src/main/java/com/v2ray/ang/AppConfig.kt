@@ -123,9 +123,16 @@ object AppConfig {
     const val PREF_KEEP_AWAKE = "pref_keep_awake"
     const val PREF_SHOW_WEATHER_CHIP = "pref_show_weather_chip"
     const val PREF_WEATHER_CACHE_TEMP = "pref_weather_cache_temp"
-    const val PREF_WEATHER_CACHE_CODE = "pref_weather_cache_code"
-    const val PREF_WEATHER_CACHE_IS_DAY = "pref_weather_cache_is_day"
+    const val PREF_WEATHER_CACHE_EMOJI = "pref_weather_cache_emoji"
     const val PREF_WEATHER_CACHE_TIMESTAMP = "pref_weather_cache_timestamp"
+    const val PREF_WEATHER_USE_CELSIUS = "pref_weather_use_celsius"
+    const val PREF_WEATHER_API = "pref_weather_api"
+    const val PREF_WEATHER_OWM_KEY = "pref_weather_owm_key"
+
+    const val WEATHER_API_OPEN_METEO = "open_meteo"
+    const val WEATHER_API_WTTR = "wttr"
+    const val WEATHER_API_OWM = "owm"
+    const val WEATHER_API_DEFAULT = WEATHER_API_OPEN_METEO
     const val WEATHER_CACHE_TTL_MS = 30 * 60 * 1000L
     const val WEATHER_UPDATE_TASK_NAME = "weather_updater"
     const val WEATHER_UPDATE_INTERVAL_MINUTES = 30L

@@ -109,6 +109,9 @@ class UiSettingsActivity : BaseActivity() {
         private val headerTopRowPaddingSlider by lazy { findPreference<HeaderTopRowPaddingDialog>(AppConfig.PREF_HEADER_TOP_ROW_PADDING) }
         private val groupAllTabIcon by lazy { findPreference<Preference>(AppConfig.PREF_GROUP_ALL_TAB_ICON) }
         private val showWeatherChip by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_WEATHER_CHIP) }
+        private val weatherApi by lazy { findPreference<ListPreference>(AppConfig.PREF_WEATHER_API) }
+        private val weatherOwmKey by lazy { findPreference<EditTextPreference>(AppConfig.PREF_WEATHER_OWM_KEY) }
+        private val weatherUnit by lazy { findPreference<ListPreference>(AppConfig.PREF_WEATHER_USE_CELSIUS) }
         private val showTotalTrafficChip by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP) }
 
         private var tabIconPickerDialog: androidx.appcompat.app.AlertDialog? = null
@@ -328,6 +331,42 @@ class UiSettingsActivity : BaseActivity() {
                     WeatherHelper.cancelBackgroundUpdates(requireContext())
                 }
                 showTotalTrafficChip?.isEnabled = !checked
+                updateWeatherSubPrefsEnabled(checked)
+                true
+            }
+
+            weatherApi?.setOnPreferenceChangeListener { pref, newValue ->
+                val valueStr = newValue.toString()
+                (pref as? ListPreference)?.let { lp ->
+                    val idx = lp.findIndexOfValue(valueStr)
+                    lp.summary = if (idx >= 0) lp.entries[idx] else valueStr
+                }
+                weatherOwmKey?.isVisible = valueStr == AppConfig.WEATHER_API_OWM
+                // Clear cache so chip refreshes with new API immediately
+                WeatherHelper.clearCache()
+                true
+            }
+
+            weatherOwmKey?.apply {
+                setOnBindEditTextListener { et ->
+                    et.inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                        android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                    et.setSingleLine()
+                }
+                setOnPreferenceChangeListener { _, newValue ->
+                    MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_OWM_KEY, newValue.toString())
+                    WeatherHelper.clearCache()
+                    true
+                }
+            }
+
+            weatherUnit?.setOnPreferenceChangeListener { pref, newValue ->
+                val valueStr = newValue.toString()
+                (pref as? ListPreference)?.let { lp ->
+                    val idx = lp.findIndexOfValue(valueStr)
+                    lp.summary = if (idx >= 0) lp.entries[idx] else valueStr
+                }
+                MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_USE_CELSIUS, valueStr)
                 true
             }
 
@@ -752,11 +791,21 @@ class UiSettingsActivity : BaseActivity() {
             }
         }
 
+        private fun updateWeatherSubPrefsEnabled(weatherOn: Boolean) {
+            val currentApi = MmkvManager.decodeSettingsString(AppConfig.PREF_WEATHER_API, "")
+                .takeIf { !it.isNullOrEmpty() } ?: AppConfig.WEATHER_API_DEFAULT
+            weatherApi?.isEnabled = weatherOn
+            weatherUnit?.isEnabled = weatherOn
+            weatherOwmKey?.isEnabled = weatherOn
+            weatherOwmKey?.isVisible = weatherOn && currentApi == AppConfig.WEATHER_API_OWM
+        }
+
         private fun updateChipPreferenceEnabledState() {
             val weatherOn = showWeatherChip?.isChecked == true
             val trafficOn = showTotalTrafficChip?.isChecked == true
             showWeatherChip?.isEnabled = !trafficOn
             showTotalTrafficChip?.isEnabled = !weatherOn
+            updateWeatherSubPrefsEnabled(weatherOn)
         }
 
         override fun onDestroyView() {

@@ -273,10 +273,10 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun applyWeatherToChip(weather: WeatherHelper.WeatherResult) {
-        binding.ivWeatherIcon.setImageResource(WeatherHelper.iconResFor(weather.weatherCode, weather.isDay))
-        binding.tvWeatherTemp.text = getString(R.string.weather_temp_format, weather.tempCelsius)
-        
-        binding.pbWeatherLoading.isVisible = false 
+        binding.ivWeatherIcon.setImageResource(WeatherHelper.iconResForEmoji(weather.emoji))
+        binding.tvWeatherTemp.text = weather.getTemperatureString(WeatherHelper.isCelsius())
+
+        binding.pbWeatherLoading.isVisible = false
         binding.ivWeatherIcon.isVisible = true
         binding.tvWeatherTemp.isVisible = true
         binding.layoutWeatherChip.isVisible = true

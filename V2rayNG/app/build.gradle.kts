@@ -30,6 +30,9 @@ android {
         resValue("string", "uwu_package_name", applicationId.toString())
         resValue("string", "uwu_build_date", rootProject.extra["BUILD_DATE"].toString())
 
+        val owmKey = System.getenv("OWM_API_KEY") ?: ""
+        buildConfigField("String", "OWM_API_KEY", "\"$owmKey\"")
+
         val abiFilterList = (properties["ABI_FILTERS"] as? String)?.split(';')
         splits {
             abi {
