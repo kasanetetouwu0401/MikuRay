@@ -126,7 +126,7 @@ object AppConfig {
     const val PREF_WEATHER_CACHE_CODE = "pref_weather_cache_code"
     const val PREF_WEATHER_CACHE_IS_DAY = "pref_weather_cache_is_day"
     const val PREF_WEATHER_CACHE_TIMESTAMP = "pref_weather_cache_timestamp"
-    const val WEATHER_CACHE_TTL_MS = 30 * 60 * 1000L // 30 menit
+    const val WEATHER_CACHE_TTL_MS = 30 * 60 * 1000L
 
     // Profile banner, sheet banner, home banner & username
     const val PREF_CUSTOM_PROFILE_NAME = "custom_profile_name"

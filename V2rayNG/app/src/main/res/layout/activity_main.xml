@@ -170,8 +170,7 @@
                         android:paddingLeft="14dp"
                         android:paddingRight="10dp"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:paddingHorizontal="14dp">
+                        android:layout_height="match_parent">
 
                         <ImageView
                             android:layout_width="25dp"

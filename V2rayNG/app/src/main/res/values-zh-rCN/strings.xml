@@ -521,7 +521,9 @@
     <string name="del_routing_dialog_comfirm_message">确定要删除此路由设置吗？一旦删除，数据将永久丢失且无法找回。</string>
     <string name="del_file_asset_dialog_comfirm_message">确定要删除此资产文件吗？一旦删除，数据将永久丢失且无法找回。</string>
     <string name="del_button_dialog_comfirm">删除</string>
-    <string name="menu_item_search_main">在找什么吗？</string>
+    <string name="menu_item_search_main">搜索配置</string>
+    <string name="pref_show_weather_chip_title">显示天气组件</string>
+    <string name="pref_show_weather_chip_summary">根据你的位置，在搜索栏旁边显示当前温度</string>
     <string name="title_vpn_sound_settings">声音</string>
     <string name="title_pref_sound_on_connect">连接提示音</string>
     <string name="summary_pref_sound_on_connect">连接或断开时播放声音</string>
