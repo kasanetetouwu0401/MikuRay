@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.content.res.AppCompatResources;
 import android.view.View;
+import com.v2ray.ang.R;
 
 final class ToastyUtils {
     private ToastyUtils() {
@@ -24,7 +25,7 @@ final class ToastyUtils {
     }
 
     static Drawable tint9PatchDrawableFrame(@NonNull Context context, @ColorInt int tintColor) {
-        final NinePatchDrawable toastDrawable = (NinePatchDrawable) getDrawable(context, R.drawable.toast_frame);
+        final NinePatchDrawable toastDrawable = (NinePatchDrawable) getDrawable(context, R.drawable.uwu_bg_sin);
         return tintIcon(toastDrawable, tintColor);
     }
 
