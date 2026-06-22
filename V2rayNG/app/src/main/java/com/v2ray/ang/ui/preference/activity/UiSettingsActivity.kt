@@ -665,9 +665,8 @@ class UiSettingsActivity : BaseActivity() {
                     when (val p = group.getPreference(i)) {
                         is androidx.preference.PreferenceGroup -> traverse(p)
                         is ListPreference -> {
-                            // Kalau value belum di-set di MMKV, pakai defaultValue supaya entry/summary muncul bener
-                            if (p.value == null && p.defaultValue != null) {
-                                p.value = p.defaultValue.toString()
+                            if (p.value == null && !p.entryValues.isNullOrEmpty()) {
+                                p.value = p.entryValues[0].toString()
                             }
                             p.summary = p.entry ?: ""
                             p.setOnPreferenceChangeListener { pref, newValue ->

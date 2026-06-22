@@ -127,7 +127,6 @@ object AppConfig {
     const val PREF_WEATHER_CACHE_TIMESTAMP = "pref_weather_cache_timestamp"
     const val PREF_WEATHER_USE_CELSIUS = "pref_weather_use_celsius"
     const val PREF_WEATHER_API = "pref_weather_api"
-    const val PREF_WEATHER_OWM_KEY = "pref_weather_owm_key"
 
     const val WEATHER_API_OPEN_METEO = "open_meteo"
     const val WEATHER_API_WTTR = "wttr"
