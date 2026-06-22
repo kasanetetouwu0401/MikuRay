@@ -128,10 +128,26 @@ class MainActivity : HelperBaseActivity(),
         BlurBottomStatusController.applyState(this, binding)
 
         SubscriptionUpdater.sync()
+        syncWeatherBackgroundUpdates()
         mainViewModel.reloadServerList()
         refreshGroupTabTitles(true)
 
         checkAndRequestPermission(PermissionType.POST_NOTIFICATIONS) {}
+    }
+
+    /**
+     * Pastikan worker cuaca tetap terjadwal kalau fitur weather chip aktif dan semua izin
+     * lokasi (termasuk background) sudah ada. Dipanggil tiap onCreate supaya tetap konsisten
+     * walau jadwal worker sebelumnya hilang (misal setelah reinstall) atau permission baru
+     * di-grant lewat halaman Settings sistem, bukan lewat dialog in-app.
+     */
+    private fun syncWeatherBackgroundUpdates() {
+        val weatherEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)
+        if (weatherEnabled && WeatherHelper.hasBackgroundLocationPermission(this)) {
+            WeatherHelper.scheduleBackgroundUpdates(this)
+        } else if (!weatherEnabled) {
+            WeatherHelper.cancelBackgroundUpdates(this)
+        }
     }
 
     override fun onResume() {

@@ -45,6 +45,7 @@ import com.v2ray.ang.ui.preference.CustomBannerPreference
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
 import com.v2ray.ang.util.BannerColorExtractor
 import com.v2ray.ang.util.ThemeManager
+import com.v2ray.ang.util.WeatherHelper
 import com.v2ray.ang.util.showBlur
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
@@ -84,6 +85,7 @@ class UiSettingsActivity : BaseActivity() {
 
         companion object {
             private const val REQUEST_CODE_LOCATION = 9001
+            private const val REQUEST_CODE_BACKGROUND_LOCATION = 9002
         }
 
         private val appTheme by lazy { findPreference<Preference>(AppConfig.PREF_APP_THEME) }
@@ -311,15 +313,23 @@ class UiSettingsActivity : BaseActivity() {
                 val checked = newValue as Boolean
                 MmkvManager.encodeSettings(AppConfig.PREF_SHOW_WEATHER_CHIP, checked)
                 if (checked) {
-                    val hasPermission = ContextCompat.checkSelfPermission(
+                    val hasForegroundPermission = ContextCompat.checkSelfPermission(
                         requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION
                     ) == PackageManager.PERMISSION_GRANTED
-                    if (!hasPermission) {
+                    if (!hasForegroundPermission) {
+                        // Foreground permission belum ada -> minta itu dulu. Background
+                        // location baru diminta setelah foreground granted (lihat
+                        // onRequestPermissionsResult di bawah), karena Android tidak
+                        // mengizinkan request keduanya bersamaan dalam satu dialog.
                         requestPermissions(
                             arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
                             REQUEST_CODE_LOCATION
                         )
+                    } else {
+                        requestBackgroundLocationThenSchedule()
                     }
+                } else {
+                    WeatherHelper.cancelBackgroundUpdates(requireContext())
                 }
                 showTotalTrafficChip?.isEnabled = !checked
                 true
@@ -651,6 +661,50 @@ class UiSettingsActivity : BaseActivity() {
             preferenceScreen?.let { traverse(it) }
         }
 
+        /**
+         * Minta ACCESS_BACKGROUND_LOCATION (kalau perlu) baru lalu jadwalkan worker cuaca.
+         * Di Android 9 ke bawah, foreground permission saja sudah cukup buat background
+         * access, jadi langsung schedule tanpa dialog tambahan.
+         */
+        private fun requestBackgroundLocationThenSchedule() {
+            if (WeatherHelper.hasBackgroundLocationPermission(requireContext())) {
+                WeatherHelper.scheduleBackgroundUpdates(requireContext(), forceReschedule = true)
+                return
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                requestPermissions(
+                    arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                    REQUEST_CODE_BACKGROUND_LOCATION
+                )
+            }
+        }
+
+        override fun onRequestPermissionsResult(
+            requestCode: Int,
+            permissions: Array<out String>,
+            grantResults: IntArray
+        ) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+            when (requestCode) {
+                REQUEST_CODE_LOCATION -> {
+                    // Foreground location baru saja diminta lewat toggle weather chip.
+                    // Granted atau tidak, lanjut coba minta background permission supaya
+                    // worker bisa langsung dijadwalkan begitu user menyalakan fitur ini.
+                    if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
+                        requestBackgroundLocationThenSchedule()
+                    }
+                }
+                REQUEST_CODE_BACKGROUND_LOCATION -> {
+                    if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
+                        // Worker tetap dijadwalkan walau background location ditolak —
+                        // UpdateWorker akan no-op dengan aman sampai user grant izinnya,
+                        // dan foreground refresh (saat app dibuka) tetap berfungsi normal.
+                        WeatherHelper.scheduleBackgroundUpdates(requireContext(), forceReschedule = true)
+                    }
+                }
+            }
+        }
+
         override fun onStart() {
             super.onStart()
             val isDynamicColor = MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, false)
@@ -713,6 +767,12 @@ class UiSettingsActivity : BaseActivity() {
             }
         }
 
+        /**
+         * Weather chip dan total data usage chip berbagi layout yang sama di search bar,
+         * jadi cuma boleh salah satu yang aktif. Kalau salah satu nyala, yang lain di-disable
+         * (bukan dimatikan) supaya user tetap bisa lihat state-nya tanpa bisa langsung
+         * menyalakan dua-duanya sekaligus.
+         */
         private fun updateChipPreferenceEnabledState() {
             val weatherOn = showWeatherChip?.isChecked == true
             val trafficOn = showTotalTrafficChip?.isChecked == true

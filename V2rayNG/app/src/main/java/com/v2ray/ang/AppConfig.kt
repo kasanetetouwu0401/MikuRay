@@ -127,6 +127,8 @@ object AppConfig {
     const val PREF_WEATHER_CACHE_IS_DAY = "pref_weather_cache_is_day"
     const val PREF_WEATHER_CACHE_TIMESTAMP = "pref_weather_cache_timestamp"
     const val WEATHER_CACHE_TTL_MS = 30 * 60 * 1000L
+    const val WEATHER_UPDATE_TASK_NAME = "weather_updater"
+    const val WEATHER_UPDATE_INTERVAL_MINUTES = 30L
     const val PREF_SHOW_TOTAL_TRAFFIC_CHIP = "pref_show_total_traffic_chip"
 
     // Profile banner, sheet banner, home banner & username

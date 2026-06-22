@@ -4,6 +4,13 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
+import androidx.work.Constraints
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkerParameters
+import androidx.work.multiprocess.RemoteWorkManager
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
@@ -48,6 +55,20 @@ object WeatherHelper {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    /**
+     * "Allow all the time" — wajib granted terpisah dari foreground location di Android 10+,
+     * supaya worker WorkManager bisa minta fix lokasi baru saat app tidak di foreground.
+     * Di Android 9 ke bawah, foreground location permission saja sudah cukup.
+     */
+    fun hasBackgroundLocationPermission(context: Context): Boolean {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
+            return hasLocationPermission(context)
+        }
+        return ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
     fun getCachedWeather(): WeatherResult? {
         val timestamp = MmkvManager.decodeSettingsLong(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
         if (timestamp == 0L) return null
@@ -84,6 +105,9 @@ object WeatherHelper {
         } else {
             Priority.PRIORITY_BALANCED_POWER_ACCURACY
         }
+        // flushLocations() membuang buffer lokasi internal Fused Provider, supaya
+        // getCurrentLocation() di bawah ini gak balikin fix lama yang masih dianggap "segar"
+        // oleh Play Services. Penting khusus untuk force refresh.
         if (force) {
             runCatching { fusedClient.flushLocations() }
         }
@@ -141,6 +165,103 @@ object WeatherHelper {
             71, 73, 75, 77, 85, 86 -> R.drawable.ic_weather_snow
             95, 96, 99 -> R.drawable.ic_weather_storm
             else -> if (isDay) R.drawable.ic_weather_sunny else R.drawable.ic_weather_night
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Background auto-refresh (WorkManager)
+    // -------------------------------------------------------------------------
+    // Menjaga cache cuaca tetap segar walau MainActivity tidak dibuka, supaya
+    // begitu user membuka app lagi, chip langsung menampilkan data yang baru
+    // saja di-fetch oleh worker, bukan cache lama yang menunggu di-refresh
+    // secara manual lewat onResume().
+
+    /**
+     * Jadwalkan/refresh periodic worker cuaca. Aman dipanggil berulang kali
+     * (misalnya tiap MainActivity.onResume()) karena pakai ExistingPeriodicWorkPolicy.KEEP
+     * secara default, sehingga tidak reset timer worker yang sudah jalan.
+     *
+     * @param forceReschedule pakai REPLACE, untuk dipanggil setelah toggle weather chip
+     *                         dinyalakan supaya worker langsung jalan dari awal.
+     */
+    fun scheduleBackgroundUpdates(context: Context, forceReschedule: Boolean = false) {
+        if (!hasLocationPermission(context)) {
+            LogUtil.e("WeatherHelper", "scheduleBackgroundUpdates: no location permission, skip")
+            return
+        }
+
+        val request = PeriodicWorkRequestBuilder<UpdateWorker>(
+            AppConfig.WEATHER_UPDATE_INTERVAL_MINUTES, TimeUnit.MINUTES
+        )
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .addTag(AppConfig.WEATHER_UPDATE_TASK_NAME)
+            .build()
+
+        val policy = if (forceReschedule) {
+            ExistingPeriodicWorkPolicy.REPLACE
+        } else {
+            ExistingPeriodicWorkPolicy.KEEP
+        }
+
+        RemoteWorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            AppConfig.WEATHER_UPDATE_TASK_NAME,
+            policy,
+            request
+        )
+        LogUtil.i(
+            "WeatherHelper",
+            "scheduleBackgroundUpdates: scheduled, interval=${AppConfig.WEATHER_UPDATE_INTERVAL_MINUTES}min policy=$policy"
+        )
+    }
+
+    /**
+     * Batalkan periodic worker cuaca. Panggil saat weather chip dimatikan dari Settings,
+     * supaya app tidak terus minta lokasi/network di background tanpa perlu.
+     */
+    fun cancelBackgroundUpdates(context: Context) {
+        RemoteWorkManager.getInstance(context).cancelUniqueWork(AppConfig.WEATHER_UPDATE_TASK_NAME)
+        LogUtil.i("WeatherHelper", "cancelBackgroundUpdates: cancelled")
+    }
+
+    /**
+     * Worker yang dijalankan WorkManager secara periodik. Reuse fetchCurrentWeather()
+     * yang sama dipakai MainActivity, supaya hasil & cache-nya konsisten — begitu worker
+     * berhasil, MainActivity.onResume() akan langsung baca cache yang sudah fresh ini
+     * lewat getCachedWeather(), tanpa perlu nunggu fetch baru saat app dibuka.
+     */
+    class UpdateWorker(context: Context, params: WorkerParameters) :
+        CoroutineWorker(context, params) {
+
+        override suspend fun doWork(): Result {
+            if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
+                LogUtil.i("WeatherHelper", "UpdateWorker: weather chip disabled, skipping run")
+                return Result.success()
+            }
+            if (!hasBackgroundLocationPermission(applicationContext)) {
+                LogUtil.w(
+                    "WeatherHelper",
+                    "UpdateWorker: missing ACCESS_BACKGROUND_LOCATION, cannot fetch in background"
+                )
+                // Bukan failure permanen secara konseptual (user bisa grant permission
+                // kapan saja), tapi retry terus-menerus tanpa permission cuma buang baterai.
+                return Result.success()
+            }
+
+            val result = fetchCurrentWeather(applicationContext)
+            return if (result != null) {
+                LogUtil.i(
+                    "WeatherHelper",
+                    "UpdateWorker: success, temp=${result.tempCelsius} code=${result.weatherCode}"
+                )
+                Result.success()
+            } else {
+                LogUtil.w("WeatherHelper", "UpdateWorker: fetch failed, will retry")
+                Result.retry()
+            }
         }
     }
 }
