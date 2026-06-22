@@ -279,9 +279,7 @@ object WeatherHelper {
 
     // OpenWeatherMap ──────────────────────────────────────────────────────────
     private fun fetchOwm(location: android.location.Location): WeatherResult? {
-        val apiKey = MmkvManager.decodeSettingsString(AppConfig.PREF_WEATHER_OWM_KEY, "")
-            ?.takeIf { it.isNotBlank() }
-            ?: com.v2ray.ang.BuildConfig.OWM_API_KEY.takeIf { it.isNotBlank() }
+        val apiKey = com.v2ray.ang.BuildConfig.OWM_API_KEY.takeIf { it.isNotBlank() }
         if (apiKey == null) {
             LogUtil.w("WeatherHelper", "OWM API key not set")
             return null

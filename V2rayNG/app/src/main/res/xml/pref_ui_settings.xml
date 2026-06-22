@@ -213,6 +213,7 @@
         <androidx.preference.ListPreference
             android:icon="@drawable/ic_weather_sunny"
             app:layout="@layout/uwu_mid"
+            android:defaultValue="true"
             android:entries="@array/weather_unit_entries"
             android:entryValues="@array/weather_unit_values"
             android:key="pref_weather_use_celsius"
