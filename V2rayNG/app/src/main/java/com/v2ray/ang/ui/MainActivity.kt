@@ -202,6 +202,41 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
+    /**
+     * Dipanggil saat chip cuaca di-tap. Skip cache (basi maupun masih segar) dan langsung
+     * hit API lagi, supaya user bisa minta data terbaru kapan saja tanpa nunggu TTL cache habis.
+     */
+    private fun forceRefreshWeatherChip() {
+        if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) return
+
+        if (!WeatherHelper.hasLocationPermission(this)) {
+            checkAndRequestPermission(PermissionType.LOCATION) {
+                forceRefreshWeatherChip()
+            }
+            return
+        }
+
+        binding.layoutWeatherChip.isVisible = true
+        binding.pbWeatherLoading.isVisible = true
+        binding.ivWeatherIcon.isVisible = false
+        binding.tvWeatherTemp.isVisible = false
+
+        lifecycleScope.launch {
+            val weather = WeatherHelper.fetchCurrentWeather(this@MainActivity)
+            binding.pbWeatherLoading.isVisible = false
+            if (weather == null) {
+                val stale = WeatherHelper.getCachedWeatherStale()
+                if (stale != null) {
+                    applyWeatherToChip(stale)
+                } else {
+                    binding.layoutWeatherChip.isVisible = false
+                }
+                return@launch
+            }
+            applyWeatherToChip(weather)
+        }
+    }
+
     private fun loadWeatherChip() {
         binding.layoutWeatherChip.isVisible = true
         binding.pbWeatherLoading.isVisible = false
@@ -393,6 +428,12 @@ class MainActivity : HelperBaseActivity(),
         
         binding.btnAddSub.setOnClickListener {
             requestActivityLauncher.launch(Intent(this, SubEditActivity::class.java))
+        }
+
+        binding.layoutWeatherChip.setOnClickListener {
+            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
+                forceRefreshWeatherChip()
+            }
         }
     }
 
