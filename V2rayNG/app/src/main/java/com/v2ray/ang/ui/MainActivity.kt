@@ -116,6 +116,8 @@ class MainActivity : HelperBaseActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        
+        hideLoading()
 
         window.statusBarColor = android.graphics.Color.TRANSPARENT
 
@@ -273,6 +275,8 @@ class MainActivity : HelperBaseActivity(),
     private fun applyWeatherToChip(weather: WeatherHelper.WeatherResult) {
         binding.ivWeatherIcon.setImageResource(WeatherHelper.iconResFor(weather.weatherCode, weather.isDay))
         binding.tvWeatherTemp.text = getString(R.string.weather_temp_format, weather.tempCelsius)
+        
+        binding.pbWeatherLoading.isVisible = false 
         binding.ivWeatherIcon.isVisible = true
         binding.tvWeatherTemp.isVisible = true
         binding.layoutWeatherChip.isVisible = true
@@ -1079,6 +1083,8 @@ class MainActivity : HelperBaseActivity(),
     }
 
     override fun onDestroy() {
+        hideLoading()
+        
         tabMediator?.detach()
         
         try {

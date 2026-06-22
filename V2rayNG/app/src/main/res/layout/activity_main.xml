@@ -219,7 +219,7 @@
                                 android:layout_height="14dp"
                                 android:gravity="center"
                                 android:indeterminateTint="?colorOnSurfaceVariant"
-                                android:visibility="visible" />
+                                android:visibility="gone" />
 
                             <TextView
                                 android:id="@+id/tv_weather_temp"
