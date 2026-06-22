@@ -151,6 +151,7 @@ dependencies {
     implementation(libs.skydoves.colorpickerview)
     implementation(libs.qmdeve.blurview)
     implementation(libs.com.airbnb.android.lottie)
+    implementation(libs.jetradar.snowfall)
 
     // Data and Storage Libraries
     implementation(libs.mmkv.static)

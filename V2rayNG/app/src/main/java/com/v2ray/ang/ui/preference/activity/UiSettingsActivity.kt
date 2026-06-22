@@ -92,6 +92,7 @@ class UiSettingsActivity : BaseActivity() {
         private val dynamicColor by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_DYNAMIC_COLOR) }
         private val dynamicColorBanner by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_DYNAMIC_COLOR_BANNER) }
         private val showHomeBanner by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_HOME_BANNER) }
+        private val showSnowfall by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_SNOWFALL) }
         private val trueBlack by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_TRUE_BLACK) }
         private val enableBlur by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_ENABLE_BLUR) }
         private val blurBottomStatus by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_BLUR_BOTTOM_STATUS) }
@@ -384,6 +385,7 @@ class UiSettingsActivity : BaseActivity() {
 
             setupProfilePreferences()
             setupHomeBannerPreferences()
+            setupSnowfallPreference()
             setupSheetBannerPreferences()
             setupParticlesPreferences()
         }
@@ -540,6 +542,23 @@ class UiSettingsActivity : BaseActivity() {
                 }
                 true
             }
+        }
+
+        private fun setupSnowfallPreference() {
+            showSnowfall?.apply {
+                isChecked = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_SNOWFALL, false)
+                setOnPreferenceChangeListener { _, newValue ->
+                    MmkvManager.encodeSettings(AppConfig.PREF_SHOW_SNOWFALL, newValue as Boolean)
+                    broadcastSnowfallChanged()
+                    true
+                }
+            }
+        }
+
+        private fun broadcastSnowfallChanged() {
+            requireContext().sendBroadcast(
+                android.content.Intent(AppConfig.BROADCAST_ACTION_SNOWFALL_CHANGED)
+            )
         }
 
         private fun setupParticlesPreferences() {
