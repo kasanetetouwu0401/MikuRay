@@ -112,6 +112,7 @@ class UiSettingsActivity : BaseActivity() {
         private val weatherApi by lazy { findPreference<ListPreference>(AppConfig.PREF_WEATHER_API) }
         private val weatherUnit by lazy { findPreference<ListPreference>(AppConfig.PREF_WEATHER_USE_CELSIUS) }
         private val showTotalTrafficChip by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP) }
+        private val searchChipGradient by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SEARCH_CHIP_GRADIENT) }
 
         private var tabIconPickerDialog: androidx.appcompat.app.AlertDialog? = null
 
@@ -328,9 +329,11 @@ class UiSettingsActivity : BaseActivity() {
                     }
                 } else {
                     WeatherHelper.cancelBackgroundUpdates(requireContext())
+                    revokeWeatherLocationPermission()
                 }
                 showTotalTrafficChip?.isEnabled = !checked
                 updateWeatherSubPrefsEnabled(checked)
+                searchChipGradient?.isEnabled = checked || (showTotalTrafficChip?.isChecked == true)
                 true
             }
 
@@ -358,6 +361,7 @@ class UiSettingsActivity : BaseActivity() {
                 val checked = newValue as Boolean
                 MmkvManager.encodeSettings(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP, checked)
                 showWeatherChip?.isEnabled = !checked
+                searchChipGradient?.isEnabled = checked || (showWeatherChip?.isChecked == true)
                 true
             }
 
@@ -783,11 +787,29 @@ class UiSettingsActivity : BaseActivity() {
             weatherUnit?.isEnabled = weatherOn
         }
 
+        private fun revokeWeatherLocationPermission() {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
+            val context = requireContext()
+            val permissions = listOfNotNull(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                } else null
+            ).filter {
+                ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+            }
+            if (permissions.isNotEmpty()) {
+                context.revokeSelfPermissionsOnKill(permissions)
+            }
+        }
+
         private fun updateChipPreferenceEnabledState() {
             val weatherOn = showWeatherChip?.isChecked == true
             val trafficOn = showTotalTrafficChip?.isChecked == true
             showWeatherChip?.isEnabled = !trafficOn
             showTotalTrafficChip?.isEnabled = !weatherOn
+            searchChipGradient?.isEnabled = weatherOn || trafficOn
             updateWeatherSubPrefsEnabled(weatherOn)
         }
 
