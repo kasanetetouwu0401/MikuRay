@@ -64,6 +64,12 @@ android {
                 "proguard-rules.pro"
             )
         }
+        
+        debug {
+            isDebuggable = true
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
     }
 
     sourceSets {
