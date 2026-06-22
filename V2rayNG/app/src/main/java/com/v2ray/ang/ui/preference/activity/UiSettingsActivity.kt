@@ -107,6 +107,7 @@ class UiSettingsActivity : BaseActivity() {
         private val headerTopRowPaddingSlider by lazy { findPreference<HeaderTopRowPaddingDialog>(AppConfig.PREF_HEADER_TOP_ROW_PADDING) }
         private val groupAllTabIcon by lazy { findPreference<Preference>(AppConfig.PREF_GROUP_ALL_TAB_ICON) }
         private val showWeatherChip by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_WEATHER_CHIP) }
+        private val showTotalTrafficChip by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP) }
 
         private var tabIconPickerDialog: androidx.appcompat.app.AlertDialog? = null
 
@@ -319,8 +320,17 @@ class UiSettingsActivity : BaseActivity() {
                         )
                     }
                 }
+                updateChipPreferenceEnabledState()
                 true
             }
+
+            showTotalTrafficChip?.setOnPreferenceChangeListener { _, newValue ->
+                MmkvManager.encodeSettings(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP, newValue as Boolean)
+                updateChipPreferenceEnabledState()
+                true
+            }
+
+            updateChipPreferenceEnabledState()
 
             updateGroupAllTabIconSummary()
             groupAllTabIcon?.setOnPreferenceClickListener {
@@ -699,6 +709,19 @@ class UiSettingsActivity : BaseActivity() {
                 val resId = resources.getIdentifier(iconName, "drawable", requireContext().packageName)
                 if (resId != 0) groupAllTabIcon?.setIcon(resId)
             }
+        }
+
+        /**
+         * Weather chip dan total data usage chip berbagi layout yang sama di search bar,
+         * jadi cuma boleh salah satu yang aktif. Kalau salah satu nyala, yang lain di-disable
+         * (bukan dimatikan) supaya user tetap bisa lihat state-nya tanpa bisa langsung
+         * menyalakan dua-duanya sekaligus.
+         */
+        private fun updateChipPreferenceEnabledState() {
+            val weatherOn = showWeatherChip?.isChecked == true
+            val trafficOn = showTotalTrafficChip?.isChecked == true
+            showWeatherChip?.isEnabled = !trafficOn
+            showTotalTrafficChip?.isEnabled = !weatherOn
         }
 
         override fun onDestroyView() {

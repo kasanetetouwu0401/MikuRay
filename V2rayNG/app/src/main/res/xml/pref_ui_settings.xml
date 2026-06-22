@@ -179,21 +179,35 @@
             
         <androidx.preference.SwitchPreferenceCompat
             android:icon="@drawable/ic_toggle_switch"
-            app:layout="@layout/uwu_mid_switch"
+            app:layout="@layout/uwu_bot_switch"
             app:widgetLayout="@layout/uwu_widget_material_switch"
             android:defaultValue="false"
             android:key="pref_show_splash_screen"
             android:title="@string/pref_show_splash_title"
             android:summary="@string/pref_show_splash_summary" />
-            
+
+    </com.neko.widget.UwuPreferenceCategory>
+
+    <com.neko.widget.UwuPreferenceCategory android:title="@string/title_search_bar_chip"
+        app:sectionIcon="@drawable/ic_weather_sunny">
+
          <androidx.preference.SwitchPreferenceCompat
             android:icon="@drawable/ic_weather_sunny"
-            app:layout="@layout/uwu_bot_switch"
+            app:layout="@layout/uwu_top_switch"
             app:widgetLayout="@layout/uwu_widget_material_switch"
             android:defaultValue="false"
             android:key="pref_show_weather_chip"
             android:summary="@string/pref_show_weather_chip_summary"
             android:title="@string/pref_show_weather_chip_title" />
+
+         <androidx.preference.SwitchPreferenceCompat
+            android:icon="@drawable/ic_traffic_total"
+            app:layout="@layout/uwu_bot_switch"
+            app:widgetLayout="@layout/uwu_widget_material_switch"
+            android:defaultValue="false"
+            android:key="pref_show_total_traffic_chip"
+            android:summary="@string/pref_show_total_traffic_chip_summary"
+            android:title="@string/pref_show_total_traffic_chip_title" />
 
     </com.neko.widget.UwuPreferenceCategory>
 

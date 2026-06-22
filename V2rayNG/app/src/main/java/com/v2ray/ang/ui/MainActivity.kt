@@ -136,7 +136,56 @@ class MainActivity : HelperBaseActivity(),
 
     override fun onResume() {
         super.onResume()
-        refreshWeatherChip()
+        refreshSearchBarChip()
+    }
+
+    /**
+     * Chip di sebelah search bar dipakai bersama oleh dua fitur: weather dan total data usage
+     * semua profile. Cuma salah satu yang boleh aktif dalam satu waktu:
+     * - Kalau weather chip aktif -> tampilkan weather, total traffic disembunyikan.
+     * - Kalau weather mati tapi total traffic chip aktif -> tampilkan total data usage.
+     * - Kalau dua-duanya mati -> seluruh layout chip disembunyikan.
+     */
+    private fun refreshSearchBarChip() {
+        val weatherEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)
+        val totalTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP, false)
+
+        when {
+            weatherEnabled -> {
+                hideTotalTrafficChip()
+                refreshWeatherChip()
+            }
+            totalTrafficEnabled -> {
+                hideWeatherChipViews()
+                refreshTotalTrafficChip()
+            }
+            else -> {
+                binding.layoutWeatherChip.isVisible = false
+            }
+        }
+    }
+
+    private fun hideWeatherChipViews() {
+        binding.ivWeatherIcon.isVisible = false
+        binding.pbWeatherLoading.isVisible = false
+        binding.tvWeatherTemp.isVisible = false
+    }
+
+    private fun hideTotalTrafficChip() {
+        binding.ivTotalTrafficIcon.isVisible = false
+        binding.tvTotalTraffic.isVisible = false
+    }
+
+    private fun refreshTotalTrafficChip() {
+        val totalTraffic = MmkvManager.getTotalTrafficString()
+        if (totalTraffic == null) {
+            binding.layoutWeatherChip.isVisible = false
+            return
+        }
+        binding.tvTotalTraffic.text = totalTraffic
+        binding.ivTotalTrafficIcon.isVisible = true
+        binding.tvTotalTraffic.isVisible = true
+        binding.layoutWeatherChip.isVisible = true
     }
 
     private fun refreshWeatherChip() {
@@ -455,7 +504,14 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun setupViewModel() {
-        mainViewModel.updateListAction.observe(this) { refreshTabBadges() }
+        mainViewModel.updateListAction.observe(this) {
+            refreshTabBadges()
+            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP, false) &&
+                !MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)
+            ) {
+                refreshTotalTrafficChip()
+            }
+        }
         mainViewModel.updateGroupBadgeAction.observe(this) { refreshTabBadges() }
         mainViewModel.updateTestResultAction.observe(this) { setTestState(it) }
         mainViewModel.updateIpResultAction.observe(this) { ip ->
