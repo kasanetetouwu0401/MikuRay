@@ -189,7 +189,11 @@ object WeatherHelper {
     }
 
     fun clearCache() {
-        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
+        // Don't zero the timestamp out entirely — getCachedWeatherStale() treats ts == 0L
+        // as "no data at all". Setting it to a far-past value still marks the cache as
+        // expired (forces a refetch via getCachedWeather()) while keeping the last known
+        // reading available as a stale fallback if the new API call fails or is slow.
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 1L)
     }
 
     // ── HTTP client ───────────────────────────────────────────────────────────
@@ -301,7 +305,11 @@ object WeatherHelper {
     }
 
     private fun getBody(url: String): String? {
-        val req = Request.Builder().url(url).build()
+        val req = Request.Builder()
+            .url(url)
+            .header("User-Agent", "MikuRay/1.0 (Android)")
+            .header("Accept", "application/json")
+            .build()
         return client.newCall(req).execute().use { resp ->
             if (!resp.isSuccessful) null else resp.body?.string()
         }
