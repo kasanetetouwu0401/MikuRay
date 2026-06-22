@@ -4,19 +4,16 @@
     android:id="@+id/toast_root"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:fitsSystemWindows="false"
     android:gravity="center"
     android:orientation="horizontal"
-    android:paddingHorizontal="16.0dip"
-    android:paddingVertical="25.0dip"
+    android:padding="16.0dip"
     tools:ignore="UseCompoundDrawables">
 
     <ImageView
         android:id="@+id/toast_icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"/>
+        android:layout_marginEnd="12dp" />
 
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/toast_text"

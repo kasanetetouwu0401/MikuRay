@@ -76,34 +76,28 @@ object ForegroundActivityTracker : Application.ActivityLifecycleCallbacks {
     override fun onActivityDestroyed(activity: Activity) {}
 }
 
-private fun Toast.withBottomMargin(context: Context): Toast {
-    val yOffset = (100f * context.resources.displayMetrics.density).toInt()
-    setGravity(Gravity.BOTTOM, 0, yOffset)
-    return this
-}
-
 fun Context.toast(message: Int) {
-    Toasty.normal(this, message).withBottomMargin(this).show()
+    Toasty.normal(this, message).show()
 }
 
 fun Context.toast(message: CharSequence) {
-    Toasty.normal(this, message).withBottomMargin(this).show()
+    Toasty.normal(this, message).show()
 }
 
 fun Context.toastSuccess(message: Int) {
-    Toasty.success(this, message, Toast.LENGTH_SHORT, true).withBottomMargin(this).show()
+    Toasty.success(this, message, Toast.LENGTH_SHORT, true).show()
 }
 
 fun Context.toastSuccess(message: CharSequence) {
-    Toasty.success(this, message, Toast.LENGTH_SHORT, true).withBottomMargin(this).show()
+    Toasty.success(this, message, Toast.LENGTH_SHORT, true).show()
 }
 
 fun Context.toastError(message: Int) {
-    Toasty.error(this, message, Toast.LENGTH_SHORT, true).withBottomMargin(this).show()
+    Toasty.error(this, message, Toast.LENGTH_SHORT, true).show()
 }
 
 fun Context.toastError(message: CharSequence) {
-    Toasty.error(this, message, Toast.LENGTH_SHORT, true).withBottomMargin(this).show()
+    Toasty.error(this, message, Toast.LENGTH_SHORT, true).show()
 }
 
 private fun Context.findSnackbarParent(): View? {

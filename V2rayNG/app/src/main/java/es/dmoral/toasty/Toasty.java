@@ -3,6 +3,7 @@ package es.dmoral.toasty;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.view.Gravity;
 import androidx.annotation.CheckResult;
 import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
@@ -291,10 +292,20 @@ public class Toasty {
         final TextView toastTextView = toastLayout.findViewById(R.id.toast_text);
         Drawable drawableFrame;
 
-        if (shouldTint)
-            drawableFrame = ToastyUtils.tint9PatchDrawableFrame(context, tintColor);
-        else
+        if (shouldTint) {
+            try {
+                drawableFrame = ToastyUtils.tint9PatchDrawableFrame(context, tintColor);
+            } catch (ClassCastException e) {
+                // Safeguard against custom XML backgrounds like RippleDrawable
+                drawableFrame = ToastyUtils.getDrawable(context, R.drawable.uwu_bg_sin);
+                if (drawableFrame != null) {
+                    drawableFrame = drawableFrame.mutate();
+                    drawableFrame.setColorFilter(tintColor, android.graphics.PorterDuff.Mode.SRC_IN);
+                }
+            }
+        } else {
             drawableFrame = ToastyUtils.getDrawable(context, R.drawable.uwu_bg_sin);
+        }
         ToastyUtils.setBackground(toastLayout, drawableFrame);
 
         if (withIcon) {
@@ -318,11 +329,16 @@ public class Toasty {
             lastToast = currentToast;
         }
 
-        currentToast.setGravity(
-                toastGravity == -1 ? currentToast.getGravity() : toastGravity,
-                xOffset == -1 ? currentToast.getXOffset() : xOffset,
-                yOffset == -1 ? currentToast.getYOffset() : yOffset
-        );
+        if (toastGravity == -1) {
+            int marginPx = (int) (120f * context.getResources().getDisplayMetrics().density);
+            currentToast.setGravity(Gravity.BOTTOM, 0, marginPx);
+        } else {
+            currentToast.setGravity(
+                    toastGravity,
+                    xOffset == -1 ? currentToast.getXOffset() : xOffset,
+                    yOffset == -1 ? currentToast.getYOffset() : yOffset
+            );
+        }
 
         return currentToast;
     }
