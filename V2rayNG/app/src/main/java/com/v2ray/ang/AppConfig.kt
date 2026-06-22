@@ -136,6 +136,7 @@ object AppConfig {
     const val WEATHER_UPDATE_TASK_NAME = "weather_updater"
     const val WEATHER_UPDATE_INTERVAL_MINUTES = 30L
     const val PREF_SHOW_TOTAL_TRAFFIC_CHIP = "pref_show_total_traffic_chip"
+    const val PREF_SEARCH_CHIP_GRADIENT = "pref_search_chip_gradient"
 
     // Profile banner, sheet banner, home banner & username
     const val PREF_CUSTOM_PROFILE_NAME = "custom_profile_name"

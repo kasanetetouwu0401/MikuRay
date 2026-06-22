@@ -222,12 +222,21 @@
 
          <androidx.preference.SwitchPreferenceCompat
             android:icon="@drawable/ic_traffic_total"
-            app:layout="@layout/uwu_bot_switch"
+            app:layout="@layout/uwu_mid_switch"
             app:widgetLayout="@layout/uwu_widget_material_switch"
             android:defaultValue="false"
             android:key="pref_show_total_traffic_chip"
             android:summary="@string/pref_show_total_traffic_chip_summary"
             android:title="@string/pref_show_total_traffic_chip_title" />
+
+         <androidx.preference.SwitchPreferenceCompat
+            android:icon="@drawable/ic_baseline_blur_on_24"
+            app:layout="@layout/uwu_bot_switch"
+            app:widgetLayout="@layout/uwu_widget_material_switch"
+            android:defaultValue="false"
+            android:key="pref_search_chip_gradient"
+            android:summary="@string/pref_search_chip_gradient_summary"
+            android:title="@string/pref_search_chip_gradient_title" />
 
     </com.neko.widget.UwuPreferenceCategory>
 

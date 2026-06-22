@@ -47,6 +47,7 @@ import com.v2ray.ang.ui.bottomsheet.MoreMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.ShareConfigBottomSheet
 import com.v2ray.ang.ui.preference.activity.SettingsActivity
 import com.v2ray.ang.util.BlurBottomStatusController
+import com.v2ray.ang.util.SearchChipGradientController
 import com.v2ray.ang.util.getColorAttr
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.QRCodeDecoder
@@ -154,6 +155,8 @@ class MainActivity : HelperBaseActivity(),
     private fun refreshSearchBarChip() {
         val weatherEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)
         val totalTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP, false)
+
+        SearchChipGradientController.applyState(this, binding)
 
         when {
             weatherEnabled -> {
@@ -557,6 +560,7 @@ class MainActivity : HelperBaseActivity(),
             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP, false) &&
                 !MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)
             ) {
+                SearchChipGradientController.applyState(this, binding)
                 refreshTotalTrafficChip()
             }
         }
