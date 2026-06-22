@@ -350,15 +350,13 @@ object MmkvManager {
      * Returns null if no traffic has been recorded yet for any profile.
      */
     fun getTotalTrafficString(): String? {
-        var uplinkTotal = 0L
         var downlinkTotal = 0L
         decodeAllServerList().forEach { guid ->
             val aff = decodeServerAffiliationInfo(guid) ?: return@forEach
-            uplinkTotal += aff.uplinkTotal
             downlinkTotal += aff.downlinkTotal
         }
-        if (uplinkTotal == 0L && downlinkTotal == 0L) return null
-        return "↑ ${formatTrafficBytes(uplinkTotal)}  ↓ ${formatTrafficBytes(downlinkTotal)}"
+        if (downlinkTotal == 0L) return null
+        return formatTrafficBytes(downlinkTotal)
     }
 
     private fun formatTrafficBytes(bytes: Long): String {

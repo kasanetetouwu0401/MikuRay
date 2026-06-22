@@ -563,9 +563,9 @@
     <string name="title_vpn_sound_settings">Sound</string>
     <string name="weather_temp_format">%d°C</string>
     <string name="pref_show_weather_chip_title">Show weather chip</string>
-    <string name="pref_show_weather_chip_summary">Show current temperature next to the search bar based on your location</string>
-    <string name="pref_show_total_traffic_chip_title">Show total data usage chip</string>
-    <string name="pref_show_total_traffic_chip_summary">Show total data usage across all profiles next to the search bar. Can\'t be active at the same time as the weather chip</string>
+    <string name="pref_show_weather_chip_summary">Show current temperature next to the search bar based on your location. Can\'t be active at the same time as the total download usage chip</string>
+    <string name="pref_show_total_traffic_chip_title">Show total download usage chip</string>
+    <string name="pref_show_total_traffic_chip_summary">Show total download usage across all profiles next to the search bar. Can\'t be active at the same time as the weather chip</string>
     <string name="title_pref_sound_on_connect">Connection Sound</string>
     <string name="summary_pref_sound_on_connect">Play a sound when connected or disconnected</string>
     <string name="ip_unknown">IP: unknown</string>

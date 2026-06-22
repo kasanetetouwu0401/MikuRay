@@ -308,8 +308,9 @@ class UiSettingsActivity : BaseActivity() {
             }
 
             showWeatherChip?.setOnPreferenceChangeListener { _, newValue ->
-                MmkvManager.encodeSettings(AppConfig.PREF_SHOW_WEATHER_CHIP, newValue as Boolean)
-                if (newValue) {
+                val checked = newValue as Boolean
+                MmkvManager.encodeSettings(AppConfig.PREF_SHOW_WEATHER_CHIP, checked)
+                if (checked) {
                     val hasPermission = ContextCompat.checkSelfPermission(
                         requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION
                     ) == PackageManager.PERMISSION_GRANTED
@@ -320,13 +321,14 @@ class UiSettingsActivity : BaseActivity() {
                         )
                     }
                 }
-                updateChipPreferenceEnabledState()
+                showTotalTrafficChip?.isEnabled = !checked
                 true
             }
 
             showTotalTrafficChip?.setOnPreferenceChangeListener { _, newValue ->
-                MmkvManager.encodeSettings(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP, newValue as Boolean)
-                updateChipPreferenceEnabledState()
+                val checked = newValue as Boolean
+                MmkvManager.encodeSettings(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP, checked)
+                showWeatherChip?.isEnabled = !checked
                 true
             }
 
