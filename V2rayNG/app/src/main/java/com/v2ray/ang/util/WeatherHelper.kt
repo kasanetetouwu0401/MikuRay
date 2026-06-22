@@ -18,11 +18,6 @@ import okhttp3.Request
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 
-/**
- * Fetches the device's current location via Google Fused Location Provider
- * and the current weather at that location from Open-Meteo (no API key).
- * Used to populate the small weather chip on the main screen.
- */
 object WeatherHelper {
 
     data class WeatherResult(
@@ -53,9 +48,6 @@ object WeatherHelper {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    /**
-     * Returns cached WeatherResult jika masih dalam TTL 30 menit, null jika expired/kosong.
-     */
     fun getCachedWeather(): WeatherResult? {
         val timestamp = MmkvManager.decodeSettingsLong(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
         if (timestamp == 0L) return null
@@ -63,10 +55,6 @@ object WeatherHelper {
         return readCacheEntry()
     }
 
-    /**
-     * Returns cached WeatherResult tanpa cek TTL (untuk ditampilkan sementara saat refresh).
-     * Null hanya kalau belum pernah ada data.
-     */
     fun getCachedWeatherStale(): WeatherResult? {
         val timestamp = MmkvManager.decodeSettingsLong(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
         if (timestamp == 0L) return null
@@ -88,10 +76,6 @@ object WeatherHelper {
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, System.currentTimeMillis())
     }
 
-    /**
-     * Uses PRIORITY_HIGH_ACCURACY if ACCESS_FINE_LOCATION is granted,
-     * otherwise falls back to PRIORITY_BALANCED_POWER_ACCURACY (coarse).
-     */
     private suspend fun getCurrentLocation(context: Context): android.location.Location? {
         if (!hasLocationPermission(context)) return null
         val fusedClient = LocationServices.getFusedLocationProviderClient(context)
@@ -113,10 +97,6 @@ object WeatherHelper {
         }
     }
 
-    /**
-     * Fetches the current temperature for the device's current location.
-     * Returns null on any failure (no permission, no location fix, or network error).
-     */
     suspend fun fetchCurrentWeather(context: Context): WeatherResult? = withContext(Dispatchers.IO) {
         val location = getCurrentLocation(context) ?: return@withContext null
         try {
@@ -147,10 +127,6 @@ object WeatherHelper {
         }
     }
 
-    /**
-     * Maps an Open-Meteo WMO weather code to one of our weather drawables.
-     * https://open-meteo.com/en/docs (WMO Weather interpretation codes)
-     */
     fun iconResFor(code: Int, isDay: Boolean): Int {
         return when (code) {
             0, 1 -> if (isDay) R.drawable.ic_weather_sunny else R.drawable.ic_weather_night

@@ -139,11 +139,6 @@ class MainActivity : HelperBaseActivity(),
         refreshWeatherChip()
     }
 
-    /**
-     * Shows/hides/loads the weather chip based on the "Show weather chip"
-     * setting. If the setting is on but location permission isn't granted
-     * yet, this requests it (the system permission dialog will appear).
-     */
     private fun refreshWeatherChip() {
         if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
             binding.layoutWeatherChip.isVisible = false
@@ -158,28 +153,20 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
-    /**
-     * Menampilkan weather chip. Kalau cache masih fresh (< 30 menit) langsung render,
-     * tidak ada progress bar. Kalau expired, tampilkan data lama dulu (jika ada) lalu
-     * fetch di background dan update text-nya langsung tanpa progress bar.
-     */
     private fun loadWeatherChip() {
         binding.layoutWeatherChip.isVisible = true
         binding.pbWeatherLoading.isVisible = false
 
         val cached = WeatherHelper.getCachedWeather()
         if (cached != null) {
-            // Cache masih fresh, tampilkan langsung — tidak perlu fetch
             applyWeatherToChip(cached)
             return
         }
 
-        // Cache expired atau kosong — render data lama kalau ada, lalu refresh background
         val stale = WeatherHelper.getCachedWeatherStale()
         if (stale != null) {
             applyWeatherToChip(stale)
         } else {
-            // Belum pernah ada data sama sekali → munculin progress bar dulu
             binding.pbWeatherLoading.isVisible = true
             binding.ivWeatherIcon.isVisible = false
             binding.tvWeatherTemp.isVisible = false

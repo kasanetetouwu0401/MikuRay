@@ -168,7 +168,7 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
                         android:paddingLeft="14dp"
-                        android:paddingRight="14dp"
+                        android:paddingRight="10dp"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:paddingHorizontal="14dp">
@@ -199,7 +199,7 @@
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
                             android:paddingStart="8dp"
-                            android:paddingEnd="8dp"
+                            android:paddingEnd="10dp"
                             android:visibility="gone">
 
                             <ImageView
