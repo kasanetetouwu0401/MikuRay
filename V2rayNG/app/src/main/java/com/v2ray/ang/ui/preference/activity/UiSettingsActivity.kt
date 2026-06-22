@@ -713,12 +713,6 @@ class UiSettingsActivity : BaseActivity() {
             }
         }
 
-        /**
-         * Weather chip dan total data usage chip berbagi layout yang sama di search bar,
-         * jadi cuma boleh salah satu yang aktif. Kalau salah satu nyala, yang lain di-disable
-         * (bukan dimatikan) supaya user tetap bisa lihat state-nya tanpa bisa langsung
-         * menyalakan dua-duanya sekaligus.
-         */
         private fun updateChipPreferenceEnabledState() {
             val weatherOn = showWeatherChip?.isChecked == true
             val trafficOn = showTotalTrafficChip?.isChecked == true

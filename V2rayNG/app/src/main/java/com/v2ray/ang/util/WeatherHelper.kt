@@ -84,9 +84,6 @@ object WeatherHelper {
         } else {
             Priority.PRIORITY_BALANCED_POWER_ACCURACY
         }
-        // flushLocations() membuang buffer lokasi internal Fused Provider, supaya
-        // getCurrentLocation() di bawah ini gak balikin fix lama yang masih dianggap "segar"
-        // oleh Play Services. Penting khusus untuk force refresh.
         if (force) {
             runCatching { fusedClient.flushLocations() }
         }

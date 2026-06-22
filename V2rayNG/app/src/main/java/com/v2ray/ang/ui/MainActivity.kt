@@ -241,14 +241,16 @@ class MainActivity : HelperBaseActivity(),
         binding.layoutWeatherChip.isVisible = true
         binding.pbWeatherLoading.isVisible = false
 
+        // Cache yang masih segar (di bawah TTL) langsung ditampilkan dulu supaya
+        // gak ada delay/loading flicker. TAPI fetch ke API tetap jalan di bawah,
+        // karena kalau di-`return` di sini, chip bakal nyangkut di nilai cache
+        // lama selama TTL belum habis (sampai 30 menit), gak peduli berapa kali
+        // activity di-resume.
         val cached = WeatherHelper.getCachedWeather()
+        val stale = cached ?: WeatherHelper.getCachedWeatherStale()
         if (cached != null) {
             applyWeatherToChip(cached)
-            return
-        }
-
-        val stale = WeatherHelper.getCachedWeatherStale()
-        if (stale != null) {
+        } else if (stale != null) {
             applyWeatherToChip(stale)
         } else {
             binding.pbWeatherLoading.isVisible = true
