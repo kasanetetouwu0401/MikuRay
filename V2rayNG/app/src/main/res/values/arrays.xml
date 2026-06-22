@@ -325,9 +325,9 @@
     </string-array>
 
     <string-array name="weather_api_entries">
-        <item>Open-Meteo (Free, no key)</item>
-        <item>wttr.in (Free, no key)</item>
-        <item>OpenWeatherMap (API key required)</item>
+        <item>Open-Meteo</item>
+        <item>wttr.in</item>
+        <item>OpenWeatherMap</item>
     </string-array>
     <string-array name="weather_api_values" translatable="false">
         <item>open_meteo</item>

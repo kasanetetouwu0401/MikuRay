@@ -210,14 +210,6 @@
             android:summary="%s"
             android:title="@string/pref_weather_api_title" />
 
-        <androidx.preference.EditTextPreference
-            android:icon="@drawable/ic_key"
-            app:layout="@layout/uwu_mid"
-            android:key="pref_weather_owm_key"
-            android:title="@string/pref_weather_owm_key_title"
-            android:summary="@string/pref_weather_owm_key_summary"
-            android:inputType="textNoSuggestions" />
-
         <androidx.preference.ListPreference
             android:icon="@drawable/ic_weather_sunny"
             app:layout="@layout/uwu_mid"
