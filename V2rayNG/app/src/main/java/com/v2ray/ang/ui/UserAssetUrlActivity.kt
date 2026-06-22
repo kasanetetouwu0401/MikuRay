@@ -12,6 +12,7 @@ import com.v2ray.ang.databinding.ActivityUserAssetUrlBinding
 import com.v2ray.ang.dto.entities.AssetUrlItem
 import com.v2ray.ang.extension.snackbarError
 import com.v2ray.ang.extension.snackbarSuccess
+import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.Utils
@@ -128,7 +129,7 @@ class UserAssetUrlActivity : BaseActivity() {
         }
 
         MmkvManager.encodeAsset(assetId, assetItem)
-        snackbarSuccess(R.string.toast_success, title = getString(R.string.title_alerter_success))
+        toastSuccess(R.string.toast_success)
         finish()
         return true
     }
