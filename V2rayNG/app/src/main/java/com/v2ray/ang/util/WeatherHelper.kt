@@ -7,6 +7,9 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
+import com.v2ray.ang.AppConfig
+import com.v2ray.ang.handler.MmkvManager
+import com.v2ray.ang.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -51,7 +54,41 @@ object WeatherHelper {
     }
 
     /**
-     * Gets the current location using Fused Location Provider.
+     * Returns cached WeatherResult jika masih dalam TTL 30 menit, null jika expired/kosong.
+     */
+    fun getCachedWeather(): WeatherResult? {
+        val timestamp = MmkvManager.decodeSettingsLong(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
+        if (timestamp == 0L) return null
+        if (System.currentTimeMillis() - timestamp > AppConfig.WEATHER_CACHE_TTL_MS) return null
+        return readCacheEntry()
+    }
+
+    /**
+     * Returns cached WeatherResult tanpa cek TTL (untuk ditampilkan sementara saat refresh).
+     * Null hanya kalau belum pernah ada data.
+     */
+    fun getCachedWeatherStale(): WeatherResult? {
+        val timestamp = MmkvManager.decodeSettingsLong(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
+        if (timestamp == 0L) return null
+        return readCacheEntry()
+    }
+
+    private fun readCacheEntry(): WeatherResult? {
+        val temp = MmkvManager.decodeSettingsInt(AppConfig.PREF_WEATHER_CACHE_TEMP, Int.MIN_VALUE)
+        if (temp == Int.MIN_VALUE) return null
+        val code = MmkvManager.decodeSettingsInt(AppConfig.PREF_WEATHER_CACHE_CODE, 0)
+        val isDay = MmkvManager.decodeSettingsBool(AppConfig.PREF_WEATHER_CACHE_IS_DAY, true)
+        return WeatherResult(tempCelsius = temp, isDay = isDay, weatherCode = code)
+    }
+
+    private fun saveCache(result: WeatherResult) {
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TEMP, result.tempCelsius)
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_CODE, result.weatherCode)
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_IS_DAY, result.isDay)
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, System.currentTimeMillis())
+    }
+
+    /**
      * Uses PRIORITY_HIGH_ACCURACY if ACCESS_FINE_LOCATION is granted,
      * otherwise falls back to PRIORITY_BALANCED_POWER_ACCURACY (coarse).
      */
@@ -96,11 +133,13 @@ object WeatherHelper {
                 val temp = current.get("temperature_2m")?.asDouble ?: return@withContext null
                 val code = current.get("weather_code")?.asInt ?: 0
                 val isDay = (current.get("is_day")?.asInt ?: 1) == 1
-                WeatherResult(
+                val result = WeatherResult(
                     tempCelsius = Math.round(temp).toInt(),
                     isDay = isDay,
                     weatherCode = code
                 )
+                saveCache(result)
+                result
             }
         } catch (e: Exception) {
             LogUtil.e("WeatherHelper", "fetchCurrentWeather failed: ${e.message}")
@@ -114,15 +153,15 @@ object WeatherHelper {
      */
     fun iconResFor(code: Int, isDay: Boolean): Int {
         return when (code) {
-            0, 1 -> if (isDay) com.v2ray.ang.R.drawable.ic_weather_sunny else com.v2ray.ang.R.drawable.ic_weather_night
-            2, 3 -> com.v2ray.ang.R.drawable.ic_cloud
-            45, 48 -> com.v2ray.ang.R.drawable.ic_weather_fog
+            0, 1 -> if (isDay) R.drawable.ic_weather_sunny else R.drawable.ic_weather_night
+            2, 3 -> R.drawable.ic_cloud
+            45, 48 -> R.drawable.ic_weather_fog
             51, 53, 55, 56, 57,
             61, 63, 65, 66, 67,
-            80, 81, 82 -> com.v2ray.ang.R.drawable.ic_weather_rain
-            71, 73, 75, 77, 85, 86 -> com.v2ray.ang.R.drawable.ic_weather_snow
-            95, 96, 99 -> com.v2ray.ang.R.drawable.ic_weather_storm
-            else -> if (isDay) com.v2ray.ang.R.drawable.ic_weather_sunny else com.v2ray.ang.R.drawable.ic_weather_night
+            80, 81, 82 -> R.drawable.ic_weather_rain
+            71, 73, 75, 77, 85, 86 -> R.drawable.ic_weather_snow
+            95, 96, 99 -> R.drawable.ic_weather_storm
+            else -> if (isDay) R.drawable.ic_weather_sunny else R.drawable.ic_weather_night
         }
     }
 }

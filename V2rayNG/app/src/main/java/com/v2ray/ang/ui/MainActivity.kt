@@ -159,29 +159,49 @@ class MainActivity : HelperBaseActivity(),
     }
 
     /**
-     * Fetches the current temperature for the device's last-known location and
-     * shows it as a small chip at the end of the search bar, matching the
-     * reference UI. Silently hides the chip if location/weather is unavailable.
+     * Menampilkan weather chip. Kalau cache masih fresh (< 30 menit) langsung render,
+     * tidak ada progress bar. Kalau expired, tampilkan data lama dulu (jika ada) lalu
+     * fetch di background dan update text-nya langsung tanpa progress bar.
      */
     private fun loadWeatherChip() {
         binding.layoutWeatherChip.isVisible = true
-        binding.pbWeatherLoading.isVisible = true
-        binding.ivWeatherIcon.isVisible = false
-        binding.tvWeatherTemp.isVisible = false
+        binding.pbWeatherLoading.isVisible = false
+
+        val cached = WeatherHelper.getCachedWeather()
+        if (cached != null) {
+            // Cache masih fresh, tampilkan langsung — tidak perlu fetch
+            applyWeatherToChip(cached)
+            return
+        }
+
+        // Cache expired atau kosong — render data lama kalau ada, lalu refresh background
+        val stale = WeatherHelper.getCachedWeatherStale()
+        if (stale != null) {
+            applyWeatherToChip(stale)
+        } else {
+            // Belum pernah ada data sama sekali → munculin progress bar dulu
+            binding.pbWeatherLoading.isVisible = true
+            binding.ivWeatherIcon.isVisible = false
+            binding.tvWeatherTemp.isVisible = false
+        }
 
         lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@MainActivity)
             binding.pbWeatherLoading.isVisible = false
             if (weather == null) {
-                binding.layoutWeatherChip.isVisible = false
+                if (stale == null) binding.layoutWeatherChip.isVisible = false
                 return@launch
             }
-            binding.ivWeatherIcon.setImageResource(WeatherHelper.iconResFor(weather.weatherCode, weather.isDay))
-            binding.tvWeatherTemp.text = getString(R.string.weather_temp_format, weather.tempCelsius)
-            binding.ivWeatherIcon.isVisible = true
-            binding.tvWeatherTemp.isVisible = true
-            binding.layoutWeatherChip.isVisible = true
+            applyWeatherToChip(weather)
         }
+    }
+
+    private fun applyWeatherToChip(weather: WeatherHelper.WeatherResult) {
+        binding.ivWeatherIcon.setImageResource(WeatherHelper.iconResFor(weather.weatherCode, weather.isDay))
+        binding.tvWeatherTemp.text = getString(R.string.weather_temp_format, weather.tempCelsius)
+        binding.ivWeatherIcon.isVisible = true
+        binding.tvWeatherTemp.isVisible = true
+        binding.layoutWeatherChip.isVisible = true
     }
 
     override fun onContentChanged() {
