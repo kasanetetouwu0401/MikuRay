@@ -3,7 +3,6 @@ package es.dmoral.toasty;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.NinePatchDrawable;
 import android.os.Build;
 import android.util.TypedValue;
 import androidx.annotation.ColorInt;
@@ -20,13 +19,16 @@ final class ToastyUtils {
     }
 
     static Drawable tintIcon(@NonNull Drawable drawable, @ColorInt int tintColor) {
-        drawable.setColorFilter(tintColor, PorterDuff.Mode.SRC_IN);
+        drawable.mutate().setColorFilter(tintColor, PorterDuff.Mode.SRC_IN);
         return drawable;
     }
 
     static Drawable tint9PatchDrawableFrame(@NonNull Context context, @ColorInt int tintColor) {
-        final NinePatchDrawable toastDrawable = (NinePatchDrawable) getDrawable(context, R.drawable.uwu_bg_sin);
-        return tintIcon(toastDrawable, tintColor);
+        Drawable toastDrawable = getDrawable(context, R.drawable.uwu_bg_sin);
+        if (toastDrawable != null) {
+            return tintIcon(toastDrawable, tintColor);
+        }
+        return null;
     }
 
     static void setBackground(@NonNull View view, Drawable drawable) {
