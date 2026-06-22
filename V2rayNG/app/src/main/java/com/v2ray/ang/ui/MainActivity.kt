@@ -196,6 +196,12 @@ class MainActivity : HelperBaseActivity(),
             binding.layoutWeatherChip.isVisible = false
             return
         }
+        val cached = WeatherHelper.getCachedWeather()
+        if (cached != null) {
+            binding.layoutWeatherChip.isVisible = true
+            applyWeatherToChip(cached)
+            return
+        }
         if (WeatherHelper.hasLocationPermission(this)) {
             loadWeatherChip()
         } else {
@@ -244,6 +250,7 @@ class MainActivity : HelperBaseActivity(),
         val stale = cached ?: WeatherHelper.getCachedWeatherStale()
         if (cached != null) {
             applyWeatherToChip(cached)
+            return
         } else if (stale != null) {
             applyWeatherToChip(stale)
         } else {
