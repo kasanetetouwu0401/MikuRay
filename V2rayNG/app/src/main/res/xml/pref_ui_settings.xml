@@ -179,12 +179,21 @@
             
         <androidx.preference.SwitchPreferenceCompat
             android:icon="@drawable/ic_toggle_switch"
-            app:layout="@layout/uwu_bot_switch"
+            app:layout="@layout/uwu_mid_switch"
             app:widgetLayout="@layout/uwu_widget_material_switch"
             android:defaultValue="false"
             android:key="pref_show_splash_screen"
             android:title="@string/pref_show_splash_title"
             android:summary="@string/pref_show_splash_summary" />
+            
+         <androidx.preference.SwitchPreferenceCompat
+            android:icon="@drawable/ic_weather_sunny"
+            app:layout="@layout/uwu_bot_switch"
+            app:widgetLayout="@layout/uwu_widget_material_switch"
+            android:defaultValue="false"
+            android:key="pref_show_weather_chip"
+            android:summary="@string/pref_show_weather_chip_summary"
+            android:title="@string/pref_show_weather_chip_title" />
 
     </com.neko.widget.UwuPreferenceCategory>
 
@@ -346,18 +355,6 @@
             android:key="pref_sound_on_connect"
             android:summary="@string/summary_pref_sound_on_connect"
             android:title="@string/title_pref_sound_on_connect" />
-
-    <com.neko.widget.UwuPreferenceCategory android:title="@string/title_weather_settings"
-        app:sectionIcon="@drawable/ic_weather_sunny">
-
-        <androidx.preference.SwitchPreferenceCompat
-            android:icon="@drawable/ic_weather_sunny"
-            app:layout="@layout/uwu_sin_switch"
-            app:widgetLayout="@layout/uwu_widget_material_switch"
-            android:defaultValue="false"
-            android:key="pref_show_weather_chip"
-            android:summary="@string/pref_show_weather_chip_summary"
-            android:title="@string/pref_show_weather_chip_title" />
 
     </com.neko.widget.UwuPreferenceCategory>
 
