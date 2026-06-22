@@ -541,9 +541,12 @@
     <string name="del_routing_dialog_comfirm_message">Вы уверены, что хотите удалить эту настройку маршрутизации? После удаления данные будут потеряны безвозвратно.</string>
     <string name="del_file_asset_dialog_comfirm_message">Вы уверены, что хотите удалить этот файл ресурса? После удаления данные будут потеряны безвозвратно.</string>
     <string name="del_button_dialog_comfirm">Удалить</string>
-    <string name="menu_item_search_main">Поиск конфига...</string>
+    <string name="menu_item_search_main">Поиск конфига</string>
+    <string name="title_search_bar_chip">Плашка строки поиска</string>
     <string name="pref_show_weather_chip_title">Показывать плашку погоды</string>
-    <string name="pref_show_weather_chip_summary">Показывать текущую температуру рядом со строкой поиска на основе вашего местоположения</string>
+    <string name="pref_show_weather_chip_summary">Показывать текущую температуру рядом со строкой поиска на основе вашего местоположения. Не может работать одновременно с плашкой общего объема скачивания</string>
+    <string name="pref_show_total_traffic_chip_title">Показывать плашку общего объема скачивания</string>
+    <string name="pref_show_total_traffic_chip_summary">Показывать общий объем скачивания для всех профилей рядом со строкой поиска. Не может работать одновременно с плашкой погоды</string>
     <string name="title_vpn_sound_settings">Звук</string>
     <string name="title_pref_sound_on_connect">Звук подключения</string>
     <string name="summary_pref_sound_on_connect">Воспроизводить звук при подключении или отключении</string>

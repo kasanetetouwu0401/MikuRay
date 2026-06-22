@@ -209,6 +209,7 @@
                                 android:layout_width="16dp"
                                 android:layout_height="16dp"
                                 android:src="@drawable/ic_weather_sunny"
+                                android:tint="?colorOnSurfaceVariant"
                                 android:visibility="gone" />
 
                             <ProgressBar
@@ -236,6 +237,7 @@
                                 android:layout_width="16dp"
                                 android:layout_height="16dp"
                                 android:src="@drawable/ic_traffic_total"
+                                android:tint="?colorOnSurfaceVariant"
                                 android:visibility="gone" />
 
                             <TextView

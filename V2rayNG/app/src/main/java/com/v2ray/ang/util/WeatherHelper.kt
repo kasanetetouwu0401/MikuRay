@@ -76,13 +76,19 @@ object WeatherHelper {
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, System.currentTimeMillis())
     }
 
-    private suspend fun getCurrentLocation(context: Context): android.location.Location? {
+    private suspend fun getCurrentLocation(context: Context, force: Boolean = false): android.location.Location? {
         if (!hasLocationPermission(context)) return null
         val fusedClient = LocationServices.getFusedLocationProviderClient(context)
-        val priority = if (hasFineLocationPermission(context)) {
+        val priority = if (force || hasFineLocationPermission(context)) {
             Priority.PRIORITY_HIGH_ACCURACY
         } else {
             Priority.PRIORITY_BALANCED_POWER_ACCURACY
+        }
+        // flushLocations() membuang buffer lokasi internal Fused Provider, supaya
+        // getCurrentLocation() di bawah ini gak balikin fix lama yang masih dianggap "segar"
+        // oleh Play Services. Penting khusus untuk force refresh.
+        if (force) {
+            runCatching { fusedClient.flushLocations() }
         }
         val cts = CancellationTokenSource()
         return suspendCancellableCoroutine { cont ->
@@ -97,8 +103,8 @@ object WeatherHelper {
         }
     }
 
-    suspend fun fetchCurrentWeather(context: Context): WeatherResult? = withContext(Dispatchers.IO) {
-        val location = getCurrentLocation(context) ?: return@withContext null
+    suspend fun fetchCurrentWeather(context: Context, force: Boolean = false): WeatherResult? = withContext(Dispatchers.IO) {
+        val location = getCurrentLocation(context, force) ?: return@withContext null
         try {
             val url = "https://api.open-meteo.com/v1/forecast" +
                 "?latitude=${location.latitude}" +

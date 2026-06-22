@@ -523,9 +523,12 @@
     <string name="del_routing_dialog_comfirm_message">Yakin mau hapus settingan routing ini? Kalau udah dihapus, datanya bakal hilang permanen dan nggak bisa dibalikin lagi lho.</string>
     <string name="del_file_asset_dialog_comfirm_message">Yakin mau hapus file aset ini? Kalau udah dihapus, datanya bakal hilang permanen dan nggak bisa dibalikin lagi lho.</string>
     <string name="del_button_dialog_comfirm">Hapus</string>
-    <string name="menu_item_search_main">Cari konfig...</string>
+    <string name="menu_item_search_main">Cari konfig</string>
+    <string name="title_search_bar_chip">Chip Bar Pencarian</string>
     <string name="pref_show_weather_chip_title">Tampilin info cuaca</string>
-    <string name="pref_show_weather_chip_summary">Tampilin suhu sekarang di sebelah bar pencarian sesuai sama lokasi kamu</string>
+    <string name="pref_show_weather_chip_summary">Tampilin suhu sekarang di sebelah bar pencarian sesuai lokasi kamu. Nggak bisa aktif barengan sama chip total pemakaian download</string>
+    <string name="pref_show_total_traffic_chip_title">Tampilin chip total pemakaian download</string>
+    <string name="pref_show_total_traffic_chip_summary">Tampilin total pemakaian download dari semua profil di sebelah bar pencarian. Nggak bisa aktif barengan sama chip info cuaca</string>
     <string name="title_vpn_sound_settings">Suara</string>
     <string name="title_pref_sound_on_connect">Bunyi Koneksi</string>
     <string name="summary_pref_sound_on_connect">Bunyi pas nyambung atau putus koneksi</string>

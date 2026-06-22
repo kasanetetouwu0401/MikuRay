@@ -222,7 +222,7 @@ class MainActivity : HelperBaseActivity(),
         binding.tvWeatherTemp.isVisible = false
 
         lifecycleScope.launch {
-            val weather = WeatherHelper.fetchCurrentWeather(this@MainActivity)
+            val weather = WeatherHelper.fetchCurrentWeather(this@MainActivity, force = true)
             binding.pbWeatherLoading.isVisible = false
             if (weather == null) {
                 val stale = WeatherHelper.getCachedWeatherStale()
