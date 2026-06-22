@@ -51,6 +51,7 @@ import com.v2ray.ang.util.getColorAttr
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.QRCodeDecoder
 import com.v2ray.ang.util.Utils
+import com.v2ray.ang.util.WeatherHelper
 import com.v2ray.ang.util.showBlur
 import com.v2ray.ang.util.showDeleteConfirmDialog
 import com.v2ray.ang.util.showSubUpdateDiffDialog
@@ -131,6 +132,56 @@ class MainActivity : HelperBaseActivity(),
         refreshGroupTabTitles(true)
 
         checkAndRequestPermission(PermissionType.POST_NOTIFICATIONS) {}
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshWeatherChip()
+    }
+
+    /**
+     * Shows/hides/loads the weather chip based on the "Show weather chip"
+     * setting. If the setting is on but location permission isn't granted
+     * yet, this requests it (the system permission dialog will appear).
+     */
+    private fun refreshWeatherChip() {
+        if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
+            binding.layoutWeatherChip.isVisible = false
+            return
+        }
+        if (WeatherHelper.hasLocationPermission(this)) {
+            loadWeatherChip()
+        } else {
+            checkAndRequestPermission(PermissionType.LOCATION) {
+                loadWeatherChip()
+            }
+        }
+    }
+
+    /**
+     * Fetches the current temperature for the device's last-known location and
+     * shows it as a small chip at the end of the search bar, matching the
+     * reference UI. Silently hides the chip if location/weather is unavailable.
+     */
+    private fun loadWeatherChip() {
+        binding.layoutWeatherChip.isVisible = true
+        binding.pbWeatherLoading.isVisible = true
+        binding.ivWeatherIcon.isVisible = false
+        binding.tvWeatherTemp.isVisible = false
+
+        lifecycleScope.launch {
+            val weather = WeatherHelper.fetchCurrentWeather(this@MainActivity)
+            binding.pbWeatherLoading.isVisible = false
+            if (weather == null) {
+                binding.layoutWeatherChip.isVisible = false
+                return@launch
+            }
+            binding.ivWeatherIcon.setImageResource(WeatherHelper.iconResFor(weather.weatherCode, weather.isDay))
+            binding.tvWeatherTemp.text = getString(R.string.weather_temp_format, weather.tempCelsius)
+            binding.ivWeatherIcon.isVisible = true
+            binding.tvWeatherTemp.isVisible = true
+            binding.layoutWeatherChip.isVisible = true
+        }
     }
 
     override fun onContentChanged() {
