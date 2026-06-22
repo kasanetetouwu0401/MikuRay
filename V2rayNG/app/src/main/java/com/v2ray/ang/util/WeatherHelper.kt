@@ -3,8 +3,11 @@ package com.v2ray.ang.util
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Build
 import androidx.core.content.ContextCompat
+import androidx.core.location.LocationManagerCompat
+import androidx.core.os.CancellationSignal
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -12,9 +15,6 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
 import androidx.work.multiprocess.RemoteWorkManager
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
@@ -38,7 +38,6 @@ object WeatherHelper {
             else "${Math.round(tempCelsius * 9.0 / 5.0 + 32)}°F"
     }
 
-    // ── WMO code → emoji ─────────────────────────────────────────────────────
     private fun emojiForCode(code: Int, isDay: Boolean): String = when (code) {
         0, 1    -> if (isDay) "\u2600" else moonPhaseEmoji()   // ☀ / moon
         2       -> "\u26c5"                                      // ⛅
@@ -57,7 +56,6 @@ object WeatherHelper {
         else    -> if (isDay) "\u2600" else moonPhaseEmoji()
     }
 
-    // OWM icon id → emoji
     private fun emojiForOwmIcon(icon: String?): String = when {
         icon == null            -> "\u2600"
         icon.startsWith("01")   -> if (icon.endsWith("d")) "\u2600" else moonPhaseEmoji() // clear
@@ -72,7 +70,6 @@ object WeatherHelper {
         else                    -> "\u2600"
     }
 
-    // wttr.in condition code → emoji (subset of their weather codes)
     private fun emojiForWttrCode(code: Int): String = when (code) {
         113                     -> "\u2600"          // Sunny/Clear
         116                     -> "\u26c5"          // Partly Cloudy
@@ -109,7 +106,6 @@ object WeatherHelper {
         }
     }
 
-    // ── Emoji → drawable ─────────────────────────────────────────────────────
     fun iconResForEmoji(emoji: String?): Int {
         if (emoji.isNullOrEmpty()) return R.drawable.ic_weather_sunny
         return when (emoji) {
@@ -128,7 +124,6 @@ object WeatherHelper {
         }
     }
 
-    // ── C/F helpers ──────────────────────────────────────────────────────────
     fun isDefaultCelsius(): Boolean {
         val tz = TimeZone.getDefault().id
         return !(tz.startsWith("US/") ||
@@ -143,7 +138,6 @@ object WeatherHelper {
         return if (stored.isNullOrEmpty()) isDefaultCelsius() else stored == "true"
     }
 
-    // ── Permission helpers ────────────────────────────────────────────────────
     fun hasLocationPermission(context: Context): Boolean =
         ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED ||
@@ -161,7 +155,6 @@ object WeatherHelper {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    // ── MMKV cache ───────────────────────────────────────────────────────────
     fun getCachedWeather(): WeatherResult? {
         val ts = MmkvManager.decodeSettingsLong(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
         if (ts == 0L) return null
@@ -189,14 +182,9 @@ object WeatherHelper {
     }
 
     fun clearCache() {
-        // Don't zero the timestamp out entirely — getCachedWeatherStale() treats ts == 0L
-        // as "no data at all". Setting it to a far-past value still marks the cache as
-        // expired (forces a refetch via getCachedWeather()) while keeping the last known
-        // reading available as a stale fallback if the new API call fails or is slow.
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 1L)
     }
 
-    // ── HTTP client ───────────────────────────────────────────────────────────
     private val client by lazy {
         OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
@@ -204,32 +192,56 @@ object WeatherHelper {
             .build()
     }
 
-    // ── Location ──────────────────────────────────────────────────────────────
     private suspend fun getCurrentLocation(
         context: Context,
         force: Boolean = false
     ): android.location.Location? {
         if (!hasLocationPermission(context)) return null
-        val fusedClient = LocationServices.getFusedLocationProviderClient(context)
-        val priority = if (force || hasFineLocationPermission(context))
-            Priority.PRIORITY_HIGH_ACCURACY
-        else
-            Priority.PRIORITY_BALANCED_POWER_ACCURACY
-        if (force) runCatching { fusedClient.flushLocations() }
-        val cts = CancellationTokenSource()
-        return suspendCancellableCoroutine { cont ->
-            cont.invokeOnCancellation { cts.cancel() }
+        
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        
+        if (!isGpsEnabled && !isNetworkEnabled) return null
+
+        val useFine = force || hasFineLocationPermission(context)
+        val provider = if (useFine && isGpsEnabled) {
+            LocationManager.GPS_PROVIDER
+        } else if (isNetworkEnabled) {
+            LocationManager.NETWORK_PROVIDER
+        } else {
+            LocationManager.GPS_PROVIDER
+        }
+
+        if (!force) {
             try {
-                fusedClient.getCurrentLocation(priority, cts.token)
-                    .addOnSuccessListener { cont.resume(it) }
-                    .addOnFailureListener { cont.resume(null) }
+                val lastKnown = locationManager.getLastKnownLocation(provider)
+                if (lastKnown != null) return lastKnown
             } catch (e: SecurityException) {
-                cont.resume(null)
+            }
+        }
+
+        val cancellationSignal = CancellationSignal()
+        return suspendCancellableCoroutine { cont ->
+            cont.invokeOnCancellation { cancellationSignal.cancel() }
+            
+            try {
+                LocationManagerCompat.getCurrentLocation(
+                    locationManager,
+                    provider,
+                    cancellationSignal,
+                    ContextCompat.getMainExecutor(context)
+                ) { location ->
+                    if (cont.isActive) cont.resume(location)
+                }
+            } catch (e: SecurityException) {
+                if (cont.isActive) cont.resume(null)
+            } catch (e: Exception) {
+                if (cont.isActive) cont.resume(null)
             }
         }
     }
 
-    // ── Fetch — dispatch ke API yang dipilih ──────────────────────────────────
     suspend fun fetchCurrentWeather(context: Context, force: Boolean = false): WeatherResult? =
         withContext(Dispatchers.IO) {
             val location = getCurrentLocation(context, force) ?: return@withContext null
@@ -247,7 +259,6 @@ object WeatherHelper {
             }
         }
 
-    // open-meteo ──────────────────────────────────────────────────────────────
     private fun fetchOpenMeteo(location: android.location.Location): WeatherResult? {
         val url = "https://api.open-meteo.com/v1/forecast" +
             "?latitude=${location.latitude}" +
@@ -265,7 +276,6 @@ object WeatherHelper {
         )
     }
 
-    // wttr.in ─────────────────────────────────────────────────────────────────
     private fun fetchWttr(location: android.location.Location): WeatherResult? {
         val url = "https://wttr.in/${location.latitude},${location.longitude}" +
             "?format=j1"
@@ -281,7 +291,6 @@ object WeatherHelper {
         )
     }
 
-    // OpenWeatherMap ──────────────────────────────────────────────────────────
     private fun fetchOwm(location: android.location.Location): WeatherResult? {
         val apiKey = com.v2ray.ang.BuildConfig.OWM_API_KEY.takeIf { it.isNotBlank() }
         if (apiKey == null) {
@@ -315,7 +324,6 @@ object WeatherHelper {
         }
     }
 
-    // ── WorkManager ───────────────────────────────────────────────────────────
     fun scheduleBackgroundUpdates(context: Context, forceReschedule: Boolean = false) {
         if (!hasLocationPermission(context)) return
         val request = PeriodicWorkRequestBuilder<UpdateWorker>(
