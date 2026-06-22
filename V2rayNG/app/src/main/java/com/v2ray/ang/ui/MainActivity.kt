@@ -135,12 +135,6 @@ class MainActivity : HelperBaseActivity(),
         checkAndRequestPermission(PermissionType.POST_NOTIFICATIONS) {}
     }
 
-    /**
-     * Pastikan worker cuaca tetap terjadwal kalau fitur weather chip aktif dan semua izin
-     * lokasi (termasuk background) sudah ada. Dipanggil tiap onCreate supaya tetap konsisten
-     * walau jadwal worker sebelumnya hilang (misal setelah reinstall) atau permission baru
-     * di-grant lewat halaman Settings sistem, bukan lewat dialog in-app.
-     */
     private fun syncWeatherBackgroundUpdates() {
         val weatherEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)
         if (weatherEnabled && WeatherHelper.hasBackgroundLocationPermission(this)) {
@@ -155,13 +149,6 @@ class MainActivity : HelperBaseActivity(),
         refreshSearchBarChip()
     }
 
-    /**
-     * Chip di sebelah search bar dipakai bersama oleh dua fitur: weather dan total data usage
-     * semua profile. Cuma salah satu yang boleh aktif dalam satu waktu:
-     * - Kalau weather chip aktif -> tampilkan weather, total traffic disembunyikan.
-     * - Kalau weather mati tapi total traffic chip aktif -> tampilkan total data usage.
-     * - Kalau dua-duanya mati -> seluruh layout chip disembunyikan.
-     */
     private fun refreshSearchBarChip() {
         val weatherEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)
         val totalTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP, false)
@@ -218,10 +205,6 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
-    /**
-     * Dipanggil saat chip cuaca di-tap. Skip cache (basi maupun masih segar) dan langsung
-     * hit API lagi, supaya user bisa minta data terbaru kapan saja tanpa nunggu TTL cache habis.
-     */
     private fun forceRefreshWeatherChip() {
         if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) return
 
@@ -257,11 +240,6 @@ class MainActivity : HelperBaseActivity(),
         binding.layoutWeatherChip.isVisible = true
         binding.pbWeatherLoading.isVisible = false
 
-        // Cache yang masih segar (di bawah TTL) langsung ditampilkan dulu supaya
-        // gak ada delay/loading flicker. TAPI fetch ke API tetap jalan di bawah,
-        // karena kalau di-`return` di sini, chip bakal nyangkut di nilai cache
-        // lama selama TTL belum habis (sampai 30 menit), gak peduli berapa kali
-        // activity di-resume.
         val cached = WeatherHelper.getCachedWeather()
         val stale = cached ?: WeatherHelper.getCachedWeatherStale()
         if (cached != null) {

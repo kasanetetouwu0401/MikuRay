@@ -55,11 +55,6 @@ object WeatherHelper {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    /**
-     * "Allow all the time" — wajib granted terpisah dari foreground location di Android 10+,
-     * supaya worker WorkManager bisa minta fix lokasi baru saat app tidak di foreground.
-     * Di Android 9 ke bawah, foreground location permission saja sudah cukup.
-     */
     fun hasBackgroundLocationPermission(context: Context): Boolean {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
             return hasLocationPermission(context)
@@ -105,9 +100,6 @@ object WeatherHelper {
         } else {
             Priority.PRIORITY_BALANCED_POWER_ACCURACY
         }
-        // flushLocations() membuang buffer lokasi internal Fused Provider, supaya
-        // getCurrentLocation() di bawah ini gak balikin fix lama yang masih dianggap "segar"
-        // oleh Play Services. Penting khusus untuk force refresh.
         if (force) {
             runCatching { fusedClient.flushLocations() }
         }
@@ -168,22 +160,6 @@ object WeatherHelper {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Background auto-refresh (WorkManager)
-    // -------------------------------------------------------------------------
-    // Menjaga cache cuaca tetap segar walau MainActivity tidak dibuka, supaya
-    // begitu user membuka app lagi, chip langsung menampilkan data yang baru
-    // saja di-fetch oleh worker, bukan cache lama yang menunggu di-refresh
-    // secara manual lewat onResume().
-
-    /**
-     * Jadwalkan/refresh periodic worker cuaca. Aman dipanggil berulang kali
-     * (misalnya tiap MainActivity.onResume()) karena pakai ExistingPeriodicWorkPolicy.KEEP
-     * secara default, sehingga tidak reset timer worker yang sudah jalan.
-     *
-     * @param forceReschedule pakai REPLACE, untuk dipanggil setelah toggle weather chip
-     *                         dinyalakan supaya worker langsung jalan dari awal.
-     */
     fun scheduleBackgroundUpdates(context: Context, forceReschedule: Boolean = false) {
         if (!hasLocationPermission(context)) {
             LogUtil.e("WeatherHelper", "scheduleBackgroundUpdates: no location permission, skip")
@@ -218,21 +194,11 @@ object WeatherHelper {
         )
     }
 
-    /**
-     * Batalkan periodic worker cuaca. Panggil saat weather chip dimatikan dari Settings,
-     * supaya app tidak terus minta lokasi/network di background tanpa perlu.
-     */
     fun cancelBackgroundUpdates(context: Context) {
         RemoteWorkManager.getInstance(context).cancelUniqueWork(AppConfig.WEATHER_UPDATE_TASK_NAME)
         LogUtil.i("WeatherHelper", "cancelBackgroundUpdates: cancelled")
     }
 
-    /**
-     * Worker yang dijalankan WorkManager secara periodik. Reuse fetchCurrentWeather()
-     * yang sama dipakai MainActivity, supaya hasil & cache-nya konsisten — begitu worker
-     * berhasil, MainActivity.onResume() akan langsung baca cache yang sudah fresh ini
-     * lewat getCachedWeather(), tanpa perlu nunggu fetch baru saat app dibuka.
-     */
     class UpdateWorker(context: Context, params: WorkerParameters) :
         CoroutineWorker(context, params) {
 
@@ -246,8 +212,6 @@ object WeatherHelper {
                     "WeatherHelper",
                     "UpdateWorker: missing ACCESS_BACKGROUND_LOCATION, cannot fetch in background"
                 )
-                // Bukan failure permanen secara konseptual (user bisa grant permission
-                // kapan saja), tapi retry terus-menerus tanpa permission cuma buang baterai.
                 return Result.success()
             }
 
