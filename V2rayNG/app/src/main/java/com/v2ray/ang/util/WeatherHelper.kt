@@ -3,11 +3,12 @@ package com.v2ray.ang.util
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.location.LocationManager
 import android.os.Build
 import androidx.core.content.ContextCompat
-import androidx.core.location.LocationManagerCompat
-import androidx.core.os.CancellationSignal
+import com.google.android.gms.location.CurrentLocationRequest
+import com.google.android.gms.location.Granularity
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -20,7 +21,7 @@ import com.v2ray.ang.BuildConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.ConnectionSpec
@@ -33,7 +34,6 @@ import java.net.SocketAddress
 import java.net.URI
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
-import kotlin.coroutines.resume
 
 object WeatherHelper {
 
@@ -225,70 +225,50 @@ object WeatherHelper {
     ): android.location.Location? {
         if (!hasLocationPermission(context)) return null
 
-        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        val fusedClient = LocationServices.getFusedLocationProviderClient(context)
 
-        if (!isGpsEnabled && !isNetworkEnabled) return null
-
-        val useFine = force || hasFineLocationPermission(context)
-        val provider = if (useFine && isGpsEnabled) {
-            LocationManager.GPS_PROVIDER
-        } else if (isNetworkEnabled) {
-            LocationManager.NETWORK_PROVIDER
-        } else {
-            LocationManager.GPS_PROVIDER
-        }
-
-        fun getFallbackLocation(): android.location.Location? {
-            return try {
-                val lastKnown = locationManager.getLastKnownLocation(provider)
-                if (lastKnown != null) return lastKnown
-                
-                val fallbackProvider = if (provider == LocationManager.GPS_PROVIDER)
-                    LocationManager.NETWORK_PROVIDER else LocationManager.GPS_PROVIDER
-                
-                if (locationManager.isProviderEnabled(fallbackProvider)) {
-                    locationManager.getLastKnownLocation(fallbackProvider)
-                } else null
-            } catch (e: Exception) { null }
-        }
-
+        // Kalau tidak force, coba last known dulu (lebih cepat & hemat baterai)
         if (!force) {
-            val fallback = getFallbackLocation()
-            if (fallback != null) {
-                LogUtil.d("WeatherHelper", "Using last known location")
-                return fallback
-            }
-        }
-
-        val cancellationSignal = CancellationSignal()
-        val location = withTimeoutOrNull(AppConfig.WEATHER_LOCATION_TIMEOUT_MS) {
-            suspendCancellableCoroutine { cont ->
-                cont.invokeOnCancellation { cancellationSignal.cancel() }
-                try {
-                    LocationManagerCompat.getCurrentLocation(
-                        locationManager,
-                        provider,
-                        cancellationSignal,
-                        ContextCompat.getMainExecutor(context)
-                    ) { loc ->
-                        if (cont.isActive) cont.resume(loc)
-                    }
-                } catch (e: SecurityException) {
-                    if (cont.isActive) cont.resume(null)
-                } catch (e: Exception) {
-                    if (cont.isActive) cont.resume(null)
+            try {
+                val lastKnown = fusedClient.lastLocation.await()
+                if (lastKnown != null) {
+                    LogUtil.d("WeatherHelper", "Using last known location (Fused)")
+                    return lastKnown
                 }
+            } catch (e: SecurityException) {
+                LogUtil.w("WeatherHelper", "SecurityException getting last location: ${e.message}")
+                return null
+            } catch (e: Exception) {
+                LogUtil.w("WeatherHelper", "Failed to get last location: ${e.message}")
             }
         }
 
-        if (location == null) {
-            LogUtil.w("WeatherHelper", "Location request timed out, forcing fallback")
-            return getFallbackLocation()
+        // Request lokasi fresh dari Fused Location Provider
+        val priority = if (hasFineLocationPermission(context))
+            Priority.PRIORITY_HIGH_ACCURACY
+        else
+            Priority.PRIORITY_BALANCED_POWER_ACCURACY
+
+        val locationRequest = CurrentLocationRequest.Builder()
+            .setPriority(priority)
+            .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
+            .setDurationMillis(AppConfig.WEATHER_LOCATION_TIMEOUT_MS)
+            .setMaxUpdateAgeMillis(if (force) 0L else 60_000L)
+            .build()
+
+        return try {
+            withTimeoutOrNull(AppConfig.WEATHER_LOCATION_TIMEOUT_MS + 1000L) {
+                fusedClient.getCurrentLocation(locationRequest, null).await()
+            }.also { loc ->
+                if (loc == null) LogUtil.w("WeatherHelper", "Fused location request returned null")
+            }
+        } catch (e: SecurityException) {
+            LogUtil.w("WeatherHelper", "SecurityException on getCurrentLocation: ${e.message}")
+            null
+        } catch (e: Exception) {
+            LogUtil.w("WeatherHelper", "getCurrentLocation failed: ${e.message}")
+            null
         }
-        
-        return location
     }
 
     suspend fun fetchCurrentWeather(context: Context, force: Boolean = false): WeatherResult? =
