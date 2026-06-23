@@ -190,7 +190,6 @@ object WeatherHelper {
             .build()
     }
 
-
     private suspend fun getCurrentLocation(
         context: Context,
         force: Boolean = false
@@ -230,25 +229,8 @@ object WeatherHelper {
             }
         }
 
-        val vpnRunning = try {
-            com.v2ray.ang.core.CoreServiceManager.isRunning()
-        } catch (e: Exception) {
-            false
-        }
-        LogUtil.d("WeatherHelper", "Requesting fresh fix via $provider (vpnRunning=$vpnRunning, force=$force)")
-
-        // Saat VPN aktif, GPS fix baru sering lambat/gagal di banyak device (terutama MIUI/HyperOS
-        // yang membatasi background location ketat). Daripada nunggu penuh sampai timeout dan
-        // akhirnya gagal total, pangkas waktu tunggu jadi lebih singkat saat VPN jalan, supaya
-        // cepat fallback ke last-known location.
-        val effectiveTimeoutMs = if (vpnRunning && !force) {
-            AppConfig.WEATHER_LOCATION_TIMEOUT_MS / 2
-        } else {
-            AppConfig.WEATHER_LOCATION_TIMEOUT_MS
-        }
-
         val cancellationSignal = CancellationSignal()
-        val location = withTimeoutOrNull(effectiveTimeoutMs) {
+        val location = withTimeoutOrNull(AppConfig.WEATHER_LOCATION_TIMEOUT_MS) {
             suspendCancellableCoroutine { cont ->
                 cont.invokeOnCancellation { cancellationSignal.cancel() }
                 try {
@@ -268,25 +250,10 @@ object WeatherHelper {
             }
         }
 
-        if (location != null) return location
-
-        LogUtil.w("WeatherHelper", "Location request timed out after ${effectiveTimeoutMs}ms (vpnRunning=$vpnRunning), trying fallback provider")
-
-        // Fallback: coba last-known dari provider alternatif sebelum benar-benar menyerah.
-        val altProvider = if (provider == LocationManager.GPS_PROVIDER)
-            LocationManager.NETWORK_PROVIDER else LocationManager.GPS_PROVIDER
-        if (locationManager.isProviderEnabled(altProvider)) {
-            try {
-                val altLocation = locationManager.getLastKnownLocation(altProvider)
-                if (altLocation != null) {
-                    LogUtil.d("WeatherHelper", "Fallback provider $altProvider returned last known location")
-                }
-                return altLocation
-            } catch (e: SecurityException) {
-                LogUtil.w("WeatherHelper", "Fallback getLastKnownLocation SecurityException: ${e.message}")
-            }
+        if (location == null) {
+            LogUtil.w("WeatherHelper", "Location request timed out after ${AppConfig.WEATHER_LOCATION_TIMEOUT_MS}ms")
         }
-        return null
+        return location
     }
 
     suspend fun fetchCurrentWeather(context: Context, force: Boolean = false): WeatherResult? =
@@ -300,19 +267,19 @@ object WeatherHelper {
                 }
             }
             try {
-                fetchOpenMeteo(context, location)?.also { saveCache(it, location) }
+                fetchOpenMeteo(location)?.also { saveCache(it, location) }
             } catch (e: Exception) {
-                LogUtil.e("WeatherHelper", "fetchCurrentWeather failed: ${e::class.simpleName} - ${e.message}")
+                LogUtil.e("WeatherHelper", "fetchCurrentWeather failed: ${e.message}")
                 null
             }
         }
 
-    private fun fetchOpenMeteo(context: Context, location: android.location.Location): WeatherResult? {
+    private fun fetchOpenMeteo(location: android.location.Location): WeatherResult? {
         val url = "https://api.open-meteo.com/v1/forecast" +
             "?latitude=${location.latitude}" +
             "&longitude=${location.longitude}" +
             "&current=temperature_2m,weather_code,is_day"
-        val body = getBody(context, url) ?: return null
+        val body = getBody(url) ?: return null
         val json = JsonUtil.parseString(body) ?: return null
         val current = json.getAsJsonObject("current") ?: return null
         val temp = current.get("temperature_2m")?.asDouble ?: return null
@@ -324,47 +291,14 @@ object WeatherHelper {
         )
     }
 
-    private fun getBody(context: Context, url: String): String? {
+    private fun getBody(url: String): String? {
         val req = Request.Builder()
             .url(url)
             .header("User-Agent", "MikuRay/1.0 (Android)")
             .header("Accept", "application/json")
             .build()
-
-        val vpnRunning = try {
-            com.v2ray.ang.core.CoreServiceManager.isRunning()
-        } catch (e: Exception) {
-            false
-        }
-
-        val httpClient = if (vpnRunning) {
-            // VPN sedang aktif: arahkan request weather lewat proxy lokal Xray-core
-            // (127.0.0.1:httpPort) supaya ikut rule/server yang sedang dipakai,
-            // bukan langsung ke internet. Ini aman karena lewat proxy aplikasi
-            // (bukan tun-level routing), jadi tidak ada risiko loop ke tun interface.
-            try {
-                val httpPort = com.v2ray.ang.handler.SettingsManager.getHttpPort()
-                val proxy = java.net.Proxy(
-                    java.net.Proxy.Type.HTTP,
-                    java.net.InetSocketAddress(AppConfig.LOOPBACK, httpPort)
-                )
-                LogUtil.d("WeatherHelper", "VPN running, routing weather request via local proxy 127.0.0.1:$httpPort")
-                client.newBuilder()
-                    .proxy(proxy)
-                    .build()
-            } catch (e: Exception) {
-                LogUtil.w("WeatherHelper", "Failed to set up local proxy, falling back to direct: ${e.message}")
-                client
-            }
-        } else {
-            client
-        }
-
-        return httpClient.newCall(req).execute().use { resp ->
-            if (!resp.isSuccessful) {
-                LogUtil.w("WeatherHelper", "Open-Meteo HTTP ${resp.code}")
-                null
-            } else resp.body?.string()
+        return client.newCall(req).execute().use { resp ->
+            if (!resp.isSuccessful) null else resp.body?.string()
         }
     }
 
