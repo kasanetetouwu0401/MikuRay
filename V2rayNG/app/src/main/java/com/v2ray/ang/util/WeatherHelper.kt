@@ -100,6 +100,110 @@ object WeatherHelper {
         }
     }
 
+    fun getCustomLocationRaw(): String =
+        MmkvManager.decodeSettingsString(AppConfig.PREF_WEATHER_CUSTOM_LOCATION, "") ?: ""
+
+    fun hasCustomLocation(): Boolean = getCustomLocationRaw().isNotBlank()
+
+    /** Display name for the resolved custom location, if one is cached. Null if not resolved yet. */
+    fun getCustomLocationResolvedName(): String? =
+        MmkvManager.decodeSettingsString(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_NAME, "")
+            ?.takeIf { it.isNotBlank() }
+
+    /** Clears the resolved custom location cache and the weather cache, forcing a fresh lookup/fetch. */
+    fun clearCustomLocationCache() {
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_RAW_CACHED, "")
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_LAT, 0f)
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_LON, 0f)
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_NAME, "")
+        clearCache()
+    }
+
+    private fun parseLatLon(raw: String): android.location.Location? {
+        val parts = raw.split(",").map { it.trim() }
+        if (parts.size != 2) return null
+        val lat = parts[0].toDoubleOrNull() ?: return null
+        val lon = parts[1].toDoubleOrNull() ?: return null
+        if (lat < -90.0 || lat > 90.0 || lon < -180.0 || lon > 180.0) return null
+        return android.location.Location("custom").apply {
+            latitude = lat
+            longitude = lon
+        }
+    }
+
+    private fun geocodeCustomLocation(raw: String): Pair<android.location.Location, String>? {
+        return try {
+            val encoded = java.net.URLEncoder.encode(raw, "UTF-8")
+            val url = "https://geocoding-api.open-meteo.com/v1/search?name=$encoded&count=1&language=id&format=json"
+            val body = getBody(url) ?: return null
+            val json = JsonUtil.parseString(body) ?: return null
+            val results = json.getAsJsonArray("results") ?: return null
+            if (results.size() == 0) return null
+            val first = results[0].asJsonObject
+            val lat = first.get("latitude")?.asDouble ?: return null
+            val lon = first.get("longitude")?.asDouble ?: return null
+            val nameParts = listOfNotNull(
+                first.get("name")?.asString,
+                first.get("admin1")?.asString,
+                first.get("country")?.asString
+            )
+            val name = nameParts.joinToString(", ")
+            val location = android.location.Location("custom").apply {
+                latitude = lat
+                longitude = lon
+            }
+            location to name
+        } catch (e: Exception) {
+            LogUtil.w("WeatherHelper", "geocodeCustomLocation failed: ${e.message}")
+            null
+        }
+    }
+
+    /**
+     * Resolves the user-entered custom location (lat,lon pair or a place name) into a Location.
+     * Caches the resolved coordinates/name keyed by the raw input so repeated calls don't
+     * re-geocode unnecessarily. Returns null if no custom location is set or resolution fails.
+     */
+    private fun resolveCustomLocation(): android.location.Location? {
+        val raw = getCustomLocationRaw()
+        if (raw.isBlank()) return null
+
+        val cachedRaw = MmkvManager.decodeSettingsString(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_RAW_CACHED, "")
+        if (cachedRaw == raw) {
+            val lat = MmkvManager.decodeSettingsFloat(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_LAT, 0f)
+            val lon = MmkvManager.decodeSettingsFloat(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_LON, 0f)
+            if (lat != 0f || lon != 0f) {
+                return android.location.Location("custom").apply {
+                    latitude = lat.toDouble()
+                    longitude = lon.toDouble()
+                }
+            }
+        }
+
+        val directLatLon = parseLatLon(raw)
+        val (location, name) = if (directLatLon != null) {
+            directLatLon to raw
+        } else {
+            geocodeCustomLocation(raw) ?: return null
+        }
+
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_RAW_CACHED, raw)
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_LAT, location.latitude.toFloat())
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_LON, location.longitude.toFloat())
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_NAME, name)
+        return location
+    }
+
+    /** Custom location if set and resolvable, otherwise falls back to the device's current location. */
+    private suspend fun getEffectiveLocation(
+        context: Context,
+        force: Boolean = false
+    ): android.location.Location? {
+        val custom = withContext(Dispatchers.IO) { resolveCustomLocation() }
+        if (custom != null) return custom
+        return getCurrentLocation(context, force)
+    }
+
     fun isDefaultCelsius(): Boolean {
         val tz = TimeZone.getDefault().id
         return !(tz.startsWith("US/") ||
@@ -271,7 +375,7 @@ object WeatherHelper {
 
     suspend fun fetchCurrentWeather(context: Context, force: Boolean = false): WeatherResult? =
         withContext(Dispatchers.IO) {
-            val location = getCurrentLocation(context, force) ?: return@withContext null
+            val location = getEffectiveLocation(context, force) ?: return@withContext null
             if (!force) {
                 val cached = getCachedWeather()
                 if (cached != null && isCacheValidForLocation(location)) {
@@ -316,7 +420,7 @@ object WeatherHelper {
     }
 
     fun scheduleBackgroundUpdates(context: Context, forceReschedule: Boolean = false) {
-        if (!hasLocationPermission(context)) return
+        if (!hasCustomLocation() && !hasLocationPermission(context)) return
         val request = PeriodicWorkRequestBuilder<UpdateWorker>(
             AppConfig.WEATHER_UPDATE_INTERVAL_MINUTES, TimeUnit.MINUTES
         )
@@ -341,7 +445,7 @@ object WeatherHelper {
             if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false))
                 return Result.success()
                 
-            if (!hasBackgroundLocationPermission(applicationContext))
+            if (!hasCustomLocation() && !hasBackgroundLocationPermission(applicationContext))
                 return Result.success()
                 
             val result = fetchCurrentWeather(applicationContext)

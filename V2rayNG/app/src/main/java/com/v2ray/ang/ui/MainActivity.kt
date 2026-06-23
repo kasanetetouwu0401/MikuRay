@@ -138,9 +138,14 @@ class MainActivity : HelperBaseActivity(),
         checkAndRequestPermission(PermissionType.POST_NOTIFICATIONS) {}
     }
 
+    private fun weatherLocationReady(): Boolean =
+        WeatherHelper.hasCustomLocation() || WeatherHelper.hasLocationPermission(this)
+
     private fun syncWeatherBackgroundUpdates() {
         val weatherEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)
-        if (weatherEnabled && WeatherHelper.hasBackgroundLocationPermission(this)) {
+        val canRunInBackground = WeatherHelper.hasCustomLocation() ||
+            WeatherHelper.hasBackgroundLocationPermission(this)
+        if (weatherEnabled && canRunInBackground) {
             WeatherHelper.scheduleBackgroundUpdates(this)
         } else if (!weatherEnabled) {
             WeatherHelper.cancelBackgroundUpdates(this)
@@ -203,7 +208,7 @@ class MainActivity : HelperBaseActivity(),
             return
         }
         val coldStart = isColdStart.also { isColdStart = false }
-        if (WeatherHelper.hasLocationPermission(this)) {
+        if (weatherLocationReady()) {
             if (coldStart) forceRefreshWeatherChip() else loadWeatherChip()
         } else {
             checkAndRequestPermission(PermissionType.LOCATION) {
@@ -215,7 +220,7 @@ class MainActivity : HelperBaseActivity(),
     private fun forceRefreshWeatherChip() {
         if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) return
 
-        if (!WeatherHelper.hasLocationPermission(this)) {
+        if (!weatherLocationReady()) {
             checkAndRequestPermission(PermissionType.LOCATION) {
                 forceRefreshWeatherChip()
             }

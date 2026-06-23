@@ -110,6 +110,7 @@ class UiSettingsActivity : BaseActivity() {
         private val showWeatherChip by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_WEATHER_CHIP) }
 
         private val weatherUnit by lazy { findPreference<ListPreference>(AppConfig.PREF_WEATHER_USE_CELSIUS) }
+        private val weatherCustomLocation by lazy { findPreference<EditTextPreference>(AppConfig.PREF_WEATHER_CUSTOM_LOCATION) }
         private val showTotalTrafficChip by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP) }
         private val searchChipGradient by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SEARCH_CHIP_GRADIENT) }
 
@@ -318,7 +319,7 @@ class UiSettingsActivity : BaseActivity() {
                     val hasForegroundPermission = ContextCompat.checkSelfPermission(
                         requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION
                     ) == PackageManager.PERMISSION_GRANTED
-                    if (!hasForegroundPermission) {
+                    if (!hasForegroundPermission && !WeatherHelper.hasCustomLocation()) {
                         requestPermissions(
                             arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
                             REQUEST_CODE_LOCATION
@@ -342,6 +343,18 @@ class UiSettingsActivity : BaseActivity() {
                     lp.summary = if (idx >= 0) lp.entries[idx] else valueStr
                 }
                 MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_USE_CELSIUS, valueStr)
+                true
+            }
+
+            updateWeatherCustomLocationSummary(weatherCustomLocation?.text.orEmpty())
+            weatherCustomLocation?.setOnPreferenceChangeListener { _, newValue ->
+                val raw = (newValue as? String)?.trim().orEmpty()
+                MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CUSTOM_LOCATION, raw)
+                WeatherHelper.clearCustomLocationCache()
+                updateWeatherCustomLocationSummary(raw)
+                if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
+                    WeatherHelper.scheduleBackgroundUpdates(requireContext(), forceReschedule = true)
+                }
                 true
             }
 
@@ -754,6 +767,25 @@ class UiSettingsActivity : BaseActivity() {
 
         private fun updateWeatherSubPrefsEnabled(weatherOn: Boolean) {
             weatherUnit?.isEnabled = weatherOn
+            weatherCustomLocation?.isEnabled = weatherOn
+        }
+
+        private fun updateWeatherCustomLocationSummary(raw: String) {
+            val pref = weatherCustomLocation ?: return
+            pref.summary = if (raw.isNotBlank()) {
+                raw
+            } else {
+                val lat = MmkvManager.decodeSettingsFloat(AppConfig.PREF_WEATHER_CACHE_LAT, 0f)
+                val lon = MmkvManager.decodeSettingsFloat(AppConfig.PREF_WEATHER_CACHE_LON, 0f)
+                if (lat != 0f || lon != 0f) {
+                    getString(
+                        R.string.pref_weather_custom_location_summary_current_coords,
+                        lat, lon
+                    )
+                } else {
+                    getString(R.string.pref_weather_custom_location_summary_auto)
+                }
+            }
         }
 
         private fun updateChipPreferenceEnabledState() {

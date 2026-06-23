@@ -210,6 +210,15 @@
             android:summary="%s"
             android:title="@string/pref_weather_unit_title" />
 
+        <androidx.preference.EditTextPreference
+            android:icon="@drawable/ic_weather_sunny"
+            app:layout="@layout/uwu_mid"
+            android:key="pref_weather_custom_location"
+            android:title="@string/pref_weather_custom_location_title"
+            android:summary="@string/pref_weather_custom_location_summary_auto"
+            android:dialogTitle="@string/pref_weather_custom_location_title"
+            android:dialogMessage="@string/pref_weather_custom_location_dialog_message" />
+
          <androidx.preference.SwitchPreferenceCompat
             android:icon="@drawable/ic_traffic_total"
             app:layout="@layout/uwu_mid_switch"
