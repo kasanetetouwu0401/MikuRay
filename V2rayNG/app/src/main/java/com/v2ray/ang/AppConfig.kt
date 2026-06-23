@@ -133,6 +133,7 @@ object AppConfig {
     const val WEATHER_UPDATE_INTERVAL_MINUTES = 30L
     const val WEATHER_LOCATION_TIMEOUT_MS = 10_000L
     const val WEATHER_LOCATION_STALE_METERS = 5_000f
+    const val WEATHER_HTTP_TIMEOUT_SECONDS = 5L
     const val PREF_SHOW_TOTAL_TRAFFIC_CHIP = "pref_show_total_traffic_chip"
     const val PREF_SEARCH_CHIP_GRADIENT = "pref_search_chip_gradient"
 

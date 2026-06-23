@@ -17,6 +17,7 @@ import androidx.work.WorkerParameters
 import androidx.work.multiprocess.RemoteWorkManager
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
+import com.v2ray.ang.core.CoreServiceManager
 import com.v2ray.ang.handler.MmkvManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -123,7 +124,6 @@ object WeatherHelper {
         ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED
 
-    // DIKEMBALIKAN: Fungsi pengecekan izin background location
     fun hasBackgroundLocationPermission(context: Context): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return hasLocationPermission(context)
         return ContextCompat.checkSelfPermission(
@@ -190,10 +190,10 @@ object WeatherHelper {
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_LON, 0f)
     }
 
-    private val client by lazy {
-        OkHttpClient.Builder()
-            .connectTimeout(8, TimeUnit.SECONDS)
-            .readTimeout(8, TimeUnit.SECONDS)
+    private fun buildClient(useProxy: Boolean): OkHttpClient {
+        val builder = OkHttpClient.Builder()
+            .connectTimeout(AppConfig.WEATHER_HTTP_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(AppConfig.WEATHER_HTTP_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .connectionSpecs(
                 listOf(
                     ConnectionSpec.CLEARTEXT,
@@ -201,12 +201,14 @@ object WeatherHelper {
                     ConnectionSpec.COMPATIBLE_TLS
                 )
             )
-            .proxySelector(object : ProxySelector() {
+
+        if (useProxy) {
+            val httpPort = try {
+                MmkvManager.decodeSettingsString(AppConfig.PREF_SOCKS_PORT, "10808")?.toInt() ?: 10808
+            } catch (e: Exception) { 10808 }
+
+            builder.proxySelector(object : ProxySelector() {
                 override fun select(uri: URI?): List<Proxy> {
-                    val httpPort = try {
-                        MmkvManager.decodeSettingsString(AppConfig.PREF_SOCKS_PORT, "10808")?.toInt() ?: 10809
-                    } catch (e: Exception) { 10808 }
-                    
                     return listOf(
                         Proxy(Proxy.Type.HTTP, java.net.InetSocketAddress("127.0.0.1", httpPort)),
                         Proxy.NO_PROXY
@@ -216,7 +218,14 @@ object WeatherHelper {
                 override fun connectFailed(uri: URI?, sa: SocketAddress?, ioe: IOException?) {
                 }
             })
-            .build()
+        } else {
+            builder.proxySelector(ProxySelector.getDefault() ?: object : ProxySelector() {
+                override fun select(uri: URI?): List<Proxy> = listOf(Proxy.NO_PROXY)
+                override fun connectFailed(uri: URI?, sa: SocketAddress?, ioe: IOException?) {}
+            })
+        }
+
+        return builder.build()
     }
 
     private suspend fun getCurrentLocation(
@@ -332,8 +341,26 @@ object WeatherHelper {
             .header("User-Agent", "MikuRay/1.0 (Android)")
             .header("Accept", "application/json")
             .build()
-        return client.newCall(req).execute().use { resp ->
-            if (!resp.isSuccessful) null else resp.body?.string()
+
+        val coreRunning = CoreServiceManager.isRunning()
+
+        if (coreRunning) {
+            try {
+                buildClient(useProxy = true).newCall(req).execute().use { resp ->
+                    if (resp.isSuccessful) return resp.body?.string()
+                }
+            } catch (e: Exception) {
+                LogUtil.w("WeatherHelper", "Proxied weather fetch failed, falling back direct: ${e.message}")
+            }
+        }
+
+        return try {
+            buildClient(useProxy = false).newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) null else resp.body?.string()
+            }
+        } catch (e: Exception) {
+            LogUtil.e("WeatherHelper", "Direct weather fetch failed: ${e.message}")
+            null
         }
     }
 
