@@ -227,8 +227,10 @@ class MainActivity : HelperBaseActivity(),
         if (cached != null) {
             applyWeatherToChip(cached)
         } else {
-            binding.ivWeatherIcon.isVisible = false
-            binding.tvWeatherTemp.isVisible = false
+            binding.ivWeatherIcon.setImageResource(WeatherHelper.iconResForEmoji(null))
+            binding.ivWeatherIcon.isVisible = true
+            binding.tvWeatherTemp.text = getString(R.string.weather_loading)
+            binding.tvWeatherTemp.isVisible = true
         }
 
         lifecycleScope.launch {
@@ -250,8 +252,10 @@ class MainActivity : HelperBaseActivity(),
         if (stale != null) {
             applyWeatherToChip(stale)
         } else {
-            binding.ivWeatherIcon.isVisible = false
-            binding.tvWeatherTemp.isVisible = false
+            binding.ivWeatherIcon.setImageResource(WeatherHelper.iconResForEmoji(null))
+            binding.ivWeatherIcon.isVisible = true
+            binding.tvWeatherTemp.text = getString(R.string.weather_loading)
+            binding.tvWeatherTemp.isVisible = true
         }
 
         if (fresh != null) return
