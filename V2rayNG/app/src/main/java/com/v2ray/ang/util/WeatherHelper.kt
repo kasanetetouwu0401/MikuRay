@@ -37,6 +37,9 @@ import java.util.concurrent.TimeUnit
 
 object WeatherHelper {
 
+    @Volatile
+    private var isFirstSessionLaunch = true
+
     data class WeatherResult(
         val emoji: String,
         val tempCelsius: Int
@@ -105,12 +108,10 @@ object WeatherHelper {
 
     fun hasCustomLocation(): Boolean = getCustomLocationRaw().isNotBlank()
 
-    /** Display name for the resolved custom location, if one is cached. Null if not resolved yet. */
     fun getCustomLocationResolvedName(): String? =
         MmkvManager.decodeSettingsString(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_NAME, "")
             ?.takeIf { it.isNotBlank() }
 
-    /** Clears the resolved custom location cache and the weather cache, forcing a fresh lookup/fetch. */
     fun clearCustomLocationCache() {
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_RAW_CACHED, "")
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_LAT, 0f)
@@ -159,11 +160,6 @@ object WeatherHelper {
         }
     }
 
-    /**
-     * Resolves the user-entered custom location (lat,lon pair or a place name) into a Location.
-     * Caches the resolved coordinates/name keyed by the raw input so repeated calls don't
-     * re-geocode unnecessarily. Returns null if no custom location is set or resolution fails.
-     */
     private fun resolveCustomLocation(): android.location.Location? {
         val raw = getCustomLocationRaw()
         if (raw.isBlank()) return null
@@ -375,14 +371,22 @@ object WeatherHelper {
 
     suspend fun fetchCurrentWeather(context: Context, force: Boolean = false): WeatherResult? =
         withContext(Dispatchers.IO) {
-            val location = getEffectiveLocation(context, force) ?: return@withContext null
-            if (!force) {
+            val forceRefresh = force || isFirstSessionLaunch
+            if (isFirstSessionLaunch) {
+                isFirstSessionLaunch = false
+                LogUtil.d("WeatherHelper", "Force refresh trigger: First session launch")
+            }
+
+            val location = getEffectiveLocation(context, forceRefresh) ?: return@withContext null
+            
+            if (!forceRefresh) {
                 val cached = getCachedWeather()
                 if (cached != null && isCacheValidForLocation(location)) {
                     LogUtil.d("WeatherHelper", "Cache still valid for current location, skipping fetch")
                     return@withContext cached
                 }
             }
+            
             try {
                 fetchOpenMeteo(location)?.also { saveCache(it, location) }
             } catch (e: Exception) {
