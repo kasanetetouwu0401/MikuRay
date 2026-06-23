@@ -443,10 +443,8 @@ class MainActivity : HelperBaseActivity(),
 
                 if (show) {
                     sv.visibility = android.view.View.VISIBLE
-                    sv.startFalling()
                 } else {
                     sv.visibility = android.view.View.GONE
-                    sv.stopFalling()
                 }
             }
         }
