@@ -85,7 +85,6 @@ class UiSettingsActivity : BaseActivity() {
 
         companion object {
             private const val REQUEST_CODE_LOCATION = 9001
-            private const val REQUEST_CODE_BACKGROUND_LOCATION = 9002
         }
 
         private val appTheme by lazy { findPreference<Preference>(AppConfig.PREF_APP_THEME) }
@@ -325,11 +324,10 @@ class UiSettingsActivity : BaseActivity() {
                             REQUEST_CODE_LOCATION
                         )
                     } else {
-                        requestBackgroundLocationThenSchedule()
+                        WeatherHelper.scheduleBackgroundUpdates(requireContext(), forceReschedule = true)
                     }
                 } else {
                     WeatherHelper.cancelBackgroundUpdates(requireContext())
-                    revokeWeatherLocationPermission()
                 }
                 showTotalTrafficChip?.isEnabled = !checked
                 updateWeatherSubPrefsEnabled(checked)
@@ -677,19 +675,6 @@ class UiSettingsActivity : BaseActivity() {
             preferenceScreen?.let { traverse(it) }
         }
 
-        private fun requestBackgroundLocationThenSchedule() {
-            if (WeatherHelper.hasBackgroundLocationPermission(requireContext())) {
-                WeatherHelper.scheduleBackgroundUpdates(requireContext(), forceReschedule = true)
-                return
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                requestPermissions(
-                    arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                    REQUEST_CODE_BACKGROUND_LOCATION
-                )
-            }
-        }
-
         override fun onRequestPermissionsResult(
             requestCode: Int,
             permissions: Array<out String>,
@@ -698,11 +683,6 @@ class UiSettingsActivity : BaseActivity() {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults)
             when (requestCode) {
                 REQUEST_CODE_LOCATION -> {
-                    if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
-                        requestBackgroundLocationThenSchedule()
-                    }
-                }
-                REQUEST_CODE_BACKGROUND_LOCATION -> {
                     if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
                         WeatherHelper.scheduleBackgroundUpdates(requireContext(), forceReschedule = true)
                     }
@@ -774,23 +754,6 @@ class UiSettingsActivity : BaseActivity() {
 
         private fun updateWeatherSubPrefsEnabled(weatherOn: Boolean) {
             weatherUnit?.isEnabled = weatherOn
-        }
-
-        private fun revokeWeatherLocationPermission() {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
-            val context = requireContext()
-            val permissions = listOfNotNull(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                } else null
-            ).filter {
-                ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-            }
-            if (permissions.isNotEmpty()) {
-                context.revokeSelfPermissionsOnKill(permissions)
-            }
         }
 
         private fun updateChipPreferenceEnabledState() {
