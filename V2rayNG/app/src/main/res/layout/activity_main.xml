@@ -210,14 +210,6 @@
                                 android:tint="?colorOnSurfaceVariant"
                                 android:visibility="gone" />
 
-                            <ProgressBar
-                                android:id="@+id/pb_weather_loading"
-                                style="?android:attr/progressBarStyleSmall"
-                                android:layout_width="14dp"
-                                android:layout_height="14dp"
-                                android:gravity="center"
-                                android:indeterminateTint="?colorOnSurfaceVariant"
-                                android:visibility="gone" />
 
                             <TextView
                                 android:id="@+id/tv_weather_temp"

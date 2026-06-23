@@ -147,6 +147,9 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
+    /** True hanya pada cold start pertama — reset setelah refreshWeatherChip dipanggil */
+    private var isColdStart = true
+
     override fun onResume() {
         super.onResume()
         refreshSearchBarChip()
@@ -175,7 +178,6 @@ class MainActivity : HelperBaseActivity(),
 
     private fun hideWeatherChipViews() {
         binding.ivWeatherIcon.isVisible = false
-        binding.pbWeatherLoading.isVisible = false
         binding.tvWeatherTemp.isVisible = false
     }
 
@@ -212,19 +214,20 @@ class MainActivity : HelperBaseActivity(),
             binding.layoutWeatherChip.isVisible = false
             return
         }
+        val coldStart = isColdStart.also { isColdStart = false }
         if (WeatherHelper.hasLocationPermission(this)) {
-            loadWeatherChip()
+            if (coldStart) forceRefreshWeatherChip() else loadWeatherChip()
         } else {
             checkAndRequestPermission(PermissionType.LOCATION) {
-                loadWeatherChip()
+                if (coldStart) forceRefreshWeatherChip() else loadWeatherChip()
             }
         }
     }
 
     /**
-     * Force refresh — dipanggil saat user tap chip.
-     * Invalidate cache dulu, lalu fetch fresh.
-     * Tetap tampilkan data stale selama loading supaya chip tidak hilang tiba-tiba.
+     * Force refresh — dipanggil saat cold start atau user tap chip.
+     * TIDAK clear cache dulu — cache tetap ada sebagai fallback kalau fetch gagal/timeout.
+     * Tampilkan data lama dulu (kalau ada), fetch fresh di background, update kalau berhasil.
      */
     private fun forceRefreshWeatherChip() {
         if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) return
@@ -236,27 +239,23 @@ class MainActivity : HelperBaseActivity(),
             return
         }
 
-        // Tampilkan stale dulu kalau ada, baru show loading spinner di atas
-        val stale = WeatherHelper.getCachedWeatherStale()
+        // Tampilkan cache yang ada dulu (fresh atau stale) — chip tidak kosong selama loading
+        val cached = WeatherHelper.getCachedWeatherStale()
         binding.layoutWeatherChip.isVisible = true
-        if (stale != null) {
-            applyWeatherToChip(stale)
+        if (cached != null) {
+            // Ada data lama → tampilkan langsung, tanpa spinner (tidak perlu bikin user cemas)
+            applyWeatherToChip(cached)
+        } else {
+            // Benar-benar belum ada data → spinner
+            binding.ivWeatherIcon.isVisible = false
+            binding.tvWeatherTemp.isVisible = false
         }
-        binding.pbWeatherLoading.isVisible = true
-        binding.ivWeatherIcon.isVisible = stale != null
-        binding.tvWeatherTemp.isVisible = stale != null
-
-        WeatherHelper.clearCache()
 
         lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@MainActivity, force = true)
-            binding.pbWeatherLoading.isVisible = false
             if (weather == null) {
-                if (stale != null) {
-                    applyWeatherToChip(stale)
-                } else {
-                    binding.layoutWeatherChip.isVisible = false
-                }
+                // Fetch gagal / timeout → fallback ke cache, jangan hilangkan chip
+                if (cached == null) binding.layoutWeatherChip.isVisible = false
                 return@launch
             }
             applyWeatherToChip(weather)
@@ -280,7 +279,6 @@ class MainActivity : HelperBaseActivity(),
             applyWeatherToChip(stale)
         } else {
             // Benar-benar belum ada data sama sekali → loading spinner
-            binding.pbWeatherLoading.isVisible = true
             binding.ivWeatherIcon.isVisible = false
             binding.tvWeatherTemp.isVisible = false
         }
@@ -290,7 +288,6 @@ class MainActivity : HelperBaseActivity(),
 
         lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@MainActivity)
-            binding.pbWeatherLoading.isVisible = false
             if (weather == null) {
                 if (stale == null) binding.layoutWeatherChip.isVisible = false
                 // kalau stale ada, chip sudah tampil → tidak perlu ubah apa-apa
@@ -304,7 +301,6 @@ class MainActivity : HelperBaseActivity(),
         binding.ivWeatherIcon.setImageResource(WeatherHelper.iconResForEmoji(weather.emoji))
         binding.tvWeatherTemp.text = weather.getTemperatureString(WeatherHelper.isCelsius())
 
-        binding.pbWeatherLoading.isVisible = false
         binding.ivWeatherIcon.isVisible = true
         binding.tvWeatherTemp.isVisible = true
         binding.layoutWeatherChip.isVisible = true
