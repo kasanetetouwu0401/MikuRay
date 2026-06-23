@@ -1,6 +1,5 @@
 package com.v2ray.ang.util
 
-import android.content.res.ColorStateList
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.v2ray.ang.AppConfig
@@ -39,13 +38,18 @@ object BlurBottomStatusController {
         )
         binding.fab.visibility = View.VISIBLE
         binding.fabNoBlur.visibility = View.GONE
-        binding.cardBottomStatus.setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
     }
 
     private fun applyBlurOff(activity: AppCompatActivity, binding: ActivityMainBinding) {
         binding.blurBottomStatus.visibility = View.GONE
+        binding.cardBottomStatus.setCardBackgroundColor(
+            activity.getColorAttr("colorPrimary")
+        )
+        val textColorOnPrimary = activity.getColorAttr("colorOnPrimary")
+        binding.tvIpState.setTextColor(textColorOnPrimary)
+        binding.tvIpState.alpha = 0.8f 
+        binding.tvTestState.setTextColor(textColorOnPrimary)
         binding.fab.visibility = View.GONE
         binding.fabNoBlur.visibility = View.VISIBLE
-        BottomStatusGradientController.applyState(activity, binding)
     }
 }

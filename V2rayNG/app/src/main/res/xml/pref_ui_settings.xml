@@ -270,19 +270,10 @@
 
         <com.v2ray.ang.ui.dialog.BlurBottomIntensityDialog
             android:icon="@drawable/ic_baseline_blur_on_24"
-            app:layout="@layout/uwu_mid"
+            app:layout="@layout/uwu_bot"
             app:key="pref_blur_bottom_intensity"
             app:title="@string/pref_blur_bottom_intensity"
             app:dependency="pref_blur_bottom_status" />
-
-        <androidx.preference.SwitchPreferenceCompat
-            android:icon="@drawable/ic_palette_24"
-            app:layout="@layout/uwu_bot_switch"
-            app:widgetLayout="@layout/uwu_widget_material_switch"
-            android:defaultValue="false"
-            android:key="pref_bottom_status_gradient"
-            android:title="@string/bottom_status_gradient_title"
-            android:summary="@string/bottom_status_gradient_summary" />
 
     </com.neko.widget.UwuPreferenceCategory>
 
@@ -322,20 +313,11 @@
 
         <Preference
             android:icon="@drawable/ic_delete_24dp"
-            app:layout="@layout/uwu_mid"
+            app:layout="@layout/uwu_bot"
             android:key="action_delete_home_banner_image"
             app:dependency="pref_show_home_banner"
             android:title="@string/home_banner_delete_title"
             android:summary="@string/home_banner_delete_summary" />
-
-        <androidx.preference.SwitchPreferenceCompat
-            android:icon="@drawable/ic_weather_snow"
-            app:layout="@layout/uwu_top_switch"
-            app:widgetLayout="@layout/uwu_widget_material_switch"
-            android:defaultValue="false"
-            android:key="pref_show_snowfall"
-            android:title="@string/snowfall_show_title"
-            android:summary="@string/snowfall_show_summary" />
 
     </com.neko.widget.UwuPreferenceCategory>
     

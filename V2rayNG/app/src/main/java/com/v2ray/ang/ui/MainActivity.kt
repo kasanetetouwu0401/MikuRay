@@ -47,14 +47,12 @@ import com.v2ray.ang.ui.bottomsheet.MoreMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.ShareConfigBottomSheet
 import com.v2ray.ang.ui.preference.activity.SettingsActivity
 import com.v2ray.ang.util.BlurBottomStatusController
-import com.v2ray.ang.util.BottomStatusGradientController
 import com.v2ray.ang.util.SearchChipGradientController
 import com.v2ray.ang.util.getColorAttr
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.QRCodeDecoder
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.util.WeatherHelper
-import com.jetradarmobile.snowfall.SnowfallView
 import com.v2ray.ang.util.showBlur
 import com.v2ray.ang.util.showDeleteConfirmDialog
 import com.v2ray.ang.util.showSubUpdateDiffDialog
@@ -83,8 +81,6 @@ class MainActivity : HelperBaseActivity(),
     private var tabMediator: TabLayoutMediator? = null
     
     private var bannerReceiver: android.content.BroadcastReceiver? = null 
-    private var snowfallReceiver: android.content.BroadcastReceiver? = null
-    private var snowfallView: SnowfallView? = null
 
     private val tabSelectedListener = object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
         override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab) {
@@ -132,9 +128,7 @@ class MainActivity : HelperBaseActivity(),
         setupGroupTab()
         setupViewModel()
         setupBannerHome()
-        setupSnowfall()
         BlurBottomStatusController.applyState(this, binding)
-        BottomStatusGradientController.applyState(this, binding)
 
         SubscriptionUpdater.sync()
         syncWeatherBackgroundUpdates()
@@ -414,66 +408,6 @@ class MainActivity : HelperBaseActivity(),
         } else {
             @Suppress("UnspecifiedRegisterReceiverFlag")
             registerReceiver(bannerReceiver, filter)
-        }
-    }
-
-    private fun setupSnowfall() {
-        snowfallView = binding.snowfallView
-
-        fun applySnowfallState() {
-            val show = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_SNOWFALL, false)
-            snowfallView?.let { sv ->
-                // Sync height with banner
-                val bannerHeightDp = MmkvManager.decodeSettingsInt(
-                    AppConfig.PREF_HOME_BANNER_HEIGHT,
-                    AppConfig.HOME_BANNER_HEIGHT_DEFAULT
-                )
-                val density = resources.displayMetrics.density
-                val statusBarHeight = run {
-                    val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-                    if (resourceId > 0) resources.getDimensionPixelSize(resourceId) else 0
-                }
-                val bannerHeightPx = (bannerHeightDp * density).toInt()
-                val totalHeight = bannerHeightPx + statusBarHeight
-
-                val lp = sv.layoutParams
-                lp.height = totalHeight
-                sv.layoutParams = lp
-                sv.translationY = -statusBarHeight.toFloat()
-
-                if (show) {
-                    sv.visibility = android.view.View.VISIBLE
-                } else {
-                    sv.visibility = android.view.View.GONE
-                }
-            }
-        }
-
-        applySnowfallState()
-
-        snowfallReceiver = object : android.content.BroadcastReceiver() {
-            override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
-                when (intent?.action) {
-                    AppConfig.BROADCAST_ACTION_SNOWFALL_CHANGED,
-                    AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED -> {
-                        applySnowfallState()
-                    }
-                    AppConfig.BROADCAST_ACTION_BOTTOM_STATUS_GRADIENT_CHANGED -> {
-                        BlurBottomStatusController.applyState(this@MainActivity, binding)
-                        BottomStatusGradientController.applyState(this@MainActivity, binding)
-                    }
-                }
-            }
-        }
-
-        val filter = android.content.IntentFilter(AppConfig.BROADCAST_ACTION_SNOWFALL_CHANGED)
-        filter.addAction(AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED)
-        filter.addAction(AppConfig.BROADCAST_ACTION_BOTTOM_STATUS_GRADIENT_CHANGED)
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(snowfallReceiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED)
-        } else {
-            @Suppress("UnspecifiedRegisterReceiverFlag")
-            registerReceiver(snowfallReceiver, filter)
         }
     }
 
@@ -1161,12 +1095,6 @@ class MainActivity : HelperBaseActivity(),
             bannerReceiver?.let { unregisterReceiver(it) }
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to unregister bannerReceiver", e)
-        }
-        
-        try {
-            snowfallReceiver?.let { unregisterReceiver(it) }
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to unregister snowfallReceiver", e)
         }
         
         super.onDestroy()

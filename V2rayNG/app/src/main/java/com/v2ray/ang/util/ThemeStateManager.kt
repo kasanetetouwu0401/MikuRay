@@ -22,8 +22,6 @@ class ThemeStateManager(private val activity: Activity) {
     private var currentBlurBottomRounds: Int = 3
     private var currentFont: String = ""
     private var currentHeaderTopRowPadding: Int = 0 
-    private var currentShowSnowfall: Boolean = false
-    private var currentBottomStatusGradient: Boolean = false
 
     init {
         loadState()
@@ -46,8 +44,6 @@ class ThemeStateManager(private val activity: Activity) {
         currentBlurBottomRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS)
         currentFont = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT) ?: ""
         currentHeaderTopRowPadding = MmkvManager.decodeSettingsInt(AppConfig.PREF_HEADER_TOP_ROW_PADDING, AppConfig.HEADER_TOP_ROW_PADDING_DEFAULT)
-        currentShowSnowfall = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_SNOWFALL, false)
-        currentBottomStatusGradient = MmkvManager.decodeSettingsBool(AppConfig.PREF_BOTTOM_STATUS_GRADIENT, false)
     }
 
     fun checkThemeChangedAndRecreate() {
@@ -67,8 +63,6 @@ class ThemeStateManager(private val activity: Activity) {
         val newBlurBottomRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS)
         val newFont = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT) ?: "" 
         val newHeaderTopRowPadding = MmkvManager.decodeSettingsInt(AppConfig.PREF_HEADER_TOP_ROW_PADDING, AppConfig.HEADER_TOP_ROW_PADDING_DEFAULT)
-        val newShowSnowfall = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_SNOWFALL, false)
-        val newBottomStatusGradient = MmkvManager.decodeSettingsBool(AppConfig.PREF_BOTTOM_STATUS_GRADIENT, false)
 
         if (currentThemeKey != newThemeKey ||
             currentDynamicColor != newDynamicColor ||
@@ -85,9 +79,7 @@ class ThemeStateManager(private val activity: Activity) {
             currentBlurBottomRadius != newBlurBottomRadius ||
             currentBlurBottomRounds != newBlurBottomRounds ||
             currentFont != newFont ||
-            currentHeaderTopRowPadding != newHeaderTopRowPadding ||
-            currentShowSnowfall != newShowSnowfall ||
-            currentBottomStatusGradient != newBottomStatusGradient
+            currentHeaderTopRowPadding != newHeaderTopRowPadding
         ) {
             loadState()
             activity.recreate()

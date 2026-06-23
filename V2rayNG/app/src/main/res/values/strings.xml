@@ -684,10 +684,6 @@ you need."</string>
     <string name="home_banner_delete_title">Delete custom home banner</string>
     <string name="home_banner_delete_summary">Revert to default home banner</string>
     <string name="home_banner_updated">Home banner updated successfully.</string>
-    <string name="snowfall_show_title">Snowfall animation</string>
-    <string name="snowfall_show_summary">Show falling snowflakes over the home banner</string>
-    <string name="bottom_status_gradient_title">Gradient status card</string>
-    <string name="bottom_status_gradient_summary">Apply a primary-to-tertiary gradient background on the bottom status card (disabled when blur is active)</string>
     <string name="pref_home_banner_height_title">Banner height</string>
     <string name="pref_home_banner_height_summary_value">%1$ddp</string>
     <string name="pref_header_top_row_padding_title">Header top padding</string>
