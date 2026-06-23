@@ -204,7 +204,7 @@ object WeatherHelper {
             .proxySelector(object : ProxySelector() {
                 override fun select(uri: URI?): List<Proxy> {
                     val httpPort = try {
-                        MmkvManager.decodeSettingsString(AppConfig.PORT_SOCKS, "10808")?.toInt() ?: 10809
+                        MmkvManager.decodeSettingsString(AppConfig.PREF_SOCKS_PORT, "10808")?.toInt() ?: 10809
                     } catch (e: Exception) { 10808 }
                     
                     return listOf(
