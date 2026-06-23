@@ -201,7 +201,7 @@
             android:title="@string/pref_show_weather_chip_title" />
 
         <androidx.preference.ListPreference
-            android:icon="@drawable/ic_weather_sunny"
+            android:icon="@drawable/ic_temperature_celsius"
             app:layout="@layout/uwu_mid"
             android:defaultValue="true"
             android:entries="@array/weather_unit_entries"
@@ -211,7 +211,7 @@
             android:title="@string/pref_weather_unit_title" />
 
         <androidx.preference.EditTextPreference
-            android:icon="@drawable/ic_weather_sunny"
+            android:icon="@drawable/ic_map_marker_outline"
             app:layout="@layout/uwu_mid"
             android:key="pref_weather_custom_location"
             android:title="@string/pref_weather_custom_location_title"

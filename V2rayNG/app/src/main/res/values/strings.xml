@@ -571,7 +571,7 @@
 
     <string name="pref_weather_unit_title">Temperature Unit</string>
     <string name="pref_weather_custom_location_title">Custom Location</string>
-    <string name="pref_weather_custom_location_dialog_message">Enter a place name (e.g. Jakarta) or coordinates as \"latitude,longitude\". Leave empty to use your current location.</string>
+    <string name="pref_weather_custom_location_dialog_message">Enter a place name (e.g. London) or coordinates as \"latitude,longitude\". Leave empty to use your current location.</string>
     <string name="pref_weather_custom_location_summary_auto">Using your current location</string>
     <string name="pref_weather_custom_location_summary_current_coords">Using current location (%1$.2f, %2$.2f)</string>
     <string name="title_pref_sound_on_connect">Connection Sound</string>

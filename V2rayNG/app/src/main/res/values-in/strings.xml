@@ -533,6 +533,10 @@
     <string name="pref_search_chip_gradient_summary">Terapin background gradasi (warna primary ke tertiary) di chip bar pencarian pas chip cuaca atau chip total pemakaian lagi aktif</string>
 
     <string name="pref_weather_unit_title">Satuan Suhu</string>
+    <string name="pref_weather_custom_location_title">Lokasi Kustom</string>
+    <string name="pref_weather_custom_location_dialog_message">Masukin nama tempat (contoh: Jakarta) atau koordinat pakai format \"latitude,longitude\". Kosongin aja kalau mau pakai lokasi kamu sekarang.</string>
+    <string name="pref_weather_custom_location_summary_auto">Pakai lokasi kamu sekarang</string>
+    <string name="pref_weather_custom_location_summary_current_coords">Pakai lokasi sekarang (%1$.2f, %2$.2f)</string>
     <string name="title_vpn_sound_settings">Suara</string>
     <string name="title_pref_sound_on_connect">Bunyi Koneksi</string>
     <string name="summary_pref_sound_on_connect">Bunyi pas nyambung atau putus koneksi</string>

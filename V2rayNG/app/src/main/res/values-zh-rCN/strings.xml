@@ -531,6 +531,10 @@
     <string name="pref_search_chip_gradient_summary">当天气或总流量组件启用时，在搜索栏组件上应用主色至第三色 (primary-to-tertiary) 的渐变背景</string>
 
     <string name="pref_weather_unit_title">温度单位</string>
+    <string name="pref_weather_custom_location_title">自定义位置</string>
+    <string name="pref_weather_custom_location_dialog_message">输入地名（例如：Beijing）或输入坐标，格式为 \"纬度,经度\"。留空则使用你当前的位置。</string>
+    <string name="pref_weather_custom_location_summary_auto">正在使用当前位置</string>
+    <string name="pref_weather_custom_location_summary_current_coords">正在使用当前位置 (%1$.2f, %2$.2f)</string>
     <string name="title_vpn_sound_settings">声音</string>
     <string name="title_pref_sound_on_connect">连接提示音</string>
     <string name="summary_pref_sound_on_connect">连接或断开时播放声音</string>

@@ -772,28 +772,18 @@ class UiSettingsActivity : BaseActivity() {
 
         private fun updateWeatherCustomLocationSummary(raw: String) {
             val pref = weatherCustomLocation ?: return
-            if (raw.isBlank()) {
+            pref.summary = if (raw.isNotBlank()) {
+                raw
+            } else {
                 val lat = MmkvManager.decodeSettingsFloat(AppConfig.PREF_WEATHER_CACHE_LAT, 0f)
                 val lon = MmkvManager.decodeSettingsFloat(AppConfig.PREF_WEATHER_CACHE_LON, 0f)
-                pref.summary = if (lat != 0f || lon != 0f) {
-                    getString(R.string.pref_weather_custom_location_summary_current_coords, lat, lon)
+                if (lat != 0f || lon != 0f) {
+                    getString(
+                        R.string.pref_weather_custom_location_summary_current_coords,
+                        lat, lon
+                    )
                 } else {
                     getString(R.string.pref_weather_custom_location_summary_auto)
-                }
-                return
-            }
-
-            val resolvedName = WeatherHelper.getCustomLocationResolvedName()
-            if (resolvedName != null) {
-                pref.summary = resolvedName
-                return
-            }
-
-            pref.summary = raw
-            lifecycleScope.launch {
-                withContext(Dispatchers.IO) { WeatherHelper.resolveCustomLocation() }
-                if (weatherCustomLocation?.text == raw) {
-                    WeatherHelper.getCustomLocationResolvedName()?.let { pref.summary = it }
                 }
             }
         }

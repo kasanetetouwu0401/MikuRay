@@ -551,6 +551,10 @@
     <string name="pref_search_chip_gradient_summary">Применить градиентный фон (от цвета primary к tertiary) на плашке строки поиска, когда активна плашка погоды или общего трафика</string>
 
     <string name="pref_weather_unit_title">Единица измерения температуры</string>
+    <string name="pref_weather_custom_location_title">Свое местоположение</string>
+    <string name="pref_weather_custom_location_dialog_message">Введите название места (например: Moscow) или координаты в формате \"широта,долгота\". Оставьте пустым, чтобы использовать текущее местоположение.</string>
+    <string name="pref_weather_custom_location_summary_auto">Используется текущее местоположение</string>
+    <string name="pref_weather_custom_location_summary_current_coords">Используется текущее местоположение (%1$.2f, %2$.2f)</string>
     <string name="title_vpn_sound_settings">Звук</string>
     <string name="title_pref_sound_on_connect">Звук подключения</string>
     <string name="summary_pref_sound_on_connect">Воспроизводить звук при подключении или отключении</string>
