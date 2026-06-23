@@ -126,14 +126,11 @@ object AppConfig {
     const val PREF_WEATHER_CACHE_EMOJI = "pref_weather_cache_emoji"
     const val PREF_WEATHER_CACHE_TIMESTAMP = "pref_weather_cache_timestamp"
     const val PREF_WEATHER_USE_CELSIUS = "pref_weather_use_celsius"
-    const val PREF_WEATHER_API = "pref_weather_api"
-    const val WEATHER_API_OPEN_METEO = "open_meteo"
-    const val WEATHER_API_WTTR = "wttr"
-    const val WEATHER_API_OWM = "owm"
-    const val WEATHER_API_DEFAULT = WEATHER_API_OPEN_METEO
     const val WEATHER_CACHE_TTL_MS = 30 * 60 * 1000L
     const val WEATHER_UPDATE_TASK_NAME = "weather_updater"
     const val WEATHER_UPDATE_INTERVAL_MINUTES = 30L
+    /** Timeout untuk request lokasi fresh — supaya chip tidak hang kalau GPS lambat */
+    const val WEATHER_LOCATION_TIMEOUT_MS = 10_000L
     const val PREF_SHOW_TOTAL_TRAFFIC_CHIP = "pref_show_total_traffic_chip"
     const val PREF_SEARCH_CHIP_GRADIENT = "pref_search_chip_gradient"
 

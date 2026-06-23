@@ -201,16 +201,6 @@
             android:title="@string/pref_show_weather_chip_title" />
 
         <androidx.preference.ListPreference
-            android:icon="@drawable/ic_cloud"
-            app:layout="@layout/uwu_mid"
-            android:defaultValue="open_meteo"
-            android:entries="@array/weather_api_entries"
-            android:entryValues="@array/weather_api_values"
-            android:key="pref_weather_api"
-            android:summary="%s"
-            android:title="@string/pref_weather_api_title" />
-
-        <androidx.preference.ListPreference
             android:icon="@drawable/ic_weather_sunny"
             app:layout="@layout/uwu_mid"
             android:defaultValue="true"

@@ -196,15 +196,20 @@ class MainActivity : HelperBaseActivity(),
         binding.layoutWeatherChip.isVisible = true
     }
 
+    /**
+     * Dipanggil saat chip pertama kali muncul / activity resume.
+     *
+     * Strategi stale-while-revalidate:
+     * 1. Tampilkan cache (fresh maupun stale) langsung — chip tidak kosong/loading
+     * 2. Kalau cache expired (atau belum ada), kick off fetch di background
+     * 3. Setelah fetch selesai, update chip dengan data baru
+     *
+     * Bug lama: kalau cache masih fresh → early return, fetch tidak pernah dijadwalkan
+     * → chip stuck sampai 30 menit penuh tanpa pernah refresh.
+     */
     private fun refreshWeatherChip() {
         if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
             binding.layoutWeatherChip.isVisible = false
-            return
-        }
-        val cached = WeatherHelper.getCachedWeather()
-        if (cached != null) {
-            binding.layoutWeatherChip.isVisible = true
-            applyWeatherToChip(cached)
             return
         }
         if (WeatherHelper.hasLocationPermission(this)) {
@@ -216,6 +221,11 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
+    /**
+     * Force refresh — dipanggil saat user tap chip.
+     * Invalidate cache dulu, lalu fetch fresh.
+     * Tetap tampilkan data stale selama loading supaya chip tidak hilang tiba-tiba.
+     */
     private fun forceRefreshWeatherChip() {
         if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) return
 
@@ -226,16 +236,22 @@ class MainActivity : HelperBaseActivity(),
             return
         }
 
+        // Tampilkan stale dulu kalau ada, baru show loading spinner di atas
+        val stale = WeatherHelper.getCachedWeatherStale()
         binding.layoutWeatherChip.isVisible = true
+        if (stale != null) {
+            applyWeatherToChip(stale)
+        }
         binding.pbWeatherLoading.isVisible = true
-        binding.ivWeatherIcon.isVisible = false
-        binding.tvWeatherTemp.isVisible = false
+        binding.ivWeatherIcon.isVisible = stale != null
+        binding.tvWeatherTemp.isVisible = stale != null
+
+        WeatherHelper.clearCache()
 
         lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@MainActivity, force = true)
             binding.pbWeatherLoading.isVisible = false
             if (weather == null) {
-                val stale = WeatherHelper.getCachedWeatherStale()
                 if (stale != null) {
                     applyWeatherToChip(stale)
                 } else {
@@ -247,28 +263,37 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
+    /**
+     * Load chip dengan pola stale-while-revalidate:
+     * - Langsung tampilkan cache (fresh atau stale)
+     * - Kalau cache expired atau belum ada → fetch di background
+     * - Update chip kalau fetch berhasil
+     */
     private fun loadWeatherChip() {
         binding.layoutWeatherChip.isVisible = true
-        binding.pbWeatherLoading.isVisible = false
 
-        val cached = WeatherHelper.getCachedWeather()
-        val stale = cached ?: WeatherHelper.getCachedWeatherStale()
-        if (cached != null) {
-            applyWeatherToChip(cached)
-            return
-        } else if (stale != null) {
+        val fresh = WeatherHelper.getCachedWeather()
+        val stale = fresh ?: WeatherHelper.getCachedWeatherStale()
+
+        if (stale != null) {
+            // Tampilkan data yang ada (fresh/stale) langsung — tidak ada loading kosong
             applyWeatherToChip(stale)
         } else {
+            // Benar-benar belum ada data sama sekali → loading spinner
             binding.pbWeatherLoading.isVisible = true
             binding.ivWeatherIcon.isVisible = false
             binding.tvWeatherTemp.isVisible = false
         }
+
+        // Fetch baru kalau: cache expired ATAU belum ada data sama sekali
+        if (fresh != null) return  // cache masih fresh, tidak perlu fetch
 
         lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@MainActivity)
             binding.pbWeatherLoading.isVisible = false
             if (weather == null) {
                 if (stale == null) binding.layoutWeatherChip.isVisible = false
+                // kalau stale ada, chip sudah tampil → tidak perlu ubah apa-apa
                 return@launch
             }
             applyWeatherToChip(weather)

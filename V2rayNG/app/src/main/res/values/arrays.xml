@@ -324,17 +324,6 @@
         <item>neru</item>
     </string-array>
 
-    <string-array name="weather_api_entries">
-        <item>Open-Meteo</item>
-        <item>wttr.in</item>
-        <item>OpenWeatherMap</item>
-    </string-array>
-    <string-array name="weather_api_values" translatable="false">
-        <item>open_meteo</item>
-        <item>wttr</item>
-        <item>owm</item>
-    </string-array>
-
     <string-array name="weather_unit_entries">
         <item>Celsius (°C)</item>
         <item>Fahrenheit (°F)</item>

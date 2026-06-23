@@ -549,7 +549,7 @@
     <string name="pref_show_total_traffic_chip_summary">Показывать общий объем скачивания для всех профилей рядом со строкой поиска. Не может работать одновременно с плашкой погоды</string>
     <string name="pref_search_chip_gradient_title">Градиентный фон плашки</string>
     <string name="pref_search_chip_gradient_summary">Применить градиентный фон (от цвета primary к tertiary) на плашке строки поиска, когда активна плашка погоды или общего трафика</string>
-    <string name="pref_weather_api_title">API погоды</string>
+
     <string name="pref_weather_unit_title">Единица измерения температуры</string>
     <string name="title_vpn_sound_settings">Звук</string>
     <string name="title_pref_sound_on_connect">Звук подключения</string>

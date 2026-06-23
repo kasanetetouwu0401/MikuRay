@@ -21,6 +21,7 @@ import com.v2ray.ang.handler.MmkvManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.util.TimeZone
@@ -54,38 +55,6 @@ object WeatherHelper {
         95      -> "\u26a1"                                      // ⚡
         96, 99  -> "\u26c8"                                     // ⛈
         else    -> if (isDay) "\u2600" else moonPhaseEmoji()
-    }
-
-    private fun emojiForOwmIcon(icon: String?): String = when {
-        icon == null            -> "\u2600"
-        icon.startsWith("01")   -> if (icon.endsWith("d")) "\u2600" else moonPhaseEmoji() // clear
-        icon.startsWith("02")   -> "\u26c5"   // few clouds
-        icon.startsWith("03") ||
-        icon.startsWith("04")   -> "\u2601"   // scattered/broken clouds
-        icon.startsWith("09")   -> "\ud83c\udf27" // shower rain
-        icon.startsWith("10")   -> "\ud83c\udf26" // rain
-        icon.startsWith("11")   -> "\u26c8"   // thunderstorm
-        icon.startsWith("13")   -> "\ud83c\udf28" // snow
-        icon.startsWith("50")   -> "\ud83d\ude36\u200d\ud83c\udf2b" // mist
-        else                    -> "\u2600"
-    }
-
-    private fun emojiForWttrCode(code: Int): String = when (code) {
-        113                     -> "\u2600"          // Sunny/Clear
-        116                     -> "\u26c5"          // Partly Cloudy
-        119, 122                -> "\u2601"          // Cloudy/Overcast
-        143, 248, 260           -> "\ud83d\ude36\u200d\ud83c\udf2b" // Mist/Fog
-        176, 263, 266, 293,
-        296, 299, 302, 305,
-        308, 353, 356, 359      -> "\ud83c\udf26"   // Rain variants
-        179, 182, 185, 227,
-        230, 281, 284, 323,
-        326, 329, 332, 335,
-        338, 350, 362, 365,
-        368, 371, 374, 377      -> "\ud83c\udf28"   // Snow variants
-        200, 386, 389, 392,
-        395                     -> "\u26c8"          // Thunderstorm
-        else                    -> "\u2600"
     }
 
     private fun moonPhaseEmoji(): String {
@@ -155,6 +124,7 @@ object WeatherHelper {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    /** Cache masih fresh (< TTL) */
     fun getCachedWeather(): WeatherResult? {
         val ts = MmkvManager.decodeSettingsLong(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
         if (ts == 0L) return null
@@ -162,10 +132,38 @@ object WeatherHelper {
         return readCacheEntry()
     }
 
+    /** Cache ada tapi mungkin udah expired — untuk fallback saat fetch gagal */
     fun getCachedWeatherStale(): WeatherResult? {
         val ts = MmkvManager.decodeSettingsLong(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
         if (ts == 0L) return null
         return readCacheEntry()
+    }
+
+    /** Berapa ms sejak cache terakhir disimpan, -1 kalau belum ada */
+    fun getCacheAgeMs(): Long {
+        val ts = MmkvManager.decodeSettingsLong(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
+        if (ts == 0L) return -1L
+        return System.currentTimeMillis() - ts
+    }
+
+    /**
+     * Cek apakah cache masih valid untuk lokasi saat ini.
+     * Return false kalau lokasi bergerak lebih dari WEATHER_LOCATION_STALE_METERS.
+     * Ditiru dari Greetings.kt — cache harus invalid kalau kondisi berubah.
+     */
+    private fun isCacheValidForLocation(location: android.location.Location): Boolean {
+        val cachedLat = MmkvManager.decodeSettingsFloat(AppConfig.PREF_WEATHER_CACHE_LAT, 0f)
+        val cachedLon = MmkvManager.decodeSettingsFloat(AppConfig.PREF_WEATHER_CACHE_LON, 0f)
+        if (cachedLat == 0f && cachedLon == 0f) return false  // belum pernah simpan koordinat
+        val results = FloatArray(1)
+        android.location.Location.distanceBetween(cachedLat.toDouble(), cachedLon.toDouble(),
+            location.latitude, location.longitude, results)
+        val moved = results[0]
+        if (moved > AppConfig.WEATHER_LOCATION_STALE_METERS) {
+            LogUtil.d("WeatherHelper", "Location moved ${moved.toInt()}m > threshold, cache invalid")
+            return false
+        }
+        return true
     }
 
     private fun readCacheEntry(): WeatherResult? {
@@ -175,33 +173,52 @@ object WeatherHelper {
         return WeatherResult(emoji = emoji, tempCelsius = temp)
     }
 
-    private fun saveCache(result: WeatherResult) {
+    private fun saveCache(result: WeatherResult, location: android.location.Location? = null) {
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TEMP, result.tempCelsius)
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_EMOJI, result.emoji)
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, System.currentTimeMillis())
+        if (location != null) {
+            // Simpan koordinat supaya bisa detect perpindahan lokasi
+            MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_LAT, location.latitude.toFloat())
+            MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_LON, location.longitude.toFloat())
+        }
     }
 
+    /**
+     * Clear cache sepenuhnya — timestamp 0L supaya getCachedWeatherStale() juga return null.
+     * Bug lama: set ke 1L → stale masih bisa return data, chip ga bener-bener reset.
+     */
     fun clearCache() {
-        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 1L)
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TEMP, Int.MIN_VALUE)
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_EMOJI, "")
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_LAT, 0f)
+        MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_LON, 0f)
     }
 
     private val client by lazy {
         OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
+            .connectTimeout(8, TimeUnit.SECONDS)   // turunkan dari 15s supaya cepat fail
+            .readTimeout(8, TimeUnit.SECONDS)
             .build()
     }
 
+    /**
+     * Ambil lokasi dengan timeout ketat.
+     * - Coba last known dulu (instan)
+     * - Kalau null, request fresh tapi dengan timeout [LOCATION_TIMEOUT_MS]
+     *   supaya tidak nunggu GPS selamanya
+     */
     private suspend fun getCurrentLocation(
         context: Context,
         force: Boolean = false
     ): android.location.Location? {
         if (!hasLocationPermission(context)) return null
-        
+
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-        
+
         if (!isGpsEnabled && !isNetworkEnabled) return null
 
         val useFine = force || hasFineLocationPermission(context)
@@ -213,48 +230,70 @@ object WeatherHelper {
             LocationManager.GPS_PROVIDER
         }
 
+        // Kalau tidak force, coba last known dulu — ini instan dan cukup akurat untuk cuaca
         if (!force) {
             try {
                 val lastKnown = locationManager.getLastKnownLocation(provider)
-                if (lastKnown != null) return lastKnown
+                if (lastKnown != null) {
+                    LogUtil.d("WeatherHelper", "Using last known location (age=${System.currentTimeMillis() - lastKnown.time}ms)")
+                    return lastKnown
+                }
+                // Fallback: coba provider lain kalau yang utama ga ada last known
+                val fallbackProvider = if (provider == LocationManager.GPS_PROVIDER)
+                    LocationManager.NETWORK_PROVIDER else LocationManager.GPS_PROVIDER
+                if (locationManager.isProviderEnabled(fallbackProvider)) {
+                    val fallback = locationManager.getLastKnownLocation(fallbackProvider)
+                    if (fallback != null) return fallback
+                }
             } catch (e: SecurityException) {
+                LogUtil.w("WeatherHelper", "getLastKnownLocation SecurityException: ${e.message}")
             }
         }
 
+        // Fresh location request dengan timeout — supaya tidak hang
         val cancellationSignal = CancellationSignal()
-        return suspendCancellableCoroutine { cont ->
-            cont.invokeOnCancellation { cancellationSignal.cancel() }
-            
-            try {
-                LocationManagerCompat.getCurrentLocation(
-                    locationManager,
-                    provider,
-                    cancellationSignal,
-                    ContextCompat.getMainExecutor(context)
-                ) { location ->
-                    if (cont.isActive) cont.resume(location)
+        val location = withTimeoutOrNull(AppConfig.WEATHER_LOCATION_TIMEOUT_MS) {
+            suspendCancellableCoroutine { cont ->
+                cont.invokeOnCancellation { cancellationSignal.cancel() }
+                try {
+                    LocationManagerCompat.getCurrentLocation(
+                        locationManager,
+                        provider,
+                        cancellationSignal,
+                        ContextCompat.getMainExecutor(context)
+                    ) { loc ->
+                        if (cont.isActive) cont.resume(loc)
+                    }
+                } catch (e: SecurityException) {
+                    if (cont.isActive) cont.resume(null)
+                } catch (e: Exception) {
+                    if (cont.isActive) cont.resume(null)
                 }
-            } catch (e: SecurityException) {
-                if (cont.isActive) cont.resume(null)
-            } catch (e: Exception) {
-                if (cont.isActive) cont.resume(null)
             }
         }
+
+        if (location == null) {
+            LogUtil.w("WeatherHelper", "Location request timed out after ${AppConfig.WEATHER_LOCATION_TIMEOUT_MS}ms")
+        }
+        return location
     }
 
     suspend fun fetchCurrentWeather(context: Context, force: Boolean = false): WeatherResult? =
         withContext(Dispatchers.IO) {
             val location = getCurrentLocation(context, force) ?: return@withContext null
-            val api = MmkvManager.decodeSettingsString(AppConfig.PREF_WEATHER_API, "")
-                .takeIf { !it.isNullOrEmpty() } ?: AppConfig.WEATHER_API_DEFAULT
+            // Kalau tidak force: cek apakah cache masih valid untuk lokasi ini
+            // (meski belum expired, kalau user pindah kota cache harus dibuang)
+            if (!force) {
+                val cached = getCachedWeather()
+                if (cached != null && isCacheValidForLocation(location)) {
+                    LogUtil.d("WeatherHelper", "Cache still valid for current location, skipping fetch")
+                    return@withContext cached
+                }
+            }
             try {
-                when (api) {
-                    AppConfig.WEATHER_API_WTTR  -> fetchWttr(location)
-                    AppConfig.WEATHER_API_OWM   -> fetchOwm(location)
-                    else                         -> fetchOpenMeteo(location)
-                }?.also { saveCache(it) }
+                fetchOpenMeteo(location)?.also { saveCache(it, location) }
             } catch (e: Exception) {
-                LogUtil.e("WeatherHelper", "fetchCurrentWeather[$api] failed: ${e.message}")
+                LogUtil.e("WeatherHelper", "fetchCurrentWeather failed: ${e.message}")
                 null
             }
         }
@@ -272,43 +311,6 @@ object WeatherHelper {
         val isDay = (current.get("is_day")?.asInt ?: 1) == 1
         return WeatherResult(
             emoji = emojiForCode(code, isDay),
-            tempCelsius = Math.round(temp).toInt()
-        )
-    }
-
-    private fun fetchWttr(location: android.location.Location): WeatherResult? {
-        val url = "https://wttr.in/${location.latitude},${location.longitude}" +
-            "?format=j1"
-        val body = getBody(url) ?: return null
-        val json = JsonUtil.parseString(body) ?: return null
-        val current = json.getAsJsonArray("current_condition")
-            ?.get(0)?.asJsonObject ?: return null
-        val tempC = current.get("temp_C")?.asInt ?: return null
-        val code = current.get("weatherCode")?.asInt ?: 113
-        return WeatherResult(
-            emoji = emojiForWttrCode(code),
-            tempCelsius = tempC
-        )
-    }
-
-    private fun fetchOwm(location: android.location.Location): WeatherResult? {
-        val apiKey = com.v2ray.ang.BuildConfig.OWM_API_KEY.takeIf { it.isNotBlank() }
-        if (apiKey == null) {
-            LogUtil.w("WeatherHelper", "OWM API key not set")
-            return null
-        }
-        val url = "https://api.openweathermap.org/data/2.5/weather" +
-            "?lat=${location.latitude}" +
-            "&lon=${location.longitude}" +
-            "&units=metric" +
-            "&appid=$apiKey"
-        val body = getBody(url) ?: return null
-        val json = JsonUtil.parseString(body) ?: return null
-        val temp = json.getAsJsonObject("main")?.get("temp")?.asDouble ?: return null
-        val icon = json.getAsJsonArray("weather")
-            ?.get(0)?.asJsonObject?.get("icon")?.asString
-        return WeatherResult(
-            emoji = emojiForOwmIcon(icon),
             tempCelsius = Math.round(temp).toInt()
         )
     }

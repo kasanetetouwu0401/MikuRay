@@ -109,7 +109,7 @@ class UiSettingsActivity : BaseActivity() {
         private val headerTopRowPaddingSlider by lazy { findPreference<HeaderTopRowPaddingDialog>(AppConfig.PREF_HEADER_TOP_ROW_PADDING) }
         private val groupAllTabIcon by lazy { findPreference<Preference>(AppConfig.PREF_GROUP_ALL_TAB_ICON) }
         private val showWeatherChip by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_WEATHER_CHIP) }
-        private val weatherApi by lazy { findPreference<ListPreference>(AppConfig.PREF_WEATHER_API) }
+
         private val weatherUnit by lazy { findPreference<ListPreference>(AppConfig.PREF_WEATHER_USE_CELSIUS) }
         private val showTotalTrafficChip by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP) }
         private val searchChipGradient by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SEARCH_CHIP_GRADIENT) }
@@ -334,16 +334,6 @@ class UiSettingsActivity : BaseActivity() {
                 showTotalTrafficChip?.isEnabled = !checked
                 updateWeatherSubPrefsEnabled(checked)
                 searchChipGradient?.isEnabled = checked || (showTotalTrafficChip?.isChecked == true)
-                true
-            }
-
-            weatherApi?.setOnPreferenceChangeListener { pref, newValue ->
-                val valueStr = newValue.toString()
-                (pref as? ListPreference)?.let { lp ->
-                    val idx = lp.findIndexOfValue(valueStr)
-                    lp.summary = if (idx >= 0) lp.entries[idx] else valueStr
-                }
-                WeatherHelper.clearCache()
                 true
             }
 
@@ -783,7 +773,6 @@ class UiSettingsActivity : BaseActivity() {
         }
 
         private fun updateWeatherSubPrefsEnabled(weatherOn: Boolean) {
-            weatherApi?.isEnabled = weatherOn
             weatherUnit?.isEnabled = weatherOn
         }
 
