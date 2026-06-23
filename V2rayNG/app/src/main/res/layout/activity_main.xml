@@ -275,7 +275,7 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 app:cardBackgroundColor="?colorCard"
                 app:cardCornerRadius="28dp"
@@ -297,7 +297,7 @@
                         android:id="@+id/tab_group"
                         android:background="@android:color/transparent"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="40dp"
                         app:tabIndicator="@drawable/uwu_tabs_rounded_indicator"
                         app:tabIndicatorAnimationMode="elastic"
                         app:tabIndicatorColor="?colorPrimary"

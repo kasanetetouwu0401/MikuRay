@@ -4,9 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
 import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.core.location.LocationManagerCompat
@@ -193,23 +190,6 @@ object WeatherHelper {
             .build()
     }
 
-    private fun findNonVpnNetwork(context: Context): Network? {
-        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-            ?: return null
-        val networks = cm.allNetworks
-        for (network in networks) {
-            val caps = cm.getNetworkCapabilities(network) ?: continue
-            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) continue
-            if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) continue
-            if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) continue
-            return network
-        }
-        for (network in networks) {
-            val caps = cm.getNetworkCapabilities(network) ?: continue
-            if (!caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) return network
-        }
-        return null
-    }
 
     private suspend fun getCurrentLocation(
         context: Context,
@@ -257,6 +237,10 @@ object WeatherHelper {
         }
         LogUtil.d("WeatherHelper", "Requesting fresh fix via $provider (vpnRunning=$vpnRunning, force=$force)")
 
+        // Saat VPN aktif, GPS fix baru sering lambat/gagal di banyak device (terutama MIUI/HyperOS
+        // yang membatasi background location ketat). Daripada nunggu penuh sampai timeout dan
+        // akhirnya gagal total, pangkas waktu tunggu jadi lebih singkat saat VPN jalan, supaya
+        // cepat fallback ke last-known location.
         val effectiveTimeoutMs = if (vpnRunning && !force) {
             AppConfig.WEATHER_LOCATION_TIMEOUT_MS / 2
         } else {
@@ -288,6 +272,7 @@ object WeatherHelper {
 
         LogUtil.w("WeatherHelper", "Location request timed out after ${effectiveTimeoutMs}ms (vpnRunning=$vpnRunning), trying fallback provider")
 
+        // Fallback: coba last-known dari provider alternatif sebelum benar-benar menyerah.
         val altProvider = if (provider == LocationManager.GPS_PROVIDER)
             LocationManager.NETWORK_PROVIDER else LocationManager.GPS_PROVIDER
         if (locationManager.isProviderEnabled(altProvider)) {
@@ -346,28 +331,32 @@ object WeatherHelper {
             .header("Accept", "application/json")
             .build()
 
-        val network = findNonVpnNetwork(context)
-        val httpClient = if (network != null) {
+        val vpnRunning = try {
+            com.v2ray.ang.core.CoreServiceManager.isRunning()
+        } catch (e: Exception) {
+            false
+        }
+
+        val httpClient = if (vpnRunning) {
+            // VPN sedang aktif: arahkan request weather lewat proxy lokal Xray-core
+            // (127.0.0.1:httpPort) supaya ikut rule/server yang sedang dipakai,
+            // bukan langsung ke internet. Ini aman karena lewat proxy aplikasi
+            // (bukan tun-level routing), jadi tidak ada risiko loop ke tun interface.
             try {
+                val httpPort = com.v2ray.ang.handler.SettingsManager.getHttpPort()
+                val proxy = java.net.Proxy(
+                    java.net.Proxy.Type.HTTP,
+                    java.net.InetSocketAddress(AppConfig.LOOPBACK, httpPort)
+                )
+                LogUtil.d("WeatherHelper", "VPN running, routing weather request via local proxy 127.0.0.1:$httpPort")
                 client.newBuilder()
-                    .socketFactory(network.socketFactory)
-                    .dns(object : okhttp3.Dns {
-                        override fun lookup(hostname: String): List<java.net.InetAddress> {
-                            return try {
-                                network.getAllByName(hostname).toList()
-                            } catch (e: Exception) {
-                                LogUtil.w("WeatherHelper", "DNS lookup via network failed, fallback to system: ${e.message}")
-                                okhttp3.Dns.SYSTEM.lookup(hostname)
-                            }
-                        }
-                    })
+                    .proxy(proxy)
                     .build()
             } catch (e: Exception) {
-                LogUtil.w("WeatherHelper", "Failed to bind OkHttp to non-VPN network: ${e.message}")
+                LogUtil.w("WeatherHelper", "Failed to set up local proxy, falling back to direct: ${e.message}")
                 client
             }
         } else {
-            LogUtil.w("WeatherHelper", "No non-VPN network found, using default client")
             client
         }
 
