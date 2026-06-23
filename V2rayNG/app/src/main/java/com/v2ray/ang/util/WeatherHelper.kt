@@ -227,7 +227,6 @@ object WeatherHelper {
 
         val fusedClient = LocationServices.getFusedLocationProviderClient(context)
 
-        // Kalau tidak force, coba last known dulu (lebih cepat & hemat baterai)
         if (!force) {
             try {
                 val lastKnown = fusedClient.lastLocation.await()
@@ -243,7 +242,6 @@ object WeatherHelper {
             }
         }
 
-        // Request lokasi fresh dari Fused Location Provider
         val priority = if (hasFineLocationPermission(context))
             Priority.PRIORITY_HIGH_ACCURACY
         else
