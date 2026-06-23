@@ -22,8 +22,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.io.IOException
+import java.net.Proxy
+import java.net.ProxySelector
+import java.net.SocketAddress
+import java.net.URI
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
@@ -117,6 +123,7 @@ object WeatherHelper {
         ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED
 
+    // DIKEMBALIKAN: Fungsi pengecekan izin background location
     fun hasBackgroundLocationPermission(context: Context): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return hasLocationPermission(context)
         return ContextCompat.checkSelfPermission(
@@ -146,7 +153,7 @@ object WeatherHelper {
     private fun isCacheValidForLocation(location: android.location.Location): Boolean {
         val cachedLat = MmkvManager.decodeSettingsFloat(AppConfig.PREF_WEATHER_CACHE_LAT, 0f)
         val cachedLon = MmkvManager.decodeSettingsFloat(AppConfig.PREF_WEATHER_CACHE_LON, 0f)
-        if (cachedLat == 0f && cachedLon == 0f) return false  // belum pernah simpan koordinat
+        if (cachedLat == 0f && cachedLon == 0f) return false
         val results = FloatArray(1)
         android.location.Location.distanceBetween(cachedLat.toDouble(), cachedLon.toDouble(),
             location.latitude, location.longitude, results)
@@ -185,8 +192,30 @@ object WeatherHelper {
 
     private val client by lazy {
         OkHttpClient.Builder()
-            .connectTimeout(8, TimeUnit.SECONDS)   // turunkan dari 15s supaya cepat fail
+            .connectTimeout(8, TimeUnit.SECONDS)
             .readTimeout(8, TimeUnit.SECONDS)
+            .connectionSpecs(
+                listOf(
+                    ConnectionSpec.CLEARTEXT,
+                    ConnectionSpec.MODERN_TLS,
+                    ConnectionSpec.COMPATIBLE_TLS
+                )
+            )
+            .proxySelector(object : ProxySelector() {
+                override fun select(uri: URI?): List<Proxy> {
+                    val httpPort = try {
+                        MmkvManager.decodeSettingsString(AppConfig.PORT_SOCKS, "10808")?.toInt() ?: 10809
+                    } catch (e: Exception) { 10808 }
+                    
+                    return listOf(
+                        Proxy(Proxy.Type.HTTP, java.net.InetSocketAddress("127.0.0.1", httpPort)),
+                        Proxy.NO_PROXY
+                    )
+                }
+
+                override fun connectFailed(uri: URI?, sa: SocketAddress?, ioe: IOException?) {
+                }
+            })
             .build()
     }
 
@@ -211,21 +240,25 @@ object WeatherHelper {
             LocationManager.GPS_PROVIDER
         }
 
-        if (!force) {
-            try {
+        fun getFallbackLocation(): android.location.Location? {
+            return try {
                 val lastKnown = locationManager.getLastKnownLocation(provider)
-                if (lastKnown != null) {
-                    LogUtil.d("WeatherHelper", "Using last known location (age=${System.currentTimeMillis() - lastKnown.time}ms)")
-                    return lastKnown
-                }
+                if (lastKnown != null) return lastKnown
+                
                 val fallbackProvider = if (provider == LocationManager.GPS_PROVIDER)
                     LocationManager.NETWORK_PROVIDER else LocationManager.GPS_PROVIDER
+                
                 if (locationManager.isProviderEnabled(fallbackProvider)) {
-                    val fallback = locationManager.getLastKnownLocation(fallbackProvider)
-                    if (fallback != null) return fallback
-                }
-            } catch (e: SecurityException) {
-                LogUtil.w("WeatherHelper", "getLastKnownLocation SecurityException: ${e.message}")
+                    locationManager.getLastKnownLocation(fallbackProvider)
+                } else null
+            } catch (e: Exception) { null }
+        }
+
+        if (!force) {
+            val fallback = getFallbackLocation()
+            if (fallback != null) {
+                LogUtil.d("WeatherHelper", "Using last known location")
+                return fallback
             }
         }
 
@@ -251,8 +284,10 @@ object WeatherHelper {
         }
 
         if (location == null) {
-            LogUtil.w("WeatherHelper", "Location request timed out after ${AppConfig.WEATHER_LOCATION_TIMEOUT_MS}ms")
+            LogUtil.w("WeatherHelper", "Location request timed out, forcing fallback")
+            return getFallbackLocation()
         }
+        
         return location
     }
 
@@ -327,8 +362,10 @@ object WeatherHelper {
         override suspend fun doWork(): Result {
             if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false))
                 return Result.success()
+                
             if (!hasBackgroundLocationPermission(applicationContext))
                 return Result.success()
+                
             val result = fetchCurrentWeather(applicationContext)
             return if (result != null) Result.success() else Result.retry()
         }
