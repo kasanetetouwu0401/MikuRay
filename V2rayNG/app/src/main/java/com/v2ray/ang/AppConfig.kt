@@ -131,7 +131,7 @@ object AppConfig {
     const val WEATHER_CACHE_TTL_MS = 30 * 60 * 1000L
     const val WEATHER_UPDATE_TASK_NAME = "weather_updater"
     const val WEATHER_UPDATE_INTERVAL_MINUTES = 30L
-    const val WEATHER_LOCATION_TIMEOUT_MS = 10_000L
+    const val WEATHER_LOCATION_TIMEOUT_MS = 15_000L
     const val WEATHER_LOCATION_STALE_METERS = 5_000f
     const val PREF_SHOW_TOTAL_TRAFFIC_CHIP = "pref_show_total_traffic_chip"
     const val PREF_SEARCH_CHIP_GRADIENT = "pref_search_chip_gradient"
