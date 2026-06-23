@@ -147,7 +147,6 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
-    /** True hanya pada cold start pertama — reset setelah refreshWeatherChip dipanggil */
     private var isColdStart = true
 
     override fun onResume() {
@@ -198,17 +197,6 @@ class MainActivity : HelperBaseActivity(),
         binding.layoutWeatherChip.isVisible = true
     }
 
-    /**
-     * Dipanggil saat chip pertama kali muncul / activity resume.
-     *
-     * Strategi stale-while-revalidate:
-     * 1. Tampilkan cache (fresh maupun stale) langsung — chip tidak kosong/loading
-     * 2. Kalau cache expired (atau belum ada), kick off fetch di background
-     * 3. Setelah fetch selesai, update chip dengan data baru
-     *
-     * Bug lama: kalau cache masih fresh → early return, fetch tidak pernah dijadwalkan
-     * → chip stuck sampai 30 menit penuh tanpa pernah refresh.
-     */
     private fun refreshWeatherChip() {
         if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
             binding.layoutWeatherChip.isVisible = false
@@ -224,11 +212,6 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
-    /**
-     * Force refresh — dipanggil saat cold start atau user tap chip.
-     * TIDAK clear cache dulu — cache tetap ada sebagai fallback kalau fetch gagal/timeout.
-     * Tampilkan data lama dulu (kalau ada), fetch fresh di background, update kalau berhasil.
-     */
     private fun forceRefreshWeatherChip() {
         if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) return
 
@@ -239,14 +222,11 @@ class MainActivity : HelperBaseActivity(),
             return
         }
 
-        // Tampilkan cache yang ada dulu (fresh atau stale) — chip tidak kosong selama loading
         val cached = WeatherHelper.getCachedWeatherStale()
         binding.layoutWeatherChip.isVisible = true
         if (cached != null) {
-            // Ada data lama → tampilkan langsung, tanpa spinner (tidak perlu bikin user cemas)
             applyWeatherToChip(cached)
         } else {
-            // Benar-benar belum ada data → spinner
             binding.ivWeatherIcon.isVisible = false
             binding.tvWeatherTemp.isVisible = false
         }
@@ -254,7 +234,6 @@ class MainActivity : HelperBaseActivity(),
         lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@MainActivity, force = true)
             if (weather == null) {
-                // Fetch gagal / timeout → fallback ke cache, jangan hilangkan chip
                 if (cached == null) binding.layoutWeatherChip.isVisible = false
                 return@launch
             }
@@ -262,12 +241,6 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
-    /**
-     * Load chip dengan pola stale-while-revalidate:
-     * - Langsung tampilkan cache (fresh atau stale)
-     * - Kalau cache expired atau belum ada → fetch di background
-     * - Update chip kalau fetch berhasil
-     */
     private fun loadWeatherChip() {
         binding.layoutWeatherChip.isVisible = true
 
@@ -275,22 +248,18 @@ class MainActivity : HelperBaseActivity(),
         val stale = fresh ?: WeatherHelper.getCachedWeatherStale()
 
         if (stale != null) {
-            // Tampilkan data yang ada (fresh/stale) langsung — tidak ada loading kosong
             applyWeatherToChip(stale)
         } else {
-            // Benar-benar belum ada data sama sekali → loading spinner
             binding.ivWeatherIcon.isVisible = false
             binding.tvWeatherTemp.isVisible = false
         }
 
-        // Fetch baru kalau: cache expired ATAU belum ada data sama sekali
-        if (fresh != null) return  // cache masih fresh, tidak perlu fetch
+        if (fresh != null) return
 
         lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@MainActivity)
             if (weather == null) {
                 if (stale == null) binding.layoutWeatherChip.isVisible = false
-                // kalau stale ada, chip sudah tampil → tidak perlu ubah apa-apa
                 return@launch
             }
             applyWeatherToChip(weather)
@@ -300,7 +269,6 @@ class MainActivity : HelperBaseActivity(),
     private fun applyWeatherToChip(weather: WeatherHelper.WeatherResult) {
         binding.ivWeatherIcon.setImageResource(WeatherHelper.iconResForEmoji(weather.emoji))
         binding.tvWeatherTemp.text = weather.getTemperatureString(WeatherHelper.isCelsius())
-
         binding.ivWeatherIcon.isVisible = true
         binding.tvWeatherTemp.isVisible = true
         binding.layoutWeatherChip.isVisible = true

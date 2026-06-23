@@ -124,7 +124,6 @@ object WeatherHelper {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    /** Cache masih fresh (< TTL) */
     fun getCachedWeather(): WeatherResult? {
         val ts = MmkvManager.decodeSettingsLong(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
         if (ts == 0L) return null
@@ -132,25 +131,18 @@ object WeatherHelper {
         return readCacheEntry()
     }
 
-    /** Cache ada tapi mungkin udah expired — untuk fallback saat fetch gagal */
     fun getCachedWeatherStale(): WeatherResult? {
         val ts = MmkvManager.decodeSettingsLong(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
         if (ts == 0L) return null
         return readCacheEntry()
     }
 
-    /** Berapa ms sejak cache terakhir disimpan, -1 kalau belum ada */
     fun getCacheAgeMs(): Long {
         val ts = MmkvManager.decodeSettingsLong(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
         if (ts == 0L) return -1L
         return System.currentTimeMillis() - ts
     }
 
-    /**
-     * Cek apakah cache masih valid untuk lokasi saat ini.
-     * Return false kalau lokasi bergerak lebih dari WEATHER_LOCATION_STALE_METERS.
-     * Ditiru dari Greetings.kt — cache harus invalid kalau kondisi berubah.
-     */
     private fun isCacheValidForLocation(location: android.location.Location): Boolean {
         val cachedLat = MmkvManager.decodeSettingsFloat(AppConfig.PREF_WEATHER_CACHE_LAT, 0f)
         val cachedLon = MmkvManager.decodeSettingsFloat(AppConfig.PREF_WEATHER_CACHE_LON, 0f)
@@ -178,16 +170,11 @@ object WeatherHelper {
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_EMOJI, result.emoji)
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, System.currentTimeMillis())
         if (location != null) {
-            // Simpan koordinat supaya bisa detect perpindahan lokasi
             MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_LAT, location.latitude.toFloat())
             MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_LON, location.longitude.toFloat())
         }
     }
 
-    /**
-     * Clear cache sepenuhnya — timestamp 0L supaya getCachedWeatherStale() juga return null.
-     * Bug lama: set ke 1L → stale masih bisa return data, chip ga bener-bener reset.
-     */
     fun clearCache() {
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TIMESTAMP, 0L)
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_TEMP, Int.MIN_VALUE)
@@ -203,12 +190,6 @@ object WeatherHelper {
             .build()
     }
 
-    /**
-     * Ambil lokasi dengan timeout ketat.
-     * - Coba last known dulu (instan)
-     * - Kalau null, request fresh tapi dengan timeout [LOCATION_TIMEOUT_MS]
-     *   supaya tidak nunggu GPS selamanya
-     */
     private suspend fun getCurrentLocation(
         context: Context,
         force: Boolean = false
@@ -230,7 +211,6 @@ object WeatherHelper {
             LocationManager.GPS_PROVIDER
         }
 
-        // Kalau tidak force, coba last known dulu — ini instan dan cukup akurat untuk cuaca
         if (!force) {
             try {
                 val lastKnown = locationManager.getLastKnownLocation(provider)
@@ -238,7 +218,6 @@ object WeatherHelper {
                     LogUtil.d("WeatherHelper", "Using last known location (age=${System.currentTimeMillis() - lastKnown.time}ms)")
                     return lastKnown
                 }
-                // Fallback: coba provider lain kalau yang utama ga ada last known
                 val fallbackProvider = if (provider == LocationManager.GPS_PROVIDER)
                     LocationManager.NETWORK_PROVIDER else LocationManager.GPS_PROVIDER
                 if (locationManager.isProviderEnabled(fallbackProvider)) {
@@ -250,7 +229,6 @@ object WeatherHelper {
             }
         }
 
-        // Fresh location request dengan timeout — supaya tidak hang
         val cancellationSignal = CancellationSignal()
         val location = withTimeoutOrNull(AppConfig.WEATHER_LOCATION_TIMEOUT_MS) {
             suspendCancellableCoroutine { cont ->
@@ -281,8 +259,6 @@ object WeatherHelper {
     suspend fun fetchCurrentWeather(context: Context, force: Boolean = false): WeatherResult? =
         withContext(Dispatchers.IO) {
             val location = getCurrentLocation(context, force) ?: return@withContext null
-            // Kalau tidak force: cek apakah cache masih valid untuk lokasi ini
-            // (meski belum expired, kalau user pindah kota cache harus dibuang)
             if (!force) {
                 val cached = getCachedWeather()
                 if (cached != null && isCacheValidForLocation(location)) {
