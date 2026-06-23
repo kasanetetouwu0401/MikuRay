@@ -103,8 +103,6 @@ jobs:
         encodedString: ${{ secrets.APP_KEYSTORE_BASE64 }}
 
     - name: Build APK (${{ env.BUILD_TYPE }})
-      env:
-        OWM_API_KEY: ${{ secrets.OWM_API_KEY }}
       run: |
         cd ${{ github.workspace }}/V2rayNG
         echo "sdk.dir=${ANDROID_HOME}" > local.properties
