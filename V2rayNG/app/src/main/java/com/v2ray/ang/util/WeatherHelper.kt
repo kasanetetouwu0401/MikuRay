@@ -4,6 +4,9 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.core.location.LocationManagerCompat
@@ -190,6 +193,24 @@ object WeatherHelper {
             .build()
     }
 
+    private fun findNonVpnNetwork(context: Context): Network? {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+            ?: return null
+        val networks = cm.allNetworks
+        for (network in networks) {
+            val caps = cm.getNetworkCapabilities(network) ?: continue
+            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) continue
+            if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) continue
+            if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) continue
+            return network
+        }
+        for (network in networks) {
+            val caps = cm.getNetworkCapabilities(network) ?: continue
+            if (!caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) return network
+        }
+        return null
+    }
+
     private suspend fun getCurrentLocation(
         context: Context,
         force: Boolean = false
@@ -229,8 +250,21 @@ object WeatherHelper {
             }
         }
 
+        val vpnRunning = try {
+            com.v2ray.ang.core.CoreServiceManager.isRunning()
+        } catch (e: Exception) {
+            false
+        }
+        LogUtil.d("WeatherHelper", "Requesting fresh fix via $provider (vpnRunning=$vpnRunning, force=$force)")
+
+        val effectiveTimeoutMs = if (vpnRunning && !force) {
+            AppConfig.WEATHER_LOCATION_TIMEOUT_MS / 2
+        } else {
+            AppConfig.WEATHER_LOCATION_TIMEOUT_MS
+        }
+
         val cancellationSignal = CancellationSignal()
-        val location = withTimeoutOrNull(AppConfig.WEATHER_LOCATION_TIMEOUT_MS) {
+        val location = withTimeoutOrNull(effectiveTimeoutMs) {
             suspendCancellableCoroutine { cont ->
                 cont.invokeOnCancellation { cancellationSignal.cancel() }
                 try {
@@ -250,10 +284,24 @@ object WeatherHelper {
             }
         }
 
-        if (location == null) {
-            LogUtil.w("WeatherHelper", "Location request timed out after ${AppConfig.WEATHER_LOCATION_TIMEOUT_MS}ms")
+        if (location != null) return location
+
+        LogUtil.w("WeatherHelper", "Location request timed out after ${effectiveTimeoutMs}ms (vpnRunning=$vpnRunning), trying fallback provider")
+
+        val altProvider = if (provider == LocationManager.GPS_PROVIDER)
+            LocationManager.NETWORK_PROVIDER else LocationManager.GPS_PROVIDER
+        if (locationManager.isProviderEnabled(altProvider)) {
+            try {
+                val altLocation = locationManager.getLastKnownLocation(altProvider)
+                if (altLocation != null) {
+                    LogUtil.d("WeatherHelper", "Fallback provider $altProvider returned last known location")
+                }
+                return altLocation
+            } catch (e: SecurityException) {
+                LogUtil.w("WeatherHelper", "Fallback getLastKnownLocation SecurityException: ${e.message}")
+            }
         }
-        return location
+        return null
     }
 
     suspend fun fetchCurrentWeather(context: Context, force: Boolean = false): WeatherResult? =
@@ -267,19 +315,19 @@ object WeatherHelper {
                 }
             }
             try {
-                fetchOpenMeteo(location)?.also { saveCache(it, location) }
+                fetchOpenMeteo(context, location)?.also { saveCache(it, location) }
             } catch (e: Exception) {
-                LogUtil.e("WeatherHelper", "fetchCurrentWeather failed: ${e.message}")
+                LogUtil.e("WeatherHelper", "fetchCurrentWeather failed: ${e::class.simpleName} - ${e.message}")
                 null
             }
         }
 
-    private fun fetchOpenMeteo(location: android.location.Location): WeatherResult? {
+    private fun fetchOpenMeteo(context: Context, location: android.location.Location): WeatherResult? {
         val url = "https://api.open-meteo.com/v1/forecast" +
             "?latitude=${location.latitude}" +
             "&longitude=${location.longitude}" +
             "&current=temperature_2m,weather_code,is_day"
-        val body = getBody(url) ?: return null
+        val body = getBody(context, url) ?: return null
         val json = JsonUtil.parseString(body) ?: return null
         val current = json.getAsJsonObject("current") ?: return null
         val temp = current.get("temperature_2m")?.asDouble ?: return null
@@ -291,14 +339,43 @@ object WeatherHelper {
         )
     }
 
-    private fun getBody(url: String): String? {
+    private fun getBody(context: Context, url: String): String? {
         val req = Request.Builder()
             .url(url)
             .header("User-Agent", "MikuRay/1.0 (Android)")
             .header("Accept", "application/json")
             .build()
-        return client.newCall(req).execute().use { resp ->
-            if (!resp.isSuccessful) null else resp.body?.string()
+
+        val network = findNonVpnNetwork(context)
+        val httpClient = if (network != null) {
+            try {
+                client.newBuilder()
+                    .socketFactory(network.socketFactory)
+                    .dns(object : okhttp3.Dns {
+                        override fun lookup(hostname: String): List<java.net.InetAddress> {
+                            return try {
+                                network.getAllByName(hostname).toList()
+                            } catch (e: Exception) {
+                                LogUtil.w("WeatherHelper", "DNS lookup via network failed, fallback to system: ${e.message}")
+                                okhttp3.Dns.SYSTEM.lookup(hostname)
+                            }
+                        }
+                    })
+                    .build()
+            } catch (e: Exception) {
+                LogUtil.w("WeatherHelper", "Failed to bind OkHttp to non-VPN network: ${e.message}")
+                client
+            }
+        } else {
+            LogUtil.w("WeatherHelper", "No non-VPN network found, using default client")
+            client
+        }
+
+        return httpClient.newCall(req).execute().use { resp ->
+            if (!resp.isSuccessful) {
+                LogUtil.w("WeatherHelper", "Open-Meteo HTTP ${resp.code}")
+                null
+            } else resp.body?.string()
         }
     }
 
