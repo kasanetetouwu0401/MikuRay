@@ -100,6 +100,7 @@ object AppConfig {
     const val PREF_USE_CUSTOM_COLOR = "pref_use_custom_color"
     const val PREF_ENABLE_BLUR = "pref_enable_blur"
     const val PREF_BLUR_BOTTOM_STATUS = "pref_blur_bottom_status"
+    const val PREF_BOTTOM_STATUS_GRADIENT = "pref_bottom_status_gradient"
     const val PREF_BLUR_INTENSITY = "pref_blur_intensity"
     const val PREF_BLUR_RADIUS = "pref_blur_radius"
     const val PREF_BLUR_ROUNDS = "pref_blur_rounds"
@@ -157,10 +158,6 @@ object AppConfig {
     const val HOME_BANNER_HEIGHT_MIN = 150
     const val HOME_BANNER_HEIGHT_MAX = 300
     const val PREF_SHOW_SNOWFALL = "pref_show_snowfall"
-    const val PREF_SNOWFALL_INTENSITY = "pref_snowfall_intensity"
-    const val SNOWFALL_INTENSITY_DEFAULT = 150
-    const val SNOWFALL_INTENSITY_MIN = 50
-    const val SNOWFALL_INTENSITY_MAX = 300
     const val PREF_HEADER_TOP_ROW_PADDING = "pref_header_top_row_padding"
     const val HEADER_TOP_ROW_PADDING_DEFAULT = 16
     const val HEADER_TOP_ROW_PADDING_MIN = 0
@@ -181,6 +178,7 @@ object AppConfig {
     const val BROADCAST_ACTION_HOME_BANNER_CHANGED = "$ANG_PACKAGE.action.home_banner_changed"
     const val BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED = "$ANG_PACKAGE.action.header_top_row_padding_changed"
     const val BROADCAST_ACTION_SNOWFALL_CHANGED = "$ANG_PACKAGE.action.snowfall_changed"
+    const val BROADCAST_ACTION_BOTTOM_STATUS_GRADIENT_CHANGED = "$ANG_PACKAGE.action.bottom_status_gradient_changed"
     const val BROADCAST_ACTION_CATEGORY_STYLE_CHANGED = "$ANG_PACKAGE.action.category_style_changed"
 
     /** Tasker extras. */

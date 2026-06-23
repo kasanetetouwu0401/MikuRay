@@ -93,6 +93,7 @@ class UiSettingsActivity : BaseActivity() {
         private val dynamicColorBanner by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_DYNAMIC_COLOR_BANNER) }
         private val showHomeBanner by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_HOME_BANNER) }
         private val showSnowfall by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_SNOWFALL) }
+        private val bottomStatusGradient by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_BOTTOM_STATUS_GRADIENT) }
         private val trueBlack by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_TRUE_BLACK) }
         private val enableBlur by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_ENABLE_BLUR) }
         private val blurBottomStatus by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_BLUR_BOTTOM_STATUS) }
@@ -256,7 +257,17 @@ class UiSettingsActivity : BaseActivity() {
             }
 
             blurBottomStatus?.setOnPreferenceChangeListener { _, newValue ->
-                MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_STATUS, newValue as Boolean)
+                val blurEnabled = newValue as Boolean
+                MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_STATUS, blurEnabled)
+                if (blurEnabled) {
+                    // Force-disable gradient when blur is turned on
+                    MmkvManager.encodeSettings(AppConfig.PREF_BOTTOM_STATUS_GRADIENT, false)
+                    bottomStatusGradient?.isChecked = false
+                    bottomStatusGradient?.isEnabled = false
+                } else {
+                    bottomStatusGradient?.isEnabled = true
+                }
+                broadcastBottomStatusGradientChanged()
                 true
             }
 
@@ -386,6 +397,7 @@ class UiSettingsActivity : BaseActivity() {
             setupProfilePreferences()
             setupHomeBannerPreferences()
             setupSnowfallPreference()
+            setupBottomStatusGradientPreference()
             setupSheetBannerPreferences()
             setupParticlesPreferences()
         }
@@ -542,6 +554,25 @@ class UiSettingsActivity : BaseActivity() {
                 }
                 true
             }
+        }
+
+        private fun setupBottomStatusGradientPreference() {
+            val blurOn = MmkvManager.decodeSettingsBool(AppConfig.PREF_BLUR_BOTTOM_STATUS, false)
+            bottomStatusGradient?.apply {
+                isChecked = MmkvManager.decodeSettingsBool(AppConfig.PREF_BOTTOM_STATUS_GRADIENT, false)
+                isEnabled = !blurOn
+                setOnPreferenceChangeListener { _, newValue ->
+                    MmkvManager.encodeSettings(AppConfig.PREF_BOTTOM_STATUS_GRADIENT, newValue as Boolean)
+                    broadcastBottomStatusGradientChanged()
+                    true
+                }
+            }
+        }
+
+        private fun broadcastBottomStatusGradientChanged() {
+            requireContext().sendBroadcast(
+                android.content.Intent(AppConfig.BROADCAST_ACTION_BOTTOM_STATUS_GRADIENT_CHANGED)
+            )
         }
 
         private fun setupSnowfallPreference() {

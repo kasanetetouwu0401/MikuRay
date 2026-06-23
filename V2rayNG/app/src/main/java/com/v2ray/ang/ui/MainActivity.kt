@@ -47,6 +47,7 @@ import com.v2ray.ang.ui.bottomsheet.MoreMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.ShareConfigBottomSheet
 import com.v2ray.ang.ui.preference.activity.SettingsActivity
 import com.v2ray.ang.util.BlurBottomStatusController
+import com.v2ray.ang.util.BottomStatusGradientController
 import com.v2ray.ang.util.SearchChipGradientController
 import com.v2ray.ang.util.getColorAttr
 import com.v2ray.ang.util.LogUtil
@@ -133,6 +134,7 @@ class MainActivity : HelperBaseActivity(),
         setupBannerHome()
         setupSnowfall()
         BlurBottomStatusController.applyState(this, binding)
+        BottomStatusGradientController.applyState(this, binding)
 
         SubscriptionUpdater.sync()
         syncWeatherBackgroundUpdates()
@@ -420,11 +422,6 @@ class MainActivity : HelperBaseActivity(),
 
         fun applySnowfallState() {
             val show = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_SNOWFALL, false)
-            val intensity = MmkvManager.decodeSettingsInt(
-                AppConfig.PREF_SNOWFALL_INTENSITY,
-                AppConfig.SNOWFALL_INTENSITY_DEFAULT
-            ).coerceIn(AppConfig.SNOWFALL_INTENSITY_MIN, AppConfig.SNOWFALL_INTENSITY_MAX)
-
             snowfallView?.let { sv ->
                 // Sync height with banner
                 val bannerHeightDp = MmkvManager.decodeSettingsInt(
@@ -446,8 +443,7 @@ class MainActivity : HelperBaseActivity(),
 
                 if (show) {
                     sv.visibility = android.view.View.VISIBLE
-                    sv.setSnowflakesNum(intensity)
-                    sv.restartFalling()
+                    sv.startFalling()
                 } else {
                     sv.visibility = android.view.View.GONE
                     sv.stopFalling()
@@ -464,12 +460,17 @@ class MainActivity : HelperBaseActivity(),
                     AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED -> {
                         applySnowfallState()
                     }
+                    AppConfig.BROADCAST_ACTION_BOTTOM_STATUS_GRADIENT_CHANGED -> {
+                        BlurBottomStatusController.applyState(this@MainActivity, binding)
+                        BottomStatusGradientController.applyState(this@MainActivity, binding)
+                    }
                 }
             }
         }
 
         val filter = android.content.IntentFilter(AppConfig.BROADCAST_ACTION_SNOWFALL_CHANGED)
         filter.addAction(AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED)
+        filter.addAction(AppConfig.BROADCAST_ACTION_BOTTOM_STATUS_GRADIENT_CHANGED)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(snowfallReceiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED)
         } else {
