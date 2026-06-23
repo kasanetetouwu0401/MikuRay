@@ -30,17 +30,7 @@
             android:id="@+id/snowfall_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
-            app:snowflakesNum="150"
-            app:snowflakeImage="@drawable/snowflake"
-            app:snowflakeAlphaMin="150"
-            app:snowflakeAlphaMax="220"
-            app:snowflakeAngleMax="10"
-            app:snowflakeMinSize="2dp"
-            app:snowflakeMaxSize="8dp"
-            app:snowflakeMinSpeed="2"
-            app:snowflakeMaxSpeed="8"
-            app:snowflakeFadeOutPercent="0.2" />
+            android:visibility="gone" />
     </FrameLayout>
 
     <com.google.android.material.appbar.AppBarLayout

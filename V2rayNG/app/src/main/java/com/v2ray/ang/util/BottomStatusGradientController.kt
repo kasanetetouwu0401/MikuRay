@@ -11,7 +11,6 @@ import com.v2ray.ang.handler.MmkvManager
 
 object BottomStatusGradientController {
 
-    /** Returns true only when gradient is on AND blur-bottom is off. */
     fun isEffectivelyEnabled(): Boolean {
         val gradientOn = MmkvManager.decodeSettingsBool(AppConfig.PREF_BOTTOM_STATUS_GRADIENT, false)
         val blurOn = MmkvManager.decodeSettingsBool(AppConfig.PREF_BLUR_BOTTOM_STATUS, false)
@@ -56,7 +55,6 @@ object BottomStatusGradientController {
     }
 
     private fun applyGradientOff(activity: AppCompatActivity, binding: ActivityMainBinding) {
-        // Reset to default solid colorPrimary background (matches existing BlurOff state)
         binding.cardBottomStatus.setCardBackgroundColor(
             activity.getColorAttr("colorPrimary")
         )

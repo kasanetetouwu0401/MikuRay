@@ -39,7 +39,6 @@ object BlurBottomStatusController {
         )
         binding.fab.visibility = View.VISIBLE
         binding.fabNoBlur.visibility = View.GONE
-        // Force-clear any gradient background when blur is active
         binding.cardBottomStatus.setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
     }
 
@@ -47,7 +46,6 @@ object BlurBottomStatusController {
         binding.blurBottomStatus.visibility = View.GONE
         binding.fab.visibility = View.GONE
         binding.fabNoBlur.visibility = View.VISIBLE
-        // Delegate colour/background to gradient controller (handles both on/off states)
         BottomStatusGradientController.applyState(activity, binding)
     }
 }
