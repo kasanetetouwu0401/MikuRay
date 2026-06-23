@@ -47,7 +47,6 @@ object SearchChipGradientController {
         val tintList = ColorStateList.valueOf(activity.getColorAttr("colorOnPrimary"))
         ImageViewCompat.setImageTintList(binding.ivWeatherIcon, tintList)
         ImageViewCompat.setImageTintList(binding.ivTotalTrafficIcon, tintList)
-        binding.pbWeatherLoading.indeterminateTintList = tintList
         binding.tvWeatherTemp.setTextColor(tintList.defaultColor)
         binding.tvTotalTraffic.setTextColor(tintList.defaultColor)
     }
@@ -58,7 +57,6 @@ object SearchChipGradientController {
         val tintList = ColorStateList.valueOf(activity.getColorAttr("colorOnSurfaceVariant"))
         ImageViewCompat.setImageTintList(binding.ivWeatherIcon, tintList)
         ImageViewCompat.setImageTintList(binding.ivTotalTrafficIcon, tintList)
-        binding.pbWeatherLoading.indeterminateTintList = tintList
         binding.tvWeatherTemp.setTextColor(tintList.defaultColor)
         binding.tvTotalTraffic.setTextColor(tintList.defaultColor)
     }
