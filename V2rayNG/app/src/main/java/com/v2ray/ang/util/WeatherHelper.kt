@@ -16,6 +16,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
 import androidx.work.multiprocess.RemoteWorkManager
 import com.v2ray.ang.AppConfig
+import com.v2ray.ang.BuildConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
 import kotlinx.coroutines.Dispatchers
@@ -203,7 +204,7 @@ object WeatherHelper {
             .proxySelector(object : ProxySelector() {
                 override fun select(uri: URI?): List<Proxy> {
                     val httpPort = try {
-                        MmkvManager.decodeSettingsString(AppConfig.PREF_SOCKS_PORT, "10808")?.toInt() ?: 10809
+                        MmkvManager.decodeSettingsString(AppConfig.PREF_SOCKS_PORT, "10808")?.toInt() ?: 10808
                     } catch (e: Exception) { 10808 }
                     
                     return listOf(
@@ -328,7 +329,7 @@ object WeatherHelper {
     private fun getBody(url: String): String? {
         val req = Request.Builder()
             .url(url)
-            .header("User-Agent", "MikuRay/1.0 (Android)")
+            .header("User-Agent", "MikuRay/${BuildConfig.VERSION_NAME} (Android)")
             .header("Accept", "application/json")
             .build()
         return client.newCall(req).execute().use { resp ->
