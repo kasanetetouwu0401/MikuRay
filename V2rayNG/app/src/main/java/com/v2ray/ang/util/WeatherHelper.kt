@@ -159,8 +159,33 @@ object WeatherHelper {
             null
         }
     }
+    
+    private fun reverseGeocode(lat: Double, lon: Double): String? {
+        return try {
+            val url = "https://nominatim.openstreetmap.org/reverse" +
+                "?lat=$lat&lon=$lon&format=json&zoom=10&addressdetails=1&accept-language=id"
+            val body = getBody(url) ?: return null
+            val json = JsonUtil.parseString(body) ?: return null
+            val address = json.getAsJsonObject("address")
+            if (address != null) {
+                val locality = listOfNotNull(
+                    "city", "town", "municipality", "village", "county"
+                ).firstNotNullOfOrNull { key -> address.get(key)?.asString }
+                val region = address.get("state")?.asString
+                val country = address.get("country")?.asString
+                val name = listOfNotNull(locality, region ?: country.takeIf { locality == null }, country.takeIf { locality != null })
+                    .distinct()
+                    .joinToString(", ")
+                if (name.isNotBlank()) return name
+            }
+            json.get("display_name")?.asString
+        } catch (e: Exception) {
+            LogUtil.w("WeatherHelper", "reverseGeocode failed: ${e.message}")
+            null
+        }
+    }
 
-    private fun resolveCustomLocation(): android.location.Location? {
+    fun resolveCustomLocation(): android.location.Location? {
         val raw = getCustomLocationRaw()
         if (raw.isBlank()) return null
 
@@ -174,6 +199,14 @@ object WeatherHelper {
                     longitude = lon.toDouble()
                 }
             }
+        }
+
+        val directLatLon = parseLatLon(raw)
+        val (location, name) = if (directLatLon != null) {
+            val resolvedName = reverseGeocode(directLatLon.latitude, directLatLon.longitude) ?: raw
+            directLatLon to resolvedName
+        } else {
+            geocodeCustomLocation(raw) ?: return null
         }
 
         val directLatLon = parseLatLon(raw)
