@@ -53,7 +53,7 @@ import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.QRCodeDecoder
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.util.WeatherHelper
-import ru.jetradar.snowfall.SnowfallView
+import com.jetradarmobile.snowfall.SnowfallView
 import com.v2ray.ang.util.showBlur
 import com.v2ray.ang.util.showDeleteConfirmDialog
 import com.v2ray.ang.util.showSubUpdateDiffDialog
