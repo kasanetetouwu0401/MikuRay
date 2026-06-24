@@ -47,6 +47,7 @@ import com.v2ray.ang.ui.bottomsheet.MoreMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.ShareConfigBottomSheet
 import com.v2ray.ang.ui.preference.activity.SettingsActivity
 import com.v2ray.ang.util.BlurBottomStatusController
+import com.v2ray.ang.util.LiquidGlassTabController
 import com.v2ray.ang.util.SearchChipGradientController
 import com.v2ray.ang.util.getColorAttr
 import com.v2ray.ang.util.LogUtil
@@ -81,6 +82,7 @@ class MainActivity : HelperBaseActivity(),
     private var tabMediator: TabLayoutMediator? = null
     
     private var bannerReceiver: android.content.BroadcastReceiver? = null 
+    private var liquidGlassReceiver: android.content.BroadcastReceiver? = null
 
     private val tabSelectedListener = object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
         override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab) {
@@ -129,6 +131,7 @@ class MainActivity : HelperBaseActivity(),
         setupViewModel()
         setupBannerHome()
         BlurBottomStatusController.applyState(this, binding)
+        setupLiquidGlassReceiver()
 
         SubscriptionUpdater.sync()
         syncWeatherBackgroundUpdates()
@@ -409,6 +412,49 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
+    // ── Liquid Glass Tab ──────────────────────────────────────────────────────
+
+    /**
+     * Returns the inner MaterialCardView that wraps the TabLayout.
+     * It is the second-level card inside layout_tab_wrapper that has clipToOutline=true.
+     */
+    private fun findInnerTabCard(): android.view.View? {
+        return try {
+            val wrapper  = binding.layoutTabWrapper      // LinearLayout
+            val outerCard = wrapper.getChildAt(0)        // outer MaterialCardView (colorCard)
+            if (outerCard is android.view.ViewGroup) outerCard.getChildAt(0) else null
+        } catch (_: Exception) { null }
+    }
+
+    private fun applyLiquidGlassTab() {
+        LiquidGlassTabController.applyState(
+            this,
+            tabCardView    = findInnerTabCard(),
+            searchCardView = binding.cardSearchBar
+        )
+    }
+
+    private fun setupLiquidGlassReceiver() {
+        applyLiquidGlassTab()
+
+        liquidGlassReceiver = object : android.content.BroadcastReceiver() {
+            override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
+                if (intent?.action == AppConfig.BROADCAST_ACTION_LIQUID_GLASS_TAB_CHANGED) {
+                    applyLiquidGlassTab()
+                }
+            }
+        }
+        val filter = android.content.IntentFilter(AppConfig.BROADCAST_ACTION_LIQUID_GLASS_TAB_CHANGED)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(liquidGlassReceiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
+            registerReceiver(liquidGlassReceiver, filter)
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+
     private fun setupViewPager() {
         groupPagerAdapter = GroupPagerAdapter(this, emptyList())
         binding.viewPager.apply {
@@ -681,6 +727,9 @@ class MainActivity : HelperBaseActivity(),
         binding.layoutTabWrapper.isVisible = hasAnyGroup
         binding.tabGroup.isVisible = hasAnyGroup
         (binding.tabGroup.parent as? View)?.isVisible = hasAnyGroup
+
+        // Re-apply liquid glass after tab card potentially re-laid-out
+        binding.root.post { applyLiquidGlassTab() }
     }
 
     fun refreshGroupTabTitles(refreshAll: Boolean = false) {
@@ -1093,6 +1142,12 @@ class MainActivity : HelperBaseActivity(),
             bannerReceiver?.let { unregisterReceiver(it) }
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to unregister bannerReceiver", e)
+        }
+
+        try {
+            liquidGlassReceiver?.let { unregisterReceiver(it) }
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "Failed to unregister liquidGlassReceiver", e)
         }
         
         super.onDestroy()

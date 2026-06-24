@@ -156,6 +156,7 @@
                     style="@style/Widget.Material3Expressive.Button.IconButton.Filled" />
 
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_search_bar"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight="1"
