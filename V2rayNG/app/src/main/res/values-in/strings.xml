@@ -662,6 +662,18 @@ yang kamu butuhin."</string>
     <string name="sheet_banner_updated">Sip, banner bottomsheet berhasil di-update!</string>
     <string name="particles_disable_title">Matiin animasi partikel</string>
     <string name="particles_disable_summary">Sembunyiin efek partikel di bottomsheet</string>
+    
+    <!-- Selected profile card banner style -->
+    <string name="selected_banner_category">Style Profil yang Dipilih</string>
+    <string name="selected_banner_enable_title">Pakai banner kustom buat profil yang dipilih</string>
+    <string name="selected_banner_enable_summary">Tampilin gambar kustom di belakang kartu server yang aktif sebagai ganti style indikator</string>
+    <string name="selected_banner_dim_title">Intensitas overlay banner</string>
+    <string name="selected_banner_custom_title">Ganti banner profil yang dipilih</string>
+    <string name="selected_banner_custom_summary">Pilih gambar kustom buat kartu server yang dipilih</string>
+    <string name="selected_banner_delete_title">Hapus banner kustom profil yang dipilih</string>
+    <string name="selected_banner_delete_summary">Balik lagi ke style indikator bawaan</string>
+    <string name="selected_banner_updated">Banner profil yang dipilih berhasil diupdate.</string>
+    <string name="pref_indicator_style_summary_disabled_by_banner">Dimatiin selama banner kustom profil yang dipilih lagi aktif</string>
 
     <!-- Snackbar notification titles -->
     <string name="title_alerter_info">Info</string>

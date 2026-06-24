@@ -660,6 +660,18 @@
     <string name="sheet_banner_updated">底部横幅更新成功。</string>
     <string name="particles_disable_title">禁用粒子动画</string>
     <string name="particles_disable_summary">隐藏底部面板中的粒子效果</string>
+    
+    <!-- Selected profile card banner style -->
+    <string name="selected_banner_category">选中配置的样式</string>
+    <string name="selected_banner_enable_title">为选中的配置使用自定义横幅</string>
+    <string name="selected_banner_enable_summary">在活动服务器卡片后面显示自定义图片，以代替指示器样式</string>
+    <string name="selected_banner_dim_title">横幅遮罩强度</string>
+    <string name="selected_banner_custom_title">更改选中配置的横幅</string>
+    <string name="selected_banner_custom_summary">为选中的服务器卡片选择一张自定义图片</string>
+    <string name="selected_banner_delete_title">删除选中的配置自定义横幅</string>
+    <string name="selected_banner_delete_summary">恢复为默认的指示器样式</string>
+    <string name="selected_banner_updated">已成功更新选中配置的横幅。</string>
+    <string name="pref_indicator_style_summary_disabled_by_banner">当自定义的选中配置横幅启用时此选项将被禁用</string>
 
     <!-- Snackbar notification titles -->
     <string name="title_alerter_info">提示</string>

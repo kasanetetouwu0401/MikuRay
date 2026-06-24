@@ -681,6 +681,18 @@
     <string name="sheet_banner_updated">Баннер панели успешно обновлен.</string>
     <string name="particles_disable_title">Отключить анимацию частиц</string>
     <string name="particles_disable_summary">Скрыть эффект частиц на нижней панели</string>
+    
+    <!-- Selected profile card banner style -->
+    <string name="selected_banner_category">Стиль выбранного профиля</string>
+    <string name="selected_banner_enable_title">Использовать свой баннер для выбранного профиля</string>
+    <string name="selected_banner_enable_summary">Показывать свою картинку позади карточки активного сервера вместо стиля индикатора</string>
+    <string name="selected_banner_dim_title">Интенсивность затемнения баннера</string>
+    <string name="selected_banner_custom_title">Изменить баннер выбранного профиля</string>
+    <string name="selected_banner_custom_summary">Выбрать свою картинку для карточки выбранного сервера</string>
+    <string name="selected_banner_delete_title">Удалить свой баннер выбранного профиля</string>
+    <string name="selected_banner_delete_summary">Вернуться к стандартному стилю индикатора</string>
+    <string name="selected_banner_updated">Баннер выбранного профиля успешно обновлен.</string>
+    <string name="pref_indicator_style_summary_disabled_by_banner">Отключено, пока активен свой баннер для выбранного профиля</string>    
 
     <!-- Snackbar notification titles -->
     <string name="title_alerter_info">Информация</string>
