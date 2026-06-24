@@ -44,7 +44,6 @@ import com.v2ray.ang.ui.dialog.HeaderTopRowPaddingDialog
 import com.v2ray.ang.ui.preference.CustomBannerPreference
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
 import com.v2ray.ang.util.BannerColorExtractor
-import com.v2ray.ang.util.LiquidGlassTabController
 import com.v2ray.ang.util.ThemeManager
 import com.v2ray.ang.util.WeatherHelper
 import com.v2ray.ang.util.showBlur
@@ -109,12 +108,12 @@ class UiSettingsActivity : BaseActivity() {
         private val headerTopRowPaddingSlider by lazy { findPreference<HeaderTopRowPaddingDialog>(AppConfig.PREF_HEADER_TOP_ROW_PADDING) }
         private val groupAllTabIcon by lazy { findPreference<Preference>(AppConfig.PREF_GROUP_ALL_TAB_ICON) }
         private val showWeatherChip by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_WEATHER_CHIP) }
+        private val selectedBannerStyleEnabled by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED) }
 
         private val weatherUnit by lazy { findPreference<ListPreference>(AppConfig.PREF_WEATHER_USE_CELSIUS) }
         private val weatherCustomLocation by lazy { findPreference<EditTextPreference>(AppConfig.PREF_WEATHER_CUSTOM_LOCATION) }
         private val showTotalTrafficChip by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP) }
         private val searchChipGradient by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SEARCH_CHIP_GRADIENT) }
-        private val liquidGlassTab by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_LIQUID_GLASS_TAB) }
 
         private var tabIconPickerDialog: androidx.appcompat.app.AlertDialog? = null
 
@@ -131,6 +130,11 @@ class UiSettingsActivity : BaseActivity() {
         private val pickSheetBannerImage =
             registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
                 if (uri != null) startCropSheetBannerActivity(uri)
+            }
+
+        private val pickSelectedBannerImage =
+            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                if (uri != null) startCropSelectedBannerActivity(uri)
             }
 
         private val cropHomeBannerImage =
@@ -183,6 +187,25 @@ class UiSettingsActivity : BaseActivity() {
                         val savedUri = saveToCache(cacheUri, "sheet_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, savedUri.toString())
                         requireContext().snackbarSuccess(getString(R.string.sheet_banner_updated), title = getString(R.string.title_alerter_success))
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                } else if (result.resultCode == UCrop.RESULT_ERROR) {
+                    UCrop.getError(result.data!!)?.printStackTrace()
+                }
+            }
+
+        private val cropSelectedBannerImage =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                    val cacheUri = UCrop.getOutput(result.data!!) ?: return@registerForActivityResult
+                    try {
+                        val oldUri = MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI)
+                        deleteOldFile(oldUri)
+                        val savedUri = saveToCache(cacheUri, "selected_banner_")
+                        MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_URI, savedUri.toString())
+                        broadcastSelectedBannerChanged()
+                        requireContext().snackbarSuccess(getString(R.string.selected_banner_updated), title = getString(R.string.title_alerter_success))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -370,22 +393,6 @@ class UiSettingsActivity : BaseActivity() {
 
             updateChipPreferenceEnabledState()
 
-            // Liquid Glass Tab
-            liquidGlassTab?.apply {
-                if (!LiquidGlassTabController.isSupported()) {
-                    isEnabled = false
-                    summary = getString(R.string.pref_liquid_glass_tab_summary_unsupported)
-                }
-                setOnPreferenceChangeListener { _, newValue ->
-                    MmkvManager.encodeSettings(AppConfig.PREF_LIQUID_GLASS_TAB, newValue as Boolean)
-                    // Broadcast so MainActivity can re-apply without recreate
-                    requireContext().sendBroadcast(
-                        android.content.Intent(AppConfig.BROADCAST_ACTION_LIQUID_GLASS_TAB_CHANGED)
-                    )
-                    true
-                }
-            }
-
             updateGroupAllTabIconSummary()
             groupAllTabIcon?.setOnPreferenceClickListener {
                 val currentIcon = MmkvManager.decodeSettingsString(AppConfig.PREF_GROUP_ALL_TAB_ICON)
@@ -404,6 +411,7 @@ class UiSettingsActivity : BaseActivity() {
             setupProfilePreferences()
             setupHomeBannerPreferences()
             setupSheetBannerPreferences()
+            setupSelectedBannerPreferences()
             setupParticlesPreferences()
         }
 
@@ -435,6 +443,43 @@ class UiSettingsActivity : BaseActivity() {
                             deleteOldFile(savedUri)
                             MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, "")
                             requireContext().snackbarSuccess(getString(R.string.sheet_banner_delete_summary), title = getString(R.string.title_alerter_success))
+                        }
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .showBlur()
+                }
+                true
+            }
+        }
+
+        private fun setupSelectedBannerPreferences() {
+            selectedBannerStyleEnabled?.apply {
+                isChecked = MmkvManager.decodeSettingsBool(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED, false)
+                setOnPreferenceChangeListener { _, newValue ->
+                    val checked = newValue as Boolean
+                    MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED, checked)
+                    broadcastSelectedBannerChanged()
+                    true
+                }
+            }
+
+            findPreference<Preference>(AppConfig.PREF_ACTION_CHANGE_SELECTED_BANNER)?.setOnPreferenceClickListener {
+                pickSelectedBannerImage.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+                true
+            }
+
+            findPreference<Preference>(AppConfig.PREF_ACTION_DELETE_SELECTED_BANNER)?.setOnPreferenceClickListener {
+                val savedUri = MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI)
+                if (!savedUri.isNullOrEmpty()) {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.selected_banner_delete_title)
+                        .setMessage(R.string.selected_banner_delete_summary)
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
+                            deleteOldFile(savedUri)
+                            MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_URI, "")
+                            broadcastSelectedBannerChanged()
+                            requireContext().snackbarSuccess(getString(R.string.selected_banner_delete_summary), title = getString(R.string.title_alerter_success))
                         }
                         .setNegativeButton(android.R.string.cancel, null)
                         .showBlur()
@@ -593,6 +638,30 @@ class UiSettingsActivity : BaseActivity() {
             cropSheetBannerImage.launch(uCrop.getIntent(requireContext()))
         }
 
+        private fun startCropSelectedBannerActivity(sourceUri: Uri) {
+            val destFile = File(requireContext().cacheDir, "cropped_selected_banner_temp.jpg")
+            val destUri = Uri.fromFile(destFile)
+
+            // Server cards are wide and short, similar aspect to a single list item.
+            val displayMetrics = resources.displayMetrics
+            val screenWidthPx = displayMetrics.widthPixels.toFloat()
+            val targetHeightPx = displayMetrics.density * 90
+
+            val uCrop = UCrop.of(sourceUri, destUri)
+                .withAspectRatio(screenWidthPx, targetHeightPx)
+                .withMaxResultSize(1280, 720)
+
+            try {
+                uCrop.withOptions(UCrop.Options().apply {
+                    setDimmedLayerColor(Color.parseColor("#CC000000"))
+                    setCircleDimmedLayer(false)
+                    setShowCropGrid(true)
+                    setFreeStyleCropEnabled(false)
+                })
+            } catch (e: Exception) { e.printStackTrace() }
+            cropSelectedBannerImage.launch(uCrop.getIntent(requireContext()))
+        }
+
         private fun startCropHomeBannerActivity(sourceUri: Uri) {
             val destFile = File(requireContext().cacheDir, "cropped_home_banner_temp.jpg")
             val destUri = Uri.fromFile(destFile)
@@ -680,6 +749,10 @@ class UiSettingsActivity : BaseActivity() {
             requireContext().sendBroadcast(
                 android.content.Intent(AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED)
             )
+        }
+
+        private fun broadcastSelectedBannerChanged() {
+            com.v2ray.ang.util.SelectedProfileBannerController.broadcastChanged(requireContext())
         }
 
         private fun initPreferenceSummaries() {

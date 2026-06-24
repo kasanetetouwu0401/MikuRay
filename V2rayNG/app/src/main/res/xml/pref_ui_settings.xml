@@ -269,19 +269,10 @@
 
         <com.v2ray.ang.ui.dialog.BlurBottomIntensityDialog
             android:icon="@drawable/ic_baseline_blur_on_24"
-            app:layout="@layout/uwu_mid"
+            app:layout="@layout/uwu_bot"
             app:key="pref_blur_bottom_intensity"
             app:title="@string/pref_blur_bottom_intensity"
             app:dependency="pref_blur_bottom_status" />
-
-        <androidx.preference.SwitchPreferenceCompat
-            android:icon="@drawable/ic_baseline_blur_on_24"
-            app:layout="@layout/uwu_bot_switch"
-            app:widgetLayout="@layout/uwu_widget_material_switch"
-            android:defaultValue="false"
-            android:key="pref_liquid_glass_tab"
-            android:title="@string/pref_liquid_glass_tab_title"
-            android:summary="@string/pref_liquid_glass_tab_summary" />
 
     </com.neko.widget.UwuPreferenceCategory>
 
@@ -354,6 +345,43 @@
             android:key="action_delete_sheet_banner_image"
             android:title="@string/sheet_banner_delete_title"
             android:summary="@string/sheet_banner_delete_summary" />
+
+    </com.neko.widget.UwuPreferenceCategory>
+
+    <com.neko.widget.UwuPreferenceCategory android:title="@string/selected_banner_category"
+        app:sectionIcon="@drawable/ic_cards_variant">
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:icon="@drawable/ic_cards_variant"
+            app:layout="@layout/uwu_top_switch"
+            app:widgetLayout="@layout/uwu_widget_material_switch"
+            android:defaultValue="false"
+            android:key="pref_selected_banner_style_enabled"
+            android:title="@string/selected_banner_enable_title"
+            android:summary="@string/selected_banner_enable_summary" />
+
+        <com.v2ray.ang.ui.dialog.SelectedBannerDimSliderDialog
+            android:icon="@drawable/ic_baseline_blur_on_24"
+            app:layout="@layout/uwu_mid"
+            app:key="pref_selected_banner_dim"
+            app:title="@string/selected_banner_dim_title"
+            app:dependency="pref_selected_banner_style_enabled" />
+
+        <Preference
+            android:icon="@drawable/ic_image_edit_24dp"
+            app:layout="@layout/uwu_mid"
+            android:key="action_change_selected_banner_image"
+            app:dependency="pref_selected_banner_style_enabled"
+            android:title="@string/selected_banner_custom_title"
+            android:summary="@string/selected_banner_custom_summary" />
+
+        <Preference
+            android:icon="@drawable/ic_delete_24dp"
+            app:layout="@layout/uwu_bot"
+            android:key="action_delete_selected_banner_image"
+            app:dependency="pref_selected_banner_style_enabled"
+            android:title="@string/selected_banner_delete_title"
+            android:summary="@string/selected_banner_delete_summary" />
 
     </com.neko.widget.UwuPreferenceCategory>
 

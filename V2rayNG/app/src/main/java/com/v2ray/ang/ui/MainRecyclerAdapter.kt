@@ -23,6 +23,7 @@ import com.v2ray.ang.helper.ItemTouchHelperViewHolder
 import com.v2ray.ang.viewmodel.MainViewModel
 import java.util.Collections
 import com.v2ray.ang.util.IndicatorStyle
+import com.v2ray.ang.util.SelectedProfileBannerController
 import com.v2ray.ang.AppConfig
 
 class MainRecyclerAdapter(
@@ -37,6 +38,7 @@ class MainRecyclerAdapter(
     private var data: MutableList<ServersCache> = mutableListOf()
     
     private var isRunningObserver: androidx.lifecycle.Observer<Boolean>? = null
+    private var selectedBannerController: SelectedProfileBannerController? = null
 
     @SuppressLint("NotifyDataSetChanged")
     fun setData(newData: MutableList<ServersCache>?, position: Int = -1) {
@@ -62,6 +64,16 @@ class MainRecyclerAdapter(
             }
             mainViewModel.isRunning.observe(lifecycleOwner, isRunningObserver!!)
         }
+
+        val controller = SelectedProfileBannerController(recyclerView.context)
+        selectedBannerController = controller
+        controller.registerChangeListener {
+            val selectedGuid = MmkvManager.getSelectServer()
+            val position = data.indexOfFirst { it.guid == selectedGuid }
+            if (position >= 0) {
+                notifyItemChanged(position)
+            }
+        }
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -69,6 +81,8 @@ class MainRecyclerAdapter(
         isRunningObserver?.let {
             mainViewModel.isRunning.removeObserver(it)
         }
+        selectedBannerController?.unregisterChangeListener()
+        selectedBannerController = null
     }
 
     override fun getItemCount() = data.size + 1
@@ -142,9 +156,17 @@ class MainRecyclerAdapter(
                 val indicatorStyle = runCatching {
                     IndicatorStyle.valueOf(styleName)
                 }.getOrDefault(IndicatorStyle.STYLE_0)
-                holder.itemMainBinding.layoutIndicator.setBackgroundResource(indicatorStyle.drawableRes)
+
+                val bannerController = selectedBannerController
+                if (bannerController != null && bannerController.isEnabled() && bannerController.hasBanner()) {
+                    bannerController.applyTo(holder.itemMainBinding.layoutIndicator)
+                } else {
+                    bannerController?.clear(holder.itemMainBinding.layoutIndicator)
+                    holder.itemMainBinding.layoutIndicator.setBackgroundResource(indicatorStyle.drawableRes)
+                }
                 holder.itemMainBinding.layoutCard.setCardBackgroundColor(Color.TRANSPARENT)
             } else {
+                selectedBannerController?.clear(holder.itemMainBinding.layoutIndicator)
                 holder.itemMainBinding.layoutIndicator.setBackgroundResource(0)
                 val typedValue = TypedValue()
                 context.theme.resolveAttribute(R.attr.colorCard, typedValue, true)

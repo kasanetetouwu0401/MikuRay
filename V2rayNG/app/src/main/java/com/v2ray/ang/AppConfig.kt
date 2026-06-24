@@ -140,7 +140,6 @@ object AppConfig {
     const val WEATHER_LOCATION_STALE_METERS = 5_000f
     const val PREF_SHOW_TOTAL_TRAFFIC_CHIP = "pref_show_total_traffic_chip"
     const val PREF_SEARCH_CHIP_GRADIENT = "pref_search_chip_gradient"
-    const val PREF_LIQUID_GLASS_TAB = "pref_liquid_glass_tab"
 
     // Profile banner, sheet banner, home banner & username
     const val PREF_CUSTOM_PROFILE_NAME = "custom_profile_name"
@@ -166,6 +165,16 @@ object AppConfig {
     const val HEADER_TOP_ROW_PADDING_MIN = 0
     const val HEADER_TOP_ROW_PADDING_MAX = 100
 
+    // Selected profile card banner style
+    const val PREF_SELECTED_BANNER_STYLE_ENABLED = "pref_selected_banner_style_enabled"
+    const val PREF_SELECTED_BANNER_URI = "custom_selected_banner_uri"
+    const val PREF_SELECTED_BANNER_DIM = "pref_selected_banner_dim"
+    const val SELECTED_BANNER_DIM_DEFAULT = 35
+    const val SELECTED_BANNER_DIM_MIN = 0
+    const val SELECTED_BANNER_DIM_MAX = 80
+    const val PREF_ACTION_CHANGE_SELECTED_BANNER = "action_change_selected_banner_image"
+    const val PREF_ACTION_DELETE_SELECTED_BANNER = "action_delete_selected_banner_image"
+
     /** Cache keys. */
     const val CACHE_SUBSCRIPTION_ID = "cache_subscription_id"
 
@@ -180,8 +189,8 @@ object AppConfig {
     const val BROADCAST_ACTION_PROFILE_BANNER_CHANGED = "$ANG_PACKAGE.action.profile_banner_changed"
     const val BROADCAST_ACTION_HOME_BANNER_CHANGED = "$ANG_PACKAGE.action.home_banner_changed"
     const val BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED = "$ANG_PACKAGE.action.header_top_row_padding_changed"
+    const val BROADCAST_ACTION_SELECTED_BANNER_CHANGED = "$ANG_PACKAGE.action.selected_banner_changed"
     const val BROADCAST_ACTION_CATEGORY_STYLE_CHANGED = "$ANG_PACKAGE.action.category_style_changed"
-    const val BROADCAST_ACTION_LIQUID_GLASS_TAB_CHANGED = "$ANG_PACKAGE.action.liquid_glass_tab_changed"
 
     /** Tasker extras. */
     const val TASKER_EXTRA_BUNDLE = "com.twofortyfouram.locale.intent.extra.BUNDLE"

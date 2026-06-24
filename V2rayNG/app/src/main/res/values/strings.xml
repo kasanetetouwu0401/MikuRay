@@ -568,9 +568,6 @@
     <string name="pref_show_total_traffic_chip_summary">Show total download usage across all profiles next to the search bar. Can\'t be active at the same time as the weather chip</string>
     <string name="pref_search_chip_gradient_title">Gradient chip background</string>
     <string name="pref_search_chip_gradient_summary">Apply a primary-to-tertiary gradient background on the search bar chip while the weather or total traffic chip is active</string>
-    <string name="pref_liquid_glass_tab_title">Liquid Glass Tab</string>
-    <string name="pref_liquid_glass_tab_summary">Apply a frosted liquid glass refraction effect on the tab layout card (API 33+)</string>
-    <string name="pref_liquid_glass_tab_summary_unsupported">Requires Android 13 (API 33) or higher</string>
 
     <string name="pref_weather_unit_title">Temperature Unit</string>
     <string name="pref_weather_custom_location_title">Custom Location</string>
@@ -705,6 +702,19 @@ you need."</string>
     <string name="sheet_banner_updated">Sheet banner updated successfully.</string>
     <string name="particles_disable_title">Disable particles animation</string>
     <string name="particles_disable_summary">Hide the particles effect in bottomsheet</string>
+
+    <!-- Selected profile card banner style -->
+    <string name="selected_banner_category">Selected Profile Banner</string>
+    <string name="selected_banner_enable_title">Use custom banner for selected profile</string>
+    <string name="selected_banner_enable_summary">Show a custom image behind the active server card instead of the indicator style</string>
+    <string name="selected_banner_dim_title">Banner dim</string>
+    <string name="selected_banner_dim_summary_value">%1$d%%</string>
+    <string name="selected_banner_custom_title">Change selected profile banner</string>
+    <string name="selected_banner_custom_summary">Choose a custom image for the selected server card</string>
+    <string name="selected_banner_delete_title">Delete custom selected profile banner</string>
+    <string name="selected_banner_delete_summary">Revert to the default indicator style</string>
+    <string name="selected_banner_updated">Selected profile banner updated successfully.</string>
+
 
     <!-- Snackbar notification titles -->
     <string name="title_alerter_info">Info</string>
