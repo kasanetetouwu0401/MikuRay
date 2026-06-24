@@ -704,10 +704,10 @@ you need."</string>
     <string name="particles_disable_summary">Hide the particles effect in bottomsheet</string>
     
     <!-- Selected profile card banner style -->
-    <string name="selected_banner_category">Selected Profile Banner</string>
+    <string name="selected_banner_category">Selected Profile</string>
     <string name="selected_banner_enable_title">Use custom banner for selected profile</string>
     <string name="selected_banner_enable_summary">Show a custom image behind the active server card instead of the indicator style</string>
-    <string name="selected_banner_dim_title">Banner dim</string>
+    <string name="selected_banner_dim_title">Banner overlay strength</string>
     <string name="selected_banner_dim_summary_value">%1$d%%</string>
     <string name="selected_banner_custom_title">Change selected profile banner</string>
     <string name="selected_banner_custom_summary">Choose a custom image for the selected server card</string>
