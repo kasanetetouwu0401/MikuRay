@@ -169,9 +169,9 @@ object AppConfig {
     const val PREF_SELECTED_BANNER_STYLE_ENABLED = "pref_selected_banner_style_enabled"
     const val PREF_SELECTED_BANNER_URI = "custom_selected_banner_uri"
     const val PREF_SELECTED_BANNER_DIM = "pref_selected_banner_dim"
-    const val SELECTED_BANNER_DIM_DEFAULT = 35
+    const val SELECTED_BANNER_DIM_DEFAULT = 60
     const val SELECTED_BANNER_DIM_MIN = 0
-    const val SELECTED_BANNER_DIM_MAX = 80
+    const val SELECTED_BANNER_DIM_MAX = 90
     const val PREF_ACTION_CHANGE_SELECTED_BANNER = "action_change_selected_banner_image"
     const val PREF_ACTION_DELETE_SELECTED_BANNER = "action_delete_selected_banner_image"
 
