@@ -531,6 +531,9 @@
     <string name="pref_show_total_traffic_chip_summary">Tampilin total pemakaian download dari semua profil di sebelah bar pencarian. Nggak bisa aktif barengan sama chip info cuaca</string>
     <string name="pref_search_chip_gradient_title">Background chip gradasi</string>
     <string name="pref_search_chip_gradient_summary">Terapin background gradasi (warna primary ke tertiary) di chip bar pencarian pas chip cuaca atau chip total pemakaian lagi aktif</string>
+    <string name="pref_liquid_glass_title">Liquid Glass ✨</string>
+    <string name="pref_liquid_glass_summary">Terapin tampilan tepi kaca (fill transparan + stroke kena cahaya) di kartu dan tombol</string>
+    <string name="pref_liquid_glass_summary_unsupported">Gak didukung di device ini uwu~</string>
 
     <string name="pref_weather_unit_title">Satuan Suhu</string>
     <string name="pref_weather_custom_location_title">Lokasi Kustom</string>

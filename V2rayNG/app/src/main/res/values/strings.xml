@@ -568,6 +568,9 @@
     <string name="pref_show_total_traffic_chip_summary">Show total download usage across all profiles next to the search bar. Can\'t be active at the same time as the weather chip</string>
     <string name="pref_search_chip_gradient_title">Gradient chip background</string>
     <string name="pref_search_chip_gradient_summary">Apply a primary-to-tertiary gradient background on the search bar chip while the weather or total traffic chip is active</string>
+    <string name="pref_liquid_glass_title">Liquid Glass</string>
+    <string name="pref_liquid_glass_summary">Apply a glass-edge look (translucent fill with a light-catching stroke) to cards and buttons</string>
+    <string name="pref_liquid_glass_summary_unsupported">Not supported on this device</string>
 
     <string name="pref_weather_unit_title">Temperature Unit</string>
     <string name="pref_weather_custom_location_title">Custom Location</string>
