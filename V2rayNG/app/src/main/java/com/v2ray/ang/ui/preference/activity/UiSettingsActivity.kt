@@ -482,6 +482,8 @@ class UiSettingsActivity : BaseActivity() {
                         .setPositiveButton(android.R.string.ok) { _, _ ->
                             deleteOldFile(savedUri)
                             MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_URI, "")
+                            MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED, false)
+                            selectedBannerStyleEnabled?.isChecked = false
                             updateIndicatorStyleEnabledState()
                             broadcastSelectedBannerChanged()
                             requireContext().snackbarSuccess(getString(R.string.selected_banner_delete_summary), title = getString(R.string.title_alerter_success))
