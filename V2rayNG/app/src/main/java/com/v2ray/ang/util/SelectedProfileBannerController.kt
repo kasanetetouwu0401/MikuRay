@@ -6,10 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -64,7 +61,8 @@ class SelectedProfileBannerController(private val context: Context) {
             return
         }
 
-        val tagKey = "selected_banner::$uriString"
+        val isDark = Utils.getDarkModeStatus(context)
+        val tagKey = "selected_banner::$uriString::dark=$isDark"
         if (target.getTag(TAG_KEY) == tagKey) return
 
         try {
@@ -101,14 +99,76 @@ class SelectedProfileBannerController(private val context: Context) {
     }
 
     private fun buildDimmedDrawable(bitmap: Bitmap): Drawable {
-        val bitmapDrawable = BitmapDrawable(context.resources, bitmap)
         val dimPercent = MmkvManager.decodeSettingsInt(
             AppConfig.PREF_SELECTED_BANNER_DIM,
             AppConfig.SELECTED_BANNER_DIM_DEFAULT
         ).coerceIn(AppConfig.SELECTED_BANNER_DIM_MIN, AppConfig.SELECTED_BANNER_DIM_MAX)
         val alpha = (dimPercent * 255 / 100).coerceIn(0, 255)
-        val dimColor = Color.argb(alpha, 0, 0, 0)
-        return LayerDrawable(arrayOf(bitmapDrawable, ColorDrawable(dimColor)))
+
+        // Light mode: wash with white so the overlay reads as a soft veil over a
+        // light card. Dark mode: wash with black, like before.
+        val isDark = Utils.getDarkModeStatus(context)
+        val dimColor = if (isDark) {
+            Color.argb(alpha, 0, 0, 0)
+        } else {
+            Color.argb(alpha, 255, 255, 255)
+        }
+        return CenterCropDimDrawable(bitmap, dimColor)
+    }
+
+    /**
+     * Draws [bitmap] center-cropped to fill whatever bounds it is given, with a flat
+     * dim color on top. Deliberately reports no intrinsic size (-1) so that, when used
+     * as a View background, it never influences a wrap_content measure pass — the
+     * card's height stays driven by its text content, exactly like the non-banner
+     * indicator drawables, and the image simply fills whatever height results.
+     */
+    private class CenterCropDimDrawable(
+        private val bitmap: Bitmap,
+        private val dimColor: Int
+    ) : Drawable() {
+        private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            isFilterBitmap = true
+        }
+        private val dimPaint = android.graphics.Paint().apply { color = dimColor }
+        private val matrix = android.graphics.Matrix()
+
+        override fun draw(canvas: android.graphics.Canvas) {
+            val bounds = bounds
+            if (bounds.width() <= 0 || bounds.height() <= 0) return
+
+            val bw = bitmap.width.toFloat()
+            val bh = bitmap.height.toFloat()
+            val vw = bounds.width().toFloat()
+            val vh = bounds.height().toFloat()
+
+            // Center-crop scale: cover the bounds, cropping overflow on one axis.
+            val scale = maxOf(vw / bw, vh / bh)
+            val scaledW = bw * scale
+            val scaledH = bh * scale
+            val dx = bounds.left + (vw - scaledW) / 2f
+            val dy = bounds.top + (vh - scaledH) / 2f
+
+            matrix.reset()
+            matrix.setScale(scale, scale)
+            matrix.postTranslate(dx, dy)
+
+            canvas.save()
+            canvas.clipRect(bounds)
+            canvas.drawBitmap(bitmap, matrix, paint)
+            canvas.drawRect(bounds, dimPaint)
+            canvas.restore()
+        }
+
+        override fun setAlpha(alpha: Int) { paint.alpha = alpha }
+        override fun setColorFilter(colorFilter: android.graphics.ColorFilter?) { paint.colorFilter = colorFilter }
+        @Deprecated("Deprecated in Java")
+        override fun getOpacity(): Int = android.graphics.PixelFormat.TRANSLUCENT
+
+        // No intrinsic size: don't let this drawable dictate a wrap_content parent's
+        // measured height/width. It simply fills whatever bounds it's assigned.
+        override fun getIntrinsicWidth(): Int = -1
+        override fun getIntrinsicHeight(): Int = -1
     }
 
     /**

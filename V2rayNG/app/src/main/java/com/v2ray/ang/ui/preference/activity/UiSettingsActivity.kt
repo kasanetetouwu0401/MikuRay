@@ -204,6 +204,7 @@ class UiSettingsActivity : BaseActivity() {
                         deleteOldFile(oldUri)
                         val savedUri = saveToCache(cacheUri, "selected_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_URI, savedUri.toString())
+                        updateIndicatorStyleEnabledState()
                         broadcastSelectedBannerChanged()
                         requireContext().snackbarSuccess(getString(R.string.selected_banner_updated), title = getString(R.string.title_alerter_success))
                     } catch (e: Exception) {
@@ -452,11 +453,14 @@ class UiSettingsActivity : BaseActivity() {
         }
 
         private fun setupSelectedBannerPreferences() {
+            updateIndicatorStyleEnabledState()
+
             selectedBannerStyleEnabled?.apply {
                 isChecked = MmkvManager.decodeSettingsBool(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED, false)
                 setOnPreferenceChangeListener { _, newValue ->
                     val checked = newValue as Boolean
                     MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED, checked)
+                    updateIndicatorStyleEnabledState()
                     broadcastSelectedBannerChanged()
                     true
                 }
@@ -478,6 +482,7 @@ class UiSettingsActivity : BaseActivity() {
                         .setPositiveButton(android.R.string.ok) { _, _ ->
                             deleteOldFile(savedUri)
                             MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_URI, "")
+                            updateIndicatorStyleEnabledState()
                             broadcastSelectedBannerChanged()
                             requireContext().snackbarSuccess(getString(R.string.selected_banner_delete_summary), title = getString(R.string.title_alerter_success))
                         }
@@ -485,6 +490,28 @@ class UiSettingsActivity : BaseActivity() {
                         .showBlur()
                 }
                 true
+            }
+        }
+
+        /**
+         * The selected-profile banner and the static indicator style both render the
+         * "selected" state of a server card, so only one should be active at a time.
+         * Disable the indicator style preference whenever the banner feature is on
+         * AND a banner image has actually been picked (a bare toggle with no image
+         * still falls back to the indicator style, so it stays usable in that case).
+         */
+        private fun updateIndicatorStyleEnabledState() {
+            val bannerEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED, false)
+            val hasBanner = !MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI).isNullOrEmpty()
+            val disabledByBanner = bannerEnabled && hasBanner
+
+            indicatorStyle?.apply {
+                isEnabled = !disabledByBanner
+                summary = if (disabledByBanner) {
+                    getString(R.string.pref_indicator_style_summary_disabled_by_banner)
+                } else {
+                    getString(R.string.pref_indicator_style_summary)
+                }
             }
         }
 
