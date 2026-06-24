@@ -495,13 +495,6 @@ class UiSettingsActivity : BaseActivity() {
             }
         }
 
-        /**
-         * The selected-profile banner and the static indicator style both render the
-         * "selected" state of a server card, so only one should be active at a time.
-         * Disable the indicator style preference whenever the banner feature is on
-         * AND a banner image has actually been picked (a bare toggle with no image
-         * still falls back to the indicator style, so it stays usable in that case).
-         */
         private fun updateIndicatorStyleEnabledState() {
             val bannerEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED, false)
             val hasBanner = !MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI).isNullOrEmpty()
@@ -671,10 +664,9 @@ class UiSettingsActivity : BaseActivity() {
             val destFile = File(requireContext().cacheDir, "cropped_selected_banner_temp.jpg")
             val destUri = Uri.fromFile(destFile)
 
-            // Server cards are wide and short, similar aspect to a single list item.
             val displayMetrics = resources.displayMetrics
             val screenWidthPx = displayMetrics.widthPixels.toFloat()
-            val targetHeightPx = displayMetrics.density * 90
+            val targetHeightPx = displayMetrics.density * 120
 
             val uCrop = UCrop.of(sourceUri, destUri)
                 .withAspectRatio(screenWidthPx, targetHeightPx)
