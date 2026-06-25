@@ -108,7 +108,7 @@ jobs:
         echo "sdk.dir=${ANDROID_HOME}" > local.properties
         chmod 755 gradlew
         echo "Running the color generator script..."
-        ./gradlew :tools:run --console=plain
+        ./gradlew :app:testDebugUnitTest --tests "com.v2ray.ang.tools.GenerateThemeSnapshotTest" --console=plain
 
     - name: Build APK (${{ env.BUILD_TYPE }})
       run: |

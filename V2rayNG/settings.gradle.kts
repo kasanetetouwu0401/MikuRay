@@ -22,4 +22,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "V2rayNG"
 include(":app")
-include(":tools")
