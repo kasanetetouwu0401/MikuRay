@@ -417,7 +417,7 @@ class MainActivity : HelperBaseActivity(),
     private fun applyLiquidGlassTab() {
         LiquidGlassController.applyState(
             context        = this,
-            tabCardView    = binding.cardTabLayout
+            tabCardView    = binding.cardTabLayout,
             searchCardView = binding.cardSearchBar,
             btnHome        = binding.btnHome,
             btnMoreMenu    = binding.btnMoreMenu,
