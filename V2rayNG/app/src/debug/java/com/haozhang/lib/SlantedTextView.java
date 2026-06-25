@@ -16,7 +16,7 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
-import com.v2ray.ang.R
+import com.v2ray.ang.R;
 
 /**
  * @author HaoZhang
