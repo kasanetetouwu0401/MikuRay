@@ -202,25 +202,39 @@
                             android:paddingEnd="10dp"
                             android:visibility="gone">
 
+                            <ImageView
+                                android:id="@+id/iv_weather_icon"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:src="@drawable/ic_weather_sunny"
+                                android:tint="?colorOnSurfaceVariant"
+                                android:visibility="gone" />
+
+
                             <TextView
                                 android:id="@+id/tv_weather_temp"
                                 android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:gravity="center_vertical"
-                                android:drawablePadding="4dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
                                 android:textAppearance="?textAppearanceBodySmall"
                                 android:textColor="?colorOnSurfaceVariant"
                                 android:textSize="13sp"
                                 android:visibility="gone"
                                 tools:text="29°C" />
 
+                            <ImageView
+                                android:id="@+id/iv_total_traffic_icon"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:src="@drawable/ic_traffic_total"
+                                android:tint="?colorOnSurfaceVariant"
+                                android:visibility="gone" />
+
                             <TextView
                                 android:id="@+id/tv_total_traffic"
                                 android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:gravity="center_vertical"
-                                android:drawableStart="@drawable/ic_traffic_total"
-                                android:drawablePadding="4dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
                                 android:textAppearance="?textAppearanceBodySmall"
                                 android:textColor="?colorOnSurfaceVariant"
                                 android:textSize="13sp"

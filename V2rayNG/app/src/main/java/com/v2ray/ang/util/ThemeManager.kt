@@ -72,16 +72,19 @@ object ThemeManager {
             "4"  -> R.style.AppTheme_DeepPurple
             "5"  -> R.style.AppTheme_Indigo
             "6"  -> R.style.AppTheme_Blue
-            "7"  -> R.style.AppTheme_Cyan
-            "8"  -> R.style.AppTheme_Teal
-            "9" -> R.style.AppTheme_Green
-            "10" -> R.style.AppTheme_LightGreen
-            "11" -> R.style.AppTheme_Lime
-            "12" -> R.style.AppTheme_Yellow
-            "13" -> R.style.AppTheme_Amber
-            "14" -> R.style.AppTheme_Orange
-            "15" -> R.style.AppTheme_Brown
-            "16" -> R.style.AppTheme_BlueGrey
+            "7"  -> R.style.AppTheme_LightBlue
+            "8"  -> R.style.AppTheme_Cyan
+            "9"  -> R.style.AppTheme_Teal
+            "10" -> R.style.AppTheme_Green
+            "11" -> R.style.AppTheme_LightGreen
+            "12" -> R.style.AppTheme_Lime
+            "13" -> R.style.AppTheme_Yellow
+            "14" -> R.style.AppTheme_Amber
+            "15" -> R.style.AppTheme_Orange
+            "16" -> R.style.AppTheme_DeepOrange
+            "17" -> R.style.AppTheme_Brown
+            "18" -> R.style.AppTheme_Grey
+            "19" -> R.style.AppTheme_BlueGrey
             else -> R.style.AppTheme_Teal
         }
     }

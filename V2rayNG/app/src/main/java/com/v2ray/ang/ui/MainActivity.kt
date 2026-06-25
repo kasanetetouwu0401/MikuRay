@@ -181,10 +181,12 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun hideWeatherChipViews() {
+        binding.ivWeatherIcon.isVisible = false
         binding.tvWeatherTemp.isVisible = false
     }
 
     private fun hideTotalTrafficChip() {
+        binding.ivTotalTrafficIcon.isVisible = false
         binding.tvTotalTraffic.isVisible = false
     }
 
@@ -195,6 +197,7 @@ class MainActivity : HelperBaseActivity(),
             return
         }
         binding.tvTotalTraffic.text = totalTraffic
+        binding.ivTotalTrafficIcon.isVisible = true
         binding.tvTotalTraffic.isVisible = true
         binding.layoutWeatherChip.isVisible = true
     }
@@ -229,7 +232,8 @@ class MainActivity : HelperBaseActivity(),
         if (cached != null) {
             applyWeatherToChip(cached)
         } else {
-            binding.tvWeatherTemp.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.weather_cloudy, 0, 0, 0)
+            binding.ivWeatherIcon.setImageResource(WeatherHelper.iconResForEmoji(null))
+            binding.ivWeatherIcon.isVisible = true
             binding.tvWeatherTemp.text = getString(R.string.weather_loading)
             binding.tvWeatherTemp.isVisible = true
         }
@@ -253,7 +257,8 @@ class MainActivity : HelperBaseActivity(),
         if (stale != null) {
             applyWeatherToChip(stale)
         } else {
-            binding.tvWeatherTemp.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.weather_cloudy, 0, 0, 0)
+            binding.ivWeatherIcon.setImageResource(WeatherHelper.iconResForEmoji(null))
+            binding.ivWeatherIcon.isVisible = true
             binding.tvWeatherTemp.text = getString(R.string.weather_loading)
             binding.tvWeatherTemp.isVisible = true
         }
@@ -271,11 +276,9 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun applyWeatherToChip(weather: WeatherHelper.WeatherResult) {
-        val iconRes = WeatherHelper.iconResForEmoji(weather.emoji)
-        
-        binding.tvWeatherTemp.setCompoundDrawablesRelativeWithIntrinsicBounds(iconRes, 0, 0, 0)
+        binding.ivWeatherIcon.setImageResource(WeatherHelper.iconResForEmoji(weather.emoji))
         binding.tvWeatherTemp.text = weather.getTemperatureString(WeatherHelper.isCelsius())
-        
+        binding.ivWeatherIcon.isVisible = true
         binding.tvWeatherTemp.isVisible = true
         binding.layoutWeatherChip.isVisible = true
     }
