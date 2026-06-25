@@ -70,15 +70,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
 
     override fun onResume() {
         super.onResume()
-        // Only trigger a reload if this fragment's subId differs from the current active one.
-        // When same-tab onResume fires (e.g. returning from another activity), we still want
-        // the list refreshed — but ViewModel will skip disk I/O if cache is already valid.
-        if (mainViewModel.subscriptionId != subId) {
-            mainViewModel.subscriptionIdChanged(subId)
-        } else if (adapter.itemCount == 0) {
-            // Cache may be empty on cold start; force load.
-            mainViewModel.subscriptionIdChanged(subId)
-        }
+        mainViewModel.subscriptionIdChanged(subId)
     }
 
     private fun editServer(guid: String, profile: ProfileItem) {

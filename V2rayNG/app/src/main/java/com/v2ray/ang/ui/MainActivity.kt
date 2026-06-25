@@ -363,17 +363,42 @@ class MainActivity : HelperBaseActivity(),
             val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_HOME_BANNER_URI)
             val targetTag = if (uriString.isNullOrBlank()) TAG_HOME_BANNER_DEFAULT else uriString
             if (headerImage.tag == targetTag) return
+
             if (!uriString.isNullOrBlank()) {
+                homeBannerBitmapCache[uriString]?.let { cached ->
+                    headerImage.setImageBitmap(cached)
+                    headerImage.tag = targetTag
+                    return
+                }
+
                 Glide.with(this@MainActivity)
+                    .asBitmap()
                     .load(Uri.parse(uriString))
                     .diskCacheStrategy(DiskCacheStrategy.DATA)
-                    .error(R.drawable.uwu_banner_image_about)
-                    .into(headerImage)
+                    .into(object : com.bumptech.glide.request.target.CustomTarget<android.graphics.Bitmap>() {
+                        override fun onResourceReady(
+                            resource: android.graphics.Bitmap,
+                            transition: com.bumptech.glide.request.transition.Transition<in android.graphics.Bitmap>?
+                        ) {
+                            homeBannerBitmapCache[uriString] = resource
+                            headerImage.setImageBitmap(resource)
+                            headerImage.tag = targetTag
+                        }
+
+                        override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {
+                            // No-op: keep whatever is currently displayed.
+                        }
+
+                        override fun onLoadFailed(errorDrawable: android.graphics.drawable.Drawable?) {
+                            headerImage.setImageResource(R.drawable.uwu_banner_image_about)
+                            headerImage.tag = null
+                        }
+                    })
             } else {
                 Glide.with(this@MainActivity).clear(headerImage)
                 headerImage.setImageResource(R.drawable.uwu_banner_image_about)
+                headerImage.tag = targetTag
             }
-            headerImage.tag = targetTag
         }
 
         val show = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_HOME_BANNER, true)
@@ -386,6 +411,7 @@ class MainActivity : HelperBaseActivity(),
             override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
                 when (intent?.action) {
                     AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED -> {
+                        homeBannerBitmapCache.clear()
                         val showNow = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_HOME_BANNER, true)
                         applyBannerVisibility(showNow)
                         applyBannerHeight()
@@ -414,9 +440,6 @@ class MainActivity : HelperBaseActivity(),
         binding.viewPager.apply {
             adapter = groupPagerAdapter
             isUserInputEnabled = true
-            // Keep adjacent fragments alive to eliminate lag on tab switch.
-            // FragmentStateAdapter destroys off-screen fragments by default.
-            offscreenPageLimit = 1
         }
     }
 
@@ -1099,5 +1122,15 @@ class MainActivity : HelperBaseActivity(),
         }
         
         super.onDestroy()
+    }
+
+    companion object {
+        /**
+         * Process-wide cache of the decoded home-banner bitmap, keyed by URI string.
+         * Cleared whenever [AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED] fires (new
+         * image picked or banner removed) so a stale bitmap never lingers after an
+         * update.
+         */
+        private val homeBannerBitmapCache = mutableMapOf<String, android.graphics.Bitmap>()
     }
 }

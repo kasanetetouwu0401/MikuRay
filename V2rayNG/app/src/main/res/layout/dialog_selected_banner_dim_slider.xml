@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:stepSize="5.0"
         android:valueFrom="0"
-        android:valueTo="90"
+        android:valueTo="80"
         app:labelBehavior="floating"
         app:tickVisibilityMode="hidden" />
 
