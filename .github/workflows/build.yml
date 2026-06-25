@@ -102,17 +102,11 @@ jobs:
         fileName: "android_keystore.jks"
         encodedString: ${{ secrets.APP_KEYSTORE_BASE64 }}
 
-    - name: Generate Material You Themes
+    - name: Build APK (${{ env.BUILD_TYPE }})
       run: |
         cd ${{ github.workspace }}/V2rayNG
         echo "sdk.dir=${ANDROID_HOME}" > local.properties
         chmod 755 gradlew
-        echo "Running the color generator script..."
-        ./gradlew :app:testDebugUnitTest --tests "com.v2ray.ang.tools.GenerateThemeSnapshotTest" --console=plain
-
-    - name: Build APK (${{ env.BUILD_TYPE }})
-      run: |
-        cd ${{ github.workspace }}/V2rayNG
         
         if [ "${{ env.BUILD_TYPE }}" == "debug" ]; then
           echo "Starting DEBUG build process..."
@@ -125,7 +119,6 @@ jobs:
             -Pandroid.injected.signing.key.alias=${{ secrets.APP_KEYSTORE_ALIAS }} \
             -Pandroid.injected.signing.key.password=${{ secrets.APP_KEY_PASSWORD }}
         fi
-        
     - name: Sign APKs with v1, v2, and v3
       run: |
         BUILD_TOOLS_DIR="$ANDROID_HOME/build-tools/37.0.0"
