@@ -15,8 +15,6 @@ import com.v2ray.ang.databinding.ItemRecyclerMainBinding
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.dto.entities.ServersCache
 import com.v2ray.ang.extension.isComplexType
-import com.v2ray.ang.extension.nullIfBlank
-import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.helper.ItemTouchHelperAdapter
 import com.v2ray.ang.helper.ItemTouchHelperViewHolder
@@ -203,10 +201,6 @@ class MainRecyclerAdapter(
                 adapterListener?.onSelectServer(guid)
             }
         }
-    }
-
-    private fun getAddress(profile: ProfileItem): String {
-        return profile.description.nullIfBlank() ?: AngConfigManager.generateDescription(profile)
     }
 
     private fun getSubscriptionRemarks(profile: ProfileItem): String {

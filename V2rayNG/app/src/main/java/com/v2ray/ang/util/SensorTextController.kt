@@ -2,8 +2,6 @@ package com.v2ray.ang.util
 
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.dto.entities.ProfileItem
-import com.v2ray.ang.extension.nullIfBlank
-import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
 
 object SensorTextController {
@@ -13,15 +11,26 @@ object SensorTextController {
 
     fun getAddress(profile: ProfileItem): String {
         return if (isEnabled()) {
-            // Show full address without *** masking
-            profile.description.nullIfBlank() ?: run {
-                val server = profile.server ?: ""
-                val port = profile.serverPort ?: ""
-                if (server.isBlank() && port.isBlank()) "" else "$server : $port"
-            }
+            val server = profile.server ?: ""
+            val port = profile.serverPort ?: ""
+            if (server.isBlank() && port.isBlank()) "" else "$server : $port"
         } else {
-            // Default: masked address (xxx.xxx.***)
-            profile.description.nullIfBlank() ?: AngConfigManager.generateDescription(profile)
+            generateMaskedDescription(profile)
         }
+    }
+
+    private fun generateMaskedDescription(profile: ProfileItem): String {
+        val server = profile.server
+        val port = profile.serverPort
+        if (server.isNullOrBlank() && port.isNullOrBlank()) return ""
+
+        val addrPart = server?.let {
+            if (it.contains(":"))
+                it.split(":").take(2).joinToString(":", postfix = ":***")
+            else
+                it.split('.').dropLast(1).joinToString(".", postfix = ".***")
+        } ?: ""
+
+        return "$addrPart : ${port ?: ""}"
     }
 }
