@@ -6,6 +6,6 @@ updates:
       interval: "daily"
 
   - package-ecosystem: "gradle"
-    directory: "/"
+    directory: "/V2rayNG"
     schedule:
       interval: "daily"
