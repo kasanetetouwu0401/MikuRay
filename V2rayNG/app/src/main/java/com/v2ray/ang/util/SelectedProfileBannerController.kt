@@ -92,15 +92,17 @@ class SelectedProfileBannerController(private val context: Context) {
         private val dimColor: Int,
         private val cornerRadius: Float = 0f
     ) : Drawable() {
-        private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+        private val bitmapPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
             isFilterBitmap = true
         }
-        private val dimPaint = android.graphics.Paint().apply { color = dimColor }
+        private val dimPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            color = dimColor
+        }
         private val matrix = android.graphics.Matrix()
-        private val clipPath = android.graphics.Path()
+        private val rectF = android.graphics.RectF()
 
-        override fun draw(canvas: android.graphics.Canvas) {
-            val bounds = bounds
+        override fun onBoundsChange(bounds: android.graphics.Rect) {
+            super.onBoundsChange(bounds)
             if (bounds.width() <= 0 || bounds.height() <= 0) return
 
             val bw = bitmap.width.toFloat()
@@ -118,26 +120,31 @@ class SelectedProfileBannerController(private val context: Context) {
             matrix.setScale(scale, scale)
             matrix.postTranslate(dx, dy)
 
-            canvas.save()
-            if (cornerRadius > 0f) {
-                clipPath.reset()
-                clipPath.addRoundRect(
-                    bounds.left.toFloat(), bounds.top.toFloat(),
-                    bounds.right.toFloat(), bounds.bottom.toFloat(),
-                    cornerRadius, cornerRadius,
-                    android.graphics.Path.Direction.CW
-                )
-                canvas.clipPath(clipPath)
-            } else {
-                canvas.clipRect(bounds)
-            }
-            canvas.drawBitmap(bitmap, matrix, paint)
-            canvas.drawRect(bounds, dimPaint)
-            canvas.restore()
+            val shader = android.graphics.BitmapShader(
+                bitmap,
+                android.graphics.Shader.TileMode.CLAMP,
+                android.graphics.Shader.TileMode.CLAMP
+            )
+            shader.setLocalMatrix(matrix)
+            bitmapPaint.shader = shader
+
+            rectF.set(bounds)
         }
 
-        override fun setAlpha(alpha: Int) { paint.alpha = alpha }
-        override fun setColorFilter(colorFilter: android.graphics.ColorFilter?) { paint.colorFilter = colorFilter }
+        override fun draw(canvas: android.graphics.Canvas) {
+            if (bounds.width() <= 0 || bounds.height() <= 0) return
+
+            if (cornerRadius > 0f) {
+                canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, bitmapPaint)
+                canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, dimPaint)
+            } else {
+                canvas.drawRect(rectF, bitmapPaint)
+                canvas.drawRect(rectF, dimPaint)
+            }
+        }
+
+        override fun setAlpha(alpha: Int) { bitmapPaint.alpha = alpha }
+        override fun setColorFilter(colorFilter: android.graphics.ColorFilter?) { bitmapPaint.colorFilter = colorFilter }
         @Deprecated("Deprecated in Java")
         override fun getOpacity(): Int = android.graphics.PixelFormat.TRANSLUCENT
 
