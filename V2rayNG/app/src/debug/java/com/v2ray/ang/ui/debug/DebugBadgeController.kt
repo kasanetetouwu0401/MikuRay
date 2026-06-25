@@ -28,7 +28,7 @@ object DebugBadgeController {
             setText(BADGE_TEXT)
             setTextColor(colorOnPrimary)
             setSlantedBackgroundColor(colorPrimary)
-            setSlantedLength((40 * density).toInt()) 
+            setSlantedLength((28 * density).toInt()) 
             setMode(SlantedTextView.MODE_RIGHT)
             setTextSize(16)
         }
