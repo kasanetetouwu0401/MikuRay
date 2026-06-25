@@ -185,7 +185,6 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun hideTotalTrafficChip() {
-        binding.ivTotalTrafficIcon.isVisible = false
         binding.tvTotalTraffic.isVisible = false
     }
 
@@ -196,7 +195,6 @@ class MainActivity : HelperBaseActivity(),
             return
         }
         binding.tvTotalTraffic.text = totalTraffic
-        binding.ivTotalTrafficIcon.isVisible = true
         binding.tvTotalTraffic.isVisible = true
         binding.layoutWeatherChip.isVisible = true
     }

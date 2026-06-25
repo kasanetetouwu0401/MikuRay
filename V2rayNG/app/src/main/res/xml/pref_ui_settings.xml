@@ -120,7 +120,7 @@
             android:summary="@string/summary_pref_dynamic_color_banner" />
 
         <ListPreference
-            android:icon="@drawable/ic_weather_night"
+            android:icon="@drawable/ic_night"
             app:layout="@layout/uwu_mid"
             android:defaultValue="0"
             android:entries="@array/ui_mode_night"
@@ -130,7 +130,7 @@
             android:title="@string/title_pref_ui_mode_night" />
 
         <androidx.preference.SwitchPreferenceCompat
-            android:icon="@drawable/ic_weather_night"
+            android:icon="@drawable/ic_night"
             app:layout="@layout/uwu_bot_switch"
             app:widgetLayout="@layout/uwu_widget_material_switch"
             android:defaultValue="false"

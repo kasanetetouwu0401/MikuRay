@@ -5,7 +5,6 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.util.TypedValue
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.ImageViewCompat
 import androidx.core.widget.TextViewCompat
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
@@ -47,10 +46,10 @@ object SearchChipGradientController {
 
         val tintList = ColorStateList.valueOf(activity.getColorAttr("colorOnPrimary"))
         
-        // Menerapkan tint ke drawable yang menempel di TextView cuaca
+        // Terapkan tint ke compound drawable di kedua TextView
         TextViewCompat.setCompoundDrawableTintList(binding.tvWeatherTemp, tintList)
+        TextViewCompat.setCompoundDrawableTintList(binding.tvTotalTraffic, tintList)
         
-        ImageViewCompat.setImageTintList(binding.ivTotalTrafficIcon, tintList)
         binding.tvWeatherTemp.setTextColor(tintList.defaultColor)
         binding.tvTotalTraffic.setTextColor(tintList.defaultColor)
     }
@@ -60,10 +59,10 @@ object SearchChipGradientController {
 
         val tintList = ColorStateList.valueOf(activity.getColorAttr("colorOnSurfaceVariant"))
         
-        // Menerapkan tint ke drawable yang menempel di TextView cuaca
+        // Terapkan tint ke compound drawable di kedua TextView
         TextViewCompat.setCompoundDrawableTintList(binding.tvWeatherTemp, tintList)
+        TextViewCompat.setCompoundDrawableTintList(binding.tvTotalTraffic, tintList)
         
-        ImageViewCompat.setImageTintList(binding.ivTotalTrafficIcon, tintList)
         binding.tvWeatherTemp.setTextColor(tintList.defaultColor)
         binding.tvTotalTraffic.setTextColor(tintList.defaultColor)
     }
