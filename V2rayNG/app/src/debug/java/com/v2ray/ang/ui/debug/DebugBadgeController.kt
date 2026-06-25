@@ -1,6 +1,7 @@
 package com.v2ray.ang.ui.debug
 
 import android.app.Activity
+import android.graphics.Typeface
 import android.view.ViewGroup
 import android.widget.RelativeLayout
 import com.haozhang.lib.SlantedTextView
@@ -27,9 +28,11 @@ object DebugBadgeController {
             setText(BADGE_TEXT)
             setTextColor(colorOnPrimary)
             setSlantedBackgroundColor(colorPrimary)
-            setSlantedLength((28 * density).toInt()) 
+            setSlantedLength((40 * density).toInt())
             setMode(SlantedTextView.MODE_RIGHT)
-            setTextSize(11)
+            setTextSize(16)
+            
+            setTypeface(Typeface.DEFAULT_BOLD) 
         }
 
         val params = RelativeLayout.LayoutParams(sizePx, sizePx).apply {
