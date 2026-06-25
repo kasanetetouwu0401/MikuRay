@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.v2ray.ang.R
 import com.v2ray.ang.contracts.MainAdapterListener
@@ -33,6 +34,8 @@ class MainRecyclerAdapter(
     companion object {
         private const val VIEW_TYPE_ITEM = 1
         private const val VIEW_TYPE_FOOTER = 2
+        const val PAYLOAD_RUNNING_STATE = "payload_running_state"
+        const val PAYLOAD_BANNER_CHANGED = "payload_banner_changed"
     }
 
     private var data: MutableList<ServersCache> = mutableListOf()
@@ -42,13 +45,36 @@ class MainRecyclerAdapter(
 
     @SuppressLint("NotifyDataSetChanged")
     fun setData(newData: MutableList<ServersCache>?, position: Int = -1) {
-        data = newData?.toMutableList() ?: mutableListOf()
+        val newList = newData?.toMutableList() ?: mutableListOf()
 
-        if (position >= 0 && position in data.indices) {
+        if (position >= 0 && position in newList.indices) {
+            // Single-item update path (e.g. ping result) — no DiffUtil needed
+            data = newList
             notifyItemChanged(position)
-        } else {
-            notifyDataSetChanged()
+            return
         }
+
+        // Full-list refresh: use DiffUtil to avoid notifyDataSetChanged which
+        // causes every visible item to rebind and restarts AnimationDrawables,
+        // triggers Glide reloads on selected-profile banner, and causes
+        // off-screen fragment RecyclerViews to invalidate their parent layout
+        // (banner_home flicker when offscreenPageLimit > 0).
+        val oldList = data
+        val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize() = oldList.size + 1 // +1 for footer
+            override fun getNewListSize() = newList.size + 1
+            override fun areItemsTheSame(oldPos: Int, newPos: Int): Boolean {
+                if (oldPos == oldList.size || newPos == newList.size) return oldPos == oldList.size && newPos == newList.size
+                return oldList[oldPos].guid == newList[newPos].guid
+            }
+            override fun areContentsTheSame(oldPos: Int, newPos: Int): Boolean {
+                if (oldPos == oldList.size || newPos == newList.size) return true
+                val o = oldList[oldPos]; val n = newList[newPos]
+                return o.guid == n.guid && o.profile.remarks == n.profile.remarks && o.profile.server == n.profile.server
+            }
+        })
+        data = newList
+        diff.dispatchUpdatesTo(this)
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -59,7 +85,8 @@ class MainRecyclerAdapter(
                 val selectedGuid = MmkvManager.getSelectServer()
                 val position = data.indexOfFirst { it.guid == selectedGuid }
                 if (position >= 0) {
-                    notifyItemChanged(position)
+                    // Partial rebind: only status dot needs updating
+                    notifyItemChanged(position, PAYLOAD_RUNNING_STATE)
                 }
             }
             mainViewModel.isRunning.observe(lifecycleOwner, isRunningObserver!!)
@@ -71,7 +98,8 @@ class MainRecyclerAdapter(
             val selectedGuid = MmkvManager.getSelectServer()
             val position = data.indexOfFirst { it.guid == selectedGuid }
             if (position >= 0) {
-                notifyItemChanged(position)
+                // Partial rebind: only banner background needs updating
+                notifyItemChanged(position, PAYLOAD_BANNER_CHANGED)
             }
         }
     }
@@ -86,6 +114,30 @@ class MainRecyclerAdapter(
     }
 
     override fun getItemCount() = data.size + 1
+
+    override fun onBindViewHolder(holder: BaseViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, position)
+            return
+        }
+        if (holder !is MainViewHolder || position >= data.size) return
+        val guid = data[position].guid
+        val isSelected = guid == MmkvManager.getSelectServer()
+        val isRunning = mainViewModel.isRunning.value == true
+
+        for (payload in payloads) {
+            when (payload) {
+                PAYLOAD_RUNNING_STATE -> bindStatusDot(holder, isSelected, isRunning)
+                PAYLOAD_BANNER_CHANGED -> {
+                    // Reset tag to force banner reload with new image
+                    holder.itemMainBinding.layoutIndicator.setTag(
+                        "selected_profile_banner_tag".hashCode(), null
+                    )
+                    bindIndicatorBackground(holder, isSelected)
+                }
+            }
+        }
+    }
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         if (holder is MainViewHolder) {
@@ -124,54 +176,12 @@ class MainRecyclerAdapter(
             }
 
             val isSelectedServer = (guid == MmkvManager.getSelectServer())
-            val isVpnConnected = mainViewModel.isRunning.value == true 
+            val isVpnConnected = mainViewModel.isRunning.value == true
 
-            if (isSelectedServer && isVpnConnected) {
-                holder.itemMainBinding.vStatusDot.setBackgroundResource(R.drawable.blink_color)
-                val blinkAnimDrawable = holder.itemMainBinding.vStatusDot.background
-                
-                if (blinkAnimDrawable is android.graphics.drawable.AnimationDrawable) {
-                    holder.itemMainBinding.vStatusDot.visibility = View.VISIBLE
-                    holder.itemMainBinding.vStatusDot.post {
-                        if (!blinkAnimDrawable.isRunning) {
-                            blinkAnimDrawable.start()
-                        }
-                    }
-                }
-            } else {
-                val blinkAnimDrawable = holder.itemMainBinding.vStatusDot.background
-                if (blinkAnimDrawable is android.graphics.drawable.AnimationDrawable) {
-                    blinkAnimDrawable.stop()
-                }
-                holder.itemMainBinding.vStatusDot.visibility = View.GONE
-                holder.itemMainBinding.vStatusDot.background = null
-            }
+            bindStatusDot(holder, isSelectedServer, isVpnConnected)
 
             //layoutIndicator & Card Background
-            if (isSelectedServer) {
-                val styleName = MmkvManager.decodeSettingsString(
-                    AppConfig.PREF_INDICATOR_STYLE,
-                    IndicatorStyle.STYLE_0.name
-                ) ?: IndicatorStyle.STYLE_0.name
-                val indicatorStyle = runCatching {
-                    IndicatorStyle.valueOf(styleName)
-                }.getOrDefault(IndicatorStyle.STYLE_0)
-
-                val bannerController = selectedBannerController
-                if (bannerController != null && bannerController.isEnabled() && bannerController.hasBanner()) {
-                    bannerController.applyTo(holder.itemMainBinding.layoutIndicator)
-                } else {
-                    bannerController?.clear(holder.itemMainBinding.layoutIndicator)
-                    holder.itemMainBinding.layoutIndicator.setBackgroundResource(indicatorStyle.drawableRes)
-                }
-                holder.itemMainBinding.layoutCard.setCardBackgroundColor(Color.TRANSPARENT)
-            } else {
-                selectedBannerController?.clear(holder.itemMainBinding.layoutIndicator)
-                holder.itemMainBinding.layoutIndicator.setBackgroundResource(0)
-                val typedValue = TypedValue()
-                context.theme.resolveAttribute(R.attr.colorCard, typedValue, true)
-                holder.itemMainBinding.layoutCard.setCardBackgroundColor(typedValue.data)
-            }
+            bindIndicatorBackground(holder, isSelectedServer)
 
             //subscription remarks
             val subRemarks = getSubscriptionRemarks(profile)
@@ -274,6 +284,46 @@ class MainRecyclerAdapter(
             holder.itemMainBinding.tvSecurity.visibility = View.VISIBLE
         } else {
             holder.itemMainBinding.tvSecurity.visibility = View.GONE
+        }
+    }
+
+    private fun bindStatusDot(holder: MainViewHolder, isSelected: Boolean, isRunning: Boolean) {
+        if (isSelected && isRunning) {
+            holder.itemMainBinding.vStatusDot.setBackgroundResource(R.drawable.blink_color)
+            val anim = holder.itemMainBinding.vStatusDot.background
+            if (anim is android.graphics.drawable.AnimationDrawable) {
+                holder.itemMainBinding.vStatusDot.visibility = View.VISIBLE
+                holder.itemMainBinding.vStatusDot.post { if (!anim.isRunning) anim.start() }
+            }
+        } else {
+            val anim = holder.itemMainBinding.vStatusDot.background
+            if (anim is android.graphics.drawable.AnimationDrawable) anim.stop()
+            holder.itemMainBinding.vStatusDot.visibility = View.GONE
+            holder.itemMainBinding.vStatusDot.background = null
+        }
+    }
+
+    private fun bindIndicatorBackground(holder: MainViewHolder, isSelected: Boolean) {
+        val context = holder.itemMainBinding.root.context
+        if (isSelected) {
+            val styleName = MmkvManager.decodeSettingsString(
+                AppConfig.PREF_INDICATOR_STYLE, IndicatorStyle.STYLE_0.name
+            ) ?: IndicatorStyle.STYLE_0.name
+            val indicatorStyle = runCatching { IndicatorStyle.valueOf(styleName) }.getOrDefault(IndicatorStyle.STYLE_0)
+            val bannerController = selectedBannerController
+            if (bannerController != null && bannerController.isEnabled() && bannerController.hasBanner()) {
+                bannerController.applyTo(holder.itemMainBinding.layoutIndicator)
+            } else {
+                bannerController?.clear(holder.itemMainBinding.layoutIndicator)
+                holder.itemMainBinding.layoutIndicator.setBackgroundResource(indicatorStyle.drawableRes)
+            }
+            holder.itemMainBinding.layoutCard.setCardBackgroundColor(Color.TRANSPARENT)
+        } else {
+            selectedBannerController?.clear(holder.itemMainBinding.layoutIndicator)
+            holder.itemMainBinding.layoutIndicator.setBackgroundResource(0)
+            val typedValue = TypedValue()
+            context.theme.resolveAttribute(R.attr.colorCard, typedValue, true)
+            holder.itemMainBinding.layoutCard.setCardBackgroundColor(typedValue.data)
         }
     }
 

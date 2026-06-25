@@ -416,7 +416,7 @@ class MainActivity : HelperBaseActivity(),
             isUserInputEnabled = true
             // Keep adjacent fragments alive to eliminate lag on tab switch.
             // FragmentStateAdapter destroys off-screen fragments by default.
-            offscreenPageLimit = 2
+            offscreenPageLimit = 1
         }
     }
 
