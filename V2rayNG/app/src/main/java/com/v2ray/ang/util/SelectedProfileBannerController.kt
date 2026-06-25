@@ -44,6 +44,8 @@ class SelectedProfileBannerController(private val context: Context) {
         if (target.getTag(TAG_KEY) == tagKey) return
 
         bitmapCache[bitmapKey]?.let { cached ->
+            target.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+            
             target.background = CenterCropDimDrawable(cached, dimColorFor(dimPercent), cornerRadiusPx)
             target.setTag(TAG_KEY, tagKey)
             return
@@ -58,6 +60,9 @@ class SelectedProfileBannerController(private val context: Context) {
                 .into(object : CustomTarget<Bitmap>() {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                         bitmapCache[bitmapKey] = resource
+                        
+                        target.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                        
                         target.background = CenterCropDimDrawable(resource, dimColorFor(dimPercent), cornerRadiusPx)
                         target.setTag(TAG_KEY, tagKey)
                     }
@@ -78,6 +83,9 @@ class SelectedProfileBannerController(private val context: Context) {
     fun clear(target: View) {
         if (target.getTag(TAG_KEY) == null) return
         target.setTag(TAG_KEY, null)
+        
+        target.setLayerType(View.LAYER_TYPE_NONE, null)
+        
         Glide.with(context).clear(target)
     }
 
