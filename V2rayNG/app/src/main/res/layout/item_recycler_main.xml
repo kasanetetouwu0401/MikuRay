@@ -20,7 +20,8 @@
         app:cardCornerRadius="16.0dip"
         app:cardElevation="0.0dip"
         app:strokeColor="?colorOutlineVariant"
-        app:strokeWidth="0.0dip">
+        app:strokeWidth="0.0dip"
+        android:layerType="software">
         <LinearLayout
             android:id="@+id/layout_indicator"
             android:layout_width="fill_parent"
@@ -205,9 +206,8 @@
                                 android:textAppearance="?attr/textAppearanceLabelSmall"
                                 android:textSize="11.0sp"
                                 android:textColor="?colorOnSurfaceVariant"
-                                android:layout_width="0.0dip"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1.0"
                                 android:layout_marginEnd="6.0dip"
                                 android:drawablePadding="3.0dip"
                                 android:gravity="center_vertical"
@@ -220,8 +220,9 @@
                                 android:textAppearance="?attr/textAppearanceLabelSmall"
                                 android:textSize="11.0sp"
                                 android:textColor="?colorOnSurfaceVariant"
-                                android:layout_width="wrap_content"
+                                android:layout_width="0.0dip"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="1.0"
                                 android:drawablePadding="3.0dip"
                                 android:gravity="center_vertical"
                                 android:ellipsize="end"

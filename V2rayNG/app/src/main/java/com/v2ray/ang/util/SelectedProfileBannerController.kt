@@ -100,12 +100,12 @@ class SelectedProfileBannerController(private val context: Context) {
         private val dimColor: Int,
         private val cornerRadius: Float = 0f
     ) : Drawable() {
+        
         private val bitmapPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
             isFilterBitmap = true
+            colorFilter = android.graphics.PorterDuffColorFilter(dimColor, android.graphics.PorterDuff.Mode.SRC_OVER)
         }
-        private val dimPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-            color = dimColor
-        }
+        
         private val matrix = android.graphics.Matrix()
         private val rectF = android.graphics.RectF()
 
@@ -144,15 +144,16 @@ class SelectedProfileBannerController(private val context: Context) {
 
             if (cornerRadius > 0f) {
                 canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, bitmapPaint)
-                canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, dimPaint)
             } else {
                 canvas.drawRect(rectF, bitmapPaint)
-                canvas.drawRect(rectF, dimPaint)
             }
         }
 
         override fun setAlpha(alpha: Int) { bitmapPaint.alpha = alpha }
-        override fun setColorFilter(colorFilter: android.graphics.ColorFilter?) { bitmapPaint.colorFilter = colorFilter }
+        
+        override fun setColorFilter(colorFilter: android.graphics.ColorFilter?) {
+        }
+        
         @Deprecated("Deprecated in Java")
         override fun getOpacity(): Int = android.graphics.PixelFormat.TRANSLUCENT
 
