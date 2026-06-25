@@ -738,6 +738,8 @@ you need."</string>
     <string name="sub_setting_tab_icon">Tab icon</string>
     <string name="sub_setting_tab_icon_hint">Shown next to the group name in the tab bar</string>
     <string name="sub_tab_icon_none">None</string>
-
     <string name="weather_loading">Loading…</string>
+    
+    <string name="action_switch_profile">Switch Profile</string>
+    <string name="close">Close</string>
 </resources>

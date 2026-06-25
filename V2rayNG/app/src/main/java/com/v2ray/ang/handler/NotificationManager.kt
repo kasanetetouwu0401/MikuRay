@@ -17,6 +17,7 @@ import com.v2ray.ang.core.CoreServiceManager
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.extension.toSpeedString
 import com.v2ray.ang.ui.MainActivity
+import com.v2ray.ang.ui.SwitchProfileActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,6 +31,7 @@ object NotificationManager : TrafficController.Listener {
     private const val NOTIFICATION_PENDING_INTENT_CONTENT = 0
     private const val NOTIFICATION_PENDING_INTENT_STOP_V2RAY = 1
     private const val NOTIFICATION_PENDING_INTENT_RESTART_V2RAY = 2
+    private const val NOTIFICATION_PENDING_INTENT_SWITCH_PROFILE = 3
     private const val NOTIFICATION_ICON_THRESHOLD = 3000
 
     private var connectStartTime = 0L
@@ -127,6 +129,18 @@ object NotificationManager : TrafficController.Listener {
         restartV2RayIntent.putExtra("key", AppConfig.MSG_STATE_RESTART)
         val restartV2RayPendingIntent = PendingIntent.getBroadcast(service, NOTIFICATION_PENDING_INTENT_RESTART_V2RAY, restartV2RayIntent, flags)
 
+        // ── Action: Ganti Profil ──────────────────────────────────────────────
+        val switchProfileIntent = Intent(service, SwitchProfileActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+        val switchProfilePendingIntent = PendingIntent.getActivity(
+            service,
+            NOTIFICATION_PENDING_INTENT_SWITCH_PROFILE,
+            switchProfileIntent,
+            flags,
+        )
+        // ─────────────────────────────────────────────────────────────────────
+
         val channelId =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 createNotificationChannel()
@@ -151,6 +165,11 @@ object NotificationManager : TrafficController.Listener {
                 R.drawable.ic_restore_24dp,
                 service.getString(R.string.title_service_restart),
                 restartV2RayPendingIntent
+            )
+            .addAction(
+                R.drawable.ic_toggle_switch,
+                service.getString(R.string.action_switch_profile),
+                switchProfilePendingIntent
             )
 
         service.startForeground(NOTIFICATION_ID, mBuilder?.build())
