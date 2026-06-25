@@ -37,6 +37,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     var subscriptionId: String = MmkvManager.decodeSettingsString(AppConfig.CACHE_SUBSCRIPTION_ID, "").orEmpty()
     var keywordFilter = ""
     val serversCache = mutableListOf<ServersCache>()
+    private var hasLoadedOnce = false
     
     val isRunning by lazy { MutableLiveData<Boolean>() }
     val updateListAction by lazy { MutableLiveData<Int>() }
@@ -69,25 +70,73 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      * Reloads the server list based on current subscription filter.
      */
     fun reloadServerList() {
-        // If ORDER_ORIGIN is selected and a pre-sort snapshot exists, restore it first (per active group)
-        val subId = subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
-        val order = MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)
-        if (order == 0) {
-            if (subscriptionId.isEmpty()) {
-                MmkvManager.decodeSubsList().forEach { MmkvManager.restoreOriginServerList(it) }
+        viewModelScope.launch(Dispatchers.Default) {
+            // If ORDER_ORIGIN is selected and a pre-sort snapshot exists, restore it first (per active group)
+            val activeSubId = subscriptionId
+            val activeKeyword = keywordFilter
+            val subId = activeSubId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
+            val order = MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)
+            if (order == 0) {
+                if (activeSubId.isEmpty()) {
+                    MmkvManager.decodeSubsList().forEach { MmkvManager.restoreOriginServerList(it) }
+                } else {
+                    MmkvManager.restoreOriginServerList(activeSubId)
+                }
+            }
+
+            val newList = if (activeSubId.isEmpty()) {
+                MmkvManager.decodeAllServerList()
             } else {
-                MmkvManager.restoreOriginServerList(subscriptionId)
+                MmkvManager.decodeServerList(activeSubId)
+            }
+
+            // Build the cache from local data only (no shared mutable state touched here),
+            // so this can safely run off the main thread.
+            val kw = activeKeyword.trim()
+            val searchRegex = try {
+                if (kw.isNotEmpty()) Regex(kw, setOf(RegexOption.IGNORE_CASE)) else null
+            } catch (e: PatternSyntaxException) {
+                null
+            }
+            val newCache = mutableListOf<ServersCache>()
+            for (guid in newList) {
+                val profile = MmkvManager.decodeServerConfig(guid) ?: continue
+                if (kw.isEmpty()) {
+                    newCache.add(ServersCache(guid, profile))
+                    continue
+                }
+
+                val remarks = profile.remarks
+                val description = profile.description.orEmpty()
+                val server = profile.server.orEmpty()
+                val protocol = profile.configType.name
+                if (remarks.matchesPattern(searchRegex, kw)
+                    || description.matchesPattern(searchRegex, kw)
+                    || server.matchesPattern(searchRegex, kw)
+                    || protocol.matchesPattern(searchRegex, kw)
+                ) {
+                    newCache.add(ServersCache(guid, profile))
+                }
+            }
+            when (order) {
+                1 -> newCache.sortWith(compareBy { it.profile.remarks.lowercase() }) // ORDER_BY_NAME
+                2 -> newCache.sortWith(compareBy { // ORDER_BY_DELAY
+                    val delay = MmkvManager.decodeServerAffiliationInfo(it.guid)?.testDelayMillis ?: 0L
+                    if (delay <= 0L) Long.MAX_VALUE else delay
+                })
+                // 0 = ORDER_ORIGIN: no sort, keep storage order
+            }
+
+            withContext(Dispatchers.Main) {
+                // If the group or search keyword changed again while we were loading in the
+                // background, drop this stale result instead of clobbering the newer state.
+                if (subscriptionId != activeSubId || keywordFilter != activeKeyword) return@withContext
+                serverList = newList
+                serversCache.clear()
+                serversCache.addAll(newCache)
+                updateListAction.value = -1
             }
         }
-
-        serverList = if (subscriptionId.isEmpty()) {
-            MmkvManager.decodeAllServerList()
-        } else {
-            MmkvManager.decodeServerList(subscriptionId)
-        }
-
-        updateCache()
-        updateListAction.value = -1
     }
 
     /**
@@ -235,10 +284,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      * @param id The new subscription ID.
      */
     fun subscriptionIdChanged(id: String) {
-        if (subscriptionId != id) {
-            subscriptionId = id
-            MmkvManager.encodeSettings(AppConfig.CACHE_SUBSCRIPTION_ID, subscriptionId)
+        if (hasLoadedOnce && subscriptionId == id) {
+            // Same group as before (e.g. fragment re-resumed after swiping tabs back and
+            // forth) - nothing changed, so skip the expensive MMKV reload + full list rebind.
+            return
         }
+        hasLoadedOnce = true
+        subscriptionId = id
+        MmkvManager.encodeSettings(AppConfig.CACHE_SUBSCRIPTION_ID, subscriptionId)
         reloadServerList()
     }
 

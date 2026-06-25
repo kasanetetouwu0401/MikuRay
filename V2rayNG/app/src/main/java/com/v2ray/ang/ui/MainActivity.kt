@@ -132,7 +132,7 @@ class MainActivity : HelperBaseActivity(),
 
         SubscriptionUpdater.sync()
         syncWeatherBackgroundUpdates()
-        mainViewModel.reloadServerList()
+        mainViewModel.subscriptionIdChanged(mainViewModel.subscriptionId)
         refreshGroupTabTitles(true)
 
         checkAndRequestPermission(PermissionType.POST_NOTIFICATIONS) {}
