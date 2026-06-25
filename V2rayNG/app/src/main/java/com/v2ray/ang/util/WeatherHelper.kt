@@ -86,20 +86,20 @@ object WeatherHelper {
     }
 
     fun iconResForEmoji(emoji: String?): Int {
-        if (emoji.isNullOrEmpty()) return R.drawable.ic_weather_sunny
+        if (emoji.isNullOrEmpty()) return 0
         return when (emoji) {
-            "\u2600"                                            -> R.drawable.ic_weather_sunny
-            "\u2601"                                            -> R.drawable.ic_cloud
-            "\u26c5", "\ud83c\udf24"                          -> R.drawable.ic_cloud
-            "\ud83c\udf26", "\ud83c\udf27"                    -> R.drawable.ic_weather_rain
-            "\u26a1", "\u26c8"                                 -> R.drawable.ic_weather_storm
-            "\u2744", "\ud83c\udf28"                          -> R.drawable.ic_weather_snow
-            "\ud83d\ude36\u200d\ud83c\udf2b"                  -> R.drawable.ic_weather_fog
+            "\u2600"                                            -> R.drawable.weather_sunny
+            "\u2601"                                            -> R.drawable.weather_cloudy
+            "\u26c5", "\ud83c\udf24"                          -> R.drawable.weather_partly_cloudy
+            "\ud83c\udf26", "\ud83c\udf27"                    -> R.drawable.weather_rainy
+            "\u26a1", "\u26c8"                                 -> R.drawable.weather_thunderstorm
+            "\u2744", "\ud83c\udf28"                          -> R.drawable.weather_snowy
+            "\ud83d\ude36\u200d\ud83c\udf2b"                  -> R.drawable.weather_foggy
             "\ud83c\udf13", "\ud83c\udf14",
             "\ud83c\udf16", "\ud83c\udf17",
             "\ud83c\udf1a", "\ud83c\udf1b",
-            "\ud83c\udf1c", "\ud83c\udf1d"                    -> R.drawable.ic_weather_night
-            else                                               -> R.drawable.ic_weather_sunny
+            "\ud83c\udf1c", "\ud83c\udf1d"                    -> R.drawable.weather_night
+            else                                               -> 0
         }
     }
 
@@ -190,7 +190,6 @@ object WeatherHelper {
         return location
     }
 
-    /** Custom location if set and resolvable, otherwise falls back to the device's current location. */
     private suspend fun getEffectiveLocation(
         context: Context,
         force: Boolean = false

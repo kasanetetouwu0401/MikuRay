@@ -194,7 +194,7 @@
         app:sectionIcon="@drawable/ic_search_icon">
 
          <androidx.preference.SwitchPreferenceCompat
-            android:icon="@drawable/ic_weather_sunny"
+            android:icon="@drawable/weather_sunny"
             app:layout="@layout/uwu_top_switch"
             app:widgetLayout="@layout/uwu_widget_material_switch"
             android:defaultValue="false"

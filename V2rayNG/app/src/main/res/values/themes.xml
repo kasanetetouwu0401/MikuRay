@@ -24,14 +24,6 @@
         <item name="textAppearanceTitleSmall">@style/TextAppearance.App.TitleSmall</item>
     </style>  
     
-    <style name="Theme.AppDialog" parent="Theme.Material3Expressive.DayNight.Dialog">
-        <item name="materialAlertDialogTheme">@style/AppThemeAlertDialog</item>
-        <item name="bottomSheetDialogTheme">@style/AppThemeBottomSheetDialog</item>
-        <item name="preferenceTheme">@style/AppThemePreference</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.App.MediumComponent</item>
-    </style>
-    
         <style name="AppTheme_Red" parent="AppThemeBase">
         <item name="colorPrimary">@color/red_primary</item>
         <item name="colorOnPrimary">@color/red_onPrimary</item>
