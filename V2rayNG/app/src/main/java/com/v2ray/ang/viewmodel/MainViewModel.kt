@@ -69,25 +69,30 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      * Reloads the server list based on current subscription filter.
      */
     fun reloadServerList() {
-        // If ORDER_ORIGIN is selected and a pre-sort snapshot exists, restore it first (per active group)
-        val subId = subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
-        val order = MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)
-        if (order == 0) {
-            if (subscriptionId.isEmpty()) {
-                MmkvManager.decodeSubsList().forEach { MmkvManager.restoreOriginServerList(it) }
+        viewModelScope.launch(Dispatchers.IO) {
+            // Heavy disk I/O on background thread
+            val subId = subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
+            val order = MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)
+            if (order == 0) {
+                if (subscriptionId.isEmpty()) {
+                    MmkvManager.decodeSubsList().forEach { MmkvManager.restoreOriginServerList(it) }
+                } else {
+                    MmkvManager.restoreOriginServerList(subscriptionId)
+                }
+            }
+
+            serverList = if (subscriptionId.isEmpty()) {
+                MmkvManager.decodeAllServerList()
             } else {
-                MmkvManager.restoreOriginServerList(subscriptionId)
+                MmkvManager.decodeServerList(subscriptionId)
+            }
+
+            updateCache()
+
+            withContext(Dispatchers.Main) {
+                updateListAction.value = -1
             }
         }
-
-        serverList = if (subscriptionId.isEmpty()) {
-            MmkvManager.decodeAllServerList()
-        } else {
-            MmkvManager.decodeServerList(subscriptionId)
-        }
-
-        updateCache()
-        updateListAction.value = -1
     }
 
     /**
@@ -235,6 +240,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      * @param id The new subscription ID.
      */
     fun subscriptionIdChanged(id: String) {
+        if (subscriptionId == id && serversCache.isNotEmpty()) {
+            // Same tab resumed, data already loaded — just re-emit to refresh UI without disk I/O
+            updateListAction.value = -1
+            return
+        }
         if (subscriptionId != id) {
             subscriptionId = id
             MmkvManager.encodeSettings(AppConfig.CACHE_SUBSCRIPTION_ID, subscriptionId)

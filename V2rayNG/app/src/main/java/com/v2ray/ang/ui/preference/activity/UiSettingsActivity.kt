@@ -44,7 +44,6 @@ import com.v2ray.ang.ui.dialog.HeaderTopRowPaddingDialog
 import com.v2ray.ang.ui.preference.CustomBannerPreference
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
 import com.v2ray.ang.util.BannerColorExtractor
-import com.v2ray.ang.util.LiquidGlassController
 import com.v2ray.ang.util.ThemeManager
 import com.v2ray.ang.util.WeatherHelper
 import com.v2ray.ang.util.showBlur
@@ -115,7 +114,6 @@ class UiSettingsActivity : BaseActivity() {
         private val weatherCustomLocation by lazy { findPreference<EditTextPreference>(AppConfig.PREF_WEATHER_CUSTOM_LOCATION) }
         private val showTotalTrafficChip by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP) }
         private val searchChipGradient by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SEARCH_CHIP_GRADIENT) }
-        private val liquidGlass by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_LIQUID_GLASS) }
 
         private var tabIconPickerDialog: androidx.appcompat.app.AlertDialog? = null
 
@@ -395,22 +393,6 @@ class UiSettingsActivity : BaseActivity() {
             }
 
             updateChipPreferenceEnabledState()
-
-            // Liquid Glass
-            liquidGlass?.apply {
-                if (!LiquidGlassController.isSupported()) {
-                    isEnabled = false
-                    summary = getString(R.string.pref_liquid_glass_summary_unsupported)
-                }
-                setOnPreferenceChangeListener { _, newValue ->
-                    MmkvManager.encodeSettings(AppConfig.PREF_LIQUID_GLASS, newValue as Boolean)
-                    // Broadcast so MainActivity can re-apply without recreate
-                    requireContext().sendBroadcast(
-                        android.content.Intent(AppConfig.BROADCAST_ACTION_LIQUID_GLASS_CHANGED)
-                    )
-                    true
-                }
-            }
 
             updateGroupAllTabIconSummary()
             groupAllTabIcon?.setOnPreferenceClickListener {
