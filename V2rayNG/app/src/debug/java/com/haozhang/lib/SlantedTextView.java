@@ -11,14 +11,12 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Typeface;
 import android.os.Build;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.View;
-import com.v2ray.ang.R;
+import com.v2ray.ang.R
 
 /**
  * @author HaoZhang
@@ -41,7 +39,6 @@ public class SlantedTextView extends View {
     private float mTextSize = 16;
     private int mSlantedBackgroundColor = Color.TRANSPARENT;
     private int mTextColor = Color.WHITE;
-    private Typeface mTypeface = Typeface.DEFAULT; // <-- Simpan status gaya huruf
     private String mSlantedText = "";
     private int mMode = MODE_LEFT;
 
@@ -65,15 +62,6 @@ public class SlantedTextView extends View {
     }
 
     public void init(AttributeSet attrs) {
-        if (attrs != null) {
-            TypedArray sysArray = getContext().obtainStyledAttributes(attrs, new int[]{android.R.attr.textAppearance});
-            int taResId = sysArray.getResourceId(0, -1);
-            sysArray.recycle();
-            if (taResId != -1) {
-                applyTextAppearance(taResId);
-            }
-        }
-
         TypedArray array = getContext().obtainStyledAttributes(attrs, R.styleable.SlantedTextView);
 
         mTextSize = array.getDimension(R.styleable.SlantedTextView_slantedTextSize, mTextSize);
@@ -100,49 +88,6 @@ public class SlantedTextView extends View {
         mTextPaint.setAntiAlias(true);
         mTextPaint.setTextSize(mTextSize);
         mTextPaint.setColor(mTextColor);
-        mTextPaint.setTypeface(mTypeface); // <-- Terapkan Typeface yang didapat
-    }
-
-    private void applyTextAppearance(int resId) {
-        int styleResId = resId;
-        TypedValue typedValue = new TypedValue();
-        
-        if (getContext().getTheme().resolveAttribute(resId, typedValue, true)) {
-            styleResId = typedValue.resourceId;
-        }
-
-        int[] attrs = new int[] {
-            android.R.attr.textSize,
-            android.R.attr.textColor,
-            android.R.attr.textStyle
-        };
-
-        TypedArray appearance = getContext().obtainStyledAttributes(styleResId, attrs);
-
-        if (appearance.hasValue(0)) {
-            mTextSize = appearance.getDimension(0, mTextSize);
-            if (mTextPaint != null) mTextPaint.setTextSize(mTextSize);
-        }
-        if (appearance.hasValue(1)) {
-            mTextColor = appearance.getColor(1, mTextColor);
-            if (mTextPaint != null) mTextPaint.setColor(mTextColor);
-        }
-        if (appearance.hasValue(2)) {
-            int style = appearance.getInt(2, 0);
-            if (style == 1) mTypeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD);
-            else if (style == 2) mTypeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC);
-            else if (style == 3) mTypeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD_ITALIC);
-            else mTypeface = Typeface.DEFAULT;
-            
-            if (mTextPaint != null) mTextPaint.setTypeface(mTypeface);
-        }
-        appearance.recycle();
-    }
-
-    public SlantedTextView setTextAppearance(int resId) {
-        applyTextAppearance(resId);
-        postInvalidate();
-        return this;
     }
 
 
@@ -362,8 +307,8 @@ public class SlantedTextView extends View {
 
     /**
      * @param mode :
-     * SlantedTextView.MODE_LEFT : top left
-     * SlantedTextView.MODE_RIGHT :top right
+     *             SlantedTextView.MODE_LEFT : top left
+     *             SlantedTextView.MODE_RIGHT :top right
      * @return this
      */
     public SlantedTextView setMode(int mode) {

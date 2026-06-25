@@ -31,7 +31,6 @@ object DebugBadgeController {
             setSlantedLength((40 * density).toInt()) 
             setMode(SlantedTextView.MODE_RIGHT)
             setTextSize(16f)
-            setTextAppearance(R.attr.textAppearanceTitleMedium)
         }
 
         val params = RelativeLayout.LayoutParams(sizePx, sizePx).apply {
