@@ -136,6 +136,7 @@ class BackupActivity : HelperBaseActivity() {
             AppConfig.PREF_CUSTOM_HOME_BANNER_URI,
             AppConfig.PREF_CUSTOM_SHEET_BANNER_URI,
             AppConfig.PREF_PROFILE_BANNER_URI,
+            AppConfig.PREF_SELECTED_BANNER_URI,
         )
         val bannersDir = java.io.File(backupDir, "banners").also { it.mkdirs() }
         for (key in bannerKeys) {
@@ -196,6 +197,7 @@ class BackupActivity : HelperBaseActivity() {
             AppConfig.PREF_CUSTOM_HOME_BANNER_URI,
             AppConfig.PREF_CUSTOM_SHEET_BANNER_URI,
             AppConfig.PREF_PROFILE_BANNER_URI,
+            AppConfig.PREF_SELECTED_BANNER_URI,
         )
         val bannersDir = java.io.File(backupDir, "banners")
         if (!bannersDir.exists()) return

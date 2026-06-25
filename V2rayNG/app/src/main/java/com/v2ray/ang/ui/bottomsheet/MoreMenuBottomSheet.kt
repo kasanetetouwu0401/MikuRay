@@ -1,6 +1,7 @@
 package com.v2ray.ang.ui.bottomsheet
 
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,10 +10,11 @@ import android.widget.CheckedTextView
 import android.widget.ImageView
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.util.SheetBannerLoader
 
 private const val TRANSITION_DURATION = 300L
 
@@ -39,6 +41,7 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
     private var currentOrder: Int = ORDER_ORIGIN
     private var subscriptionId: String = ""
 
+    private val TAG_SHEET_DEFAULT = "DEFAULT_BANNER_SHEET"
 
     private fun orderKey(): String {
         val subId = subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
@@ -159,7 +162,21 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
     private fun loadBanner(view: View) {
         val bannerImageView = view.findViewById<ImageView>(R.id.img_banner_sheet) ?: return
         bannerImageView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
-        SheetBannerLoader.load(this, bannerImageView)
+        val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI)
+        val targetTag = if (uriString.isNullOrBlank()) TAG_SHEET_DEFAULT else uriString
+        if (bannerImageView.tag != targetTag) {
+            if (!uriString.isNullOrBlank()) {
+                Glide.with(this)
+                    .load(Uri.parse(uriString))
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
+                    .error(R.drawable.uwu_banner_image_about)
+                    .into(bannerImageView)
+            } else {
+                Glide.with(this).clear(bannerImageView)
+                bannerImageView.setImageResource(R.drawable.uwu_banner_image_about)
+            }
+            bannerImageView.tag = targetTag
+        }
     }
 
     private fun setupExpandable(

@@ -17,49 +17,16 @@ import com.bumptech.glide.request.transition.Transition
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
 
-/**
- * Controller that applies a custom banner image (via Glide) as the background of a
- * server card's indicator layout whenever that card represents the currently
- * selected profile. Designed to be driven from [com.v2ray.ang.ui.MainRecyclerAdapter]
- * during onBindViewHolder, mirroring the existing IndicatorStyle behaviour but
- * backed by a user-picked image instead of a static drawable resource.
- *
- * Usage:
- *   val controller = SelectedProfileBannerController(context)
- *   ...
- *   if (controller.isEnabled() && isSelectedServer) {
- *       controller.applyTo(holder.itemMainBinding.layoutIndicator)
- *   } else {
- *       controller.clear(holder.itemMainBinding.layoutIndicator)
- *   }
- *
- * Call [registerChangeListener] from the RecyclerView's onAttachedToRecyclerView and
- * [unregisterChangeListener] from onDetachedFromRecyclerView to get live updates
- * (e.g. notifyDataSetChanged) whenever the user changes the banner from settings.
- */
 class SelectedProfileBannerController(private val context: Context) {
 
     private var changeReceiver: BroadcastReceiver? = null
 
-    /** Whether the selected-profile banner style is turned on in settings. */
     fun isEnabled(): Boolean =
         MmkvManager.decodeSettingsBool(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED, false)
 
-    /** Whether the user has actually picked a banner image to use. */
     fun hasBanner(): Boolean =
         !MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI).isNullOrEmpty()
 
-    /**
-     * Applies the saved banner image as the background of [target], dimmed for
-     * text legibility. Safe to call repeatedly (e.g. on every bind).
-     *
-     * The decoded bitmap is cached by URI in [bitmapCache], a process-wide cache
-     * shared by every controller instance. Once a banner has been decoded once,
-     * every subsequent bind anywhere in the app applies it synchronously from that
-     * cache instead of waiting on Glide's async callback — this is what avoids the
-     * brief "no background" flash that otherwise shows up whenever the RecyclerView
-     * rebinds (e.g. returning from another Activity).
-     */
     fun applyTo(target: View) {
         val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI)
         if (uriString.isNullOrEmpty()) {
@@ -76,7 +43,6 @@ class SelectedProfileBannerController(private val context: Context) {
         val tagKey = "$bitmapKey::dark=$isDark::dim=$dimPercent"
         if (target.getTag(TAG_KEY) == tagKey) return
 
-        // Cache hit: apply immediately, no flash, no Glide round-trip.
         bitmapCache[bitmapKey]?.let { cached ->
             target.background = CenterCropDimDrawable(cached, dimColorFor(isDark, dimPercent))
             target.setTag(TAG_KEY, tagKey)
@@ -97,7 +63,6 @@ class SelectedProfileBannerController(private val context: Context) {
                     }
 
                     override fun onLoadCleared(placeholder: Drawable?) {
-                        // No-op: leave whatever indicator drawable was set before.
                     }
 
                     override fun onLoadFailed(errorDrawable: Drawable?) {
@@ -110,7 +75,6 @@ class SelectedProfileBannerController(private val context: Context) {
         }
     }
 
-    /** Clears any banner previously applied via [applyTo] and resets the bind tag. */
     fun clear(target: View) {
         if (target.getTag(TAG_KEY) == null) return
         target.setTag(TAG_KEY, null)
@@ -119,18 +83,9 @@ class SelectedProfileBannerController(private val context: Context) {
 
     private fun dimColorFor(isDark: Boolean, dimPercent: Int): Int {
         val alpha = (dimPercent * 255 / 100).coerceIn(0, 255)
-        // Light mode: wash with white so the overlay reads as a soft veil over a
-        // light card. Dark mode: wash with black.
         return if (isDark) Color.argb(alpha, 0, 0, 0) else Color.argb(alpha, 255, 255, 255)
     }
 
-    /**
-     * Draws [bitmap] center-cropped to fill whatever bounds it is given, with a flat
-     * dim color on top. Deliberately reports no intrinsic size (-1) so that, when used
-     * as a View background, it never influences a wrap_content measure pass — the
-     * card's height stays driven by its text content, exactly like the non-banner
-     * indicator drawables, and the image simply fills whatever height results.
-     */
     private class CenterCropDimDrawable(
         private val bitmap: Bitmap,
         private val dimColor: Int
@@ -150,7 +105,6 @@ class SelectedProfileBannerController(private val context: Context) {
             val vw = bounds.width().toFloat()
             val vh = bounds.height().toFloat()
 
-            // Center-crop scale: cover the bounds, cropping overflow on one axis.
             val scale = maxOf(vw / bw, vh / bh)
             val scaledW = bw * scale
             val scaledH = bh * scale
@@ -173,16 +127,10 @@ class SelectedProfileBannerController(private val context: Context) {
         @Deprecated("Deprecated in Java")
         override fun getOpacity(): Int = android.graphics.PixelFormat.TRANSLUCENT
 
-        // No intrinsic size: don't let this drawable dictate a wrap_content parent's
-        // measured height/width. It simply fills whatever bounds it's assigned.
         override fun getIntrinsicWidth(): Int = -1
         override fun getIntrinsicHeight(): Int = -1
     }
 
-    /**
-     * Registers a receiver so any open RecyclerView refreshes its bound items the
-     * moment the user changes/removes the selected-profile banner from settings.
-     */
     fun registerChangeListener(onChanged: () -> Unit) {
         if (changeReceiver != null) return
         val receiver = object : BroadcastReceiver() {
@@ -210,15 +158,6 @@ class SelectedProfileBannerController(private val context: Context) {
     companion object {
         private val TAG_KEY = "selected_profile_banner_tag".hashCode()
 
-        /**
-         * Process-wide cache of decoded banner bitmaps, keyed by the banner's URI
-         * string alone (dark mode and dim level are applied on top at draw time, not
-         * baked into the cached bitmap). Shared across every
-         * [SelectedProfileBannerController] instance (e.g. one per RecyclerView) so a
-         * banner decoded once in any list applies instantly everywhere else too.
-         * Cleared via [broadcastChanged] whenever the underlying image actually
-         * changes (new pick or deletion) so stale bitmaps never linger.
-         */
         private val bitmapCache = mutableMapOf<String, Bitmap>()
 
         fun broadcastChanged(context: Context) {

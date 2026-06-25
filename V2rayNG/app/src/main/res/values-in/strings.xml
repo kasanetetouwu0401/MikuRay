@@ -507,12 +507,12 @@
     <string name="indicator_style_title">Pilih Model Indikator</string>
     <string name="pref_indicator_style_title">Model Indikator Server</string>
     <string name="pref_indicator_style_summary">Pilih tampilan indikator buat server yang lagi aktif</string>
-    <string name="summary_navigate_ui_settings">Tampilan, tema, bahasa, dan penampilan</string>
-    <string name="summary_navigate_vpn_settings">IPv6, DNS, HEV tunnel, MTU, dan antarmuka</string>
-    <string name="summary_navigate_core_settings">Port proxy, DNS, sniffing, dan level log</string>
-    <string name="summary_navigate_mux_settings">Multiplexing dan konkurensi XUDP</string>
-    <string name="summary_navigate_fragment_settings">Panjang dan interval fragmentasi paket</string>
-    <string name="summary_navigate_advanced_settings">Boot, test, ping, mode, dan URL API</string>
+    <string name="summary_navigate_ui_settings">UI umum, tema, tampilan, chip pencarian, blur, banner, dan suara</string> 
+    <string name="summary_navigate_vpn_settings">IPv6, keep awake, DNS, HTTP proxy, bypass LAN, interface, MTU, Hev TUN, dan proxy per aplikasi</string>   
+    <string name="summary_navigate_core_settings">Sniffing, route only, proxy lokal/SOCKS, DNS, level log, resolusi domain, dan file geo</string>
+    <string name="summary_navigate_mux_settings">Status mux, konkurensi TCP/XUDP, dan penanganan QUIC</string>
+    <string name="summary_navigate_fragment_settings">Status fragment, panjang, interval, dan paket</string>
+    <string name="summary_navigate_advanced_settings">Auto-start, aksi auto-test, URL API ping/IP, strategi routing, mode, dan kirim HWID</string>
     <string name="summary_navigate_per_app_proxy_settings">Pilih aplikasi mana aja yang mau pakai proxy</string>
     <string name="title_ui_general">Umum</string>
     <string name="title_ui_theme">Tema</string>
@@ -662,20 +662,18 @@ yang kamu butuhin."</string>
     <string name="sheet_banner_updated">Sip, banner bottomsheet berhasil di-update!</string>
     <string name="particles_disable_title">Matiin animasi partikel</string>
     <string name="particles_disable_summary">Sembunyiin efek partikel di bottomsheet</string>
-
+    
     <!-- Selected profile card banner style -->
-    <string name="selected_banner_category">Banner Profil Terpilih</string>
-    <string name="selected_banner_enable_title">Pakai banner kustom buat profil terpilih</string>
-    <string name="selected_banner_enable_summary">Tampilin gambar kustom di belakang card server yang aktif, gantiin style indikator</string>
-    <string name="selected_banner_dim_title">Tingkat overlay banner</string>
-    <string name="selected_banner_dim_summary_value">%1$d%%</string>
-    <string name="selected_banner_custom_title">Ganti banner profil terpilih</string>
-    <string name="selected_banner_custom_summary">Pilih gambar sendiri buat card server yang terpilih</string>
-    <string name="selected_banner_delete_title">Hapus banner profil terpilih kustom</string>
-    <string name="selected_banner_delete_summary">Balikin ke style indikator bawaan</string>
-    <string name="selected_banner_updated">Sip, banner profil terpilih berhasil di-update!</string>
-    <string name="pref_indicator_style_summary_disabled_by_banner">Nonaktif selama banner profil terpilih kustom aktif</string>
-
+    <string name="selected_banner_category">Style Profil yang Dipilih</string>
+    <string name="selected_banner_enable_title">Pakai banner kustom buat profil yang dipilih</string>
+    <string name="selected_banner_enable_summary">Tampilin gambar kustom di belakang kartu server yang aktif sebagai ganti style indikator</string>
+    <string name="selected_banner_dim_title">Intensitas overlay banner</string>
+    <string name="selected_banner_custom_title">Ganti banner profil yang dipilih</string>
+    <string name="selected_banner_custom_summary">Pilih gambar kustom buat kartu server yang dipilih</string>
+    <string name="selected_banner_delete_title">Hapus banner kustom profil yang dipilih</string>
+    <string name="selected_banner_delete_summary">Balik lagi ke style indikator bawaan</string>
+    <string name="selected_banner_updated">Banner profil yang dipilih berhasil diupdate.</string>
+    <string name="pref_indicator_style_summary_disabled_by_banner">Dimatiin selama banner kustom profil yang dipilih lagi aktif</string>
 
     <!-- Snackbar notification titles -->
     <string name="title_alerter_info">Info</string>

@@ -20,7 +20,8 @@
         app:cardCornerRadius="16.0dip"
         app:cardElevation="0.0dip"
         app:strokeColor="?colorOutlineVariant"
-        app:strokeWidth="0.0dip">
+        app:strokeWidth="0.0dip"
+        android:layerType="software">
         <LinearLayout
             android:id="@+id/layout_indicator"
             android:layout_width="fill_parent"
@@ -119,7 +120,7 @@
                                 android:layout_width="40.0dip"
                                 android:layout_height="40.0dip"
                                 android:contentDescription="@string/title_configuration_share"
-                                android:background="?selectableItemBackgroundBorderless"
+                                android:background="@drawable/bg_icon_button" 
                                 android:focusable="true"
                                 app:srcCompat="@drawable/ic_share_color"
                                 app:tint="@null" />
@@ -128,7 +129,7 @@
                                 android:layout_width="40.0dip"
                                 android:layout_height="40.0dip"
                                 android:contentDescription="@string/menu_item_edit_config"
-                                android:background="?selectableItemBackgroundBorderless"
+                                android:background="@drawable/bg_icon_button" 
                                 android:focusable="true"
                                 app:srcCompat="@drawable/ic_edit_color"
                                 app:tint="@null" />
@@ -137,7 +138,7 @@
                                 android:layout_width="40.0dip"
                                 android:layout_height="40.0dip"
                                 android:contentDescription="@string/menu_item_del_config"
-                                android:background="?selectableItemBackgroundBorderless"
+                                android:background="@drawable/bg_icon_button" 
                                 android:focusable="true"
                                 app:srcCompat="@drawable/ic_delete_empty"
                                 app:tint="?colorError" />
