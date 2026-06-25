@@ -1,7 +1,7 @@
 package com.v2ray.ang.util
 
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.dto.ProfileItem
+import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.extension.nullIfBlank
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager

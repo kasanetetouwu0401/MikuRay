@@ -34,18 +34,17 @@ class SelectedProfileBannerController(private val context: Context) {
             return
         }
 
-        val isDark = Utils.getDarkModeStatus(context)
         val dimPercent = MmkvManager.decodeSettingsInt(
             AppConfig.PREF_SELECTED_BANNER_DIM,
             AppConfig.SELECTED_BANNER_DIM_DEFAULT
         ).coerceIn(AppConfig.SELECTED_BANNER_DIM_MIN, AppConfig.SELECTED_BANNER_DIM_MAX)
         val cornerRadiusPx = cornerRadiusDp * context.resources.displayMetrics.density
         val bitmapKey = "selected_banner::$uriString"
-        val tagKey = "$bitmapKey::dark=$isDark::dim=$dimPercent::r=$cornerRadiusPx"
+        val tagKey = "$bitmapKey::dim=$dimPercent::r=$cornerRadiusPx"
         if (target.getTag(TAG_KEY) == tagKey) return
 
         bitmapCache[bitmapKey]?.let { cached ->
-            target.background = CenterCropDimDrawable(cached, dimColorFor(isDark, dimPercent), cornerRadiusPx)
+            target.background = CenterCropDimDrawable(cached, dimColorFor(dimPercent), cornerRadiusPx)
             target.setTag(TAG_KEY, tagKey)
             return
         }
@@ -59,7 +58,7 @@ class SelectedProfileBannerController(private val context: Context) {
                 .into(object : CustomTarget<Bitmap>() {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                         bitmapCache[bitmapKey] = resource
-                        target.background = CenterCropDimDrawable(resource, dimColorFor(isDark, dimPercent), cornerRadiusPx)
+                        target.background = CenterCropDimDrawable(resource, dimColorFor(dimPercent), cornerRadiusPx)
                         target.setTag(TAG_KEY, tagKey)
                     }
 
@@ -82,9 +81,10 @@ class SelectedProfileBannerController(private val context: Context) {
         Glide.with(context).clear(target)
     }
 
-    private fun dimColorFor(isDark: Boolean, dimPercent: Int): Int {
+    private fun dimColorFor(dimPercent: Int): Int {
         val alpha = (dimPercent * 255 / 100).coerceIn(0, 255)
-        return if (isDark) Color.argb(alpha, 0, 0, 0) else Color.argb(alpha, 255, 255, 255)
+        val baseColor = context.getColorAttr("colorCard")
+        return Color.argb(alpha, Color.red(baseColor), Color.green(baseColor), Color.blue(baseColor))
     }
 
     private class CenterCropDimDrawable(
