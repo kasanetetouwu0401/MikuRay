@@ -684,4 +684,13 @@ object AngConfigManager {
         MmkvManager.encodeSubscription("", subItem)
         return 1
     }
+
+    /** Generates a raw description for the profile (Unmasked, masking is now dynamic in UI). */
+    fun generateDescription(profile: ProfileItem): String {
+        val server = profile.server
+        val port = profile.serverPort
+        if (server.isNullOrBlank() && port.isNullOrBlank()) return ""
+
+        return "$server : ${port ?: ""}"
+    }
 }
