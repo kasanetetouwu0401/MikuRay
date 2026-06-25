@@ -74,7 +74,7 @@ android {
 
     sourceSets {
         getByName("main") {
-            jniLibs.srcDirs.add(app("libs"))
+            jniLibs.srcDirs("libs")
         }
     }
 
