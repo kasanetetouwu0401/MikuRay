@@ -129,6 +129,9 @@ dependencies {
     // Core Libraries
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar", "*.jar"))))
 
+    // Debug-only Libraries (not included in release builds)
+    debugImplementation("com.github.HeZaiJin:SlantedTextView:1.2")
+
     // AndroidX Core Libraries
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

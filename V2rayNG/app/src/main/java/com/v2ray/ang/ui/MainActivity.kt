@@ -28,6 +28,7 @@ import com.v2ray.ang.R
 import com.v2ray.ang.core.CoreServiceManager
 import com.v2ray.ang.databinding.ActivityMainBinding
 import com.v2ray.ang.databinding.ItemQrcodeBinding
+import com.v2ray.ang.ui.debug.DebugBadgeController
 import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.enums.PermissionType
 import com.v2ray.ang.extension.snackbarDefault
@@ -117,6 +118,7 @@ class MainActivity : HelperBaseActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        DebugBadgeController.attach(this, binding.root)
         
         hideLoading()
 
