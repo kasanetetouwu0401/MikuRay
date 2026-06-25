@@ -1,3 +1,5 @@
+package com.v2ray.ang.tools
+
 /*
  * Theme snapshot generator (batch + verify).
  *
