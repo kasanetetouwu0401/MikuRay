@@ -18,16 +18,7 @@ import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.util.getColorAttr
 import com.v2ray.ang.viewmodel.MainViewModel
 
-/**
- * Floating dialog activity untuk switch profil server dari notifikasi.
- *
- * Pakai Theme.AppDialog (parent: Theme.Material3Expressive.DayNight.Dialog) sehingga
- * Android otomatis handle: floating window, dim background, ukuran dialog —
- * tanpa layout card/scrim manual.
- *
- * Diluncurkan via PendingIntent dari action notifikasi "Ganti Profil".
- */
-class SwitchProfileActivity : BaseActivity(), SwitchProfileGroupFragment.Callback {
+class SwitchProfileActivity : BaseDialogActivity(), SwitchProfileGroupFragment.Callback {
 
     private val binding by lazy {
         ActivitySwitchProfileBinding.inflate(layoutInflater)

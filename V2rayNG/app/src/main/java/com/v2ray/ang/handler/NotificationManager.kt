@@ -131,7 +131,7 @@ object NotificationManager : TrafficController.Listener {
 
         // ── Action: Ganti Profil ──────────────────────────────────────────────
         val switchProfileIntent = Intent(service, SwitchProfileActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         val switchProfilePendingIntent = PendingIntent.getActivity(
             service,
