@@ -24,6 +24,7 @@ import com.v2ray.ang.viewmodel.MainViewModel
 import java.util.Collections
 import com.v2ray.ang.util.IndicatorStyle
 import com.v2ray.ang.util.SelectedProfileBannerController
+import com.v2ray.ang.util.SensorTextController
 import com.v2ray.ang.AppConfig
 
 class MainRecyclerAdapter(
@@ -97,7 +98,7 @@ class MainRecyclerAdapter(
 
             //Name address
             holder.itemMainBinding.tvName.text = profile.remarks
-            holder.itemMainBinding.tvStatistics.text = getAddress(profile)
+            holder.itemMainBinding.tvStatistics.text = SensorTextController.getAddress(profile)
             holder.itemMainBinding.tvType.text = getProtocolName(profile)
 
             // Network & security icon+text (TCP Fix)
