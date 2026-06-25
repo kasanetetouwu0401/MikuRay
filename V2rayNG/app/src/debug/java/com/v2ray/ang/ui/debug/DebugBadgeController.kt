@@ -29,7 +29,7 @@ object DebugBadgeController {
             setSlantedBackgroundColor(colorPrimary)
             setSlantedLength(28 * density)
             setMode(SlantedTextView.MODE_RIGHT)
-            setTextSize = 11f
+            setTextSize(11)
         }
 
         val params = RelativeLayout.LayoutParams(sizePx, sizePx).apply {
