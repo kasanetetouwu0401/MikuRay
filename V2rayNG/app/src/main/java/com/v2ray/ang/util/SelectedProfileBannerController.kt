@@ -27,7 +27,7 @@ class SelectedProfileBannerController(private val context: Context) {
     fun hasBanner(): Boolean =
         !MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI).isNullOrEmpty()
 
-    fun applyTo(target: View) {
+    fun applyTo(target: View, cornerRadiusDp: Float = 16f) {
         val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI)
         if (uriString.isNullOrEmpty()) {
             clear(target)
@@ -39,12 +39,13 @@ class SelectedProfileBannerController(private val context: Context) {
             AppConfig.PREF_SELECTED_BANNER_DIM,
             AppConfig.SELECTED_BANNER_DIM_DEFAULT
         ).coerceIn(AppConfig.SELECTED_BANNER_DIM_MIN, AppConfig.SELECTED_BANNER_DIM_MAX)
+        val cornerRadiusPx = cornerRadiusDp * context.resources.displayMetrics.density
         val bitmapKey = "selected_banner::$uriString"
-        val tagKey = "$bitmapKey::dark=$isDark::dim=$dimPercent"
+        val tagKey = "$bitmapKey::dark=$isDark::dim=$dimPercent::r=$cornerRadiusPx"
         if (target.getTag(TAG_KEY) == tagKey) return
 
         bitmapCache[bitmapKey]?.let { cached ->
-            target.background = CenterCropDimDrawable(cached, dimColorFor(isDark, dimPercent))
+            target.background = CenterCropDimDrawable(cached, dimColorFor(isDark, dimPercent), cornerRadiusPx)
             target.setTag(TAG_KEY, tagKey)
             return
         }
@@ -58,7 +59,7 @@ class SelectedProfileBannerController(private val context: Context) {
                 .into(object : CustomTarget<Bitmap>() {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                         bitmapCache[bitmapKey] = resource
-                        target.background = CenterCropDimDrawable(resource, dimColorFor(isDark, dimPercent))
+                        target.background = CenterCropDimDrawable(resource, dimColorFor(isDark, dimPercent), cornerRadiusPx)
                         target.setTag(TAG_KEY, tagKey)
                     }
 
@@ -88,13 +89,15 @@ class SelectedProfileBannerController(private val context: Context) {
 
     private class CenterCropDimDrawable(
         private val bitmap: Bitmap,
-        private val dimColor: Int
+        private val dimColor: Int,
+        private val cornerRadius: Float = 0f
     ) : Drawable() {
         private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
             isFilterBitmap = true
         }
         private val dimPaint = android.graphics.Paint().apply { color = dimColor }
         private val matrix = android.graphics.Matrix()
+        private val clipPath = android.graphics.Path()
 
         override fun draw(canvas: android.graphics.Canvas) {
             val bounds = bounds
@@ -116,7 +119,18 @@ class SelectedProfileBannerController(private val context: Context) {
             matrix.postTranslate(dx, dy)
 
             canvas.save()
-            canvas.clipRect(bounds)
+            if (cornerRadius > 0f) {
+                clipPath.reset()
+                clipPath.addRoundRect(
+                    bounds.left.toFloat(), bounds.top.toFloat(),
+                    bounds.right.toFloat(), bounds.bottom.toFloat(),
+                    cornerRadius, cornerRadius,
+                    android.graphics.Path.Direction.CW
+                )
+                canvas.clipPath(clipPath)
+            } else {
+                canvas.clipRect(bounds)
+            }
             canvas.drawBitmap(bitmap, matrix, paint)
             canvas.drawRect(bounds, dimPaint)
             canvas.restore()
