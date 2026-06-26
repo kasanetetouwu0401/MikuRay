@@ -10,6 +10,7 @@ import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.AttributeSet
 import android.text.TextUtils
 import androidx.annotation.StringRes
@@ -37,28 +38,32 @@ class Greetings @JvmOverloads constructor(
     /** Active controllers we've attached a callback to, so we can detach them later. */
     private val observedControllers = mutableListOf<MediaController>()
 
+    private var sessionListenerRegistered = false
+
     private val controllerCallback = object : MediaController.Callback() {
         override fun onPlaybackStateChanged(state: PlaybackState?) {
-            refreshNowPlaying()
+            mainHandler.post { refreshNowPlaying() }
         }
 
         override fun onMetadataChanged(metadata: android.media.MediaMetadata?) {
-            refreshNowPlaying()
+            mainHandler.post { refreshNowPlaying() }
         }
 
         override fun onSessionDestroyed() {
-            refreshNowPlaying()
+            mainHandler.post { refreshNowPlaying() }
         }
     }
 
     private val activeSessionsChangedListener =
-        MediaSessionManager.OnActiveSessionsChangedListener { refreshNowPlaying() }
+        MediaSessionManager.OnActiveSessionsChangedListener {
+            mainHandler.post { refreshNowPlaying() }
+        }
 
     private val timeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action in listOf(
-                    Intent.ACTION_TIME_TICK, 
-                    Intent.ACTION_TIME_CHANGED, 
+                    Intent.ACTION_TIME_TICK,
+                    Intent.ACTION_TIME_CHANGED,
                     Intent.ACTION_TIMEZONE_CHANGED
                 )
             ) {
@@ -103,32 +108,57 @@ class Greetings @JvmOverloads constructor(
         super.onWindowFocusChanged(hasWindowFocus)
         if (hasWindowFocus) {
             isSelected = true
+            // Re-register listener in case notification access was just granted
+            // while the app was in background / settings was open.
+            if (!sessionListenerRegistered) {
+                registerMediaSessionListener()
+            }
             refreshNowPlaying()
         }
     }
 
+    /**
+     * Returns true if the user has granted Notification Access (required for
+     * [MediaSessionManager.getActiveSessions]).
+     */
+    private fun hasNotificationListenerPermission(): Boolean {
+        val flat = Settings.Secure.getString(
+            context.contentResolver,
+            "enabled_notification_listeners"
+        ) ?: return false
+        val myPkg = context.packageName
+        return flat.split(":").any { it.startsWith(myPkg) }
+    }
+
     private fun registerMediaSessionListener() {
+        if (!hasNotificationListenerPermission()) {
+            sessionListenerRegistered = false
+            return
+        }
         try {
             mediaSessionManager?.addOnActiveSessionsChangedListener(
                 activeSessionsChangedListener,
                 mediaListenerComponent,
                 mainHandler
             )
+            sessionListenerRegistered = true
         } catch (e: SecurityException) {
-            // Notification access not granted yet, that's fine — we just fall back to the clock greeting.
+            sessionListenerRegistered = false
         }
     }
 
     private fun unregisterMediaSessionListener() {
+        sessionListenerRegistered = false
         try {
             mediaSessionManager?.removeOnActiveSessionsChangedListener(activeSessionsChangedListener)
         } catch (e: Exception) {
         }
+        detachAllControllerCallbacks()
+    }
+
+    private fun detachAllControllerCallbacks() {
         observedControllers.forEach {
-            try {
-                it.unregisterCallback(controllerCallback)
-            } catch (e: Exception) {
-            }
+            try { it.unregisterCallback(controllerCallback) } catch (e: Exception) { }
         }
         observedControllers.clear()
     }
@@ -139,6 +169,11 @@ class Greetings @JvmOverloads constructor(
      * (or we don't have notification access), we fall back to [updateGreeting].
      */
     private fun refreshNowPlaying() {
+        if (!hasNotificationListenerPermission()) {
+            updateGreeting()
+            return
+        }
+
         val controllers = try {
             mediaSessionManager?.getActiveSessions(mediaListenerComponent)
         } catch (e: SecurityException) {
@@ -146,13 +181,7 @@ class Greetings @JvmOverloads constructor(
         }
 
         // Re-attach callbacks so future playback/metadata changes keep us updated.
-        observedControllers.forEach {
-            try {
-                it.unregisterCallback(controllerCallback)
-            } catch (e: Exception) {
-            }
-        }
-        observedControllers.clear()
+        detachAllControllerCallbacks()
         controllers?.forEach {
             try {
                 it.registerCallback(controllerCallback, mainHandler)
@@ -191,10 +220,10 @@ class Greetings @JvmOverloads constructor(
             in 19..23 -> R.string.uwu_greeting_night
             else -> R.string.uwu_greeting_late_night
         }
-        
+
         text = context.getString(greetRes)
-        
+
         isSelected = false
-        isSelected = true 
+        isSelected = true
     }
 }
