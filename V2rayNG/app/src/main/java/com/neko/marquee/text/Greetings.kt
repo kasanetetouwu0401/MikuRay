@@ -1,14 +1,21 @@
 package com.neko.marquee.text
 
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.session.MediaController
+import android.media.session.MediaSessionManager
+import android.media.session.PlaybackState
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.text.TextUtils
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.AppCompatTextView
 import com.v2ray.ang.R
+import com.v2ray.ang.service.MediaListenerService
 import java.util.*
 
 class Greetings @JvmOverloads constructor(
@@ -16,6 +23,36 @@ class Greetings @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : AppCompatTextView(context, attrs, defStyleAttr) {
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    private val mediaSessionManager: MediaSessionManager? by lazy {
+        context.getSystemService(Context.MEDIA_SESSION_SERVICE) as? MediaSessionManager
+    }
+
+    private val mediaListenerComponent by lazy {
+        ComponentName(context, MediaListenerService::class.java)
+    }
+
+    /** Active controllers we've attached a callback to, so we can detach them later. */
+    private val observedControllers = mutableListOf<MediaController>()
+
+    private val controllerCallback = object : MediaController.Callback() {
+        override fun onPlaybackStateChanged(state: PlaybackState?) {
+            refreshNowPlaying()
+        }
+
+        override fun onMetadataChanged(metadata: android.media.MediaMetadata?) {
+            refreshNowPlaying()
+        }
+
+        override fun onSessionDestroyed() {
+            refreshNowPlaying()
+        }
+    }
+
+    private val activeSessionsChangedListener =
+        MediaSessionManager.OnActiveSessionsChangedListener { refreshNowPlaying() }
 
     private val timeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -25,7 +62,7 @@ class Greetings @JvmOverloads constructor(
                     Intent.ACTION_TIMEZONE_CHANGED
                 )
             ) {
-                updateDisplay()
+                refreshNowPlaying()
             }
         }
     }
@@ -49,7 +86,8 @@ class Greetings @JvmOverloads constructor(
         }
         context.registerReceiver(timeReceiver, filter)
 
-        updateDisplay()
+        registerMediaSessionListener()
+        refreshNowPlaying()
     }
 
     override fun onDetachedFromWindow() {
@@ -58,14 +96,93 @@ class Greetings @JvmOverloads constructor(
             context.unregisterReceiver(timeReceiver)
         } catch (e: Exception) {
         }
+        unregisterMediaSessionListener()
     }
 
     override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
         super.onWindowFocusChanged(hasWindowFocus)
-        if (hasWindowFocus) isSelected = true
+        if (hasWindowFocus) {
+            isSelected = true
+            refreshNowPlaying()
+        }
     }
 
-    private fun updateDisplay() {
+    private fun registerMediaSessionListener() {
+        try {
+            mediaSessionManager?.addOnActiveSessionsChangedListener(
+                activeSessionsChangedListener,
+                mediaListenerComponent,
+                mainHandler
+            )
+        } catch (e: SecurityException) {
+            // Notification access not granted yet, that's fine — we just fall back to the clock greeting.
+        }
+    }
+
+    private fun unregisterMediaSessionListener() {
+        try {
+            mediaSessionManager?.removeOnActiveSessionsChangedListener(activeSessionsChangedListener)
+        } catch (e: Exception) {
+        }
+        observedControllers.forEach {
+            try {
+                it.unregisterCallback(controllerCallback)
+            } catch (e: Exception) {
+            }
+        }
+        observedControllers.clear()
+    }
+
+    /**
+     * Looks for a currently-playing media session (Spotify, YT Music, etc). If one is found,
+     * we show its title/artist instead of the regular clock greeting. If nothing is playing
+     * (or we don't have notification access), we fall back to [updateGreeting].
+     */
+    private fun refreshNowPlaying() {
+        val controllers = try {
+            mediaSessionManager?.getActiveSessions(mediaListenerComponent)
+        } catch (e: SecurityException) {
+            null
+        }
+
+        // Re-attach callbacks so future playback/metadata changes keep us updated.
+        observedControllers.forEach {
+            try {
+                it.unregisterCallback(controllerCallback)
+            } catch (e: Exception) {
+            }
+        }
+        observedControllers.clear()
+        controllers?.forEach {
+            try {
+                it.registerCallback(controllerCallback, mainHandler)
+                observedControllers.add(it)
+            } catch (e: Exception) {
+            }
+        }
+
+        val playingController = controllers?.firstOrNull {
+            it.playbackState?.state == PlaybackState.STATE_PLAYING
+        }
+
+        val metadata = playingController?.metadata
+        val title = metadata?.getString(android.media.MediaMetadata.METADATA_KEY_TITLE)
+        val artist = metadata?.getString(android.media.MediaMetadata.METADATA_KEY_ARTIST)
+
+        if (playingController != null && !title.isNullOrBlank()) {
+            text = if (!artist.isNullOrBlank()) {
+                context.getString(R.string.uwu_now_playing, title, artist)
+            } else {
+                context.getString(R.string.uwu_now_playing_no_artist, title)
+            }
+            isSelected = false
+            isSelected = true
+        } else {
+            updateGreeting()
+        }
+    }
+
+    private fun updateGreeting() {
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         @StringRes val greetRes = when (hour) {
             in 5..10 -> R.string.uwu_greeting_morning
