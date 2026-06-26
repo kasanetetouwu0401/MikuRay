@@ -74,12 +74,12 @@ class Greetings @JvmOverloads constructor(
     private val musicReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             intent ?: return
-            val playing = intent.getBooleanExtra("playing", false)
-                .takeIf { intent.hasExtra("playing") }
-                ?: (intent.getIntExtra("playstate", -1) == 1)
-                    .takeIf { intent.hasExtra("playstate") }
-                ?: (intent.action?.contains("PLAY") == true &&
-                        !intent.action?.contains("PAUSE") == true)
+            val action = intent.action ?: ""
+            val playing: Boolean = when {
+                intent.hasExtra("playing") -> intent.getBooleanExtra("playing", false)
+                intent.hasExtra("playstate") -> intent.getIntExtra("playstate", -1) == 1
+                else -> action.contains("PLAY") && !action.contains("PAUSE")
+            }
 
             val title  = intent.getStringExtra("track")
                 ?: intent.getStringExtra("title")
