@@ -219,15 +219,35 @@ class Greetings @JvmOverloads constructor(
                 } catch (_: Exception) {}
             }
 
+            // Prefer STATE_PLAYING, but also accept BUFFERING / CONNECTING in case
+            // the player hasn't transitioned state yet.
             val playing = controllers?.firstOrNull {
-                it.playbackState?.state == PlaybackState.STATE_PLAYING
-            }
-            val title  = playing?.metadata?.getString(android.media.MediaMetadata.METADATA_KEY_TITLE)
-            val artist = playing?.metadata?.getString(android.media.MediaMetadata.METADATA_KEY_ARTIST)
+                val s = it.playbackState?.state
+                s == PlaybackState.STATE_PLAYING ||
+                s == PlaybackState.STATE_BUFFERING ||
+                s == PlaybackState.STATE_CONNECTING
+            } ?: controllers?.firstOrNull { it.playbackState != null }
 
-            if (playing != null && !title.isNullOrBlank()) {
-                showNowPlaying(title, artist)
-                return
+            if (playing != null) {
+                val meta = playing.metadata
+                // Try every known title key — different players use different ones
+                val title = meta?.getString(android.media.MediaMetadata.METADATA_KEY_TITLE)
+                    ?: meta?.getString(android.media.MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
+                    ?: meta?.getString(android.media.MediaMetadata.METADATA_KEY_ALBUM)
+                val artist = meta?.getString(android.media.MediaMetadata.METADATA_KEY_ARTIST)
+                    ?: meta?.getString(android.media.MediaMetadata.METADATA_KEY_ALBUM_ARTIST)
+                    ?: meta?.getString(android.media.MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE)
+
+                if (!title.isNullOrBlank()) {
+                    showNowPlaying(title, artist)
+                    return
+                }
+                // Controller found but metadata is empty — show generic rather than greeting
+                if (audioManager?.isMusicActive == true) {
+                    text = context.getString(R.string.uwu_now_playing_generic)
+                    isSelected = false; isSelected = true
+                    return
+                }
             }
         }
 
@@ -237,8 +257,7 @@ class Greetings @JvmOverloads constructor(
             return
         }
 
-        // 3. Last resort: AudioManager music-active flag (no metadata, but at least
-        //    we know something is playing — show a generic "music playing" string)
+        // 3. Last resort: AudioManager music-active flag
         if (audioManager?.isMusicActive == true) {
             text = context.getString(R.string.uwu_now_playing_generic)
             isSelected = false; isSelected = true
