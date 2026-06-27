@@ -19,8 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.v2ray.ang.util.BannerImageCache
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
 import com.v2ray.ang.AppConfig
@@ -91,7 +90,6 @@ class MainActivity : HelperBaseActivity(),
         }
         override fun onTabReselected(tab: com.google.android.material.tabs.TabLayout.Tab) {}
     }
-    private val TAG_HOME_BANNER_DEFAULT = "DEFAULT_HOME_BANNER"
 
     private val requestVpnPermission = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_OK) {
@@ -361,19 +359,13 @@ class MainActivity : HelperBaseActivity(),
             if (isDestroyed || isFinishing) return
 
             val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_HOME_BANNER_URI)
-            val targetTag = if (uriString.isNullOrBlank()) TAG_HOME_BANNER_DEFAULT else uriString
-            if (headerImage.tag == targetTag) return
-            if (!uriString.isNullOrBlank()) {
-                Glide.with(this@MainActivity)
-                    .load(Uri.parse(uriString))
-                    .diskCacheStrategy(DiskCacheStrategy.DATA)
-                    .error(R.drawable.uwu_banner_home)
-                    .into(headerImage)
-            } else {
-                Glide.with(this@MainActivity).clear(headerImage)
-                headerImage.setImageResource(R.drawable.uwu_banner_home)
-            }
-            headerImage.tag = targetTag
+            BannerImageCache.load(
+                context = this@MainActivity,
+                target = headerImage,
+                namespace = "home",
+                uriString = uriString,
+                defaultDrawableRes = R.drawable.uwu_banner_home
+            )
         }
 
         val show = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_HOME_BANNER, true)

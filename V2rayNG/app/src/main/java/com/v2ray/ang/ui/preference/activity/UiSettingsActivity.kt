@@ -44,6 +44,7 @@ import com.v2ray.ang.ui.dialog.HeaderTopRowPaddingDialog
 import com.v2ray.ang.ui.preference.CustomBannerPreference
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
 import com.v2ray.ang.util.BannerColorExtractor
+import com.v2ray.ang.util.BannerImageCache
 import com.v2ray.ang.util.ThemeManager
 import com.v2ray.ang.util.WeatherHelper
 import com.v2ray.ang.util.showBlur
@@ -144,6 +145,7 @@ class UiSettingsActivity : BaseActivity() {
                     try {
                         val oldUri = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_HOME_BANNER_URI)
                         deleteOldFile(oldUri)
+                        BannerImageCache.remove("home", oldUri)
                         val savedUri = saveToCache(cacheUri, "home_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_HOME_BANNER_URI, savedUri.toString())
                         
@@ -184,6 +186,7 @@ class UiSettingsActivity : BaseActivity() {
                     try {
                         val oldUri = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI)
                         deleteOldFile(oldUri)
+                        BannerImageCache.remove("sheet", oldUri)
                         val savedUri = saveToCache(cacheUri, "sheet_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, savedUri.toString())
                         requireContext().snackbarSuccess(getString(R.string.sheet_banner_updated), title = getString(R.string.title_alerter_success))
@@ -442,6 +445,7 @@ class UiSettingsActivity : BaseActivity() {
                         .setMessage(R.string.sheet_banner_delete_summary)
                         .setPositiveButton(android.R.string.ok) { _, _ ->
                             deleteOldFile(savedUri)
+                            BannerImageCache.remove("sheet", savedUri)
                             MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, "")
                             requireContext().snackbarSuccess(getString(R.string.sheet_banner_delete_summary), title = getString(R.string.title_alerter_success))
                         }
@@ -608,6 +612,7 @@ class UiSettingsActivity : BaseActivity() {
                         .setMessage(R.string.home_banner_delete_summary)
                         .setPositiveButton(android.R.string.ok) { _, _ ->
                             deleteOldFile(savedUri)
+                            BannerImageCache.remove("home", savedUri)
                             MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_HOME_BANNER_URI, "")
                             MmkvManager.encodeSettings(AppConfig.PREF_BANNER_COLOR, 0)
                             

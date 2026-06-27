@@ -1,7 +1,6 @@
 package com.v2ray.ang.ui.bottomsheet
 
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,11 +9,10 @@ import android.widget.CheckedTextView
 import android.widget.ImageView
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
+import com.v2ray.ang.util.BannerImageCache
 
 private const val TRANSITION_DURATION = 300L
 
@@ -41,7 +39,6 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
     private var currentOrder: Int = ORDER_ORIGIN
     private var subscriptionId: String = ""
 
-    private val TAG_SHEET_DEFAULT = "DEFAULT_BANNER_SHEET"
 
     private fun orderKey(): String {
         val subId = subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
@@ -163,20 +160,13 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
         val bannerImageView = view.findViewById<ImageView>(R.id.img_banner_sheet) ?: return
         bannerImageView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI)
-        val targetTag = if (uriString.isNullOrBlank()) TAG_SHEET_DEFAULT else uriString
-        if (bannerImageView.tag != targetTag) {
-            if (!uriString.isNullOrBlank()) {
-                Glide.with(this)
-                    .load(Uri.parse(uriString))
-                    .diskCacheStrategy(DiskCacheStrategy.DATA)
-                    .error(R.drawable.uwu_banner_sheet)
-                    .into(bannerImageView)
-            } else {
-                Glide.with(this).clear(bannerImageView)
-                bannerImageView.setImageResource(R.drawable.uwu_banner_sheet)
-            }
-            bannerImageView.tag = targetTag
-        }
+        BannerImageCache.load(
+            context = requireContext(),
+            target = bannerImageView,
+            namespace = "sheet",
+            uriString = uriString,
+            defaultDrawableRes = R.drawable.uwu_banner_sheet
+        )
     }
 
     private fun setupExpandable(
