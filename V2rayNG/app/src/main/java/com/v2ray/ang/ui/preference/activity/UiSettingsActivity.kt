@@ -147,7 +147,13 @@ class UiSettingsActivity : BaseActivity() {
                         val savedUri = saveToCache(cacheUri, "home_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_HOME_BANNER_URI, savedUri.toString())
                         
-                        requireContext().snackbarSuccess(getString(R.string.home_banner_updated), title = getString(R.string.title_alerter_success))
+                        activity?.let { act ->
+                            act.snackbarSuccess(
+                                act.getString(R.string.home_banner_updated), 
+                                title = act.getString(R.string.title_alerter_success)
+                            )
+                        }
+                        
                         extractAndSaveBannerColor(savedUri)
                         broadcastHomeBannerChanged()
                     } catch (e: Exception) {

@@ -64,7 +64,7 @@
                             android:id="@+id/img_banner_sheet"
                             android:layout_width="fill_parent"
                             android:layout_height="150.0dip"
-                            android:src="@drawable/uwu_banner_image_about"
+                            android:src="@drawable/uwu_banner_sheet"
                             android:scaleType="centerCrop"
                             android:elevation="0.0dip" />
                         <View
