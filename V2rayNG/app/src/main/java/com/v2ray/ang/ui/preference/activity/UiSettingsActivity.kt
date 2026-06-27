@@ -22,7 +22,6 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.v2ray.ang.AppConfig
@@ -77,15 +76,15 @@ class UiSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_ui_settings))
 
         if (savedInstanceState == null) {
+            val fragment = UiSettingsFragment().apply {
+                arguments = Bundle().apply {
+                    putString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY,
+                        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY))
+                }
+            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, UiSettingsFragment())
+                .replace(R.id.settings_container, fragment)
                 .commit()
-        }
-
-        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
-            supportFragmentManager.executePendingTransactions()
-            (supportFragmentManager.findFragmentById(R.id.settings_container) as? UiSettingsFragment)
-                ?.scrollToAndHighlight(key, findViewById(R.id.app_bar))
         }
     }
 
@@ -894,6 +893,11 @@ class UiSettingsActivity : BaseActivity() {
             val savedBottomRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_RADIUS, AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS)
             val savedBottomRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS)
             blurBottomIntensity?.updateSummary(savedBottomRadius, savedBottomRounds)
+
+            arguments?.getString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
+                scrollToAndHighlight(key)
+                arguments?.remove(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)
+            }
         }
 
         private fun updateTrueBlackState(isNight: Boolean) {

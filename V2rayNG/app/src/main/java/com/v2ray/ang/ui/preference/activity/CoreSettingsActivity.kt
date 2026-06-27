@@ -9,7 +9,6 @@ import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
@@ -31,7 +30,7 @@ class CoreSettingsActivity : BaseActivity() {
             val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
             view.updatePadding(
                 top    = maxOf(systemBars.top,    displayCutout.top),
-                bottom = maxOf(systemBars.bottom,    displayCutout.bottom),
+                bottom = maxOf(systemBars.bottom, displayCutout.bottom),
                 left   = maxOf(systemBars.left,   displayCutout.left),
                 right  = maxOf(systemBars.right,  displayCutout.right)
             )
@@ -42,15 +41,15 @@ class CoreSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_core_settings))
 
         if (savedInstanceState == null) {
+            val fragment = CoreSettingsFragment().apply {
+                arguments = Bundle().apply {
+                    putString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY,
+                        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY))
+                }
+            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, CoreSettingsFragment())
+                .replace(R.id.settings_container, fragment)
                 .commit()
-        }
-
-        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
-            supportFragmentManager.executePendingTransactions()
-            (supportFragmentManager.findFragmentById(R.id.settings_container) as? CoreSettingsFragment)
-                ?.scrollToAndHighlight(key, findViewById(R.id.app_bar))
         }
     }
 
@@ -122,6 +121,10 @@ class CoreSettingsActivity : BaseActivity() {
             super.onStart()
             updateEnableLocalProxy(MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_LOCAL_PROXY, true))
             updateDynamicSocksPort(MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_SOCKS_PORT, false))
+            arguments?.getString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
+                scrollToAndHighlight(key)
+                arguments?.remove(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)
+            }
         }
 
         private fun updateEnableLocalProxy(enabled: Boolean) {

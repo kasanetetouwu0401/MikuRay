@@ -10,7 +10,6 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.VPN
@@ -34,7 +33,7 @@ class VpnSettingsActivity : BaseActivity() {
             val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
             view.updatePadding(
                 top    = maxOf(systemBars.top,    displayCutout.top),
-                bottom = maxOf(systemBars.bottom,    displayCutout.bottom),
+                bottom = maxOf(systemBars.bottom, displayCutout.bottom),
                 left   = maxOf(systemBars.left,   displayCutout.left),
                 right  = maxOf(systemBars.right,  displayCutout.right)
             )
@@ -45,15 +44,15 @@ class VpnSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_vpn_settings))
 
         if (savedInstanceState == null) {
+            val fragment = VpnSettingsFragment().apply {
+                arguments = Bundle().apply {
+                    putString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY,
+                        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY))
+                }
+            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, VpnSettingsFragment())
+                .replace(R.id.settings_container, fragment)
                 .commit()
-        }
-
-        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
-            supportFragmentManager.executePendingTransactions()
-            (supportFragmentManager.findFragmentById(R.id.settings_container) as? VpnSettingsFragment)
-                ?.scrollToAndHighlight(key, findViewById(R.id.app_bar))
         }
     }
 
@@ -137,6 +136,10 @@ class VpnSettingsActivity : BaseActivity() {
             if (isVpnMode) {
                 updateLocalDns(MmkvManager.decodeSettingsBool(AppConfig.PREF_LOCAL_DNS_ENABLED, false))
                 updateHevTunSettings(MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_HEV_TUNNEL, true))
+            }
+            arguments?.getString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
+                scrollToAndHighlight(key)
+                arguments?.remove(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)
             }
         }
 

@@ -8,7 +8,6 @@ import androidx.core.view.updatePadding
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
@@ -30,7 +29,7 @@ class AdvancedSettingsActivity : BaseActivity() {
             val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
             view.updatePadding(
                 top    = maxOf(systemBars.top,    displayCutout.top),
-                bottom = maxOf(systemBars.bottom,    displayCutout.bottom),
+                bottom = maxOf(systemBars.bottom, displayCutout.bottom),
                 left   = maxOf(systemBars.left,   displayCutout.left),
                 right  = maxOf(systemBars.right,  displayCutout.right)
             )
@@ -41,15 +40,15 @@ class AdvancedSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_advanced))
 
         if (savedInstanceState == null) {
+            val fragment = AdvancedSettingsFragment().apply {
+                arguments = Bundle().apply {
+                    putString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY,
+                        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY))
+                }
+            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, AdvancedSettingsFragment())
+                .replace(R.id.settings_container, fragment)
                 .commit()
-        }
-
-        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
-            supportFragmentManager.executePendingTransactions()
-            (supportFragmentManager.findFragmentById(R.id.settings_container) as? AdvancedSettingsFragment)
-                ?.scrollToAndHighlight(key, findViewById(R.id.app_bar))
         }
     }
 
@@ -100,6 +99,14 @@ class AdvancedSettingsActivity : BaseActivity() {
                 }
             }
             preferenceScreen?.let { traverse(it) }
+        }
+
+        override fun onStart() {
+            super.onStart()
+            arguments?.getString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
+                scrollToAndHighlight(key)
+                arguments?.remove(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)
+            }
         }
     }
 
