@@ -13,6 +13,13 @@
         android:layout_height="170dp"
         android:layout_alignParentTop="true">
 
+        <VideoView
+            android:id="@+id/header_video"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
         <ImageView
             android:id="@+id/header_image"
             android:layout_width="match_parent"
@@ -209,7 +216,6 @@
                                 android:src="@drawable/ic_weather_sunny"
                                 android:tint="?colorOnSurfaceVariant"
                                 android:visibility="gone" />
-
 
                             <TextView
                                 android:id="@+id/tv_weather_temp"

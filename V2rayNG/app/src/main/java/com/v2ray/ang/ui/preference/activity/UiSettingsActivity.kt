@@ -125,9 +125,10 @@ class UiSettingsActivity : BaseActivity() {
         private val pickHomeBannerImage =
             registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
                 if (uri != null) {
-                    if (isGif(uri)) {
-                        saveGifBannerDirectly(uri, AppConfig.PREF_CUSTOM_HOME_BANNER_URI, "home_banner_") {
-                            extractAndSaveBannerColor(it)
+                    if (isGif(uri) || isVideo(uri)) {
+                        val ext = if (isVideo(uri)) "mp4" else "gif"
+                        saveMediaBannerDirectly(uri, AppConfig.PREF_CUSTOM_HOME_BANNER_URI, "home_banner_", ext) { savedUri ->
+                            if (!isVideo(uri)) extractAndSaveBannerColor(savedUri)
                             broadcastHomeBannerChanged()
                             requireContext().snackbarSuccess(getString(R.string.home_banner_updated), title = getString(R.string.title_alerter_success))
                         }
@@ -140,8 +141,9 @@ class UiSettingsActivity : BaseActivity() {
         private val pickSheetBannerImage =
             registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
                 if (uri != null) {
-                    if (isGif(uri)) {
-                        saveGifBannerDirectly(uri, AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, "sheet_banner_") {
+                    if (isGif(uri) || isVideo(uri)) {
+                        val ext = if (isVideo(uri)) "mp4" else "gif"
+                        saveMediaBannerDirectly(uri, AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, "sheet_banner_", ext) {
                             requireContext().snackbarSuccess(getString(R.string.sheet_banner_updated), title = getString(R.string.title_alerter_success))
                         }
                     } else {
@@ -152,7 +154,18 @@ class UiSettingsActivity : BaseActivity() {
 
         private val pickSelectedBannerImage =
             registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-                if (uri != null) startCropSelectedBannerActivity(uri)
+                if (uri != null) {
+                    if (isGif(uri) || isVideo(uri)) {
+                        val ext = if (isVideo(uri)) "mp4" else "gif"
+                        saveMediaBannerDirectly(uri, AppConfig.PREF_SELECTED_BANNER_URI, "selected_banner_", ext) {
+                            updateIndicatorStyleEnabledState()
+                            broadcastSelectedBannerChanged()
+                            requireContext().snackbarSuccess(getString(R.string.selected_banner_updated), title = getString(R.string.title_alerter_success))
+                        }
+                    } else {
+                        startCropSelectedBannerActivity(uri)
+                    }
+                }
             }
 
         private val cropHomeBannerImage =
@@ -447,7 +460,7 @@ class UiSettingsActivity : BaseActivity() {
         private fun setupSheetBannerPreferences() {
             findPreference<Preference>(AppConfig.PREF_ACTION_CHANGE_SHEET_BANNER)?.setOnPreferenceClickListener {
                 pickSheetBannerImage.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
                 )
                 true
             }
@@ -486,7 +499,7 @@ class UiSettingsActivity : BaseActivity() {
 
             findPreference<Preference>(AppConfig.PREF_ACTION_CHANGE_SELECTED_BANNER)?.setOnPreferenceClickListener {
                 pickSelectedBannerImage.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
                 )
                 true
             }
@@ -613,7 +626,7 @@ class UiSettingsActivity : BaseActivity() {
 
             findPreference<Preference>(AppConfig.PREF_ACTION_CHANGE_HOME_BANNER)?.setOnPreferenceClickListener {
                 pickHomeBannerImage.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
                 )
                 true
             }
@@ -744,24 +757,31 @@ class UiSettingsActivity : BaseActivity() {
             cropProfileImage.launch(uCrop.getIntent(requireContext()))
         }
 
+        private fun isVideo(uri: Uri): Boolean {
+            val mimeType = requireContext().contentResolver.getType(uri)
+            if (mimeType?.startsWith("video/") == true) return true
+            val path = uri.path ?: return false
+            return path.lowercase().endsWith(".mp4") || path.lowercase().endsWith(".webm")
+        }
+
         private fun isGif(uri: Uri): Boolean {
             val mimeType = requireContext().contentResolver.getType(uri)
             if (mimeType == "image/gif") return true
-            // fallback: cek extension dari path
             val path = uri.path ?: return false
             return path.lowercase().endsWith(".gif")
         }
 
-        private fun saveGifBannerDirectly(
+        private fun saveMediaBannerDirectly(
             sourceUri: Uri,
             prefKey: String,
             fileNamePrefix: String,
+            ext: String,
             onSuccess: (Uri) -> Unit
         ) {
             try {
                 val oldUri = MmkvManager.decodeSettingsString(prefKey)
                 deleteOldFile(oldUri)
-                val savedUri = saveToCache(sourceUri, fileNamePrefix, ext = "gif")
+                val savedUri = saveToCache(sourceUri, fileNamePrefix, ext = ext)
                 MmkvManager.encodeSettings(prefKey, savedUri.toString())
                 onSuccess(savedUri)
             } catch (e: Exception) {

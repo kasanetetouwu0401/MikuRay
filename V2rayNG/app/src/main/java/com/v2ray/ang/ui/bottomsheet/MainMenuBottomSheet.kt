@@ -70,27 +70,66 @@ class MainMenuBottomSheet : BaseBottomSheetFragment() {
 
     private fun loadBanner(view: View) {
         val bannerImageView = view.findViewById<ImageView>(R.id.img_banner_sheet) ?: return
+        val bannerVideoView = view.findViewById<android.widget.VideoView>(R.id.video_banner_sheet)
+        
         bannerImageView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI)
         val targetTag = if (uriString.isNullOrBlank()) TAG_SHEET_DEFAULT else uriString
+        
         if (bannerImageView.tag != targetTag) {
             if (!uriString.isNullOrBlank()) {
                 val isGif = uriString.lowercase().endsWith(".gif")
-                if (isGif) {
-                    Glide.with(this)
-                        .asGif()
-                        .load(Uri.parse(uriString))
-                        .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .error(R.drawable.uwu_banner_sheet)
-                        .into(bannerImageView)
+                val isVideo = uriString.lowercase().endsWith(".mp4") || uriString.lowercase().endsWith(".webm")
+
+                if (isVideo && bannerVideoView != null) {
+                    bannerImageView.visibility = View.GONE
+                    bannerVideoView.visibility = View.VISIBLE
+                    bannerVideoView.setVideoURI(Uri.parse(uriString))
+                    bannerVideoView.setOnPreparedListener { mp ->
+                        mp.isLooping = true
+                        mp.setVolume(0f, 0f)
+
+                        mp.setOnVideoSizeChangedListener { _, videoWidth, videoHeight ->
+                            val viewWidth = bannerVideoView.width.toFloat()
+                            val viewHeight = bannerVideoView.height.toFloat()
+
+                            if (viewWidth > 0f && viewHeight > 0f) {
+                                val videoRatio = videoWidth.toFloat() / videoHeight.toFloat()
+                                val viewRatio = viewWidth / viewHeight
+
+                                if (videoRatio > viewRatio) {
+                                    bannerVideoView.scaleX = videoRatio / viewRatio
+                                    bannerVideoView.scaleY = 1f
+                                } else {
+                                    bannerVideoView.scaleX = 1f
+                                    bannerVideoView.scaleY = viewRatio / videoRatio
+                                }
+                            }
+                        }
+
+                        mp.start()
+                    }
                 } else {
-                    Glide.with(this)
-                        .load(Uri.parse(uriString))
-                        .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .error(R.drawable.uwu_banner_sheet)
-                        .into(bannerImageView)
+                    bannerVideoView?.visibility = View.GONE
+                    bannerImageView.visibility = View.VISIBLE
+                    if (isGif) {
+                        Glide.with(this)
+                            .asGif()
+                            .load(Uri.parse(uriString))
+                            .diskCacheStrategy(DiskCacheStrategy.DATA)
+                            .error(R.drawable.uwu_banner_sheet)
+                            .into(bannerImageView)
+                    } else {
+                        Glide.with(this)
+                            .load(Uri.parse(uriString))
+                            .diskCacheStrategy(DiskCacheStrategy.DATA)
+                            .error(R.drawable.uwu_banner_sheet)
+                            .into(bannerImageView)
+                    }
                 }
             } else {
+                bannerVideoView?.visibility = View.GONE
+                bannerImageView.visibility = View.VISIBLE
                 Glide.with(this).clear(bannerImageView)
                 bannerImageView.setImageResource(R.drawable.uwu_banner_sheet)
             }
