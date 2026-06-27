@@ -416,8 +416,11 @@ object CoreOutboundBuilder {
                 wssetting.host = host.orEmpty()
                 sni = host
                 wssetting.path = path ?: "/"
-                // Send WS ping frame every 60s to prevent idle timeout/NAT drop
-                wssetting.heartbeatPeriod = 60
+                // Send WS ping frame periodically to prevent idle timeout/NAT drop.
+                // User can configure via PREF_WS_HEARTBEAT_PERIOD; 0 = disabled.
+                val heartbeat = MmkvManager.decodeSettingsString(AppConfig.PREF_WS_HEARTBEAT_PERIOD, "60")
+                    ?.toIntOrNull() ?: 60
+                if (heartbeat > 0) wssetting.heartbeatPeriod = heartbeat
                 streamSettings.wsSettings = wssetting
             }
 

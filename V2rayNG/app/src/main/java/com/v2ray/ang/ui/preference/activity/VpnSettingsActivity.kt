@@ -64,6 +64,7 @@ class VpnSettingsActivity : BaseActivity() {
         private val navigatePerAppProxy by lazy { findPreference<Preference>(AppConfig.PREF_NAVIGATE_PER_APP_PROXY_SETTINGS) }
         private val keepAwake by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_KEEP_AWAKE) }
         private val tcpKeepaliveIdle by lazy { findPreference<EditTextPreference>(AppConfig.PREF_TCP_KEEPALIVE_IDLE) }
+        private val wsHeartbeatPeriod by lazy { findPreference<EditTextPreference>(AppConfig.PREF_WS_HEARTBEAT_PERIOD) }
 
         override fun onCreatePreferences(bundle: Bundle?, s: String?) {
             preferenceManager.preferenceDataStore = MmkvPreferenceDataStore()

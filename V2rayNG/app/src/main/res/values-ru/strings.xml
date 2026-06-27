@@ -598,6 +598,7 @@
     <string name="title_pref_hide_from_recent_apps">Скрыть из недавних приложений</string>
     <string name="summary_pref_hide_from_recent_apps">Скрывать приложение из недавних задач при работе в фоне</string>
     <string name="title_pref_tcp_keepalive_idle">TCP Keepalive idle (секунд, 0 = отключено)</string>
+    <string name="title_pref_ws_heartbeat_period">WS Ping Interval (секунд, 0 = отключено)</string>
     
     <string name="uwu_banner_settings_title">Привет...</string>
     <string name="uwu_banner_settings_summary">"Добро пожаловать в

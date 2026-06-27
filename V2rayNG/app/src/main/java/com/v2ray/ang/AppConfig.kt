@@ -39,6 +39,7 @@ object AppConfig {
     const val PREF_MUX_XUDP_CONCURRENCY = "pref_mux_xudp_concurrency"
     const val PREF_MUX_XUDP_QUIC = "pref_mux_xudp_quic"
     const val PREF_TCP_KEEPALIVE_IDLE = "pref_tcp_keepalive_idle"
+    const val PREF_WS_HEARTBEAT_PERIOD = "pref_ws_heartbeat_period"
     const val PREF_FRAGMENT_ENABLED = "pref_fragment_enabled"
     const val PREF_FRAGMENT_PACKETS = "pref_fragment_packets"
     const val PREF_FRAGMENT_LENGTH = "pref_fragment_length"

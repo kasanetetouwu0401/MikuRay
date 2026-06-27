@@ -577,6 +577,7 @@
     <string name="title_pref_hide_from_recent_apps">从最近任务中隐藏</string>
     <string name="summary_pref_hide_from_recent_apps">在后台运行时从最近任务列表中隐藏本应用</string>
     <string name="title_pref_tcp_keepalive_idle">TCP Keepalive idle (秒，0 = 禁用)</string>
+    <string name="title_pref_ws_heartbeat_period">WS Ping 间隔（秒，0 = 禁用）</string>
     
     <string name="uwu_banner_settings_title">你好呀……</string>
     <string name="uwu_banner_settings_summary">"欢迎来到设置菜单,

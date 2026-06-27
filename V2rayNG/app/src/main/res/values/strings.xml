@@ -616,6 +616,7 @@
     <string name="title_pref_hide_from_recent_apps">Hide from recent tasks</string>
     <string name="summary_pref_hide_from_recent_apps">Hide the app from recent tasks when running in background</string>
     <string name="title_pref_tcp_keepalive_idle">TCP Keepalive idle (seconds, 0 = disabled)</string>
+    <string name="title_pref_ws_heartbeat_period">WS Ping Interval (seconds, 0 = disabled)</string>
     
     <string name="uwu_banner_settings_title">Hello there...</string>
     <string name="uwu_banner_settings_summary">"Welcome to the settings
@@ -669,8 +670,6 @@ you need."</string>
     <string name="uwu_greeting_evening">Good evening...</string>
     <string name="uwu_greeting_night">Good night...</string>
     <string name="uwu_greeting_late_night">"It's time to go to sleep..."</string>
-    <string name="uwu_now_playing">Now playing: %1$s - %2$s</string>
-    <string name="uwu_now_playing_no_artist">Now playing: %1$s</string>
     
     <!-- Header banner: username display -->
     <string name="uwu_profile_banner_title">master</string>
