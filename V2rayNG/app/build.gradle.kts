@@ -139,6 +139,7 @@ dependencies {
     implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.androidx.viewpager2)
     implementation(libs.androidx.fragment)
+    implementation(libs.palette)
     implementation(libs.play.services.location)
 
     // UI Libraries

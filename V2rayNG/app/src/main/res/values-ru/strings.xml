@@ -576,6 +576,8 @@
     <string name="select_photo">Выбрать фото</string>
     <string name="pref_show_splash_title">Показывать заставку</string>
     <string name="pref_show_splash_summary">Показывать заставку при запуске приложения</string>
+    <string name="title_pref_dynamic_color_banner">Динамическая тема от баннера главного экрана</string>
+    <string name="summary_pref_dynamic_color_banner">Цветовая схема темы будет динамически подстраиваться под изображение баннера на главном экране.</string>
     <string name="title_pref_keep_awake">Не давать устройству уснуть</string>
     <string name="summary_pref_keep_awake">Удерживать частичную блокировку сна (partial wake lock) при подключенном VPN. Необходимо на Xiaomi/HyperOS; на Samsung/Pixel это только разряжает батарею — оставьте выключенным.</string>
     <string name="title_reset_traffic">Сброс статистики трафика</string>

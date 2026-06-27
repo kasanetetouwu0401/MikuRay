@@ -555,6 +555,8 @@
     <string name="select_photo">选择照片</string>
     <string name="pref_show_splash_title">显示启动画面</string>
     <string name="pref_show_splash_summary">在运行应用时显示启动画面</string>
+    <string name="title_pref_dynamic_color_banner">基于主页横幅的动态主题</string>
+    <string name="summary_pref_dynamic_color_banner">主题配色方案将根据您的主页横幅图片进行动态调整。</string>
     <string name="title_pref_keep_awake">保持设备唤醒</string>
     <string name="summary_pref_keep_awake">在 VPN 连接时保持部分唤醒锁 (partial wake lock)。小米/HyperOS 设备需要开启此项；在三星/Pixel 上开启只会徒增耗电 —— 建议保持关闭。</string>
     <string name="title_reset_traffic">重置数据用量</string>

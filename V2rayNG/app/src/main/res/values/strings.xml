@@ -594,6 +594,8 @@
     <string name="select_photo">Select Photo</string>
     <string name="pref_show_splash_title">Show splash screen</string>
     <string name="pref_show_splash_summary">Show splash screen when application is run</string>
+    <string name="title_pref_dynamic_color_banner">Dynamic Theme from Home Banner</string>
+    <string name="summary_pref_dynamic_color_banner">The theme color scheme will dynamically adapt to your Home Banner image.</string>
     <string name="title_pref_keep_awake">Keep device awake</string>
     <string name="summary_pref_keep_awake">Hold a partial wake lock while the VPN is connected. Needed on Xiaomi/HyperOS; on Samsung/Pixel it just drains battery — leave off.</string>
     <string name="title_reset_traffic">Reset Data Usage</string>

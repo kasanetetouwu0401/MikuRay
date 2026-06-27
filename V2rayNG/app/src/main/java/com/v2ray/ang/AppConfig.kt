@@ -95,6 +95,7 @@ object AppConfig {
     // UI
     const val PREF_APP_THEME = "pref_app_theme"
     const val PREF_DYNAMIC_COLOR = "pref_dynamic_color"
+    const val PREF_DYNAMIC_COLOR_BANNER = "pref_dynamic_color_banner"
     const val PREF_BANNER_COLOR = "pref_banner_color"
     const val PREF_TRUE_BLACK = "pref_true_black"
     const val PREF_CATEGORY_STYLE = "pref_category_style"

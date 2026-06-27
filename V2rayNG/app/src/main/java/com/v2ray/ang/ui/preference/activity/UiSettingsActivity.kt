@@ -27,6 +27,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.extension.snackbarSuccess
+import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
@@ -89,6 +90,7 @@ class UiSettingsActivity : BaseActivity() {
 
         private val appTheme by lazy { findPreference<Preference>(AppConfig.PREF_APP_THEME) }
         private val dynamicColor by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_DYNAMIC_COLOR) }
+        private val dynamicColorBanner by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_DYNAMIC_COLOR_BANNER) }
         private val showHomeBanner by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_HOME_BANNER) }
         private val trueBlack by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_TRUE_BLACK) }
         private val enableBlur by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_ENABLE_BLUR) }
@@ -128,7 +130,7 @@ class UiSettingsActivity : BaseActivity() {
                         saveGifBannerDirectly(uri, AppConfig.PREF_CUSTOM_HOME_BANNER_URI, "home_banner_") {
                             extractAndSaveBannerColor(it)
                             broadcastHomeBannerChanged()
-                            requireContext().snackbarSuccess(getString(R.string.home_banner_updated), title = getString(R.string.title_alerter_success))
+                            requireContext().toastSuccess(getString(R.string.home_banner_updated))
                         }
                     } else {
                         startCropHomeBannerActivity(uri)
@@ -141,7 +143,7 @@ class UiSettingsActivity : BaseActivity() {
                 if (uri != null) {
                     if (isGif(uri)) {
                         saveGifBannerDirectly(uri, AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, "sheet_banner_") {
-                            requireContext().snackbarSuccess(getString(R.string.sheet_banner_updated), title = getString(R.string.title_alerter_success))
+                            requireContext().toastSuccess(getString(R.string.sheet_banner_updated))
                         }
                     } else {
                         startCropSheetBannerActivity(uri)
@@ -166,7 +168,7 @@ class UiSettingsActivity : BaseActivity() {
                         
                         extractAndSaveBannerColor(savedUri)
                         broadcastHomeBannerChanged()
-                        requireContext().snackbarSuccess(getString(R.string.home_banner_updated), title = getString(R.string.title_alerter_success))
+                        requireContext().toastSuccess(getString(R.string.home_banner_updated))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -185,7 +187,7 @@ class UiSettingsActivity : BaseActivity() {
                         val savedUri = saveToCache(cacheUri, "profile_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_PROFILE_BANNER_URI, savedUri.toString())
                         broadcastProfileChanged()
-                        requireContext().snackbarSuccess(getString(R.string.custom_banner_profile_set), title = getString(R.string.title_alerter_success))
+                        requireContext().toastSuccess(getString(R.string.custom_banner_profile_set))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -203,7 +205,7 @@ class UiSettingsActivity : BaseActivity() {
                         deleteOldFile(oldUri)
                         val savedUri = saveToCache(cacheUri, "sheet_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, savedUri.toString())
-                        requireContext().snackbarSuccess(getString(R.string.sheet_banner_updated), title = getString(R.string.title_alerter_success))
+                        requireContext().toastSuccess(getString(R.string.sheet_banner_updated))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -223,7 +225,7 @@ class UiSettingsActivity : BaseActivity() {
                         MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_URI, savedUri.toString())
                         updateIndicatorStyleEnabledState()
                         broadcastSelectedBannerChanged()
-                        requireContext().snackbarSuccess(getString(R.string.selected_banner_updated), title = getString(R.string.title_alerter_success))
+                        requireContext().toastSuccess(getString(R.string.selected_banner_updated))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -256,6 +258,28 @@ class UiSettingsActivity : BaseActivity() {
                 val enabled = newValue as Boolean
                 MmkvManager.encodeSettings(AppConfig.PREF_DYNAMIC_COLOR, enabled)
                 
+                if (enabled) {
+                    MmkvManager.encodeSettings(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)
+                    dynamicColorBanner?.isChecked = false
+                }
+                
+                dynamicColorBanner?.isEnabled = !enabled && showHomeBanner?.isChecked == true
+                appTheme?.isEnabled = !enabled
+                
+                activity?.recreate()
+                true
+            }
+
+            dynamicColorBanner?.setOnPreferenceChangeListener { _, newValue ->
+                val enabled = newValue as Boolean
+                MmkvManager.encodeSettings(AppConfig.PREF_DYNAMIC_COLOR_BANNER, enabled)
+                
+                if (enabled) {
+                    MmkvManager.encodeSettings(AppConfig.PREF_DYNAMIC_COLOR, false)
+                    dynamicColor?.isChecked = false
+                }
+                
+                dynamicColor?.isEnabled = !enabled
                 appTheme?.isEnabled = !enabled
                 
                 activity?.recreate()
@@ -413,7 +437,11 @@ class UiSettingsActivity : BaseActivity() {
 
         private fun extractAndSaveBannerColor(uri: Uri) {
             lifecycleScope.launch {
-                BannerColorExtractor.extractAndSave(requireContext(), uri) { _ -> }
+                BannerColorExtractor.extractAndSave(requireContext(), uri) { colorChanged ->
+                    if (colorChanged && MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)) {
+                        activity?.recreate()
+                    }
+                }
             }
         }
 
@@ -563,8 +591,21 @@ class UiSettingsActivity : BaseActivity() {
                     val checked = newValue as Boolean
                     MmkvManager.encodeSettings(AppConfig.PREF_SHOW_HOME_BANNER, checked)
                     
+                    val isDynamicColor = MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, false)
+                    dynamicColorBanner?.isEnabled = checked && !isDynamicColor
+                    
                     bannerHeightSlider?.isEnabled = checked
                     headerTopRowPaddingSlider?.isEnabled = checked
+                    
+                    if (!checked) {
+                        val isDynamicBannerActive = MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)
+                        if (isDynamicBannerActive) {
+                            MmkvManager.encodeSettings(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)
+                            dynamicColorBanner?.isChecked = false
+                            appTheme?.isEnabled = !isDynamicColor
+                            activity?.recreate()
+                        }
+                    }
                     
                     broadcastHomeBannerChanged()
                     true
@@ -589,6 +630,9 @@ class UiSettingsActivity : BaseActivity() {
                             MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_HOME_BANNER_URI, "")
                             MmkvManager.encodeSettings(AppConfig.PREF_BANNER_COLOR, 0)
                             
+                            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)) {
+                                activity?.recreate()
+                            }
                             broadcastHomeBannerChanged()
                             requireContext().snackbarSuccess(getString(R.string.home_banner_delete_summary), title = getString(R.string.title_alerter_success))
                         }
@@ -814,15 +858,19 @@ class UiSettingsActivity : BaseActivity() {
         override fun onStart() {
             super.onStart()
             val isDynamicColor = MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, false)
+            val isDynamicBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)
             val isShowHomeBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_HOME_BANNER, true)
             
-            appTheme?.isEnabled = !isDynamicColor
+            appTheme?.isEnabled = !isDynamicColor && !isDynamicBanner
             
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                 dynamicColor?.isEnabled = false
                 dynamicColor?.summary = requireContext().getString(R.string.summary_pref_dynamic_color_unavailable)
+                dynamicColorBanner?.isEnabled = false
+                dynamicColorBanner?.summary = requireContext().getString(R.string.summary_pref_dynamic_color_unavailable)
             } else {
-                dynamicColor?.isEnabled = true
+                dynamicColor?.isEnabled = !isDynamicBanner
+                dynamicColorBanner?.isEnabled = !isDynamicColor && isShowHomeBanner
             }
             
             bannerHeightSlider?.isEnabled = isShowHomeBanner
