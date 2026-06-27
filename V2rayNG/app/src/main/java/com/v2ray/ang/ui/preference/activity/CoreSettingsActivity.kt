@@ -9,6 +9,7 @@ import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
@@ -49,7 +50,7 @@ class CoreSettingsActivity : BaseActivity() {
         intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
             supportFragmentManager.executePendingTransactions()
             (supportFragmentManager.findFragmentById(R.id.settings_container) as? CoreSettingsFragment)
-                ?.scrollToAndHighlight(key)
+                ?.scrollToAndHighlight(key, findViewById(R.id.app_bar))
         }
     }
 

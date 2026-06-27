@@ -22,6 +22,7 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.v2ray.ang.AppConfig
@@ -84,7 +85,7 @@ class UiSettingsActivity : BaseActivity() {
         intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
             supportFragmentManager.executePendingTransactions()
             (supportFragmentManager.findFragmentById(R.id.settings_container) as? UiSettingsFragment)
-                ?.scrollToAndHighlight(key)
+                ?.scrollToAndHighlight(key, findViewById(R.id.app_bar))
         }
     }
 

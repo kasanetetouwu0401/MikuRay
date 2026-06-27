@@ -10,6 +10,7 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.VPN
@@ -52,7 +53,7 @@ class VpnSettingsActivity : BaseActivity() {
         intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
             supportFragmentManager.executePendingTransactions()
             (supportFragmentManager.findFragmentById(R.id.settings_container) as? VpnSettingsFragment)
-                ?.scrollToAndHighlight(key)
+                ?.scrollToAndHighlight(key, findViewById(R.id.app_bar))
         }
     }
 

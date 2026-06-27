@@ -8,6 +8,7 @@ import androidx.core.view.updatePadding
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
@@ -48,7 +49,7 @@ class AdvancedSettingsActivity : BaseActivity() {
         intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
             supportFragmentManager.executePendingTransactions()
             (supportFragmentManager.findFragmentById(R.id.settings_container) as? AdvancedSettingsFragment)
-                ?.scrollToAndHighlight(key)
+                ?.scrollToAndHighlight(key, findViewById(R.id.app_bar))
         }
     }
 
