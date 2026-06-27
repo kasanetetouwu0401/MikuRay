@@ -65,15 +65,15 @@ object ForegroundActivityTracker : Application.ActivityLifecycleCallbacks {
         resumedActivity = WeakReference(activity)
     }
 
-    override fun onActivityPaused(activity: Activity) {}
-
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
-    override fun onActivityStarted(activity: Activity) {}
-    override fun onActivityStopped(activity: Activity) {
+    override fun onActivityPaused(activity: Activity) {
         if (resumedActivity?.get() === activity) {
             resumedActivity = null
         }
     }
+
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+    override fun onActivityStarted(activity: Activity) {}
+    override fun onActivityStopped(activity: Activity) {}
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
     override fun onActivityDestroyed(activity: Activity) {}
 }
