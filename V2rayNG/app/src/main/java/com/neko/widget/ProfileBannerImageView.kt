@@ -13,7 +13,7 @@ import com.neko.shapeimageview.shader.SvgShader
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.util.BannerImageCache // Pastikan import ini sesuai dengan lokasi package-mu
+import com.v2ray.ang.util.BannerImageCache
 
 class ProfileBannerImageView @JvmOverloads constructor(
     context: Context,
@@ -107,17 +107,15 @@ class ProfileBannerImageView @JvmOverloads constructor(
         try {
             val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_PROFILE_BANNER_URI)
             
-            // Menggunakan fungsi Cache yang sudah kamu buat sebelumnya
             BannerImageCache.load(
                 context = context,
                 target = this,
-                namespace = "profile", // Namespace agar terpisah dari home/sheet
+                namespace = "profile",
                 uriString = uriString,
                 defaultDrawableRes = R.drawable.uwu_banner_profile
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            // Fallback aman jika terjadi error yang tidak terduga
             setImageResource(R.drawable.uwu_banner_profile)
         }
     }

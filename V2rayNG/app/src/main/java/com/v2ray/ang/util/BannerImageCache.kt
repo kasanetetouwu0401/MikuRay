@@ -8,29 +8,14 @@ import android.net.Uri
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 
-/**
- * Shared in-memory bitmap cache for banner images (home banner + sheet banners),
- * following the same anti-blink pattern already used by SelectedProfileBannerController.
- *
- * First load decodes via Glide (custom URI) or BitmapFactory (default drawable) once,
- * caches the resulting Bitmap, then every subsequent call for the same key sets the
- * bitmap directly with no async round-trip, no transition, and no flicker.
- */
 object BannerImageCache {
 
     private val bitmapCache = mutableMapOf<String, Bitmap>()
 
-    /**
-     * Loads a banner into [target].
-     *
-     * @param namespace distinguishes different banner contexts (e.g. "home", "sheet")
-     *                  so cache keys never collide between unrelated banners.
-     * @param uriString custom banner URI string, or null/blank to use [defaultDrawableRes]
-     * @param defaultDrawableRes drawable resource shown when there's no custom banner
-     */
     fun load(
         context: Context,
         target: ImageView,
@@ -76,11 +61,27 @@ object BannerImageCache {
                 .asBitmap()
                 .load(Uri.parse(uriString))
                 .diskCacheStrategy(DiskCacheStrategy.DATA)
+                .transition(BitmapTransitionOptions.withCrossFade(300))
                 .into(object : CustomTarget<Bitmap>() {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                         bitmapCache[cacheKey] = resource
-                        target.setImageBitmap(resource)
                         target.tag = tagKey
+
+                        var isTransitionHandled = false
+                        if (transition != null) {
+                            val viewAdapter = object : Transition.ViewAdapter {
+                                override fun getView() = target
+                                override fun getCurrentDrawable() = target.drawable
+                                override fun setDrawable(drawable: Drawable) {
+                                    target.setImageDrawable(drawable)
+                                }
+                            }
+                            isTransitionHandled = transition.transition(resource, viewAdapter)
+                        }
+
+                        if (!isTransitionHandled) {
+                            target.setImageBitmap(resource)
+                        }
                     }
 
                     override fun onLoadCleared(placeholder: Drawable?) {
@@ -98,27 +99,11 @@ object BannerImageCache {
         }
     }
 
-    /**
-     * Removes the cached bitmap for a specific banner URI from the in-memory cache,
-     * dropping our strong reference so it becomes eligible for GC once no ImageView
-     * is still displaying it. Call this when the user deletes a custom banner, right
-     * alongside clearing the MMKV pref / deleting the file.
-     *
-     * Note: this deliberately does NOT call bitmap.recycle(). The bitmap may still be
-     * actively set on a live ImageView (banner change broadcasts are delivered
-     * asynchronously), and recycling a bitmap a View is still drawing crashes with
-     * "Canvas: trying to use a recycled bitmap". Dropping the reference is enough —
-     * native memory is freed once nothing (cache or View) holds onto it anymore.
-     *
-     * @param namespace must match the namespace used in [load] (e.g. "home", "sheet")
-     * @param uriString the URI string that was previously loaded; safe to pass null/blank
-     */
     fun remove(namespace: String, uriString: String?) {
         if (uriString.isNullOrBlank()) return
         bitmapCache.remove("$namespace::$uriString")
     }
 
-    /** Call when a banner preference changes so stale cached bitmaps don't linger. */
     fun invalidate(namespace: String? = null) {
         if (namespace == null) {
             bitmapCache.clear()

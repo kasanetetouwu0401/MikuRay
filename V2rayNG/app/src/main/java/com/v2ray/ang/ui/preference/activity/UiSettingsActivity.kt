@@ -167,6 +167,7 @@ class UiSettingsActivity : BaseActivity() {
                     try {
                         val oldUri = MmkvManager.decodeSettingsString(AppConfig.PREF_PROFILE_BANNER_URI)
                         deleteOldFile(oldUri)
+                        BannerImageCache.remove("profile", oldUri)
                         val savedUri = saveToCache(cacheUri, "profile_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_PROFILE_BANNER_URI, savedUri.toString())
                         broadcastProfileChanged()
@@ -554,6 +555,7 @@ class UiSettingsActivity : BaseActivity() {
                         .setMessage(R.string.delete_custom_banner_profile_summary)
                         .setPositiveButton(android.R.string.ok) { _, _ ->
                             deleteOldFile(savedUri)
+                            BannerImageCache.remove("profile", savedUri)
                             MmkvManager.encodeSettings(AppConfig.PREF_PROFILE_BANNER_URI, "")
                             broadcastProfileChanged()
                             requireContext().snackbarSuccess(getString(R.string.delete_custom_banner_profile_summary), title = getString(R.string.title_alerter_success))
