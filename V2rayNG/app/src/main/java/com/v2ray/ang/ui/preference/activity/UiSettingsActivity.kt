@@ -147,9 +147,9 @@ class UiSettingsActivity : BaseActivity() {
                         val savedUri = saveToCache(cacheUri, "home_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_HOME_BANNER_URI, savedUri.toString())
                         
-                        extractAndSaveBannerColor(savedUri)
-                        broadcastHomeBannerChanged()
                         requireContext().snackbarSuccess(getString(R.string.home_banner_updated), title = getString(R.string.title_alerter_success))
+                        broadcastHomeBannerChanged()
+                        extractAndSaveBannerColor(savedUri)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -420,6 +420,7 @@ class UiSettingsActivity : BaseActivity() {
             lifecycleScope.launch {
                 BannerColorExtractor.extractAndSave(requireContext(), uri) { colorChanged ->
                     if (colorChanged && MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)) {
+                        activity?.recreate()
                     }
                 }
             }
