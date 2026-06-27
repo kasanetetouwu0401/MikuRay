@@ -360,65 +360,26 @@ class MainActivity : HelperBaseActivity(),
         fun loadBannerImage() {
             if (isDestroyed || isFinishing) return
 
-            val headerVideo = binding.root.findViewById<android.widget.VideoView>(R.id.header_video)
-            
             val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_HOME_BANNER_URI)
             val targetTag = if (uriString.isNullOrBlank()) TAG_HOME_BANNER_DEFAULT else uriString
             if (headerImage.tag == targetTag) return
-
             if (!uriString.isNullOrBlank()) {
                 val isGif = uriString.lowercase().endsWith(".gif")
-                val isVideo = uriString.lowercase().endsWith(".mp4") || uriString.lowercase().endsWith(".webm")
-
-                if (isVideo && headerVideo != null) {
-                    headerImage.visibility = View.GONE
-                    headerVideo.visibility = View.VISIBLE
-                    headerVideo.setVideoURI(Uri.parse(uriString))
-                    headerVideo.setOnPreparedListener { mp ->
-                        mp.isLooping = true
-                        mp.setVolume(0f, 0f)
-
-                        mp.setOnVideoSizeChangedListener { _, videoWidth, videoHeight ->
-                            val viewWidth = headerVideo.width.toFloat()
-                            val viewHeight = headerVideo.height.toFloat()
-
-                            if (viewWidth > 0f && viewHeight > 0f) {
-                                val videoRatio = videoWidth.toFloat() / videoHeight.toFloat()
-                                val viewRatio = viewWidth / viewHeight
-
-                                if (videoRatio > viewRatio) {
-                                    headerVideo.scaleX = videoRatio / viewRatio
-                                    headerVideo.scaleY = 1f
-                                } else {
-                                    headerVideo.scaleX = 1f
-                                    headerVideo.scaleY = viewRatio / videoRatio
-                                }
-                            }
-                        }
-
-                        mp.start()
-                    }
+                if (isGif) {
+                    Glide.with(this@MainActivity)
+                        .asGif()
+                        .load(Uri.parse(uriString))
+                        .diskCacheStrategy(DiskCacheStrategy.DATA)
+                        .error(R.drawable.uwu_banner_home)
+                        .into(headerImage)
                 } else {
-                    headerVideo?.visibility = View.GONE
-                    headerImage.visibility = View.VISIBLE
-                    if (isGif) {
-                        Glide.with(this@MainActivity)
-                            .asGif()
-                            .load(Uri.parse(uriString))
-                            .diskCacheStrategy(DiskCacheStrategy.DATA)
-                            .error(R.drawable.uwu_banner_home)
-                            .into(headerImage)
-                    } else {
-                        Glide.with(this@MainActivity)
-                            .load(Uri.parse(uriString))
-                            .diskCacheStrategy(DiskCacheStrategy.DATA)
-                            .error(R.drawable.uwu_banner_home)
-                            .into(headerImage)
-                    }
+                    Glide.with(this@MainActivity)
+                        .load(Uri.parse(uriString))
+                        .diskCacheStrategy(DiskCacheStrategy.DATA)
+                        .error(R.drawable.uwu_banner_home)
+                        .into(headerImage)
                 }
             } else {
-                headerVideo?.visibility = View.GONE
-                headerImage.visibility = View.VISIBLE
                 Glide.with(this@MainActivity).clear(headerImage)
                 headerImage.setImageResource(R.drawable.uwu_banner_home)
             }

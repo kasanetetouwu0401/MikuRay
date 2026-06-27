@@ -46,14 +46,6 @@
                         app:cardCornerRadius="19.0dip"
                         app:cardElevation="0.0dip"
                         app:strokeWidth="0.0dip">
-                        
-                        <VideoView
-                            android:id="@+id/video_banner_sheet"
-                            android:layout_width="match_parent"
-                            android:layout_height="150.0dip"
-                            android:layout_gravity="center"
-                            android:visibility="gone" />
-
                         <ImageView
                             android:id="@+id/img_banner_sheet"
                             android:layout_width="fill_parent"
