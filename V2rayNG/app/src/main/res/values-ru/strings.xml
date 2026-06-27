@@ -143,6 +143,10 @@
     <!-- PerAppProxyActivity -->
     <string name="msg_dialog_progress">Загрузка</string>
     <string name="menu_item_search">Поиск</string>
+    <string name="menu_item_search_preferences">Поиск настроек</string>
+    <string name="preference_search_hint">Поиск настроек</string>
+    <string name="preference_search_empty">Настройки не найдены</string>
+    <string name="preference_search_empty_query">Начните вводить текст для поиска по всем настройкам</string>
     <string name="menu_item_select_all">Выбрать все</string>
     <string name="menu_item_invert_selection">Инвертировать выбор</string>
     <string name="msg_enter_keywords">Введите ключевые слова</string>

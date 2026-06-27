@@ -3,6 +3,8 @@ package com.v2ray.ang.ui.preference.activity
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
@@ -44,6 +46,19 @@ class SettingsActivity : BaseActivity() {
                 .replace(R.id.settings_container, SettingsFragment())
                 .commit()
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_settings, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.action_search_preferences -> {
+            startActivity(android.content.Intent(this, PreferenceSearchActivity::class.java))
+            true
+        }
+        else -> super.onOptionsItemSelected(item)
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {

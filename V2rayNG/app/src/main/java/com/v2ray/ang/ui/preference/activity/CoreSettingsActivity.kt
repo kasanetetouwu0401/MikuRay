@@ -16,6 +16,7 @@ import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
 import com.v2ray.ang.ui.BaseActivity
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
+import com.v2ray.ang.ui.preference.scrollToAndHighlight
 
 class CoreSettingsActivity : BaseActivity() {
 
@@ -43,6 +44,12 @@ class CoreSettingsActivity : BaseActivity() {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.settings_container, CoreSettingsFragment())
                 .commit()
+        }
+
+        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
+            supportFragmentManager.executePendingTransactions()
+            (supportFragmentManager.findFragmentById(R.id.settings_container) as? CoreSettingsFragment)
+                ?.scrollToAndHighlight(key)
         }
     }
 

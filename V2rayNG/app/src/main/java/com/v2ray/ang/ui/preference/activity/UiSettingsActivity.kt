@@ -43,6 +43,7 @@ import com.v2ray.ang.ui.dialog.BannerHeightSliderDialog
 import com.v2ray.ang.ui.dialog.HeaderTopRowPaddingDialog
 import com.v2ray.ang.ui.preference.CustomBannerPreference
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
+import com.v2ray.ang.ui.preference.scrollToAndHighlight
 import com.v2ray.ang.util.BannerColorExtractor
 import com.v2ray.ang.util.ThemeManager
 import com.v2ray.ang.util.WeatherHelper
@@ -78,6 +79,12 @@ class UiSettingsActivity : BaseActivity() {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.settings_container, UiSettingsFragment())
                 .commit()
+        }
+
+        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
+            supportFragmentManager.executePendingTransactions()
+            (supportFragmentManager.findFragmentById(R.id.settings_container) as? UiSettingsFragment)
+                ?.scrollToAndHighlight(key)
         }
     }
 

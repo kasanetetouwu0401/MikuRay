@@ -157,6 +157,10 @@
     <!-- PerAppProxyActivity -->
     <string name="msg_dialog_progress">Loading</string>
     <string name="menu_item_search">Search</string>
+    <string name="menu_item_search_preferences">Search settings</string>
+    <string name="preference_search_hint">Search settings</string>
+    <string name="preference_search_empty">No matching settings found</string>
+    <string name="preference_search_empty_query">Start typing to search across all settings</string>
     <string name="menu_item_select_all">Select all</string>
     <string name="menu_item_invert_selection">Invert selection</string>
     <string name="msg_enter_keywords">Enter keywords</string>
