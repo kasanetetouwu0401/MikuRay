@@ -557,8 +557,6 @@
     <string name="select_photo">Pilih Foto</string>
     <string name="pref_show_splash_title">Tampilin splash screen</string>
     <string name="pref_show_splash_summary">Tampilin splash screen pas aplikasi dibuka</string>
-    <string name="title_pref_dynamic_color_banner">Tema Dinamis dari Banner Beranda</string>
-    <string name="summary_pref_dynamic_color_banner">Skema warna tema bakal otomatis nyesuaiin sama gambar Banner Beranda kamu.</string>
     <string name="title_pref_keep_awake">Bikin HP tetep aktif</string>
     <string name="summary_pref_keep_awake">Nahan partial wake lock pas VPN lagi nyambung. Dibutuhin buat HP Xiaomi/HyperOS; kalau di Samsung/Pixel malah bikin boros baterai — mending biarin mati aja.</string>
     <string name="title_reset_traffic">Reset Penggunaan Data</string>

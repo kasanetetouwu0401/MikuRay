@@ -8,7 +8,6 @@ class ThemeStateManager(private val activity: Activity) {
 
     private var currentThemeKey: String = "8"
     private var currentDynamicColor: Boolean = false
-    private var currentDynamicBanner: Boolean = false
     private var currentTrueBlack: Boolean = false
     private var currentUseCustomColor: Boolean = false
     private var currentCustomColor: Int = 0
@@ -30,7 +29,6 @@ class ThemeStateManager(private val activity: Activity) {
     private fun loadState() {
         currentThemeKey = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "8"
         currentDynamicColor = MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, false)
-        currentDynamicBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)
         currentTrueBlack = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRUE_BLACK, false)
         currentUseCustomColor = MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_CUSTOM_COLOR, false)
         currentCustomColor = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_COLOR, 0)
@@ -49,7 +47,6 @@ class ThemeStateManager(private val activity: Activity) {
     fun checkThemeChangedAndRecreate() {
         val newThemeKey = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "8"
         val newDynamicColor = MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, false)
-        val newDynamicBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)
         val newTrueBlack = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRUE_BLACK, false)
         val newUseCustomColor = MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_CUSTOM_COLOR, false)
         val newCustomColor = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_COLOR, 0)
@@ -66,7 +63,6 @@ class ThemeStateManager(private val activity: Activity) {
 
         if (currentThemeKey != newThemeKey ||
             currentDynamicColor != newDynamicColor ||
-            currentDynamicBanner != newDynamicBanner ||
             currentTrueBlack != newTrueBlack ||
             currentUseCustomColor != newUseCustomColor ||
             currentCustomColor != newCustomColor ||

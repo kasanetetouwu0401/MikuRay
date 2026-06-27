@@ -25,40 +25,20 @@ object ThemeManager {
         val useCustom   = MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_CUSTOM_COLOR, false)
         val customColor = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_COLOR, 0)
         val isTrueBlack = isDarkMode(activity) && MmkvManager.decodeSettingsBool(AppConfig.PREF_TRUE_BLACK, false)
-        val isDynamicBanner = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)
-        val bannerColor = MmkvManager.decodeSettingsInt(AppConfig.PREF_BANNER_COLOR, 0)
-
-        var themeApplied = false
-
-        if (isDynamicBanner && bannerColor != 0) {
-            val builder = DynamicColorsOptions.Builder()
-                .setContentBasedSource(bannerColor)
-            
-            if (isTrueBlack) {
-                builder.setThemeOverlay(R.style.ThemeOverlay_App_TrueBlack)
+        when {
+            isDynamic && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                DynamicColors.applyToActivityIfAvailable(activity)
             }
-            
-            DynamicColors.applyToActivityIfAvailable(activity, builder.build())
-            themeApplied = true
-        }
-
-        if (!themeApplied) {
-            when {
-                isDynamic && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-                    DynamicColors.applyToActivityIfAvailable(activity)
-                }
-                useCustom && customColor != 0 -> {
-                    applyCustomColorTheme(activity, customColor)
-                }
-                else -> {
-                    val key = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "8"
-                    activity.setTheme(getThemeStyleRes(key))
-                }
+            useCustom && customColor != 0 -> {
+                applyCustomColorTheme(activity, customColor)
+            }
+            else -> {
+                val key = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "8"
+                activity.setTheme(getThemeStyleRes(key))
             }
         }
 
-        if (isTrueBlack && !themeApplied) {
+        if (isTrueBlack) {
             activity.theme.applyStyle(R.style.ThemeOverlay_App_TrueBlack, true)
         }
     }
