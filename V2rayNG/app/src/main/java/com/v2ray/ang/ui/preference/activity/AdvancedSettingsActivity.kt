@@ -15,7 +15,6 @@ import com.v2ray.ang.helper.MmkvPreferenceDataStore
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.ui.BaseActivity
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
-import com.v2ray.ang.ui.preference.scrollToAndHighlight
 
 class AdvancedSettingsActivity : BaseActivity() {
 
@@ -29,7 +28,7 @@ class AdvancedSettingsActivity : BaseActivity() {
             val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
             view.updatePadding(
                 top    = maxOf(systemBars.top,    displayCutout.top),
-                bottom = maxOf(systemBars.bottom, displayCutout.bottom),
+                bottom = maxOf(systemBars.bottom,    displayCutout.bottom),
                 left   = maxOf(systemBars.left,   displayCutout.left),
                 right  = maxOf(systemBars.right,  displayCutout.right)
             )
@@ -40,14 +39,8 @@ class AdvancedSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_advanced))
 
         if (savedInstanceState == null) {
-            val fragment = AdvancedSettingsFragment().apply {
-                arguments = Bundle().apply {
-                    putString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY,
-                        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY))
-                }
-            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, fragment)
+                .replace(R.id.settings_container, AdvancedSettingsFragment())
                 .commit()
         }
     }
@@ -99,14 +92,6 @@ class AdvancedSettingsActivity : BaseActivity() {
                 }
             }
             preferenceScreen?.let { traverse(it) }
-        }
-
-        override fun onStart() {
-            super.onStart()
-            arguments?.getString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
-                scrollToAndHighlight(key)
-                arguments?.remove(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)
-            }
         }
     }
 

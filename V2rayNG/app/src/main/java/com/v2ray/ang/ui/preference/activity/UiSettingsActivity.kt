@@ -27,6 +27,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.extension.snackbarSuccess
+import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
@@ -43,7 +44,6 @@ import com.v2ray.ang.ui.dialog.BannerHeightSliderDialog
 import com.v2ray.ang.ui.dialog.HeaderTopRowPaddingDialog
 import com.v2ray.ang.ui.preference.CustomBannerPreference
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
-import com.v2ray.ang.ui.preference.scrollToAndHighlight
 import com.v2ray.ang.util.BannerColorExtractor
 import com.v2ray.ang.util.ThemeManager
 import com.v2ray.ang.util.WeatherHelper
@@ -76,14 +76,8 @@ class UiSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_ui_settings))
 
         if (savedInstanceState == null) {
-            val fragment = UiSettingsFragment().apply {
-                arguments = Bundle().apply {
-                    putString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY,
-                        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY))
-                }
-            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, fragment)
+                .replace(R.id.settings_container, UiSettingsFragment())
                 .commit()
         }
     }
@@ -174,7 +168,7 @@ class UiSettingsActivity : BaseActivity() {
                         
                         extractAndSaveBannerColor(savedUri)
                         broadcastHomeBannerChanged()
-                        requireContext().snackbarSuccess(getString(R.string.home_banner_updated), title = getString(R.string.title_alerter_success))
+                        requireContext().toastSuccess(getString(R.string.home_banner_updated))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -193,7 +187,7 @@ class UiSettingsActivity : BaseActivity() {
                         val savedUri = saveToCache(cacheUri, "profile_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_PROFILE_BANNER_URI, savedUri.toString())
                         broadcastProfileChanged()
-                        requireContext().snackbarSuccess(getString(R.string.custom_banner_profile_set), title = getString(R.string.title_alerter_success))
+                        requireContext().toastSuccess(getString(R.string.custom_banner_profile_set))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -211,7 +205,7 @@ class UiSettingsActivity : BaseActivity() {
                         deleteOldFile(oldUri)
                         val savedUri = saveToCache(cacheUri, "sheet_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, savedUri.toString())
-                        requireContext().snackbarSuccess(getString(R.string.sheet_banner_updated), title = getString(R.string.title_alerter_success))
+                        requireContext().toastSuccess(getString(R.string.sheet_banner_updated))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -231,7 +225,7 @@ class UiSettingsActivity : BaseActivity() {
                         MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_URI, savedUri.toString())
                         updateIndicatorStyleEnabledState()
                         broadcastSelectedBannerChanged()
-                        requireContext().snackbarSuccess(getString(R.string.selected_banner_updated), title = getString(R.string.title_alerter_success))
+                        requireContext().toastSuccess(getString(R.string.selected_banner_updated))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -893,11 +887,6 @@ class UiSettingsActivity : BaseActivity() {
             val savedBottomRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_RADIUS, AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS)
             val savedBottomRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS)
             blurBottomIntensity?.updateSummary(savedBottomRadius, savedBottomRounds)
-
-            arguments?.getString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
-                scrollToAndHighlight(key)
-                arguments?.remove(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)
-            }
         }
 
         private fun updateTrueBlackState(isNight: Boolean) {

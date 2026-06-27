@@ -16,7 +16,6 @@ import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
 import com.v2ray.ang.ui.BaseActivity
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
-import com.v2ray.ang.ui.preference.scrollToAndHighlight
 
 class MuxSettingsActivity : BaseActivity() {
 
@@ -30,7 +29,7 @@ class MuxSettingsActivity : BaseActivity() {
             val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
             view.updatePadding(
                 top    = maxOf(systemBars.top,    displayCutout.top),
-                bottom = maxOf(systemBars.bottom, displayCutout.bottom),
+                bottom = maxOf(systemBars.bottom,    displayCutout.bottom),
                 left   = maxOf(systemBars.left,   displayCutout.left),
                 right  = maxOf(systemBars.right,  displayCutout.right)
             )
@@ -41,14 +40,8 @@ class MuxSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_mux_settings))
 
         if (savedInstanceState == null) {
-            val fragment = MuxSettingsFragment().apply {
-                arguments = Bundle().apply {
-                    putString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY,
-                        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY))
-                }
-            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, fragment)
+                .replace(R.id.settings_container, MuxSettingsFragment())
                 .commit()
         }
     }
@@ -113,10 +106,6 @@ class MuxSettingsActivity : BaseActivity() {
         override fun onStart() {
             super.onStart()
             updateMux(MmkvManager.decodeSettingsBool(AppConfig.PREF_MUX_ENABLED, false))
-            arguments?.getString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
-                scrollToAndHighlight(key)
-                arguments?.remove(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)
-            }
         }
 
         private fun updateMux(enabled: Boolean) {

@@ -139,10 +139,6 @@
     <!-- PerAppProxyActivity -->
     <string name="msg_dialog_progress">正在加载</string>
     <string name="menu_item_search">搜索</string>
-    <string name="menu_item_search_preferences">搜索设置</string>
-    <string name="preference_search_hint">搜索设置</string>
-    <string name="preference_search_empty">未找到匹配的设置</string>
-    <string name="preference_search_empty_query">输入关键字以搜索所有设置</string>
     <string name="menu_item_select_all">全选</string>
     <string name="menu_item_invert_selection">反选</string>
     <string name="msg_enter_keywords">输入关键字</string>

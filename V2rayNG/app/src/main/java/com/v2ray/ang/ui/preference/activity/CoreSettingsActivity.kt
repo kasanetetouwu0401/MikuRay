@@ -16,7 +16,6 @@ import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
 import com.v2ray.ang.ui.BaseActivity
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
-import com.v2ray.ang.ui.preference.scrollToAndHighlight
 
 class CoreSettingsActivity : BaseActivity() {
 
@@ -30,7 +29,7 @@ class CoreSettingsActivity : BaseActivity() {
             val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
             view.updatePadding(
                 top    = maxOf(systemBars.top,    displayCutout.top),
-                bottom = maxOf(systemBars.bottom, displayCutout.bottom),
+                bottom = maxOf(systemBars.bottom,    displayCutout.bottom),
                 left   = maxOf(systemBars.left,   displayCutout.left),
                 right  = maxOf(systemBars.right,  displayCutout.right)
             )
@@ -41,14 +40,8 @@ class CoreSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_core_settings))
 
         if (savedInstanceState == null) {
-            val fragment = CoreSettingsFragment().apply {
-                arguments = Bundle().apply {
-                    putString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY,
-                        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY))
-                }
-            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, fragment)
+                .replace(R.id.settings_container, CoreSettingsFragment())
                 .commit()
         }
     }
@@ -121,10 +114,6 @@ class CoreSettingsActivity : BaseActivity() {
             super.onStart()
             updateEnableLocalProxy(MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_LOCAL_PROXY, true))
             updateDynamicSocksPort(MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_SOCKS_PORT, false))
-            arguments?.getString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
-                scrollToAndHighlight(key)
-                arguments?.remove(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)
-            }
         }
 
         private fun updateEnableLocalProxy(enabled: Boolean) {

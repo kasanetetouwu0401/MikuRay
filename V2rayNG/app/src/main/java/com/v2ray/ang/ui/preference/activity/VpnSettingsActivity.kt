@@ -19,7 +19,6 @@ import com.v2ray.ang.helper.MmkvPreferenceDataStore
 import com.v2ray.ang.ui.BaseActivity
 import com.v2ray.ang.ui.PerAppProxyActivity
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
-import com.v2ray.ang.ui.preference.scrollToAndHighlight
 
 class VpnSettingsActivity : BaseActivity() {
 
@@ -33,7 +32,7 @@ class VpnSettingsActivity : BaseActivity() {
             val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
             view.updatePadding(
                 top    = maxOf(systemBars.top,    displayCutout.top),
-                bottom = maxOf(systemBars.bottom, displayCutout.bottom),
+                bottom = maxOf(systemBars.bottom,    displayCutout.bottom),
                 left   = maxOf(systemBars.left,   displayCutout.left),
                 right  = maxOf(systemBars.right,  displayCutout.right)
             )
@@ -44,14 +43,8 @@ class VpnSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_vpn_settings))
 
         if (savedInstanceState == null) {
-            val fragment = VpnSettingsFragment().apply {
-                arguments = Bundle().apply {
-                    putString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY,
-                        intent.getStringExtra(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY))
-                }
-            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, fragment)
+                .replace(R.id.settings_container, VpnSettingsFragment())
                 .commit()
         }
     }
@@ -136,10 +129,6 @@ class VpnSettingsActivity : BaseActivity() {
             if (isVpnMode) {
                 updateLocalDns(MmkvManager.decodeSettingsBool(AppConfig.PREF_LOCAL_DNS_ENABLED, false))
                 updateHevTunSettings(MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_HEV_TUNNEL, true))
-            }
-            arguments?.getString(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)?.let { key ->
-                scrollToAndHighlight(key)
-                arguments?.remove(PreferenceSearchActivity.EXTRA_HIGHLIGHT_KEY)
             }
         }
 

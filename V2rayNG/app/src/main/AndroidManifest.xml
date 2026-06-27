@@ -129,10 +129,6 @@
             android:name=".ui.preference.activity.AdvancedSettingsActivity"
             android:exported="false" />           
         <activity
-            android:name=".ui.preference.activity.PreferenceSearchActivity"
-            android:exported="false"
-            android:windowSoftInputMode="stateAlwaysVisible" />
-        <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:exported="false" />      
         <activity

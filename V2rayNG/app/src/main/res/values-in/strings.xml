@@ -139,10 +139,6 @@
 
     <string name="msg_dialog_progress">Sabar, lagi loading...</string>
     <string name="menu_item_search">Cari</string>
-    <string name="menu_item_search_preferences">Cari pengaturan</string>
-    <string name="preference_search_hint">Cari pengaturan</string>
-    <string name="preference_search_empty">Pengaturan tidak ditemukan</string>
-    <string name="preference_search_empty_query">Mulai mengetik untuk mencari di semua pengaturan</string>
     <string name="menu_item_select_all">Pilih semua</string>
     <string name="menu_item_invert_selection">Balik pilihan</string>
     <string name="msg_enter_keywords">Ketik kata kuncinya</string>
