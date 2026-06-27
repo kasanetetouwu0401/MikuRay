@@ -6,7 +6,9 @@ import android.view.animation.LinearInterpolator
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroupAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.AppBarLayout // Tambahkan import AppBarLayout
 import com.google.android.material.card.MaterialCardView
+import com.v2ray.ang.R // Tambahkan import R untuk mengakses R.id.app_bar
 import com.v2ray.ang.util.getColorAttr
 
 /**
@@ -18,6 +20,10 @@ import com.v2ray.ang.util.getColorAttr
  */
 fun PreferenceFragmentCompat.scrollToAndHighlight(key: String?) {
     if (key.isNullOrBlank()) return
+
+    // 1. Instruksikan AppBarLayout untuk collapse (mengecil) secara terprogram
+    // Parameter (false, true) = expanded diset ke false, dengan animasi true
+    activity?.findViewById<AppBarLayout>(R.id.app_bar)?.setExpanded(false, true)
 
     val recyclerView = listView ?: return
 
