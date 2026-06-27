@@ -7,9 +7,7 @@ import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.TransitionDrawable
 import android.net.Uri
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -31,7 +29,7 @@ class SelectedProfileBannerController(private val context: Context) {
     fun hasCustomBanner(): Boolean =
         !MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI).isNullOrEmpty()
 
-    fun hasBanner(): Boolean = true
+    fun hasBanner(): Boolean = true // always has at least the default banner
 
     fun applyTo(target: View, cornerRadiusDp: Float = 16f) {
         val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI)
@@ -51,6 +49,7 @@ class SelectedProfileBannerController(private val context: Context) {
 
         bitmapCache[bitmapKey]?.let { cached ->
             target.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+            
             target.background = CenterCropDimDrawable(cached, dimColorFor(dimPercent), cornerRadiusPx)
             target.setTag(TAG_KEY, tagKey)
             return
@@ -65,23 +64,10 @@ class SelectedProfileBannerController(private val context: Context) {
                 .into(object : CustomTarget<Bitmap>() {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                         bitmapCache[bitmapKey] = resource
+                        
                         target.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
                         
-                        val newDrawable = CenterCropDimDrawable(resource, dimColorFor(dimPercent), cornerRadiusPx)
-                        
-                        val currentDrawable = target.background ?: ColorDrawable(Color.TRANSPARENT)
-                        
-                        val baseOldDrawable = if (currentDrawable is TransitionDrawable) {
-                            currentDrawable.getDrawable(1) 
-                        } else {
-                            currentDrawable
-                        }
-
-                        val transitionDrawable = TransitionDrawable(arrayOf(baseOldDrawable, newDrawable))
-                        transitionDrawable.isCrossFadeEnabled = true
-                        target.background = transitionDrawable
-                        transitionDrawable.startTransition(300)
-
+                        target.background = CenterCropDimDrawable(resource, dimColorFor(dimPercent), cornerRadiusPx)
                         target.setTag(TAG_KEY, tagKey)
                     }
 
@@ -121,21 +107,7 @@ class SelectedProfileBannerController(private val context: Context) {
             if (bitmap != null) {
                 bitmapCache[cacheKey] = bitmap
                 target.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-                
-                val newDrawable = CenterCropDimDrawable(bitmap, dimColorFor(dimPercent), cornerRadiusPx)
-                val currentDrawable = target.background ?: ColorDrawable(Color.TRANSPARENT)
-                
-                val baseOldDrawable = if (currentDrawable is TransitionDrawable) {
-                    currentDrawable.getDrawable(1) 
-                } else {
-                    currentDrawable
-                }
-
-                val transitionDrawable = TransitionDrawable(arrayOf(baseOldDrawable, newDrawable))
-                transitionDrawable.isCrossFadeEnabled = true
-                target.background = transitionDrawable
-                transitionDrawable.startTransition(300)
-                
+                target.background = CenterCropDimDrawable(bitmap, dimColorFor(dimPercent), cornerRadiusPx)
                 target.setTag(TAG_KEY, tagKey)
             }
         } catch (e: Exception) {
@@ -254,7 +226,7 @@ class SelectedProfileBannerController(private val context: Context) {
         private val bitmapCache = mutableMapOf<String, Bitmap>()
 
         fun broadcastChanged(context: Context) {
-            bitmapCache.clear()
+            bitmapCache.clear() // clears custom + default banner cache
             context.sendBroadcast(Intent(AppConfig.BROADCAST_ACTION_SELECTED_BANNER_CHANGED))
         }
     }
