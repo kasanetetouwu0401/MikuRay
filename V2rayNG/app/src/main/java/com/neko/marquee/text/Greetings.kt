@@ -5,7 +5,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.media.AudioManager
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
@@ -33,9 +32,6 @@ class Greetings @JvmOverloads constructor(
         context.getSystemService(Context.MEDIA_SESSION_SERVICE) as? MediaSessionManager
     }
 
-    private val audioManager: AudioManager? by lazy {
-        context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
-    }
 
     private val mediaListenerComponent by lazy {
         ComponentName(context, MediaListenerService::class.java)
@@ -242,25 +238,12 @@ class Greetings @JvmOverloads constructor(
                     showNowPlaying(title, artist)
                     return
                 }
-                // Controller found but metadata is empty — show generic rather than greeting
-                if (audioManager?.isMusicActive == true) {
-                    text = context.getString(R.string.uwu_now_playing_generic)
-                    isSelected = false; isSelected = true
-                    return
-                }
             }
         }
 
         // 2. Fallback: legacy music broadcast (no permission needed)
         if (broadcastPlaying && !broadcastTitle.isNullOrBlank()) {
             showNowPlaying(broadcastTitle!!, broadcastArtist)
-            return
-        }
-
-        // 3. Last resort: AudioManager music-active flag
-        if (audioManager?.isMusicActive == true) {
-            text = context.getString(R.string.uwu_now_playing_generic)
-            isSelected = false; isSelected = true
             return
         }
 
