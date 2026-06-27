@@ -119,14 +119,27 @@ class Greetings @JvmOverloads constructor(
         super.onAttachedToWindow()
         isSelected = true
 
-        context.registerReceiver(timeReceiver, IntentFilter().apply {
-            addAction(Intent.ACTION_TIME_TICK)
-            addAction(Intent.ACTION_TIME_CHANGED)
-            addAction(Intent.ACTION_TIMEZONE_CHANGED)
-        })
+        // TIME_TICK etc. are protected system broadcasts — NOT_EXPORTED is correct here
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(timeReceiver, IntentFilter().apply {
+                addAction(Intent.ACTION_TIME_TICK)
+                addAction(Intent.ACTION_TIME_CHANGED)
+                addAction(Intent.ACTION_TIMEZONE_CHANGED)
+            }, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            context.registerReceiver(timeReceiver, IntentFilter().apply {
+                addAction(Intent.ACTION_TIME_TICK)
+                addAction(Intent.ACTION_TIME_CHANGED)
+                addAction(Intent.ACTION_TIMEZONE_CHANGED)
+            })
+        }
 
-        // Register music broadcast receiver — catches legacy + modern player intents
-        context.registerReceiver(musicReceiver, buildMusicIntentFilter())
+        // Music broadcasts come from other apps — must be EXPORTED on API 33+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(musicReceiver, buildMusicIntentFilter(), Context.RECEIVER_EXPORTED)
+        } else {
+            context.registerReceiver(musicReceiver, buildMusicIntentFilter())
+        }
 
         registerMediaSessionListener()
         refreshNowPlaying()
