@@ -63,11 +63,16 @@ class SelectedProfileBannerController(private val context: Context) {
                 .diskCacheStrategy(DiskCacheStrategy.DATA)
                 .into(object : CustomTarget<Bitmap>() {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                        bitmapCache[bitmapKey] = resource
-                        
+                        val safeCopy = try {
+                            resource.copy(resource.config ?: Bitmap.Config.ARGB_8888, false)
+                        } catch (e: Exception) {
+                            resource
+                        }
+                        bitmapCache[bitmapKey] = safeCopy
+
                         target.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-                        
-                        target.background = CenterCropDimDrawable(resource, dimColorFor(dimPercent), cornerRadiusPx)
+
+                        target.background = CenterCropDimDrawable(safeCopy, dimColorFor(dimPercent), cornerRadiusPx)
                         target.setTag(TAG_KEY, tagKey)
                     }
 
@@ -147,6 +152,7 @@ class SelectedProfileBannerController(private val context: Context) {
         override fun onBoundsChange(bounds: android.graphics.Rect) {
             super.onBoundsChange(bounds)
             if (bounds.width() <= 0 || bounds.height() <= 0) return
+            if (bitmap.isRecycled) return
 
             val bw = bitmap.width.toFloat()
             val bh = bitmap.height.toFloat()
@@ -176,6 +182,7 @@ class SelectedProfileBannerController(private val context: Context) {
 
         override fun draw(canvas: android.graphics.Canvas) {
             if (bounds.width() <= 0 || bounds.height() <= 0) return
+            if (bitmap.isRecycled) return
 
             if (cornerRadius > 0f) {
                 canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, bitmapPaint)
@@ -226,7 +233,7 @@ class SelectedProfileBannerController(private val context: Context) {
         private val bitmapCache = mutableMapOf<String, Bitmap>()
 
         fun broadcastChanged(context: Context) {
-            bitmapCache.clear() // clears custom + default banner cache
+            bitmapCache.clear()
             context.sendBroadcast(Intent(AppConfig.BROADCAST_ACTION_SELECTED_BANNER_CHANGED))
         }
     }
