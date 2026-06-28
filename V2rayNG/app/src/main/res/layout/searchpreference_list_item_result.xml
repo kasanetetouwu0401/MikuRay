@@ -13,7 +13,6 @@
         app:strokeWidth="0dp"
         app:rippleColor="?colorPrimary"
         app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent"
-        app:checkable="true"
         app:contentPadding="16dp">
 
     <LinearLayout
