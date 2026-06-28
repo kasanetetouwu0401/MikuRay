@@ -514,12 +514,12 @@
     <string name="indicator_style_title">Pilih Model Indikator</string>
     <string name="pref_indicator_style_title">Model Indikator Server</string>
     <string name="pref_indicator_style_summary">Pilih tampilan indikator buat server yang lagi aktif</string>
-    <string name="summary_navigate_ui_settings">UI umum, tema, tampilan, chip pencarian, blur, banner, dan suara</string> 
-    <string name="summary_navigate_vpn_settings">IPv6, keep awake, DNS, HTTP proxy, bypass LAN, interface, MTU, Hev TUN, dan proxy per aplikasi</string>   
-    <string name="summary_navigate_core_settings">Sniffing, route only, proxy lokal/SOCKS, DNS, level log, resolusi domain, dan file geo</string>
-    <string name="summary_navigate_mux_settings">Status mux, konkurensi TCP/XUDP, dan penanganan QUIC</string>
-    <string name="summary_navigate_fragment_settings">Status fragment, panjang, interval, dan paket</string>
-    <string name="summary_navigate_advanced_settings">Auto-start, aksi auto-test, URL API ping/IP, strategi routing, mode, dan kirim HWID</string>
+    <string name="summary_navigate_ui_settings">UI umum, tema, tampilan, chip pencarian, blur, banner, suara, dll.</string> 
+    <string name="summary_navigate_vpn_settings">IPv6, keep awake, DNS, HTTP proxy, bypass LAN, interface, MTU, Hev TUN, timer TCP/WS, proxy per aplikasi, mode Root, dll.</string>   
+    <string name="summary_navigate_core_settings">Sniffing, route only, proxy lokal/sharing, SOCKS, DNS, level log, resolusi domain, file geo, dll.</string>
+    <string name="summary_navigate_mux_settings">Status mux, konkurensi, konkurensi XUDP, penanganan QUIC, dll.</string>
+    <string name="summary_navigate_fragment_settings">Status fragment, panjang, interval, maxsplit, paket, dll.</string>
+    <string name="summary_navigate_advanced_settings">Auto-start, aksi auto-test, URL API delay/IP, strategi routing, mode, sembunyiin dari recent apps, kirim HWID, dll.</string>
     <string name="summary_navigate_per_app_proxy_settings">Pilih aplikasi mana aja yang mau pakai proxy</string>
     <string name="title_ui_general">Umum</string>
     <string name="title_ui_theme">Tema</string>
@@ -721,5 +721,13 @@ yang kamu butuhin."</string>
     <string name="sub_setting_tab_icon">Ikon tab</string>
     <string name="sub_setting_tab_icon_hint">Ditampilin di sebelah nama grup di tab bar</string>
     <string name="sub_tab_icon_none">Nggak ada</string>
+
+    <!-- Reset all settings -->
+    <string name="title_pref_reset_all_settings">Reset Semua Pengaturan</string>
+    <string name="summary_pref_reset_all_settings">Kembalikan semua pengaturan ke nilai default. Profil server dan langganan tidak akan terpengaruh.</string>
+    <string name="dialog_reset_settings_title">Reset Semua Pengaturan?</string>
+    <string name="dialog_reset_settings_message">Ini akan mengembalikan semua pengaturan ke nilai default.\n\nProfil server dan langganan tidak akan dihapus.\n\nTindakan ini tidak dapat dibatalkan.</string>
+    <string name="dialog_reset_settings_confirm">Reset</string>
+    <string name="reset_settings_success">Pengaturan telah direset ke default.</string>
 
 </resources>

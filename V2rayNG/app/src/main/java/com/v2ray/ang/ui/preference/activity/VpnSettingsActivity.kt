@@ -2,10 +2,10 @@ package com.v2ray.ang.ui.preference.activity
 
 import android.os.Bundle
 import android.view.View
-import androidx.lifecycle.lifecycleScope
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -15,14 +15,14 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.VPN
 import com.v2ray.ang.R
+import com.v2ray.ang.extension.snackbarError
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
+import com.v2ray.ang.root.RootManager
 import com.v2ray.ang.ui.BaseActivity
 import com.v2ray.ang.ui.PerAppProxyActivity
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
-import com.v2ray.ang.root.RootManager
 import kotlinx.coroutines.launch
-import com.v2ray.ang.extension.snackbarError
 
 class VpnSettingsActivity : BaseActivity() {
 
@@ -92,7 +92,7 @@ class VpnSettingsActivity : BaseActivity() {
                 startActivity(android.content.Intent(requireContext(), PerAppProxyActivity::class.java))
                 true
             }
-            
+
             enableRootMode?.setOnPreferenceChangeListener { _, newValue ->
                 if (newValue == true && !RootManager.cachedRoot()) {
                     lifecycleScope.launch {
@@ -118,7 +118,23 @@ class VpnSettingsActivity : BaseActivity() {
                     true
                 }
             }
-            
+        }
+
+        /**
+         * Probes for root access off the main thread (spawns su, can block briefly) and
+         * surfaces a snackbar if it's not available. Used to gate the Root mode and LAN
+         * sharing toggles so they can't be left on without root actually being granted.
+         */
+        private suspend fun checkAndRequestRoot(): Boolean {
+            val hasRoot = RootManager.refresh()
+            if (!isAdded) return false
+            if (!hasRoot) {
+                requireContext().snackbarError(
+                    getString(R.string.toast_root_required),
+                    title = getString(R.string.title_alerter_error)
+                )
+            }
+            return hasRoot
         }
 
         private fun initPreferenceSummaries() {
@@ -153,15 +169,6 @@ class VpnSettingsActivity : BaseActivity() {
                 }
             }
             preferenceScreen?.let { traverse(it) }
-        }
-        
-        private suspend fun checkAndRequestRoot(): Boolean {
-            val hasRoot = RootManager.refresh()
-            if (!isAdded) return false
-            if (!hasRoot) {
-                context?.snackbarError(getString(R.string.toast_root_required), title = getString(R.string.title_alerter_success))
-            }
-            return hasRoot
         }
 
         override fun onStart() {

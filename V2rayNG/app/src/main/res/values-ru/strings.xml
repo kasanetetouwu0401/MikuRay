@@ -532,12 +532,12 @@
     <string name="indicator_style_title">Выбрать стиль индикатора</string>
     <string name="pref_indicator_style_title">Стиль индикатора сервера</string>
     <string name="pref_indicator_style_summary">Выберите отображение индикатора активного сервера</string>
-    <string name="summary_navigate_ui_settings">Общий интерфейс, темы, внешний вид, плашки поиска, размытие, баннеры и звук</string> 
-    <string name="summary_navigate_vpn_settings">IPv6, бодрствование (keep awake), DNS, HTTP-прокси, обход LAN, интерфейс, MTU, Hev TUN и прокси для приложений</string>   
-    <string name="summary_navigate_core_settings">Сниффинг, только маршрутизация, локальный прокси/SOCKS, DNS, уровень логов, разрешение доменов и Geo-файлы</string>
-    <string name="summary_navigate_mux_settings">Статус Mux, подключения TCP/XUDP и обработка QUIC</string>
-    <string name="summary_navigate_fragment_settings">Статус фрагментации, длина, интервал и пакеты</string>
-    <string name="summary_navigate_advanced_settings">Автозапуск, действия автотеста, URL API пинга/IP, стратегия маршрутизации, режим и отправка HWID</string>
+    <string name="summary_navigate_ui_settings">Общий интерфейс, темы, внешний вид, плашки поиска, размытие, баннеры, звук и т.д.</string> 
+    <string name="summary_navigate_vpn_settings">IPv6, бодрствование (keep awake), DNS, HTTP-прокси, обход LAN, интерфейс, MTU, Hev TUN, таймеры TCP/WS, прокси для приложений, Root-режим и т.д.</string>   
+    <string name="summary_navigate_core_settings">Сниффинг, только маршрутизация, локальный прокси/общий доступ, SOCKS, DNS, уровень логов, разрешение доменов, Geo-файлы и т.д.</string>
+    <string name="summary_navigate_mux_settings">Статус Mux, подключения, подключения XUDP, обработка QUIC и т.д.</string>
+    <string name="summary_navigate_fragment_settings">Статус фрагментации, длина, интервал, maxsplit, пакеты и т.д.</string>
+    <string name="summary_navigate_advanced_settings">Автозапуск, действия автотеста, URL API задержки/IP, стратегия маршрутизации, режим, скрыть из недавних приложений, отправка HWID и т.д.</string>
     <string name="summary_navigate_per_app_proxy_settings">Выберите, какие приложения будут использовать прокси</string>
     <string name="title_ui_general">Общие</string>
     <string name="title_ui_theme">Тема</string>
@@ -740,5 +740,13 @@
     <string name="sub_setting_tab_icon">Иконка вкладки</string>
     <string name="sub_setting_tab_icon_hint">Отображается рядом с названием группы на панели вкладок</string>
     <string name="sub_tab_icon_none">Нет</string>
+
+    <!-- Reset all settings -->
+    <string name="title_pref_reset_all_settings">Сбросить все настройки</string>
+    <string name="summary_pref_reset_all_settings">Восстановить все настройки по умолчанию. Профили серверов и подписки не будут затронуты.</string>
+    <string name="dialog_reset_settings_title">Сбросить все настройки?</string>
+    <string name="dialog_reset_settings_message">Это восстановит все настройки по умолчанию.\n\nПрофили серверов и подписки удалены не будут.\n\nЭто действие нельзя отменить.</string>
+    <string name="dialog_reset_settings_confirm">Сбросить</string>
+    <string name="reset_settings_success">Настройки сброшены до значений по умолчанию.</string>
 
 </resources>

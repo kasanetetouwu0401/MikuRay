@@ -12,6 +12,7 @@ import java.io.File
 
 /**
  * Installs and removes the iptables / ip-rule routing that pushes system-wide traffic
+ * into the proxy for Root mode (no VpnService).
  *
  * A bundled `hev-socks5-tunnel` binary (run as root) creates a tun device and forwards it to
  * the in-process core's SOCKS inbound; a mangle MARK chain plus a dedicated routing table /
@@ -19,11 +20,18 @@ import java.io.File
  *
  * All rules live in dedicated chains ([AppConfig.ROOT_IPTABLES_CHAIN] in the mangle
  * table, [AppConfig.ROOT_FWD_CHAIN] for LAN sharing) plus a dedicated routing table, so
- * [teardown] is a clean, bounded flush. Teardown runs before every setup (to clear stale
+ * teardown is a clean, bounded flush. Teardown runs before every setup (to clear stale
  * rules) and on every stop path — leaving rules behind after the core dies would break
  * the device's connectivity.
+ *
+ * Setup/teardown each run as a single root script via [RootShell.runScript] instead of one
+ * `su` fork per command: this makes the whole operation effectively atomic (a failure rolls
+ * back instead of leaving half-installed rules) and is far cheaper than forking `su` dozens
+ * of times per call.
  */
 object RootProxyManager {
+
+    private const val TAG = AppConfig.TAG
 
     private const val CHAIN = AppConfig.ROOT_IPTABLES_CHAIN
     private const val TUN = AppConfig.ROOT_TUN_NAME
@@ -44,42 +52,68 @@ object RootProxyManager {
         "::1/128", "fe80::/10", "fc00::/7", "ff00::/8"
     )
 
+    // ---- public API --------------------------------------------------------
+
+    /**
+     * Full setup: iptables + tun + hev process for system-wide Root mode.
+     * Called from a coroutine on Dispatchers.IO.
+     */
     fun start(context: Context): Boolean {
+        LogUtil.i(TAG, "RootProxyManager: start")
         teardown(context)
         val script = buildTun2socksSetup(context) ?: return false
         val result = RootShell.runScript(context, "setup_rules.sh", script)
         if (!result.success) {
-            LogUtil.e(AppConfig.TAG, "RootProxyManager: setup failed, rolling back:\n${result.output}")
+            LogUtil.e(TAG, "RootProxyManager: setup failed, rolling back:\n${result.output}")
             teardown(context)
             return false
         }
+        LogUtil.i(TAG, "RootProxyManager: rules installed")
         return true
     }
 
     /**
      * Set up LAN/tethering sharing while the device itself uses another mode (e.g. VPN
-     * mode). Runs a dedicated client tun2socks into the in-process core's SOCKS inbound
-     * and forwards tethered clients into it, WITHOUT capturing the device's own traffic
-     * (that keeps flowing through the VpnService). Requires root.
+     * mode). Runs a dedicated tun2socks into the in-process core's SOCKS inbound and
+     * forwards tethered clients into it, WITHOUT capturing the device's own traffic (that
+     * keeps flowing through the VpnService). Requires root.
+     * Called from a coroutine on Dispatchers.IO.
      */
     fun startClientSharing(context: Context): Boolean {
+        LogUtil.i(TAG, "RootProxyManager: startClientSharing")
         teardown(context)
         val script = buildTun2socksSetup(context, captureDeviceTraffic = false, forceLanShare = true)
             ?: return false
         val result = RootShell.runScript(context, "setup_rules.sh", script)
         if (!result.success) {
-            LogUtil.e(AppConfig.TAG, "RootProxyManager: client sharing setup failed:\n${result.output}")
+            LogUtil.e(TAG, "RootProxyManager: client sharing setup failed:\n${result.output}")
             teardown(context)
             return false
         }
-        LogUtil.i(AppConfig.TAG, "RootProxyManager: LAN client sharing installed")
+        LogUtil.i(TAG, "RootProxyManager: LAN client sharing installed")
         return true
     }
 
-    /** Remove all rules and stop helper processes. Safe to call repeatedly. */
+    /**
+     * Remove all rules, kill the hev process, and tear down the tun. Safe to call
+     * repeatedly. Used both as the LAN-sharing-only teardown (VPN mode) and as the full
+     * Root-mode teardown — the script clears every chain/rule/process unconditionally,
+     * so it's harmless to call when only a subset was ever installed.
+     */
     fun stop(context: Context) {
         teardown(context)
-        LogUtil.i(AppConfig.TAG, "RootProxyManager: rules removed")
+        LogUtil.i(TAG, "RootProxyManager: rules removed")
+    }
+
+    /**
+     * Full teardown: kill hev, flush iptables, delete tun. Identical to [stop] — kept as
+     * a separate name so call sites can express intent (full Root-mode shutdown vs.
+     * LAN-sharing-only shutdown) even though the underlying cleanup is the same script.
+     * Called from a coroutine on Dispatchers.IO.
+     */
+    fun stopFull(context: Context) {
+        LogUtil.i(TAG, "RootProxyManager: stopFull")
+        teardown(context)
     }
 
     private fun teardown(context: Context) {
@@ -102,7 +136,7 @@ object RootProxyManager {
     ): String? {
         val bin = File(context.applicationInfo.nativeLibraryDir, AppConfig.ROOT_TUN2SOCKS_BIN)
         if (!bin.exists()) {
-            LogUtil.e(AppConfig.TAG, "RootProxyManager: hev-socks5-tunnel binary missing at ${bin.absolutePath}")
+            LogUtil.e(TAG, "RootProxyManager: hev-socks5-tunnel binary missing at ${bin.absolutePath}")
             return null
         }
         val appUid = context.applicationInfo.uid
