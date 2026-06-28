@@ -39,7 +39,7 @@ public class SearchConfiguration {
     private boolean historyEnabled = true;
     private String historyId = null;
     private boolean breadcrumbsEnabled = false;
-    private boolean fuzzySearchEnabled = true;
+    private boolean fuzzySearchEnabled = false;
     private boolean searchBarEnabled = true;
     private AppCompatActivity activity;
     private int containerResId = android.R.id.content;
