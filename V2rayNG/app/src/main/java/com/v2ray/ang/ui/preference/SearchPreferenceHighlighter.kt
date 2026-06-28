@@ -95,7 +95,7 @@ object SearchPreferenceHighlighter {
 
     private fun flashCard(itemView: View) {
         val card = itemView as? MaterialCardView ?: return
-        val highlightColor = card.context.getColorAttr(com.google.android.material.R.attr.colorPrimary)
+        val highlightColor = card.context.getColorAttr("colorPrimary")
 
         val overlay = MaterialShapeDrawable(card.shapeAppearanceModel).apply {
             setTint(highlightColor and 0xFFFFFF or 0x33000000) // ~20% alpha
