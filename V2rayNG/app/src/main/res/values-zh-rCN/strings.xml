@@ -726,7 +726,7 @@
     <string name="dialog_reset_settings_title">重置所有设置？</string>
     <string name="dialog_reset_settings_message">这将把所有设置恢复为默认值。\n\n服务器配置和订阅不会被删除。\n\n此操作无法撤销。</string>
     <string name="dialog_reset_settings_confirm">重置</string>
-    <string name="reset_settings_success">设置已重置为默认值。</string>
+    <string name="reset_settings_success">设置已重置为默认值。</string>    
 
     <!-- SearchPreference (in-module fork) -->
     <string name="searchpreference_search">搜索…</string>
