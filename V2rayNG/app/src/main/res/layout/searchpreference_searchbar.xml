@@ -28,8 +28,8 @@
                 android:layout_marginStart="4dp"
                 android:layout_marginRight="4dp"
                 android:layout_marginEnd="4dp"
-                app:tint="?colorOnSurfaceVariant"
-                app:srcCompat="@drawable/searchpreference_ic_search" />
+                app:tint="@null"
+                app:srcCompat="@drawable/ic_aim_color" />
 
         <EditText
                 android:hint="@string/searchpreference_search"
@@ -51,10 +51,10 @@
                 android:layout_height="40dp"
                 android:padding="10dp"
                 android:contentDescription="@string/searchpreference_clear"
-                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:background="@drawable/bg_icon_button" 
                 android:visibility="gone"
                 app:tint="?colorOnSurfaceVariant"
-                app:srcCompat="@drawable/searchpreference_ic_clear" />
+                app:srcCompat="@drawable/ic_close" />
 
         <ImageView
                 android:id="@+id/more"
@@ -63,10 +63,10 @@
                 android:layout_marginEnd="4dp"
                 android:padding="10dp"
                 android:contentDescription="@string/searchpreference_more"
-                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:background="@drawable/bg_icon_button" 
                 android:visibility="gone"
                 app:tint="?colorOnSurfaceVariant"
-                app:srcCompat="@drawable/searchpreference_ic_more"/>
+                app:srcCompat="@drawable/ic_more_vert_24dp"/>
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
