@@ -760,4 +760,11 @@ you need."</string>
     <string name="dialog_reset_settings_confirm">Reset</string>
     <string name="reset_settings_success">Settings have been reset to default.</string>
 
+    <!-- SearchPreference (in-module fork) -->
+    <string name="searchpreference_search">Search…</string>
+    <string name="searchpreference_clear">Clear</string>
+    <string name="searchpreference_more">More</string>
+    <string name="searchpreference_clear_history">Clear history</string>
+    <string name="searchpreference_no_results">No results</string>
+
 </resources>

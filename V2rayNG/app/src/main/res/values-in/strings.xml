@@ -728,6 +728,13 @@ yang kamu butuhin."</string>
     <string name="dialog_reset_settings_title">Reset Semua Settingan?</string>
     <string name="dialog_reset_settings_message">Ini akan mengembalikan semua settingan ke nilai default.\n\nProfil server dan langganan tidak akan dihapus.\n\nTindakan ini tidak dapat dibatalkan.</string>
     <string name="dialog_reset_settings_confirm">Reset</string>
-    <string name="reset_settings_success">Settingan telah direset ke default.</string>    
+    <string name="reset_settings_success">Settingan telah direset ke default.</string>
+
+    <!-- SearchPreference (in-module fork) -->
+    <string name="searchpreference_search">Cari…</string>
+    <string name="searchpreference_clear">Hapus</string>
+    <string name="searchpreference_more">Lainnya</string>
+    <string name="searchpreference_clear_history">Hapus riwayat</string>
+    <string name="searchpreference_no_results">Nggak ada hasil</string>
 
 </resources>

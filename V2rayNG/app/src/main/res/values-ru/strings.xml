@@ -747,6 +747,13 @@
     <string name="dialog_reset_settings_title">Сбросить все настройки?</string>
     <string name="dialog_reset_settings_message">Это восстановит все настройки по умолчанию.\n\nПрофили серверов и подписки удалены не будут.\n\nЭто действие нельзя отменить.</string>
     <string name="dialog_reset_settings_confirm">Сбросить</string>
-    <string name="reset_settings_success">Настройки сброшены до значений по умолчанию.</string>    
+    <string name="reset_settings_success">Настройки сброшены до значений по умолчанию.</string>
+
+    <!-- SearchPreference (in-module fork) -->
+    <string name="searchpreference_search">Поиск…</string>
+    <string name="searchpreference_clear">Очистить</string>
+    <string name="searchpreference_more">Ещё</string>
+    <string name="searchpreference_clear_history">Очистить историю</string>
+    <string name="searchpreference_no_results">Нет результатов</string>
 
 </resources>
