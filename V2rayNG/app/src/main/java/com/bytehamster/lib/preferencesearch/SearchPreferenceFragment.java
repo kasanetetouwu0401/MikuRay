@@ -251,6 +251,8 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
     }
 
     private void updateSearchResults(String keyword) {
+        adapter.setKeyword(keyword);
+
         if (TextUtils.isEmpty(keyword)) {
             showHistory();
             return;
@@ -276,8 +278,18 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
         viewHolder.noResults.setVisibility(View.GONE);
         viewHolder.recyclerView.setVisibility(View.VISIBLE);
 
-        adapter.setContent(new ArrayList<>(history));
-        setEmptyViewShown(history.isEmpty());
+        // Only show history entries that still produce actual search results
+        List<HistoryItem> validHistory = new ArrayList<>();
+        for (HistoryItem item : history) {
+            List<PreferenceItem> itemResults = searcher.searchFor(
+                    item.getTerm(), searchConfiguration.isFuzzySearchEnabled());
+            if (!itemResults.isEmpty()) {
+                validHistory.add(item);
+            }
+        }
+
+        adapter.setContent(new ArrayList<>(validHistory));
+        setEmptyViewShown(validHistory.isEmpty());
     }
 
     @Override

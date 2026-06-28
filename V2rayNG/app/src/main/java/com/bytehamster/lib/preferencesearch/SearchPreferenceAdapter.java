@@ -2,25 +2,36 @@ package com.bytehamster.lib.preferencesearch;
 
 import com.v2ray.ang.R;
 
+import android.graphics.Color;
+import android.text.SpannableString;
+import android.text.Spannable;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.v2ray.ang.util.ThemeManagerKt;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 class SearchPreferenceAdapter extends RecyclerView.Adapter<SearchPreferenceAdapter.ViewHolder> {
     private List<ListItem> dataset;
     private SearchConfiguration searchConfiguration;
     private SearchClickListener onItemClickListener;
-
+    private String keyword = "";
 
     SearchPreferenceAdapter() {
         dataset = new ArrayList<>();
+    }
+
+    /** Update the current keyword so the adapter can highlight matching text. */
+    void setKeyword(String keyword) {
+        this.keyword = keyword == null ? "" : keyword;
     }
 
     @NonNull
@@ -40,20 +51,25 @@ class SearchPreferenceAdapter extends RecyclerView.Adapter<SearchPreferenceAdapt
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder h, final int position) {
         final ListItem listItem = dataset.get(position);
+
+        // Resolve colorPrimary from theme for text highlight
+        int highlightColor = ThemeManagerKt.getColorAttr(h.root.getContext(), "colorPrimary");
+
         if (getItemViewType(position) == HistoryItem.TYPE) {
             HistoryViewHolder holder = (HistoryViewHolder) h;
             HistoryItem item = (HistoryItem) listItem;
-            holder.term.setText(item.getTerm());
+            holder.term.setText(highlight(item.getTerm(), highlightColor));
+
         } else if (getItemViewType(position) == PreferenceItem.TYPE) {
             PreferenceViewHolder holder = (PreferenceViewHolder) h;
             PreferenceItem item = (PreferenceItem) listItem;
-            holder.title.setText(item.title);
+            holder.title.setText(highlight(item.title, highlightColor));
 
             if (TextUtils.isEmpty(item.summary)) {
                 holder.summary.setVisibility(View.GONE);
             } else {
                 holder.summary.setVisibility(View.VISIBLE);
-                holder.summary.setText(item.summary);
+                holder.summary.setText(highlight(item.summary, highlightColor));
             }
 
             if (searchConfiguration.isBreadcrumbsEnabled()) {
@@ -64,7 +80,6 @@ class SearchPreferenceAdapter extends RecyclerView.Adapter<SearchPreferenceAdapt
                 holder.breadcrumbs.setVisibility(View.GONE);
                 holder.summary.setAlpha(0.6f);
             }
-
         }
 
         h.root.setOnClickListener(v -> {
@@ -72,6 +87,29 @@ class SearchPreferenceAdapter extends RecyclerView.Adapter<SearchPreferenceAdapt
                 onItemClickListener.onItemClicked(listItem, h.getAdapterPosition());
             }
         });
+    }
+
+    /**
+     * Returns a SpannableString with all case-insensitive occurrences of the
+     * current keyword highlighted using the given background color.
+     */
+    private SpannableString highlight(String text, int highlightColor) {
+        SpannableString spannable = new SpannableString(text == null ? "" : text);
+        if (keyword.isEmpty() || text == null) return spannable;
+
+        String textLower    = text.toLowerCase(Locale.getDefault());
+        String keywordLower = keyword.toLowerCase(Locale.getDefault());
+
+        int start = 0;
+        while ((start = textLower.indexOf(keywordLower, start)) != -1) {
+            int end = start + keywordLower.length();
+            spannable.setSpan(
+                    new ForegroundColorSpan(highlightColor),
+                    start, end,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            start = end;
+        }
+        return spannable;
     }
 
     void setContent(List<ListItem> items) {

@@ -52,7 +52,7 @@ public class PreferenceItem extends ListItem implements Parcelable {
     }
 
     boolean matchesFuzzy(String keyword) {
-        return getScore(keyword) > 0.3;
+        return getScore(keyword) > 0.7;
     }
 
     boolean matches(String keyword) {
