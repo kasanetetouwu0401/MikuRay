@@ -8,13 +8,15 @@ import android.view.View
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.v2ray.ang.AppConfig
+import com.v2ray.ang.R // <-- Pastikan ini di-import untuk mengakses R.id.app_bar
 import com.v2ray.ang.util.getColorAttr
 
 /**
- * Smoothly collapses the CollapsingToolbar via natural RecyclerView scroll,
+ * Smoothly collapses the CollapsingToolbar programmatically,
  * then scrolls to and highlights the target preference using a shape-aware
  * overlay that respects the card's existing ShapeAppearanceModel (Top/Mid/Bottom/Single).
  */
@@ -31,10 +33,18 @@ object SearchPreferenceHighlighter {
     }
 
     private fun collapseToolbarThenHighlight(fragment: PreferenceFragmentCompat, key: String) {
-        // Scroll RecyclerView programmatically so CoordinatorLayout collapses
-        // the AppBar naturally — same smooth animation as user scrolling
-        fragment.listView.smoothScrollBy(0, 1000)
+        // Karena kita tahu ID-nya di layout, langsung tembak menggunakan findViewById
+        val appBarLayout = fragment.activity?.findViewById<AppBarLayout>(R.id.app_bar)
+        
+        if (appBarLayout != null) {
+            // Mengecilkan toolbar secara otomatis dengan animasi yang halus
+            appBarLayout.setExpanded(false, true)
+        } else {
+            // Fallback scroll biasa jika entah kenapa AppBarLayout tidak ditemukan
+            fragment.listView.smoothScrollBy(0, 1000)
+        }
 
+        // Tunggu animasi collapse selesai (sekitar 400ms), lalu eksekusi highlight
         Handler(Looper.getMainLooper()).postDelayed({
             highlight(fragment, key)
         }, 400)
@@ -64,11 +74,10 @@ object SearchPreferenceHighlighter {
     private fun flashCard(itemView: View) {
         val card = itemView as? MaterialCardView ?: return
 
-        // Resolve
-        val highlightColor = card.context.getColorAttr("colorPrimary")
+        // Resolve colorPrimary menggunakan extension function dari util
+        val highlightColor = card.context.getColorAttr(com.google.android.material.R.attr.colorPrimary)
 
         // Build a highlight overlay that clones the card's ShapeAppearanceModel exactly
-        // — so it matches Top/Middle/Bottom/Single corners automatically
         val overlay = MaterialShapeDrawable(card.shapeAppearanceModel).apply {
             setTint(highlightColor and 0xFFFFFF or 0x33000000) // ~20% alpha
             shadowCompatibilityMode = MaterialShapeDrawable.SHADOW_COMPAT_MODE_NEVER
