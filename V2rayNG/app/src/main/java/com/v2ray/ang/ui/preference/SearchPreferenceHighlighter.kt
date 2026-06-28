@@ -4,7 +4,6 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.os.Handler
 import android.os.Looper
-import android.util.TypedValue
 import android.view.View
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
@@ -12,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.R
+import com.v2ray.ang.util.getColorAttr
 
 /**
  * Smoothly collapses the CollapsingToolbar via natural RecyclerView scroll,
@@ -65,12 +64,8 @@ object SearchPreferenceHighlighter {
     private fun flashCard(itemView: View) {
         val card = itemView as? MaterialCardView ?: return
 
-        // Resolve colorPrimary
-        val tv = TypedValue()
-        card.context.theme.resolveAttribute(
-            com.google.android.material.R.attr.colorPrimary, tv, true
-        )
-        val highlightColor = tv.data
+        // Resolve
+        val highlightColor = card.context.getColorAttr("colorPrimary")
 
         // Build a highlight overlay that clones the card's ShapeAppearanceModel exactly
         // — so it matches Top/Middle/Bottom/Single corners automatically
