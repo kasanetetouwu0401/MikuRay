@@ -67,7 +67,7 @@ object SearchPreferenceHighlighter {
         card.foreground = overlay
         overlay.alpha = 0
 
-        val targetAlpha = 178 
+        val targetAlpha = 128 
 
         val fadeIn = ObjectAnimator.ofInt(overlay, "alpha", 0, targetAlpha).apply {
             duration = 200
