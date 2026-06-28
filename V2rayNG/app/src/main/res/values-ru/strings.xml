@@ -290,6 +290,7 @@
     <string name="title_pref_hev_tunnel_loglevel">Уровень журнала Hev TUN</string>
     <string name="title_pref_hev_tunnel_rw_timeout">Тайм-аут чтения/записи Hev TUN (секунды) (tcp,udp по умолчанию 300,60)</string>
 
+    <string name="title_category_root_mode">Root-режим</string>
     <string name="title_pref_root_mode">Root-режим (общесистемный)</string>
     <string name="summary_pref_root_mode">Перехват всего трафика через iptables без VpnService. Требуется root-доступ.</string>
     <string name="title_pref_root_lan_sharing">Root: общий доступ LAN / тезеринг</string>

@@ -17,7 +17,7 @@ class PreferenceParser {
     private static final int MAX_RESULTS = 10;
     private static final String NS_ANDROID = "http://schemas.android.com/apk/res/android";
     private static final String NS_SEARCH = "http://schemas.android.com/apk/com.bytehamster.lib.preferencesearch";
-    private static final List<String> BLACKLIST = Arrays.asList(SearchPreference.class.getName(), "PreferenceCategory");
+    private static final List<String> BLACKLIST = Arrays.asList(SearchPreference.class.getName());
     private static final List<String> CONTAINERS = Arrays.asList("PreferenceCategory", "PreferenceScreen");
     private Context context;
     private ArrayList<PreferenceItem> allEntries = new ArrayList<>();
