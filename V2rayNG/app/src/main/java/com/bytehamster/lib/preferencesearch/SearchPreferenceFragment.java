@@ -22,6 +22,8 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bytehamster.lib.preferencesearch.ui.AnimationUtils;
 import com.bytehamster.lib.preferencesearch.ui.RevealAnimationSetting;
@@ -126,6 +128,24 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
         }
         rootView.setOnTouchListener((v, event) -> true);
         return rootView;
+    }
+
+    @Override
+    public void onViewCreated(android.view.View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            androidx.core.graphics.Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            androidx.core.graphics.Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
+            int topInset = Math.max(systemBars.top, cutout.top);
+            int bottomInset = Math.max(systemBars.bottom, cutout.bottom);
+            v.setPadding(
+                v.getPaddingLeft(),
+                topInset,
+                v.getPaddingRight(),
+                bottomInset
+            );
+            return insets;
+        });
     }
 
     private void loadHistory() {

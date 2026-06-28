@@ -1,19 +1,23 @@
 package com.v2ray.ang.ui.preference
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
+import android.view.View
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.shape.MaterialShapeDrawable
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 
 /**
- * Collapses the AppBarLayout, scrolls to, and briefly highlights a preference
- * identified by [AppConfig.EXTRA_HIGHLIGHT_KEY] passed in the host Activity's intent.
- * Call from [PreferenceFragmentCompat.onViewCreated].
+ * Smoothly collapses the CollapsingToolbar via natural RecyclerView scroll,
+ * then scrolls to and highlights the target preference using a shape-aware
+ * overlay that respects the card's existing ShapeAppearanceModel (Top/Mid/Bottom/Single).
  */
 object SearchPreferenceHighlighter {
 
@@ -22,54 +26,78 @@ object SearchPreferenceHighlighter {
             ?.getStringExtra(AppConfig.EXTRA_HIGHLIGHT_KEY)
             ?: return
 
-        // Collapse the toolbar first, then scroll + highlight after it settles
-        val appBar = fragment.activity?.findViewById<AppBarLayout>(R.id.app_bar)
-        if (appBar != null) {
-            appBar.setExpanded(false, true)
-            // Wait for collapse animation (~300ms) before scrolling
-            Handler(Looper.getMainLooper()).postDelayed({
-                highlight(fragment, key)
-            }, 350)
-        } else {
-            Handler(Looper.getMainLooper()).postDelayed({
-                highlight(fragment, key)
-            }, 300)
+        Handler(Looper.getMainLooper()).post {
+            collapseToolbarThenHighlight(fragment, key)
         }
+    }
+
+    private fun collapseToolbarThenHighlight(fragment: PreferenceFragmentCompat, key: String) {
+        // Scroll RecyclerView programmatically so CoordinatorLayout collapses
+        // the AppBar naturally — same smooth animation as user scrolling
+        fragment.listView.smoothScrollBy(0, 1000)
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            highlight(fragment, key)
+        }, 400)
     }
 
     private fun highlight(fragment: PreferenceFragmentCompat, key: String) {
         val pref = fragment.findPreference<androidx.preference.Preference>(key) ?: return
+        val recyclerView = fragment.listView
+        val adapter = recyclerView.adapter ?: return
 
         fragment.scrollToPreference(pref)
-
-        val recyclerView = fragment.listView
-        val adapter = recyclerView.adapter
 
         Handler(Looper.getMainLooper()).postDelayed({
             if (adapter is PreferenceGroup.PreferencePositionCallback) {
                 val position = adapter.getPreferenceAdapterPosition(pref)
                 if (position != RecyclerView.NO_POSITION) {
-                    val holder = recyclerView.findViewHolderForAdapterPosition(position)
-                    if (holder != null) {
-                        flashView(holder)
-                        return@postDelayed
-                    }
+                    recyclerView.scrollToPosition(position)
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        val holder = recyclerView.findViewHolderForAdapterPosition(position)
+                        if (holder != null) flashCard(holder.itemView)
+                    }, 100)
                 }
             }
-            fragment.scrollToPreference(pref)
         }, 200)
     }
 
-    private fun flashView(holder: RecyclerView.ViewHolder) {
-        val view = holder.itemView
-        val typedValue = TypedValue()
-        view.context.theme.resolveAttribute(android.R.attr.colorControlHighlight, typedValue, true)
-        val highlightColor = typedValue.data.takeIf { it != 0 }
-            ?: (view.context.getColor(android.R.color.darker_gray) and 0xFFFFFF or 0x44000000)
-        val originalBackground = view.background
-        view.setBackgroundColor(highlightColor)
-        Handler(Looper.getMainLooper()).postDelayed({
-            view.background = originalBackground
-        }, 1200)
+    private fun flashCard(itemView: View) {
+        val card = itemView as? MaterialCardView ?: return
+
+        // Resolve colorPrimary
+        val tv = TypedValue()
+        card.context.theme.resolveAttribute(
+            com.google.android.material.R.attr.colorPrimary, tv, true
+        )
+        val highlightColor = tv.data
+
+        // Build a highlight overlay that clones the card's ShapeAppearanceModel exactly
+        // — so it matches Top/Middle/Bottom/Single corners automatically
+        val overlay = MaterialShapeDrawable(card.shapeAppearanceModel).apply {
+            setTint(highlightColor and 0xFFFFFF or 0x33000000) // ~20% alpha
+            shadowCompatibilityMode = MaterialShapeDrawable.SHADOW_COMPAT_MODE_NEVER
+        }
+
+        // Add as foreground overlay, animate alpha in → hold → fade out
+        card.foreground = overlay
+        overlay.alpha = 0
+
+        val fadeIn = ObjectAnimator.ofInt(overlay, "alpha", 0, 80).apply {
+            duration = 200
+        }
+        val fadeOut = ObjectAnimator.ofInt(overlay, "alpha", 80, 0).apply {
+            duration = 400
+            startDelay = 800
+        }
+        fadeOut.addListener(object : android.animation.AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: android.animation.Animator) {
+                card.foreground = null
+            }
+        })
+        AnimatorSet().apply {
+            playSequentially(fadeIn, fadeOut)
+            start()
+        }
     }
 }
