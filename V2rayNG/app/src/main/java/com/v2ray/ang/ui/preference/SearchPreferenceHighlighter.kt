@@ -75,7 +75,7 @@ object SearchPreferenceHighlighter {
         val card = itemView as? MaterialCardView ?: return
 
         // Resolve colorPrimary menggunakan extension function dari util
-        val highlightColor = card.context.getColorAttr(com.google.android.material.R.attr.colorPrimary)
+        val highlightColor = card.context.getColorAttr("colorPrimary")
 
         // Build a highlight overlay that clones the card's ShapeAppearanceModel exactly
         val overlay = MaterialShapeDrawable(card.shapeAppearanceModel).apply {
