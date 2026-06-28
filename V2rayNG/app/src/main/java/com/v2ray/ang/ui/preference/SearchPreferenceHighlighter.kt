@@ -60,7 +60,6 @@ object SearchPreferenceHighlighter {
         val highlightColor = card.context.getColorAttr("colorPrimary")
 
         val overlay = MaterialShapeDrawable(card.shapeAppearanceModel).apply {
-            // Menggunakan warna solid colorPrimary agar tidak terjadi double-transparency
             setTint(highlightColor) 
             shadowCompatibilityMode = MaterialShapeDrawable.SHADOW_COMPAT_MODE_NEVER
         }
@@ -68,8 +67,6 @@ object SearchPreferenceHighlighter {
         card.foreground = overlay
         overlay.alpha = 0
 
-        // Mengubah targetAlpha dari 80 (~31% opacity) menjadi 128 (~50% opacity) agar lebih tebal
-        // Silakan naikkan ke 153 jika ingin opacity 60%, atau 178 untuk 70%
         val targetAlpha = 178 
 
         val fadeIn = ObjectAnimator.ofInt(overlay, "alpha", 0, targetAlpha).apply {

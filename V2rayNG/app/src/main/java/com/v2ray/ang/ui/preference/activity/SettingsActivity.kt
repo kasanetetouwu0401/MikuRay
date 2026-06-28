@@ -55,7 +55,6 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
                 .commit()
         }
 
-        // Bypass bug delay backstack dari library saat gesture back ditekan
         onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 val searchFragment = supportFragmentManager.fragments.find { 
@@ -63,12 +62,10 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
                 }
 
                 if (searchFragment != null && searchFragment.isVisible) {
-                    // Jika layar pencarian sedang terbuka, biarkan library menutupnya
                     isEnabled = false
                     onBackPressedDispatcher.onBackPressed()
                     isEnabled = true
                 } else {
-                    // Jika tidak ada pencarian, langsung keluar (instan)
                     finish()
                 }
             }
@@ -76,7 +73,6 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
     }
 
     override fun onSearchResultClicked(@NonNull result: SearchPreferenceResult) {
-        // Hapus fragment pencarian secara manual & sinkron (Bypass delay/animasi tersangkut dari library)
         val searchFragment = supportFragmentManager.fragments.find { 
             it.javaClass.name.contains("SearchPreferenceFragment") 
         }
@@ -150,7 +146,7 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
             // Configure SearchPreference
             findPreference<SearchPreference>("pref_search")?.apply {
                 getSearchConfiguration().apply {
-                    setActivity(requireActivity() as androidx.appcompat.app.AppCompatActivity)
+                    setActivity(requireActivity() as com.v2ray.ang.ui.BaseActivity)
                     setBreadcrumbsEnabled(true)
                     setHistoryEnabled(true)
                     index(R.xml.pref_ui_settings).addBreadcrumb(R.string.title_ui_settings)
