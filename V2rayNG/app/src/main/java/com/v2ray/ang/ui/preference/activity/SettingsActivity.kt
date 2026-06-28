@@ -70,7 +70,9 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
         }
 
         if (targetActivity != null) {
-            startActivity(Intent(this, targetActivity))
+            startActivity(Intent(this, targetActivity).apply {
+                putExtra(AppConfig.EXTRA_HIGHLIGHT_KEY, result.key)
+            })
         }
     }
 
