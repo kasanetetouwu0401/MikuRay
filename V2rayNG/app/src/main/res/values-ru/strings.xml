@@ -743,10 +743,10 @@
 
     <!-- Reset all settings -->
     <string name="title_pref_reset_all_settings">Сбросить все настройки</string>
-    <string name="summary_pref_reset_all_settings">Восстановить все настройки по умолчанию.</string>
+    <string name="summary_pref_reset_all_settings">Восстановить все настройки по умолчанию. Профили серверов и подписки не будут затронуты.</string>
     <string name="dialog_reset_settings_title">Сбросить все настройки?</string>
-    <string name="dialog_reset_settings_message">Это действие вернет все настройки к значениям по умолчанию.\n\nПрофили серверов и подписки не будут удалены.\n\nЭто действие нельзя отменить.</string>
+    <string name="dialog_reset_settings_message">Это восстановит все настройки по умолчанию.\n\nПрофили серверов и подписки удалены не будут.\n\nЭто действие нельзя отменить.</string>
     <string name="dialog_reset_settings_confirm">Сбросить</string>
-    <string name="reset_settings_success">Настройки сброшены по умолчанию.</string>
+    <string name="reset_settings_success">Настройки сброшены до значений по умолчанию.</string>    
 
 </resources>
