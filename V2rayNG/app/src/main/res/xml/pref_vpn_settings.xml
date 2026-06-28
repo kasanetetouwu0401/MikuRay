@@ -145,7 +145,8 @@
 
         <androidx.preference.SwitchPreferenceCompat
             android:icon="@drawable/ic_key"
-            app:layout="@layout/uwu_top"
+            app:layout="@layout/uwu_top_switch"
+            app:widgetLayout="@layout/uwu_widget_material_switch"
             android:key="pref_root_mode_enabled"
             android:title="@string/title_pref_root_mode"
             android:summary="@string/summary_pref_root_mode"
@@ -153,7 +154,8 @@
 
         <androidx.preference.SwitchPreferenceCompat
             android:icon="@drawable/ic_key"
-            app:layout="@layout/uwu_bot"
+            app:layout="@layout/uwu_bot_switch"
+            app:widgetLayout="@layout/uwu_widget_material_switch"
             android:key="pref_root_lan_sharing"
             android:title="@string/title_pref_root_lan_sharing"
             android:summary="@string/summary_pref_root_lan_sharing"
