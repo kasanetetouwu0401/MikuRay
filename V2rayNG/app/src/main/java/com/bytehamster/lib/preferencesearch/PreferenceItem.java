@@ -4,14 +4,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import androidx.annotation.XmlRes;
-import org.apache.commons.text.similarity.FuzzyScore;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class PreferenceItem extends ListItem implements Parcelable {
     static final int TYPE = 2;
-    private static FuzzyScore fuzzyScore = new FuzzyScore(Locale.getDefault());
 
     String title;
     String summary;
@@ -70,12 +68,41 @@ public class PreferenceItem extends ListItem implements Parcelable {
         }
         String info = getInfo();
 
-        float score = fuzzyScore.fuzzyScore(info, "ø" + keyword);
-        float maxScore = (keyword.length() + 1) * 3 - 2; // First item can not get +2 bonus score
+        float score = fuzzyScore(info, "ø" + keyword);
+        float maxScore = (keyword.length() + 1) * 3 - 2;
 
         lastScore = score / maxScore;
         lastKeyword = keyword;
         return lastScore;
+    }
+
+    /**
+     * Inline fuzzy score — mirrors Apache Commons Text FuzzyScore behaviour.
+     * Returns a score based on how many consecutive character matches are found.
+     */
+    private static float fuzzyScore(String term, String query) {
+        if (term == null || query == null) return 0;
+        final String termLower = term.toLowerCase(Locale.getDefault());
+        final String queryLower = query.toLowerCase(Locale.getDefault());
+        int score = 0;
+        int termIndex = 0;
+        int previousMatchingCharacterIndex = Integer.MIN_VALUE;
+        for (int queryIndex = 0; queryIndex < queryLower.length(); queryIndex++) {
+            final char queryChar = queryLower.charAt(queryIndex);
+            boolean termCharacterMatchFound = false;
+            for (; termIndex < termLower.length() && !termCharacterMatchFound; termIndex++) {
+                final char termChar = termLower.charAt(termIndex);
+                if (queryChar == termChar) {
+                    score++;
+                    if (previousMatchingCharacterIndex + 1 == termIndex) {
+                        score += 2;
+                    }
+                    previousMatchingCharacterIndex = termIndex;
+                    termCharacterMatchFound = true;
+                }
+            }
+        }
+        return score;
     }
 
     private String getInfo() {
@@ -128,10 +155,6 @@ public class PreferenceItem extends ListItem implements Parcelable {
         return this;
     }
 
-    /**
-     * @param breadcrumb The breadcrumb to add
-     * @return For chaining
-     */
     public PreferenceItem addBreadcrumb(String breadcrumb) {
         this.breadcrumbs = Breadcrumb.concat(this.breadcrumbs, breadcrumb);
         return this;
@@ -161,5 +184,4 @@ public class PreferenceItem extends ListItem implements Parcelable {
         parcel.writeString(keywords);
         parcel.writeInt(resId);
     }
-
 }

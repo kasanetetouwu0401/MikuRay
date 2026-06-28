@@ -1,5 +1,7 @@
 package com.bytehamster.lib.preferencesearch;
 
+import com.v2ray.ang.R;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;

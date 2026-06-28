@@ -1,5 +1,7 @@
 package com.bytehamster.lib.preferencesearch;
 
+import com.v2ray.ang.R;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;

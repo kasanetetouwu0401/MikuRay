@@ -1,5 +1,7 @@
 package com.bytehamster.lib.preferencesearch;
 
+import com.v2ray.ang.R;
+
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;

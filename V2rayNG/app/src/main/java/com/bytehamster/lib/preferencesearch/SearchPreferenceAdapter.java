@@ -1,5 +1,7 @@
 package com.bytehamster.lib.preferencesearch;
 
+import com.v2ray.ang.R;
+
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
