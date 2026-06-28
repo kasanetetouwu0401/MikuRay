@@ -54,10 +54,35 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
                 .replace(R.id.settings_container, SettingsFragment())
                 .commit()
         }
+
+        // Bypass bug delay backstack dari library saat gesture back ditekan
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val searchFragment = supportFragmentManager.fragments.find { 
+                    it.javaClass.name.contains("SearchPreferenceFragment") 
+                }
+
+                if (searchFragment != null && searchFragment.isVisible) {
+                    // Jika layar pencarian sedang terbuka, biarkan library menutupnya
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                    isEnabled = true
+                } else {
+                    // Jika tidak ada pencarian, langsung keluar (instan)
+                    finish()
+                }
+            }
+        })
     }
 
     override fun onSearchResultClicked(@NonNull result: SearchPreferenceResult) {
-        result.closeSearchPage(this)
+        // Hapus fragment pencarian secara manual & sinkron (Bypass delay/animasi tersangkut dari library)
+        val searchFragment = supportFragmentManager.fragments.find { 
+            it.javaClass.name.contains("SearchPreferenceFragment") 
+        }
+        if (searchFragment != null) {
+            supportFragmentManager.beginTransaction().remove(searchFragment).commitNowAllowingStateLoss()
+        }
 
         val targetActivity: Class<*>? = when (result.resourceFile) {
             R.xml.pref_ui_settings       -> UiSettingsActivity::class.java

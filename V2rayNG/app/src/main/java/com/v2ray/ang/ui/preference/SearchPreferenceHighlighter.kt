@@ -4,15 +4,17 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.os.Handler
 import android.os.Looper
+import android.util.DisplayMetrics
 import android.view.View
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
+import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.R // <-- Pastikan ini di-import untuk mengakses R.id.app_bar
+import com.v2ray.ang.R
 import com.v2ray.ang.util.getColorAttr
 
 /**
@@ -33,18 +35,14 @@ object SearchPreferenceHighlighter {
     }
 
     private fun collapseToolbarThenHighlight(fragment: PreferenceFragmentCompat, key: String) {
-        // Karena kita tahu ID-nya di layout, langsung tembak menggunakan findViewById
         val appBarLayout = fragment.activity?.findViewById<AppBarLayout>(R.id.app_bar)
         
         if (appBarLayout != null) {
-            // Mengecilkan toolbar secara otomatis dengan animasi yang halus
             appBarLayout.setExpanded(false, true)
         } else {
-            // Fallback scroll biasa jika entah kenapa AppBarLayout tidak ditemukan
             fragment.listView.smoothScrollBy(0, 1000)
         }
 
-        // Tunggu animasi collapse selesai (sekitar 400ms), lalu eksekusi highlight
         Handler(Looper.getMainLooper()).postDelayed({
             highlight(fragment, key)
         }, 400)
@@ -55,35 +53,55 @@ object SearchPreferenceHighlighter {
         val recyclerView = fragment.listView
         val adapter = recyclerView.adapter ?: return
 
-        fragment.scrollToPreference(pref)
+        if (adapter is PreferenceGroup.PreferencePositionCallback) {
+            val position = adapter.getPreferenceAdapterPosition(pref)
+            if (position != RecyclerView.NO_POSITION) {
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (adapter is PreferenceGroup.PreferencePositionCallback) {
-                val position = adapter.getPreferenceAdapterPosition(pref)
-                if (position != RecyclerView.NO_POSITION) {
-                    recyclerView.scrollToPosition(position)
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        val holder = recyclerView.findViewHolderForAdapterPosition(position)
-                        if (holder != null) flashCard(holder.itemView)
-                    }, 100)
+                // 1. Buat Custom Scroller agar meluncur mulus dan tidak memaksa CPU
+                val smoothScroller = object : LinearSmoothScroller(recyclerView.context) {
+                    override fun getVerticalSnapPreference(): Int {
+                        // SNAP_TO_ANY akan mencoba menaruh item di tengah area layar yang kosong
+                        return SNAP_TO_ANY
+                    }
+
+                    override fun calculateSpeedPerPixel(displayMetrics: DisplayMetrics): Float {
+                        // Secara bawaan scroller Android terlalu cepat sehingga sering lag di list panjang.
+                        // Di sini kita perlambat sedikit (50f) agar gliding-nya lebih elegan dan ringan.
+                        return 50f / displayMetrics.densityDpi
+                    }
                 }
+                smoothScroller.targetPosition = position
+
+                // 2. Jalankan scroll menggunakan layout manager (tanpa menggunakan scrollToPreference bawaan fragment)
+                recyclerView.layoutManager?.startSmoothScroll(smoothScroller)
+
+                // 3. Tunggu estimasi scroll selesai (~600ms), lalu eksekusi animasi nyala (highlight)
+                Handler(Looper.getMainLooper()).postDelayed({
+                    val holder = recyclerView.findViewHolderForAdapterPosition(position)
+                    if (holder != null) {
+                        flashCard(holder.itemView)
+                    } else {
+                        // Fallback: Jika listnya sangat amat panjang dan scroll belum selesai total
+                        recyclerView.scrollToPosition(position)
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            val lateHolder = recyclerView.findViewHolderForAdapterPosition(position)
+                            if (lateHolder != null) flashCard(lateHolder.itemView)
+                        }, 100)
+                    }
+                }, 600)
             }
-        }, 200)
+        }
     }
 
     private fun flashCard(itemView: View) {
         val card = itemView as? MaterialCardView ?: return
+        val highlightColor = card.context.getColorAttr(com.google.android.material.R.attr.colorPrimary)
 
-        // Resolve colorPrimary menggunakan extension function dari util
-        val highlightColor = card.context.getColorAttr("colorPrimary")
-
-        // Build a highlight overlay that clones the card's ShapeAppearanceModel exactly
         val overlay = MaterialShapeDrawable(card.shapeAppearanceModel).apply {
             setTint(highlightColor and 0xFFFFFF or 0x33000000) // ~20% alpha
             shadowCompatibilityMode = MaterialShapeDrawable.SHADOW_COMPAT_MODE_NEVER
         }
 
-        // Add as foreground overlay, animate alpha in → hold → fade out
         card.foreground = overlay
         overlay.alpha = 0
 
