@@ -723,11 +723,11 @@ yang kamu butuhin."</string>
     <string name="sub_tab_icon_none">Nggak ada</string>
 
     <!-- Reset all settings -->
-    <string name="title_pref_reset_all_settings">Reset Semua Pengaturan</string>
-    <string name="summary_pref_reset_all_settings">Kembalikan semua pengaturan ke nilai default. Profil server dan langganan tidak akan terpengaruh.</string>
-    <string name="dialog_reset_settings_title">Reset Semua Pengaturan?</string>
-    <string name="dialog_reset_settings_message">Ini akan mengembalikan semua pengaturan ke nilai default.\n\nProfil server dan langganan tidak akan dihapus.\n\nTindakan ini tidak dapat dibatalkan.</string>
+    <string name="title_pref_reset_all_settings">Reset Semua Settingan</string>
+    <string name="summary_pref_reset_all_settings">Kembaliin semua settingan ke nilai bawaannya.</string>
+    <string name="dialog_reset_settings_title">Reset Semua Settingan?</string>
+    <string name="dialog_reset_settings_message">Ini bakal ngembaliin semua settingan ke nilai bawaannya.\n\nProfil server sama langganan (subscription) nggak bakal dihapus.\n\nTindakan ini nggak bisa dibatalin.</string>
     <string name="dialog_reset_settings_confirm">Reset</string>
-    <string name="reset_settings_success">Pengaturan telah direset ke default.</string>
+    <string name="reset_settings_success">Settingan berhasil di-reset ke bawaan.</string>
 
 </resources>

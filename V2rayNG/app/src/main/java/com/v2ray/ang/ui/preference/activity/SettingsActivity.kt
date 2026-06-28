@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import com.v2ray.ang.extension.snackbarSuccess
+import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
 import com.v2ray.ang.ui.BaseActivity
@@ -134,7 +134,7 @@ class SettingsActivity : BaseActivity() {
                     positiveTextRes = R.string.dialog_reset_settings_confirm,
                 ) {
                     SettingsManager.resetAllSettings(requireContext().applicationContext)
-                    requireContext().snackbarSuccess(getString(R.string.reset_settings_success), title = getString(R.string.title_alerter_success))
+                    requireContext().toastSuccess(R.string.reset_settings_success)
                     activity?.recreate()
                 }
                 true
