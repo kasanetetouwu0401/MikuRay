@@ -1,11 +1,8 @@
 package com.v2ray.ang.ui.preference.activity
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
@@ -15,18 +12,13 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.bytehamster.lib.preferencesearch.SearchConfiguration
-import com.bytehamster.lib.preferencesearch.SearchPreferenceFragment
-import com.bytehamster.lib.preferencesearch.SearchPreferenceResult
-import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
 import com.v2ray.ang.ui.BaseActivity
 
-class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
-
+class SettingsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -37,7 +29,7 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
             val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
             view.updatePadding(
                 top    = maxOf(systemBars.top,    displayCutout.top),
-                bottom = maxOf(systemBars.bottom, displayCutout.bottom),
+                bottom = maxOf(systemBars.bottom,    displayCutout.bottom),
                 left   = maxOf(systemBars.left,   displayCutout.left),
                 right  = maxOf(systemBars.right,  displayCutout.right)
             )
@@ -51,73 +43,6 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.settings_container, SettingsFragment())
                 .commit()
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_settings, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_search_settings -> {
-                openSearchFragment()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    private fun openSearchFragment() {
-        val searchFragment = SearchPreferenceFragment()
-        val config: SearchConfiguration = searchFragment.searchConfiguration
-        config.apply {
-            setActivity(this@SettingsActivity)
-            index(R.xml.pref_ui_settings)
-                .addBreadcrumb(getString(R.string.title_ui_settings))
-                .setFragmentClass(UiSettingsActivity.UiSettingsFragment::class.java)
-            index(R.xml.pref_vpn_settings)
-                .addBreadcrumb(getString(R.string.title_vpn_settings))
-                .setFragmentClass(VpnSettingsActivity.VpnSettingsFragment::class.java)
-            index(R.xml.pref_core_settings)
-                .addBreadcrumb(getString(R.string.title_core_settings))
-                .setFragmentClass(CoreSettingsActivity.CoreSettingsFragment::class.java)
-            index(R.xml.pref_mux_settings)
-                .addBreadcrumb(getString(R.string.title_mux_settings))
-                .setFragmentClass(MuxSettingsActivity.MuxSettingsFragment::class.java)
-            index(R.xml.pref_fragment_settings)
-                .addBreadcrumb(getString(R.string.title_fragment_settings))
-                .setFragmentClass(FragmentSettingsActivity.FragmentSettingsFragment::class.java)
-            index(R.xml.pref_advanced_settings)
-                .addBreadcrumb(getString(R.string.title_advanced))
-                .setFragmentClass(AdvancedSettingsActivity.AdvancedSettingsFragment::class.java)
-        }
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.settings_container, searchFragment)
-            .addToBackStack("search")
-            .commit()
-    }
-
-    override fun onSearchResultClicked(result: SearchPreferenceResult) {
-        val targetIntent: Intent? = when {
-            result.fragmentName.contains("UiSettings") ->
-                Intent(this, UiSettingsActivity::class.java)
-            result.fragmentName.contains("VpnSettings") ->
-                Intent(this, VpnSettingsActivity::class.java)
-            result.fragmentName.contains("CoreSettings") ->
-                Intent(this, CoreSettingsActivity::class.java)
-            result.fragmentName.contains("MuxSettings") ->
-                Intent(this, MuxSettingsActivity::class.java)
-            result.fragmentName.contains("FragmentSettings") ->
-                Intent(this, FragmentSettingsActivity::class.java)
-            result.fragmentName.contains("AdvancedSettings") ->
-                Intent(this, AdvancedSettingsActivity::class.java)
-            else -> null
-        }
-        targetIntent?.let {
-            it.putExtra(SearchPreferenceResult.EXTRA_SEARCH_RESULT, result)
-            startActivity(it)
         }
     }
 
@@ -137,7 +62,7 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
         ): RecyclerView {
             val recyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState)
             recyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-
+            
             val paddingHorizontalPx = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 12f,
@@ -156,7 +81,7 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
                 paddingHorizontalPx,
                 paddingVerticalPx
             )
-
+            
             recyclerView.clipToPadding = false
 
             return recyclerView
@@ -167,32 +92,32 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
             addPreferencesFromResource(R.xml.pref_settings)
 
             navigateUiSettings?.setOnPreferenceClickListener {
-                startActivity(Intent(requireContext(), UiSettingsActivity::class.java))
+                startActivity(android.content.Intent(requireContext(), UiSettingsActivity::class.java))
                 true
             }
 
             navigateVpnSettings?.setOnPreferenceClickListener {
-                startActivity(Intent(requireContext(), VpnSettingsActivity::class.java))
+                startActivity(android.content.Intent(requireContext(), VpnSettingsActivity::class.java))
                 true
             }
 
             navigateCoreSettings?.setOnPreferenceClickListener {
-                startActivity(Intent(requireContext(), CoreSettingsActivity::class.java))
+                startActivity(android.content.Intent(requireContext(), CoreSettingsActivity::class.java))
                 true
             }
 
             navigateMuxSettings?.setOnPreferenceClickListener {
-                startActivity(Intent(requireContext(), MuxSettingsActivity::class.java))
+                startActivity(android.content.Intent(requireContext(), MuxSettingsActivity::class.java))
                 true
             }
 
             navigateFragmentSettings?.setOnPreferenceClickListener {
-                startActivity(Intent(requireContext(), FragmentSettingsActivity::class.java))
+                startActivity(android.content.Intent(requireContext(), FragmentSettingsActivity::class.java))
                 true
             }
 
             navigateAdvancedSettings?.setOnPreferenceClickListener {
-                startActivity(Intent(requireContext(), AdvancedSettingsActivity::class.java))
+                startActivity(android.content.Intent(requireContext(), AdvancedSettingsActivity::class.java))
                 true
             }
         }

@@ -9,7 +9,6 @@ import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
-import com.bytehamster.lib.preferencesearch.SearchPreferenceResult
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
@@ -41,15 +40,8 @@ class CoreSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_core_settings))
 
         if (savedInstanceState == null) {
-            val fragment = CoreSettingsFragment()
-            val result = SearchPreferenceResult.fromIntent(intent)
-            if (result != null) {
-                val args = android.os.Bundle()
-                SearchPreferenceResult.addToBundle(result, args)
-                fragment.arguments = args
-            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, fragment)
+                .replace(R.id.settings_container, CoreSettingsFragment())
                 .commit()
         }
     }
@@ -64,11 +56,6 @@ class CoreSettingsActivity : BaseActivity() {
         private val socksEnableUdp by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SOCKS_ENABLE_UDP) }
         private val proxySharing by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_PROXY_SHARING) }
         private val appendHttpProxy by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_APPEND_HTTP_PROXY) }
-
-        override fun onStart() {
-            super.onStart()
-            SearchPreferenceResult.fromBundle(arguments)?.highlight(this)
-        }
 
         override fun onCreatePreferences(bundle: Bundle?, s: String?) {
             preferenceManager.preferenceDataStore = MmkvPreferenceDataStore()

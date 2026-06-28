@@ -22,7 +22,6 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
-import com.bytehamster.lib.preferencesearch.SearchPreferenceResult
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.v2ray.ang.AppConfig
@@ -77,15 +76,8 @@ class UiSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_ui_settings))
 
         if (savedInstanceState == null) {
-            val fragment = UiSettingsFragment()
-            val result = SearchPreferenceResult.fromIntent(intent)
-            if (result != null) {
-                val args = Bundle()
-                SearchPreferenceResult.addToBundle(result, args)
-                fragment.arguments = args
-            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, fragment)
+                .replace(R.id.settings_container, UiSettingsFragment())
                 .commit()
         }
     }
@@ -865,8 +857,6 @@ class UiSettingsActivity : BaseActivity() {
 
         override fun onStart() {
             super.onStart()
-            // Highlight preference from search result navigation
-            SearchPreferenceResult.fromBundle(arguments)?.highlight(this)
             val isDynamicColor = MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, false)
             val isDynamicBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)
             val isShowHomeBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_HOME_BANNER, true)

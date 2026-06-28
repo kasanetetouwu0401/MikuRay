@@ -9,7 +9,6 @@ import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
-import com.bytehamster.lib.preferencesearch.SearchPreferenceResult
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
@@ -41,15 +40,8 @@ class FragmentSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_fragment_settings))
 
         if (savedInstanceState == null) {
-            val fragment = FragmentSettingsFragment()
-            val result = SearchPreferenceResult.fromIntent(intent)
-            if (result != null) {
-                val args = android.os.Bundle()
-                SearchPreferenceResult.addToBundle(result, args)
-                fragment.arguments = args
-            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, fragment)
+                .replace(R.id.settings_container, FragmentSettingsFragment())
                 .commit()
         }
     }
@@ -61,11 +53,6 @@ class FragmentSettingsActivity : BaseActivity() {
         private val fragmentLength by lazy { findPreference<EditTextPreference>(AppConfig.PREF_FRAGMENT_LENGTH) }
         private val fragmentInterval by lazy { findPreference<EditTextPreference>(AppConfig.PREF_FRAGMENT_INTERVAL) }
         private val fragmentMaxSplit by lazy { findPreference<EditTextPreference>(AppConfig.PREF_FRAGMENT_MAXSPLIT) }
-
-        override fun onStart() {
-            super.onStart()
-            SearchPreferenceResult.fromBundle(arguments)?.highlight(this)
-        }
 
         override fun onCreatePreferences(bundle: Bundle?, s: String?) {
             preferenceManager.preferenceDataStore = MmkvPreferenceDataStore()

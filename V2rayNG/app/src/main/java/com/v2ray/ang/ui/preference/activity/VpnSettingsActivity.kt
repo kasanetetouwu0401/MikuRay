@@ -2,6 +2,7 @@ package com.v2ray.ang.ui.preference.activity
 
 import android.os.Bundle
 import android.view.View
+import androidx.lifecycle.lifecycleScope
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -10,7 +11,6 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
-import com.bytehamster.lib.preferencesearch.SearchPreferenceResult
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.VPN
@@ -20,6 +20,9 @@ import com.v2ray.ang.helper.MmkvPreferenceDataStore
 import com.v2ray.ang.ui.BaseActivity
 import com.v2ray.ang.ui.PerAppProxyActivity
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
+import com.v2ray.ang.root.RootManager
+import kotlinx.coroutines.launch
+import com.v2ray.ang.extension.snackbarError
 
 class VpnSettingsActivity : BaseActivity() {
 
@@ -44,15 +47,8 @@ class VpnSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_vpn_settings))
 
         if (savedInstanceState == null) {
-            val fragment = VpnSettingsFragment()
-            val result = SearchPreferenceResult.fromIntent(intent)
-            if (result != null) {
-                val args = android.os.Bundle()
-                SearchPreferenceResult.addToBundle(result, args)
-                fragment.arguments = args
-            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, fragment)
+                .replace(R.id.settings_container, VpnSettingsFragment())
                 .commit()
         }
     }
@@ -73,11 +69,8 @@ class VpnSettingsActivity : BaseActivity() {
         private val keepAwake by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_KEEP_AWAKE) }
         private val tcpKeepaliveIdle by lazy { findPreference<EditTextPreference>(AppConfig.PREF_TCP_KEEPALIVE_IDLE) }
         private val wsHeartbeatPeriod by lazy { findPreference<EditTextPreference>(AppConfig.PREF_WS_HEARTBEAT_PERIOD) }
-
-        override fun onStart() {
-            super.onStart()
-            SearchPreferenceResult.fromBundle(arguments)?.highlight(this)
-        }
+        private val enableRootMode by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_ROOT_MODE_ENABLE) }
+        private val lanSharing by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_ROOT_LAN_SHARING) }
 
         override fun onCreatePreferences(bundle: Bundle?, s: String?) {
             preferenceManager.preferenceDataStore = MmkvPreferenceDataStore()
@@ -99,6 +92,33 @@ class VpnSettingsActivity : BaseActivity() {
                 startActivity(android.content.Intent(requireContext(), PerAppProxyActivity::class.java))
                 true
             }
+            
+            enableRootMode?.setOnPreferenceChangeListener { _, newValue ->
+                if (newValue == true && !RootManager.cachedRoot()) {
+                    lifecycleScope.launch {
+                        if (checkAndRequestRoot()) {
+                            enableRootMode?.isChecked = true
+                        }
+                    }
+                    false
+                } else {
+                    true
+                }
+            }
+
+            lanSharing?.setOnPreferenceChangeListener { _, newValue ->
+                if (newValue == true && !RootManager.cachedRoot()) {
+                    lifecycleScope.launch {
+                        if (checkAndRequestRoot()) {
+                            lanSharing?.isChecked = true
+                        }
+                    }
+                    false
+                } else {
+                    true
+                }
+            }
+            
         }
 
         private fun initPreferenceSummaries() {
@@ -133,6 +153,15 @@ class VpnSettingsActivity : BaseActivity() {
                 }
             }
             preferenceScreen?.let { traverse(it) }
+        }
+        
+        private suspend fun checkAndRequestRoot(): Boolean {
+            val hasRoot = RootManager.refresh()
+            if (!isAdded) return false
+            if (!hasRoot) {
+                context?.snackbarError(getString(R.string.toast_root_required), title = getString(R.string.title_alerter_success))
+            }
+            return hasRoot
         }
 
         override fun onStart() {

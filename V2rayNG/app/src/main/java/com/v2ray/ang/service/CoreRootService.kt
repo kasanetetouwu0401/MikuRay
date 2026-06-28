@@ -7,14 +7,10 @@ import android.os.IBinder
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.contracts.ServiceControl
 import com.v2ray.ang.core.CoreServiceManager
-import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.handler.NotificationManager
-import com.v2ray.ang.handler.SettingsManager
-import com.v2ray.ang.handler.TrafficController
 import com.v2ray.ang.root.RootProxyManager
+import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.MyContextWrapper
-import com.v2ray.ang.util.SoundPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -24,19 +20,16 @@ import kotlinx.coroutines.runBlocking
 import java.lang.ref.SoftReference
 
 /**
- * Foreground service for Root mode (system-wide proxy without VpnService).
+ * Foreground service for the root (system-wide) run modes. Unlike [CoreVpnService] it
+ * does not use Android VpnService — traffic is routed by iptables instead
+ * (see [RootProxyManager]).
  *
- * Unlike [CoreVpnService] this service does not extend [android.net.VpnService].
- * Traffic is captured via iptables mangle MARK chains + a TUN device managed by
- * [RootProxyManager], which also spawns hev-socks5-tunnel as a standalone root process.
- *
- * The iptables setup runs asynchronously in [setupJob] so it doesn't block
- * [onStartCommand]. [onDestroy] waits for [setupJob] to finish before tearing down
- * so teardown always runs after setup — preventing orphan routing rules.
+ * The in-process core is started first (so its listener is up and the foreground
+ * notification is posted promptly), then the root routing rules are installed off the
+ * main thread. On teardown the rules are removed before the core stops.
  */
 class CoreRootService : Service(), ServiceControl {
 
-    private var isRunning = false
     private var setupJob: Job? = null
 
     override fun onCreate() {
@@ -46,32 +39,20 @@ class CoreRootService : Service(), ServiceControl {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        LogUtil.i(AppConfig.TAG, "StartCore-Root: Service command received")
-        NotificationManager.showNotification(null)
-        TrafficController.start()
+        LogUtil.i(AppConfig.TAG, "StartCore-Root: command received")
 
-        // Start core first so the SOCKS inbound is ready before hev connects to it
+        // Start the in-process core first (this also posts the foreground notification),
+        // then install the root routing off the main thread.
         if (!CoreServiceManager.startCoreLoop(null)) {
-            LogUtil.e(AppConfig.TAG, "StartCore-Root: Failed to start core loop")
-            stopAllService()
+            LogUtil.e(AppConfig.TAG, "StartCore-Root: core failed to start")
+            stopService()
             return START_NOT_STICKY
         }
 
-        isRunning = true
-
-        // Sound
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
-            SoundPlayer.playConnect(this)
-        }
-
-        // Async iptables + tun + hev setup
         setupJob = CoroutineScope(Dispatchers.IO).launch {
-            try {
-                RootProxyManager.start(this@CoreRootService)
-                LogUtil.i(AppConfig.TAG, "StartCore-Root: iptables/tun/hev setup complete")
-            } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "StartCore-Root: setup failed", e)
-                stopAllService()
+            if (!RootProxyManager.start(this@CoreRootService)) {
+                LogUtil.e(AppConfig.TAG, "StartCore-Root: failed to start root mode, stopping")
+                stopService()
             }
         }
 
@@ -80,20 +61,26 @@ class CoreRootService : Service(), ServiceControl {
 
     override fun onDestroy() {
         super.onDestroy()
-        LogUtil.i(AppConfig.TAG, "StartCore-Root: Service destroyed")
-        if (isRunning) {
-            stopAllService(isForced = false)
-        }
+        // Wait for any in-flight async setup to finish before tearing down. The rules are
+        // installed off the main thread and can take seconds (the setup script waits for the
+        // tun to appear); if a stop arrives during that window, teardown would run first and
+        // the setup would then re-install the rules + tun pointing at a now-dead core,
+        // blackholing all traffic until the next start/stop cycle clears it.
+        runBlocking { setupJob?.cancelAndJoin() }
+        // Remove routing rules BEFORE stopping the core so traffic is never redirected
+        // to a dead listener. Synchronous on purpose — leaving rules behind breaks the net.
+        RootProxyManager.stop(this)
+        CoreServiceManager.stopCoreLoop()
     }
 
     override fun getService(): Service = this
 
     override fun startService() {
-        // nothing; core loop is started in onStartCommand
+        // do nothing
     }
 
     override fun stopService() {
-        stopAllService()
+        stopSelf()
     }
 
     override fun vpnProtect(socket: Int): Boolean = true
@@ -105,39 +92,5 @@ class CoreRootService : Service(), ServiceControl {
             MyContextWrapper.wrap(newBase, SettingsManager.getLocale())
         }
         super.attachBaseContext(context)
-    }
-
-    // ---- private -----------------------------------------------------------
-
-    private fun stopAllService(isForced: Boolean = true) {
-        isRunning = false
-
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
-            SoundPlayer.playDisconnect(this)
-        }
-
-        // Wait for any in-flight setup to finish before tearing down.
-        // If setup is still running when we try to tear down, teardown would finish
-        // first and setup would then re-install the rules into a dead core,
-        // leaving orphan iptables chains and a tun that black-holes all traffic.
-        runBlocking {
-            setupJob?.cancelAndJoin()
-        }
-        setupJob = null
-
-        // Tear down iptables/tun/hev
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                RootProxyManager.stopFull(this@CoreRootService)
-            } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "StartCore-Root: teardown error", e)
-            }
-        }
-
-        CoreServiceManager.stopCoreLoop()
-
-        if (isForced) {
-            stopSelf()
-        }
     }
 }
