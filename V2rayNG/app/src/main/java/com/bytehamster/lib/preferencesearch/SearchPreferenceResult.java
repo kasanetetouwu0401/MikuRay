@@ -98,7 +98,7 @@ public class SearchPreferenceResult {
     private void highlightFallback(PreferenceFragmentCompat prefsFragment, final Preference prefResult) {
         final Drawable oldIcon = prefResult.getIcon();
         final boolean oldSpaceReserved = prefResult.isIconSpaceReserved();
-        Drawable arrow = AppCompatResources.getDrawable(prefsFragment.getContext(), R.drawable.searchpreference_ic_arrow_right);
+        Drawable arrow = AppCompatResources.getDrawable(prefsFragment.getContext(), R.drawable.uwu_arrow);
         int color = getColorFromAttr(prefsFragment.getContext(), android.R.attr.textColorPrimary);
         arrow.setColorFilter(color, PorterDuff.Mode.SRC_IN);
         prefResult.setIcon(arrow);
