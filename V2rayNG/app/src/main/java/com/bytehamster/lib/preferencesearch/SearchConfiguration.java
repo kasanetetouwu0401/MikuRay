@@ -21,7 +21,6 @@ import java.util.Arrays;
 public class SearchConfiguration {
     private static final String ARGUMENT_INDEX_FILES = "items";
     private static final String ARGUMENT_INDEX_INDIVIDUAL_PREFERENCES = "individual_prefs";
-    private static final String ARGUMENT_FUZZY_ENABLED = "fuzzy";
     private static final String ARGUMENT_HISTORY_ENABLED = "history_enabled";
     private static final String ARGUMENT_HISTORY_ID = "history_id";
     private static final String ARGUMENT_SEARCH_BAR_ENABLED = "search_bar_enabled";
@@ -39,7 +38,6 @@ public class SearchConfiguration {
     private boolean historyEnabled = true;
     private String historyId = null;
     private boolean breadcrumbsEnabled = false;
-    private boolean fuzzySearchEnabled = false;
     private boolean searchBarEnabled = true;
     private AppCompatActivity activity;
     private int containerResId = android.R.id.content;
@@ -54,18 +52,10 @@ public class SearchConfiguration {
 
     }
 
-    /**
-     * Creates a new search configuration
-     * @param activity The Activity that receives callbacks. Must implement SearchPreferenceResultListener.
-     */
     public SearchConfiguration(AppCompatActivity activity) {
         setActivity(activity);
     }
 
-    /**
-     * Shows the fragment
-     * @return A reference to the fragment
-     */
     public SearchPreferenceFragment showSearchFragment() {
         if (activity == null) {
             throw new IllegalStateException("setActivity() not called");
@@ -87,7 +77,6 @@ public class SearchConfiguration {
         arguments.putParcelableArrayList(ARGUMENT_INDEX_INDIVIDUAL_PREFERENCES, preferencesToIndex);
         arguments.putBoolean(ARGUMENT_HISTORY_ENABLED, historyEnabled);
         arguments.putParcelable(ARGUMENT_REVEAL_ANIMATION_SETTING, revealAnimationSetting);
-        arguments.putBoolean(ARGUMENT_FUZZY_ENABLED, fuzzySearchEnabled);
         arguments.putBoolean(ARGUMENT_BREADCRUMBS_ENABLED, breadcrumbsEnabled);
         arguments.putBoolean(ARGUMENT_SEARCH_BAR_ENABLED, searchBarEnabled);
         arguments.putString(ARGUMENT_TEXT_HINT, textHint);
@@ -105,7 +94,6 @@ public class SearchConfiguration {
         config.preferencesToIndex = bundle.getParcelableArrayList(ARGUMENT_INDEX_INDIVIDUAL_PREFERENCES);
         config.historyEnabled = bundle.getBoolean(ARGUMENT_HISTORY_ENABLED);
         config.revealAnimationSetting = bundle.getParcelable(ARGUMENT_REVEAL_ANIMATION_SETTING);
-        config.fuzzySearchEnabled = bundle.getBoolean(ARGUMENT_FUZZY_ENABLED);
         config.breadcrumbsEnabled = bundle.getBoolean(ARGUMENT_BREADCRUMBS_ENABLED);
         config.searchBarEnabled = bundle.getBoolean(ARGUMENT_SEARCH_BAR_ENABLED);
         config.textHint = bundle.getString(ARGUMENT_TEXT_HINT);
@@ -117,10 +105,6 @@ public class SearchConfiguration {
         return config;
     }
 
-    /**
-     * Sets the current activity that also receives callbacks
-     * @param activity The Activity that receives callbacks. Must implement SearchPreferenceResultListener.
-     */
     public void setActivity(@NonNull AppCompatActivity activity) {
         this.activity = activity;
         if (!(activity instanceof SearchPreferenceResultListener)) {
@@ -128,97 +112,42 @@ public class SearchConfiguration {
         }
     }
 
-    /**
-     * Show a history of recent search terms if nothing was typed yet. Default is true
-     * @param historyEnabled True if history should be enabled
-     */
     public void setHistoryEnabled(boolean historyEnabled) {
         this.historyEnabled = historyEnabled;
     }
 
-    /**
-     * Sets the id to use for saving the history. Preference screens with the same history id will share the same
-     * history. The default id is null (no id).
-     * @param historyId the history id
-     */
     public void setHistoryId(String historyId) {
         this.historyId = historyId;
     }
 
-    /**
-     * Allow to enable and disable fuzzy searching. Default is true
-     * @param fuzzySearchEnabled True if search should be fuzzy
-     */
-    public void setFuzzySearchEnabled(boolean fuzzySearchEnabled) {
-        this.fuzzySearchEnabled = fuzzySearchEnabled;
-    }
-
-    /**
-     * Show breadcrumbs in the list of search results, containing of
-     * the prefix given in addResourceFileToIndex, PreferenceCategory and PreferenceScreen.
-     * Default is false
-     * @param breadcrumbsEnabled True if breadcrumbs should be shown
-     */
     public void setBreadcrumbsEnabled(boolean breadcrumbsEnabled) {
         this.breadcrumbsEnabled = breadcrumbsEnabled;
     }
 
-    /**
-     * Show the search bar above the list. When setting this to false, you have to use {@see SearchPreferenceFragment#setSearchTerm(String) setSearchTerm} instead
-     * Default is true
-     * @param searchBarEnabled True if search bar should be shown
-     */
     public void setSearchBarEnabled(boolean searchBarEnabled) {
         this.searchBarEnabled = searchBarEnabled;
     }
 
-    /**
-     * Sets the container to use when loading the fragment
-     * @param containerResId Resource id of the container
-     */
     public void setFragmentContainerViewId(@IdRes int containerResId) {
         this.containerResId = containerResId;
     }
 
-    /**
-     * Display a reveal animation
-     * @param centerX Origin of the reveal animation
-     * @param centerY Origin of the reveal animation
-     * @param width Size of the main container
-     * @param height Size of the main container
-     * @param colorAccent Accent color to use
-     */
     public void useAnimation(int centerX, int centerY, int width, int height, @ColorInt int colorAccent) {
         revealAnimationSetting = new RevealAnimationSetting(centerX, centerY, width, height, colorAccent);
     }
 
-    /**
-     * Adds a new file to the index
-     * @param resId The preference file to index
-     */
     public SearchIndexItem index(@XmlRes int resId) {
         SearchIndexItem item = new SearchIndexItem(resId, this);
         filesToIndex.add(item);
         return item;
     }
 
-    /**
-     * Indexes a single preference
-     * @return the indexed PreferenceItem to configure it with chaining
-     * @see PreferenceItem for the available methods for configuring it
-     */
     public PreferenceItem indexItem() {
         PreferenceItem preferenceItem = new PreferenceItem();
         preferencesToIndex.add(preferenceItem);
         return preferenceItem;
     }
 
-    /**
-     * Indexes a single android preference
-     * @param preference to get its key, summary, title and entries
-     * @return the indexed PreferenceItem to configure it with chaining
-     * @see PreferenceItem for the available methods for configuring it
-     */
     public PreferenceItem indexItem(@NonNull Preference preference) {
         PreferenceItem preferenceItem = new PreferenceItem();
 
@@ -245,9 +174,6 @@ public class SearchConfiguration {
         return bannedKeys;
     }
 
-    /**
-     * @param key of the preference to be ignored
-     */
     public void ignorePreference(@NonNull String key) {
         bannedKeys.add(key);
     }
@@ -270,10 +196,6 @@ public class SearchConfiguration {
 
     boolean isBreadcrumbsEnabled() {
         return breadcrumbsEnabled;
-    }
-
-    boolean isFuzzySearchEnabled() {
-        return fuzzySearchEnabled;
     }
 
     boolean isSearchBarEnabled() {
@@ -324,47 +246,27 @@ public class SearchConfiguration {
         this.textMore = textMore;
     }
 
-    /**
-     * Adds a given R.xml resource to the search index
-     */
     public static class SearchIndexItem implements Parcelable {
         private String breadcrumb = "";
         private final @XmlRes int resId;
         private final SearchConfiguration searchConfiguration;
 
-        /**
-         * Includes the given R.xml resource in the index
-         * @param resId The resource to index
-         */
         private SearchIndexItem(@XmlRes int resId, SearchConfiguration searchConfiguration) {
             this.resId = resId;
             this.searchConfiguration = searchConfiguration;
         }
 
-        /**
-         * Adds a breadcrumb
-         * @param breadcrumb The breadcrumb to add
-         * @return For chaining
-         */
         public SearchIndexItem addBreadcrumb(@StringRes int breadcrumb) {
             assertNotParcel();
             return addBreadcrumb(searchConfiguration.activity.getString(breadcrumb));
         }
 
-        /**
-         * Adds a breadcrumb
-         * @param breadcrumb The breadcrumb to add
-         * @return For chaining
-         */
         public SearchIndexItem addBreadcrumb(String breadcrumb) {
             assertNotParcel();
             this.breadcrumb = Breadcrumb.concat(this.breadcrumb, breadcrumb);
             return this;
         }
 
-        /**
-         * Throws an exception if the item does not have a searchConfiguration (thus, is restored from a parcel)
-         */
         private void assertNotParcel() {
             if (searchConfiguration == null) {
                 throw new IllegalStateException("SearchIndexItems that are restored from parcel can not be modified.");

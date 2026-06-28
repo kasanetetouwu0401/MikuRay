@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SearchPreferenceFragment extends Fragment implements SearchPreferenceAdapter.SearchClickListener {
-    /** Default tag used on the library's Fragment transactions with {@link SearchPreferenceFragment} */
     public static final String TAG = "SearchPreferenceFragment";
 
     private static final String SHARED_PREFS_FILE = "preferenceSearch";
@@ -170,10 +169,6 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
         editor.apply();
     }
 
-    /**
-     * Gets the preference key for the history size, prefixed with the history ID, if set.
-     * @return the preference key for the history size
-     */
     private String historySizeKey() {
         if (searchConfiguration.getHistoryId() != null) {
             return searchConfiguration.getHistoryId() + "_history_size";
@@ -182,10 +177,6 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
         }
     }
 
-    /**
-     * Gets the preference key for a history entry, prefixed with the history ID, if set.
-     * @return the preference key for the history entry
-     */
     private String historyEntryKey(int i) {
         if (searchConfiguration.getHistoryId() != null) {
             return searchConfiguration.getHistoryId() + "_history_" + i;
@@ -258,7 +249,7 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
             return;
         }
 
-        results = searcher.searchFor(keyword, searchConfiguration.isFuzzySearchEnabled());
+        results = searcher.searchFor(keyword);
         adapter.setContent(new ArrayList<>(results));
 
         setEmptyViewShown(results.isEmpty());
@@ -278,11 +269,9 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
         viewHolder.noResults.setVisibility(View.GONE);
         viewHolder.recyclerView.setVisibility(View.VISIBLE);
 
-        // Only show history entries that still produce actual search results
         List<HistoryItem> validHistory = new ArrayList<>();
         for (HistoryItem item : history) {
-            List<PreferenceItem> itemResults = searcher.searchFor(
-                    item.getTerm(), searchConfiguration.isFuzzySearchEnabled());
+            List<PreferenceItem> itemResults = searcher.searchFor(item.getTerm());
             if (!itemResults.isEmpty()) {
                 validHistory.add(item);
             }

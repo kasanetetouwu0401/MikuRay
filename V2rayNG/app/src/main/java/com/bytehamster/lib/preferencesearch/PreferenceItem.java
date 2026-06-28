@@ -20,9 +20,6 @@ public class PreferenceItem extends ListItem implements Parcelable {
     ArrayList<String> keyBreadcrumbs = new ArrayList<>();
     int resId;
 
-    private float lastScore = 0;
-    private String lastKeyword = null;
-
     PreferenceItem() {
     }
 
@@ -51,58 +48,9 @@ public class PreferenceItem extends ListItem implements Parcelable {
         return title != null || summary != null;
     }
 
-    boolean matchesFuzzy(String keyword) {
-        return getScore(keyword) > 0.7;
-    }
-
     boolean matches(String keyword) {
         Locale locale = Locale.getDefault();
         return getInfo().toLowerCase(locale).contains(keyword.toLowerCase(locale));
-    }
-
-    float getScore(String keyword) {
-        if (TextUtils.isEmpty(keyword)) {
-            return 0;
-        } else if (TextUtils.equals(lastKeyword, keyword)) {
-            return lastScore;
-        }
-        String info = getInfo();
-
-        float score = fuzzyScore(info, "ø" + keyword);
-        float maxScore = (keyword.length() + 1) * 3 - 2;
-
-        lastScore = score / maxScore;
-        lastKeyword = keyword;
-        return lastScore;
-    }
-
-    /**
-     * Inline fuzzy score — mirrors Apache Commons Text FuzzyScore behaviour.
-     * Returns a score based on how many consecutive character matches are found.
-     */
-    private static float fuzzyScore(String term, String query) {
-        if (term == null || query == null) return 0;
-        final String termLower = term.toLowerCase(Locale.getDefault());
-        final String queryLower = query.toLowerCase(Locale.getDefault());
-        int score = 0;
-        int termIndex = 0;
-        int previousMatchingCharacterIndex = Integer.MIN_VALUE;
-        for (int queryIndex = 0; queryIndex < queryLower.length(); queryIndex++) {
-            final char queryChar = queryLower.charAt(queryIndex);
-            boolean termCharacterMatchFound = false;
-            for (; termIndex < termLower.length() && !termCharacterMatchFound; termIndex++) {
-                final char termChar = termLower.charAt(termIndex);
-                if (queryChar == termChar) {
-                    score++;
-                    if (previousMatchingCharacterIndex + 1 == termIndex) {
-                        score += 2;
-                    }
-                    previousMatchingCharacterIndex = termIndex;
-                    termCharacterMatchFound = true;
-                }
-            }
-        }
-        return score;
     }
 
     private String getInfo() {

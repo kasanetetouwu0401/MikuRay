@@ -9,8 +9,6 @@ import org.xmlpull.v1.XmlPullParser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 class PreferenceParser {
@@ -167,35 +165,22 @@ class PreferenceParser {
         return s;
     }
 
-    List<PreferenceItem> searchFor(final String keyword, boolean fuzzy) {
+    List<PreferenceItem> searchFor(final String keyword) {
         if (TextUtils.isEmpty(keyword)) {
             return new ArrayList<>();
         }
         ArrayList<PreferenceItem> results = new ArrayList<>();
 
         for (PreferenceItem item : allEntries) {
-            if ((fuzzy && item.matchesFuzzy(keyword))
-                    || (!fuzzy && item.matches(keyword))) {
+            if (item.matches(keyword)) {
                 results.add(item);
             }
         }
-
-        Collections.sort(results, new Comparator<PreferenceItem>() {
-            @Override
-            public int compare(PreferenceItem i1, PreferenceItem i2) {
-                return floatCompare(i2.getScore(keyword), i1.getScore(keyword));
-            }
-        });
 
         if (results.size() > MAX_RESULTS) {
             return results.subList(0, MAX_RESULTS);
         } else {
             return results;
         }
-    }
-
-    @SuppressWarnings("UseCompareMethod")
-    private static int floatCompare(float x, float y) {
-        return (x < y) ? -1 : ((x == y) ? 0 : 1);
     }
 }
