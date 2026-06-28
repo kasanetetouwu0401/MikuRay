@@ -141,7 +141,6 @@ dependencies {
     implementation(libs.androidx.fragment)
     implementation(libs.palette)
     implementation(libs.play.services.location)
-    implementation(libs.search.preference)
 
     // UI Libraries
     implementation(libs.material)
