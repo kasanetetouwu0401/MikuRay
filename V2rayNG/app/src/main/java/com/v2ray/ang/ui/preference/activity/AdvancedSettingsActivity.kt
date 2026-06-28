@@ -8,6 +8,7 @@ import androidx.core.view.updatePadding
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
+import com.bytehamster.lib.preferencesearch.SearchPreferenceResult
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
@@ -39,8 +40,15 @@ class AdvancedSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_advanced))
 
         if (savedInstanceState == null) {
+            val fragment = AdvancedSettingsFragment()
+            val result = SearchPreferenceResult.fromIntent(intent)
+            if (result != null) {
+                val args = android.os.Bundle()
+                SearchPreferenceResult.addToBundle(result, args)
+                fragment.arguments = args
+            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, AdvancedSettingsFragment())
+                .replace(R.id.settings_container, fragment)
                 .commit()
         }
     }
@@ -48,6 +56,11 @@ class AdvancedSettingsActivity : BaseActivity() {
     class AdvancedSettingsFragment : PreferenceFragmentCompat() {
 
         private val mode by lazy { findPreference<ListPreference>(AppConfig.PREF_MODE) }
+
+        override fun onStart() {
+            super.onStart()
+            SearchPreferenceResult.fromBundle(arguments)?.highlight(this)
+        }
 
         override fun onCreatePreferences(bundle: Bundle?, s: String?) {
             preferenceManager.preferenceDataStore = MmkvPreferenceDataStore()

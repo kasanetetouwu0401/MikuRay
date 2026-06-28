@@ -10,6 +10,7 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
+import com.bytehamster.lib.preferencesearch.SearchPreferenceResult
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.VPN
@@ -43,8 +44,15 @@ class VpnSettingsActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_vpn_settings))
 
         if (savedInstanceState == null) {
+            val fragment = VpnSettingsFragment()
+            val result = SearchPreferenceResult.fromIntent(intent)
+            if (result != null) {
+                val args = android.os.Bundle()
+                SearchPreferenceResult.addToBundle(result, args)
+                fragment.arguments = args
+            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, VpnSettingsFragment())
+                .replace(R.id.settings_container, fragment)
                 .commit()
         }
     }
@@ -65,6 +73,11 @@ class VpnSettingsActivity : BaseActivity() {
         private val keepAwake by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_KEEP_AWAKE) }
         private val tcpKeepaliveIdle by lazy { findPreference<EditTextPreference>(AppConfig.PREF_TCP_KEEPALIVE_IDLE) }
         private val wsHeartbeatPeriod by lazy { findPreference<EditTextPreference>(AppConfig.PREF_WS_HEARTBEAT_PERIOD) }
+
+        override fun onStart() {
+            super.onStart()
+            SearchPreferenceResult.fromBundle(arguments)?.highlight(this)
+        }
 
         override fun onCreatePreferences(bundle: Bundle?, s: String?) {
             preferenceManager.preferenceDataStore = MmkvPreferenceDataStore()
