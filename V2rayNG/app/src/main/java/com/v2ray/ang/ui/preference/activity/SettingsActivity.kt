@@ -2,12 +2,18 @@ package com.v2ray.ang.ui.preference.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import android.widget.ImageView
 import androidx.annotation.NonNull
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -16,26 +22,59 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.bytehamster.lib.preferencesearch.SearchPreferenceActionView
+import com.bytehamster.lib.preferencesearch.SearchConfiguration
+import com.bytehamster.lib.preferencesearch.SearchPreferenceFragment
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResult
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.card.MaterialCardView
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
 import com.v2ray.ang.ui.BaseActivity
-import com.v2ray.ang.ui.PerAppProxyActivity
 import com.v2ray.ang.util.showDeleteConfirmDialog
 
 class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
 
-    private var searchActionView: SearchPreferenceActionView? = null
+    private lateinit var appBar: AppBarLayout
+    private lateinit var collapsingToolbar: CollapsingToolbarLayout
+    private lateinit var toolbar: MaterialToolbar
+    private lateinit var searchBarCard: MaterialCardView
+    private lateinit var searchEditText: EditText
+    private lateinit var searchClear: ImageView
+    private lateinit var searchBack: ImageView
+
+    private var activeSearchFragment: SearchPreferenceFragment? = null
+
+    private val searchConfiguration by lazy {
+        SearchConfiguration(this).apply {
+            setSearchBarEnabled(false) // search bar ada di toolbar kita sendiri
+            setBreadcrumbsEnabled(true)
+            setHistoryEnabled(true)
+            index(R.xml.pref_ui_settings).addBreadcrumb(getString(R.string.title_ui_settings))
+            index(R.xml.pref_vpn_settings).addBreadcrumb(getString(R.string.title_vpn_settings))
+            index(R.xml.pref_core_settings).addBreadcrumb(getString(R.string.title_core_settings))
+            index(R.xml.pref_mux_settings).addBreadcrumb(getString(R.string.title_mux_settings))
+            index(R.xml.pref_fragment_settings).addBreadcrumb(getString(R.string.title_fragment_settings))
+            index(R.xml.pref_advanced_settings).addBreadcrumb(getString(R.string.title_advanced))
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+        setContentView(R.layout.activity_settings_search)
+
+        appBar = findViewById(R.id.app_bar)
+        collapsingToolbar = findViewById(R.id.collapsing_toolbar)
+        toolbar = findViewById(R.id.toolbar)
+        searchBarCard = findViewById(R.id.search_bar_card)
+        searchEditText = findViewById(R.id.search_edit_text)
+        searchClear = findViewById(R.id.search_clear)
+        searchBack = findViewById(R.id.search_back)
 
         val rootView = findViewById<View>(R.id.main_content)
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
@@ -50,7 +89,6 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
             insets
         }
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_settings))
 
         if (savedInstanceState == null) {
@@ -59,15 +97,17 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
                 .commit()
         }
 
+        setupSearchBar()
+
         onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                // Tutup search dulu kalau lagi aktif
-                if (searchActionView?.cancelSearch() == true) return
-
+                if (searchBarCard.visibility == View.VISIBLE) {
+                    closeSearch()
+                    return
+                }
                 val searchFragment = supportFragmentManager.fragments.find {
                     it.javaClass.name.contains("SearchPreferenceFragment")
                 }
-
                 if (searchFragment != null && searchFragment.isVisible) {
                     isEnabled = false
                     onBackPressedDispatcher.onBackPressed()
@@ -79,50 +119,94 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
         })
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_settings, menu)
+    private fun setupSearchBar() {
+        searchBack.setOnClickListener { closeSearch() }
 
-        val searchItem = menu.findItem(R.id.action_search)
-        searchActionView = searchItem.actionView as? SearchPreferenceActionView
-
-        searchActionView?.apply {
-            setActivity(this@SettingsActivity)
-            getSearchConfiguration().apply {
-                setBreadcrumbsEnabled(true)
-                setHistoryEnabled(true)
-                setFragmentContainerViewId(R.id.settings_container)
-                index(R.xml.pref_ui_settings).addBreadcrumb(R.string.title_ui_settings)
-                index(R.xml.pref_vpn_settings).addBreadcrumb(R.string.title_vpn_settings)
-                index(R.xml.pref_core_settings).addBreadcrumb(R.string.title_core_settings)
-                index(R.xml.pref_mux_settings).addBreadcrumb(R.string.title_mux_settings)
-                index(R.xml.pref_fragment_settings).addBreadcrumb(R.string.title_fragment_settings)
-                index(R.xml.pref_advanced_settings).addBreadcrumb(R.string.title_advanced)
-            }
+        searchClear.setOnClickListener {
+            searchEditText.setText("")
         }
 
-        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionExpand(item: MenuItem) = true
-            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-                searchActionView?.cancelSearch()
-                return true
+        searchEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                val text = s?.toString() ?: ""
+                searchClear.visibility = if (text.isEmpty()) View.GONE else View.VISIBLE
+                activeSearchFragment?.setSearchTerm(text)
             }
         })
 
+        searchEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                hideKeyboard()
+                true
+            } else false
+        }
+    }
+
+    private fun openSearch() {
+        // Sembunyikan collapsing toolbar, munculkan search bar
+        collapsingToolbar.visibility = View.GONE
+        searchBarCard.visibility = View.VISIBLE
+
+        // Show search fragment (tanpa search bar bawaannya)
+        activeSearchFragment = searchConfiguration.showSearchFragment() as SearchPreferenceFragment
+        activeSearchFragment?.setHistoryClickListener { entry ->
+            searchEditText.setText(entry)
+            searchEditText.setSelection(entry.length)
+        }
+
+        // Focus dan buka keyboard
+        searchEditText.post {
+            searchEditText.requestFocus()
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT)
+        }
+    }
+
+    private fun closeSearch() {
+        hideKeyboard()
+
+        // Kembalikan toolbar normal
+        searchBarCard.visibility = View.GONE
+        collapsingToolbar.visibility = View.VISIBLE
+        searchEditText.setText("")
+
+        // Tutup search fragment
+        activeSearchFragment?.let { fragment ->
+            if (fragment.isAdded) {
+                supportFragmentManager.beginTransaction()
+                    .remove(fragment)
+                    .commitAllowingStateLoss()
+                supportFragmentManager.popBackStack(
+                    SearchPreferenceFragment.TAG,
+                    androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
+                )
+            }
+        }
+        activeSearchFragment = null
+    }
+
+    private fun hideKeyboard() {
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        currentFocus?.let { imm.hideSoftInputFromWindow(it.windowToken, 0) }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_settings, menu)
         return true
     }
 
-    override fun onSearchResultClicked(@NonNull result: SearchPreferenceResult) {
-        // Tutup search fragment
-        val searchFragment = supportFragmentManager.fragments.find {
-            it.javaClass.name.contains("SearchPreferenceFragment")
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.action_search) {
+            openSearch()
+            return true
         }
-        if (searchFragment != null) {
-            supportFragmentManager.beginTransaction().remove(searchFragment).commitNowAllowingStateLoss()
-        }
+        return super.onOptionsItemSelected(item)
+    }
 
-        // Collapse action view di toolbar
-        val searchItem = findViewById<MaterialToolbar>(R.id.toolbar).menu?.findItem(R.id.action_search)
-        searchItem?.collapseActionView()
+    override fun onSearchResultClicked(@NonNull result: SearchPreferenceResult) {
+        closeSearch()
 
         val targetActivity: Class<*>? = when (result.resourceFile) {
             R.xml.pref_ui_settings       -> UiSettingsActivity::class.java
@@ -160,24 +244,14 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
             recyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
             val paddingHorizontalPx = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                12f,
-                resources.displayMetrics
+                TypedValue.COMPLEX_UNIT_DIP, 12f, resources.displayMetrics
             ).toInt()
 
             val paddingVerticalPx = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                4f,
-                resources.displayMetrics
+                TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics
             ).toInt()
 
-            recyclerView.setPadding(
-                paddingHorizontalPx,
-                paddingVerticalPx,
-                paddingHorizontalPx,
-                paddingVerticalPx
-            )
-
+            recyclerView.setPadding(paddingHorizontalPx, paddingVerticalPx, paddingHorizontalPx, paddingVerticalPx)
             recyclerView.clipToPadding = false
 
             return recyclerView
@@ -191,32 +265,26 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
                 startActivity(android.content.Intent(requireContext(), UiSettingsActivity::class.java))
                 true
             }
-
             navigateVpnSettings?.setOnPreferenceClickListener {
                 startActivity(android.content.Intent(requireContext(), VpnSettingsActivity::class.java))
                 true
             }
-
             navigateCoreSettings?.setOnPreferenceClickListener {
                 startActivity(android.content.Intent(requireContext(), CoreSettingsActivity::class.java))
                 true
             }
-
             navigateMuxSettings?.setOnPreferenceClickListener {
                 startActivity(android.content.Intent(requireContext(), MuxSettingsActivity::class.java))
                 true
             }
-
             navigateFragmentSettings?.setOnPreferenceClickListener {
                 startActivity(android.content.Intent(requireContext(), FragmentSettingsActivity::class.java))
                 true
             }
-
             navigateAdvancedSettings?.setOnPreferenceClickListener {
                 startActivity(android.content.Intent(requireContext(), AdvancedSettingsActivity::class.java))
                 true
             }
-
             resetAllSettings?.setOnPreferenceClickListener {
                 showDeleteConfirmDialog(
                     context = requireContext(),
