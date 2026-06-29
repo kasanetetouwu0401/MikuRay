@@ -62,6 +62,13 @@
         android:summary="@string/summary_navigate_advanced_settings"
         android:title="@string/title_advanced"
         app:layout="@layout/uwu_grid" />
+        
+    <Preference
+        android:icon="@drawable/ic_flash_on"
+        android:key="pref_disable_battery_optimization"
+        android:summary="@string/summary_pref_disable_battery_optimization"
+        android:title="@string/title_pref_disable_battery_optimization"
+        app:layout="@layout/uwu_grid" />
 
     <Preference
         android:icon="@drawable/ic_restore_24dp"
