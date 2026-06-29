@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
     <item
-        android:id="@+id/action_search"
-        android:icon="@drawable/ic_search_icon"
-        android:title="@string/searchpreference_search"
-        app:actionViewClass="com.bytehamster.lib.preferencesearch.SearchPreferenceActionView"
-        app:showAsAction="ifRoom|collapseActionView" />
-
+        android:id="@+id/action_reset_settings"
+        android:icon="@drawable/ic_restore_24dp"
+        android:title="@string/title_pref_reset_all_settings"
+        app:showAsAction="ifRoom" />
 </menu>

@@ -746,16 +746,15 @@ you need."</string>
     <string name="pref_blur_bottom_intensity">Bottom Card Blur Intensity</string>
     <string name="title_blur_settings">Blur Settings</string>
     <string name="title_blur_warning">High iterations (10+) may cause FPS drops. Recommended: 2-5 iterations with radius 25-40</string>
-    
+
     <string name="sub_setting_tab_icon">Tab icon</string>
     <string name="sub_setting_tab_icon_hint">Shown next to the group name in the tab bar</string>
     <string name="sub_tab_icon_none">None</string>
-    
+
     <string name="weather_loading">Loading…</string>
 
     <!-- Reset all settings -->
     <string name="title_pref_reset_all_settings">Reset All Settings</string>
-    <string name="summary_pref_reset_all_settings">Restore all settings to their default values. Server profiles and subscriptions will not be affected.</string>
     <string name="dialog_reset_settings_title">Reset All Settings?</string>
     <string name="dialog_reset_settings_message">This will restore all settings to their default values.\n\nServer profiles and subscriptions will not be deleted.\n\nThis action cannot be undone.</string>
     <string name="dialog_reset_settings_confirm">Reset</string>
