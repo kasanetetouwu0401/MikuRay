@@ -196,6 +196,11 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+    
+    <string-array name="root_backend" translatable="false">
+        <item>SU</item>
+        <item>Shizuku</item>
+    </string-array>
 
     <string-array name="root_backend_value" translatable="false">
         <item>su</item>
