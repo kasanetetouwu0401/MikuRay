@@ -327,6 +327,11 @@ object AppConfig {
     const val ROOT_V6_PRE_CHAIN = "V2RAY_NG6_PRE" // ip6tables mangle/PREROUTING chain: mark forwarded clients' IPv6 into the tun
     const val ROOT_LAN_DNS = "1.1.1.1"          // fallback resolver for tethered clients when no plain-IPv4 DNS is configured
     const val ROOT_OOM_SCORE = "-1000"          // oom_score_adj that makes the LMK never kill us
+    
+    /** Root backend selector ([PREF_ROOT_BACKEND]): which privileged shell runs the iptables/tun setup. */
+    const val ROOT_BACKEND_SU = "su"
+    const val ROOT_BACKEND_SHIZUKU = "shizuku"
+    const val SHIZUKU_PACKAGE_NAME = "moe.shizuku.privileged.api"
 
     /** hev-sock5-tunnel read-write-timeout value */
     const val HEVTUN_RW_TIMEOUT = "300,60"
