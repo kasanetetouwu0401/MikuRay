@@ -19,6 +19,7 @@ import com.v2ray.ang.extension.snackbarError
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
 import com.v2ray.ang.root.RootManager
+import com.v2ray.ang.root.ShizukuManager
 import com.v2ray.ang.ui.BaseActivity
 import com.v2ray.ang.ui.preference.SearchPreferenceHighlighter
 import com.v2ray.ang.ui.PerAppProxyActivity
@@ -72,6 +73,8 @@ class VpnSettingsActivity : BaseActivity() {
         private val wsHeartbeatPeriod by lazy { findPreference<EditTextPreference>(AppConfig.PREF_WS_HEARTBEAT_PERIOD) }
         private val enableRootMode by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_ROOT_MODE_ENABLE) }
         private val lanSharing by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_ROOT_LAN_SHARING) }
+        private val rootBackend by lazy { findPreference<ListPreference>(AppConfig.PREF_ROOT_BACKEND) }
+        private val shizukuPermission by lazy { findPreference<Preference>(AppConfig.PREF_SHIZUKU_PERMISSION) }
 
         override fun onCreatePreferences(bundle: Bundle?, s: String?) {
             preferenceManager.preferenceDataStore = MmkvPreferenceDataStore()
@@ -119,6 +122,19 @@ class VpnSettingsActivity : BaseActivity() {
                     true
                 }
             }
+
+            rootBackend?.setOnPreferenceChangeListener { _, _ ->
+                // Switching backend changes what "root available" even means (su probe vs
+                // Shizuku binder/permission), so any cached su result and the visible row
+                // both need a fresh look right after the value actually changes.
+                view?.post { updateShizukuRow() }
+                true
+            }
+
+            shizukuPermission?.setOnPreferenceClickListener {
+                onShizukuRowClicked()
+                true
+            }
         }
 
         override fun onViewCreated(view: android.view.View, savedInstanceState: android.os.Bundle?) {
@@ -141,6 +157,59 @@ class VpnSettingsActivity : BaseActivity() {
                 )
             }
             return hasRoot
+        }
+
+        /**
+         * Reflects Shizuku's live state in [shizukuPermission]'s summary, and hides the whole
+         * row when the `su` backend is selected (Shizuku-specific status is just noise there).
+         */
+        private fun updateShizukuRow() {
+            val usesShizuku = rootBackend?.value == AppConfig.ROOT_BACKEND_SHIZUKU
+            shizukuPermission?.isVisible = usesShizuku
+            if (!usesShizuku) return
+
+            val context = context ?: return
+            shizukuPermission?.summary = when {
+                !ShizukuManager.isAppInstalled(context) -> getString(R.string.summary_shizuku_not_installed)
+                !ShizukuManager.isBinderAlive() -> getString(R.string.summary_shizuku_not_running)
+                !ShizukuManager.hasPermission() -> getString(R.string.summary_shizuku_permission_denied)
+                ShizukuManager.isRootBacked() -> getString(R.string.summary_shizuku_granted_root)
+                else -> getString(R.string.summary_shizuku_granted_shell)
+            }
+        }
+
+        /**
+         * Walks the user through whatever Shizuku is missing: install it, start its service,
+         * or grant the permission — each tap re-checks and moves to the next step.
+         */
+        private fun onShizukuRowClicked() {
+            val context = requireContext()
+            when {
+                !ShizukuManager.isAppInstalled(context) -> {
+                    try {
+                        startActivity(
+                            android.content.Intent(android.content.Intent.ACTION_VIEW)
+                                .setData(android.net.Uri.parse("https://shizuku.rikka.app/download/"))
+                        )
+                    } catch (e: Exception) {
+                        context.snackbarError(getString(R.string.toast_shizuku_not_available))
+                    }
+                }
+                !ShizukuManager.isBinderAlive() -> {
+                    context.snackbarError(getString(R.string.toast_shizuku_not_available))
+                }
+                !ShizukuManager.hasPermission() -> {
+                    lifecycleScope.launch {
+                        val granted = ShizukuManager.requestPermission()
+                        if (!isAdded) return@launch
+                        if (!granted) {
+                            requireContext().snackbarError(getString(R.string.toast_shizuku_permission_denied))
+                        }
+                        updateShizukuRow()
+                    }
+                }
+                else -> updateShizukuRow()
+            }
         }
 
         private fun initPreferenceSummaries() {
@@ -185,6 +254,7 @@ class VpnSettingsActivity : BaseActivity() {
                 updateLocalDns(MmkvManager.decodeSettingsBool(AppConfig.PREF_LOCAL_DNS_ENABLED, false))
                 updateHevTunSettings(MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_HEV_TUNNEL, true))
             }
+            updateShizukuRow()
         }
 
         private fun updateModeDependent(vpn: Boolean) {

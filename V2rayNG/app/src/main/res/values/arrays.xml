@@ -197,6 +197,11 @@
         <item>2</item>
     </string-array>
 
+    <string-array name="root_backend_value" translatable="false">
+        <item>su</item>
+        <item>shizuku</item>
+    </string-array>
+
     <string-array name="vpn_interface_address_value" translatable="false">
         <item>0</item>
         <item>1</item>

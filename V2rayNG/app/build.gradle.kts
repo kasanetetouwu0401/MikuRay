@@ -182,6 +182,10 @@ dependencies {
     implementation(libs.work.multiprocess)
     implementation(libs.multidex)
 
+    // Root mode (Shizuku backend)
+    implementation(libs.shizuku.api)
+    implementation(libs.shizuku.provider)
+
     // Testing Libraries
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -8,6 +8,7 @@ import com.tencent.mmkv.MMKV
 import com.v2ray.ang.AppConfig.ANG_PACKAGE
 import com.v2ray.ang.extension.ForegroundActivityTracker
 import com.v2ray.ang.handler.SettingsManager
+import com.v2ray.ang.root.ShizukuManager
 import com.neko.crashlog.CrashHandler
 
 class AngApplication : MultiDexApplication() {
@@ -35,6 +36,8 @@ class AngApplication : MultiDexApplication() {
         super.onCreate()
 
         MMKV.initialize(this)
+
+        ShizukuManager.init()
 
         ForegroundActivityTracker.register(this)
 

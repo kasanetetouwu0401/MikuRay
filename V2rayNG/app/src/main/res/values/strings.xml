@@ -312,6 +312,16 @@
     <string name="title_pref_root_lan_sharing">Root LAN / tethering sharing</string>
     <string name="summary_pref_root_lan_sharing">Share the proxy with tethered USB/Wi-Fi clients. Requires root.</string>
     <string name="toast_root_required">Root access is required for Root mode but is not available on this device.</string>
+    <string name="title_pref_root_backend">Privileged shell backend</string>
+    <string name="summary_pref_root_backend">Which privileged shell runs Root mode\'s iptables/tun setup.</string>
+    <string name="title_pref_shizuku_permission">Shizuku permission</string>
+    <string name="summary_shizuku_not_installed">Shizuku is not installed. Tap to open its download page.</string>
+    <string name="summary_shizuku_not_running">Shizuku is installed but not running. Open the Shizuku app and start its service.</string>
+    <string name="summary_shizuku_permission_denied">Permission not granted yet. Tap to request it.</string>
+    <string name="summary_shizuku_granted_root">Granted, backed by root (uid 0). iptables/tun setup will work.</string>
+    <string name="summary_shizuku_granted_shell">Granted, but only backed by adb/shell (uid 2000). iptables/ip rule/tun need real root — pair Shizuku with Sui/Magisk, or use the su backend instead.</string>
+    <string name="toast_shizuku_permission_denied">Shizuku permission was denied.</string>
+    <string name="toast_shizuku_not_available">Shizuku isn\'t running. Start it from the Shizuku app first.</string>
 
     <string name="title_logcat">Logcat</string>
     <string name="logcat_share">Share log</string>
