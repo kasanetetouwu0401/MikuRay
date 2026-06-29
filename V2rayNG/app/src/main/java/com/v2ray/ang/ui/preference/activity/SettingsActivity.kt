@@ -10,11 +10,13 @@ import androidx.annotation.NonNull
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import android.view.Menu
+import android.view.MenuItem
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.bytehamster.lib.preferencesearch.SearchPreference
+import com.bytehamster.lib.preferencesearch.SearchPreferenceActionView
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResult
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener
 import com.google.android.material.appbar.MaterialToolbar
@@ -28,6 +30,8 @@ import com.v2ray.ang.ui.PerAppProxyActivity
 import com.v2ray.ang.util.showDeleteConfirmDialog
 
 class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
+
+    private var searchActionView: SearchPreferenceActionView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +61,10 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
 
         onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                if (searchActionView?.cancelSearch() == true) {
+                    return
+                }
+
                 val searchFragment = supportFragmentManager.fragments.find { 
                     it.javaClass.name.contains("SearchPreferenceFragment") 
                 }
@@ -70,6 +78,35 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
                 }
             }
         })
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_settings, menu)
+
+        val searchItem = menu.findItem(R.id.action_search)
+        searchActionView = searchItem?.actionView as? SearchPreferenceActionView
+        searchActionView?.apply {
+            setActivity(this@SettingsActivity)
+            getSearchConfiguration().apply {
+                setBreadcrumbsEnabled(true)
+                setHistoryEnabled(true)
+                index(R.xml.pref_ui_settings).addBreadcrumb(R.string.title_ui_settings)
+                index(R.xml.pref_vpn_settings).addBreadcrumb(R.string.title_vpn_settings)
+                index(R.xml.pref_core_settings).addBreadcrumb(R.string.title_core_settings)
+                index(R.xml.pref_mux_settings).addBreadcrumb(R.string.title_mux_settings)
+                index(R.xml.pref_fragment_settings).addBreadcrumb(R.string.title_fragment_settings)
+                index(R.xml.pref_advanced_settings).addBreadcrumb(R.string.title_advanced)
+            }
+        }
+
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.action_search) {
+            return false
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onSearchResultClicked(@NonNull result: SearchPreferenceResult) {
@@ -142,21 +179,6 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
         override fun onCreatePreferences(bundle: Bundle?, s: String?) {
             preferenceManager.preferenceDataStore = MmkvPreferenceDataStore()
             addPreferencesFromResource(R.xml.pref_settings)
-
-            // Configure SearchPreference
-            findPreference<SearchPreference>("pref_search")?.apply {
-                getSearchConfiguration().apply {
-                    setActivity(requireActivity() as com.v2ray.ang.ui.BaseActivity)
-                    setBreadcrumbsEnabled(true)
-                    setHistoryEnabled(true)
-                    index(R.xml.pref_ui_settings).addBreadcrumb(R.string.title_ui_settings)
-                    index(R.xml.pref_vpn_settings).addBreadcrumb(R.string.title_vpn_settings)
-                    index(R.xml.pref_core_settings).addBreadcrumb(R.string.title_core_settings)
-                    index(R.xml.pref_mux_settings).addBreadcrumb(R.string.title_mux_settings)
-                    index(R.xml.pref_fragment_settings).addBreadcrumb(R.string.title_fragment_settings)
-                    index(R.xml.pref_advanced_settings).addBreadcrumb(R.string.title_advanced)
-                }
-            }
 
             navigateUiSettings?.setOnPreferenceClickListener {
                 startActivity(android.content.Intent(requireContext(), UiSettingsActivity::class.java))
