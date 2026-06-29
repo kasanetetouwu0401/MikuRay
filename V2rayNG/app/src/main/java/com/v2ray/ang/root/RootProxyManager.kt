@@ -60,6 +60,7 @@ object RootProxyManager {
      */
     fun start(context: Context): Boolean {
         LogUtil.i(TAG, "RootProxyManager: start")
+        if (!checkBackendCanInstallRules()) return false
         teardown(context)
         val script = buildTun2socksSetup(context) ?: return false
         val result = RootShell.runScript(context, "setup_rules.sh", script)
@@ -81,6 +82,7 @@ object RootProxyManager {
      */
     fun startClientSharing(context: Context): Boolean {
         LogUtil.i(TAG, "RootProxyManager: startClientSharing")
+        if (!checkBackendCanInstallRules()) return false
         teardown(context)
         val script = buildTun2socksSetup(context, captureDeviceTraffic = false, forceLanShare = true)
             ?: return false
@@ -114,6 +116,23 @@ object RootProxyManager {
     fun stopFull(context: Context) {
         LogUtil.i(TAG, "RootProxyManager: stopFull")
         teardown(context)
+    }
+
+    /**
+     * iptables / ip rule / mknod /dev/net/tun all require real root (uid 0). A Shizuku
+     * session backed by plain adb (uid 2000, the common case on non-rooted phones) cannot do
+     * any of this — failing fast here with a clear log line beats letting the setup script
+     * die midway and leaving a partially-installed ruleset for [teardown] to clean up.
+     */
+    private fun checkBackendCanInstallRules(): Boolean {
+        if (!RootManager.usesShizukuBackend()) return true
+        if (RootManager.isShizukuRootBacked()) return true
+        LogUtil.e(
+            TAG,
+            "RootProxyManager: Shizuku is backed by adb/shell (uid ${ShizukuManager.getUid()}), " +
+                "not root — iptables/ip rule/tun setup needs uid 0 (Sui/Magisk, or Shizuku started from a rooted su)."
+        )
+        return false
     }
 
     private fun teardown(context: Context) {

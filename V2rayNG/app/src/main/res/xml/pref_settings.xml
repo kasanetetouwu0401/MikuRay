@@ -34,19 +34,19 @@
         android:summary="@string/summary_navigate_ui_settings"
         android:title="@string/title_ui_settings"
         app:layout="@layout/uwu_grid" />
+        
+    <Preference
+        android:icon="@drawable/ic_numeric"
+        android:key="pref_navigate_mux_settings"
+        android:summary="@string/summary_navigate_mux_settings"
+        android:title="@string/title_mux_settings"
+        app:layout="@layout/uwu_grid" />
 
     <Preference
         android:icon="@drawable/ic_router"
         android:key="pref_navigate_core_settings"
         android:summary="@string/summary_navigate_core_settings"
         android:title="@string/title_core_settings"
-        app:layout="@layout/uwu_grid" />
-
-    <Preference
-        android:icon="@drawable/ic_numeric"
-        android:key="pref_navigate_mux_settings"
-        android:summary="@string/summary_navigate_mux_settings"
-        android:title="@string/title_mux_settings"
         app:layout="@layout/uwu_grid" />
 
     <Preference
