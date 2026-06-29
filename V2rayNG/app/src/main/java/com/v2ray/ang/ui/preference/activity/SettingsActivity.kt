@@ -1,11 +1,7 @@
 package com.v2ray.ang.ui.preference.activity
 
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.PowerManager
-import android.provider.Settings
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -110,9 +106,6 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
         private val navigateFragmentSettings by lazy { findPreference<Preference>(AppConfig.PREF_NAVIGATE_FRAGMENT_SETTINGS) }
         private val navigateAdvancedSettings by lazy { findPreference<Preference>(AppConfig.PREF_NAVIGATE_ADVANCED_SETTINGS) }
         private val resetAllSettings by lazy { findPreference<Preference>(AppConfig.PREF_RESET_ALL_SETTINGS) }
-        private val disableBatteryOptimization by lazy {
-            findPreference<Preference>(AppConfig.PREF_DISABLE_BATTERY_OPTIMIZATION)
-        }
 
         override fun onCreateRecyclerView(
             inflater: LayoutInflater,
@@ -208,60 +201,6 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
                     activity?.recreate()
                 }
                 true
-            }
-
-            disableBatteryOptimization?.setOnPreferenceClickListener {
-                if (!isIgnoringBatteryOptimizations()) {
-                    requestIgnoreBatteryOptimizations()
-                }
-                true
-            }
-        }
-
-        override fun onResume() {
-            super.onResume()
-            refreshBatteryOptimizationState()
-        }
-
-        /**
-         * Reflects the real OS-level battery optimization exemption state onto the
-         * preference. Once the app is already exempted, there's nothing left for the
-         * user to do from here (revoking it can only be done from system Settings),
-         * so the preference is disabled to make that clear.
-         */
-        private fun refreshBatteryOptimizationState() {
-            val ignoring = isIgnoringBatteryOptimizations()
-            disableBatteryOptimization?.apply {
-                isEnabled = !ignoring
-                summary = if (ignoring) {
-                    getString(R.string.summary_pref_disable_battery_optimization_done)
-                } else {
-                    getString(R.string.summary_pref_disable_battery_optimization)
-                }
-            }
-        }
-
-        private fun isIgnoringBatteryOptimizations(): Boolean {
-            val powerManager = requireContext().getSystemService(android.content.Context.POWER_SERVICE) as? PowerManager
-            return powerManager?.isIgnoringBatteryOptimizations(requireContext().packageName) ?: true
-        }
-
-        @android.annotation.SuppressLint("BatteryLife")
-        private fun requestIgnoreBatteryOptimizations() {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
-            try {
-                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-                    data = Uri.parse("package:${requireContext().packageName}")
-                }
-                startActivity(intent)
-            } catch (e: Exception) {
-                // Some OEM ROMs (e.g. heavily customized MIUI/ColorOS builds) block this
-                // intent; fall back to the generic battery optimization list instead.
-                try {
-                    startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-                } catch (e2: Exception) {
-                    android.util.Log.w("SettingsActivity", "Failed to open battery optimization settings: ${e2.message}")
-                }
             }
         }
     }
