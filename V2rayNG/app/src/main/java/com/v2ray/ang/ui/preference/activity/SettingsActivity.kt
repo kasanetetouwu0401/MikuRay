@@ -4,14 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.NonNull
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import android.view.Menu
-import android.view.MenuItem
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -61,12 +61,11 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
 
         onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (searchActionView?.cancelSearch() == true) {
-                    return
-                }
+                // Tutup search dulu kalau lagi aktif
+                if (searchActionView?.cancelSearch() == true) return
 
-                val searchFragment = supportFragmentManager.fragments.find { 
-                    it.javaClass.name.contains("SearchPreferenceFragment") 
+                val searchFragment = supportFragmentManager.fragments.find {
+                    it.javaClass.name.contains("SearchPreferenceFragment")
                 }
 
                 if (searchFragment != null && searchFragment.isVisible) {
@@ -84,7 +83,8 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
         menuInflater.inflate(R.menu.menu_settings, menu)
 
         val searchItem = menu.findItem(R.id.action_search)
-        searchActionView = searchItem?.actionView as? SearchPreferenceActionView
+        searchActionView = searchItem.actionView as? SearchPreferenceActionView
+
         searchActionView?.apply {
             setActivity(this@SettingsActivity)
             getSearchConfiguration().apply {
@@ -99,23 +99,29 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
             }
         }
 
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem) = true
+            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                searchActionView?.cancelSearch()
+                return true
+            }
+        })
+
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_search) {
-            return false
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
     override fun onSearchResultClicked(@NonNull result: SearchPreferenceResult) {
-        val searchFragment = supportFragmentManager.fragments.find { 
-            it.javaClass.name.contains("SearchPreferenceFragment") 
+        // Tutup search fragment
+        val searchFragment = supportFragmentManager.fragments.find {
+            it.javaClass.name.contains("SearchPreferenceFragment")
         }
         if (searchFragment != null) {
             supportFragmentManager.beginTransaction().remove(searchFragment).commitNowAllowingStateLoss()
         }
+
+        // Collapse action view di toolbar
+        val searchItem = findViewById<MaterialToolbar>(R.id.toolbar).menu?.findItem(R.id.action_search)
+        searchItem?.collapseActionView()
 
         val targetActivity: Class<*>? = when (result.resourceFile) {
             R.xml.pref_ui_settings       -> UiSettingsActivity::class.java
@@ -151,7 +157,7 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
         ): RecyclerView {
             val recyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState)
             recyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-            
+
             val paddingHorizontalPx = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 12f,
@@ -170,7 +176,7 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
                 paddingHorizontalPx,
                 paddingVerticalPx
             )
-            
+
             recyclerView.clipToPadding = false
 
             return recyclerView
