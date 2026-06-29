@@ -90,6 +90,7 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
             getSearchConfiguration().apply {
                 setBreadcrumbsEnabled(true)
                 setHistoryEnabled(true)
+                setFragmentContainerViewId(R.id.settings_container)
                 index(R.xml.pref_ui_settings).addBreadcrumb(R.string.title_ui_settings)
                 index(R.xml.pref_vpn_settings).addBreadcrumb(R.string.title_vpn_settings)
                 index(R.xml.pref_core_settings).addBreadcrumb(R.string.title_core_settings)
