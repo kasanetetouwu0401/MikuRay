@@ -146,27 +146,9 @@
         android:key="pref_category_root_mode"
         android:title="@string/title_category_root_mode">
 
-        <ListPreference
-            android:icon="@drawable/ic_key"
-            app:layout="@layout/uwu_top"
-            android:defaultValue="su"
-            android:entries="@array/root_backend"
-            android:entryValues="@array/root_backend_value"
-            android:key="pref_root_backend"
-            android:summary="%s"
-            android:title="@string/title_pref_root_backend" />
-
-        <Preference
-            android:icon="@drawable/ic_key"
-            app:layout="@layout/uwu_mid"
-            android:key="pref_shizuku_permission"
-            android:title="@string/title_pref_shizuku_permission"
-            android:summary="@string/summary_shizuku_not_installed"
-            android:visible="false" />
-
         <androidx.preference.SwitchPreferenceCompat
             android:icon="@drawable/ic_key"
-            app:layout="@layout/uwu_mid_switch"
+            app:layout="@layout/uwu_top_switch"
             app:widgetLayout="@layout/uwu_widget_material_switch"
             android:key="pref_root_mode_enabled"
             android:title="@string/title_pref_root_mode"

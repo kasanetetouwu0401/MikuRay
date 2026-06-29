@@ -1,80 +1,45 @@
 package com.v2ray.ang.root
 
 import com.v2ray.ang.AppConfig
-import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.util.LogUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 /**
- * Detects whether the device grants privileged shell access through whichever backend
- * [AppConfig.PREF_ROOT_BACKEND] currently selects: the `su` binary, or Shizuku/Sui.
+ * Detects whether the device grants root (`su`) access.
  *
- * For the `su` backend the result is cached after the first successful probe (probing spawns
- * `su` and blocks). For the Shizuku backend there's no process to spawn — availability is just
- * "is the binder alive and has permission been granted" — so it's cheap enough to check live
- * every time; nothing is cached for it.
- *
- * Note this only reports whether a privileged shell exists, not whether it's *root* — see
- * [isShizukuRootBacked] for that distinction, which [RootProxyManager] needs separately
- * because its iptables/ip rule/tun setup requires real root (uid 0), not just adb/shell (uid
- * 2000).
+ * The result is cached after the first successful probe. Probing spawns `su` and
+ * blocks, so [refresh] (a suspending call on [Dispatchers.IO]) should be used from UI
+ * code; [isRootAvailable] may block and must not be called on the main thread the first time.
  */
 object RootManager {
 
     @Volatile
-    private var cachedSu: Boolean? = null
-
-    private fun backend(): String =
-        MmkvManager.decodeSettingsString(AppConfig.PREF_ROOT_BACKEND) ?: AppConfig.ROOT_BACKEND_SU
+    private var cached: Boolean? = null
 
     /** Last known result without probing. Defaults to false when never probed. */
-    fun cachedRoot(): Boolean = when (backend()) {
-        AppConfig.ROOT_BACKEND_SHIZUKU -> isShizukuAvailable()
-        else -> cachedSu ?: false
-    }
+    fun cachedRoot(): Boolean = cached ?: false
 
     /**
-     * Returns whether a privileged shell is available, probing once if unknown (`su` backend)
-     * or checking live (Shizuku backend).
+     * Returns whether root is available, probing once if unknown.
      * May block while `su` is spawned; avoid calling on the main thread before a probe.
      */
     fun isRootAvailable(forceRefresh: Boolean = false): Boolean {
-        return when (backend()) {
-            AppConfig.ROOT_BACKEND_SHIZUKU -> isShizukuAvailable()
-            else -> {
-                if (!forceRefresh) cachedSu?.let { return it }
-                val result = probeSu()
-                cachedSu = result
-                result
-            }
-        }
+        if (!forceRefresh) cached?.let { return it }
+        val result = probe()
+        cached = result
+        return result
     }
 
-    /** Probes for privileged access off the main thread, updates the cache, and returns the result. */
+    /** Probes root off the main thread, updates the cache, and returns the result. */
     suspend fun refresh(): Boolean = withContext(Dispatchers.IO) {
-        when (backend()) {
-            AppConfig.ROOT_BACKEND_SHIZUKU -> isShizukuAvailable()
-            else -> {
-                val result = probeSu()
-                cachedSu = result
-                result
-            }
-        }
+        val result = probe()
+        cached = result
+        result
     }
 
-    /** Whether the currently selected backend is Shizuku and it's backed by real root (uid 0). */
-    fun isShizukuRootBacked(): Boolean =
-        backend() == AppConfig.ROOT_BACKEND_SHIZUKU && ShizukuManager.isRootBacked()
-
-    /** Whether the user has selected Shizuku as the privileged-shell backend (regardless of its uid). */
-    fun usesShizukuBackend(): Boolean = backend() == AppConfig.ROOT_BACKEND_SHIZUKU
-
-    private fun isShizukuAvailable(): Boolean =
-        ShizukuManager.isBinderAlive() && ShizukuManager.hasPermission()
-
-    private fun probeSu(): Boolean {
+    private fun probe(): Boolean {
         return try {
             val process = ProcessBuilder("su", "-c", "id -u")
                 .redirectErrorStream(true)
