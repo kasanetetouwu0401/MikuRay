@@ -45,6 +45,19 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
     private SearchPreferenceAdapter adapter;
     private HistoryClickListener historyClickListener;
     private CharSequence searchTermPreset = null;
+    private OnResultsChangedListener resultsChangedListener;
+
+    /**
+     * Notified every time the visible result list changes, both for live search
+     * results and for the history list shown when the query is empty.
+     */
+    public interface OnResultsChangedListener {
+        void onResultsChanged(int count, boolean isHistory);
+    }
+
+    public void setOnResultsChangedListener(OnResultsChangedListener listener) {
+        this.resultsChangedListener = listener;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -246,6 +259,9 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
 
         if (TextUtils.isEmpty(keyword)) {
             showHistory();
+            if (resultsChangedListener != null) {
+                resultsChangedListener.onResultsChanged(0, true);
+            }
             return;
         }
 
@@ -253,6 +269,10 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
         adapter.setContent(new ArrayList<>(results));
 
         setEmptyViewShown(results.isEmpty());
+
+        if (resultsChangedListener != null) {
+            resultsChangedListener.onResultsChanged(results.size(), false);
+        }
     }
 
     private void setEmptyViewShown(boolean shown) {

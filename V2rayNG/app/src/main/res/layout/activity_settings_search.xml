@@ -33,9 +33,16 @@
             app:maxLines="4"
             app:titleCollapseMode="scale">
 
-            <include layout="@layout/toolbar_settings_search" />
+            <include layout="@layout/toolbar_settings_pinned" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        <!--
+            Search card: sibling of CollapsingToolbarLayout, sits right below
+            the large title and scrolls away together with it (see
+            app:layout_scrollFlags="scroll" inside search_card_settings.xml).
+        -->
+        <include layout="@layout/search_card_settings" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
