@@ -27,8 +27,12 @@ import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.net.Proxy
+import java.io.IOException
 import java.net.InetSocketAddress
+import java.net.Proxy
+import java.net.ProxySelector
+import java.net.SocketAddress
+import java.net.URI
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
@@ -297,7 +301,19 @@ object WeatherHelper {
                     ConnectionSpec.COMPATIBLE_TLS
                 )
             )
-            .proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress("127.0.0.1", 10809)))
+            .proxySelector(object : ProxySelector() {
+                override fun select(uri: URI?): List<Proxy> {
+                    return listOf(
+                        Proxy(Proxy.Type.HTTP, InetSocketAddress("127.0.0.1", 10809)),
+                        Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", 10808)),
+                        Proxy.NO_PROXY
+                    )
+                }
+
+                override fun connectFailed(uri: URI?, sa: SocketAddress?, ioe: IOException?) {
+                    LogUtil.w("WeatherHelper", "Local proxy connection failed: ${ioe?.message}")
+                }
+            })
             .build()
     }
 
