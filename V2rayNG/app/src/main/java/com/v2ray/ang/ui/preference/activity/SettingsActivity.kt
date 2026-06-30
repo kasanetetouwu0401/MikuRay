@@ -55,7 +55,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+        setContentView(R.layout.activity_settings_search)
 
         val rootView = findViewById<View>(R.id.main_content)
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
