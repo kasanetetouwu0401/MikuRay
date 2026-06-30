@@ -29,6 +29,7 @@ import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
+import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
 import com.v2ray.ang.ui.BaseActivity
 import com.v2ray.ang.ui.preference.SearchPreferenceHighlighter
@@ -166,8 +167,9 @@ class UiSettingsActivity : BaseActivity() {
                         try {
                             val oldUri = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_HOME_BANNER_URI)
                             deleteOldFile(oldUri)
-                            val savedUri = saveToCache(cacheUri, "home_banner_")
+                            val savedUri = saveBannerFile(cacheUri, "home_banner_")
                             MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_HOME_BANNER_URI, savedUri.toString())
+                            SettingsManager.preloadBanner(requireContext(), savedUri.toString())
                             
                             extractAndSaveBannerColor(savedUri)
                             broadcastHomeBannerChanged()
@@ -189,8 +191,9 @@ class UiSettingsActivity : BaseActivity() {
                         try {
                             val oldUri = MmkvManager.decodeSettingsString(AppConfig.PREF_PROFILE_BANNER_URI)
                             deleteOldFile(oldUri)
-                            val savedUri = saveToCache(cacheUri, "profile_banner_")
+                            val savedUri = saveBannerFile(cacheUri, "profile_banner_")
                             MmkvManager.encodeSettings(AppConfig.PREF_PROFILE_BANNER_URI, savedUri.toString())
+                            SettingsManager.preloadBanner(requireContext(), savedUri.toString())
                             broadcastProfileChanged()
                             requireContext().toastSuccess(getString(R.string.custom_banner_profile_set))
                         } catch (e: Exception) {
@@ -210,8 +213,9 @@ class UiSettingsActivity : BaseActivity() {
                         try {
                             val oldUri = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI)
                             deleteOldFile(oldUri)
-                            val savedUri = saveToCache(cacheUri, "sheet_banner_")
+                            val savedUri = saveBannerFile(cacheUri, "sheet_banner_")
                             MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, savedUri.toString())
+                            SettingsManager.preloadBanner(requireContext(), savedUri.toString())
                             requireContext().toastSuccess(getString(R.string.sheet_banner_updated))
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -230,8 +234,9 @@ class UiSettingsActivity : BaseActivity() {
                         try {
                             val oldUri = MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI)
                             deleteOldFile(oldUri)
-                            val savedUri = saveToCache(cacheUri, "selected_banner_")
+                            val savedUri = saveBannerFile(cacheUri, "selected_banner_")
                             MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_URI, savedUri.toString())
+                            SettingsManager.preloadBanner(requireContext(), savedUri.toString())
                             updateIndicatorStyleEnabledState()
                             broadcastSelectedBannerChanged()
                             requireContext().toastSuccess(getString(R.string.selected_banner_updated))
@@ -785,8 +790,9 @@ class UiSettingsActivity : BaseActivity() {
                 try {
                     val oldUri = MmkvManager.decodeSettingsString(prefKey)
                     deleteOldFile(oldUri)
-                    val savedUri = saveToCache(sourceUri, fileNamePrefix, ext = "gif")
+                    val savedUri = saveBannerFile(sourceUri, fileNamePrefix, ext = "gif")
                     MmkvManager.encodeSettings(prefKey, savedUri.toString())
+                    SettingsManager.preloadBanner(requireContext(), savedUri.toString())
                     onSuccess(savedUri)
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -795,15 +801,18 @@ class UiSettingsActivity : BaseActivity() {
         }
 
         @Throws(IOException::class)
-        private suspend fun saveToCache(sourceCacheUri: Uri, fileNamePrefix: String, ext: String = "jpg"): Uri = withContext(Dispatchers.IO) {
+        private suspend fun saveBannerFile(sourceUri: Uri, fileNamePrefix: String, ext: String = "jpg"): Uri = withContext(Dispatchers.IO) {
             val ctx = requireContext()
-            val destFile = File(ctx.cacheDir, "${fileNamePrefix}${System.currentTimeMillis()}.$ext")
-            ctx.contentResolver.openInputStream(sourceCacheUri)?.use { input ->
+            // Persistent banners must live in filesDir, NOT cacheDir — the system's
+            // "Clear Cache" wipes cacheDir but leaves filesDir untouched.
+            val bannersDir = File(ctx.filesDir, "banners").apply { mkdirs() }
+            val destFile = File(bannersDir, "${fileNamePrefix}${System.currentTimeMillis()}.$ext")
+            ctx.contentResolver.openInputStream(sourceUri)?.use { input ->
                 destFile.outputStream().use { output -> input.copyTo(output) }
             }
             try {
-                if (sourceCacheUri.scheme == "file") {
-                    val tempFile = File(sourceCacheUri.path!!)
+                if (sourceUri.scheme == "file") {
+                    val tempFile = File(sourceUri.path!!)
                     if (tempFile.exists() && tempFile.absolutePath.contains(ctx.cacheDir.absolutePath)) {
                         tempFile.delete()
                     }

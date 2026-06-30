@@ -175,6 +175,7 @@ class BackupActivity : HelperBaseActivity() {
 
         // Restore custom banner image files and fix their paths in MMKV
         restoreBannerImages(backupDir)
+        SettingsManager.preloadAllBanners(this)
 
         // Re-extract banner color from restored home banner image if present
         val restoredHomeBannerUri = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_HOME_BANNER_URI)
@@ -210,7 +211,8 @@ class BackupActivity : HelperBaseActivity() {
                 continue
             }
             try {
-                val destFile = java.io.File(cacheDir, "${key}_${System.currentTimeMillis()}.jpg")
+                val bannersOutDir = java.io.File(filesDir, "banners").apply { mkdirs() }
+                val destFile = java.io.File(bannersOutDir, "${key}_${System.currentTimeMillis()}.jpg")
                 srcFile.copyTo(destFile, overwrite = true)
                 MmkvManager.encodeSettings(key, Uri.fromFile(destFile).toString())
             } catch (e: Exception) {

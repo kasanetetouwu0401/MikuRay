@@ -2,9 +2,12 @@ package com.v2ray.ang.handler
 
 import android.content.Context
 import android.content.res.AssetManager
+import android.net.Uri
 import android.os.Build
 import android.text.TextUtils
 import androidx.appcompat.app.AppCompatDelegate
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.ANG_PACKAGE
 import com.v2ray.ang.AppConfig.DEFAULT_SUBSCRIPTION_ID
@@ -46,6 +49,42 @@ object SettingsManager {
         initRoutingRulesets(context)
         migrateServerListToSubscriptions()
         migrateHysteria2PinSHA256()
+    }
+
+    /**
+     * Warms Glide's memory + disk cache for every currently configured banner
+     * (home, sheet, profile, selected) so the views that show them — MainActivity
+     * header, all the bottom sheets, ProfileBannerImageView, SelectedProfileBannerController —
+     * render instantly instead of popping in on first display.
+     */
+    fun preloadAllBanners(context: Context) {
+        val bannerKeys = listOf(
+            AppConfig.PREF_CUSTOM_HOME_BANNER_URI,
+            AppConfig.PREF_CUSTOM_SHEET_BANNER_URI,
+            AppConfig.PREF_PROFILE_BANNER_URI,
+            AppConfig.PREF_SELECTED_BANNER_URI,
+        )
+        bannerKeys.forEach { key ->
+            preloadBanner(context, MmkvManager.decodeSettingsString(key))
+        }
+    }
+
+    /**
+     * Preloads a single banner URI into Glide's cache. Safe to call with a
+     * null/blank URI (no-op) — handy to call right after saving/restoring a
+     * banner so it's already cached before any view tries to display it.
+     */
+    fun preloadBanner(context: Context, uriString: String?) {
+        if (uriString.isNullOrBlank()) return
+        try {
+            val appContext = context.applicationContext
+            Glide.with(appContext)
+                .load(Uri.parse(uriString))
+                .diskCacheStrategy(DiskCacheStrategy.DATA)
+                .preload()
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "Failed to preload banner $uriString", e)
+        }
     }
 
     /**

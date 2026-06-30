@@ -43,7 +43,8 @@ class AngApplication : MultiDexApplication() {
 
         // Ensure critical preference defaults are present in MMKV early
         SettingsManager.initApp(this)
-        SettingsManager.setNightMode()     
+        SettingsManager.setNightMode()
+        SettingsManager.preloadAllBanners(this)
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler(this))
     }
 }
