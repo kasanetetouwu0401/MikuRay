@@ -2,6 +2,14 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     
+    <com.bytehamster.lib.preferencesearch.SearchPreference
+        android:key="pref_search"
+        app:textHint="@string/searchpreference_search"
+        app:textNoResults="@string/searchpreference_no_results"
+        app:textClearHistory="@string/searchpreference_clear_history"
+        app:textClearInput="@string/searchpreference_clear"
+        app:textMore="@string/searchpreference_more" />
+    
     <com.v2ray.ang.ui.preference.FullSpanPreference
         android:layout="@layout/uwu_banner_settings"
         app:selectable="false" />
@@ -12,14 +20,6 @@
         android:title="@string/uwu_maintainer_title"
         app:selectable="false"
         android:summary="@string/uwu_maintainer_summary" />
-
-    <com.bytehamster.lib.preferencesearch.SearchPreference
-        android:key="pref_search"
-        app:textHint="@string/searchpreference_search"
-        app:textNoResults="@string/searchpreference_no_results"
-        app:textClearHistory="@string/searchpreference_clear_history"
-        app:textClearInput="@string/searchpreference_clear"
-        app:textMore="@string/searchpreference_more" />
         
     <Preference
         android:icon="@drawable/ic_baseline_color_lens_24"

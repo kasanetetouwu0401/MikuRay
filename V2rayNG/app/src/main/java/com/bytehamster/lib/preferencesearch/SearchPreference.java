@@ -10,8 +10,9 @@ import android.view.View;
 import android.widget.EditText;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
+import com.v2ray.ang.ui.preference.FullSpanPreference;
 
-public class SearchPreference extends Preference implements View.OnClickListener {
+public class SearchPreference extends FullSpanPreference implements View.OnClickListener {
     private SearchConfiguration searchConfiguration = new SearchConfiguration();
     private String hint = null;
 
