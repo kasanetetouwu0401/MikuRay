@@ -13,8 +13,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.materialswitch.MaterialSwitch;
-import com.v2ray.ang.handler.MmkvManager;
 import com.v2ray.ang.util.ThemeManagerKt;
 
 import java.util.ArrayList;
@@ -82,28 +80,6 @@ class SearchPreferenceAdapter extends RecyclerView.Adapter<SearchPreferenceAdapt
                 holder.breadcrumbs.setVisibility(View.GONE);
                 holder.summary.setAlpha(0.6f);
             }
-
-            if (item.isSwitch() && !TextUtils.isEmpty(item.key)) {
-                holder.switchWidget.setVisibility(View.VISIBLE);
-                holder.switchWidget.setOnCheckedChangeListener(null);
-                holder.switchWidget.setChecked(MmkvManager.decodeSettingsBool(item.key, item.defaultValue));
-                holder.switchWidget.setOnCheckedChangeListener((buttonView, isChecked) ->
-                        MmkvManager.encodeSettings(item.key, isChecked));
-
-                // For switch preferences, tapping anywhere on the card toggles
-                // it in place - no navigation to the target activity at all.
-                h.root.setOnClickListener(v -> holder.switchWidget.toggle());
-            } else {
-                holder.switchWidget.setVisibility(View.GONE);
-                holder.switchWidget.setOnCheckedChangeListener(null);
-
-                h.root.setOnClickListener(v -> {
-                    if (onItemClickListener != null) {
-                        onItemClickListener.onItemClicked(listItem, h.getAdapterPosition());
-                    }
-                });
-            }
-            return;
         }
 
         h.root.setOnClickListener(v -> {
@@ -183,13 +159,11 @@ class SearchPreferenceAdapter extends RecyclerView.Adapter<SearchPreferenceAdapt
         TextView title;
         TextView summary;
         TextView breadcrumbs;
-        MaterialSwitch switchWidget;
         PreferenceViewHolder(View v) {
             super(v);
             title = v.findViewById(R.id.title);
             summary = v.findViewById(R.id.summary);
             breadcrumbs = v.findViewById(R.id.breadcrumbs);
-            switchWidget = v.findViewById(R.id.switchWidget);
         }
     }
 }

@@ -68,14 +68,28 @@ public class SearchPreferenceActionView extends SearchView {
         }
         if (searchFragment != null && searchFragment.isVisible()) {
             removeFragment();
+
+            /*
+            AnimationUtils.startCircularExitAnimation(getContext(), searchFragment.getView(),
+                    getSearchConfiguration().getRevealAnimationSetting(),
+                    new AnimationUtils.OnDismissedListener() {
+                @Override
+                public void onDismissed() {
+                    removeFragment();
+                }
+            });
+            */
+
             didSomething = true;
         }
         return didSomething;
     }
 
     protected void removeFragment() {
-        if (searchFragment != null && searchFragment.isVisible()) {
-            searchFragment.dismiss();
+        if (searchFragment.isVisible()) {
+            FragmentManager fm = activity.getSupportFragmentManager();
+            fm.beginTransaction().remove(searchFragment).commit();
+            fm.popBackStack(SearchPreferenceFragment.TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
     }
 
