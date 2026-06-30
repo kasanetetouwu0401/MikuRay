@@ -12,6 +12,7 @@
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?attr/colorBg"
         app:liftOnScroll="true">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -37,11 +38,6 @@
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-        <!--
-            Search card: sibling of CollapsingToolbarLayout, sits right below
-            the large title and scrolls away together with it (see
-            app:layout_scrollFlags="scroll" inside search_card_settings.xml).
-        -->
         <include layout="@layout/search_card_settings" />
 
     </com.google.android.material.appbar.AppBarLayout>

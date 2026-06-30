@@ -4,12 +4,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!--
-        Direct sibling of CollapsingToolbarLayout inside AppBarLayout (NOT a
-        child of it). app:layout_scrollFlags="scroll" makes it scroll away
-        together with the large title as soon as the user scrolls the
-        preference list, instead of staying pinned like the toolbar.
-    -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/search_card"
         android:layout_width="match_parent"
