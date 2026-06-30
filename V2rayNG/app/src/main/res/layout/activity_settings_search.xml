@@ -53,7 +53,8 @@
         android:background="?attr/colorBg"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        app:layout_scrollFlags="scroll|enterAlways">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/search_card"
