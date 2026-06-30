@@ -49,9 +49,10 @@
         android:id="@+id/search_card_row"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
         android:gravity="center_vertical"
         android:background="?attr/colorBg"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:orientation="horizontal">
 
     <com.google.android.material.card.MaterialCardView
