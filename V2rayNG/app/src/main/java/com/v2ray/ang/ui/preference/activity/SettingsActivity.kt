@@ -43,8 +43,6 @@ import kotlinx.coroutines.launch
 class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
     private lateinit var searchActionView: SearchPreferenceActionView
-
-    // Same weather / total-traffic chip as MainActivity's layout_weather_chip.
     private lateinit var layoutWeatherChip: LinearLayout
     private lateinit var ivWeatherIcon: ImageView
     private lateinit var tvWeatherTemp: TextView
@@ -84,7 +82,6 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                // Let the search action view close the search fragment / collapse itself first.
                 if (searchActionView.cancelSearch()) {
                     return
                 }
@@ -115,9 +112,6 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         searchActionView.getSearchConfiguration().apply {
             setHistoryEnabled(true)
             setBreadcrumbsEnabled(true)
-            // Show the search-results fragment inside settings_container instead of
-            // covering the whole screen (android.R.id.content default) — that way the
-            // AppBarLayout with our toolbar + search card stays visible above it.
             setFragmentContainerViewId(R.id.settings_container)
             index(R.xml.pref_ui_settings).addBreadcrumb(R.string.title_ui_settings)
             index(R.xml.pref_vpn_settings).addBreadcrumb(R.string.title_vpn_settings)
@@ -360,10 +354,6 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         override fun onCreatePreferences(bundle: Bundle?, s: String?) {
             preferenceManager.preferenceDataStore = MmkvPreferenceDataStore()
             addPreferencesFromResource(R.xml.pref_settings)
-
-            // NOTE: SearchPreference was removed from pref_settings.xml.
-            // Search is now configured in SettingsActivity.setupSearchActionView()
-            // via the SearchPreferenceActionView embedded in the toolbar.
 
             navigateUiSettings?.setOnPreferenceClickListener {
                 startActivity(android.content.Intent(requireContext(), UiSettingsActivity::class.java))
