@@ -17,12 +17,15 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.bytehamster.lib.preferencesearch.SearchPreferenceActionView
+import com.bytehamster.lib.preferencesearch.SearchPreferenceFragment
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResult
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener
 import com.google.android.material.appbar.MaterialToolbar
@@ -43,6 +46,7 @@ import kotlinx.coroutines.launch
 class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
     private lateinit var searchActionView: SearchPreferenceActionView
+    private lateinit var btnClearHistory: com.google.android.material.button.MaterialButton
     private lateinit var layoutWeatherChip: LinearLayout
     private lateinit var ivWeatherIcon: ImageView
     private lateinit var tvWeatherTemp: TextView
@@ -107,6 +111,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
     private fun setupSearchActionView() {
         searchActionView = findViewById(R.id.search_action_view)
+        btnClearHistory = findViewById(R.id.btn_clear_history)
         searchActionView.setActivity(this)
         searchActionView.getSearchConfiguration().apply {
             setHistoryEnabled(true)
@@ -119,7 +124,32 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
             index(R.xml.pref_fragment_settings).addBreadcrumb(R.string.title_fragment_settings)
             index(R.xml.pref_advanced_settings).addBreadcrumb(R.string.title_advanced)
         }
+
+        btnClearHistory.setOnClickListener {
+            currentSearchFragment()?.clearHistory()
+            btnClearHistory.isVisible = false
+        }
+
+        supportFragmentManager.registerFragmentLifecycleCallbacks(
+            object : FragmentManager.FragmentLifecycleCallbacks() {
+                override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
+                    if (f is SearchPreferenceFragment) {
+                        btnClearHistory.isVisible = f.hasHistory()
+                    }
+                }
+
+                override fun onFragmentViewDestroyed(fm: FragmentManager, f: Fragment) {
+                    if (f is SearchPreferenceFragment) {
+                        btnClearHistory.isVisible = false
+                    }
+                }
+            },
+            true
+        )
     }
+
+    private fun currentSearchFragment(): SearchPreferenceFragment? =
+        supportFragmentManager.fragments.filterIsInstance<SearchPreferenceFragment>().firstOrNull()
 
     private fun setupWeatherTrafficChip() {
         layoutWeatherChip = findViewById(R.id.layout_weather_chip)

@@ -141,7 +141,15 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
                 v.getPaddingLeft(),
                 topInset,
                 v.getPaddingRight(),
-                bottomInset
+                v.getPaddingBottom()
+            );
+
+            int baseBottomPadding = (int) (16 * v.getResources().getDisplayMetrics().density);
+            viewHolder.recyclerView.setPadding(
+                viewHolder.recyclerView.getPaddingLeft(),
+                viewHolder.recyclerView.getPaddingTop(),
+                viewHolder.recyclerView.getPaddingRight(),
+                baseBottomPadding + bottomInset
             );
             return insets;
         });
