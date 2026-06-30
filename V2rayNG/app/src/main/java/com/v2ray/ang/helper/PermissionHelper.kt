@@ -15,9 +15,10 @@ import com.v2ray.ang.extension.snackbarDefault
 class PermissionHelper(private val activity: AppCompatActivity) {
     private var permissionCallback: ((Boolean) -> Unit)? = null
 
-    private val permissionLauncher: ActivityResultLauncher<String> =
-        activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            permissionCallback?.invoke(isGranted)
+    private val permissionLauncher: ActivityResultLauncher<Array<String>> =
+        activity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
+            val anyGranted = results.values.any { it }
+            permissionCallback?.invoke(anyGranted)
             permissionCallback = null
         }
 
@@ -28,8 +29,11 @@ class PermissionHelper(private val activity: AppCompatActivity) {
      * @param onGranted called when permission is granted (called immediately if already granted)
      */
     fun request(permissionType: PermissionType, onGranted: () -> Unit) {
-        val permission = permissionType.getPermission()
-        if (ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_GRANTED) {
+        val permissions = permissionType.getPermissions()
+        val alreadyGranted = permissions.any {
+            ContextCompat.checkSelfPermission(activity, it) == PackageManager.PERMISSION_GRANTED
+        }
+        if (alreadyGranted) {
             onGranted()
         } else {
             permissionCallback = { isGranted ->
@@ -40,7 +44,7 @@ class PermissionHelper(private val activity: AppCompatActivity) {
                     activity.snackbarDefault(message, title = activity.getString(R.string.title_alerter_info))
                 }
             }
-            permissionLauncher.launch(permission)
+            permissionLauncher.launch(permissions)
         }
     }
 }

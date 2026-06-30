@@ -19,13 +19,25 @@ enum class PermissionType {
         override fun getPermission(): String = Manifest.permission.POST_NOTIFICATIONS
     },
 
-    /** Coarse location permission (used for the weather chip on the search bar) */
+    /**
+     * Location permission (used for the weather chip on the search bar).
+     * Requests both coarse and fine together: requesting coarse alone is
+     * unreliable on many OEMs (MIUI/HyperOS included) and FusedLocationProviderClient
+     * tends to fail/return null far more often when only coarse is granted.
+     */
     LOCATION {
-        override fun getPermission(): String = Manifest.permission.ACCESS_COARSE_LOCATION
+        override fun getPermission(): String = Manifest.permission.ACCESS_FINE_LOCATION
+        override fun getPermissions(): Array<String> = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
     };
 
     /** Return the actual Android permission string */
     abstract fun getPermission(): String
+
+    /** Return all permission strings to request for this type (defaults to a single permission) */
+    open fun getPermissions(): Array<String> = arrayOf(getPermission())
 
     /** Return a human-readable label for the permission */
     fun getLabel(): String {
