@@ -10,7 +10,6 @@ public class SearchPreferenceActionView extends SearchView {
     protected SearchPreferenceFragment searchFragment;
     protected SearchConfiguration searchConfiguration = new SearchConfiguration();
     protected AppCompatActivity activity;
-    private SearchPreferenceFragment.OnResultsChangedListener pendingResultsListener;
 
     public SearchPreferenceActionView(Context context) {
         super(context);
@@ -47,36 +46,12 @@ public class SearchPreferenceActionView extends SearchView {
             if (hasFocus && (searchFragment == null || !searchFragment.isVisible())) {
                 searchFragment = searchConfiguration.showSearchFragment();
                 searchFragment.setHistoryClickListener(entry -> setQuery(entry, false));
-                if (pendingResultsListener != null) {
-                    searchFragment.setOnResultsChangedListener(pendingResultsListener);
-                }
             }
         });
     }
 
     public SearchConfiguration getSearchConfiguration() {
         return searchConfiguration;
-    }
-
-    /**
-     * The currently shown search fragment, if any. Null until the user has
-     * focused the search field at least once.
-     */
-    public SearchPreferenceFragment getSearchFragment() {
-        return searchFragment;
-    }
-
-    /**
-     * Registers a listener that is notified whenever the result list (or the
-     * history list, when the query is empty) of the search fragment changes.
-     * Safe to call before the fragment has been created; it will be attached
-     * as soon as the fragment is shown.
-     */
-    public void setOnResultsChangedListener(SearchPreferenceFragment.OnResultsChangedListener listener) {
-        this.pendingResultsListener = listener;
-        if (searchFragment != null) {
-            searchFragment.setOnResultsChangedListener(listener);
-        }
     }
 
     /**

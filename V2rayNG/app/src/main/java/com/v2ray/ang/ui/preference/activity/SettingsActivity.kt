@@ -8,11 +8,16 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.NonNull
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -23,20 +28,34 @@ import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
+import com.v2ray.ang.enums.PermissionType
 import com.v2ray.ang.extension.toastSuccess
+import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
-import com.v2ray.ang.ui.BaseActivity
+import com.v2ray.ang.ui.HelperBaseActivity
 import com.v2ray.ang.ui.PerAppProxyActivity
+import com.v2ray.ang.util.SearchChipGradientController
+import com.v2ray.ang.util.WeatherHelper
 import com.v2ray.ang.util.showDeleteConfirmDialog
+import kotlinx.coroutines.launch
 
-class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
+class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
     private lateinit var searchActionView: SearchPreferenceActionView
 
+    // Same weather / total-traffic chip as MainActivity's layout_weather_chip.
+    private lateinit var layoutWeatherChip: LinearLayout
+    private lateinit var ivWeatherIcon: ImageView
+    private lateinit var tvWeatherTemp: TextView
+    private lateinit var ivTotalTrafficIcon: ImageView
+    private lateinit var tvTotalTraffic: TextView
+
+    private var isColdStart = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings_search)
+        setContentView(R.layout.activity_settings)
 
         val rootView = findViewById<View>(R.id.main_content)
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
@@ -55,6 +74,7 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_settings))
 
         setupSearchActionView()
+        setupWeatherTrafficChip()
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
@@ -84,12 +104,21 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
         })
     }
 
+    override fun onResume() {
+        super.onResume()
+        refreshSearchBarChip()
+    }
+
     private fun setupSearchActionView() {
         searchActionView = findViewById(R.id.search_action_view)
         searchActionView.setActivity(this)
         searchActionView.getSearchConfiguration().apply {
             setHistoryEnabled(true)
             setBreadcrumbsEnabled(true)
+            // Show the search-results fragment inside settings_container instead of
+            // covering the whole screen (android.R.id.content default) — that way the
+            // AppBarLayout with our toolbar + search card stays visible above it.
+            setFragmentContainerViewId(R.id.settings_container)
             index(R.xml.pref_ui_settings).addBreadcrumb(R.string.title_ui_settings)
             index(R.xml.pref_vpn_settings).addBreadcrumb(R.string.title_vpn_settings)
             index(R.xml.pref_core_settings).addBreadcrumb(R.string.title_core_settings)
@@ -97,6 +126,149 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
             index(R.xml.pref_fragment_settings).addBreadcrumb(R.string.title_fragment_settings)
             index(R.xml.pref_advanced_settings).addBreadcrumb(R.string.title_advanced)
         }
+    }
+
+    private fun setupWeatherTrafficChip() {
+        layoutWeatherChip = findViewById(R.id.layout_weather_chip)
+        ivWeatherIcon = findViewById(R.id.iv_weather_icon)
+        tvWeatherTemp = findViewById(R.id.tv_weather_temp)
+        ivTotalTrafficIcon = findViewById(R.id.iv_total_traffic_icon)
+        tvTotalTraffic = findViewById(R.id.tv_total_traffic)
+    }
+
+    private fun chipViews() = SearchChipGradientController.ChipViews(
+        layoutWeatherChip = layoutWeatherChip,
+        ivWeatherIcon = ivWeatherIcon,
+        tvWeatherTemp = tvWeatherTemp,
+        ivTotalTrafficIcon = ivTotalTrafficIcon,
+        tvTotalTraffic = tvTotalTraffic
+    )
+
+    private fun weatherLocationReady(): Boolean =
+        WeatherHelper.hasCustomLocation() || WeatherHelper.hasLocationPermission(this)
+
+    private fun refreshSearchBarChip() {
+        val weatherEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)
+        val totalTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP, false)
+
+        SearchChipGradientController.applyState(this, chipViews())
+
+        when {
+            weatherEnabled -> {
+                hideTotalTrafficChip()
+                refreshWeatherChip()
+            }
+            totalTrafficEnabled -> {
+                hideWeatherChipViews()
+                refreshTotalTrafficChip()
+            }
+            else -> {
+                layoutWeatherChip.isVisible = false
+            }
+        }
+    }
+
+    private fun hideWeatherChipViews() {
+        ivWeatherIcon.isVisible = false
+        tvWeatherTemp.isVisible = false
+    }
+
+    private fun hideTotalTrafficChip() {
+        ivTotalTrafficIcon.isVisible = false
+        tvTotalTraffic.isVisible = false
+    }
+
+    private fun refreshTotalTrafficChip() {
+        val totalTraffic = MmkvManager.getTotalTrafficString()
+        if (totalTraffic == null) {
+            layoutWeatherChip.isVisible = false
+            return
+        }
+        tvTotalTraffic.text = totalTraffic
+        ivTotalTrafficIcon.isVisible = true
+        tvTotalTraffic.isVisible = true
+        layoutWeatherChip.isVisible = true
+    }
+
+    private fun refreshWeatherChip() {
+        if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
+            layoutWeatherChip.isVisible = false
+            return
+        }
+        val coldStart = isColdStart.also { isColdStart = false }
+        if (weatherLocationReady()) {
+            if (coldStart) forceRefreshWeatherChip() else loadWeatherChip()
+        } else {
+            checkAndRequestPermission(PermissionType.LOCATION) {
+                if (coldStart) forceRefreshWeatherChip() else loadWeatherChip()
+            }
+        }
+    }
+
+    private fun forceRefreshWeatherChip() {
+        if (!MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) return
+
+        if (!weatherLocationReady()) {
+            checkAndRequestPermission(PermissionType.LOCATION) {
+                forceRefreshWeatherChip()
+            }
+            return
+        }
+
+        val cached = WeatherHelper.getCachedWeatherStale()
+        layoutWeatherChip.isVisible = true
+        if (cached != null) {
+            applyWeatherToChip(cached)
+        } else {
+            ivWeatherIcon.setImageResource(WeatherHelper.iconResForEmoji(null))
+            ivWeatherIcon.isVisible = true
+            tvWeatherTemp.text = getString(R.string.weather_loading)
+            tvWeatherTemp.isVisible = true
+        }
+
+        lifecycleScope.launch {
+            val weather = WeatherHelper.fetchCurrentWeather(this@SettingsActivity, force = true)
+            if (weather == null) {
+                if (cached == null) layoutWeatherChip.isVisible = false
+                return@launch
+            }
+            applyWeatherToChip(weather)
+        }
+    }
+
+    private fun loadWeatherChip() {
+        layoutWeatherChip.isVisible = true
+
+        val fresh = WeatherHelper.getCachedWeather()
+        val stale = fresh ?: WeatherHelper.getCachedWeatherStale()
+
+        if (stale != null) {
+            applyWeatherToChip(stale)
+        } else {
+            ivWeatherIcon.setImageResource(WeatherHelper.iconResForEmoji(null))
+            ivWeatherIcon.isVisible = true
+            tvWeatherTemp.text = getString(R.string.weather_loading)
+            tvWeatherTemp.isVisible = true
+        }
+
+        if (fresh != null) return
+
+        lifecycleScope.launch {
+            val weather = WeatherHelper.fetchCurrentWeather(this@SettingsActivity)
+            if (weather == null) {
+                if (stale == null) layoutWeatherChip.isVisible = false
+                return@launch
+            }
+            applyWeatherToChip(weather)
+        }
+    }
+
+    private fun applyWeatherToChip(weather: WeatherHelper.WeatherResult) {
+        ivWeatherIcon.setImageResource(WeatherHelper.iconResForEmoji(weather.emoji))
+        tvWeatherTemp.text = weather.getTemperatureString(WeatherHelper.isCelsius())
+        ivWeatherIcon.isVisible = true
+        tvWeatherTemp.isVisible = true
+        layoutWeatherChip.isVisible = true
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

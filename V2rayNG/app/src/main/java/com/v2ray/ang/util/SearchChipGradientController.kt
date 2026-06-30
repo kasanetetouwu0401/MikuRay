@@ -4,6 +4,9 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.util.TypedValue
+import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.ImageViewCompat
 import com.v2ray.ang.AppConfig
@@ -13,6 +16,19 @@ import com.v2ray.ang.handler.MmkvManager
 
 object SearchChipGradientController {
 
+    /**
+     * Holds references to the weather/total-traffic chip views. Decoupled from
+     * any specific Activity's ViewBinding so it can be reused by any screen
+     * that embeds the same chip (MainActivity, SettingsActivity, ...).
+     */
+    data class ChipViews(
+        val layoutWeatherChip: View,
+        val ivWeatherIcon: ImageView,
+        val tvWeatherTemp: TextView,
+        val ivTotalTrafficIcon: ImageView,
+        val tvTotalTraffic: TextView
+    )
+
     fun isEnabled(): Boolean {
         val gradientSwitchOn = MmkvManager.decodeSettingsBool(AppConfig.PREF_SEARCH_CHIP_GRADIENT, false)
         val weatherEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)
@@ -20,12 +36,25 @@ object SearchChipGradientController {
         return gradientSwitchOn && (weatherEnabled || totalTrafficEnabled)
     }
 
+    /** Back-compat overload for MainActivity, which still uses ViewBinding. */
     fun applyState(activity: AppCompatActivity, binding: ActivityMainBinding) {
-        if (isEnabled()) applyGradientOn(activity, binding)
-        else applyGradientOff(activity, binding)
+        applyState(
+            activity,
+            ChipViews(
+                layoutWeatherChip = binding.layoutWeatherChip,
+                ivWeatherIcon = binding.ivWeatherIcon,
+                tvWeatherTemp = binding.tvWeatherTemp,
+                ivTotalTrafficIcon = binding.ivTotalTrafficIcon,
+                tvTotalTraffic = binding.tvTotalTraffic
+            )
+        )
     }
 
-    private fun applyGradientOn(activity: AppCompatActivity, binding: ActivityMainBinding) {
+    fun applyState(activity: AppCompatActivity, chip: ChipViews) {
+        if (isEnabled()) applyGradientOn(activity, chip) else applyGradientOff(activity, chip)
+    }
+
+    private fun applyGradientOn(activity: AppCompatActivity, chip: ChipViews) {
         val colorStart = activity.getColorAttr("colorPrimary")
         val colorEnd = activity.getColorAttr("colorTertiary")
         val cornerRadiusPx = TypedValue.applyDimension(
@@ -38,26 +67,26 @@ object SearchChipGradientController {
             shape = GradientDrawable.RECTANGLE
             cornerRadius = cornerRadiusPx
         }
-        binding.layoutWeatherChip.background = RippleDrawable(
+        chip.layoutWeatherChip.background = RippleDrawable(
             ColorStateList.valueOf(activity.getColorAttr("android:colorControlHighlight")),
             gradient,
             null
         )
 
         val tintList = ColorStateList.valueOf(activity.getColorAttr("colorOnPrimary"))
-        ImageViewCompat.setImageTintList(binding.ivWeatherIcon, tintList)
-        ImageViewCompat.setImageTintList(binding.ivTotalTrafficIcon, tintList)
-        binding.tvWeatherTemp.setTextColor(tintList.defaultColor)
-        binding.tvTotalTraffic.setTextColor(tintList.defaultColor)
+        ImageViewCompat.setImageTintList(chip.ivWeatherIcon, tintList)
+        ImageViewCompat.setImageTintList(chip.ivTotalTrafficIcon, tintList)
+        chip.tvWeatherTemp.setTextColor(tintList.defaultColor)
+        chip.tvTotalTraffic.setTextColor(tintList.defaultColor)
     }
 
-    private fun applyGradientOff(activity: AppCompatActivity, binding: ActivityMainBinding) {
-        binding.layoutWeatherChip.setBackgroundResource(R.drawable.bg_weather_chip)
+    private fun applyGradientOff(activity: AppCompatActivity, chip: ChipViews) {
+        chip.layoutWeatherChip.setBackgroundResource(R.drawable.bg_weather_chip)
 
         val tintList = ColorStateList.valueOf(activity.getColorAttr("colorOnSurfaceVariant"))
-        ImageViewCompat.setImageTintList(binding.ivWeatherIcon, tintList)
-        ImageViewCompat.setImageTintList(binding.ivTotalTrafficIcon, tintList)
-        binding.tvWeatherTemp.setTextColor(tintList.defaultColor)
-        binding.tvTotalTraffic.setTextColor(tintList.defaultColor)
+        ImageViewCompat.setImageTintList(chip.ivWeatherIcon, tintList)
+        ImageViewCompat.setImageTintList(chip.ivTotalTrafficIcon, tintList)
+        chip.tvWeatherTemp.setTextColor(tintList.defaultColor)
+        chip.tvTotalTraffic.setTextColor(tintList.defaultColor)
     }
 }
