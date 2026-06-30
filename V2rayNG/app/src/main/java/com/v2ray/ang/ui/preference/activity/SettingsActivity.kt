@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.annotation.NonNull
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -16,7 +17,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.bytehamster.lib.preferencesearch.SearchPreference
+import com.bytehamster.lib.preferencesearch.SearchPreferenceActionView
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResult
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener
 import com.google.android.material.appbar.MaterialToolbar
@@ -31,9 +32,11 @@ import com.v2ray.ang.util.showDeleteConfirmDialog
 
 class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
 
+    private lateinit var searchActionView: SearchPreferenceActionView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+        setContentView(R.layout.activity_settings_search)
 
         val rootView = findViewById<View>(R.id.main_content)
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
@@ -51,16 +54,23 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_settings))
 
+        setupSearchActionView()
+
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.settings_container, SettingsFragment())
                 .commit()
         }
 
-        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                val searchFragment = supportFragmentManager.fragments.find { 
-                    it.javaClass.name.contains("SearchPreferenceFragment") 
+                // Let the search action view close the search fragment / collapse itself first.
+                if (searchActionView.cancelSearch()) {
+                    return
+                }
+
+                val searchFragment = supportFragmentManager.fragments.find {
+                    it.javaClass.name.contains("SearchPreferenceFragment")
                 }
 
                 if (searchFragment != null && searchFragment.isVisible) {
@@ -72,6 +82,21 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
                 }
             }
         })
+    }
+
+    private fun setupSearchActionView() {
+        searchActionView = findViewById(R.id.search_action_view)
+        searchActionView.setActivity(this)
+        searchActionView.getSearchConfiguration().apply {
+            setHistoryEnabled(true)
+            setBreadcrumbsEnabled(true)
+            index(R.xml.pref_ui_settings).addBreadcrumb(R.string.title_ui_settings)
+            index(R.xml.pref_vpn_settings).addBreadcrumb(R.string.title_vpn_settings)
+            index(R.xml.pref_core_settings).addBreadcrumb(R.string.title_core_settings)
+            index(R.xml.pref_mux_settings).addBreadcrumb(R.string.title_mux_settings)
+            index(R.xml.pref_fragment_settings).addBreadcrumb(R.string.title_fragment_settings)
+            index(R.xml.pref_advanced_settings).addBreadcrumb(R.string.title_advanced)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -100,12 +125,7 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
     }
 
     override fun onSearchResultClicked(@NonNull result: SearchPreferenceResult) {
-        val searchFragment = supportFragmentManager.fragments.find { 
-            it.javaClass.name.contains("SearchPreferenceFragment") 
-        }
-        if (searchFragment != null) {
-            supportFragmentManager.beginTransaction().remove(searchFragment).commitNowAllowingStateLoss()
-        }
+        searchActionView.cancelSearch()
 
         val targetActivity: Class<*>? = when (result.resourceFile) {
             R.xml.pref_ui_settings       -> UiSettingsActivity::class.java
@@ -140,7 +160,7 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
         ): RecyclerView {
             val recyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState)
             recyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-            
+
             val paddingHorizontalPx = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 12f,
@@ -159,7 +179,7 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
                 paddingHorizontalPx,
                 paddingVerticalPx
             )
-            
+
             recyclerView.clipToPadding = false
 
             return recyclerView
@@ -169,20 +189,9 @@ class SettingsActivity : BaseActivity(), SearchPreferenceResultListener {
             preferenceManager.preferenceDataStore = MmkvPreferenceDataStore()
             addPreferencesFromResource(R.xml.pref_settings)
 
-            // Configure SearchPreference
-            findPreference<SearchPreference>("pref_search")?.apply {
-                getSearchConfiguration().apply {
-                    setActivity(requireActivity() as com.v2ray.ang.ui.BaseActivity)
-                    setBreadcrumbsEnabled(true)
-                    setHistoryEnabled(true)
-                    index(R.xml.pref_ui_settings).addBreadcrumb(R.string.title_ui_settings)
-                    index(R.xml.pref_vpn_settings).addBreadcrumb(R.string.title_vpn_settings)
-                    index(R.xml.pref_core_settings).addBreadcrumb(R.string.title_core_settings)
-                    index(R.xml.pref_mux_settings).addBreadcrumb(R.string.title_mux_settings)
-                    index(R.xml.pref_fragment_settings).addBreadcrumb(R.string.title_fragment_settings)
-                    index(R.xml.pref_advanced_settings).addBreadcrumb(R.string.title_advanced)
-                }
-            }
+            // NOTE: SearchPreference was removed from pref_settings.xml.
+            // Search is now configured in SettingsActivity.setupSearchActionView()
+            // via the SearchPreferenceActionView embedded in the toolbar.
 
             navigateUiSettings?.setOnPreferenceClickListener {
                 startActivity(android.content.Intent(requireContext(), UiSettingsActivity::class.java))
