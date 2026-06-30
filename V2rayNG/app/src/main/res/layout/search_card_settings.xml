@@ -42,18 +42,12 @@
                 android:layout_marginStart="8dp"
                 android:background="@android:color/transparent"
                 app:iconifiedByDefault="false"
-                app:closeIcon="@drawable/ic_close"
+                app:closeIcon="@null"
                 app:queryBackground="@android:color/transparent"
                 app:submitBackground="@android:color/transparent"
                 app:searchIcon="@null"
                 app:queryHint="@string/searchpreference_search" />
 
-            <!--
-                Same weather / total-traffic chip as MainActivity's
-                layout_weather_chip. Mutually exclusive, driven by
-                PREF_SHOW_WEATHER_CHIP / PREF_SHOW_TOTAL_TRAFFIC_CHIP,
-                refreshed in SettingsActivity (see refreshSearchBarChip()).
-            -->
             <LinearLayout
                 android:id="@+id/layout_weather_chip"
                 android:layout_width="wrap_content"
