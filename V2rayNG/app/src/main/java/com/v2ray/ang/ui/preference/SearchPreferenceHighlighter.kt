@@ -22,7 +22,7 @@ object SearchPreferenceHighlighter {
         val intent = fragment.activity?.intent ?: return
         val key = intent.getStringExtra(AppConfig.EXTRA_HIGHLIGHT_KEY) ?: return
 
-        // Hapus extra agar tidak nge-trigger highlight berulang kali (misal saat rotasi layar)
+        // Hapus extra agar tidak nge-trigger highlight berulang kali
         intent.removeExtra(AppConfig.EXTRA_HIGHLIGHT_KEY)
 
         // Gunakan view?.post agar tereksekusi sinkron dengan siklus perenderan UI
@@ -35,27 +35,33 @@ object SearchPreferenceHighlighter {
         val appBarLayout = fragment.activity?.findViewById<AppBarLayout>(R.id.app_bar)
         val recyclerView = fragment.listView
         
+        // 1. Eksekusi pengecilan AppBarLayout terlebih dahulu (false = tanpa animasi)
         appBarLayout?.setExpanded(false, false)
 
-        val pref = fragment.findPreference<androidx.preference.Preference>(key) ?: return
-        val adapter = recyclerView.adapter ?: return
+        // 2. Lempar perintah scroll ke antrean berikutnya (menunggu AppBar selesai mengecil)
+        // Ini kunci untuk menghilangkan glitch
+        recyclerView.post {
+            val pref = fragment.findPreference<androidx.preference.Preference>(key) ?: return@post
+            val adapter = recyclerView.adapter ?: return@post
 
-        if (adapter is PreferenceGroup.PreferencePositionCallback) {
-            val position = adapter.getPreferenceAdapterPosition(pref)
-            if (position != RecyclerView.NO_POSITION) {
-                
-                // Gunakan 1 metode scroll ini saja, hapus fragment.scrollToPreference(pref)
-                val layoutManager = recyclerView.layoutManager
-                if (layoutManager is LinearLayoutManager) {
-                    layoutManager.scrollToPositionWithOffset(position, 0)
-                } else {
-                    recyclerView.scrollToPosition(position)
-                }
-                
-                // Tunggu RecyclerView selesai menyusun view baru di layarnya
-                recyclerView.post {
-                    val holder = recyclerView.findViewHolderForAdapterPosition(position)
-                    holder?.itemView?.let { flashCard(it) }
+            if (adapter is PreferenceGroup.PreferencePositionCallback) {
+                val position = adapter.getPreferenceAdapterPosition(pref)
+                if (position != RecyclerView.NO_POSITION) {
+                    
+                    recyclerView.stopScroll()
+                    
+                    val layoutManager = recyclerView.layoutManager
+                    if (layoutManager is LinearLayoutManager) {
+                        layoutManager.scrollToPositionWithOffset(position, 0)
+                    } else {
+                        recyclerView.scrollToPosition(position)
+                    }
+                    
+                    // 3. Tunggu lompatan RecyclerView selesai, baru render animasi highlight
+                    recyclerView.post {
+                        val holder = recyclerView.findViewHolderForAdapterPosition(position)
+                        holder?.itemView?.let { flashCard(it) }
+                    }
                 }
             }
         }
@@ -93,7 +99,7 @@ object SearchPreferenceHighlighter {
             })
         }
 
-        // Cegah bug visual/memory leak apabila card di-recycle saat user melakukan scroll paksa
+        // Cegah bug visual/memory leak apabila card di-recycle saat ditarik manual
         val attachListener = object : View.OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(v: View) {}
             override fun onViewDetachedFromWindow(v: View) {
