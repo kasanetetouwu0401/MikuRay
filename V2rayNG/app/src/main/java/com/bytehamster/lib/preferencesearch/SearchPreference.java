@@ -7,12 +7,13 @@ import android.content.res.TypedArray;
 import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
-import com.v2ray.ang.ui.preference.FullSpanPreference;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager; // Import tambahan
 
-public class SearchPreference extends FullSpanPreference implements View.OnClickListener {
+public class SearchPreference extends Preference implements View.OnClickListener {
     private SearchConfiguration searchConfiguration = new SearchConfiguration();
     private String hint = null;
 
@@ -67,6 +68,8 @@ public class SearchPreference extends FullSpanPreference implements View.OnClick
 
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
+        super.onBindViewHolder(holder);
+
         EditText searchText = (EditText) holder.findViewById(R.id.search);
         searchText.setFocusable(false);
         searchText.setInputType(InputType.TYPE_NULL);
@@ -79,6 +82,11 @@ public class SearchPreference extends FullSpanPreference implements View.OnClick
         holder.findViewById(R.id.search_card).setOnClickListener(this);
         holder.itemView.setOnClickListener(this);
         holder.itemView.setBackgroundColor(0x0);
+
+        ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
+        if (layoutParams instanceof StaggeredGridLayoutManager.LayoutParams) {
+            ((StaggeredGridLayoutManager.LayoutParams) layoutParams).setFullSpan(true);
+        }
     }
 
     @Override
