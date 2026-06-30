@@ -10,7 +10,6 @@
         android:layout_marginLeft="8.0dip"
         android:layout_marginRight="8.0dip"
         android:background="?colorBg"
-        app:contentScrim="?attr/colorBg"
         app:layout_collapseMode="pin" />
 
 </merge>
