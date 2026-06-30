@@ -8,6 +8,7 @@ import android.view.View
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.card.MaterialCardView
@@ -25,7 +26,6 @@ object SearchPreferenceHighlighter {
         // Hapus extra agar tidak nge-trigger highlight berulang kali
         intent.removeExtra(AppConfig.EXTRA_HIGHLIGHT_KEY)
 
-        // Gunakan view?.post agar tereksekusi sinkron dengan siklus perenderan UI
         fragment.view?.post {
             jumpAndHighlight(fragment, key)
         }
@@ -35,33 +35,47 @@ object SearchPreferenceHighlighter {
         val appBarLayout = fragment.activity?.findViewById<AppBarLayout>(R.id.app_bar)
         val recyclerView = fragment.listView
         
-        // 1. Eksekusi pengecilan AppBarLayout terlebih dahulu (false = tanpa animasi)
-        appBarLayout?.setExpanded(false, false)
+        // Pakai 'true' agar AppBarLayout mengecil secara perlahan/animasi
+        appBarLayout?.setExpanded(false, true)
 
-        // 2. Lempar perintah scroll ke antrean berikutnya (menunggu AppBar selesai mengecil)
-        // Ini kunci untuk menghilangkan glitch
-        recyclerView.post {
-            val pref = fragment.findPreference<androidx.preference.Preference>(key) ?: return@post
-            val adapter = recyclerView.adapter ?: return@post
+        val pref = fragment.findPreference<androidx.preference.Preference>(key) ?: return
+        val adapter = recyclerView.adapter ?: return
 
-            if (adapter is PreferenceGroup.PreferencePositionCallback) {
-                val position = adapter.getPreferenceAdapterPosition(pref)
-                if (position != RecyclerView.NO_POSITION) {
+        if (adapter is PreferenceGroup.PreferencePositionCallback) {
+            val position = adapter.getPreferenceAdapterPosition(pref)
+            if (position != RecyclerView.NO_POSITION) {
+                
+                recyclerView.stopScroll()
+                
+                val layoutManager = recyclerView.layoutManager
+                
+                // Buat custom scroller agar pergerakannya natural dan pas nyampe di atas
+                val smoothScroller = object : LinearSmoothScroller(recyclerView.context) {
                     
-                    recyclerView.stopScroll()
-                    
-                    val layoutManager = recyclerView.layoutManager
-                    if (layoutManager is LinearLayoutManager) {
-                        layoutManager.scrollToPositionWithOffset(position, 0)
-                    } else {
-                        recyclerView.scrollToPosition(position)
+                    // Memastikan target berhenti tepat di bagian paling atas layar (offset 0)
+                    override fun getVerticalSnapPreference(): Int {
+                        return SNAP_TO_START
                     }
-                    
-                    // 3. Tunggu lompatan RecyclerView selesai, baru render animasi highlight
-                    recyclerView.post {
-                        val holder = recyclerView.findViewHolderForAdapterPosition(position)
-                        holder?.itemView?.let { flashCard(it) }
+
+                    // Callback ini akan dipanggil otomatis saat layar selesai nge-scroll
+                    override fun onStop() {
+                        super.onStop()
+                        // Beri jeda sangat halus biar mata user fokus dulu sebelum berkedip
+                        recyclerView.postDelayed({
+                            val holder = recyclerView.findViewHolderForAdapterPosition(position)
+                            holder?.itemView?.let { flashCard(it) }
+                        }, 100)
                     }
+                }
+
+                smoothScroller.targetPosition = position
+
+                if (layoutManager is LinearLayoutManager) {
+                    // Mulai luncurkan layarnya
+                    layoutManager.startSmoothScroll(smoothScroller)
+                } else {
+                    // Fallback jika bukan LinearLayoutManager
+                    recyclerView.smoothScrollToPosition(position)
                 }
             }
         }
@@ -99,7 +113,6 @@ object SearchPreferenceHighlighter {
             })
         }
 
-        // Cegah bug visual/memory leak apabila card di-recycle saat ditarik manual
         val attachListener = object : View.OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(v: View) {}
             override fun onViewDetachedFromWindow(v: View) {
