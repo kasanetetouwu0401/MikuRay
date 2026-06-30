@@ -2,10 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     
-    <com.v2ray.ang.ui.preference.FullSpanPreference
-        android:layout="@layout/uwu_banner_settings"
-        app:selectable="false" />
-        
     <com.bytehamster.lib.preferencesearch.SearchPreference
         android:key="pref_search"
         app:textHint="@string/searchpreference_search"
@@ -13,6 +9,10 @@
         app:textClearHistory="@string/searchpreference_clear_history"
         app:textClearInput="@string/searchpreference_clear"
         app:textMore="@string/searchpreference_more" />
+    
+    <com.v2ray.ang.ui.preference.FullSpanPreference
+        android:layout="@layout/uwu_banner_settings"
+        app:selectable="false" />
         
      <com.v2ray.ang.ui.preference.FullSpanPreference
         android:icon="@drawable/uwu_check"
