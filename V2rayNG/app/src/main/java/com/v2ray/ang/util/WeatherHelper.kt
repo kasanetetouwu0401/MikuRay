@@ -297,7 +297,7 @@ object WeatherHelper {
                     ConnectionSpec.COMPATIBLE_TLS
                 )
             )
-            .proxy(Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", 10808)))
+            .proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress("127.0.0.1", 10809)))
             .build()
     }
 
