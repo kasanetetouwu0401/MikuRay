@@ -4,7 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="250.0dip"
     android:layout_marginTop="4.0dip"
-    android:layout_marginBottom="8.0dip"
+    android:layout_marginBottom="4.0dip"
     android:minHeight="?android:listPreferredItemHeightSmall"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -14,9 +14,11 @@
         android:layout_marginStart="4.0dip"
         android:layout_marginEnd="4.0dip"
         app:cardBackgroundColor="?attr/colorCard"
-        app:cardCornerRadius="28.0dip"
         app:cardElevation="0.0dip"
-        app:strokeWidth="0.0dip">
+        app:strokeWidth="0.0dip"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Top"
+        app:cardPreventCornerOverlap="false"
+        app:contentPadding="0dp">
         <ImageView
             android:layout_gravity="end"
             android:layout_width="wrap_content"
