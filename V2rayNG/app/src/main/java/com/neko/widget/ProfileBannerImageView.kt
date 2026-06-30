@@ -123,7 +123,7 @@ class ProfileBannerImageView @JvmOverloads constructor(
                         .load(savedUri)
                         .diskCacheStrategy(DiskCacheStrategy.DATA)
                         .dontAnimate()
-                        .error(R.drawable.uwu_banner_author)
+                        .error(R.drawable.uwu_banner_profile)
                         .into(this)
                 } else {
                     loadDefault()
@@ -141,6 +141,6 @@ class ProfileBannerImageView @JvmOverloads constructor(
 
     private fun loadDefault() {
         Glide.with(this).clear(this)
-        setImageResource(R.drawable.uwu_banner_author)
+        setImageResource(R.drawable.uwu_banner_profile)
     }
 }
