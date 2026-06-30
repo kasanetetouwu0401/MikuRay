@@ -7,6 +7,7 @@ import android.os.Looper
 import android.view.View
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
+import androidx.recyclerview.widget.LinearLayoutManager // Tambahan Import Ini
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.card.MaterialCardView
@@ -43,7 +44,12 @@ object SearchPreferenceHighlighter {
                 val position = adapter.getPreferenceAdapterPosition(pref)
                 if (position != RecyclerView.NO_POSITION) {
                     
-                    recyclerView.scrollToPosition(position)
+                    val layoutManager = recyclerView.layoutManager
+                    if (layoutManager is LinearLayoutManager) {
+                        layoutManager.scrollToPositionWithOffset(position, 0)
+                    } else {
+                        recyclerView.scrollToPosition(position)
+                    }
                     
                     Handler(Looper.getMainLooper()).postDelayed({
                         val holder = recyclerView.findViewHolderForAdapterPosition(position)

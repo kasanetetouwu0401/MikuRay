@@ -86,16 +86,9 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                val searchFragment = supportFragmentManager.fragments.find {
-                    it.javaClass.name.contains("SearchPreferenceFragment")
-                }
+                val searchFragment = currentSearchFragment()
 
-                if (searchFragment != null && searchFragment.isVisible) {
-                    // Search results are showing: just collapse/clear the search,
-                    // don't rely on cancelSearch()'s return value here since the
-                    // search bar is always-expanded (iconifiedByDefault=false),
-                    // which makes isIconified() permanently false and would make
-                    // cancelSearch() always report true.
+                if (searchFragment != null && searchFragment.dialog?.isShowing == true) {
                     searchActionView.cancelSearch()
                 } else {
                     finish()

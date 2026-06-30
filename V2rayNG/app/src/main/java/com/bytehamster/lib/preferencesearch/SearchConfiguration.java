@@ -64,10 +64,9 @@ public class SearchConfiguration {
         Bundle arguments = this.toBundle();
         SearchPreferenceFragment fragment = new SearchPreferenceFragment();
         fragment.setArguments(arguments);
-        activity.getSupportFragmentManager().beginTransaction()
-                .add(containerResId, fragment, SearchPreferenceFragment.TAG)
-                .addToBackStack(SearchPreferenceFragment.TAG)
-                .commit();
+        
+        fragment.show(activity.getSupportFragmentManager(), SearchPreferenceFragment.TAG);
+        
         return fragment;
     }
 

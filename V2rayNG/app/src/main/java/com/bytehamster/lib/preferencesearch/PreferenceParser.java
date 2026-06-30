@@ -129,6 +129,8 @@ class PreferenceParser {
         result.key = readString(getAttribute(xpp, "key"));
         result.entries = readStringArray(getAttribute(xpp, "entries"));
         result.keywords = readString(getAttribute(xpp, NS_SEARCH, "keywords"));
+        result.widgetType = xpp.getName();
+        result.defaultValue = "true".equals(getAttribute(xpp, NS_ANDROID, "defaultValue"));
 
         Log.d("PreferenceParser", "Found: " + xpp.getName() + "/" + result);
         return result;

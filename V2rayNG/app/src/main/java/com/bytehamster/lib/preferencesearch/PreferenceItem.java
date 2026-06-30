@@ -19,6 +19,8 @@ public class PreferenceItem extends ListItem implements Parcelable {
     String keywords;
     ArrayList<String> keyBreadcrumbs = new ArrayList<>();
     int resId;
+    String widgetType;
+    boolean defaultValue;
 
     PreferenceItem() {
     }
@@ -30,6 +32,8 @@ public class PreferenceItem extends ListItem implements Parcelable {
         this.breadcrumbs = in.readString();
         this.keywords = in.readString();
         this.resId = in.readInt();
+        this.widgetType = in.readString();
+        this.defaultValue = in.readByte() != 0;
     }
 
     public static final Creator<PreferenceItem> CREATOR = new Creator<PreferenceItem>() {
@@ -46,6 +50,11 @@ public class PreferenceItem extends ListItem implements Parcelable {
 
     boolean hasData() {
         return title != null || summary != null;
+    }
+
+    boolean isSwitch() {
+        return widgetType != null
+                && (widgetType.endsWith("SwitchPreferenceCompat") || widgetType.endsWith("SwitchPreference"));
     }
 
     boolean matches(String keyword) {
@@ -131,5 +140,7 @@ public class PreferenceItem extends ListItem implements Parcelable {
         parcel.writeString(breadcrumbs);
         parcel.writeString(keywords);
         parcel.writeInt(resId);
+        parcel.writeString(widgetType);
+        parcel.writeByte((byte) (defaultValue ? 1 : 0));
     }
 }

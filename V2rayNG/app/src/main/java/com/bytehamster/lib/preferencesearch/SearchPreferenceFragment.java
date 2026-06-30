@@ -20,10 +20,8 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bytehamster.lib.preferencesearch.ui.AnimationUtils;
 import com.bytehamster.lib.preferencesearch.ui.RevealAnimationSetting;
@@ -31,7 +29,7 @@ import com.bytehamster.lib.preferencesearch.ui.RevealAnimationSetting;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchPreferenceFragment extends Fragment implements SearchPreferenceAdapter.SearchClickListener {
+public class SearchPreferenceFragment extends BottomSheetDialogFragment implements SearchPreferenceAdapter.SearchClickListener {
     public static final String TAG = "SearchPreferenceFragment";
 
     private static final String SHARED_PREFS_FILE = "preferenceSearch";
@@ -132,34 +130,6 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
     @Override
     public void onViewCreated(android.view.View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
-            androidx.core.graphics.Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            androidx.core.graphics.Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
-            // Only apply the top status-bar inset when this fragment's own search bar
-            // is shown (i.e. it's a true fullscreen overlay). When the search bar is
-            // disabled, the fragment is hosted inline below an existing toolbar/AppBarLayout
-            // that already accounts for the top inset, so adding it again here just creates
-            // an oversized gap between the host's search bar and the results list.
-            int topInset = searchConfiguration.isSearchBarEnabled()
-                ? Math.max(systemBars.top, cutout.top)
-                : 0;
-            int bottomInset = Math.max(systemBars.bottom, cutout.bottom);
-            v.setPadding(
-                v.getPaddingLeft(),
-                topInset,
-                v.getPaddingRight(),
-                v.getPaddingBottom()
-            );
-
-            int baseBottomPadding = (int) (16 * v.getResources().getDisplayMetrics().density);
-            viewHolder.recyclerView.setPadding(
-                viewHolder.recyclerView.getPaddingLeft(),
-                viewHolder.recyclerView.getPaddingTop(),
-                viewHolder.recyclerView.getPaddingRight(),
-                baseBottomPadding + bottomInset
-            );
-            return insets;
-        });
     }
 
     private void loadHistory() {
@@ -323,6 +293,9 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
                     screen = r.keyBreadcrumbs.get(r.keyBreadcrumbs.size() - 1);
                 }
                 SearchPreferenceResult result = new SearchPreferenceResult(r.key, r.resId, screen);
+                
+                dismiss(); 
+                
                 callback.onSearchResultClicked(result);
             } catch (ClassCastException e) {
                 throw new ClassCastException(getActivity().toString() + " must implement SearchPreferenceResultListener");
