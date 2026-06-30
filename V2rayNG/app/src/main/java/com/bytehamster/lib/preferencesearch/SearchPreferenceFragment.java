@@ -193,7 +193,11 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
         }
     }
 
-    private void clearHistory() {
+    public boolean hasHistory() {
+        return history != null && !history.isEmpty();
+    }
+
+    public void clearHistory() {
         viewHolder.searchView.setText("");
         history.clear();
         saveHistory();
