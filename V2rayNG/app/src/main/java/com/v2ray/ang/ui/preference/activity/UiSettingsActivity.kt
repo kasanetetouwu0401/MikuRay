@@ -566,7 +566,6 @@ class UiSettingsActivity : BaseActivity() {
                         customFontSwitch?.isChecked = false
                         appFont?.isEnabled = true
                         updateCustomFontSummary()
-                        requireContext().snackbarSuccess(getString(R.string.custom_font_removed), title = getString(R.string.title_alerter_success))
                         activity?.recreate()
                     }
                     .setNegativeButton(android.R.string.cancel, null)
