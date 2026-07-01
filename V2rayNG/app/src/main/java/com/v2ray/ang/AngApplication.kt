@@ -23,9 +23,9 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
     companion object {
         lateinit var application: AngApplication
 
-        fun getCustomTypeface(context: Context, fontName: String? = null): Typeface {
+        fun getCustomTypeface(context: Context, fontName: String? = null): Typeface? {
             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_APP_FONT_USE_CUSTOM, false)) {
-                return CustomFontManager.getTypeface(context) ?: Typeface.DEFAULT
+                return CustomFontManager.getTypeface(context)
             }
             val name = fontName ?: MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT)
             return AppFontResolver.getTypeface(context, name)
