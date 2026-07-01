@@ -6,7 +6,6 @@ import android.content.Context
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
-import androidx.core.content.res.ResourcesCompat
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.tencent.mmkv.MMKV
@@ -16,8 +15,9 @@ import com.v2ray.ang.extension.ForegroundActivityTracker
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.util.ThemeManager
-import com.neko.crashlog.CrashHandler
 import com.v2ray.ang.util.CustomFontManager
+import com.v2ray.ang.util.AppFontResolver
+import com.neko.crashlog.CrashHandler
 
 class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
     companion object {
@@ -27,31 +27,8 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_APP_FONT_USE_CUSTOM, false)) {
                 return CustomFontManager.getTypeface(context) ?: Typeface.DEFAULT
             }
-            
             val name = fontName ?: MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT)
-            val fontResId = when (name) {
-                "google"        -> R.font.googlesansregular
-                "roboto"        -> R.font.robotoregular
-                "poppins"       -> R.font.poppinsregular
-                "chococooky"    -> R.font.chococookyregular
-                "simpleday"     -> R.font.simpleday
-                "fucek"         -> R.font.fucek
-                "sfprodisplay"  -> R.font.sfprodisplay
-                "dancingscript" -> R.font.dancingscript
-                "cream"         -> R.font.cream
-                "oneui"         -> R.font.oneui
-                "inconsolata"   -> R.font.incosolata
-                "emilyscandy"   -> R.font.emilyscandy
-                "summerdream"   -> R.font.summerdream
-                "rine"          -> R.font.rine
-                "evolve"        -> R.font.evolvesans
-                else            -> return Typeface.DEFAULT
-            }
-            return try {
-                ResourcesCompat.getFont(context, fontResId) ?: Typeface.DEFAULT
-            } catch (e: Exception) {
-                Typeface.DEFAULT
-            }
+            return AppFontResolver.getTypeface(context, name)
         }
     }
 

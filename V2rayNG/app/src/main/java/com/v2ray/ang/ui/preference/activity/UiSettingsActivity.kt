@@ -108,7 +108,7 @@ class UiSettingsActivity : BaseActivity() {
         private val blurBottomIntensity by lazy { findPreference<BlurBottomIntensityDialog>(AppConfig.PREF_BLUR_BOTTOM_INTENSITY) }
         private val indicatorStyle by lazy { findPreference<Preference>(AppConfig.PREF_INDICATOR_STYLE) }
         private val navigateCheckUpdate by lazy { findPreference<CustomBannerPreference>(AppConfig.PREF_NAVIGATE_CHECK_UPDATE) }
-        private val appFont by lazy { findPreference<ListPreference>(AppConfig.PREF_APP_FONT) }
+        private val appFont by lazy { findPreference<Preference>(AppConfig.PREF_APP_FONT) }
         private val customFontSwitch by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_APP_FONT_USE_CUSTOM) }
         private val customFontPick by lazy { findPreference<Preference>(AppConfig.PREF_ACTION_PICK_CUSTOM_FONT) }
         private val customFontDelete by lazy { findPreference<Preference>(AppConfig.PREF_ACTION_DELETE_CUSTOM_FONT) }
@@ -370,11 +370,16 @@ class UiSettingsActivity : BaseActivity() {
                 true
             }
 
-            appFont?.setOnPreferenceChangeListener { _, newValue ->
-                MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT, newValue as String)
-                activity?.recreate()
+            appFont?.setOnPreferenceClickListener {
+                val currentValue = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT) ?: "default"
+                com.v2ray.ang.ui.bottomsheet.FontPickerBottomSheet(requireContext(), currentValue) { value, label ->
+                    MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT, value)
+                    appFont?.summary = label
+                    activity?.recreate()
+                }.show()
                 true
             }
+            updateAppFontSummary()
             setupCustomFontPreferences()
 
             CategoryStyleHelper.applyToFragment(this)
@@ -569,6 +574,14 @@ class UiSettingsActivity : BaseActivity() {
                     .showBlur()
                 true
             }
+        }
+
+        private fun updateAppFontSummary() {
+            val currentValue = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT) ?: "default"
+            val values = resources.getStringArray(R.array.app_font_values)
+            val labels = resources.getStringArray(R.array.app_font_entries)
+            val idx = values.indexOf(currentValue)
+            appFont?.summary = if (idx >= 0) labels[idx] else currentValue
         }
 
         private fun updateCustomFontSummary() {

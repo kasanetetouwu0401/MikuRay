@@ -3,6 +3,7 @@ package com.v2ray.ang.util
 import android.content.Context
 import android.graphics.Typeface
 import android.net.Uri
+import android.util.Log
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
 import java.io.File
@@ -61,7 +62,7 @@ object CustomFontManager {
             cachedPath = destFile.absolutePath
             destFile
         } catch (e: Exception) {
-            LogUtil.w(TAG, "Failed to save custom font: ${e.message}")
+            Log.w(TAG, "Failed to save custom font: ${e.message}")
             null
         }
     }
@@ -96,7 +97,7 @@ object CustomFontManager {
             cachedPath = destFile.absolutePath
             destFile
         } catch (e: Exception) {
-            LogUtil.w(TAG, "Failed to restore custom font: ${e.message}")
+            Log.w(TAG, "Failed to restore custom font: ${e.message}")
             null
         }
     }
@@ -132,7 +133,7 @@ object CustomFontManager {
             cachedPath = file.absolutePath
             typeface
         } catch (e: Exception) {
-            LogUtil.w(TAG, "Failed to load custom font: ${e.message}")
+            Log.w(TAG, "Failed to load custom font: ${e.message}")
             null
         }
     }
@@ -156,7 +157,7 @@ object CustomFontManager {
             field.isAccessible = true
             field.set(null, typeface)
         } catch (e: Exception) {
-            LogUtil.w(TAG, "Failed to override Typeface.$fieldName: ${e.message}")
+            Log.w(TAG, "Failed to override Typeface.$fieldName: ${e.message}")
         }
     }
 
@@ -178,7 +179,7 @@ object CustomFontManager {
         } catch (e: Exception) {
             // Not available on this API level / OEM build; the DEFAULT field override above
             // still covers most stock widgets.
-            LogUtil.d(TAG, "sSystemFontMap override unavailable: ${e.message}")
+            Log.d(TAG, "sSystemFontMap override unavailable: ${e.message}")
         }
     }
 }
