@@ -51,7 +51,7 @@ class SplashActivity : BaseActivity() {
         versionText.text = getString(
             R.string.uwu_splash_summary,
             getString(R.string.uwu_version_name),
-            getString(R.string.uwu_version_code)
+            getString(R.string.uwu_version_code).toInt()
         )
 
         lifecycleScope.launch {
