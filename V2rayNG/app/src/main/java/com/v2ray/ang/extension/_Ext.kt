@@ -31,7 +31,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.updateLayoutParams
-import com.google.android.material.color.MaterialColors
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.snackbar.BaseTransientBottomBar
@@ -39,6 +38,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.v2ray.ang.AngApplication
 import com.v2ray.ang.R
 import com.v2ray.ang.enums.EConfigType
+import com.v2ray.ang.util.getColorAttr
 import com.neko.toasty.Toasty
 import java.io.Serializable
 import java.lang.ref.WeakReference
@@ -146,13 +146,13 @@ private fun showSnackbar(
     title: CharSequence,
     message: CharSequence,
     @DrawableRes iconRes: Int,
-    @AttrRes backgroundColorAttrRes: Int?,
-    @AttrRes textColorAttrRes: Int?,
+    @AttrRes backgroundColorAttr: Int?,
+    @AttrRes textColorAttr: Int?,
     duration: Int
 ) {
     if (Looper.myLooper() != Looper.getMainLooper()) {
         Handler(Looper.getMainLooper()).post {
-            showSnackbar(context, title, message, iconRes, backgroundColorAttrRes, textColorAttrRes, duration)
+            showSnackbar(context, title, message, iconRes, backgroundColorAttr, textColorAttr, duration)
         }
         return
     }
@@ -174,10 +174,11 @@ private fun showSnackbar(
     val contentView = LayoutInflater.from(parent.context)
         .inflate(R.layout.layout_snackbar_custom, snackbarLayout, false)
 
-    val resolvedTextColor = MaterialColors.getColor(
-        parent,
-        textColorAttrRes ?: R.attr.colorOnSurfaceInverse
-    )
+    val resolvedTextColor = if (textColorAttr != null) {
+        parent.context.getColorAttr(textColorAttr)
+    } else {
+        parent.context.getColorAttr(R.attr.colorOnSurfaceInverse)
+    }
 
     contentView.findViewById<ImageView>(R.id.iv_snackbar_icon)?.apply {
         setImageResource(iconRes)
@@ -257,10 +258,11 @@ private fun showSnackbar(
     }
 
     val cornerRadiusPx = 28f * parent.context.resources.displayMetrics.density
-    val backgroundColor = MaterialColors.getColor(
-        parent,
-        backgroundColorAttrRes ?: R.attr.colorSurfaceInverse
-    )
+    val backgroundColor = if (backgroundColorAttr != null) {
+        parent.context.getColorAttr(backgroundColorAttr)
+    } else {
+        parent.context.getColorAttr(R.attr.colorSurfaceInverse)
+    }
 
     snackbarLayout.backgroundTintList = null
     snackbarLayout.backgroundTintMode = null

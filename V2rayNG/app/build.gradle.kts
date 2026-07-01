@@ -23,9 +23,8 @@ android {
         targetSdk = 37
         versionCode = appVersionCode
         versionName = appVersionName
-        multiDexEnabled = true
         
-        resValue("string", "uwu_version_name", appVersionName)
+        resValue("string", "uwu_version_name", appVersionName.toString())
         resValue("string", "uwu_version_code", appVersionCode.toString())
         resValue("string", "uwu_package_name", applicationId.toString())
         resValue("string", "uwu_build_date", rootProject.extra["BUILD_DATE"].toString())
@@ -69,6 +68,7 @@ android {
             isDebuggable = true
             isMinifyEnabled = false
             isShrinkResources = false
+            multiDexEnabled = true
         }
     }
 

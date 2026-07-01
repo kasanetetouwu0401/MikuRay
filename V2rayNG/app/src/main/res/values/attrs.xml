@@ -2,6 +2,21 @@
 <resources>
     <attr name="colorBg" format="color" />
     <attr name="colorCard" format="color" />
+
+    <!-- M3 color role attrs re-declared here so they're accessible via com.v2ray.ang.R
+         (app uses non-transitive R classes; values are still supplied by the active
+         Material theme, this only affects which R class Kotlin/Java code imports from) -->
+    <attr name="colorPrimary" format="color" />
+    <attr name="colorOnPrimary" format="color" />
+    <attr name="colorTertiary" format="color" />
+    <attr name="colorOnTertiary" format="color" />
+    <attr name="colorOnSurface" format="color" />
+    <attr name="colorOnSurfaceVariant" format="color" />
+    <attr name="colorSurfaceVariant" format="color" />
+    <attr name="colorSurfaceInverse" format="color" />
+    <attr name="colorOnSurfaceInverse" format="color" />
+    <attr name="colorError" format="color" />
+    <attr name="colorOnError" format="color" />
     
     <attr name="siArrowPosition">
         <enum name="left" value="0" />

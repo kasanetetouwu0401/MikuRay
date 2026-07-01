@@ -2,6 +2,7 @@ package com.bytehamster.lib.preferencesearch;
 
 import com.v2ray.ang.R;
 
+import android.graphics.Color;
 import android.text.SpannableString;
 import android.text.Spannable;
 import android.text.TextUtils;
@@ -12,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.color.MaterialColors;
+import com.v2ray.ang.util.ThemeManagerKt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,7 @@ class SearchPreferenceAdapter extends RecyclerView.Adapter<SearchPreferenceAdapt
         final ListItem listItem = dataset.get(position);
 
         // Resolve colorPrimary from theme for text highlight
-        int highlightColor = MaterialColors.getColor(h.root.getContext(), R.attr.colorPrimary, 0);
+        int highlightColor = ThemeManagerKt.getColorAttr(h.root.getContext(), R.attr.colorPrimary);
 
         if (getItemViewType(position) == HistoryItem.TYPE) {
             HistoryViewHolder holder = (HistoryViewHolder) h;

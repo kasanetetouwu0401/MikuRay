@@ -10,7 +10,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.v2ray.ang.AppConfig.PREF_SHOW_SPLASH
-import com.v2ray.ang.BuildConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
 import kotlinx.coroutines.delay
@@ -51,8 +50,8 @@ class SplashActivity : BaseActivity() {
         val versionText = findViewById<TextView>(R.id.splash_version)
         versionText.text = getString(
             R.string.uwu_splash_summary,
-            BuildConfig.VERSION_NAME,
-            BuildConfig.VERSION_CODE
+            getString(R.string.uwu_version_name),
+            getString(R.string.uwu_version_code)
         )
 
         lifecycleScope.launch {

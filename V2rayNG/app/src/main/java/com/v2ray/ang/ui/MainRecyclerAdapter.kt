@@ -232,7 +232,7 @@ class MainRecyclerAdapter(
                 wrapped,
                 com.google.android.material.color.MaterialColors.getColor(
                     holder.itemView,
-                    com.google.android.material.R.attr.colorOnSurfaceVariant
+                    R.attr.colorOnSurfaceVariant
                 )
             )
             wrapped.setBounds(0, 0, iconSize, iconSize)
@@ -309,7 +309,7 @@ class MainRecyclerAdapter(
         override fun onItemSelected() {
             val context = itemView.context
             val typedValue = TypedValue()
-            context.theme.resolveAttribute(com.google.android.material.R.attr.colorSurfaceVariant, typedValue, true)
+            context.theme.resolveAttribute(R.attr.colorSurfaceVariant, typedValue, true)
             itemMainBinding.layoutCard.setCardBackgroundColor(typedValue.data)
         }
         override fun onItemClear() {

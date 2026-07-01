@@ -48,7 +48,7 @@ import com.v2ray.ang.ui.bottomsheet.ShareConfigBottomSheet
 import com.v2ray.ang.ui.preference.activity.SettingsActivity
 import com.v2ray.ang.util.BlurBottomStatusController
 import com.v2ray.ang.util.SearchChipGradientController
-import com.google.android.material.color.MaterialColors
+import com.v2ray.ang.util.getColorAttr
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.QRCodeDecoder
 import com.v2ray.ang.util.Utils
@@ -633,19 +633,19 @@ class MainActivity : HelperBaseActivity(),
         val label = view.findViewById<TextView>(R.id.tab_label) ?: return
         val badge = view.findViewById<TextView>(R.id.tab_badge) ?: return
 
-        val tintColor = if (selected) MaterialColors.getColor(this, R.attr.colorOnPrimary, 0) else MaterialColors.getColor(this, R.attr.colorOnSurfaceVariant, 0)
+        val tintColor = if (selected) getColorAttr(R.attr.colorOnPrimary) else getColorAttr(R.attr.colorOnSurfaceVariant)
         label.setTextColor(tintColor)
         icon?.imageTintList = android.content.res.ColorStateList.valueOf(tintColor)
 
         if (selected) {
-            badge.setTextColor(MaterialColors.getColor(this, R.attr.colorPrimary, 0))
+            badge.setTextColor(getColorAttr(R.attr.colorPrimary))
             badge.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                MaterialColors.getColor(this, R.attr.colorOnPrimary, 0)
+                getColorAttr(R.attr.colorOnPrimary)
             )
         } else {
-            badge.setTextColor(MaterialColors.getColor(this, R.attr.colorOnPrimary, 0))
+            badge.setTextColor(getColorAttr(R.attr.colorOnPrimary))
             badge.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                MaterialColors.getColor(this, R.attr.colorPrimary, 0)
+                getColorAttr(R.attr.colorPrimary)
             )
         }
     }

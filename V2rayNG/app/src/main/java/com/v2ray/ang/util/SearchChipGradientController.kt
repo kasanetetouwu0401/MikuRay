@@ -1,6 +1,5 @@
 package com.v2ray.ang.util
 
-import com.google.android.material.color.MaterialColors
 import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
@@ -56,8 +55,8 @@ object SearchChipGradientController {
     }
 
     private fun applyGradientOn(activity: AppCompatActivity, chip: ChipViews) {
-        val colorStart = MaterialColors.getColor(activity, R.attr.colorPrimary, 0)
-        val colorEnd = MaterialColors.getColor(activity, R.attr.colorTertiary, 0)
+        val colorStart = activity.getColorAttr(R.attr.colorPrimary)
+        val colorEnd = activity.getColorAttr(R.attr.colorTertiary)
         val cornerRadiusPx = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, 16f, activity.resources.displayMetrics
         )
@@ -69,12 +68,12 @@ object SearchChipGradientController {
             cornerRadius = cornerRadiusPx
         }
         chip.layoutWeatherChip.background = RippleDrawable(
-            ColorStateList.valueOf(MaterialColors.getColor(activity, android.R.attr.colorControlHighlight, 0)),
+            ColorStateList.valueOf(activity.getColorAttr(android.R.attr.colorControlHighlight)),
             gradient,
             null
         )
 
-        val tintList = ColorStateList.valueOf(MaterialColors.getColor(activity, R.attr.colorOnPrimary, 0))
+        val tintList = ColorStateList.valueOf(activity.getColorAttr(R.attr.colorOnPrimary))
         ImageViewCompat.setImageTintList(chip.ivWeatherIcon, tintList)
         ImageViewCompat.setImageTintList(chip.ivTotalTrafficIcon, tintList)
         chip.tvWeatherTemp.setTextColor(tintList.defaultColor)
@@ -84,7 +83,7 @@ object SearchChipGradientController {
     private fun applyGradientOff(activity: AppCompatActivity, chip: ChipViews) {
         chip.layoutWeatherChip.setBackgroundResource(R.drawable.bg_weather_chip)
 
-        val tintList = ColorStateList.valueOf(MaterialColors.getColor(activity, R.attr.colorOnSurfaceVariant, 0))
+        val tintList = ColorStateList.valueOf(activity.getColorAttr(R.attr.colorOnSurfaceVariant))
         ImageViewCompat.setImageTintList(chip.ivWeatherIcon, tintList)
         ImageViewCompat.setImageTintList(chip.ivTotalTrafficIcon, tintList)
         chip.tvWeatherTemp.setTextColor(tintList.defaultColor)

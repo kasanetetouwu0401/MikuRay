@@ -1,6 +1,5 @@
 package com.v2ray.ang.ui.dialog
 
-import com.google.android.material.color.MaterialColors
 import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -21,6 +20,7 @@ import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.util.ThemeManager
 import com.v2ray.ang.util.WindowBlurUtils
+import com.v2ray.ang.util.getColorAttr
 
 class ThemeColorDialog : DialogFragment() {
 
@@ -67,7 +67,7 @@ class ThemeColorDialog : DialogFragment() {
             
             val styleRes = ThemeManager.getThemeStyleRes(key)
             val wrappedContext = ContextThemeWrapper(requireContext(), styleRes)
-            val m3PrimaryColor = MaterialColors.getColor(wrappedContext, R.attr.colorPrimary, 0)
+            val m3PrimaryColor = wrappedContext.getColorAttr(R.attr.colorPrimary)
 
             applyCircleDrawable(circle, m3PrimaryColor, isSelected)
             
@@ -96,7 +96,7 @@ class ThemeColorDialog : DialogFragment() {
                 .setContentBasedSource(rawCustomColor)
                 .build()
             val wrappedCustomContext = DynamicColors.wrapContextIfAvailable(requireContext(), customOptions)
-            val m3CustomPrimary = MaterialColors.getColor(wrappedCustomContext, R.attr.colorPrimary, 0)
+            val m3CustomPrimary = wrappedCustomContext.getColorAttr(R.attr.colorPrimary)
 
             applyCircleDrawable(customCircle, m3CustomPrimary, isCustomSelected)
 

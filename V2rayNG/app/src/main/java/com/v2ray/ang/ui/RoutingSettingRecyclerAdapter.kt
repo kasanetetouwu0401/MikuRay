@@ -62,7 +62,7 @@ class RoutingSettingRecyclerAdapter(
         override fun onItemSelected() {
             val context = itemView.context
             val typedValue = TypedValue()
-            context.theme.resolveAttribute(com.google.android.material.R.attr.colorSurfaceVariant, typedValue, true)
+            context.theme.resolveAttribute(R.attr.colorSurfaceVariant, typedValue, true)
             itemRoutingSettingBinding.layoutCard.setCardBackgroundColor(typedValue.data)
         }
 

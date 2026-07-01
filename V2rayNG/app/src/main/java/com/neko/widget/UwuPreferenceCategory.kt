@@ -1,12 +1,12 @@
 package com.neko.widget
 
-import com.google.android.material.color.MaterialColors
 import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.widget.ImageView
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceViewHolder
+import com.v2ray.ang.util.getColorAttr
 import com.v2ray.ang.R
 
 class UwuPreferenceCategory @JvmOverloads constructor(
@@ -31,8 +31,8 @@ class UwuPreferenceCategory @JvmOverloads constructor(
         }
         val frame = iconView.parent as? android.view.ViewGroup ?: return
         
-        val colorStart = MaterialColors.getColor(context, R.attr.colorPrimary, 0)
-        val colorEnd = MaterialColors.getColor(context, R.attr.colorTertiary, 0)
+        val colorStart = context.getColorAttr(R.attr.colorPrimary)
+        val colorEnd = context.getColorAttr(R.attr.colorTertiary)
         
         frame.background = GradientDrawable(
             GradientDrawable.Orientation.TL_BR,

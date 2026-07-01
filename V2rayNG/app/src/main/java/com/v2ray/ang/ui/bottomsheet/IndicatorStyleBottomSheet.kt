@@ -1,6 +1,5 @@
 package com.v2ray.ang.ui.bottomsheet
 
-import com.google.android.material.color.MaterialColors
 import android.content.Context
 import android.content.res.ColorStateList
 import android.view.LayoutInflater
@@ -16,6 +15,7 @@ import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.util.IndicatorStyle
 import com.v2ray.ang.util.WindowBlurUtils
 import com.v2ray.ang.ui.IndicatorStyleAdapter
+import com.v2ray.ang.util.getColorAttr
 
 class IndicatorStyleBottomSheet(
     private val context: Context,
@@ -49,7 +49,7 @@ class IndicatorStyleBottomSheet(
             skipCollapsed = true
         }
 
-        val bgColor = MaterialColors.getColor(context, R.attr.colorBg, 0)
+        val bgColor = context.getColorAttr(R.attr.colorBg)
 
         val bottomSheet = dialog.findViewById<android.view.View>(
             com.google.android.material.R.id.design_bottom_sheet
