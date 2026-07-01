@@ -7,7 +7,6 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import androidx.core.content.res.ResourcesCompat
-import androidx.multidex.MultiDexApplication
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.tencent.mmkv.MMKV
@@ -19,7 +18,7 @@ import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.util.ThemeManager
 import com.neko.crashlog.CrashHandler
 
-class AngApplication : MultiDexApplication(), Application.ActivityLifecycleCallbacks {
+class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
     companion object {
         lateinit var application: AngApplication
 
