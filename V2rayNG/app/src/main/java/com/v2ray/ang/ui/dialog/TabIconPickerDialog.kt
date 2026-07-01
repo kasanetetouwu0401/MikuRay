@@ -41,7 +41,7 @@ class TabIconPickerDialog(
         val noneSelected = currentIcon == null
         checkNone.visibility = if (noneSelected) View.VISIBLE else View.GONE
         checkNone.imageTintList = ColorStateList.valueOf(
-            if (noneSelected) MaterialColors.getColor(context, R.attr.colorPrimary) else 0
+            if (noneSelected) MaterialColors.getColor(context, R.attr.colorPrimary, 0) else 0
         )
 
         rowNone.setOnClickListener {

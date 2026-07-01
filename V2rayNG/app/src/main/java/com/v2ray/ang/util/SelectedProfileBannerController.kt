@@ -132,7 +132,7 @@ class SelectedProfileBannerController(private val context: Context) {
 
     private fun dimColorFor(dimPercent: Int): Int {
         val alpha = (dimPercent * 255 / 100).coerceIn(0, 255)
-        val baseColor = MaterialColors.getColor(context, R.attr.colorCard)
+        val baseColor = MaterialColors.getColor(context, R.attr.colorCard, 0)
         return Color.argb(alpha, Color.red(baseColor), Color.green(baseColor), Color.blue(baseColor))
     }
 

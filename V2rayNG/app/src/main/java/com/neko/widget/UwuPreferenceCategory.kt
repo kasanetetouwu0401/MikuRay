@@ -31,8 +31,8 @@ class UwuPreferenceCategory @JvmOverloads constructor(
         }
         val frame = iconView.parent as? android.view.ViewGroup ?: return
         
-        val colorStart = MaterialColors.getColor(context, R.attr.colorPrimary)
-        val colorEnd = MaterialColors.getColor(context, R.attr.colorTertiary)
+        val colorStart = MaterialColors.getColor(context, R.attr.colorPrimary, 0)
+        val colorEnd = MaterialColors.getColor(context, R.attr.colorTertiary, 0)
         
         frame.background = GradientDrawable(
             GradientDrawable.Orientation.TL_BR,

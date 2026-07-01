@@ -52,7 +52,7 @@ class SearchPreferenceAdapter extends RecyclerView.Adapter<SearchPreferenceAdapt
         final ListItem listItem = dataset.get(position);
 
         // Resolve colorPrimary from theme for text highlight
-        int highlightColor = MaterialColors.getColor(h.root.getContext(), R.attr.colorPrimary);
+        int highlightColor = MaterialColors.getColor(h.root.getContext(), R.attr.colorPrimary, 0);
 
         if (getItemViewType(position) == HistoryItem.TYPE) {
             HistoryViewHolder holder = (HistoryViewHolder) h;

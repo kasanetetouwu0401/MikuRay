@@ -18,7 +18,7 @@ abstract class BaseBottomSheetFragment : BottomSheetDialogFragment() {
         super.onStart()
         val sheetDialog = dialog as? BottomSheetDialog ?: return
 
-        val bgColor = MaterialColors.getColor(requireContext(), R.attr.colorBg)
+        val bgColor = MaterialColors.getColor(requireContext(), R.attr.colorBg, 0)
 
         sheetDialog.window?.let { window ->
             WindowBlurUtils.applyWindowBlur(window)
