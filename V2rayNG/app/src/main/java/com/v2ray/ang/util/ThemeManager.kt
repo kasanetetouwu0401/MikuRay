@@ -1,15 +1,10 @@
 package com.v2ray.ang.util
 
 import android.app.Activity
-import android.content.Context
 import android.content.res.Configuration
-import android.graphics.Color
 import android.os.Build
-import android.util.TypedValue
-import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.StyleRes
-import androidx.core.content.ContextCompat
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import com.google.android.material.color.utilities.Hct
@@ -126,31 +121,4 @@ object ThemeManager {
         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_COLOR, 0)
         activity.recreate()
     }
-}
-
-fun Context.getColorAttr(@AttrRes resId: Int): Int {
-    val typedValue = TypedValue()
-    return if (theme.resolveAttribute(resId, typedValue, true)) {
-        if (typedValue.resourceId != 0) {
-            ContextCompat.getColor(this, typedValue.resourceId)
-        } else {
-            typedValue.data
-        }
-    } else {
-        Color.TRANSPARENT
-    }
-}
-
-fun Context.getColorAttr(attrName: String): Int {
-    var packageNameToUse = packageName
-    var finalAttrName = attrName
-
-    if (attrName.startsWith("android:")) {
-        packageNameToUse = "android"
-        finalAttrName = attrName.removePrefix("android:")
-    }
-
-    val resId = resources.getIdentifier(finalAttrName, "attr", packageNameToUse)
-    if (resId == 0) return Color.TRANSPARENT
-    return getColorAttr(resId)
 }

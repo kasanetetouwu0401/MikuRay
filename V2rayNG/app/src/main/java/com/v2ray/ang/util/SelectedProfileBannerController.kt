@@ -1,5 +1,6 @@
 package com.v2ray.ang.util
 
+import com.google.android.material.color.MaterialColors
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -131,7 +132,7 @@ class SelectedProfileBannerController(private val context: Context) {
 
     private fun dimColorFor(dimPercent: Int): Int {
         val alpha = (dimPercent * 255 / 100).coerceIn(0, 255)
-        val baseColor = context.getColorAttr("colorCard")
+        val baseColor = MaterialColors.getColor(context, R.attr.colorCard)
         return Color.argb(alpha, Color.red(baseColor), Color.green(baseColor), Color.blue(baseColor))
     }
 

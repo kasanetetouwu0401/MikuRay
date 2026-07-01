@@ -28,7 +28,7 @@ import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.SubscriptionUpdater
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.util.WindowBlurUtils
-import com.v2ray.ang.util.getColorAttr
+import com.google.android.material.color.MaterialColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.v2ray.ang.util.SoftInputAssist
@@ -94,7 +94,7 @@ class SubEditActivity : BaseActivity() {
         fun refreshNoneCheck() {
             val noneSelected = selectedIconDrawable == null
             checkNone.visibility = if (noneSelected) android.view.View.VISIBLE else android.view.View.GONE
-            val tint = if (noneSelected) getColorAttr("colorPrimary") else 0
+            val tint = if (noneSelected) MaterialColors.getColor(this, R.attr.colorPrimary) else 0
             checkNone.imageTintList = ColorStateList.valueOf(tint)
         }
         refreshNoneCheck()
@@ -122,7 +122,7 @@ class SubEditActivity : BaseActivity() {
             binding.etTabIcon.setText(getString(R.string.sub_tab_icon_none))
             binding.tilTabIcon.setStartIconDrawable(R.drawable.filter_all)
             binding.tilTabIcon.setStartIconTintList(
-                ColorStateList.valueOf(getColorAttr("colorOnSurfaceVariant"))
+                ColorStateList.valueOf(MaterialColors.getColor(this, R.attr.colorOnSurfaceVariant))
             )
         } else {
             val resId = resources.getIdentifier(iconName, "drawable", packageName)
@@ -131,7 +131,7 @@ class SubEditActivity : BaseActivity() {
             if (resId != 0) {
                 binding.tilTabIcon.setStartIconDrawable(resId)
                 binding.tilTabIcon.setStartIconTintList(
-                    ColorStateList.valueOf(getColorAttr("colorOnSurfaceVariant"))
+                    ColorStateList.valueOf(MaterialColors.getColor(this, R.attr.colorOnSurfaceVariant))
                 )
             }
         }

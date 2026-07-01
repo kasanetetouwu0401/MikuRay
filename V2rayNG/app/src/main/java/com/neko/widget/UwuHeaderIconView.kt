@@ -1,5 +1,6 @@
 package com.neko.widget
 
+import com.google.android.material.color.MaterialColors
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -12,7 +13,6 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import com.v2ray.ang.util.getColorAttr
 import com.v2ray.ang.handler.MmkvManager
 
 class UwuHeaderIconView @JvmOverloads constructor(
@@ -76,7 +76,7 @@ class UwuHeaderIconView @JvmOverloads constructor(
             scaleType = ScaleType.CENTER
             setImageDrawable(iconDrawable)
             imageTintList = android.content.res.ColorStateList.valueOf(
-                context.getColorAttr("colorOnPrimary")
+                MaterialColors.getColor(context, R.attr.colorOnPrimary)
             )
         } else {
             setPadding(0, 0, 0, 0)
@@ -87,8 +87,8 @@ class UwuHeaderIconView @JvmOverloads constructor(
     }
 
     private fun buildGradientBackground(): GradientDrawable {
-        val colorStart = context.getColorAttr("colorPrimary")
-        val colorEnd = context.getColorAttr("colorTertiary")
+        val colorStart = MaterialColors.getColor(context, R.attr.colorPrimary)
+        val colorEnd = MaterialColors.getColor(context, R.attr.colorTertiary)
         
         return GradientDrawable(
             GradientDrawable.Orientation.TL_BR,

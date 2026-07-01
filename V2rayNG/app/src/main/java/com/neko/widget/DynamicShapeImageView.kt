@@ -1,5 +1,6 @@
 package com.neko.widget
 
+import com.google.android.material.color.MaterialColors
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -13,9 +14,7 @@ import com.neko.shapeimageview.shader.ShaderHelper
 import com.neko.shapeimageview.shader.SvgShader
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import androidx.appcompat.R as AppCompatR
 import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.util.getColorAttr
 
 class DynamicShapeImageView @JvmOverloads constructor(
     context: Context,
@@ -66,7 +65,7 @@ class DynamicShapeImageView @JvmOverloads constructor(
 
     private fun loadColorBitmap() {
         try {
-            val color = customBgColor ?: context.getColorAttr(androidx.appcompat.R.attr.colorPrimary)
+            val color = customBgColor ?: MaterialColors.getColor(context, R.attr.colorPrimary)
             
             val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)

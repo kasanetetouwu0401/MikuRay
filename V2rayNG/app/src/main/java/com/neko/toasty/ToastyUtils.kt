@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.util.TypedValue
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
@@ -47,19 +46,5 @@ internal object ToastyUtils {
     @JvmStatic
     fun getColor(context: Context, @ColorRes color: Int): Int {
         return ContextCompat.getColor(context, color)
-    }
-
-    @JvmStatic
-    fun getColorAttr(context: Context, attrName: String, @ColorInt fallbackColor: Int): Int {
-        val resId = context.resources.getIdentifier(attrName, "attr", context.packageName)
-        if (resId == 0) {
-            return fallbackColor
-        }
-        val typedValue = TypedValue()
-        return if (context.theme.resolveAttribute(resId, typedValue, true)) {
-            typedValue.data
-        } else {
-            fallbackColor
-        }
     }
 }

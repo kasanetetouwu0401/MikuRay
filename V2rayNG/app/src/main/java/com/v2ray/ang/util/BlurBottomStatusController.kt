@@ -2,7 +2,9 @@ package com.v2ray.ang.util
 
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.color.MaterialColors
 import com.v2ray.ang.AppConfig
+import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ActivityMainBinding
 import com.v2ray.ang.handler.MmkvManager
 
@@ -31,10 +33,10 @@ object BlurBottomStatusController {
         binding.blurBottomStatus.visibility = View.VISIBLE
         binding.cardBottomStatus.setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
         binding.tvIpState.setTextColor(
-            activity.getColorAttr("colorOnSurfaceVariant")
+            MaterialColors.getColor(activity, R.attr.colorOnSurfaceVariant)
         )
         binding.tvTestState.setTextColor(
-            activity.getColorAttr("colorOnSurface")
+            MaterialColors.getColor(activity, R.attr.colorOnSurface)
         )
         binding.fab.visibility = View.VISIBLE
         binding.fabNoBlur.visibility = View.GONE
@@ -43,9 +45,9 @@ object BlurBottomStatusController {
     private fun applyBlurOff(activity: AppCompatActivity, binding: ActivityMainBinding) {
         binding.blurBottomStatus.visibility = View.GONE
         binding.cardBottomStatus.setCardBackgroundColor(
-            activity.getColorAttr("colorPrimary")
+            MaterialColors.getColor(activity, R.attr.colorPrimary)
         )
-        val textColorOnPrimary = activity.getColorAttr("colorOnPrimary")
+        val textColorOnPrimary = MaterialColors.getColor(activity, R.attr.colorOnPrimary)
         binding.tvIpState.setTextColor(textColorOnPrimary)
         binding.tvIpState.alpha = 0.8f 
         binding.tvTestState.setTextColor(textColorOnPrimary)

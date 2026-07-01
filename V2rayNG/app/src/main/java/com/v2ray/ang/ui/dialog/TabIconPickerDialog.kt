@@ -1,5 +1,6 @@
 package com.v2ray.ang.ui.dialog
 
+import com.google.android.material.color.MaterialColors
 import android.content.Context
 import android.content.res.ColorStateList
 import android.view.LayoutInflater
@@ -11,7 +12,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.v2ray.ang.R
 import com.v2ray.ang.ui.TabIconPickerAdapter
 import com.v2ray.ang.util.WindowBlurUtils
-import com.v2ray.ang.util.getColorAttr
 
 class TabIconPickerDialog(
     private val context: Context,
@@ -41,7 +41,7 @@ class TabIconPickerDialog(
         val noneSelected = currentIcon == null
         checkNone.visibility = if (noneSelected) View.VISIBLE else View.GONE
         checkNone.imageTintList = ColorStateList.valueOf(
-            if (noneSelected) context.getColorAttr("colorPrimary") else 0
+            if (noneSelected) MaterialColors.getColor(context, R.attr.colorPrimary) else 0
         )
 
         rowNone.setOnClickListener {

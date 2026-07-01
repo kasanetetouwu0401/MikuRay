@@ -1,5 +1,6 @@
 package com.v2ray.ang.ui.preference
 
+import com.google.android.material.color.MaterialColors
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
@@ -14,7 +15,6 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import com.v2ray.ang.util.getColorAttr
 
 object SearchPreferenceHighlighter {
 
@@ -60,7 +60,7 @@ object SearchPreferenceHighlighter {
     private fun flashCard(itemView: View) {
         val card = itemView as? MaterialCardView ?: return
         
-        val highlightColor = card.context.getColorAttr("colorPrimary")
+        val highlightColor = MaterialColors.getColor(card.context, R.attr.colorPrimary)
 
         val overlay = MaterialShapeDrawable(card.shapeAppearanceModel).apply {
             setTint(highlightColor) 

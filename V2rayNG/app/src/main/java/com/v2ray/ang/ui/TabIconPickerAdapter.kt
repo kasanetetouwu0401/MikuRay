@@ -1,5 +1,6 @@
 package com.v2ray.ang.ui
 
+import com.google.android.material.color.MaterialColors
 import android.content.Context
 import android.content.res.ColorStateList
 import android.view.LayoutInflater
@@ -9,7 +10,6 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.v2ray.ang.R
-import com.v2ray.ang.util.getColorAttr
 
 class TabIconPickerAdapter(
     private val context: Context,
@@ -85,14 +85,14 @@ class TabIconPickerAdapter(
 
         val (bgColor, iconTint, checkTint) = if (selected) {
             Triple(
-                context.getColorAttr("colorPrimary"),
-                context.getColorAttr("colorOnPrimary"),
-                context.getColorAttr("colorOnPrimary"),
+                MaterialColors.getColor(context, R.attr.colorPrimary),
+                MaterialColors.getColor(context, R.attr.colorOnPrimary),
+                MaterialColors.getColor(context, R.attr.colorOnPrimary),
             )
         } else {
             Triple(
                 0,
-                context.getColorAttr("colorOnSurfaceVariant"),
+                MaterialColors.getColor(context, R.attr.colorOnSurfaceVariant),
                 0,
             )
         }
