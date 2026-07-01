@@ -16,20 +16,19 @@ import com.v2ray.ang.extension.ForegroundActivityTracker
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.util.ThemeManager
-import com.v2ray.ang.util.CustomFontManager
 import com.neko.crashlog.CrashHandler
+import com.v2ray.ang.util.CustomFontManager
 
 class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
     companion object {
         lateinit var application: AngApplication
 
         fun getCustomTypeface(context: Context, fontName: String? = null): Typeface {
-            val name = fontName ?: MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT)
-            
-            if (name == AppConfig.APP_FONT_VALUE_CUSTOM) {
+            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_APP_FONT_USE_CUSTOM, false)) {
                 return CustomFontManager.getTypeface(context) ?: Typeface.DEFAULT
             }
             
+            val name = fontName ?: MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT)
             val fontResId = when (name) {
                 "google"        -> R.font.googlesansregular
                 "roboto"        -> R.font.robotoregular
@@ -80,11 +79,12 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         ThemeManager.applyTheme(activity)
 
-        val selectedFont = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT)
-        if (selectedFont == AppConfig.APP_FONT_VALUE_CUSTOM) {
+        val useCustomFont = MmkvManager.decodeSettingsBool(AppConfig.PREF_APP_FONT_USE_CUSTOM, false)
+        if (useCustomFont) {
             com.v2ray.ang.util.CustomFontManager.applyGlobalOverride(activity)
         } else {
-            val fontOverlayId = getFontStyleResId(selectedFont)
+            val fontName = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT)
+            val fontOverlayId = getFontStyleResId(fontName)
             if (fontOverlayId != 0) {
                 activity.theme.applyStyle(fontOverlayId, true)
             }

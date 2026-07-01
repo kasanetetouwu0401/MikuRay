@@ -109,6 +109,7 @@ class UiSettingsActivity : BaseActivity() {
         private val indicatorStyle by lazy { findPreference<Preference>(AppConfig.PREF_INDICATOR_STYLE) }
         private val navigateCheckUpdate by lazy { findPreference<CustomBannerPreference>(AppConfig.PREF_NAVIGATE_CHECK_UPDATE) }
         private val appFont by lazy { findPreference<ListPreference>(AppConfig.PREF_APP_FONT) }
+        private val customFontSwitch by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_APP_FONT_USE_CUSTOM) }
         private val customFontPick by lazy { findPreference<Preference>(AppConfig.PREF_ACTION_PICK_CUSTOM_FONT) }
         private val customFontDelete by lazy { findPreference<Preference>(AppConfig.PREF_ACTION_DELETE_CUSTOM_FONT) }
         private val categoryStyle by lazy { findPreference<ListPreference>(AppConfig.PREF_CATEGORY_STYLE) }
@@ -173,8 +174,9 @@ class UiSettingsActivity : BaseActivity() {
                         CustomFontManager.saveFontFile(requireContext(), uri, displayName)
                     }
                     if (savedFile != null) {
-                        MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT, AppConfig.APP_FONT_VALUE_CUSTOM)
-                        appFont?.value = AppConfig.APP_FONT_VALUE_CUSTOM
+                        MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT_USE_CUSTOM, true)
+                        customFontSwitch?.isChecked = true
+                        appFont?.isEnabled = false
                         updateCustomFontSummary()
                         requireContext().toastSuccess(getString(R.string.custom_font_applied))
                         activity?.recreate()
@@ -369,17 +371,9 @@ class UiSettingsActivity : BaseActivity() {
             }
 
             appFont?.setOnPreferenceChangeListener { _, newValue ->
-                val value = newValue as String
-                if (value == AppConfig.APP_FONT_VALUE_CUSTOM && CustomFontManager.getFontFile(requireContext()) == null) {
-                    // No custom font saved yet — send the user to pick one instead of
-                    // silently switching to a "custom" mode with nothing loaded.
-                    pickCustomFontFile.launch(arrayOf("*/*"))
-                    false
-                } else {
-                    MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT, value)
-                    activity?.recreate()
-                    true
-                }
+                MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT, newValue as String)
+                activity?.recreate()
+                true
             }
             setupCustomFontPreferences()
 
@@ -530,6 +524,25 @@ class UiSettingsActivity : BaseActivity() {
         private fun setupCustomFontPreferences() {
             updateCustomFontSummary()
 
+            val useCustom = MmkvManager.decodeSettingsBool(AppConfig.PREF_APP_FONT_USE_CUSTOM, false)
+            customFontSwitch?.isChecked = useCustom
+            appFont?.isEnabled = !useCustom
+
+            customFontSwitch?.setOnPreferenceChangeListener { _, newValue ->
+                val checked = newValue as Boolean
+                if (checked && CustomFontManager.getFontFile(requireContext()) == null) {
+                    // No custom font saved yet — send the user to pick one instead of
+                    // silently flipping the switch on with nothing loaded.
+                    pickCustomFontFile.launch(arrayOf("*/*"))
+                    false
+                } else {
+                    MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT_USE_CUSTOM, checked)
+                    appFont?.isEnabled = !checked
+                    activity?.recreate()
+                    true
+                }
+            }
+
             customFontPick?.setOnPreferenceClickListener {
                 pickCustomFontFile.launch(arrayOf("*/*"))
                 true
@@ -545,14 +558,12 @@ class UiSettingsActivity : BaseActivity() {
                     .setMessage(R.string.custom_font_delete_confirm)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
                         CustomFontManager.clearFont(requireContext())
-                        val wasCustom = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT) == AppConfig.APP_FONT_VALUE_CUSTOM
-                        if (wasCustom) {
-                            MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT, "default")
-                            appFont?.value = "default"
-                        }
+                        MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT_USE_CUSTOM, false)
+                        customFontSwitch?.isChecked = false
+                        appFont?.isEnabled = true
                         updateCustomFontSummary()
                         requireContext().snackbarSuccess(getString(R.string.custom_font_removed), title = getString(R.string.title_alerter_success))
-                        if (wasCustom) activity?.recreate()
+                        activity?.recreate()
                     }
                     .setNegativeButton(android.R.string.cancel, null)
                     .showBlur()
@@ -563,6 +574,14 @@ class UiSettingsActivity : BaseActivity() {
         private fun updateCustomFontSummary() {
             val name = CustomFontManager.getFontDisplayName()
             customFontPick?.summary = name ?: getString(R.string.summary_pref_app_font_custom_pick_empty)
+            customFontDelete?.apply {
+                isEnabled = name != null
+                summary = if (name != null) {
+                    getString(R.string.summary_pref_app_font_custom_delete_set, name)
+                } else {
+                    getString(R.string.summary_pref_app_font_custom_delete_empty)
+                }
+            }
         }
 
         private fun queryDisplayName(uri: Uri): String? {
@@ -575,6 +594,7 @@ class UiSettingsActivity : BaseActivity() {
                 null
             }
         }
+
         private fun setupSelectedBannerPreferences() {
             updateIndicatorStyleEnabledState()
 

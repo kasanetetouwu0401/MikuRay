@@ -67,6 +67,41 @@ object CustomFontManager {
         }
     }
 
+    /**
+     * Same as [saveFontFile] but copies from a local [File] instead of a content [Uri].
+     * Used when restoring a font file from a backup archive.
+     */
+    fun restoreFontFile(context: Context, srcFile: File, displayName: String?): File? {
+        return try {
+            val ext = srcFile.extension.lowercase().takeIf { it in SUPPORTED_EXTENSIONS } ?: "ttf"
+
+            val dir = File(context.filesDir, FONT_DIR).apply { mkdirs() }
+            dir.listFiles()?.forEach { it.delete() }
+
+            val destFile = File(dir, "font.$ext")
+            srcFile.copyTo(destFile, overwrite = true)
+
+            val typeface = try {
+                Typeface.createFromFile(destFile)
+            } catch (e: Exception) {
+                null
+            }
+            if (typeface == null || typeface == Typeface.DEFAULT) {
+                destFile.delete()
+                return null
+            }
+
+            MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT_CUSTOM_NAME, displayName ?: destFile.name)
+
+            cachedTypeface = typeface
+            cachedPath = destFile.absolutePath
+            destFile
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to restore custom font: ${e.message}")
+            null
+        }
+    }
+
     /** Returns the saved custom font file, if any. */
     fun getFontFile(context: Context): File? {
         val dir = File(context.filesDir, FONT_DIR)
