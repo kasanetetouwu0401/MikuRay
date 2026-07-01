@@ -21,6 +21,7 @@ class ThemeStateManager(private val activity: Activity) {
     private var currentBlurBottomRadius: Int = 20
     private var currentBlurBottomRounds: Int = 3
     private var currentFont: String = ""
+    private var currentUseCustomFont: Boolean = false
     private var currentHeaderTopRowPadding: Int = 0 
 
     init {
@@ -43,6 +44,7 @@ class ThemeStateManager(private val activity: Activity) {
         currentBlurBottomRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_RADIUS, AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS)
         currentBlurBottomRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS)
         currentFont = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT) ?: ""
+        currentUseCustomFont = MmkvManager.decodeSettingsBool(AppConfig.PREF_APP_FONT_USE_CUSTOM, false)
         currentHeaderTopRowPadding = MmkvManager.decodeSettingsInt(AppConfig.PREF_HEADER_TOP_ROW_PADDING, AppConfig.HEADER_TOP_ROW_PADDING_DEFAULT)
     }
 
@@ -62,6 +64,7 @@ class ThemeStateManager(private val activity: Activity) {
         val newBlurBottomRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_RADIUS, AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS)
         val newBlurBottomRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS)
         val newFont = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT) ?: "" 
+        val newUseCustomFont = MmkvManager.decodeSettingsBool(AppConfig.PREF_APP_FONT_USE_CUSTOM, false)
         val newHeaderTopRowPadding = MmkvManager.decodeSettingsInt(AppConfig.PREF_HEADER_TOP_ROW_PADDING, AppConfig.HEADER_TOP_ROW_PADDING_DEFAULT)
 
         if (currentThemeKey != newThemeKey ||
@@ -79,6 +82,7 @@ class ThemeStateManager(private val activity: Activity) {
             currentBlurBottomRadius != newBlurBottomRadius ||
             currentBlurBottomRounds != newBlurBottomRounds ||
             currentFont != newFont ||
+            currentUseCustomFont != newUseCustomFont ||
             currentHeaderTopRowPadding != newHeaderTopRowPadding
         ) {
             loadState()

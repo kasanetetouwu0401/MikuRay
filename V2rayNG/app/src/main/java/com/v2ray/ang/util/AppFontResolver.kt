@@ -5,12 +5,6 @@ import android.graphics.Typeface
 import androidx.core.content.res.ResourcesCompat
 import com.v2ray.ang.R
 
-/**
- * Maps a bundled font's preference value (e.g. "google", "roboto") to its @font resource and
- * loaded [Typeface]. Shared between [com.v2ray.ang.ui.BaseActivity] (which applies the font
- * app-wide via a theme overlay) and the font picker UI (which needs to render each option's
- * label in that option's own font).
- */
 object AppFontResolver {
 
     private fun fontResId(value: String?): Int = when (value) {
@@ -32,14 +26,14 @@ object AppFontResolver {
         else            -> 0
     }
 
-    /** Loads the [Typeface] for a bundled font value, or [Typeface.DEFAULT] for "default"/unknown/null. */
-    fun getTypeface(context: Context, value: String?): Typeface {
+    fun getTypeface(context: Context, value: String?): Typeface? {
         val resId = fontResId(value)
-        if (resId == 0) return Typeface.DEFAULT
+        if (resId == 0) return null
+        
         return try {
-            ResourcesCompat.getFont(context, resId) ?: Typeface.DEFAULT
+            ResourcesCompat.getFont(context, resId)
         } catch (e: Exception) {
-            Typeface.DEFAULT
+            null
         }
     }
 }
