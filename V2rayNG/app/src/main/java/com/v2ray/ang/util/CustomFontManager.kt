@@ -19,6 +19,31 @@ object CustomFontManager {
     @Volatile
     private var cachedPath: String? = null
 
+    private var originalDefault: Typeface? = null
+    private var originalDefaultBold: Typeface? = null
+    private var originalSansSerif: Typeface? = null
+    private var originalSystemFontMap: Map<String, Typeface>? = null
+    private var isOriginalCached = false
+
+    private fun cacheOriginalFonts() {
+        if (isOriginalCached) return
+        isOriginalCached = true
+        originalDefault = Typeface.DEFAULT
+        originalDefaultBold = Typeface.DEFAULT_BOLD
+        originalSansSerif = Typeface.SANS_SERIF
+        try {
+            val field = Typeface::class.java.getDeclaredField("sSystemFontMap")
+            field.isAccessible = true
+            @Suppress("UNCHECKED_CAST")
+            val map = field.get(null) as? Map<String, Typeface>
+            if (map != null) {
+                originalSystemFontMap = HashMap(map)
+            }
+        } catch (e: Exception) {
+            LogUtil.d(TAG, "sSystemFontMap backup unavailable: ${e.message}")
+        }
+    }
+
     fun saveFontFile(context: Context, uri: Uri, displayName: String?): File? {
         return try {
             val ext = displayName?.substringAfterLast('.', "")?.lowercase()
@@ -95,6 +120,7 @@ object CustomFontManager {
         MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT_CUSTOM_NAME, "")
         cachedTypeface = null
         cachedPath = null
+        restoreGlobalOverride()
     }
 
     fun getFontDisplayName(): String? =
@@ -118,10 +144,27 @@ object CustomFontManager {
 
     fun applyGlobalOverride(context: Context) {
         val typeface = getTypeface(context) ?: return
+        cacheOriginalFonts()
         replaceStaticField("DEFAULT", typeface)
         replaceStaticField("DEFAULT_BOLD", Typeface.create(typeface, Typeface.BOLD))
         replaceStaticField("SANS_SERIF", typeface)
         replaceSystemFontMapEntries(typeface)
+    }
+
+    fun restoreGlobalOverride() {
+        if (!isOriginalCached) return
+        originalDefault?.let { replaceStaticField("DEFAULT", it) }
+        originalDefaultBold?.let { replaceStaticField("DEFAULT_BOLD", it) }
+        originalSansSerif?.let { replaceStaticField("SANS_SERIF", it) }
+        originalSystemFontMap?.let { originalMap ->
+            try {
+                val field = Typeface::class.java.getDeclaredField("sSystemFontMap")
+                field.isAccessible = true
+                field.set(null, originalMap)
+            } catch (e: Exception) {
+                LogUtil.w(TAG, "Failed to restore sSystemFontMap: ${e.message}")
+            }
+        }
     }
 
     private fun replaceStaticField(fieldName: String, typeface: Typeface) {

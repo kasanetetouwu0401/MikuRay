@@ -60,6 +60,7 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
         if (useCustomFont) {
             com.v2ray.ang.util.CustomFontManager.applyGlobalOverride(activity)
         } else {
+            com.v2ray.ang.util.CustomFontManager.restoreGlobalOverride()
             val fontName = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT)
             val fontOverlayId = getFontStyleResId(fontName)
             if (fontOverlayId != 0) {
