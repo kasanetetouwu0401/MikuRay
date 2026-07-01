@@ -175,6 +175,19 @@
             android:summary="%s"
             android:title="@string/title_pref_app_font" />
 
+        <Preference
+            android:icon="@drawable/ic_file_24dp"
+            app:layout="@layout/uwu_mid"
+            android:key="action_pick_custom_font"
+            android:title="@string/title_pref_app_font_custom_pick"
+            android:summary="@string/summary_pref_app_font_custom_pick_empty" />
+
+        <Preference
+            android:icon="@drawable/ic_delete_24dp"
+            app:layout="@layout/uwu_mid"
+            android:key="action_delete_custom_font"
+            android:title="@string/title_pref_app_font_custom_delete" />
+
         <ListPreference
             android:icon="@drawable/ic_cards_variant"
             app:layout="@layout/uwu_mid"

@@ -26,6 +26,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.extension.snackbarSuccess
+import com.v2ray.ang.extension.toastError
+import com.v2ray.ang.extension.toastInfo
 import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
@@ -46,6 +48,7 @@ import com.v2ray.ang.ui.dialog.HeaderTopRowPaddingDialog
 import com.v2ray.ang.ui.preference.CustomBannerPreference
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
 import com.v2ray.ang.util.BannerColorExtractor
+import com.v2ray.ang.util.CustomFontManager
 import com.v2ray.ang.util.ThemeManager
 import com.v2ray.ang.util.WeatherHelper
 import com.v2ray.ang.util.showBlur
@@ -106,6 +109,8 @@ class UiSettingsActivity : BaseActivity() {
         private val indicatorStyle by lazy { findPreference<Preference>(AppConfig.PREF_INDICATOR_STYLE) }
         private val navigateCheckUpdate by lazy { findPreference<CustomBannerPreference>(AppConfig.PREF_NAVIGATE_CHECK_UPDATE) }
         private val appFont by lazy { findPreference<ListPreference>(AppConfig.PREF_APP_FONT) }
+        private val customFontPick by lazy { findPreference<Preference>(AppConfig.PREF_ACTION_PICK_CUSTOM_FONT) }
+        private val customFontDelete by lazy { findPreference<Preference>(AppConfig.PREF_ACTION_DELETE_CUSTOM_FONT) }
         private val categoryStyle by lazy { findPreference<ListPreference>(AppConfig.PREF_CATEGORY_STYLE) }
         private val showSplash by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_SPLASH) }
         private val bannerHeightSlider by lazy { findPreference<BannerHeightSliderDialog>(AppConfig.PREF_HOME_BANNER_HEIGHT) }
@@ -157,6 +162,26 @@ class UiSettingsActivity : BaseActivity() {
         private val pickSelectedBannerImage =
             registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
                 if (uri != null) startCropSelectedBannerActivity(uri)
+            }
+
+        private val pickCustomFontFile =
+            registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+                if (uri == null) return@registerForActivityResult
+                val displayName = queryDisplayName(uri)
+                lifecycleScope.launch {
+                    val savedFile = withContext(Dispatchers.IO) {
+                        CustomFontManager.saveFontFile(requireContext(), uri, displayName)
+                    }
+                    if (savedFile != null) {
+                        MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT, AppConfig.APP_FONT_VALUE_CUSTOM)
+                        appFont?.value = AppConfig.APP_FONT_VALUE_CUSTOM
+                        updateCustomFontSummary()
+                        requireContext().toastSuccess(getString(R.string.custom_font_applied))
+                        activity?.recreate()
+                    } else {
+                        requireContext().toastError(getString(R.string.custom_font_invalid))
+                    }
+                }
             }
 
         private val cropHomeBannerImage =
@@ -344,10 +369,19 @@ class UiSettingsActivity : BaseActivity() {
             }
 
             appFont?.setOnPreferenceChangeListener { _, newValue ->
-                MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT, newValue as String)
-                activity?.recreate()
-                true
+                val value = newValue as String
+                if (value == AppConfig.APP_FONT_VALUE_CUSTOM && CustomFontManager.getFontFile(requireContext()) == null) {
+                    // No custom font saved yet — send the user to pick one instead of
+                    // silently switching to a "custom" mode with nothing loaded.
+                    pickCustomFontFile.launch(arrayOf("*/*"))
+                    false
+                } else {
+                    MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT, value)
+                    activity?.recreate()
+                    true
+                }
             }
+            setupCustomFontPreferences()
 
             CategoryStyleHelper.applyToFragment(this)
             categoryStyle?.setOnPreferenceChangeListener { pref, newValue ->
@@ -493,6 +527,54 @@ class UiSettingsActivity : BaseActivity() {
             }
         }
 
+        private fun setupCustomFontPreferences() {
+            updateCustomFontSummary()
+
+            customFontPick?.setOnPreferenceClickListener {
+                pickCustomFontFile.launch(arrayOf("*/*"))
+                true
+            }
+
+            customFontDelete?.setOnPreferenceClickListener {
+                if (CustomFontManager.getFontFile(requireContext()) == null) {
+                    requireContext().toastInfo(getString(R.string.custom_font_none_to_remove))
+                    return@setOnPreferenceClickListener true
+                }
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.title_pref_app_font_custom_delete)
+                    .setMessage(R.string.custom_font_delete_confirm)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        CustomFontManager.clearFont(requireContext())
+                        val wasCustom = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT) == AppConfig.APP_FONT_VALUE_CUSTOM
+                        if (wasCustom) {
+                            MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT, "default")
+                            appFont?.value = "default"
+                        }
+                        updateCustomFontSummary()
+                        requireContext().snackbarSuccess(getString(R.string.custom_font_removed), title = getString(R.string.title_alerter_success))
+                        if (wasCustom) activity?.recreate()
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .showBlur()
+                true
+            }
+        }
+
+        private fun updateCustomFontSummary() {
+            val name = CustomFontManager.getFontDisplayName()
+            customFontPick?.summary = name ?: getString(R.string.summary_pref_app_font_custom_pick_empty)
+        }
+
+        private fun queryDisplayName(uri: Uri): String? {
+            return try {
+                requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                    val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                    if (nameIndex >= 0 && cursor.moveToFirst()) cursor.getString(nameIndex) else null
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
         private fun setupSelectedBannerPreferences() {
             updateIndicatorStyleEnabledState()
 

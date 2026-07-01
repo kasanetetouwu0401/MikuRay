@@ -16,6 +16,7 @@ import com.v2ray.ang.extension.ForegroundActivityTracker
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.util.ThemeManager
+import com.v2ray.ang.util.CustomFontManager
 import com.neko.crashlog.CrashHandler
 
 class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
@@ -24,6 +25,11 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
 
         fun getCustomTypeface(context: Context, fontName: String? = null): Typeface {
             val name = fontName ?: MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT)
+            
+            if (name == AppConfig.APP_FONT_VALUE_CUSTOM) {
+                return CustomFontManager.getTypeface(context) ?: Typeface.DEFAULT
+            }
+            
             val fontResId = when (name) {
                 "google"        -> R.font.googlesansregular
                 "roboto"        -> R.font.robotoregular
@@ -74,16 +80,19 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         ThemeManager.applyTheme(activity)
 
-        val fontName = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT)
-        val fontOverlayId = getFontStyleResId(fontName)
-        
-        if (fontOverlayId != 0) {
-            activity.theme.applyStyle(fontOverlayId, true)
-            
-            val isTrueBlack = ThemeManager.isDarkMode(activity) && MmkvManager.decodeSettingsBool(AppConfig.PREF_TRUE_BLACK, false)
-            if (isTrueBlack) {
-                activity.theme.applyStyle(R.style.ThemeOverlay_App_TrueBlack_DialogFix, true)
+        val selectedFont = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT)
+        if (selectedFont == AppConfig.APP_FONT_VALUE_CUSTOM) {
+            com.v2ray.ang.util.CustomFontManager.applyGlobalOverride(activity)
+        } else {
+            val fontOverlayId = getFontStyleResId(selectedFont)
+            if (fontOverlayId != 0) {
+                activity.theme.applyStyle(fontOverlayId, true)
             }
+        }
+        
+        val isTrueBlack = ThemeManager.isDarkMode(activity) && MmkvManager.decodeSettingsBool(AppConfig.PREF_TRUE_BLACK, false)
+        if (isTrueBlack) {
+            activity.theme.applyStyle(R.style.ThemeOverlay_App_TrueBlack_DialogFix, true)
         }
     }
 

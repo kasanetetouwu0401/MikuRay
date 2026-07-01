@@ -285,6 +285,7 @@
         <item>Summer Dream</item>
         <item>Rine</item>
         <item>Evolve Sans</item>
+        <item>Custom (Internal Storage)</item>
     </string-array>
 
     <string-array name="app_font_values" translatable="false">
@@ -304,6 +305,7 @@
         <item>summerdream</item>
         <item>rine</item>
         <item>evolve</item>
+        <item>custom</item>
     </string-array>
     
     <string-array name="category_style_entries" translatable="false">
