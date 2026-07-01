@@ -179,7 +179,6 @@ class UiSettingsActivity : BaseActivity() {
                         appFont?.isEnabled = false
                         updateCustomFontSummary()
                         activity?.recreate()
-                        requireContext().toastSuccess(getString(R.string.custom_font_applied))
                     } else {
                         requireContext().toastError(getString(R.string.custom_font_invalid))
                     }
