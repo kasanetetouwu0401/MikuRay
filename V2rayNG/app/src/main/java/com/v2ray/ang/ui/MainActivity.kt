@@ -25,6 +25,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
+import com.v2ray.ang.contracts.GroupServerHost
 import com.v2ray.ang.core.CoreServiceManager
 import com.v2ray.ang.databinding.ActivityMainBinding
 import com.v2ray.ang.databinding.ItemQrcodeBinding
@@ -70,7 +71,8 @@ class MainActivity : HelperBaseActivity(),
     MainMenuBottomSheet.OnOptionClickListener,
     AddConfigBottomSheet.OnAddConfigClickListener,
     MoreMenuBottomSheet.OnMoreOptionClickListener,
-    ShareConfigBottomSheet.OnShareOptionClickListener {
+    ShareConfigBottomSheet.OnShareOptionClickListener,
+    GroupServerHost {
 
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
@@ -693,7 +695,7 @@ class MainActivity : HelperBaseActivity(),
         (binding.tabGroup.parent as? View)?.isVisible = hasAnyGroup
     }
 
-    fun refreshGroupTabTitles(refreshAll: Boolean = false) {
+    override fun refreshGroupTabTitles(refreshAll: Boolean) {
         refreshTabBadges()
     }
 
@@ -741,7 +743,7 @@ class MainActivity : HelperBaseActivity(),
         CoreServiceManager.startVService(this)
     }
 
-    fun restartV2Ray() {
+    override fun restartV2Ray() {
         if (mainViewModel.isRunning.value == true) {
             CoreServiceManager.stopVService(this)
         }
@@ -1051,7 +1053,7 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
-    fun showShareBottomSheet(guid: String, configType: Int) {
+    override fun showShareBottomSheet(guid: String, configType: Int) {
         ShareConfigBottomSheet.newInstance(guid, configType).show(supportFragmentManager, ShareConfigBottomSheet.TAG)
     }
 

@@ -182,6 +182,14 @@
             android:theme="@style/AppThemeDayNight.NoActionBar.Translucent" />
 
         <activity
+            android:name=".ui.QuickProfileSwitchActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:theme="@style/AppThemeDayNight.NoActionBar.Translucent" />
+
+        <activity
             android:name=".ui.UrlSchemeActivity"
             android:exported="true">
             <intent-filter>
