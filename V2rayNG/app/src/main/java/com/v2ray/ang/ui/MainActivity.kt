@@ -45,6 +45,7 @@ import com.v2ray.ang.ui.bottomsheet.AddConfigBottomSheet
 import com.v2ray.ang.ui.bottomsheet.MainMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.MoreMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.ShareConfigBottomSheet
+import com.v2ray.ang.ui.bottomsheet.WeatherForecastBottomSheet
 import com.v2ray.ang.ui.preference.activity.SettingsActivity
 import com.v2ray.ang.util.BlurBottomStatusController
 import com.v2ray.ang.util.SearchChipGradientController
@@ -450,7 +451,9 @@ class MainActivity : HelperBaseActivity(),
 
         binding.layoutWeatherChip.setOnClickListener {
             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
-                forceRefreshWeatherChip()
+                WeatherForecastBottomSheet(this) { weather ->
+                    applyWeatherToChip(weather)
+                }.show()
             }
         }
     }

@@ -39,6 +39,7 @@ import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
 import com.v2ray.ang.ui.HelperBaseActivity
 import com.v2ray.ang.ui.PerAppProxyActivity
+import com.v2ray.ang.ui.bottomsheet.WeatherForecastBottomSheet
 import com.v2ray.ang.util.SearchChipGradientController
 import com.v2ray.ang.util.WeatherHelper
 import com.v2ray.ang.util.showDeleteConfirmDialog
@@ -153,6 +154,14 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         tvWeatherTemp = findViewById(R.id.tv_weather_temp)
         ivTotalTrafficIcon = findViewById(R.id.iv_total_traffic_icon)
         tvTotalTraffic = findViewById(R.id.tv_total_traffic)
+
+        layoutWeatherChip.setOnClickListener {
+            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
+                WeatherForecastBottomSheet(this) { weather ->
+                    applyWeatherToChip(weather)
+                }.show()
+            }
+        }
     }
 
     private fun chipViews() = SearchChipGradientController.ChipViews(

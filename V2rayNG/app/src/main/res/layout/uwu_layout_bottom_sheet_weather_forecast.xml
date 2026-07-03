@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?colorBg"
+    android:orientation="vertical"
+    android:paddingBottom="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="6dp">
+
+        <com.neko.widget.UwuHeaderIconView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="12dp"
+            app:sectionIcon="@drawable/ic_weather_sunny" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/weather_forecast_sheet_title"
+            android:textAppearance="?textAppearanceTitleMedium"
+            android:textColor="?colorPrimary"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Current conditions -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="20dp">
+
+                <ImageView
+                    android:id="@+id/ivForecastCurrentIcon"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    tools:src="@drawable/ic_weather_sunny" />
+
+                <TextView
+                    android:id="@+id/tvForecastCurrentCondition"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?textAppearanceTitleLarge"
+                    android:textColor="?colorOnSurface"
+                    tools:text="Cerah" />
+
+                <TextView
+                    android:id="@+id/tvForecastCurrentTemp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="?colorPrimary"
+                    android:textSize="76sp"
+                    android:textStyle="bold"
+                    tools:text="28°" />
+
+                <TextView
+                    android:id="@+id/tvForecastFeelsLike"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textAppearanceTitleMedium"
+                    android:textColor="?colorOnSurfaceVariant"
+                    tools:text="Berasa kayak 30°" />
+
+                <TextView
+                    android:id="@+id/tvForecastMaxMin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="?textAppearanceTitleMedium"
+                    android:textColor="?colorOnSurfaceVariant"
+                    tools:text="Maks 30°  Min 24°" />
+
+                <TextView
+                    android:id="@+id/tvForecastError"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/weather_forecast_load_error"
+                    android:textAppearance="?textAppearanceBodyMedium"
+                    android:textColor="?colorOnSurfaceVariant"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <ProgressBar
+                    android:id="@+id/progressForecastLoading"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+            </LinearLayout>
+
+            <!-- Hourly forecast -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardForecastHourly"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="?colorCard"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                tools:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/weather_hourly_forecast_title"
+                        android:textAppearance="?textAppearanceTitleSmall"
+                        android:textColor="?colorOnSurface" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerForecastHourly"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:paddingHorizontal="12dp"
+                        tools:itemCount="6"
+                        tools:listitem="@layout/item_weather_hourly" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Daily forecast -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardForecastDaily"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="?colorCard"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                tools:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/weather_daily_forecast_title"
+                        android:textAppearance="?textAppearanceTitleSmall"
+                        android:textColor="?colorOnSurface" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerForecastDaily"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:paddingHorizontal="12dp"
+                        tools:itemCount="7"
+                        tools:listitem="@layout/item_weather_daily" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>
