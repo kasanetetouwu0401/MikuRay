@@ -50,14 +50,6 @@ object WeatherHelper {
             else "${Math.round(tempCelsius * 9.0 / 5.0 + 32)}°F"
     }
 
-    /**
-     * Everything from a single Open-Meteo fetch — current conditions plus a
-     * 7-day hourly + daily forecast — cached as one MMKV JSON blob (was 5
-     * separate keys for current-only) so the parsed fields and the timestamp
-     * used for staleness checks can never drift out of sync. Only
-     * [WeatherResult] (emoji + temp) feeds the chip; the forecast bottom
-     * sheet reads the rest of this directly via [getCachedWeatherEntry].
-     */
     data class WeatherCacheEntry(
         val latitude: Double,
         val longitude: Double,
@@ -92,20 +84,20 @@ object WeatherHelper {
     }
 
     private fun emojiForCode(code: Int, isDay: Boolean): String = when (code) {
-        0, 1    -> if (isDay) "\u2600" else moonPhaseEmoji()   // ☀ / moon
-        2       -> "\u26c5"                                      // ⛅
-        3       -> "\u2601"                                      // ☁
-        45, 48  -> "\ud83d\ude36\u200d\ud83c\udf2b"            // 😶‍🌫
+        0, 1    -> if (isDay) "\u2600" else moonPhaseEmoji()
+        2       -> "\u26c5"
+        3       -> "\u2601"
+        45, 48  -> "\ud83d\ude36\u200d\ud83c\udf2b"
         51, 53, 55,
         61, 63,
-        80, 81  -> "\ud83c\udf26"                               // 🌦
+        80, 81  -> "\ud83c\udf26"
         56, 57,
         65, 66, 67,
-        82      -> "\ud83c\udf27"                               // 🌧
+        82      -> "\ud83c\udf27"
         71, 73, 75, 77,
-        85, 86  -> "\ud83c\udf28"                               // 🌨
-        95      -> "\u26a1"                                      // ⚡
-        96, 99  -> "\u26c8"                                     // ⛈
+        85, 86  -> "\ud83c\udf28"
+        95      -> "\u26a1"
+        96, 99  -> "\u26c8"
         else    -> if (isDay) "\u2600" else moonPhaseEmoji()
     }
 
@@ -145,14 +137,8 @@ object WeatherHelper {
         }
     }
 
-    /** Same icon [emojiForCode]+[iconResForEmoji] would give, without exposing the emoji step. */
     fun iconResForCode(code: Int, isDay: Boolean): Int = iconResForEmoji(emojiForCode(code, isDay))
 
-    /**
-     * Text label for a WMO code, bucketed the same way as [emojiForCode] (not
-     * the reference file's slightly coarser buckets) so a code's label and
-     * its icon can never disagree.
-     */
     fun conditionLabelRes(code: Int): Int = when (code) {
         0, 1 -> R.string.weather_condition_clear
         2 -> R.string.weather_condition_partly_cloudy
@@ -217,7 +203,6 @@ object WeatherHelper {
             }
             location to name
         } catch (e: Exception) {
-            LogUtil.w("WeatherHelper", "geocodeCustomLocation failed: ${e.message}")
             null
         }
     }
@@ -300,11 +285,6 @@ object WeatherHelper {
 
     fun getCachedWeatherStale(): WeatherResult? = readCacheEntry()?.toWeatherResult()
 
-    /**
-     * Full cached entry — current conditions, hourly, and daily — for the
-     * forecast bottom sheet. Same staleness rules as [getCachedWeatherStale]
-     * apply if the caller cares; this returns whatever's cached, fresh or not.
-     */
     fun getCachedWeatherEntry(): WeatherCacheEntry? = readCacheEntry()
 
     fun getCacheAgeMs(): Long {
@@ -320,7 +300,6 @@ object WeatherHelper {
             location.latitude, location.longitude, results)
         val moved = results[0]
         if (moved > AppConfig.WEATHER_LOCATION_STALE_METERS) {
-            LogUtil.d("WeatherHelper", "Location moved ${moved.toInt()}m > threshold, cache invalid")
             return false
         }
         return true
@@ -361,7 +340,6 @@ object WeatherHelper {
                 }
 
                 override fun connectFailed(uri: URI?, sa: SocketAddress?, ioe: IOException?) {
-                    LogUtil.w("WeatherHelper", "Local proxy connection failed: ${ioe?.message}")
                 }
             })
             .build()
@@ -379,14 +357,11 @@ object WeatherHelper {
             try {
                 val lastKnown = fusedClient.lastLocation.await()
                 if (lastKnown != null) {
-                    LogUtil.d("WeatherHelper", "Using last known location (Fused)")
                     return lastKnown
                 }
             } catch (e: SecurityException) {
-                LogUtil.w("WeatherHelper", "SecurityException getting last location: ${e.message}")
                 return null
             } catch (e: Exception) {
-                LogUtil.w("WeatherHelper", "Failed to get last location: ${e.message}")
             }
         }
 
@@ -405,14 +380,10 @@ object WeatherHelper {
         return try {
             withTimeoutOrNull(AppConfig.WEATHER_LOCATION_TIMEOUT_MS + 1000L) {
                 fusedClient.getCurrentLocation(locationRequest, null).await()
-            }.also { loc ->
-                if (loc == null) LogUtil.w("WeatherHelper", "Fused location request returned null")
             }
         } catch (e: SecurityException) {
-            LogUtil.w("WeatherHelper", "SecurityException on getCurrentLocation: ${e.message}")
             null
         } catch (e: Exception) {
-            LogUtil.w("WeatherHelper", "getCurrentLocation failed: ${e.message}")
             null
         }
     }
@@ -420,12 +391,6 @@ object WeatherHelper {
     suspend fun fetchCurrentWeather(context: Context, force: Boolean = false): WeatherResult? =
         fetchWeatherEntry(context, force)?.toWeatherResult()
 
-    /**
-     * Same fetch + cache as [fetchCurrentWeather], but returns the full entry
-     * (hourly + daily included) for the forecast bottom sheet. Shares one
-     * cache with the chip, so opening the sheet right after the chip already
-     * refreshed won't trigger a second network call.
-     */
     suspend fun fetchForecast(context: Context, force: Boolean = false): WeatherCacheEntry? =
         fetchWeatherEntry(context, force)
 
@@ -434,7 +399,6 @@ object WeatherHelper {
             val forceRefresh = force || isFirstSessionLaunch
             if (isFirstSessionLaunch) {
                 isFirstSessionLaunch = false
-                LogUtil.d("WeatherHelper", "Force refresh trigger: First session launch")
             }
 
             val location = getEffectiveLocation(context, forceRefresh) ?: return@withContext null
@@ -444,7 +408,6 @@ object WeatherHelper {
                 val cachedFresh = cachedEntry != null &&
                     System.currentTimeMillis() - cachedEntry.fetchedAtEpochMs <= AppConfig.WEATHER_CACHE_TTL_MS
                 if (cachedFresh && isCacheValidForLocation(location)) {
-                    LogUtil.d("WeatherHelper", "Cache still valid for current location, skipping fetch")
                     return@withContext cachedEntry
                 }
             }
@@ -452,21 +415,10 @@ object WeatherHelper {
             try {
                 fetchOpenMeteo(location)?.also { saveCache(it) }
             } catch (e: Exception) {
-                LogUtil.e("WeatherHelper", "fetchWeatherEntry failed: ${e.message}")
                 null
             }
         }
 
-    /**
-     * Pulls current conditions (feels-like, humidity, dew point, wind,
-     * pressure, visibility, cloud cover, gusts) plus a 7-day hourly + daily
-     * forecast in the same request — Open-Meteo supports `current`, `hourly`
-     * and `daily` together in one call. Hourly/daily are trimmed to just the
-     * fields `HourlyCard`/`DailyCard` render (time, temp, code, precip%);
-     * the reference file's wider per-hour field list (apparent temp,
-     * humidity, wind, UV, etc.) belongs to the stat-block screens this port
-     * intentionally leaves out, so it's not fetched.
-     */
     private fun fetchOpenMeteo(location: android.location.Location): WeatherCacheEntry? {
         val url = buildString {
             append("https://api.open-meteo.com/v1/forecast")
