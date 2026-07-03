@@ -3,13 +3,17 @@ package com.v2ray.ang.ui
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.Outline
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.widget.FrameLayout
+import androidx.activity.BackEventCompat
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -40,6 +44,9 @@ abstract class BaseActivity : AppCompatActivity() {
     private var loadingOverlay: FrameLayout? = null
     private lateinit var themeStateManager: ThemeStateManager
 
+    private val predictiveBackRoot: View by lazy { window.decorView.findViewById(android.R.id.content) }
+    private var predictiveBackCornerRadius = 0f
+
     override fun onCreate(savedInstanceState: Bundle?) {
         themeStateManager = ThemeStateManager(this)
         super.onCreate(savedInstanceState)
@@ -55,6 +62,83 @@ abstract class BaseActivity : AppCompatActivity() {
                 }
             },
             true
+        )
+
+        setupPredictiveBack()
+    }
+
+    /**
+     * AOSP-style predictive back: root content scales down, edge-peeks toward the
+     * swipe edge, and gains rounded corners as the gesture progresses (Android 13+).
+     * Uses OnBackPressedCallback so it's a no-op (falls back to normal back) on
+     * devices/OS versions where predictive back isn't available.
+     */
+    private fun setupPredictiveBack() {
+        predictiveBackRoot.clipToOutline = true
+        predictiveBackRoot.outlineProvider = object : ViewOutlineProvider() {
+            override fun getOutline(view: View, outline: Outline) {
+                outline.setRoundRect(0, 0, view.width, view.height, predictiveBackCornerRadius)
+            }
+        }
+
+        val maxCornerRadius = resources.getDimension(R.dimen.predictive_back_max_corner_radius)
+        val maxTranslateX = resources.getDimension(R.dimen.predictive_back_max_translate_x)
+
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackStarted(backEvent: BackEventCompat) {
+                    predictiveBackRoot.pivotY = predictiveBackRoot.height / 2f
+                    predictiveBackRoot.pivotX = if (backEvent.swipeEdge == BackEventCompat.EDGE_LEFT) {
+                        0f
+                    } else {
+                        predictiveBackRoot.width.toFloat()
+                    }
+                }
+
+                override fun handleOnBackProgressed(backEvent: BackEventCompat) {
+                    val progress = backEvent.progress
+
+                    val scale = 1f - (0.1f * progress)
+                    predictiveBackRoot.scaleX = scale
+                    predictiveBackRoot.scaleY = scale
+
+                    predictiveBackRoot.translationX = if (backEvent.swipeEdge == BackEventCompat.EDGE_LEFT) {
+                        maxTranslateX * progress
+                    } else {
+                        -maxTranslateX * progress
+                    }
+
+                    predictiveBackCornerRadius = maxCornerRadius * progress
+                    predictiveBackRoot.invalidateOutline()
+                }
+
+                override fun handleOnBackCancelled() {
+                    predictiveBackRoot.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .translationX(0f)
+                        .setDuration(200L)
+                        .withEndAction {
+                            predictiveBackCornerRadius = 0f
+                            predictiveBackRoot.invalidateOutline()
+                        }
+                        .start()
+                }
+
+                override fun handleOnBackPressed() {
+                    // Gesture completed without progress callbacks (e.g. button back);
+                    // reset any residual transform before finishing.
+                    predictiveBackRoot.scaleX = 1f
+                    predictiveBackRoot.scaleY = 1f
+                    predictiveBackRoot.translationX = 0f
+                    predictiveBackCornerRadius = 0f
+                    predictiveBackRoot.invalidateOutline()
+
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
         )
     }
 
@@ -211,7 +295,7 @@ abstract class BaseActivity : AppCompatActivity() {
         return overlay
     }
 
-    fun showLoading() {
+    protected fun showLoading() {
         runOnUiThread {
             val overlay = getOrCreateLoadingOverlay()
             if (overlay.visibility != View.VISIBLE) {
@@ -220,7 +304,7 @@ abstract class BaseActivity : AppCompatActivity() {
         }
     }
 
-    fun hideLoading() {
+    protected fun hideLoading() {
         runOnUiThread {
             loadingOverlay?.let {
                 if (it.visibility == View.VISIBLE) {
@@ -230,7 +314,7 @@ abstract class BaseActivity : AppCompatActivity() {
         }
     }
 
-    fun isLoadingVisible(): Boolean {
+    protected fun isLoadingVisible(): Boolean {
         return loadingOverlay?.visibility == View.VISIBLE
     }
 

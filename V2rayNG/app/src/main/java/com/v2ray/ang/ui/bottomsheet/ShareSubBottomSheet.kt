@@ -25,11 +25,10 @@ class ShareSubBottomSheet : BaseBottomSheetFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        val host = parentFragment
-        mListener = when {
-            host is OnShareSubOptionClickListener -> host
-            context is OnShareSubOptionClickListener -> context
-            else -> throw RuntimeException("$context must implement OnShareSubOptionClickListener")
+        if (context is OnShareSubOptionClickListener) {
+            mListener = context
+        } else {
+            throw RuntimeException("$context must implement OnShareSubOptionClickListener")
         }
     }
 

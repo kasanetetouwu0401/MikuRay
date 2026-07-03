@@ -1,24 +1,22 @@
 package com.v2ray.ang.helper
 
-import android.content.Context
 import android.content.pm.PackageManager
-import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.v2ray.ang.R
 import com.v2ray.ang.enums.PermissionType
 import com.v2ray.ang.extension.snackbarDefault
 
 /**
- * Helper for requesting permissions. Works with both an Activity and a Fragment via
- * [ActivityResultCaller]; [context] is used for permission checks/resources/snackbars.
+ * Helper for requesting permissions.
  */
-class PermissionHelper(private val caller: ActivityResultCaller, private val context: Context) {
+class PermissionHelper(private val activity: AppCompatActivity) {
     private var permissionCallback: ((Boolean) -> Unit)? = null
 
     private val permissionLauncher: ActivityResultLauncher<Array<String>> =
-        caller.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
+        activity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
             val anyGranted = results.values.any { it }
             permissionCallback?.invoke(anyGranted)
             permissionCallback = null
@@ -33,7 +31,7 @@ class PermissionHelper(private val caller: ActivityResultCaller, private val con
     fun request(permissionType: PermissionType, onGranted: () -> Unit) {
         val permissions = permissionType.getPermissions()
         val alreadyGranted = permissions.any {
-            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(activity, it) == PackageManager.PERMISSION_GRANTED
         }
         if (alreadyGranted) {
             onGranted()
@@ -42,8 +40,8 @@ class PermissionHelper(private val caller: ActivityResultCaller, private val con
                 if (isGranted) {
                     onGranted()
                 } else {
-                    val message = "${context.getString(R.string.toast_permission_denied)}  ${permissionType.getLabel()}"
-                    context.snackbarDefault(message, title = context.getString(R.string.title_alerter_info))
+                    val message = "${activity.getString(R.string.toast_permission_denied)}  ${permissionType.getLabel()}"
+                    activity.snackbarDefault(message, title = activity.getString(R.string.title_alerter_info))
                 }
             }
             permissionLauncher.launch(permissions)

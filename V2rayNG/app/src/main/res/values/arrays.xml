@@ -270,6 +270,7 @@
     
     <string-array name="app_font_entries" translatable="false">
         <item>Default</item>
+        <item>IOS 15</item>
         <item>Google Sans</item>
         <item>Roboto</item>
         <item>Poppins</item>
@@ -289,6 +290,7 @@
 
     <string-array name="app_font_values" translatable="false">
         <item>default</item>
+        <item>ios15</item>
         <item>google</item>
         <item>roboto</item>
         <item>poppins</item>

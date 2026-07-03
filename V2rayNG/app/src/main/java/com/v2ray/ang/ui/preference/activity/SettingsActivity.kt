@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -12,7 +14,10 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityOptionsCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
@@ -24,21 +29,22 @@ import com.bytehamster.lib.preferencesearch.SearchPreferenceActionView
 import com.bytehamster.lib.preferencesearch.SearchPreferenceFragment
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResult
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener
+import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import com.v2ray.ang.databinding.ActivitySettingsSearchBinding
 import com.v2ray.ang.enums.PermissionType
 import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
-import com.v2ray.ang.ui.HelperMikuFragment
+import com.v2ray.ang.ui.HelperBaseActivity
+import com.v2ray.ang.ui.PerAppProxyActivity
 import com.v2ray.ang.util.SearchChipGradientController
 import com.v2ray.ang.util.WeatherHelper
 import com.v2ray.ang.util.showDeleteConfirmDialog
 import kotlinx.coroutines.launch
 
-class SettingsHubFragment : HelperMikuFragment<ActivitySettingsSearchBinding>(), SearchPreferenceResultListener {
+class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
     private lateinit var searchActionView: SearchPreferenceActionView
     private lateinit var btnClearHistory: com.google.android.material.button.MaterialButton
@@ -50,35 +56,45 @@ class SettingsHubFragment : HelperMikuFragment<ActivitySettingsSearchBinding>(),
 
     private var isColdStart = true
 
-    override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?) =
-        ActivitySettingsSearchBinding.inflate(inflater, container, false)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_settings_search)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        val rootView = findViewById<View>(R.id.main_content)
+        ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
+            view.updatePadding(
+                top    = maxOf(systemBars.top,    displayCutout.top),
+                bottom = maxOf(systemBars.bottom, displayCutout.bottom),
+                left   = maxOf(systemBars.left,   displayCutout.left),
+                right  = maxOf(systemBars.right,  displayCutout.right)
+            )
+            insets
+        }
 
-        setupToolbar(binding.toolbar, title = getString(R.string.title_settings))
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_settings))
 
         setupSearchActionView()
         setupWeatherTrafficChip()
-        setupMenu()
 
         if (savedInstanceState == null) {
-            childFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, SettingsListFragment())
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.settings_container, SettingsFragment())
                 .commit()
         }
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                val searchFragment = childFragmentManager.fragments.find {
+                val searchFragment = supportFragmentManager.fragments.find {
                     it.javaClass.name.contains("SearchPreferenceFragment")
                 }
 
                 if (searchFragment != null && searchFragment.isVisible) {
                     searchActionView.cancelSearch()
                 } else {
-                    isEnabled = false
-                    closeThisFragment()
+                    finish()
                 }
             }
         })
@@ -90,9 +106,9 @@ class SettingsHubFragment : HelperMikuFragment<ActivitySettingsSearchBinding>(),
     }
 
     private fun setupSearchActionView() {
-        searchActionView = binding.searchActionView
-        btnClearHistory = binding.btnClearHistory
-        searchActionView.setFragment(this)
+        searchActionView = findViewById(R.id.search_action_view)
+        btnClearHistory = findViewById(R.id.btn_clear_history)
+        searchActionView.setActivity(this)
         searchActionView.getSearchConfiguration().apply {
             setHistoryEnabled(true)
             setBreadcrumbsEnabled(true)
@@ -110,7 +126,7 @@ class SettingsHubFragment : HelperMikuFragment<ActivitySettingsSearchBinding>(),
             btnClearHistory.isVisible = false
         }
 
-        childFragmentManager.registerFragmentLifecycleCallbacks(
+        supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
                 override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
                     if (f is SearchPreferenceFragment) {
@@ -129,14 +145,14 @@ class SettingsHubFragment : HelperMikuFragment<ActivitySettingsSearchBinding>(),
     }
 
     private fun currentSearchFragment(): SearchPreferenceFragment? =
-        childFragmentManager.fragments.filterIsInstance<SearchPreferenceFragment>().firstOrNull()
+        supportFragmentManager.fragments.filterIsInstance<SearchPreferenceFragment>().firstOrNull()
 
     private fun setupWeatherTrafficChip() {
-        layoutWeatherChip = binding.layoutWeatherChip
-        ivWeatherIcon = binding.ivWeatherIcon
-        tvWeatherTemp = binding.tvWeatherTemp
-        ivTotalTrafficIcon = binding.ivTotalTrafficIcon
-        tvTotalTraffic = binding.tvTotalTraffic
+        layoutWeatherChip = findViewById(R.id.layout_weather_chip)
+        ivWeatherIcon = findViewById(R.id.iv_weather_icon)
+        tvWeatherTemp = findViewById(R.id.tv_weather_temp)
+        ivTotalTrafficIcon = findViewById(R.id.iv_total_traffic_icon)
+        tvTotalTraffic = findViewById(R.id.tv_total_traffic)
     }
 
     private fun chipViews() = SearchChipGradientController.ChipViews(
@@ -148,13 +164,13 @@ class SettingsHubFragment : HelperMikuFragment<ActivitySettingsSearchBinding>(),
     )
 
     private fun weatherLocationReady(): Boolean =
-        WeatherHelper.hasCustomLocation() || WeatherHelper.hasLocationPermission(requireContext())
+        WeatherHelper.hasCustomLocation() || WeatherHelper.hasLocationPermission(this)
 
     private fun refreshSearchBarChip() {
         val weatherEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)
         val totalTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP, false)
 
-        SearchChipGradientController.applyState(requireActivity() as androidx.appcompat.app.AppCompatActivity, chipViews())
+        SearchChipGradientController.applyState(this, chipViews())
 
         when {
             weatherEnabled -> {
@@ -230,7 +246,7 @@ class SettingsHubFragment : HelperMikuFragment<ActivitySettingsSearchBinding>(),
         }
 
         lifecycleScope.launch {
-            val weather = WeatherHelper.fetchCurrentWeather(requireContext(), force = true)
+            val weather = WeatherHelper.fetchCurrentWeather(this@SettingsActivity, force = true)
             if (weather == null) {
                 if (cached == null) layoutWeatherChip.isVisible = false
                 return@launch
@@ -257,7 +273,7 @@ class SettingsHubFragment : HelperMikuFragment<ActivitySettingsSearchBinding>(),
         if (fresh != null) return
 
         lifecycleScope.launch {
-            val weather = WeatherHelper.fetchCurrentWeather(requireContext())
+            val weather = WeatherHelper.fetchCurrentWeather(this@SettingsActivity)
             if (weather == null) {
                 if (stale == null) layoutWeatherChip.isVisible = false
                 return@launch
@@ -274,26 +290,28 @@ class SettingsHubFragment : HelperMikuFragment<ActivitySettingsSearchBinding>(),
         layoutWeatherChip.isVisible = true
     }
 
-    private fun setupMenu() {
-        binding.toolbar.inflateMenu(R.menu.menu_settings)
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_reset_settings -> {
-                    showDeleteConfirmDialog(
-                        context = requireContext(),
-                        titleRes = R.string.dialog_reset_settings_title,
-                        messageRes = R.string.dialog_reset_settings_message,
-                        iconRes = R.drawable.ic_restore_24dp,
-                        positiveTextRes = R.string.dialog_reset_settings_confirm,
-                    ) {
-                        SettingsManager.resetAllSettings(requireContext().applicationContext)
-                        requireContext().toastSuccess(R.string.reset_settings_success)
-                        requireActivity().recreate()
-                    }
-                    true
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_settings, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_reset_settings -> {
+                showDeleteConfirmDialog(
+                    context = this,
+                    titleRes = R.string.dialog_reset_settings_title,
+                    messageRes = R.string.dialog_reset_settings_message,
+                    iconRes = R.drawable.ic_restore_24dp,
+                    positiveTextRes = R.string.dialog_reset_settings_confirm,
+                ) {
+                    SettingsManager.resetAllSettings(applicationContext)
+                    toastSuccess(R.string.reset_settings_success)
+                    recreate()
                 }
-                else -> false
+                true
             }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -311,21 +329,21 @@ class SettingsHubFragment : HelperMikuFragment<ActivitySettingsSearchBinding>(),
         }
 
         if (targetActivity != null) {
-            val intent = Intent(requireContext(), targetActivity).apply {
+            val intent = Intent(this, targetActivity).apply {
                 putExtra(AppConfig.EXTRA_HIGHLIGHT_KEY, result.key)
             }
-
+            
             val options = ActivityOptionsCompat.makeCustomAnimation(
-                requireContext(),
+                this,
                 R.anim.fade_in,
                 R.anim.fade_out
             )
-
+            
             startActivity(intent, options.toBundle())
         }
     }
 
-    class SettingsListFragment : PreferenceFragmentCompat() {
+    class SettingsFragment : PreferenceFragmentCompat() {
 
         private val navigateUiSettings by lazy { findPreference<Preference>(AppConfig.PREF_NAVIGATE_UI_SETTINGS) }
         private val navigateVpnSettings by lazy { findPreference<Preference>(AppConfig.PREF_NAVIGATE_VPN_SETTINGS) }
@@ -371,32 +389,32 @@ class SettingsHubFragment : HelperMikuFragment<ActivitySettingsSearchBinding>(),
             addPreferencesFromResource(R.xml.pref_settings)
 
             navigateUiSettings?.setOnPreferenceClickListener {
-                startActivity(Intent(requireContext(), UiSettingsActivity::class.java))
+                startActivity(android.content.Intent(requireContext(), UiSettingsActivity::class.java))
                 true
             }
 
             navigateVpnSettings?.setOnPreferenceClickListener {
-                startActivity(Intent(requireContext(), VpnSettingsActivity::class.java))
+                startActivity(android.content.Intent(requireContext(), VpnSettingsActivity::class.java))
                 true
             }
 
             navigateCoreSettings?.setOnPreferenceClickListener {
-                startActivity(Intent(requireContext(), CoreSettingsActivity::class.java))
+                startActivity(android.content.Intent(requireContext(), CoreSettingsActivity::class.java))
                 true
             }
 
             navigateMuxSettings?.setOnPreferenceClickListener {
-                startActivity(Intent(requireContext(), MuxSettingsActivity::class.java))
+                startActivity(android.content.Intent(requireContext(), MuxSettingsActivity::class.java))
                 true
             }
 
             navigateFragmentSettings?.setOnPreferenceClickListener {
-                startActivity(Intent(requireContext(), FragmentSettingsActivity::class.java))
+                startActivity(android.content.Intent(requireContext(), FragmentSettingsActivity::class.java))
                 true
             }
 
             navigateAdvancedSettings?.setOnPreferenceClickListener {
-                startActivity(Intent(requireContext(), AdvancedSettingsActivity::class.java))
+                startActivity(android.content.Intent(requireContext(), AdvancedSettingsActivity::class.java))
                 true
             }
         }

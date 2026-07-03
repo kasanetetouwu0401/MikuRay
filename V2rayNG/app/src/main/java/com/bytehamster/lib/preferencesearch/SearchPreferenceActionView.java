@@ -4,14 +4,12 @@ import android.content.Context;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import android.util.AttributeSet;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 public class SearchPreferenceActionView extends SearchView {
     protected SearchPreferenceFragment searchFragment;
     protected SearchConfiguration searchConfiguration = new SearchConfiguration();
     protected AppCompatActivity activity;
-    protected Fragment hostFragment;
 
     public SearchPreferenceActionView(Context context) {
         super(context);
@@ -89,9 +87,7 @@ public class SearchPreferenceActionView extends SearchView {
 
     protected void removeFragment() {
         if (searchFragment.isVisible()) {
-            FragmentManager fm = hostFragment != null
-                    ? hostFragment.getChildFragmentManager()
-                    : activity.getSupportFragmentManager();
+            FragmentManager fm = activity.getSupportFragmentManager();
             fm.beginTransaction().remove(searchFragment).commit();
             fm.popBackStack(SearchPreferenceFragment.TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
@@ -100,16 +96,5 @@ public class SearchPreferenceActionView extends SearchView {
     public void setActivity(AppCompatActivity activity) {
         searchConfiguration.setActivity(activity);
         this.activity = activity;
-        this.hostFragment = null;
-    }
-
-    /**
-     * Use instead of {@link #setActivity} when this search action view lives inside a Fragment
-     * (rather than directly in an Activity).
-     */
-    public void setFragment(Fragment fragment) {
-        searchConfiguration.setFragment(fragment);
-        this.hostFragment = fragment;
-        this.activity = null;
     }
 }

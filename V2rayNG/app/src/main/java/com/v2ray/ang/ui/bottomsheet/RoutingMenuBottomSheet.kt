@@ -24,11 +24,10 @@ class RoutingMenuBottomSheet : BaseBottomSheetFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        val host = parentFragment
-        mListener = when {
-            host is OnRoutingMenuOptionClickListener -> host
-            context is OnRoutingMenuOptionClickListener -> context
-            else -> throw RuntimeException("$context must implement OnRoutingMenuOptionClickListener")
+        if (context is OnRoutingMenuOptionClickListener) {
+            mListener = context
+        } else {
+            throw RuntimeException("$context must implement OnRoutingMenuOptionClickListener")
         }
     }
 

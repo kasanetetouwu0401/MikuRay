@@ -26,8 +26,8 @@ abstract class HelperBaseActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        fileChooser = FileChooserHelper(this, this)
-        permissionRequester = PermissionHelper(this, this)
+        fileChooser = FileChooserHelper(this)
+        permissionRequester = PermissionHelper(this)
         qrCodeScanner = QRCodeScannerHelper(this)
     }
 
