@@ -133,8 +133,6 @@ object AppConfig {
     const val PREF_KEEP_AWAKE = "pref_keep_awake"
     const val PREF_SHOW_WEATHER_CHIP = "pref_show_weather_chip"
     const val PREF_WEATHER_CACHE_ENTRY = "pref_weather_cache_entry"
-    const val PREF_WEATHER_CACHE_LAT = "pref_weather_cache_lat"
-    const val PREF_WEATHER_CACHE_LON = "pref_weather_cache_lon"
     const val PREF_WEATHER_USE_CELSIUS = "pref_weather_use_celsius"
     const val PREF_WEATHER_CUSTOM_LOCATION = "pref_weather_custom_location"
     const val PREF_WEATHER_CUSTOM_LOCATION_RAW_CACHED = "pref_weather_custom_location_raw_cached"
