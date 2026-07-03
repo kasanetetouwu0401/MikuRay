@@ -64,13 +64,19 @@ abstract class MikuFragment<VB : ViewBinding> : Fragment() {
     }
 
     /**
-     * Sets up a fragment-local toolbar with a back arrow that pops this fragment off
-     * MainActivity's fragment back stack (instead of the old finish()/ActionBar-home flow).
+     * Sets up a fragment-local toolbar whose navigation icon opens the main menu bottom
+     * sheet again (same as MainActivity's home button), instead of a plain back arrow.
+     * Closing/going back to the server list is still handled by the system back button.
      */
     protected fun setupToolbar(toolbar: MaterialToolbar?, title: CharSequence? = null) {
         toolbar ?: return
-        toolbar.setNavigationIcon(R.drawable.uwu_back_arrow)
-        toolbar.setNavigationOnClickListener { closeThisFragment() }
+        toolbar.setNavigationIcon(R.drawable.ic_navigation_menu)
+        toolbar.setNavigationOnClickListener {
+            com.v2ray.ang.ui.bottomsheet.MainMenuBottomSheet().show(
+                parentFragmentManager,
+                com.v2ray.ang.ui.bottomsheet.MainMenuBottomSheet.TAG
+            )
+        }
         title?.let { toolbar.title = it }
     }
 
