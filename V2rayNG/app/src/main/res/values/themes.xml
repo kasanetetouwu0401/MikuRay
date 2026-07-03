@@ -937,6 +937,14 @@
     	<item name="textAppearanceTitleMedium">@style/TextAppearance.Material3.TitleMedium</item>
         <item name="textAppearanceTitleSmall">@style/TextAppearance.Material3.TitleSmall</item>
     </style>
+    
+    <style name="StyleFontIos15">
+        <item name="android:fontFamily">@font/ios15</item>
+        <item name="fontFamily">@font/ios15</item>
+        <item name="titleTextAppearance">@style/Text.Font.Ios15</item>
+        <item name="materialAlertDialogTheme">@style/DialogFontIos15</item>
+        <item name="alertDialogTheme">@style/DialogFontIos15</item>
+    </style>
 
     <style name="StyleFontGoogle">
         <item name="android:fontFamily">@font/googlesansregular</item>
@@ -1057,6 +1065,11 @@
         <item name="materialAlertDialogTheme">@style/DialogFontEvolve</item>
         <item name="alertDialogTheme">@style/DialogFontEvolve</item>
     </style>
+    
+    <style name="Text.Font.Ios15" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:fontFamily">@font/ios15</item>
+        <item name="fontFamily">@font/ios15</item>
+    </style>
 
     <style name="Text.Font.Google" parent="TextAppearance.Material3.TitleMedium">
         <item name="android:fontFamily">@font/googlesansregular</item>
@@ -1131,6 +1144,13 @@
     <style name="Text.Font.Evolve" parent="TextAppearance.Material3.TitleMedium">
         <item name="android:fontFamily">@font/evolvesans</item>
         <item name="fontFamily">@font/evolvesans</item>
+    </style>
+    
+    <style name="DialogFontIos15" parent="@style/AppThemeAlertDialog">
+        <item name="android:fontFamily">@font/ios15</item>
+        <item name="android:textAppearanceMedium">@style/Text.Font.Ios15</item>
+        <item name="android:textAppearanceSmall">@style/Text.Font.Ios15</item>
+        <item name="android:textAppearance">@style/Text.Font.Ios15</item>
     </style>
 
     <style name="DialogFontGoogle" parent="@style/AppThemeAlertDialog">

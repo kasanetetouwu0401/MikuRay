@@ -313,7 +313,9 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
             hideKeyboard();
 
             try {
-                final SearchPreferenceResultListener callback = (SearchPreferenceResultListener) getActivity();
+                final SearchPreferenceResultListener callback = getParentFragment() instanceof SearchPreferenceResultListener
+                        ? (SearchPreferenceResultListener) getParentFragment()
+                        : (SearchPreferenceResultListener) getActivity();
                 PreferenceItem r = results.get(position);
                 if (r.title != null) {
                     addHistoryEntry(r.title);

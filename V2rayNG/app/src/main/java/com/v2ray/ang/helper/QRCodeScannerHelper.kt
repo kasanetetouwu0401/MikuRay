@@ -1,6 +1,6 @@
 package com.v2ray.ang.helper
 
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.ActivityResultCaller
 import io.github.g00fy2.quickie.QRResult
 import io.github.g00fy2.quickie.ScanCustomCode
 import io.github.g00fy2.quickie.config.BarcodeFormat
@@ -10,12 +10,13 @@ import io.github.g00fy2.quickie.config.ScannerConfig
  * Helper for scanning QR codes.
  *
  * This class encapsulates the logic for launching the QR code scanner directly
- * using the Quickie library and handling the scan result.
+ * using the Quickie library and handling the scan result. Works with both an
+ * Activity and a Fragment via [ActivityResultCaller].
  */
-class QRCodeScannerHelper(private val activity: AppCompatActivity) {
+class QRCodeScannerHelper(private val caller: ActivityResultCaller) {
     private var scanCallback: ((String?) -> Unit)? = null
 
-    private val scanLauncher = activity.registerForActivityResult(ScanCustomCode()) { result ->
+    private val scanLauncher = caller.registerForActivityResult(ScanCustomCode()) { result ->
         if (result is QRResult.QRSuccess) {
             scanCallback?.invoke(result.content.rawValue)
         } else {

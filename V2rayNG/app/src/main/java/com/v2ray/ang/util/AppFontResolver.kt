@@ -8,6 +8,7 @@ import com.v2ray.ang.R
 object AppFontResolver {
 
     private fun fontResId(value: String?): Int = when (value) {
+    	"ios15"        -> R.font.ios15
         "google"        -> R.font.googlesansregular
         "roboto"        -> R.font.robotoregular
         "poppins"       -> R.font.poppinsregular

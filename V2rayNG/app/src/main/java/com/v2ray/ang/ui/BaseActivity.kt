@@ -211,7 +211,7 @@ abstract class BaseActivity : AppCompatActivity() {
         return overlay
     }
 
-    protected fun showLoading() {
+    fun showLoading() {
         runOnUiThread {
             val overlay = getOrCreateLoadingOverlay()
             if (overlay.visibility != View.VISIBLE) {
@@ -220,7 +220,7 @@ abstract class BaseActivity : AppCompatActivity() {
         }
     }
 
-    protected fun hideLoading() {
+    fun hideLoading() {
         runOnUiThread {
             loadingOverlay?.let {
                 if (it.visibility == View.VISIBLE) {
@@ -230,7 +230,7 @@ abstract class BaseActivity : AppCompatActivity() {
         }
     }
 
-    protected fun isLoadingVisible(): Boolean {
+    fun isLoadingVisible(): Boolean {
         return loadingOverlay?.visibility == View.VISIBLE
     }
 

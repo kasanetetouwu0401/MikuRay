@@ -1,6 +1,5 @@
 package com.v2ray.ang.ui
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,9 +13,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import com.v2ray.ang.contracts.GroupServerHost
 import com.v2ray.ang.contracts.MainAdapterListener
-import com.v2ray.ang.core.CoreServiceManager
 import com.v2ray.ang.databinding.FragmentGroupServerBinding
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.enums.EConfigType
@@ -27,14 +24,8 @@ import com.v2ray.ang.viewmodel.MainViewModel
 
 class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
     SwipeRefreshLayout.OnRefreshListener {
-    // Any Activity works here (used for startActivity()/snackbarDefault()).
-    private val ownerActivity: Activity
-        get() = requireActivity()
-
-    // The host must additionally implement GroupServerHost so this fragment can be reused
-    // both by MainActivity and by lightweight overlay hosts (e.g. quick profile switch).
-    private val groupServerHost: GroupServerHost
-        get() = requireActivity() as GroupServerHost
+    private val ownerActivity: MainActivity
+        get() = requireActivity() as MainActivity
     private val mainViewModel: MainViewModel by activityViewModels()
     private lateinit var adapter: MainRecyclerAdapter
     private var itemTouchHelper: ItemTouchHelper? = null
@@ -124,7 +115,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
     private fun removeServerSub(guid: String, position: Int) {
         mainViewModel.removeServer(guid)
         adapter.removeServerSub(guid, position)
-        groupServerHost.refreshGroupTabTitles()
+        ownerActivity.refreshGroupTabTitles()
     }
 
     private fun setSelectServer(guid: String) {
@@ -135,11 +126,8 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
             val toPosition = mainViewModel.getPosition(guid)
             adapter.setSelectServer(fromPosition, toPosition)
 
-            // Check the core directly instead of the ViewModel's isRunning LiveData: hosts
-            // other than MainActivity (e.g. the quick profile switch overlay) may not have
-            // registered for service broadcasts, so the LiveData could be stale/uninitialized.
-            if (CoreServiceManager.isRunning()) {
-                groupServerHost.restartV2Ray()
+            if (mainViewModel.isRunning.value == true) {
+                ownerActivity.restartV2Ray()
             }
         }
     }
@@ -167,15 +155,12 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
         }
 
         override fun onShare(guid: String, profile: ProfileItem, position: Int, more: Boolean) {
-            groupServerHost.showShareBottomSheet(guid, profile.configType.value)
+            ownerActivity.showShareBottomSheet(guid, profile.configType.value)
         }
     }
 
     override fun onRefresh() {
-        // Only meaningful when hosted by the full MainActivity; swipe-to-refresh is disabled
-        // (see binding.refreshLayout.isEnabled = false above) so this is currently unreachable
-        // from lightweight hosts like the quick profile switch overlay anyway.
-        (ownerActivity as? MainActivity)?.importConfigViaSub()
+        ownerActivity.importConfigViaSub()
     }
 
     fun scrollToSelectedServer() {

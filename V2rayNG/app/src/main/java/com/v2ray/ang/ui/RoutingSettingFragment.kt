@@ -3,18 +3,14 @@ package com.v2ray.ang.ui
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
-import android.view.Menu
-import android.view.MenuItem
-import androidx.activity.viewModels
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
-import com.v2ray.ang.util.showBlur
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.contracts.BaseAdapterListener
@@ -24,48 +20,38 @@ import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
-import com.v2ray.ang.ui.UserAssetActivity
 import com.v2ray.ang.ui.bottomsheet.RoutingMenuBottomSheet
 import com.v2ray.ang.util.JsonUtil
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.Utils
+import com.v2ray.ang.util.showBlur
 import com.v2ray.ang.viewmodel.RoutingSettingsViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRoutingMenuOptionClickListener {
-    private val binding by lazy { ActivityRoutingSettingBinding.inflate(layoutInflater) }
-    private val ownerActivity: RoutingSettingActivity
-        get() = this
+class RoutingSettingFragment : HelperMikuFragment<ActivityRoutingSettingBinding>(),
+    RoutingMenuBottomSheet.OnRoutingMenuOptionClickListener {
+
+    override val applyBottomInset: Boolean = true
+
     private val viewModel: RoutingSettingsViewModel by viewModels()
     private lateinit var adapter: RoutingSettingRecyclerAdapter
     private var mItemTouchHelper: ItemTouchHelper? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        
-        setContentView(binding.root)
-        
-        ViewCompat.setOnApplyWindowInsetsListener(binding.mainContent) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
-            view.updatePadding(
-                top    = maxOf(systemBars.top,    displayCutout.top),
-                bottom = maxOf(systemBars.bottom,    displayCutout.bottom),
-                left   = maxOf(systemBars.left,   displayCutout.left),
-                right  = maxOf(systemBars.right,  displayCutout.right)
-            )
-            insets
-        }
+    override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?) =
+        ActivityRoutingSettingBinding.inflate(inflater, container, false)
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
-        setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.routing_settings_title))
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        adapter = RoutingSettingRecyclerAdapter(viewModel, ActivityAdapterListener())
+        setupToolbar(binding.toolbar, title = getString(R.string.routing_settings_title))
+        setupMenu()
+
+        adapter = RoutingSettingRecyclerAdapter(viewModel, FragmentAdapterListener())
 
         binding.recyclerView.setHasFixedSize(true)
-        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
 
         mItemTouchHelper = ItemTouchHelper(SimpleItemTouchHelperCallback(adapter))
@@ -77,19 +63,22 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
         refreshData()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_routing_setting, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
-        R.id.add_rule -> startActivity(Intent(this, RoutingEditActivity::class.java)).let { true }
-        R.id.action_more_menu -> {
-            val bottomSheet = RoutingMenuBottomSheet()
-            bottomSheet.show(supportFragmentManager, RoutingMenuBottomSheet.TAG)
-            true
+    private fun setupMenu() {
+        binding.toolbar.inflateMenu(R.menu.menu_routing_setting)
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.add_rule -> {
+                    startActivity(Intent(requireContext(), RoutingEditActivity::class.java))
+                    true
+                }
+                R.id.action_more_menu -> {
+                    val bottomSheet = RoutingMenuBottomSheet()
+                    bottomSheet.show(childFragmentManager, RoutingMenuBottomSheet.TAG)
+                    true
+                }
+                else -> false
+            }
         }
-        else -> super.onOptionsItemSelected(item)
     }
 
     override fun onRoutingMenuOptionClicked(viewId: Int) {
@@ -98,20 +87,20 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
             R.id.import_rulesets_from_clipboard -> importFromClipboard()
             R.id.import_rulesets_from_qrcode -> importQRcode()
             R.id.export_rulesets_to_clipboard -> export2Clipboard()
-            R.id.menu_user_asset_setting -> startActivity(Intent(this, UserAssetActivity::class.java))
+            R.id.menu_user_asset_setting -> startActivity(Intent(requireContext(), UserAssetActivity::class.java))
         }
     }
 
     private fun importPredefined() {
-        AlertDialog.Builder(this).setItems(resources.getStringArray(R.array.preset_rulesets)) { _, i ->
-            AlertDialog.Builder(this).setMessage(R.string.routing_settings_import_rulesets_tip)
+        AlertDialog.Builder(requireContext()).setItems(resources.getStringArray(R.array.preset_rulesets)) { _, i ->
+            AlertDialog.Builder(requireContext()).setMessage(R.string.routing_settings_import_rulesets_tip)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     try {
                         lifecycleScope.launch(Dispatchers.IO) {
-                            SettingsManager.resetRoutingRulesetsFromPresets(this@RoutingSettingActivity, i)
+                            SettingsManager.resetRoutingRulesetsFromPresets(requireContext(), i)
                             launch(Dispatchers.Main) {
                                 refreshData()
-                                snackbarSuccess(
+                                requireContext().snackbarSuccess(
                                     getString(R.string.routing_settings_import_predefined_rulesets),
                                     title = getString(R.string.title_alerter_success)
                                 )
@@ -129,13 +118,13 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
     }
 
     private fun importFromClipboard() {
-        AlertDialog.Builder(this).setMessage(R.string.routing_settings_import_rulesets_tip)
+        AlertDialog.Builder(requireContext()).setMessage(R.string.routing_settings_import_rulesets_tip)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 val clipboard = try {
-                    Utils.getClipboard(this)
+                    Utils.getClipboard(requireContext())
                 } catch (e: Exception) {
                     LogUtil.e(AppConfig.TAG, "Failed to get clipboard content", e)
-                    snackbarError(
+                    requireContext().snackbarError(
                         getString(R.string.routing_settings_import_rulesets_from_clipboard),
                         title = getString(R.string.title_alerter_error)
                     )
@@ -146,12 +135,12 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
                     withContext(Dispatchers.Main) {
                         if (result) {
                             refreshData()
-                            snackbarSuccess(
+                            requireContext().snackbarSuccess(
                                 getString(R.string.routing_settings_import_rulesets_from_clipboard),
                                 title = getString(R.string.title_alerter_success)
                             )
                         } else {
-                            snackbarError(
+                            requireContext().snackbarError(
                                 getString(R.string.routing_settings_import_rulesets_from_clipboard),
                                 title = getString(R.string.title_alerter_error)
                             )
@@ -177,34 +166,33 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
     private fun export2Clipboard() {
         val rulesetList = MmkvManager.decodeRoutingRulesets()
         if (rulesetList.isNullOrEmpty()) {
-            snackbarError(
+            requireContext().snackbarError(
                 getString(R.string.routing_settings_export_rulesets_to_clipboard),
                 title = getString(R.string.title_alerter_error)
             )
         } else {
-            Utils.setClipboard(this, JsonUtil.toJson(rulesetList))
-            snackbarSuccess(
+            Utils.setClipboard(requireContext(), JsonUtil.toJson(rulesetList))
+            requireContext().snackbarSuccess(
                 getString(R.string.routing_settings_export_rulesets_to_clipboard),
                 title = getString(R.string.title_alerter_success)
             )
         }
     }
 
-
     private fun importRulesetsFromQRcode(qrcode: String?): Boolean {
-        AlertDialog.Builder(this).setMessage(R.string.routing_settings_import_rulesets_tip)
+        AlertDialog.Builder(requireContext()).setMessage(R.string.routing_settings_import_rulesets_tip)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 lifecycleScope.launch(Dispatchers.IO) {
                     val result = SettingsManager.resetRoutingRulesets(qrcode)
                     withContext(Dispatchers.Main) {
                         if (result) {
                             refreshData()
-                            snackbarSuccess(
+                            requireContext().snackbarSuccess(
                                 getString(R.string.routing_settings_import_rulesets_from_qrcode),
                                 title = getString(R.string.title_alerter_success)
                             )
                         } else {
-                            snackbarError(
+                            requireContext().snackbarError(
                                 getString(R.string.routing_settings_import_rulesets_from_qrcode),
                                 title = getString(R.string.title_alerter_error)
                             )
@@ -225,10 +213,10 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
         adapter.notifyDataSetChanged()
     }
 
-    private inner class ActivityAdapterListener : BaseAdapterListener {
+    private inner class FragmentAdapterListener : BaseAdapterListener {
         override fun onEdit(guid: String, position: Int) {
             startActivity(
-                Intent(ownerActivity, RoutingEditActivity::class.java)
+                Intent(requireContext(), RoutingEditActivity::class.java)
                     .putExtra("position", position)
             )
         }

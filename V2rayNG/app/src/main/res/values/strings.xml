@@ -13,17 +13,11 @@
 
     <!-- Notifications -->
     <string name="notification_action_stop_v2ray">Stop</string>
-    <string name="notification_action_switch_profile">Switch</string>
     <string name="notification_connect_time">timer : %s</string>
     <string name="notification_data_usage" formatted="false">total : ↑ %s  ↓ %s</string>
     <string name="toast_permission_denied">Unable to obtain the permission</string>
     <string name="toast_permission_denied_notification">Unable to obtain the notification permission</string>
     <string name="notification_action_more">Click for more</string>
-
-    <!-- Quick profile switch (from notification) -->
-    <string name="title_switch_profile_sheet">Switch Profile</string>
-    <string name="subtitle_switch_profile_sheet">Pick a server to connect to, without opening the app</string>
-    <string name="toast_share_unavailable_quick_switch">Open the app to share this config</string>
     <string name="toast_services_start">Start Services</string>
     <string name="toast_services_stop">Stop Services</string>
     <string name="toast_services_success">Start Services Success</string>

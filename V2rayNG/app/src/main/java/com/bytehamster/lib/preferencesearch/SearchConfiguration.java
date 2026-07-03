@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.XmlRes;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import com.bytehamster.lib.preferencesearch.ui.RevealAnimationSetting;
@@ -40,6 +42,7 @@ public class SearchConfiguration {
     private boolean breadcrumbsEnabled = false;
     private boolean searchBarEnabled = true;
     private AppCompatActivity activity;
+    private Fragment hostFragment;
     private int containerResId = android.R.id.content;
     private RevealAnimationSetting revealAnimationSetting = null;
     private String textClearHistory;
@@ -57,18 +60,34 @@ public class SearchConfiguration {
     }
 
     public SearchPreferenceFragment showSearchFragment() {
-        if (activity == null) {
-            throw new IllegalStateException("setActivity() not called");
+        FragmentManager fm = resolveFragmentManager();
+        if (fm == null) {
+            throw new IllegalStateException("setActivity()/setFragment() not called");
         }
 
         Bundle arguments = this.toBundle();
         SearchPreferenceFragment fragment = new SearchPreferenceFragment();
         fragment.setArguments(arguments);
-        activity.getSupportFragmentManager().beginTransaction()
+        fm.beginTransaction()
                 .add(containerResId, fragment, SearchPreferenceFragment.TAG)
                 .addToBackStack(SearchPreferenceFragment.TAG)
                 .commit();
         return fragment;
+    }
+
+    /**
+     * The FragmentManager that owns the search fragment/container: the host fragment's
+     * childFragmentManager when hosted inside a fragment (see {@link #setFragment}),
+     * otherwise the hosting activity's supportFragmentManager.
+     */
+    FragmentManager resolveFragmentManager() {
+        if (hostFragment != null) {
+            return hostFragment.getChildFragmentManager();
+        }
+        if (activity != null) {
+            return activity.getSupportFragmentManager();
+        }
+        return null;
     }
 
     private Bundle toBundle() {
@@ -107,8 +126,23 @@ public class SearchConfiguration {
 
     public void setActivity(@NonNull AppCompatActivity activity) {
         this.activity = activity;
+        this.hostFragment = null;
         if (!(activity instanceof SearchPreferenceResultListener)) {
             throw new IllegalArgumentException("Activity must implement SearchPreferenceResultListener");
+        }
+    }
+
+    /**
+     * Use this instead of {@link #setActivity} when the search action view is hosted inside a
+     * Fragment (e.g. a top-level destination swapped into a fragment container) rather than
+     * directly in an Activity. The search fragment/results are then scoped to the host
+     * fragment's own childFragmentManager instead of the Activity's.
+     */
+    public void setFragment(@NonNull Fragment fragment) {
+        this.hostFragment = fragment;
+        this.activity = null;
+        if (!(fragment instanceof SearchPreferenceResultListener)) {
+            throw new IllegalArgumentException("Fragment must implement SearchPreferenceResultListener");
         }
     }
 
@@ -258,7 +292,10 @@ public class SearchConfiguration {
 
         public SearchIndexItem addBreadcrumb(@StringRes int breadcrumb) {
             assertNotParcel();
-            return addBreadcrumb(searchConfiguration.activity.getString(breadcrumb));
+            String resolved = searchConfiguration.hostFragment != null
+                    ? searchConfiguration.hostFragment.getString(breadcrumb)
+                    : searchConfiguration.activity.getString(breadcrumb);
+            return addBreadcrumb(resolved);
         }
 
         public SearchIndexItem addBreadcrumb(String breadcrumb) {

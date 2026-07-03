@@ -25,7 +25,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import com.v2ray.ang.contracts.GroupServerHost
 import com.v2ray.ang.core.CoreServiceManager
 import com.v2ray.ang.databinding.ActivityMainBinding
 import com.v2ray.ang.databinding.ItemQrcodeBinding
@@ -46,7 +45,7 @@ import com.v2ray.ang.ui.bottomsheet.AddConfigBottomSheet
 import com.v2ray.ang.ui.bottomsheet.MainMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.MoreMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.ShareConfigBottomSheet
-import com.v2ray.ang.ui.preference.activity.SettingsActivity
+import com.v2ray.ang.ui.preference.activity.SettingsHubFragment
 import com.v2ray.ang.util.BlurBottomStatusController
 import com.v2ray.ang.util.SearchChipGradientController
 import com.v2ray.ang.util.getColorAttr
@@ -71,8 +70,7 @@ class MainActivity : HelperBaseActivity(),
     MainMenuBottomSheet.OnOptionClickListener,
     AddConfigBottomSheet.OnAddConfigClickListener,
     MoreMenuBottomSheet.OnMoreOptionClickListener,
-    ShareConfigBottomSheet.OnShareOptionClickListener,
-    GroupServerHost {
+    ShareConfigBottomSheet.OnShareOptionClickListener {
 
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
@@ -130,6 +128,7 @@ class MainActivity : HelperBaseActivity(),
         setupGroupTab()
         setupViewModel()
         setupBannerHome()
+        setupMikuFragmentContainer()
         BlurBottomStatusController.applyState(this, binding)
 
         SubscriptionUpdater.sync()
@@ -155,6 +154,47 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private var isColdStart = true
+
+    // region Fragment-hosted destinations (Sub setting, Routing setting, Settings, Logcat, Backup, About)
+    // These used to be standalone Activities launched from MainMenuBottomSheet; they are now
+    // fragments swapped into `fragment_holder`, mirroring MikuBox's ToolbarFragment pattern.
+    private val mikuFragmentBackCallback = object : androidx.activity.OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            supportFragmentManager.popBackStack()
+        }
+    }
+
+    private fun setupMikuFragmentContainer() {
+        onBackPressedDispatcher.addCallback(this, mikuFragmentBackCallback)
+        supportFragmentManager.addOnBackStackChangedListener {
+            val count = supportFragmentManager.backStackEntryCount
+            binding.fragmentHolder.isVisible = count > 0
+            mikuFragmentBackCallback.isEnabled = count > 0
+            if (count == 0) {
+                if (SettingsChangeManager.consumeRestartService() && mainViewModel.isRunning.value == true) {
+                    restartV2Ray()
+                }
+                if (SettingsChangeManager.consumeSetupGroupTab()) {
+                    setupGroupTab()
+                }
+            }
+        }
+    }
+
+    fun displayMikuFragment(fragment: androidx.fragment.app.Fragment) {
+        supportFragmentManager.beginTransaction()
+            .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
+            .replace(R.id.fragment_holder, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    fun closeMikuFragment() {
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            supportFragmentManager.popBackStack()
+        }
+    }
+    // endregion
 
     override fun onResume() {
         super.onResume()
@@ -475,12 +515,12 @@ class MainActivity : HelperBaseActivity(),
 
     override fun onOptionClicked(viewId: Int) {
         when (viewId) {
-            R.id.menu_sub_setting -> requestActivityLauncher.launch(Intent(this, SubSettingActivity::class.java))
-            R.id.menu_routing_setting -> requestActivityLauncher.launch(Intent(this, RoutingSettingActivity::class.java))
-            R.id.menu_settings -> requestActivityLauncher.launch(Intent(this, SettingsActivity::class.java))
-            R.id.menu_logcat -> startActivity(Intent(this, LogcatActivity::class.java))
-            R.id.menu_backup_restore -> requestActivityLauncher.launch(Intent(this, BackupActivity::class.java))
-            R.id.menu_about -> startActivity(Intent(this, AboutActivity::class.java))
+            R.id.menu_sub_setting -> displayMikuFragment(SubSettingFragment())
+            R.id.menu_routing_setting -> displayMikuFragment(RoutingSettingFragment())
+            R.id.menu_settings -> displayMikuFragment(SettingsHubFragment())
+            R.id.menu_logcat -> displayMikuFragment(LogcatFragment())
+            R.id.menu_backup_restore -> displayMikuFragment(BackupFragment())
+            R.id.menu_about -> displayMikuFragment(AboutFragment())
         }
     }
 
@@ -695,7 +735,7 @@ class MainActivity : HelperBaseActivity(),
         (binding.tabGroup.parent as? View)?.isVisible = hasAnyGroup
     }
 
-    override fun refreshGroupTabTitles(refreshAll: Boolean) {
+    fun refreshGroupTabTitles(refreshAll: Boolean = false) {
         refreshTabBadges()
     }
 
@@ -743,7 +783,7 @@ class MainActivity : HelperBaseActivity(),
         CoreServiceManager.startVService(this)
     }
 
-    override fun restartV2Ray() {
+    fun restartV2Ray() {
         if (mainViewModel.isRunning.value == true) {
             CoreServiceManager.stopVService(this)
         }
@@ -1053,7 +1093,7 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
-    override fun showShareBottomSheet(guid: String, configType: Int) {
+    fun showShareBottomSheet(guid: String, configType: Int) {
         ShareConfigBottomSheet.newInstance(guid, configType).show(supportFragmentManager, ShareConfigBottomSheet.TAG)
     }
 

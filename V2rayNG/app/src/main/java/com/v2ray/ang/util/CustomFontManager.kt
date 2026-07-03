@@ -40,7 +40,6 @@ object CustomFontManager {
                 originalSystemFontMap = HashMap(map)
             }
         } catch (e: Exception) {
-            LogUtil.d(TAG, "sSystemFontMap backup unavailable: ${e.message}")
         }
     }
 
@@ -73,7 +72,6 @@ object CustomFontManager {
             cachedPath = destFile.absolutePath
             destFile
         } catch (e: Exception) {
-            LogUtil.w(TAG, "Failed to save custom font: ${e.message}")
             null
         }
     }
@@ -104,7 +102,6 @@ object CustomFontManager {
             cachedPath = destFile.absolutePath
             destFile
         } catch (e: Exception) {
-            LogUtil.w(TAG, "Failed to restore custom font: ${e.message}")
             null
         }
     }
@@ -137,7 +134,6 @@ object CustomFontManager {
             cachedPath = file.absolutePath
             typeface
         } catch (e: Exception) {
-            LogUtil.w(TAG, "Failed to load custom font: ${e.message}")
             null
         }
     }
@@ -162,7 +158,6 @@ object CustomFontManager {
                 field.isAccessible = true
                 field.set(null, originalMap)
             } catch (e: Exception) {
-                LogUtil.w(TAG, "Failed to restore sSystemFontMap: ${e.message}")
             }
         }
     }
@@ -173,7 +168,6 @@ object CustomFontManager {
             field.isAccessible = true
             field.set(null, typeface)
         } catch (e: Exception) {
-            LogUtil.w(TAG, "Failed to override Typeface.$fieldName: ${e.message}")
         }
     }
 
@@ -191,7 +185,6 @@ object CustomFontManager {
             ).forEach { mutableMap[it] = typeface }
             field.set(null, mutableMap)
         } catch (e: Exception) {
-            LogUtil.d(TAG, "sSystemFontMap override unavailable: ${e.message}")
         }
     }
 }

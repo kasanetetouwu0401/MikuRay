@@ -1,11 +1,13 @@
 package com.v2ray.ang.helper
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.extension.snackbarDefault
@@ -14,15 +16,18 @@ import com.v2ray.ang.util.LogUtil
 /**
  * Helper for choosing and creating files using Android Storage Access Framework.
  * Supports both file selection (ACTION_GET_CONTENT) and file creation (CreateDocument).
+ *
+ * [caller] registers the activity-result contracts (works for both an Activity and a Fragment),
+ * [context] is used for resources/snackbars, since [caller] alone isn't guaranteed to be a Context.
  */
-class FileChooserHelper(private val activity: AppCompatActivity) {
+class FileChooserHelper(private val caller: ActivityResultCaller, private val context: Context) {
     private var fileChooserCallback: ((Uri?) -> Unit)? = null
     private var documentCreateCallback: ((Uri?) -> Unit)? = null
 
     private val fileChooserLauncher: ActivityResultLauncher<Intent> =
-        activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        caller.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val uri = result.data?.data
-            if (result.resultCode == AppCompatActivity.RESULT_OK && uri != null) {
+            if (result.resultCode == Activity.RESULT_OK && uri != null) {
                 fileChooserCallback?.invoke(uri)
             } else {
                 fileChooserCallback?.invoke(null)
@@ -31,7 +36,7 @@ class FileChooserHelper(private val activity: AppCompatActivity) {
         }
 
     private val documentCreateLauncher: ActivityResultLauncher<String> =
-        activity.registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
+        caller.registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
             documentCreateCallback?.invoke(uri)
             documentCreateCallback = null
         }
@@ -55,11 +60,11 @@ class FileChooserHelper(private val activity: AppCompatActivity) {
 
         try {
             fileChooserLauncher.launch(
-                Intent.createChooser(intent, activity.getString(R.string.title_file_chooser))
+                Intent.createChooser(intent, context.getString(R.string.title_file_chooser))
             )
         } catch (ex: ActivityNotFoundException) {
             LogUtil.e(AppConfig.TAG, "File chooser activity not found", ex)
-            activity.snackbarDefault(R.string.toast_require_file_manager, title = activity.getString(R.string.title_alerter_info))
+            context.snackbarDefault(R.string.toast_require_file_manager, title = context.getString(R.string.title_alerter_info))
             fileChooserCallback?.invoke(null)
             fileChooserCallback = null
         }
@@ -80,7 +85,7 @@ class FileChooserHelper(private val activity: AppCompatActivity) {
             documentCreateLauncher.launch(fileName)
         } catch (ex: ActivityNotFoundException) {
             LogUtil.e(AppConfig.TAG, "Document creator activity not found", ex)
-            activity.snackbarDefault(R.string.toast_require_file_manager, title = activity.getString(R.string.title_alerter_info))
+            context.snackbarDefault(R.string.toast_require_file_manager, title = context.getString(R.string.title_alerter_info))
             documentCreateCallback?.invoke(null)
             documentCreateCallback = null
         }

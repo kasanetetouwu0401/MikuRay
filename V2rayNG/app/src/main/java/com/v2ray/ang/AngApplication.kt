@@ -5,7 +5,6 @@ import android.app.Application
 import android.content.Context
 import android.graphics.Typeface
 import android.os.Bundle
-import android.util.Log
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.tencent.mmkv.MMKV
@@ -58,9 +57,9 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
 
         val useCustomFont = MmkvManager.decodeSettingsBool(AppConfig.PREF_APP_FONT_USE_CUSTOM, false)
         if (useCustomFont) {
-            com.v2ray.ang.util.CustomFontManager.applyGlobalOverride(activity)
+            CustomFontManager.applyGlobalOverride(activity)
         } else {
-            com.v2ray.ang.util.CustomFontManager.restoreGlobalOverride()
+            CustomFontManager.restoreGlobalOverride()
             val fontName = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT)
             val fontOverlayId = getFontStyleResId(fontName)
             if (fontOverlayId != 0) {
@@ -83,12 +82,12 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
                 tasks[0].setExcludeFromRecents(hide)
             }
         } catch (e: Exception) {
-            Log.w("AngApplication", "Failed to set excludeFromRecents: ${e.message}")
         }
     }
 
     private fun getFontStyleResId(fontName: String?): Int {
         return when (fontName) {
+        	"ios15"       -> R.style.StyleFontIos15
             "google"       -> R.style.StyleFontGoogle
             "roboto"       -> R.style.StyleFontRoboto
             "poppins"      -> R.style.StyleFontPoppins

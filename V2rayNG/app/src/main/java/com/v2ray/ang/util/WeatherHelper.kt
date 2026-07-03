@@ -156,7 +156,6 @@ object WeatherHelper {
             }
             location to name
         } catch (e: Exception) {
-            LogUtil.w("WeatherHelper", "geocodeCustomLocation failed: ${e.message}")
             null
         }
     }
@@ -259,7 +258,6 @@ object WeatherHelper {
             location.latitude, location.longitude, results)
         val moved = results[0]
         if (moved > AppConfig.WEATHER_LOCATION_STALE_METERS) {
-            LogUtil.d("WeatherHelper", "Location moved ${moved.toInt()}m > threshold, cache invalid")
             return false
         }
         return true
@@ -311,7 +309,6 @@ object WeatherHelper {
                 }
 
                 override fun connectFailed(uri: URI?, sa: SocketAddress?, ioe: IOException?) {
-                    LogUtil.w("WeatherHelper", "Local proxy connection failed: ${ioe?.message}")
                 }
             })
             .build()
@@ -329,14 +326,11 @@ object WeatherHelper {
             try {
                 val lastKnown = fusedClient.lastLocation.await()
                 if (lastKnown != null) {
-                    LogUtil.d("WeatherHelper", "Using last known location (Fused)")
                     return lastKnown
                 }
             } catch (e: SecurityException) {
-                LogUtil.w("WeatherHelper", "SecurityException getting last location: ${e.message}")
                 return null
             } catch (e: Exception) {
-                LogUtil.w("WeatherHelper", "Failed to get last location: ${e.message}")
             }
         }
 
@@ -355,14 +349,10 @@ object WeatherHelper {
         return try {
             withTimeoutOrNull(AppConfig.WEATHER_LOCATION_TIMEOUT_MS + 1000L) {
                 fusedClient.getCurrentLocation(locationRequest, null).await()
-            }.also { loc ->
-                if (loc == null) LogUtil.w("WeatherHelper", "Fused location request returned null")
             }
         } catch (e: SecurityException) {
-            LogUtil.w("WeatherHelper", "SecurityException on getCurrentLocation: ${e.message}")
             null
         } catch (e: Exception) {
-            LogUtil.w("WeatherHelper", "getCurrentLocation failed: ${e.message}")
             null
         }
     }
@@ -372,7 +362,6 @@ object WeatherHelper {
             val forceRefresh = force || isFirstSessionLaunch
             if (isFirstSessionLaunch) {
                 isFirstSessionLaunch = false
-                LogUtil.d("WeatherHelper", "Force refresh trigger: First session launch")
             }
 
             val location = getEffectiveLocation(context, forceRefresh) ?: return@withContext null
@@ -380,7 +369,6 @@ object WeatherHelper {
             if (!forceRefresh) {
                 val cached = getCachedWeather()
                 if (cached != null && isCacheValidForLocation(location)) {
-                    LogUtil.d("WeatherHelper", "Cache still valid for current location, skipping fetch")
                     return@withContext cached
                 }
             }
@@ -388,7 +376,6 @@ object WeatherHelper {
             try {
                 fetchOpenMeteo(location)?.also { saveCache(it, location) }
             } catch (e: Exception) {
-                LogUtil.e("WeatherHelper", "fetchCurrentWeather failed: ${e.message}")
                 null
             }
         }

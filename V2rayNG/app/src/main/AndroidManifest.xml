@@ -108,9 +108,6 @@
             android:exported="false"
             android:windowSoftInputMode="stateUnchanged" />
         <activity
-            android:name=".ui.preference.activity.SettingsActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.preference.activity.UiSettingsActivity"
             android:exported="false" />
         <activity
@@ -138,16 +135,7 @@
             android:name=".ui.AppPickerActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.LogcatActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.RoutingSettingActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.RoutingEditActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.SubSettingActivity"
             android:exported="false" />
         <activity
             android:name=".ui.UserAssetActivity"
@@ -182,14 +170,6 @@
             android:theme="@style/AppThemeDayNight.NoActionBar.Translucent" />
 
         <activity
-            android:name=".ui.QuickProfileSwitchActivity"
-            android:excludeFromRecents="true"
-            android:exported="false"
-            android:launchMode="singleTask"
-            android:taskAffinity=""
-            android:theme="@style/AppThemeDayNight.NoActionBar.Translucent" />
-
-        <activity
             android:name=".ui.UrlSchemeActivity"
             android:exported="true">
             <intent-filter>
@@ -210,12 +190,6 @@
         </activity>
         <activity
             android:name=".ui.CheckUpdateActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.BackupActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.AboutActivity"
             android:exported="false" />
 
         <service
