@@ -1130,7 +1130,11 @@ class MainActivity : HelperBaseActivity(),
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_BUTTON_B) {
-            moveTaskToBack(false)
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                onBackPressedDispatcher.onBackPressed()
+            } else {
+                moveTaskToBack(false)
+            }
             return true
         }
         return super.onKeyDown(keyCode, event)
