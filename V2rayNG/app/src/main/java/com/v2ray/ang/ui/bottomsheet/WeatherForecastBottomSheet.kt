@@ -41,7 +41,6 @@ data class HourlyForecastItem(
     val isNow: Boolean
 )
 
-/** One rendered pill in the 7-day strip. */
 data class DailyForecastItem(
     val weekdayLabel: String,
     val maxTempCelsius: Int,
@@ -50,13 +49,6 @@ data class DailyForecastItem(
     val iconRes: Int
 )
 
-/**
- * Forecast detail sheet opened by tapping the weather chip. Current + hourly
- * + daily all come from the same [WeatherHelper] cache entry the chip itself
- * uses, so this shows cached data the instant it opens, then refreshes in
- * the background — [onWeatherUpdated] lets the caller (chip) sync too if the
- * refresh changed anything.
- */
 class WeatherForecastBottomSheet(
     private val context: Context,
     private val onWeatherUpdated: ((WeatherHelper.WeatherResult) -> Unit)? = null
@@ -175,15 +167,6 @@ class WeatherForecastBottomSheet(
         dialog.show()
     }
 
-    /**
-     * Next ~24h starting from the current hour. "Current hour" is found by
-     * comparing the device's own local wall-clock string against Open-Meteo's
-     * local (`timezone=auto`) hourly strings — no UTC-offset math needed
-     * since both the parse and the format below consistently use the
-     * device's default timezone, so the wall-clock digits just pass through.
-     * This is exact when checking nearby/device-location weather and only
-     * approximate for a custom location in a very different timezone.
-     */
     private fun buildHourlyItems(entry: WeatherHelper.WeatherCacheEntry): List<HourlyForecastItem> {
         val times = entry.hourlyTimeIso
         if (times.isEmpty()) return emptyList()
