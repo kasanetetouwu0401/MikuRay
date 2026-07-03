@@ -115,7 +115,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onContentChanged() {
         super.onContentChanged()
-        
+
         findViewById<View>(android.R.id.content)?.apply {
             clipToOutline = true
             outlineProvider = object : ViewOutlineProvider() {
