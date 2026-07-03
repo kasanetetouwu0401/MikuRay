@@ -4,7 +4,6 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowActivityTransitions">true</item>        
         <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.App.SmallComponent</item>
         <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.App.MediumComponent</item>
         <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.App.LargeComponent</item>
@@ -851,12 +850,12 @@
         <item name="enableEdgeToEdge">true</item>
     </style>
 
-    <style name="AppThemeBottomSheetStyle" parent="@style/Widget.Material3.BottomSheet">
+    <style name="AppThemeBottomSheetStyle" parent="@style/Widget.Material3.BottomSheet.Modal">
         <item name="backgroundTint">?attr/colorBg</item>
-        <item name="shapeAppearance">@style/AppThemeBottomSheetShape</item>
+        <item name="shapeAppearanceOverlay">@style/AppThemeBottomSheetShape</item>
     </style>
 
-    <style name="AppThemeBottomSheetShape" parent="@style/ShapeAppearance.Material3.LargeComponent">
+    <style name="AppThemeBottomSheetShape" parent="@style/ShapeAppearanceOverlay.Material3.Corner.Top">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopLeft">35dp</item>
         <item name="cornerSizeTopRight">35dp</item>
@@ -866,7 +865,7 @@
 
     <!-- Alert Dialog -->
     <style name="AppThemeAlertDialog" parent="@style/ThemeOverlay.Material3Expressive.MaterialAlertDialog">
-        <item name="shapeAppearance">@style/AppThemeAlertDialogShape</item>
+        <item name="shapeAppearanceOverlay">@style/AppThemeAlertDialogShape</item>
         <item name="backgroundTint">?attr/colorSurfaceContainer</item>
         <item name="colorSurface">?attr/colorSurfaceContainer</item>
         <item name="android:backgroundTint">?attr/colorSurfaceContainer</item>
