@@ -844,18 +844,21 @@
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowAnimationStyle">@style/Animation.Material3.BottomSheetDialog</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">?attr/colorBg</item>
         <item name="android:windowElevation">0.0dip</item>
         <item name="bottomSheetStyle">@style/AppThemeBottomSheetStyle</item>
         <item name="enableEdgeToEdge">true</item>
+        <item name="paddingBottomSystemWindowInsets">true</item>
+        <item name="paddingLeftSystemWindowInsets">true</item>
+        <item name="paddingRightSystemWindowInsets">true</item>
     </style>
 
     <style name="AppThemeBottomSheetStyle" parent="@style/Widget.Material3.BottomSheet.Modal">
         <item name="backgroundTint">?attr/colorBg</item>
-        <item name="shapeAppearanceOverlay">@style/AppThemeBottomSheetShape</item>
+        <item name="shapeAppearance">@style/AppThemeBottomSheetShape</item>
     </style>
 
-    <style name="AppThemeBottomSheetShape" parent="@style/ShapeAppearanceOverlay.Material3.Corner.Top">
+    <style name="AppThemeBottomSheetShape" parent="@style/ShapeAppearance.Material3.LargeComponent">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopLeft">35dp</item>
         <item name="cornerSizeTopRight">35dp</item>
@@ -865,7 +868,7 @@
 
     <!-- Alert Dialog -->
     <style name="AppThemeAlertDialog" parent="@style/ThemeOverlay.Material3Expressive.MaterialAlertDialog">
-        <item name="shapeAppearanceOverlay">@style/AppThemeAlertDialogShape</item>
+        <item name="shapeAppearance">@style/AppThemeAlertDialogShape</item>
         <item name="backgroundTint">?attr/colorSurfaceContainer</item>
         <item name="colorSurface">?attr/colorSurfaceContainer</item>
         <item name="android:backgroundTint">?attr/colorSurfaceContainer</item>
