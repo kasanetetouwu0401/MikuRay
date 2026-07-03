@@ -1,7 +1,6 @@
 package com.v2ray.ang.ui
 
 import android.content.Context
-import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
@@ -10,11 +9,9 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -27,7 +24,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.transition.platform.MaterialSharedAxis
 import com.v2ray.ang.AngApplication
 import com.v2ray.ang.R
 import com.v2ray.ang.AppConfig
@@ -45,13 +41,6 @@ abstract class BaseActivity : AppCompatActivity() {
     private lateinit var themeStateManager: ThemeStateManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-        
-        window.exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, true)
-        window.reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, false)
-        window.enterTransition = MaterialSharedAxis(MaterialSharedAxis.X, true)
-        window.returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, false)
-
         themeStateManager = ThemeStateManager(this)
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -67,20 +56,6 @@ abstract class BaseActivity : AppCompatActivity() {
             },
             true
         )
-    }
-
-    override fun startActivity(intent: Intent) {
-        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle()
-        super.startActivity(intent, options)
-    }
-
-    override fun startActivity(intent: Intent, options: Bundle?) {
-        val finalOptions = options ?: ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle()
-        super.startActivity(intent, finalOptions)
-    }
-
-    override fun finish() {
-        super.finishAfterTransition()
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
