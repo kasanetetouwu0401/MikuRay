@@ -853,7 +853,7 @@
         <item name="paddingRightSystemWindowInsets">true</item>
     </style>
 
-    <style name="AppThemeBottomSheetStyle" parent="@style/Widget.Material3.BottomSheet.Modal">
+    <style name="AppThemeBottomSheetStyle" parent="@style/Widget.Material3.BottomSheet">
         <item name="backgroundTint">?attr/colorBg</item>
         <item name="shapeAppearance">@style/AppThemeBottomSheetShape</item>
     </style>
