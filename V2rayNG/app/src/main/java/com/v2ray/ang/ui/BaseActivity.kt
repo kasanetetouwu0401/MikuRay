@@ -1,18 +1,14 @@
 package com.v2ray.ang.ui
 
-import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.Outline
-import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewOutlineProvider
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -28,17 +24,17 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.appbar.MaterialToolbar
-import com.qmdeve.blurview.widget.BlurView
 import com.v2ray.ang.AngApplication
-import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
+import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.CustomDividerItemDecoration
 import com.v2ray.ang.util.DPIController
 import com.v2ray.ang.util.MyContextWrapper
-import com.v2ray.ang.util.ThemeStateManager
 import com.v2ray.ang.util.WindowBlurUtils
+import com.v2ray.ang.util.ThemeStateManager
+import com.qmdeve.blurview.widget.BlurView
 
 abstract class BaseActivity : AppCompatActivity() {
     private var loadingOverlay: FrameLayout? = null
@@ -46,18 +42,6 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         themeStateManager = ThemeStateManager(this)
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            overrideActivityTransition(
-                Activity.OVERRIDE_TRANSITION_OPEN,
-                R.anim.slide_in_right,
-                R.anim.slide_out_left
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-        }
-        
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -72,14 +56,6 @@ abstract class BaseActivity : AppCompatActivity() {
             },
             true
         )
-    }
-
-    override fun finish() {
-        super.finish()
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            @Suppress("DEPRECATION")
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-        }
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -101,17 +77,6 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onContentChanged() {
         super.onContentChanged()
-
-        findViewById<View>(android.R.id.content)?.apply {
-            clipToOutline = true
-            outlineProvider = object : ViewOutlineProvider() {
-                override fun getOutline(view: View, outline: Outline) {
-                    val radius = 32f * resources.displayMetrics.density
-                    outline.setRoundRect(0, 0, view.width, view.height, radius)
-                }
-            }
-        }
-
         val root = findViewById<android.view.View>(R.id.main_content) ?: return
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
