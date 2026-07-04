@@ -355,8 +355,33 @@ object WeatherHelper {
     private fun readCacheEntry(): WeatherCacheEntry? {
         val json = MmkvManager.decodeSettingsString(AppConfig.PREF_WEATHER_CACHE_ENTRY, "")
         if (json.isNullOrBlank()) return null
-        return JsonUtil.fromJsonSafe(json, WeatherCacheEntry::class.java)
+        return JsonUtil.fromJsonSafe(json, WeatherCacheEntry::class.java)?.sanitized()
     }
+
+    /**
+     * Gson constructs cached entries via reflection, bypassing Kotlin's default
+     * parameter values entirely. A cache written before a field existed (or with
+     * that key simply absent from the JSON) ends up with an actual `null` in a
+     * field Kotlin's type system promises is non-null, which crashes the first
+     * time it's touched (e.g. `list.getOrNull(0)`). Coalesce every list field
+     * back to empty here, once, right after deserialization.
+     */
+    @Suppress("USELESS_ELVIS")
+    private fun WeatherCacheEntry.sanitized(): WeatherCacheEntry = copy(
+        hourlyTimeIso = hourlyTimeIso ?: emptyList(),
+        hourlyTemperatureCelsius = hourlyTemperatureCelsius ?: emptyList(),
+        hourlyWeatherCode = hourlyWeatherCode ?: emptyList(),
+        hourlyPrecipitationProbability = hourlyPrecipitationProbability ?: emptyList(),
+        hourlyIsDay = hourlyIsDay ?: emptyList(),
+        dailyDateIso = dailyDateIso ?: emptyList(),
+        dailyWeatherCode = dailyWeatherCode ?: emptyList(),
+        dailyTemperatureMaxCelsius = dailyTemperatureMaxCelsius ?: emptyList(),
+        dailyTemperatureMinCelsius = dailyTemperatureMinCelsius ?: emptyList(),
+        dailyPrecipitationProbabilityMax = dailyPrecipitationProbabilityMax ?: emptyList(),
+        dailySunriseIso = dailySunriseIso ?: emptyList(),
+        dailySunsetIso = dailySunsetIso ?: emptyList(),
+        dailyDaylightDurationSec = dailyDaylightDurationSec ?: emptyList()
+    )
 
     private fun saveCache(entry: WeatherCacheEntry) {
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_ENTRY, JsonUtil.toJson(entry))
