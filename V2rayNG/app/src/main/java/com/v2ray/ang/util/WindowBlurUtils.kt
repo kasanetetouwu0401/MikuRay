@@ -6,6 +6,7 @@ import android.content.ContextWrapper
 import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
@@ -17,6 +18,7 @@ import com.v2ray.ang.handler.MmkvManager
 object WindowBlurUtils {
 
     private const val BLUR_OVERLAY_ID = 2100000000
+    private const val DEFAULT_DOWNSAMPLE_FACTOR = 4f
 
     fun applyWindowBlur(window: Window?) {
         if (window == null) return
@@ -48,6 +50,7 @@ object WindowBlurUtils {
                 val blurRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
                 setBlurRadius(blurRadius)
                 setBlurRounds(blurRounds)
+                setDownsampleFactor(DEFAULT_DOWNSAMPLE_FACTOR)
                 setOverlayColor(Color.argb(120, 0, 0, 0))
                 
                 isClickable = false
@@ -56,7 +59,15 @@ object WindowBlurUtils {
                 outlineProvider = null
             }
 
-            decorView.addView(blurView)          
+            decorView.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    decorView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    if (decorView.findViewById<View>(BLUR_OVERLAY_ID) == null) {
+                        decorView.addView(blurView)
+                    }
+                }
+            })
+
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
             window.decorView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
