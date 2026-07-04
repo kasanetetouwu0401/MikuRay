@@ -39,7 +39,7 @@ import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.MmkvPreferenceDataStore
 import com.v2ray.ang.ui.HelperBaseActivity
 import com.v2ray.ang.ui.PerAppProxyActivity
-import com.v2ray.ang.ui.bottomsheet.WeatherForecastBottomSheet
+import com.v2ray.ang.ui.WeatherForecastActivity
 import com.v2ray.ang.util.SearchChipGradientController
 import com.v2ray.ang.util.WeatherHelper
 import com.v2ray.ang.util.showDeleteConfirmDialog
@@ -157,9 +157,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
         layoutWeatherChip.setOnClickListener {
             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)) {
-                WeatherForecastBottomSheet(this) { weather ->
-                    applyWeatherToChip(weather)
-                }.show()
+                startActivity(Intent(this, WeatherForecastActivity::class.java))
             }
         }
     }

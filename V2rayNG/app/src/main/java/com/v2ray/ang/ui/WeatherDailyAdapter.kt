@@ -8,7 +8,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.v2ray.ang.R
-import com.v2ray.ang.ui.bottomsheet.DailyForecastItem
 
 class WeatherDailyAdapter(
     private val context: Context,

@@ -9,7 +9,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.v2ray.ang.R
-import com.v2ray.ang.ui.bottomsheet.HourlyForecastItem
 import com.v2ray.ang.util.getColorAttr
 
 class WeatherHourlyAdapter(
