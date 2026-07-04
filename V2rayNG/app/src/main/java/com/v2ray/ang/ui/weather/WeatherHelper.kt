@@ -85,8 +85,8 @@ object WeatherHelper {
     }
 
     private fun emojiForCode(code: Int, isDay: Boolean): String = when (code) {
-        0, 1    -> if (isDay) "\u2600" else moonPhaseEmoji()
-        2       -> if (isDay) "\u26c5" else "\ud83c\udf19"
+        0       -> if (isDay) "\u2600" else moonPhaseEmoji()
+        1, 2    -> if (isDay) "\u26c5" else "\ud83c\udf19"
         3       -> "\u2601"
         45, 48  -> "\ud83d\ude36\u200d\ud83c\udf2b"
         51, 53, 55,
@@ -99,7 +99,7 @@ object WeatherHelper {
         85, 86  -> "\ud83c\udf28"
         95      -> "\u26a1"
         96, 99  -> "\u26c8"
-        else    -> if (isDay) "\u2600" else moonPhaseEmoji()
+        else    -> "\u2601"
     }
 
     private fun moonPhaseEmoji(): String {
@@ -121,7 +121,7 @@ object WeatherHelper {
     }
 
     fun iconResForEmoji(emoji: String?): Int {
-        if (emoji.isNullOrEmpty()) return R.drawable.ic_weather_sunny
+        if (emoji.isNullOrEmpty()) return R.drawable.ic_cloud
         return when (emoji) {
             "\u2600"                                            -> R.drawable.ic_weather_sunny
             "\u2601"                                            -> R.drawable.ic_cloud
@@ -136,15 +136,15 @@ object WeatherHelper {
             "\ud83c\udf16", "\ud83c\udf17",
             "\ud83c\udf1a", "\ud83c\udf1b",
             "\ud83c\udf1c", "\ud83c\udf1d"                    -> R.drawable.ic_weather_night
-            else                                               -> R.drawable.ic_weather_sunny
+            else                                               -> R.drawable.ic_cloud
         }
     }
 
     fun iconResForCode(code: Int, isDay: Boolean): Int = iconResForEmoji(emojiForCode(code, isDay))
 
     fun conditionLabelRes(code: Int): Int = when (code) {
-        0, 1 -> R.string.weather_condition_clear
-        2 -> R.string.weather_condition_partly_cloudy
+        0 -> R.string.weather_condition_clear
+        1, 2 -> R.string.weather_condition_partly_cloudy
         3 -> R.string.weather_condition_cloudy
         45, 48 -> R.string.weather_condition_fog
         51, 53, 55,
