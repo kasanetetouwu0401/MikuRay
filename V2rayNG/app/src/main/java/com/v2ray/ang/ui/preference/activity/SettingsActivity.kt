@@ -246,7 +246,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         if (cached != null) {
             applyWeatherToChip(cached)
         } else {
-            ivWeatherIcon.setImageResource(WeatherHelper.iconResForEmoji(null))
+            ivWeatherIcon.setImageResource(WeatherHelper.iconRes(null))
             ivWeatherIcon.isVisible = true
             tvWeatherTemp.text = getString(R.string.weather_loading)
             tvWeatherTemp.isVisible = true
@@ -271,7 +271,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         if (stale != null) {
             applyWeatherToChip(stale)
         } else {
-            ivWeatherIcon.setImageResource(WeatherHelper.iconResForEmoji(null))
+            ivWeatherIcon.setImageResource(WeatherHelper.iconRes(null))
             ivWeatherIcon.isVisible = true
             tvWeatherTemp.text = getString(R.string.weather_loading)
             tvWeatherTemp.isVisible = true
@@ -290,7 +290,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     }
 
     private fun applyWeatherToChip(weather: WeatherHelper.WeatherResult) {
-        ivWeatherIcon.setImageResource(WeatherHelper.iconResForEmoji(weather.emoji))
+        ivWeatherIcon.setImageResource(WeatherHelper.iconRes(weather.emoji))
         tvWeatherTemp.text = weather.getTemperatureString(WeatherHelper.isCelsius())
         ivWeatherIcon.isVisible = true
         tvWeatherTemp.isVisible = true
