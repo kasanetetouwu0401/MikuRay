@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.CurrentLocationRequest
 import com.google.android.gms.location.Granularity
@@ -79,28 +80,62 @@ object WeatherHelper {
         val dailyPrecipitationProbabilityMax: List<Int> = emptyList()
     ) {
         fun toWeatherResult(): WeatherResult = WeatherResult(
-            emoji = emojiForCode(weatherCode, isDay),
+            emoji = weatherConditionForCode(weatherCode).emoji(isDay),
             tempCelsius = Math.round(temperatureCelsius).toInt()
         )
     }
 
-    private fun emojiForCode(code: Int, isDay: Boolean): String = when (code) {
-        0       -> if (isDay) "\u2600" else moonPhaseEmoji()
-        1, 2    -> if (isDay) "\u26c5" else "\ud83c\udf19"
-        3       -> "\u2601"
-        45, 48  -> "\ud83d\ude36\u200d\ud83c\udf2b"
-        51, 53, 55,
-        61, 63,
-        80, 81  -> "\ud83c\udf26"
-        56, 57,
-        65, 66, 67,
-        82      -> "\ud83c\udf27"
-        71, 73, 75, 77,
-        85, 86  -> "\ud83c\udf28"
-        95      -> "\u26a1"
-        96, 99  -> "\u26c8"
-        else    -> "\u2601"
+    enum class WeatherCondition(@StringRes val labelRes: Int) {
+        Clear(R.string.weather_condition_clear),
+        PartlyCloudy(R.string.weather_condition_partly_cloudy),
+        Cloudy(R.string.weather_condition_cloudy),
+        Fog(R.string.weather_condition_fog),
+        Drizzle(R.string.weather_condition_rain_light),
+        Rain(R.string.weather_condition_rain_heavy),
+        Snow(R.string.weather_condition_snow),
+        Thunderstorm(R.string.weather_condition_thunder),
+        Unknown(R.string.weather_condition_unknown);
+
+        fun iconRes(isDay: Boolean): Int = when (this) {
+            Clear -> if (isDay) R.drawable.ic_weather_sunny else R.drawable.ic_weather_night
+            PartlyCloudy -> if (isDay) R.drawable.ic_weather_partly_cloudy_day else R.drawable.ic_weather_partly_cloudy_night
+            Cloudy -> R.drawable.ic_cloud
+            Fog -> R.drawable.ic_weather_fog
+            Drizzle -> R.drawable.ic_weather_drizzle
+            Rain -> R.drawable.ic_weather_rain
+            Snow -> R.drawable.ic_weather_snow
+            Thunderstorm -> R.drawable.ic_weather_storm
+            Unknown -> R.drawable.ic_cloud
+        }
+
+        fun emoji(isDay: Boolean): String = when (this) {
+            Clear -> if (isDay) "\u2600" else moonPhaseEmoji()
+            PartlyCloudy -> if (isDay) "\u26c5" else "\ud83c\udf19"
+            Cloudy -> "\u2601"
+            Fog -> "\ud83d\ude36\u200d\ud83c\udf2b"
+            Drizzle -> "\ud83c\udf26"
+            Rain -> "\ud83c\udf27"
+            Snow -> "\ud83c\udf28"
+            Thunderstorm -> "\u26a1"
+            Unknown -> "\u2601"
+        }
     }
+
+    private fun weatherConditionForCode(code: Int): WeatherCondition = when (code) {
+        0 -> WeatherCondition.Clear
+        1, 2 -> WeatherCondition.PartlyCloudy
+        3 -> WeatherCondition.Cloudy
+        45, 48 -> WeatherCondition.Fog
+        51, 53, 55, 56, 57 -> WeatherCondition.Drizzle
+        61, 63, 65, 66, 67, 80, 81, 82 -> WeatherCondition.Rain
+        71, 73, 75, 77, 85, 86 -> WeatherCondition.Snow
+        95, 96, 99 -> WeatherCondition.Thunderstorm
+        else -> WeatherCondition.Unknown
+    }
+
+    fun iconResForCode(code: Int, isDay: Boolean): Int = weatherConditionForCode(code).iconRes(isDay)
+    
+    fun conditionLabelRes(code: Int): Int = weatherConditionForCode(code).labelRes
 
     private fun moonPhaseEmoji(): String {
         val newMoonRef = 2451550.1
@@ -118,46 +153,6 @@ object WeatherHelper {
             phase < 27.68 -> "\ud83c\udf1c"
             else          -> "\ud83c\udf1a"
         }
-    }
-
-    fun iconResForEmoji(emoji: String?): Int {
-        if (emoji.isNullOrEmpty()) return R.drawable.ic_cloud
-        return when (emoji) {
-            "\u2600"                                            -> R.drawable.ic_weather_sunny
-            "\u2601"                                            -> R.drawable.ic_cloud
-            "\u26c5"                                            -> R.drawable.ic_weather_partly_cloudy_day
-            "\ud83c\udf19"                                     -> R.drawable.ic_weather_partly_cloudy_night
-            "\ud83c\udf26"                                     -> R.drawable.ic_weather_drizzle
-            "\ud83c\udf27"                                     -> R.drawable.ic_weather_rain
-            "\u26a1", "\u26c8"                                 -> R.drawable.ic_weather_storm
-            "\u2744", "\ud83c\udf28"                          -> R.drawable.ic_weather_snow
-            "\ud83d\ude36\u200d\ud83c\udf2b"                  -> R.drawable.ic_weather_fog
-            "\ud83c\udf13", "\ud83c\udf14",
-            "\ud83c\udf16", "\ud83c\udf17",
-            "\ud83c\udf1a", "\ud83c\udf1b",
-            "\ud83c\udf1c", "\ud83c\udf1d"                    -> R.drawable.ic_weather_night
-            else                                               -> R.drawable.ic_cloud
-        }
-    }
-
-    fun iconResForCode(code: Int, isDay: Boolean): Int = iconResForEmoji(emojiForCode(code, isDay))
-
-    fun conditionLabelRes(code: Int): Int = when (code) {
-        0 -> R.string.weather_condition_clear
-        1, 2 -> R.string.weather_condition_partly_cloudy
-        3 -> R.string.weather_condition_cloudy
-        45, 48 -> R.string.weather_condition_fog
-        51, 53, 55,
-        61, 63,
-        80, 81 -> R.string.weather_condition_rain_light
-        56, 57,
-        65, 66, 67,
-        82 -> R.string.weather_condition_rain_heavy
-        71, 73, 75, 77,
-        85, 86 -> R.string.weather_condition_snow
-        95 -> R.string.weather_condition_thunder
-        96, 99 -> R.string.weather_condition_thunder_hail
-        else -> R.string.weather_condition_unknown
     }
 
     fun getCustomLocationRaw(): String =
