@@ -148,7 +148,6 @@ object WeatherHelper {
     
     fun conditionLabelRes(code: Int): Int = weatherConditionForCode(code).labelRes
 
-    /** US AQI breakpoints per airnow.gov, collapsed to a single label per band. */
     @StringRes
     fun airQualityLabelRes(aqi: Int): Int = when {
         aqi <= 50 -> R.string.weather_aqi_good
@@ -328,7 +327,14 @@ object WeatherHelper {
     private fun readCacheEntry(): WeatherCacheEntry? {
         val json = MmkvManager.decodeSettingsString(AppConfig.PREF_WEATHER_CACHE_ENTRY, "")
         if (json.isNullOrBlank()) return null
-        return JsonUtil.fromJsonSafe(json, WeatherCacheEntry::class.java)
+        return try {
+            val entry = JsonUtil.fromJsonSafe(json, WeatherCacheEntry::class.java) ?: return null
+            entry.dailyUvIndexMax.size
+            entry.dailySunriseIso.size
+            entry
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun saveCache(entry: WeatherCacheEntry) {
