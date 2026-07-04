@@ -582,7 +582,6 @@
     <string name="pref_weather_custom_location_dialog_message">Enter a place name (e.g. London) or coordinates as \"latitude,longitude\". Leave empty to use your current location.</string>
     <string name="pref_weather_custom_location_summary_auto">Using your current location</string>
     <string name="pref_weather_custom_location_summary_current_coords">Using current location (%1$.2f, %2$.2f)</string>
-
     <string name="weather_condition_clear">Clear</string>
     <string name="weather_condition_partly_cloudy">Partly Cloudy</string>
     <string name="weather_condition_cloudy">Cloudy</string>
@@ -601,6 +600,7 @@
     <string name="weather_now">Now</string>
     <string name="weather_today">Today</string>
     <string name="weather_forecast_load_error">Couldn\'t load the forecast</string>
+    
     <string name="title_pref_sound_on_connect">Connection Sound</string>
     <string name="summary_pref_sound_on_connect">Play a sound when connected or disconnected</string>
     <string name="ip_unknown">IP: unknown</string>
