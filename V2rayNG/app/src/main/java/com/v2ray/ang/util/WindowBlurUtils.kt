@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Color
-import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -38,15 +37,12 @@ object WindowBlurUtils {
                 decorView.removeView(it)
             }
 
-            val blurView = BlurView(activity, null).apply {
+            val blurView = BlurView(context, null).apply {
                 id = BLUR_OVERLAY_ID
-                layoutParams = android.widget.FrameLayout.LayoutParams(
-                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
-                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
                 )
-                
-                fitsSystemWindows = false
-                setOnApplyWindowInsetsListener { _, insets -> insets }
                 
                 val blurRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
                 val blurRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
@@ -60,29 +56,7 @@ object WindowBlurUtils {
                 outlineProvider = null
             }
 
-            // HACK/WORKAROUND: Paksa library untuk menggunakan PixelCopy agar tidak menghancurkan 
-            // bounds/scale (nge-zoom) dari banner (ImageView) di belakangnya akibat masalah Hardware Bitmap.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                try {
-                    var clazz: Class<*>? = blurView.javaClass
-                    while (clazz != null && clazz.name != "com.qmdeve.blurview.base.BaseBlurView") {
-                        clazz = clazz.superclass
-                    }
-                    clazz?.getDeclaredField("mUsePixelCopyFallback")?.apply {
-                        isAccessible = true
-                        setBoolean(blurView, true)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-
-            decorView.post {
-                if (decorView.findViewById<View>(BLUR_OVERLAY_ID) == null) {
-                    decorView.addView(blurView)
-                }
-            }
-            
+            decorView.addView(blurView)          
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
             window.decorView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
