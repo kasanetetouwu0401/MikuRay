@@ -45,6 +45,7 @@ object WeatherHelper {
 
     data class WeatherResult(
         val emoji: String,
+        val iconRes: Int,
         val tempCelsius: Int
     ) {
         fun getTemperatureString(celsius: Boolean = isDefaultCelsius()): String =
@@ -81,6 +82,7 @@ object WeatherHelper {
     ) {
         fun toWeatherResult(): WeatherResult = WeatherResult(
             emoji = weatherConditionForCode(weatherCode).emoji(isDay),
+            iconRes = weatherConditionForCode(weatherCode).iconRes(isDay),
             tempCelsius = Math.round(temperatureCelsius).toInt()
         )
     }

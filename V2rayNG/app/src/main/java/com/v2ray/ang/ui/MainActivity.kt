@@ -233,7 +233,7 @@ class MainActivity : HelperBaseActivity(),
         if (cached != null) {
             applyWeatherToChip(cached)
         } else {
-            binding.ivWeatherIcon.setImageResource(WeatherHelper.iconRes(null))
+            binding.ivWeatherIcon.setImageResource(R.drawable.ic_cloud)
             binding.ivWeatherIcon.isVisible = true
             binding.tvWeatherTemp.text = getString(R.string.weather_loading)
             binding.tvWeatherTemp.isVisible = true
@@ -258,7 +258,7 @@ class MainActivity : HelperBaseActivity(),
         if (stale != null) {
             applyWeatherToChip(stale)
         } else {
-            binding.ivWeatherIcon.setImageResource(WeatherHelper.iconRes(null))
+            binding.ivWeatherIcon.setImageResource(R.drawable.ic_cloud)
             binding.ivWeatherIcon.isVisible = true
             binding.tvWeatherTemp.text = getString(R.string.weather_loading)
             binding.tvWeatherTemp.isVisible = true
@@ -277,7 +277,7 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun applyWeatherToChip(weather: WeatherHelper.WeatherResult) {
-        binding.ivWeatherIcon.setImageResource(WeatherHelper.iconRes(weather.emoji))
+        binding.ivWeatherIcon.setImageResource(weather.iconRes)
         binding.tvWeatherTemp.text = weather.getTemperatureString(WeatherHelper.isCelsius())
         binding.ivWeatherIcon.isVisible = true
         binding.tvWeatherTemp.isVisible = true
