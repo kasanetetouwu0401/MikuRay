@@ -573,7 +573,7 @@
     <string name="weather_condition_thunder">Гроза</string>
     <string name="weather_condition_thunder_hail">Гроза с градом</string>
     <string name="weather_condition_unknown">Неизвестно</string>
-    <string name="weather_forecast_sheet_title">Прогноз погоды</string>
+    <string name="weather_forecast_title">Прогноз погоды</string>
     <string name="weather_feels_like">Ощущается как %1$s</string>
     <string name="weather_max_min">Макс. %1$s  Мин. %2$s</string>
     <string name="weather_summary_title">Сводка</string>

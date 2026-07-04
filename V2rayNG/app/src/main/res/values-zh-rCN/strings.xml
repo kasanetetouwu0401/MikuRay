@@ -553,7 +553,7 @@
     <string name="weather_condition_thunder">雷阵雨</string>
     <string name="weather_condition_thunder_hail">雷阵雨伴冰雹</string>
     <string name="weather_condition_unknown">未知</string>
-    <string name="weather_forecast_sheet_title">天气预报</string>
+    <string name="weather_forecast_title">天气预报</string>
     <string name="weather_feels_like">体感温度 %1$s</string>
     <string name="weather_max_min">最高 %1$s  最低 %2$s</string>
     <string name="weather_summary_title">摘要</string>

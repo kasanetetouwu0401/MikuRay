@@ -592,7 +592,7 @@
     <string name="weather_condition_thunder">Thunderstorm</string>
     <string name="weather_condition_thunder_hail">Thunderstorm with Hail</string>
     <string name="weather_condition_unknown">Unknown</string>
-    <string name="weather_forecast_sheet_title">Weather Forecast</string>
+    <string name="weather_forecast_title">Weather Forecast</string>
     <string name="weather_feels_like">Feels like %1$s</string>
     <string name="weather_max_min">Max %1$s  Min %2$s</string>
     <string name="weather_summary_title">Summary</string>

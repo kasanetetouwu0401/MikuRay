@@ -555,7 +555,7 @@
     <string name="weather_condition_thunder">Badai petir</string>
     <string name="weather_condition_thunder_hail">Badai petir dengan es</string>
     <string name="weather_condition_unknown">Tidak diketahui</string>
-    <string name="weather_forecast_sheet_title">Prakiraan cuaca</string>
+    <string name="weather_forecast_title">Prakiraan cuaca</string>
     <string name="weather_feels_like">Terasa seperti %1$s</string>
     <string name="weather_max_min">Maks %1$s  Min %2$s</string>
     <string name="weather_summary_title">Ringkasan</string>

@@ -58,7 +58,7 @@ class WeatherForecastActivity : BaseActivity() {
         setContentView(R.layout.activity_weather_forecast)
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
-        setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.weather_forecast_sheet_title))
+        setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.weather_forecast_title))
 
         ivIcon = findViewById(R.id.ivForecastCurrentIcon)
         tvCondition = findViewById(R.id.tvForecastCurrentCondition)
