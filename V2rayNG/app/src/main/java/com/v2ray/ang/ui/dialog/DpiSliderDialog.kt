@@ -13,7 +13,6 @@ import com.google.android.material.slider.Slider
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.util.DPIController
 import com.v2ray.ang.util.WindowBlurUtils
 
 class DpiSliderDialog @JvmOverloads constructor(
@@ -52,8 +51,6 @@ class DpiSliderDialog @JvmOverloads constructor(
                 
                 MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_DPI, valueToSave)
                 summary = if (valueToSave == 0) systemDpi.toString() else clamped.toString()
-                
-                DPIController.applyDpi(activity.applicationContext, clamped)
                 
                 activity.recreate()
             }

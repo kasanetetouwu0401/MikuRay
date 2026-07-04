@@ -11,12 +11,4 @@ object DPIController {
         configuration.densityDpi = dpiValue
         return base.createConfigurationContext(configuration)
     }
-
-    fun applyDpi(context: Context, dpiValue: Int) {
-        if (dpiValue <= 0) return
-        val configuration = Configuration(context.resources.configuration)
-        configuration.densityDpi = dpiValue
-        @Suppress("DEPRECATION")
-        context.resources.updateConfiguration(configuration, context.resources.displayMetrics)
-    }
 }
