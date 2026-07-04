@@ -312,6 +312,8 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <include layout="@layout/weather_detail_grid" />
+
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

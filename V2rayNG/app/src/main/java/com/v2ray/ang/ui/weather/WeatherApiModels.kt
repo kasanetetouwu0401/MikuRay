@@ -22,7 +22,9 @@ data class OpenMeteoCurrent(
     @SerializedName("visibility") val visibility: Double = 0.0,
     @SerializedName("cloud_cover") val cloudCover: Int = 0,
     @SerializedName("wind_gusts_10m") val windGusts: Double = 0.0,
-    @SerializedName("is_day") val isDay: Int = 1
+    @SerializedName("is_day") val isDay: Int = 1,
+    @SerializedName("uv_index") val uvIndex: Double? = null,
+    @SerializedName("precipitation") val precipitation: Double? = null
 )
 
 data class OpenMeteoHourly(
@@ -38,7 +40,24 @@ data class OpenMeteoDaily(
     @SerializedName("weather_code") val weatherCode: List<Int>? = null,
     @SerializedName("temperature_2m_max") val temperatureMax: List<Double>? = null,
     @SerializedName("temperature_2m_min") val temperatureMin: List<Double>? = null,
-    @SerializedName("precipitation_probability_max") val precipitationProbabilityMax: List<Int>? = null
+    @SerializedName("precipitation_probability_max") val precipitationProbabilityMax: List<Int>? = null,
+    val sunrise: List<String>? = null,
+    val sunset: List<String>? = null,
+    @SerializedName("daylight_duration") val daylightDuration: List<Double>? = null
+)
+
+data class OpenMeteoAirQualityResponse(
+    val current: OpenMeteoAirQualityCurrent? = null
+)
+
+data class OpenMeteoAirQualityCurrent(
+    @SerializedName("us_aqi") val usAqi: Int? = null,
+    @SerializedName("alder_pollen") val alderPollen: Double? = null,
+    @SerializedName("birch_pollen") val birchPollen: Double? = null,
+    @SerializedName("grass_pollen") val grassPollen: Double? = null,
+    @SerializedName("mugwort_pollen") val mugwortPollen: Double? = null,
+    @SerializedName("olive_pollen") val olivePollen: Double? = null,
+    @SerializedName("ragweed_pollen") val ragweedPollen: Double? = null
 )
 
 data class OpenMeteoGeocodingResponse(
