@@ -37,11 +37,11 @@ object WindowBlurUtils {
                 decorView.removeView(it)
             }
 
-            val blurView = BlurView(context, null).apply {
+            val blurView = BlurView(activity, null).apply {
                 id = BLUR_OVERLAY_ID
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
+                layoutParams = android.widget.FrameLayout.LayoutParams(
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT
                 )
                 
                 val blurRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
