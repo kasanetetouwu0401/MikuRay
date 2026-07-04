@@ -79,15 +79,15 @@ object WeatherHelper {
         val dailyTemperatureMaxCelsius: List<Double> = emptyList(),
         val dailyTemperatureMinCelsius: List<Double> = emptyList(),
         val dailyPrecipitationProbabilityMax: List<Int> = emptyList(),
-        val uvIndex: Double? = null,
-        val precipitationMm: Double? = null,
+        val dailyApparentTemperatureMaxCelsius: List<Double> = emptyList(),
+        val dailyApparentTemperatureMinCelsius: List<Double> = emptyList(),
+        val dailyPrecipitationSumMm: List<Double> = emptyList(),
+        val dailyUvIndexMax: List<Double> = emptyList(),
         val dailySunriseIso: List<String> = emptyList(),
         val dailySunsetIso: List<String> = emptyList(),
-        val dailyDaylightDurationSec: List<Double> = emptyList(),
-        val airQualityUsAqi: Int? = null,
-        val pollenTree: Double? = null,
-        val pollenGrass: Double? = null,
-        val pollenWeed: Double? = null
+        val dailyDaylightDurationSeconds: List<Double> = emptyList(),
+        val dailySunshineDurationSeconds: List<Double> = emptyList(),
+        val airQualityIndex: Int? = null
     ) {
         fun toWeatherResult(): WeatherResult = WeatherResult(
             emoji = weatherConditionForCode(weatherCode).emoji(isDay),
@@ -148,39 +148,15 @@ object WeatherHelper {
     
     fun conditionLabelRes(code: Int): Int = weatherConditionForCode(code).labelRes
 
-    /** UV index category as (0..4 level, label string res). Matches the standard WHO UV scale. */
-    fun uvCategory(uvIndex: Double): Pair<Int, Int> = when {
-        uvIndex < 3 -> 0 to R.string.weather_uv_low
-        uvIndex < 6 -> 1 to R.string.weather_uv_moderate
-        uvIndex < 8 -> 2 to R.string.weather_uv_high
-        uvIndex < 11 -> 3 to R.string.weather_uv_very_high
-        else -> 4 to R.string.weather_uv_extreme
-    }
-
-    /** US AQI category as (0f..1f position on the 0-300+ scale, color res, label string res). */
-    fun aqiCategory(aqi: Int): Triple<Float, Int, Int> = when {
-        aqi <= 50 -> Triple(aqi / 300f, R.color.palette_green, R.string.weather_aqi_good)
-        aqi <= 100 -> Triple(aqi / 300f, R.color.palette_yellow, R.string.weather_aqi_moderate)
-        aqi <= 150 -> Triple(aqi / 300f, R.color.palette_orange, R.string.weather_aqi_sensitive)
-        aqi <= 200 -> Triple(aqi / 300f, R.color.palette_red, R.string.weather_aqi_unhealthy)
-        aqi <= 300 -> Triple(aqi / 300f, R.color.palette_deep_purple, R.string.weather_aqi_very_unhealthy)
-        else -> Triple(1f, R.color.palette_brown, R.string.weather_aqi_hazardous)
-    }
-
-    /** Pollen severity (grains/m3) as (0..4 level, label string res). Same thresholds Google/Météo-France style apps use. */
-    fun pollenCategory(grainsPerM3: Double): Pair<Int, Int> = when {
-        grainsPerM3 <= 0.0 -> 0 to R.string.weather_pollen_none
-        grainsPerM3 < 10 -> 1 to R.string.weather_pollen_low
-        grainsPerM3 < 50 -> 2 to R.string.weather_pollen_moderate
-        grainsPerM3 < 150 -> 3 to R.string.weather_pollen_high
-        else -> 4 to R.string.weather_pollen_very_high
-    }
-
-    fun cloudCoverLabelRes(percent: Int): Int = when {
-        percent < 15 -> R.string.weather_cloud_clear
-        percent < 40 -> R.string.weather_cloud_mostly_clear
-        percent < 70 -> R.string.weather_cloud_partly_cloudy
-        else -> R.string.weather_cloud_overcast
+    /** US AQI breakpoints per airnow.gov, collapsed to a single label per band. */
+    @StringRes
+    fun airQualityLabelRes(aqi: Int): Int = when {
+        aqi <= 50 -> R.string.weather_aqi_good
+        aqi <= 100 -> R.string.weather_aqi_moderate
+        aqi <= 150 -> R.string.weather_aqi_unhealthy_sensitive
+        aqi <= 200 -> R.string.weather_aqi_unhealthy
+        aqi <= 300 -> R.string.weather_aqi_very_unhealthy
+        else -> R.string.weather_aqi_hazardous
     }
 
     private fun moonPhaseEmoji(): String {
@@ -352,33 +328,8 @@ object WeatherHelper {
     private fun readCacheEntry(): WeatherCacheEntry? {
         val json = MmkvManager.decodeSettingsString(AppConfig.PREF_WEATHER_CACHE_ENTRY, "")
         if (json.isNullOrBlank()) return null
-        return JsonUtil.fromJsonSafe(json, WeatherCacheEntry::class.java)?.sanitized()
+        return JsonUtil.fromJsonSafe(json, WeatherCacheEntry::class.java)
     }
-
-    /**
-     * Gson constructs cached entries via reflection, bypassing Kotlin's default
-     * parameter values entirely. A cache written before a field existed (or with
-     * that key simply absent from the JSON) ends up with an actual `null` in a
-     * field Kotlin's type system promises is non-null, which crashes the first
-     * time it's touched (e.g. `list.getOrNull(0)`). Coalesce every list field
-     * back to empty here, once, right after deserialization.
-     */
-    @Suppress("USELESS_ELVIS")
-    private fun WeatherCacheEntry.sanitized(): WeatherCacheEntry = copy(
-        hourlyTimeIso = hourlyTimeIso ?: emptyList(),
-        hourlyTemperatureCelsius = hourlyTemperatureCelsius ?: emptyList(),
-        hourlyWeatherCode = hourlyWeatherCode ?: emptyList(),
-        hourlyPrecipitationProbability = hourlyPrecipitationProbability ?: emptyList(),
-        hourlyIsDay = hourlyIsDay ?: emptyList(),
-        dailyDateIso = dailyDateIso ?: emptyList(),
-        dailyWeatherCode = dailyWeatherCode ?: emptyList(),
-        dailyTemperatureMaxCelsius = dailyTemperatureMaxCelsius ?: emptyList(),
-        dailyTemperatureMinCelsius = dailyTemperatureMinCelsius ?: emptyList(),
-        dailyPrecipitationProbabilityMax = dailyPrecipitationProbabilityMax ?: emptyList(),
-        dailySunriseIso = dailySunriseIso ?: emptyList(),
-        dailySunsetIso = dailySunsetIso ?: emptyList(),
-        dailyDaylightDurationSec = dailyDaylightDurationSec ?: emptyList()
-    )
 
     private fun saveCache(entry: WeatherCacheEntry) {
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CACHE_ENTRY, JsonUtil.toJson(entry))
@@ -482,7 +433,13 @@ object WeatherHelper {
             }
 
             try {
-                fetchOpenMeteo(location)?.also { saveCache(it) }
+                val forecastEntry = fetchOpenMeteo(location) ?: return@withContext null
+                val aqi = try {
+                    fetchAirQuality(location)
+                } catch (e: Exception) {
+                    null
+                }
+                forecastEntry.copy(airQualityIndex = aqi).also { saveCache(it) }
             } catch (e: Exception) {
                 null
             }
@@ -507,9 +464,7 @@ object WeatherHelper {
                     "visibility",
                     "cloud_cover",
                     "wind_gusts_10m",
-                    "is_day",
-                    "uv_index",
-                    "precipitation"
+                    "is_day"
                 ).joinToString(",")
             )
             append("&hourly=").append(
@@ -525,10 +480,15 @@ object WeatherHelper {
                     "weather_code",
                     "temperature_2m_max",
                     "temperature_2m_min",
+                    "apparent_temperature_max",
+                    "apparent_temperature_min",
                     "precipitation_probability_max",
+                    "precipitation_sum",
+                    "uv_index_max",
                     "sunrise",
                     "sunset",
-                    "daylight_duration"
+                    "daylight_duration",
+                    "sunshine_duration"
                 ).joinToString(",")
             )
             append("&forecast_days=7")
@@ -539,12 +499,6 @@ object WeatherHelper {
         val temp = current.temperature ?: return null
         val hourly = response.hourly
         val daily = response.daily
-        val airQuality = try {
-            fetchAirQuality(location)
-        } catch (e: Exception) {
-            null
-        }
-        val pollenValues = listOfNotNull(airQuality?.alderPollen, airQuality?.birchPollen)
         return WeatherCacheEntry(
             latitude = location.latitude,
             longitude = location.longitude,
@@ -571,39 +525,28 @@ object WeatherHelper {
             dailyTemperatureMaxCelsius = daily?.temperatureMax ?: emptyList(),
             dailyTemperatureMinCelsius = daily?.temperatureMin ?: emptyList(),
             dailyPrecipitationProbabilityMax = daily?.precipitationProbabilityMax ?: emptyList(),
-            uvIndex = current.uvIndex,
-            precipitationMm = current.precipitation,
+            dailyApparentTemperatureMaxCelsius = daily?.apparentTemperatureMax ?: emptyList(),
+            dailyApparentTemperatureMinCelsius = daily?.apparentTemperatureMin ?: emptyList(),
+            dailyPrecipitationSumMm = daily?.precipitationSum ?: emptyList(),
+            dailyUvIndexMax = daily?.uvIndexMax ?: emptyList(),
             dailySunriseIso = daily?.sunrise ?: emptyList(),
             dailySunsetIso = daily?.sunset ?: emptyList(),
-            dailyDaylightDurationSec = daily?.daylightDuration ?: emptyList(),
-            airQualityUsAqi = airQuality?.usAqi,
-            pollenTree = pollenValues.maxOrNull(),
-            pollenGrass = airQuality?.grassPollen,
-            pollenWeed = listOfNotNull(airQuality?.mugwortPollen, airQuality?.olivePollen, airQuality?.ragweedPollen).maxOrNull()
+            dailyDaylightDurationSeconds = daily?.daylightDuration ?: emptyList(),
+            dailySunshineDurationSeconds = daily?.sunshineDuration ?: emptyList()
         )
     }
 
-    /** Separate Open-Meteo Air Quality endpoint for AQI + pollen; returns null quietly if unavailable (e.g. outside coverage). */
-    private fun fetchAirQuality(location: android.location.Location): OpenMeteoAirQualityCurrent? {
+    private fun fetchAirQuality(location: android.location.Location): Int? {
         val url = buildString {
             append("https://air-quality-api.open-meteo.com/v1/air-quality")
             append("?latitude=").append(location.latitude)
             append("&longitude=").append(location.longitude)
+            append("&current=us_aqi")
             append("&timezone=auto")
-            append("&current=").append(
-                listOf(
-                    "us_aqi",
-                    "alder_pollen",
-                    "birch_pollen",
-                    "grass_pollen",
-                    "mugwort_pollen",
-                    "olive_pollen",
-                    "ragweed_pollen"
-                ).joinToString(",")
-            )
         }
         val body = getBody(url) ?: return null
-        return JsonUtil.fromJsonSafe(body, OpenMeteoAirQualityResponse::class.java)?.current
+        val response = JsonUtil.fromJsonSafe(body, OpenMeteoAirQualityResponse::class.java) ?: return null
+        return response.current?.usAqi
     }
 
     private fun getBody(url: String): String? {
