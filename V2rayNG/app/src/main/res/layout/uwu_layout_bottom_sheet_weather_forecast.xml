@@ -125,14 +125,29 @@
                     android:paddingTop="16dp"
                     android:paddingBottom="12dp">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="20dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/weather_hourly_forecast_title"
-                        android:textAppearance="?textAppearanceTitleSmall"
-                        android:textColor="?colorOnSurface" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginEnd="6dp"
+                            android:src="@drawable/ic_weather_schedule"
+                            app:tint="?colorOnSurfaceVariant" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/weather_hourly_forecast_title"
+                            android:textAppearance="?textAppearanceTitleSmall"
+                            android:textColor="?colorOnSurface" />
+
+                    </LinearLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerForecastHourly"
@@ -166,14 +181,29 @@
                     android:paddingTop="16dp"
                     android:paddingBottom="12dp">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="20dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/weather_daily_forecast_title"
-                        android:textAppearance="?textAppearanceTitleSmall"
-                        android:textColor="?colorOnSurface" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginEnd="6dp"
+                            android:src="@drawable/ic_weather_calendar"
+                            app:tint="?colorOnSurfaceVariant" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/weather_daily_forecast_title"
+                            android:textAppearance="?textAppearanceTitleSmall"
+                            android:textColor="?colorOnSurface" />
+
+                    </LinearLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerForecastDaily"
