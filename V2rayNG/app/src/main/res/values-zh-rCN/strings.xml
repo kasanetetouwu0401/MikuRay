@@ -561,6 +561,7 @@
     <string name="weather_now">现在</string>
     <string name="weather_today">今天</string>
     <string name="weather_forecast_load_error">无法加载预报</string>
+    <string name="menu_item_refresh_weather">刷新</string>
 
     <string name="title_vpn_sound_settings">声音</string>
     <string name="title_pref_sound_on_connect">连接提示音</string>

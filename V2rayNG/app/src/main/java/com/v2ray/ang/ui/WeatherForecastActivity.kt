@@ -1,6 +1,8 @@
 package com.v2ray.ang.ui
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.isVisible
@@ -70,20 +72,42 @@ class WeatherForecastActivity : BaseActivity() {
 
         recyclerHourly.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         recyclerDaily.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        recyclerHourly.isNestedScrollingEnabled = false
+        recyclerDaily.isNestedScrollingEnabled = false
 
         val cached = WeatherHelper.getCachedWeatherEntry()
         if (cached != null) {
             render(cached)
-        } else {
+        }
+        loadForecast(force = false, showLoadingIndicator = cached == null)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_weather_forecast, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.action_refresh_weather -> {
+            loadForecast(force = true, showLoadingIndicator = true)
+            true
+        }
+        else -> super.onOptionsItemSelected(item)
+    }
+
+    private fun loadForecast(force: Boolean, showLoadingIndicator: Boolean) {
+        job?.cancel()
+        if (showLoadingIndicator) {
             showLoading()
         }
-
         job = lifecycleScope.launch {
-            val fresh = WeatherHelper.fetchForecast(this@WeatherForecastActivity)
-            hideLoading()
+            val fresh = WeatherHelper.fetchForecast(this@WeatherForecastActivity, force = force)
+            if (showLoadingIndicator) {
+                hideLoading()
+            }
             if (fresh != null) {
                 render(fresh)
-            } else if (cached == null) {
+            } else if (!cardCurrent.isVisible) {
                 tvError.isVisible = true
             }
         }

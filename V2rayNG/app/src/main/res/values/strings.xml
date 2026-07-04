@@ -600,6 +600,7 @@
     <string name="weather_now">Now</string>
     <string name="weather_today">Today</string>
     <string name="weather_forecast_load_error">Couldn\'t load the forecast</string>
+    <string name="menu_item_refresh_weather">Refresh</string>
     
     <string name="title_pref_sound_on_connect">Connection Sound</string>
     <string name="summary_pref_sound_on_connect">Play a sound when connected or disconnected</string>

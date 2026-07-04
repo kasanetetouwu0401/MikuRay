@@ -563,6 +563,7 @@
     <string name="weather_now">Sekarang</string>
     <string name="weather_today">Hari ini</string>
     <string name="weather_forecast_load_error">Gagal memuat prakiraan</string>
+    <string name="menu_item_refresh_weather">Segarkan</string>
 
     <string name="title_vpn_sound_settings">Suara</string>
     <string name="title_pref_sound_on_connect">Bunyi Koneksi</string>

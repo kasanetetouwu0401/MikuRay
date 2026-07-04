@@ -581,6 +581,7 @@
     <string name="weather_now">Сейчас</string>
     <string name="weather_today">Сегодня</string>
     <string name="weather_forecast_load_error">Не удалось загрузить прогноз</string>
+    <string name="menu_item_refresh_weather">Обновить</string>
 
     <string name="title_vpn_sound_settings">Звук</string>
     <string name="title_pref_sound_on_connect">Звук подключения</string>
