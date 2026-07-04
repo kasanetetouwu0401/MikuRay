@@ -1,0 +1,761 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:orientation="vertical">
+
+    <!-- Row 1: Humidity | UV index -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="168dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal">
+
+        <com.v2ray.ang.ui.weather.ShapeClipLayout
+            android:id="@+id/cardHumidity"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            app:shapeFillColor="?attr/colorCard"
+            app:shapeType="squircle">
+
+            <com.v2ray.ang.ui.weather.WaveFillView
+                android:id="@+id/waveHumidity"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="6dp"
+                        android:src="@drawable/ic_weather_air_lines"
+                        app:tint="?attr/colorOnSurface" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/weather_humidity_title"
+                        android:textAppearance="?textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvHumidityValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?textAppearanceHeadlineSmall"
+                    android:textColor="?attr/colorOnSurface"
+                    tools:text="65%" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvDewPoint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="20dp"
+                android:background="@drawable/bg_pill_translucent"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorOnSurface"
+                tools:text="22° Dew point" />
+
+        </com.v2ray.ang.ui.weather.ShapeClipLayout>
+
+        <com.v2ray.ang.ui.weather.ShapeClipLayout
+            android:id="@+id/cardUvIndex"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            android:visibility="gone"
+            app:shapeFillColor="?attr/colorCard"
+            app:shapeType="cookie"
+            tools:visibility="visible">
+
+            <com.v2ray.ang.ui.weather.UvScaleView
+                android:id="@+id/uvScaleView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:orientation="vertical"
+                android:padding="26dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="6dp"
+                        android:src="@drawable/ic_weather_sunny"
+                        app:tint="?attr/colorOnSurface" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/weather_uv_index_title"
+                        android:textAppearance="?textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="26dp"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvUvValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textAppearanceHeadlineSmall"
+                    android:textColor="?attr/colorOnSurface"
+                    tools:text="7" />
+
+                <TextView
+                    android:id="@+id/tvUvLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textAppearanceLabelMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    tools:text="High" />
+            </LinearLayout>
+
+        </com.v2ray.ang.ui.weather.ShapeClipLayout>
+
+    </LinearLayout>
+
+    <!-- Row 2: Precipitation | Wind -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="168dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal">
+
+        <com.v2ray.ang.ui.weather.ShapeClipLayout
+            android:id="@+id/cardPrecipitation"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            app:shapeFillColor="?attr/colorCard"
+            app:shapeType="squircle">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="6dp"
+                        android:src="@drawable/ic_weather_water_drop"
+                        app:tint="?attr/colorOnSurface" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/weather_precipitation_title"
+                        android:textAppearance="?textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface" />
+                </LinearLayout>
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/tvPrecipitationValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textAppearanceHeadlineSmall"
+                    android:textColor="?attr/colorOnSurface"
+                    tools:text="0.0" />
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/tvPrecipitationHint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textAppearance="?textAppearanceLabelMedium"
+                    android:textColor="?attr/colorTertiary"
+                    tools:text="No rain in the next 2 hours" />
+
+            </LinearLayout>
+
+        </com.v2ray.ang.ui.weather.ShapeClipLayout>
+
+        <com.v2ray.ang.ui.weather.ShapeClipLayout
+            android:id="@+id/cardWind"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            app:shapeFillColor="?attr/colorTertiary"
+            app:shapeType="blob">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_marginTop="22dp"
+                android:layout_marginStart="22dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_weather_air_lines"
+                    app:tint="?attr/colorOnTertiary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/weather_wind_title"
+                    android:textAppearance="?textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnTertiary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvWindValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textAppearanceHeadlineSmall"
+                    android:textColor="?attr/colorOnTertiary"
+                    tools:text="11 km/h" />
+
+                <TextView
+                    android:id="@+id/tvWindDetail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textAppearance="?textAppearanceLabelMedium"
+                    android:textColor="?attr/colorOnTertiary"
+                    tools:text="From S - Gusts 26 km/h" />
+            </LinearLayout>
+
+        </com.v2ray.ang.ui.weather.ShapeClipLayout>
+
+    </LinearLayout>
+
+    <!-- Row 3: Cloud cover | Pressure -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="168dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal">
+
+        <com.v2ray.ang.ui.weather.ShapeClipLayout
+            android:id="@+id/cardCloudCover"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            app:shapeFillColor="?attr/colorCard"
+            app:shapeType="circle">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="28dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="6dp"
+                        android:src="@drawable/ic_cloud"
+                        app:tint="?attr/colorOnSurface" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/weather_cloud_cover_title"
+                        android:textAppearance="?textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvCloudCoverValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textAppearanceHeadlineSmall"
+                    android:textColor="?attr/colorOnSurface"
+                    tools:text="9%" />
+
+                <TextView
+                    android:id="@+id/tvCloudCoverLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textAppearanceLabelMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    tools:text="Clear" />
+
+            </LinearLayout>
+
+        </com.v2ray.ang.ui.weather.ShapeClipLayout>
+
+        <com.v2ray.ang.ui.weather.ShapeClipLayout
+            android:id="@+id/cardPressure"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            app:shapeFillColor="?attr/colorCard"
+            app:shapeType="circle">
+
+            <com.v2ray.ang.ui.weather.ArcGaugeView
+                android:id="@+id/arcPressure"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="28dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="6dp"
+                        android:src="@drawable/ic_weather_pressure_gauge"
+                        app:tint="?attr/colorOnSurface" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/weather_pressure_title"
+                        android:textAppearance="?textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvPressureValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textAppearanceHeadlineSmall"
+                    android:textColor="?attr/colorOnSurface"
+                    tools:text="1011" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/weather_pressure_unit"
+                    android:textAppearance="?textAppearanceLabelMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+            </LinearLayout>
+
+        </com.v2ray.ang.ui.weather.ShapeClipLayout>
+
+    </LinearLayout>
+
+    <!-- Row 4: Visibility | Sun -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal">
+
+        <com.v2ray.ang.ui.weather.ShapeClipLayout
+            android:id="@+id/cardVisibility"
+            android:layout_width="0dp"
+            android:layout_height="168dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            app:shapeFillColor="?attr/colorTertiary"
+            app:shapeType="cookie">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="26dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="6dp"
+                        android:src="@drawable/ic_weather_visibility"
+                        app:tint="?attr/colorOnTertiary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/weather_visibility_title"
+                        android:textAppearance="?textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnTertiary" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvVisibilityValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textAppearanceHeadlineSmall"
+                    android:textColor="?attr/colorOnTertiary"
+                    tools:text="16" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/weather_visibility_unit"
+                    android:textAppearance="?textAppearanceLabelMedium"
+                    android:textColor="?attr/colorOnTertiary"
+                    android:alpha="0.85" />
+
+            </LinearLayout>
+
+        </com.v2ray.ang.ui.weather.ShapeClipLayout>
+
+        <com.v2ray.ang.ui.weather.ShapeClipLayout
+            android:id="@+id/cardSun"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            android:visibility="gone"
+            app:shapeFillColor="?attr/colorCard"
+            app:shapeType="squircle"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="6dp"
+                        android:src="@drawable/ic_weather_sunny"
+                        app:tint="?attr/colorOnSurface" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/weather_sun_title"
+                        android:textAppearance="?textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface" />
+                </LinearLayout>
+
+                <com.v2ray.ang.ui.weather.SunArcView
+                    android:id="@+id/sunArcView"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:layout_marginTop="8dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="?attr/colorOutlineVariant" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_weather_sunny"
+                        app:tint="?attr/colorOnSurfaceVariant" />
+
+                    <TextView
+                        android:id="@+id/tvSunrise"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        tools:text="05:57" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_weather_night"
+                        app:tint="?attr/colorOnSurfaceVariant" />
+
+                    <TextView
+                        android:id="@+id/tvSunset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        tools:text="17:39" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_weather_schedule"
+                        app:tint="?attr/colorOnSurfaceVariant" />
+
+                    <TextView
+                        android:id="@+id/tvDaylight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        tools:text="11h 42m" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </com.v2ray.ang.ui.weather.ShapeClipLayout>
+
+    </LinearLayout>
+
+    <!-- Row 5: Air quality | Pollen -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:orientation="horizontal">
+
+        <com.v2ray.ang.ui.weather.ShapeClipLayout
+            android:id="@+id/cardAirQuality"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            android:visibility="gone"
+            app:shapeFillColor="?attr/colorCard"
+            app:shapeType="squircle"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="6dp"
+                        android:src="@drawable/ic_weather_air_lines"
+                        app:tint="?attr/colorOnSurface" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/weather_air_quality_title"
+                        android:textAppearance="?textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvAqiValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?textAppearanceHeadlineSmall"
+                    android:textColor="?attr/colorOnSurface"
+                    tools:text="142" />
+
+                <com.v2ray.ang.ui.weather.LevelBarView
+                    android:id="@+id/barAqi"
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp"
+                    android:layout_marginTop="10dp" />
+
+                <TextView
+                    android:id="@+id/tvAqiLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textAppearance="?textAppearanceLabelMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    tools:text="Unhealthy" />
+
+            </LinearLayout>
+
+        </com.v2ray.ang.ui.weather.ShapeClipLayout>
+
+        <com.v2ray.ang.ui.weather.ShapeClipLayout
+            android:id="@+id/cardPollen"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            android:visibility="gone"
+            app:shapeFillColor="?attr/colorCard"
+            app:shapeType="squircle"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="6dp"
+                        android:src="@drawable/ic_weather_leaf"
+                        app:tint="?attr/colorOnSurface" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/weather_pollen_title"
+                        android:textAppearance="?textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvPollenValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?textAppearanceHeadlineSmall"
+                    android:textColor="?attr/colorOnSurface"
+                    tools:text="1/4" />
+
+                <com.v2ray.ang.ui.weather.LevelBarView
+                    android:id="@+id/barPollen"
+                    android:layout_width="match_parent"
+                    android:layout_height="10dp"
+                    android:layout_marginTop="10dp" />
+
+                <TextView
+                    android:id="@+id/tvPollenLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textAppearance="?textAppearanceLabelMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    tools:text="Low" />
+
+            </LinearLayout>
+
+        </com.v2ray.ang.ui.weather.ShapeClipLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
