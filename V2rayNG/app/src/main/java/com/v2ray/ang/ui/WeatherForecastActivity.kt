@@ -45,7 +45,9 @@ class WeatherForecastActivity : BaseActivity() {
     private lateinit var tvFeelsLike: TextView
     private lateinit var tvMaxMin: TextView
     private lateinit var tvError: TextView
+    private lateinit var tvSummary: TextView
     private lateinit var cardCurrent: android.view.View
+    private lateinit var cardSummary: android.view.View
     private lateinit var cardHourly: android.view.View
     private lateinit var cardDaily: android.view.View
     private lateinit var recyclerHourly: RecyclerView
@@ -64,7 +66,9 @@ class WeatherForecastActivity : BaseActivity() {
         tvFeelsLike = findViewById(R.id.tvForecastFeelsLike)
         tvMaxMin = findViewById(R.id.tvForecastMaxMin)
         tvError = findViewById(R.id.tvForecastError)
+        tvSummary = findViewById(R.id.tvForecastSummary)
         cardCurrent = findViewById(R.id.cardForecastCurrent)
+        cardSummary = findViewById(R.id.cardForecastSummary)
         cardHourly = findViewById(R.id.cardForecastHourly)
         cardDaily = findViewById(R.id.cardForecastDaily)
         recyclerHourly = findViewById(R.id.recyclerForecastHourly)
@@ -141,6 +145,9 @@ class WeatherForecastActivity : BaseActivity() {
             )
         }
 
+        cardSummary.isVisible = true
+        tvSummary.text = buildDaySummary(entry)
+
         val hourlyItems = buildHourlyItems(entry)
         cardHourly.isVisible = hourlyItems.isNotEmpty()
         recyclerHourly.adapter = WeatherHourlyAdapter(this, hourlyItems)
@@ -148,6 +155,36 @@ class WeatherForecastActivity : BaseActivity() {
         val dailyItems = buildDailyItems(entry)
         cardDaily.isVisible = dailyItems.isNotEmpty()
         recyclerDaily.adapter = WeatherDailyAdapter(this, dailyItems)
+    }
+
+    /** Rule-based one-paragraph human summary of today's forecast, built from cached data already on hand. */
+    private fun buildDaySummary(entry: WeatherHelper.WeatherCacheEntry): String {
+        val conditionLabel = getString(WeatherHelper.conditionLabelRes(entry.weatherCode)).lowercase(Locale.getDefault())
+        val hi = entry.dailyTemperatureMaxCelsius.getOrNull(0)
+        val lo = entry.dailyTemperatureMinCelsius.getOrNull(0)
+        val precip = entry.dailyPrecipitationProbabilityMax.getOrNull(0) ?: 0
+        val wind = entry.windSpeedKmh
+
+        val parts = mutableListOf<String>()
+        parts.add(getString(R.string.weather_summary_condition, conditionLabel))
+        if (hi != null && lo != null) {
+            parts.add(
+                getString(
+                    R.string.weather_summary_high_low,
+                    "${Math.round(hi)}\u00b0",
+                    "${Math.round(lo)}\u00b0"
+                )
+            )
+        }
+        when {
+            precip >= 70 -> parts.add(getString(R.string.weather_summary_rain_likely))
+            precip >= 40 -> parts.add(getString(R.string.weather_summary_rain_possible))
+            precip >= 20 -> parts.add(getString(R.string.weather_summary_rain_slight))
+        }
+        if (wind >= 30) {
+            parts.add(getString(R.string.weather_summary_windy))
+        }
+        return parts.joinToString(" ")
     }
 
     private fun buildHourlyItems(entry: WeatherHelper.WeatherCacheEntry): List<HourlyForecastItem> {

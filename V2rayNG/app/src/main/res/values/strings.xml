@@ -595,6 +595,13 @@
     <string name="weather_forecast_sheet_title">Weather Forecast</string>
     <string name="weather_feels_like">Feels like %1$s</string>
     <string name="weather_max_min">Max %1$s  Min %2$s</string>
+    <string name="weather_summary_title">Summary</string>
+    <string name="weather_summary_condition">Expect %1$s throughout the day.</string>
+    <string name="weather_summary_high_low">High %1$s, low %2$s.</string>
+    <string name="weather_summary_rain_likely">Rain is likely — bring an umbrella.</string>
+    <string name="weather_summary_rain_possible">Showers are possible later on.</string>
+    <string name="weather_summary_rain_slight">A slight chance of rain.</string>
+    <string name="weather_summary_windy">Winds will be noticeable today.</string>
     <string name="weather_hourly_forecast_title">Hourly Forecast</string>
     <string name="weather_daily_forecast_title">Daily Forecast</string>
     <string name="weather_now">Now</string>

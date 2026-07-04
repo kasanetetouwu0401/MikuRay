@@ -576,6 +576,13 @@
     <string name="weather_forecast_sheet_title">Прогноз погоды</string>
     <string name="weather_feels_like">Ощущается как %1$s</string>
     <string name="weather_max_min">Макс. %1$s  Мин. %2$s</string>
+    <string name="weather_summary_title">Сводка</string>
+    <string name="weather_summary_condition">В течение дня ожидается %1$s.</string>
+    <string name="weather_summary_high_low">Макс. %1$s, мин. %2$s.</string>
+    <string name="weather_summary_rain_likely">Вероятен дождь — возьмите зонт.</string>
+    <string name="weather_summary_rain_possible">Позже возможны осадки.</string>
+    <string name="weather_summary_rain_slight">Небольшая вероятность дождя.</string>
+    <string name="weather_summary_windy">Сегодня будет заметный ветер.</string>
     <string name="weather_hourly_forecast_title">Почасовой прогноз</string>
     <string name="weather_daily_forecast_title">Прогноз на день</string>
     <string name="weather_now">Сейчас</string>

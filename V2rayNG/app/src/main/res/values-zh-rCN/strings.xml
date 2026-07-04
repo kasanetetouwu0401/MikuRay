@@ -556,6 +556,13 @@
     <string name="weather_forecast_sheet_title">天气预报</string>
     <string name="weather_feels_like">体感温度 %1$s</string>
     <string name="weather_max_min">最高 %1$s  最低 %2$s</string>
+    <string name="weather_summary_title">摘要</string>
+    <string name="weather_summary_condition">全天预计%1$s。</string>
+    <string name="weather_summary_high_low">最高%1$s，最低%2$s。</string>
+    <string name="weather_summary_rain_likely">很可能有雨 —— 请携带雨伞。</string>
+    <string name="weather_summary_rain_possible">稍后可能有阵雨。</string>
+    <string name="weather_summary_rain_slight">有轻微降雨的可能。</string>
+    <string name="weather_summary_windy">今天风力较为明显。</string>
     <string name="weather_hourly_forecast_title">小时预报</string>
     <string name="weather_daily_forecast_title">每日预报</string>
     <string name="weather_now">现在</string>

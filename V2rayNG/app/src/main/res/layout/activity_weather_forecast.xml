@@ -143,6 +143,63 @@
                 tools:visibility="visible" />
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardForecastSummary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="?colorCard"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                tools:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginEnd="6dp"
+                            android:src="@drawable/ic_description_24dp"
+                            app:tint="?colorOnSurfaceVariant" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/weather_summary_title"
+                            android:textAppearance="?textAppearanceTitleSmall"
+                            android:textColor="?colorOnSurface" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvForecastSummary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:textAppearance="?textAppearanceBodyMedium"
+                        android:textColor="?colorOnSurfaceVariant"
+                        tools:text="Expect clear skies throughout the day. High 30°, low 24°." />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardForecastHourly"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

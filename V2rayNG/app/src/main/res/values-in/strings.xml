@@ -558,6 +558,13 @@
     <string name="weather_forecast_sheet_title">Prakiraan cuaca</string>
     <string name="weather_feels_like">Terasa seperti %1$s</string>
     <string name="weather_max_min">Maks %1$s  Min %2$s</string>
+    <string name="weather_summary_title">Ringkasan</string>
+    <string name="weather_summary_condition">Diperkirakan %1$s sepanjang hari.</string>
+    <string name="weather_summary_high_low">Tertinggi %1$s, terendah %2$s.</string>
+    <string name="weather_summary_rain_likely">Hujan kemungkinan besar terjadi — bawa payung.</string>
+    <string name="weather_summary_rain_possible">Hujan mungkin turun nanti.</string>
+    <string name="weather_summary_rain_slight">Ada sedikit kemungkinan hujan.</string>
+    <string name="weather_summary_windy">Angin akan cukup terasa hari ini.</string>
     <string name="weather_hourly_forecast_title">Prakiraan per jam</string>
     <string name="weather_daily_forecast_title">Prakiraan harian</string>
     <string name="weather_now">Sekarang</string>
