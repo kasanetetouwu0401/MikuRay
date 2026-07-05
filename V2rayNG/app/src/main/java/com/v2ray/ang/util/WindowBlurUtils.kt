@@ -19,6 +19,12 @@ object WindowBlurUtils {
 
     private const val BLUR_OVERLAY_ID = 2100000000
 
+    // Alpha (0-255) of the black overlay the custom BlurView draws on top of its
+    // blur (see setOverlayColor below). Native blur has no such overlay of its
+    // own, so we fake the same darkness using the window's dimAmount instead —
+    // keeping both engines visually consistent.
+    private const val CUSTOM_BLUR_OVERLAY_ALPHA = 120
+
     /**
      * Whether the device supports Android's own window-blur-behind API
      * (Window#setBackgroundBlurRadius, added in Android 12 / API 31).
@@ -76,7 +82,7 @@ object WindowBlurUtils {
                 val blurRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
                 setBlurRadius(blurRadius)
                 setBlurRounds(blurRounds)
-                setOverlayColor(Color.argb(120, 0, 0, 0))
+                setOverlayColor(Color.argb(CUSTOM_BLUR_OVERLAY_ALPHA, 0, 0, 0))
                 
                 isClickable = false
                 isFocusable = false
@@ -146,19 +152,21 @@ object WindowBlurUtils {
             decorView.removeView(it)
         }
 
-        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        // dimAmount only actually renders when FLAG_DIM_BEHIND is set, so both
+        // flags need to be on together to get "blurred + dimmed" like the custom engine.
+        window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         window.addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
 
         val radius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
         val density = window.context.resources.displayMetrics.density
         val radiusPx = (radius * density).toInt().coerceIn(1, 250)
 
-        // Dim it a touch on top of the blur so foreground content stays readable,
-        // mirroring what the system does for its own blurred surfaces. Written
-        // together with blurBehindRadius so both take effect in a single relayout.
+        // Match the darkness of the custom BlurView's black overlay so both
+        // engines look the same. Written together with blurBehindRadius so
+        // both take effect in a single relayout.
         val params = window.attributes
         params.blurBehindRadius = radiusPx
-        params.dimAmount = 0.1f
+        params.dimAmount = CUSTOM_BLUR_OVERLAY_ALPHA / 255f
         window.attributes = params
     }
 
@@ -181,8 +189,10 @@ object WindowBlurUtils {
         if (!isNativeBlurSupported()) return
         try {
             window.clearFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             val params = window.attributes
             params.blurBehindRadius = 0
+            params.dimAmount = 0f
             window.attributes = params
         } catch (e: Exception) {
             e.printStackTrace()
