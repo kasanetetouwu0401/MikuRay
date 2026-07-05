@@ -1,6 +1,5 @@
 package com.v2ray.ang.util
 
-import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Color
@@ -13,6 +12,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmdeve.blurview.widget.BlurView
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
+import com.v2ray.ang.ui.BaseActivity
 
 object WindowBlurUtils {
 
@@ -30,7 +30,7 @@ object WindowBlurUtils {
 
         try {
             val dialogContext = window.context
-            val activity = dialogContext.getActivity() ?: return
+            val activity = dialogContext.getBaseActivity() ?: return
             val targetView = activity.findViewById<ViewGroup>(targetId) ?: return
             
             targetView.findViewById<View>(BLUR_OVERLAY_ID)?.let {
@@ -80,7 +80,7 @@ object WindowBlurUtils {
         if (window == null) return
         
         try {
-            val activity = window.context.getActivity() ?: return
+            val activity = window.context.getBaseActivity() ?: return
             val targetView = activity.findViewById<ViewGroup>(targetId) ?: return
             val blurView = targetView.findViewById<BlurView>(BLUR_OVERLAY_ID) ?: return
             
@@ -96,9 +96,9 @@ object WindowBlurUtils {
     }
 }
 
-tailrec fun Context.getActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.getActivity()
+tailrec fun Context.getBaseActivity(): BaseActivity? = when (this) {
+    is BaseActivity -> this
+    is ContextWrapper -> baseContext.getBaseActivity()
     else -> null
 }
 
