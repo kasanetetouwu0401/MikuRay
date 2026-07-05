@@ -44,6 +44,8 @@ object WindowBlurUtils {
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 
+                setLayerType(View.LAYER_TYPE_HARDWARE, null)
+                
                 val blurRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
                 val blurRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
                 
