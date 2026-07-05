@@ -1027,10 +1027,12 @@ class UiSettingsActivity : BaseActivity() {
             customDpi?.summary = if (savedDpi > 0) savedDpi.toString() else systemDpi.toString()
             
             val savedRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS)
-            blurIntensity?.updateSummary(savedRadius)
+            val savedRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
+            blurIntensity?.updateSummary(savedRadius, savedRounds)
             
             val savedBottomRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_RADIUS, AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS)
-            blurBottomIntensity?.updateSummary(savedBottomRadius)
+            val savedBottomRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS)
+            blurBottomIntensity?.updateSummary(savedBottomRadius, savedBottomRounds)
         }
 
         private fun updateTrueBlackState(isNight: Boolean) {

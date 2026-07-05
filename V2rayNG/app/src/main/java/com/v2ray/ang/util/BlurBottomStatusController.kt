@@ -22,8 +22,12 @@ object BlurBottomStatusController {
             AppConfig.PREF_BLUR_BOTTOM_RADIUS,
             AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS
         ).toFloat()
-        binding.blurBottomStatus.setupWith(binding.blurTargetMain)
-            .setBlurRadius(radius)
+        val rounds = MmkvManager.decodeSettingsInt(
+            AppConfig.PREF_BLUR_BOTTOM_ROUNDS,
+            AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS
+        )
+        binding.blurBottomStatus.setBlurRadius(radius)
+        binding.blurBottomStatus.setBlurRounds(rounds)
         binding.blurBottomStatus.invalidate()
         binding.blurBottomStatus.visibility = View.VISIBLE
         binding.cardBottomStatus.setCardBackgroundColor(android.graphics.Color.TRANSPARENT)

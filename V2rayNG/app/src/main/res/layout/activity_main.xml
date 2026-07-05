@@ -7,15 +7,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <eightbitlab.com.blurview.BlurTarget
-        android:id="@+id/blur_target_main"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
     <FrameLayout
         android:id="@+id/banner_home"
         android:layout_width="match_parent"
@@ -348,10 +339,6 @@
         android:layout_alignParentBottom="true"
         android:background="@drawable/uwu_bg_fade_bottom" />
 
-    </RelativeLayout>
-
-    </eightbitlab.com.blurview.BlurTarget>
-
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_bottom_status"
         android:layout_width="match_parent"
@@ -365,11 +352,13 @@
         app:cardElevation="0dp"
         app:strokeWidth="0dp">
 
-        <eightbitlab.com.blurview.BlurView
+        <com.qmdeve.blurview.widget.BlurView
             android:id="@+id/blur_bottom_status"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:blurOverlayColor="@color/uwu_tint_blur" />
+            app:blurRadius="20dp"
+            app:cornerRadius="28dp"
+            app:overlayColor="@color/uwu_tint_blur" />
 
         <RelativeLayout
             android:gravity="center_vertical"
