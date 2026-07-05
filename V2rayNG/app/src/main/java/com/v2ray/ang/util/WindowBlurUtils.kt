@@ -1,5 +1,6 @@
 package com.v2ray.ang.util
 
+import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Color
@@ -9,16 +10,14 @@ import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmdeve.blurview.widget.BlurView
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.ui.BaseActivity
 
 object WindowBlurUtils {
 
     private const val BLUR_OVERLAY_ID = 2100000000
 
-    fun applyWindowBlur(window: Window?, targetId: Int = android.R.id.content) {
+    fun applyWindowBlur(window: Window?) {
         if (window == null) return
         
         val isBlurEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
@@ -29,28 +28,25 @@ object WindowBlurUtils {
         }
 
         try {
-            val dialogContext = window.context
-            val activity = dialogContext.getBaseActivity() ?: return
-            val targetView = activity.findViewById<ViewGroup>(targetId) ?: return
+            val context = window.context
+            val activity = context.getActivity() ?: return
+            val decorView = activity.window?.decorView as? ViewGroup ?: return
             
-            targetView.findViewById<View>(BLUR_OVERLAY_ID)?.let {
-                targetView.removeView(it)
+            decorView.findViewById<View>(BLUR_OVERLAY_ID)?.let {
+                decorView.removeView(it)
             }
 
-            val blurView = BlurView(activity, null).apply {
+            val blurView = LiquidGlassBlurView(context, null).apply {
                 id = BLUR_OVERLAY_ID
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 
-                setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-                
                 val blurRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
                 val blurRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
-                
-                setBlurRadius(if (blurRadius > 0f) blurRadius else 12f)
-                setBlurRounds(if (blurRounds > 0) blurRounds else 3)
+                setBlurRadius(blurRadius)
+                setBlurRounds(blurRounds)
                 setOverlayColor(Color.argb(120, 0, 0, 0))
                 
                 isClickable = false
@@ -59,14 +55,13 @@ object WindowBlurUtils {
                 outlineProvider = null
             }
 
-            targetView.addView(blurView)          
+            decorView.addView(blurView)          
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
             window.decorView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
                 override fun onViewAttachedToWindow(v: View) {}
-                
                 override fun onViewDetachedFromWindow(v: View) {
-                    targetView.removeView(blurView)
+                    decorView.removeView(blurView)
                     window.decorView.removeOnAttachStateChangeListener(this)
                 }
             })
@@ -78,19 +73,18 @@ object WindowBlurUtils {
         }
     }
 
-    fun updateWindowBlur(window: Window?, radius: Float, rounds: Int, targetId: Int = android.R.id.content) {
+    fun updateWindowBlur(window: Window?, radius: Float, rounds: Int) {
         if (window == null) return
-        
         try {
-            val activity = window.context.getBaseActivity() ?: return
-            val targetView = activity.findViewById<ViewGroup>(targetId) ?: return
-            val blurView = targetView.findViewById<BlurView>(BLUR_OVERLAY_ID) ?: return
+            val activity = window.context.getActivity() ?: return
+            val decorView = activity.window?.decorView as? ViewGroup ?: return
+            val blurView = decorView.findViewById<LiquidGlassBlurView>(BLUR_OVERLAY_ID) ?: return
             
-            blurView.setBlurRadius(if (radius > 0f) radius else 12f)
-            blurView.setBlurRounds(if (rounds > 0) rounds else 3)
+            blurView.setBlurRadius(radius)
+            blurView.setBlurRounds(rounds)
             
             blurView.invalidate()
-            targetView.invalidate()
+            decorView.invalidate()
             
         } catch (e: Exception) {
             e.printStackTrace()
@@ -98,22 +92,22 @@ object WindowBlurUtils {
     }
 }
 
-tailrec fun Context.getBaseActivity(): BaseActivity? = when (this) {
-    is BaseActivity -> this
-    is ContextWrapper -> baseContext.getBaseActivity()
+tailrec fun Context.getActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.getActivity()
     else -> null
 }
 
-fun MaterialAlertDialogBuilder.showBlur(targetId: Int = android.R.id.content): AlertDialog {
+fun MaterialAlertDialogBuilder.showBlur(): androidx.appcompat.app.AlertDialog {
     val dialog = this.create()
-    WindowBlurUtils.applyWindowBlur(dialog.window, targetId)
+    WindowBlurUtils.applyWindowBlur(dialog.window)
     dialog.show()
     return dialog
 }
 
-fun AlertDialog.Builder.showBlur(targetId: Int = android.R.id.content): AlertDialog {
+fun AlertDialog.Builder.showBlur(): AlertDialog {
     val dialog = this.create()
-    WindowBlurUtils.applyWindowBlur(dialog.window, targetId)
+    WindowBlurUtils.applyWindowBlur(dialog.window)
     dialog.show()
     return dialog
 }

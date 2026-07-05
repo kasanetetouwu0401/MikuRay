@@ -34,7 +34,7 @@ import com.v2ray.ang.util.DPIController
 import com.v2ray.ang.util.MyContextWrapper
 import com.v2ray.ang.util.WindowBlurUtils
 import com.v2ray.ang.util.ThemeStateManager
-import com.qmdeve.blurview.widget.BlurView
+import com.v2ray.ang.util.LiquidGlassBlurView
 
 abstract class BaseActivity : AppCompatActivity() {
     private var loadingOverlay: FrameLayout? = null
@@ -177,7 +177,7 @@ abstract class BaseActivity : AppCompatActivity() {
             val isBlurEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
 
             if (isBlurEnabled) {
-                val blurView = BlurView(this@BaseActivity, null).apply {
+                val blurView = LiquidGlassBlurView(this@BaseActivity, null).apply {
                     layoutParams = FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT

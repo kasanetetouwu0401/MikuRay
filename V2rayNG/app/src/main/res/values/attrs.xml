@@ -93,4 +93,9 @@
         <attr name="textMore" format="string" />
     </declare-styleable>
 
+    <declare-styleable name="LiquidGlassBlurView">
+        <attr name="lgCornerRadius" format="dimension" />
+        <attr name="lgOverlayColor" format="color" />
+    </declare-styleable>
+
 </resources>
