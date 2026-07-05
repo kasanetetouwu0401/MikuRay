@@ -44,13 +44,13 @@ object WindowBlurUtils {
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 
-                setLayerType(View.LAYER_TYPE_HARDWARE, null)
+                setLayerType(View.LAYER_TYPE_SOFTWARE, null)
                 
                 val blurRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
                 val blurRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
                 
-                setBlurRadius(if (blurRadius > 0f) blurRadius else 10f)
-                setBlurRounds(if (blurRounds > 0) blurRounds else 1)
+                setBlurRadius(if (blurRadius > 0f) blurRadius else 12f)
+                setBlurRounds(if (blurRounds > 0) blurRounds else 3)
                 setOverlayColor(Color.argb(120, 0, 0, 0))
                 
                 isClickable = false
