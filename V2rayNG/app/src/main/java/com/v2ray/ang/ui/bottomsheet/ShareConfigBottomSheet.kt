@@ -92,12 +92,14 @@ class ShareConfigBottomSheet : BaseBottomSheetFragment() {
                         .asGif()
                         .load(Uri.parse(uriString))
                         .diskCacheStrategy(DiskCacheStrategy.DATA)
+                        .disallowHardwareConfig()
                         .error(R.drawable.uwu_banner_sheet)
                         .into(bannerImageView)
                 } else {
                     Glide.with(this)
                         .load(Uri.parse(uriString))
                         .diskCacheStrategy(DiskCacheStrategy.DATA)
+                        .disallowHardwareConfig()
                         .error(R.drawable.uwu_banner_sheet)
                         .into(bannerImageView)
                 }
