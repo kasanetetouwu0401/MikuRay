@@ -10,7 +10,6 @@ import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmdeve.blurview.BlurNative
 import com.qmdeve.blurview.widget.BlurView
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
@@ -38,14 +37,6 @@ object WindowBlurUtils {
                 decorView.removeView(it)
             }
 
-            val blurRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
-            val blurRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
-
-            // Inisialisasi BlurNative
-            val nativeAlgorithm = BlurNative().apply {
-                setBlurRounds(blurRounds)
-            }
-
             val blurView = BlurView(context, null).apply {
                 id = BLUR_OVERLAY_ID
                 layoutParams = ViewGroup.LayoutParams(
@@ -53,15 +44,16 @@ object WindowBlurUtils {
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 
+                val blurRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
+                val blurRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
+                setBlurRadius(blurRadius)
+                setBlurRounds(blurRounds)
+                setOverlayColor(Color.argb(120, 0, 0, 0))
+                
                 isClickable = false
                 isFocusable = false
                 elevation = 0f
                 outlineProvider = null
-
-                // Langsung masukkan algoritma, radius, dan warna di sini
-                setBlurAlgorithm(nativeAlgorithm)
-                setBlurRadius(blurRadius)
-                setOverlayColor(Color.argb(120, 0, 0, 0))
             }
 
             decorView.addView(blurView)          
@@ -89,18 +81,10 @@ object WindowBlurUtils {
             val decorView = activity.window?.decorView as? ViewGroup ?: return
             val blurView = decorView.findViewById<BlurView>(BLUR_OVERLAY_ID) ?: return
             
-            // Perbarui BlurNative dengan parameter rounds terbaru
-            val nativeAlgorithm = BlurNative().apply {
-                setBlurRounds(rounds)
-            }
+            blurView.setBlurRadius(radius)
+            blurView.setBlurRounds(rounds)
             
-            // Timpa algoritma dan radius yang lama
-            blurView.apply {
-                setBlurAlgorithm(nativeAlgorithm)
-                setBlurRadius(radius)
-                invalidate()
-            }
-            
+            blurView.invalidate()
             decorView.invalidate()
             
         } catch (e: Exception) {
