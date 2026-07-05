@@ -150,25 +150,40 @@ object WindowBlurUtils {
         window.addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
 
         val radius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
-        setNativeBlurRadius(window, radius)
+        val density = window.context.resources.displayMetrics.density
+        val radiusPx = (radius * density).toInt().coerceIn(1, 250)
 
         // Dim it a touch on top of the blur so foreground content stays readable,
-        // mirroring what the system does for its own blurred surfaces.
-        window.attributes?.dimAmount = 0.1f
+        // mirroring what the system does for its own blurred surfaces. Written
+        // together with blurBehindRadius so both take effect in a single relayout.
+        val params = window.attributes
+        params.blurBehindRadius = radiusPx
+        params.dimAmount = 0.1f
+        window.attributes = params
     }
 
     private fun setNativeBlurRadius(window: Window, radius: Float) {
         if (!isNativeBlurSupported()) return
         val density = window.context.resources.displayMetrics.density
         val radiusPx = (radius * density).toInt().coerceIn(1, 250)
-        window.setBackgroundBlurRadius(radiusPx)
+
+        // Window#setBackgroundBlurRadius() only takes effect once the window's
+        // ViewRootImpl is already attached, so it silently no-ops when called
+        // before the dialog is shown. Writing the field on the LayoutParams
+        // directly (like dimAmount above) and re-assigning it is what actually
+        // gets picked up both before *and* after the window is shown.
+        val params = window.attributes
+        params.blurBehindRadius = radiusPx
+        window.attributes = params
     }
 
     private fun clearNativeBlur(window: Window) {
         if (!isNativeBlurSupported()) return
         try {
             window.clearFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
-            window.setBackgroundBlurRadius(0)
+            val params = window.attributes
+            params.blurBehindRadius = 0
+            window.attributes = params
         } catch (e: Exception) {
             e.printStackTrace()
         }
