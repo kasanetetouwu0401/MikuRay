@@ -10,8 +10,7 @@ import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-// Import diubah menggunakan BlurViewGroup sesuai referensi Java
-import com.qmdeve.blurview.widget.BlurViewGroup
+import com.qmdeve.blurview.widget.BlurView
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
 
@@ -32,14 +31,13 @@ object WindowBlurUtils {
         try {
             val context = window.context
             val activity = context.getActivity() ?: return
-            val decorView = activity.window?.decorView as? ViewGroup ?: return
+            val decorView = activity.findViewById<ViewGroup>(android.R.id.content) ?: return
             
             decorView.findViewById<View>(BLUR_OVERLAY_ID)?.let {
                 decorView.removeView(it)
             }
 
-            // Inisialisasi menggunakan BlurViewGroup
-            val blurView = BlurViewGroup(context, null).apply {
+            val blurView = BlurView(context, null).apply {
                 id = BLUR_OVERLAY_ID
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -81,9 +79,7 @@ object WindowBlurUtils {
         try {
             val activity = window.context.getActivity() ?: return
             val decorView = activity.window?.decorView as? ViewGroup ?: return
-            
-            // Casting diubah menjadi BlurViewGroup
-            val blurView = decorView.findViewById<BlurViewGroup>(BLUR_OVERLAY_ID) ?: return
+            val blurView = decorView.findViewById<BlurView>(BLUR_OVERLAY_ID) ?: return
             
             blurView.setBlurRadius(radius)
             blurView.setBlurRounds(rounds)
