@@ -76,7 +76,7 @@ object WindowBlurUtils {
         }
     }
 
-    fun updateWindowBlur(window: Window?, targetId: Int = android.R.id.content, radius: Float, rounds: Int) {
+    fun updateWindowBlur(window: Window?, radius: Float, rounds: Int, targetId: Int = android.R.id.content) {
         if (window == null) return
         
         try {
@@ -84,8 +84,8 @@ object WindowBlurUtils {
             val targetView = activity.findViewById<ViewGroup>(targetId) ?: return
             val blurView = targetView.findViewById<BlurView>(BLUR_OVERLAY_ID) ?: return
             
-            blurView.setBlurRadius(if (radius > 0f) radius else 10f)
-            blurView.setBlurRounds(if (rounds > 0) rounds else 1)
+            blurView.setBlurRadius(if (radius > 0f) radius else 12f)
+            blurView.setBlurRounds(if (rounds > 0) rounds else 3)
             
             blurView.invalidate()
             targetView.invalidate()
