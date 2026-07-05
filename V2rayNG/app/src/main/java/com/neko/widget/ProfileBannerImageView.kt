@@ -122,7 +122,6 @@ class ProfileBannerImageView @JvmOverloads constructor(
                         .asBitmap()
                         .load(savedUri)
                         .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .disallowHardwareConfig()
                         .dontAnimate()
                         .error(R.drawable.uwu_banner_profile)
                         .into(this)

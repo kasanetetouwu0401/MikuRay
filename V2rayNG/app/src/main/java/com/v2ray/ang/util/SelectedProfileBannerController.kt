@@ -61,11 +61,10 @@ class SelectedProfileBannerController(private val context: Context) {
                 .asBitmap()
                 .load(uri)
                 .diskCacheStrategy(DiskCacheStrategy.DATA)
-                .disallowHardwareConfig()
                 .into(object : CustomTarget<Bitmap>() {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                         val safeCopy = try {
-                            resource.copy(Bitmap.Config.ARGB_8888, false)
+                            resource.copy(resource.config ?: Bitmap.Config.ARGB_8888, false)
                         } catch (e: Exception) {
                             resource
                         }

@@ -371,14 +371,12 @@ class MainActivity : HelperBaseActivity(),
                         .asGif()
                         .load(Uri.parse(uriString))
                         .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .disallowHardwareConfig()
                         .error(R.drawable.uwu_banner_home)
                         .into(headerImage)
                 } else {
                     Glide.with(this@MainActivity)
                         .load(Uri.parse(uriString))
                         .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .disallowHardwareConfig()
                         .error(R.drawable.uwu_banner_home)
                         .into(headerImage)
                 }

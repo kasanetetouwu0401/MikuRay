@@ -61,7 +61,6 @@ data class OpenMeteoGeocodingResult(
     val admin1: String? = null
 )
 
-/** https://air-quality-api.open-meteo.com/v1/air-quality — best-effort, may be unavailable in some regions. */
 data class OpenMeteoAirQualityResponse(
     val current: OpenMeteoAirQualityCurrent? = null
 )

@@ -49,7 +49,8 @@ object WindowBlurUtils {
                 setBlurRadius(blurRadius)
                 setBlurRounds(blurRounds)
                 setOverlayColor(Color.argb(120, 0, 0, 0))
-                
+                setForcePixelCopy(true)
+
                 isClickable = false
                 isFocusable = false
                 elevation = 0f
