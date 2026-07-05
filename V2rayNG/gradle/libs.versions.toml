@@ -18,6 +18,7 @@ quickieFoss = "1.18.1"
 kotlinxCoroutinesAndroid = "1.11.0"
 kotlinxCoroutinesCore = "1.11.0"
 swiperefreshlayout = "1.2.0"
+blurview = "version-3.2.0"
 lottie = "6.7.1"
 editorkit = "2.9.0"
 core = "3.5.4"
@@ -54,6 +55,7 @@ quickie-foss = { module = "com.github.T8RIN.QuickieExtended:quickie-foss", versi
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesCore" }
+dimezis-blurview = { module = "com.github.Dimezis:BlurView", version.ref = "blurview" }
 com-airbnb-android-lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
 editorkit = { module = "com.blacksquircle.ui:editorkit", version.ref = "editorkit" }
 language-base = { module = "com.blacksquircle.ui:language-base", version.ref = "editorkit" }

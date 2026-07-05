@@ -34,7 +34,7 @@ import com.v2ray.ang.util.DPIController
 import com.v2ray.ang.util.MyContextWrapper
 import com.v2ray.ang.util.WindowBlurUtils
 import com.v2ray.ang.util.ThemeStateManager
-import com.qmdeve.blurview.widget.BlurView
+import eightbitlab.com.blurview.BlurView
 
 abstract class BaseActivity : AppCompatActivity() {
     private var loadingOverlay: FrameLayout? = null
@@ -177,16 +177,19 @@ abstract class BaseActivity : AppCompatActivity() {
             val isBlurEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
 
             if (isBlurEnabled) {
-                val blurView = BlurView(this@BaseActivity, null).apply {
+                val blurTarget = WindowBlurUtils.getOrCreateBlurTarget(this@BaseActivity)
+                val blurView = BlurView(this@BaseActivity).apply {
                     layoutParams = FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT
                     )
-                    setBlurRadius(MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat())
-                    setBlurRounds(MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS))
                     setOverlayColor(Color.argb(120, 0, 0, 0))
                 }
                 addView(blurView)
+                if (blurTarget != null) {
+                    blurView.setupWith(blurTarget)
+                        .setBlurRadius(MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat())
+                }
             } else {
                 setBackgroundColor(Color.argb(120, 0, 0, 0))
             }

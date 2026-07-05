@@ -30,14 +30,11 @@ class BlurIntensityDialog @JvmOverloads constructor(
 
     override fun onClick() {
         val originalRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS)
-        val originalRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
 
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_blur_intensity, null)
         val sliderRadius = dialogView.findViewById<Slider>(R.id.slider_blur_radius)
-        val sliderRounds = dialogView.findViewById<Slider>(R.id.slider_blur_rounds)
 
         sliderRadius.value = originalRadius.toFloat().coerceIn(2f, 100f)
-        sliderRounds.value = originalRounds.toFloat().coerceIn(1f, 15f)
 
         val dialog = MaterialAlertDialogBuilder(context)
             .setTitle(R.string.pref_blur_intensity)
@@ -52,44 +49,31 @@ class BlurIntensityDialog @JvmOverloads constructor(
 
         sliderRadius.addOnChangeListener { _, value, fromUser ->
             if (fromUser) {
-                WindowBlurUtils.updateWindowBlur(dialog.window, value, sliderRounds.value.toInt())
-            }
-        }
-        sliderRounds.addOnChangeListener { _, value, fromUser ->
-            if (fromUser) {
-                WindowBlurUtils.updateWindowBlur(dialog.window, sliderRadius.value, value.toInt())
+                WindowBlurUtils.updateWindowBlur(dialog.window, value)
             }
         }
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val radius = sliderRadius.value.toInt()
-            val rounds = sliderRounds.value.toInt()
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_RADIUS, radius)
-            MmkvManager.encodeSettings(AppConfig.PREF_BLUR_ROUNDS, rounds)
-            updateSummary(radius, rounds)
+            updateSummary(radius)
             dialog.dismiss()
         }
 
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
-            WindowBlurUtils.updateWindowBlur(dialog.window, originalRadius.toFloat(), originalRounds)
+            WindowBlurUtils.updateWindowBlur(dialog.window, originalRadius.toFloat())
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_RADIUS, originalRadius)
-            MmkvManager.encodeSettings(AppConfig.PREF_BLUR_ROUNDS, originalRounds)
-            updateSummary(originalRadius, originalRounds)
+            updateSummary(originalRadius)
             dialog.dismiss()
         }
 
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
             sliderRadius.value = AppConfig.DEFAULT_BLUR_RADIUS.toFloat()
-            sliderRounds.value = AppConfig.DEFAULT_BLUR_ROUNDS.toFloat()
-            WindowBlurUtils.updateWindowBlur(
-                dialog.window,
-                AppConfig.DEFAULT_BLUR_RADIUS.toFloat(),
-                AppConfig.DEFAULT_BLUR_ROUNDS
-            )
+            WindowBlurUtils.updateWindowBlur(dialog.window, AppConfig.DEFAULT_BLUR_RADIUS.toFloat())
         }
     }
 
-    fun updateSummary(radius: Int, rounds: Int) {
-        summary = context.getString(R.string.summary_blur_intensity_value, radius, rounds)
+    fun updateSummary(radius: Int) {
+        summary = context.getString(R.string.summary_blur_intensity_value, radius)
     }
 }

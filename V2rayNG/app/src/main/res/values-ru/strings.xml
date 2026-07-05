@@ -790,11 +790,10 @@
     <string name="summary_pref_blur_bottom_status">Включить эффект размытия для нижней карточки статуса</string>
     <string name="pref_blur_intensity">Интенсивность размытия</string>
     <string name="blur_intensity_radius_label">Радиус размытия (2–100)</string>
-    <string name="blur_intensity_rounds_label">Итерации размытия (1–15)</string>
-    <string name="summary_blur_intensity_value">Радиус: %1$d · Итерации: %2$d</string>
+    <string name="summary_blur_intensity_value">Радиус: %1$d</string>
     <string name="pref_blur_bottom_intensity">Интенсивность размытия нижней карточки</string>
     <string name="title_blur_settings">Настройки размытия</string>
-    <string name="title_blur_warning">Высокое число итераций (10+) может снизить FPS. Рекомендуется: 2–5 итераций с радиусом 25–40</string>
+    <string name="title_blur_warning">Слишком высокий радиус (70+) может снизить FPS. Рекомендуется: 20–40</string>
     <string name="toast_allow_insecure_deprecated">ПРЕДУПРЕЖДЕНИЕ: Пропуск проверки сертификата «allowInsecure» будет отключён в августе 2026 г. Пожалуйста, как можно скорее перейдите на отпечаток сертификата. После истечения срока функция будет недоступна.</string>
 
     <!-- WelcomeActivity -->
