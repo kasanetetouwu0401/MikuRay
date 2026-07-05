@@ -50,6 +50,7 @@ import com.v2ray.ang.ui.preference.CategoryStyleHelper
 import com.v2ray.ang.util.BannerColorExtractor
 import com.v2ray.ang.util.CustomFontManager
 import com.v2ray.ang.util.ThemeManager
+import com.v2ray.ang.util.WindowBlurUtils
 import com.v2ray.ang.ui.weather.WeatherHelper
 import com.v2ray.ang.util.showBlur
 import com.yalantis.ucrop.UCrop
@@ -100,6 +101,7 @@ class UiSettingsActivity : BaseActivity() {
         private val showHomeBanner by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_HOME_BANNER) }
         private val trueBlack by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_TRUE_BLACK) }
         private val enableBlur by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_ENABLE_BLUR) }
+        private val blurUseNative by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_BLUR_USE_NATIVE) }
         private val blurBottomStatus by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_BLUR_BOTTOM_STATUS) }
         private val nightTheme by lazy { findPreference<ListPreference>(AppConfig.PREF_UI_MODE_NIGHT) }
         private val iconShape by lazy { findPreference<ListPreference>(AppConfig.PREF_ICON_SHAPE) }
@@ -337,8 +339,15 @@ class UiSettingsActivity : BaseActivity() {
 
             enableBlur?.setOnPreferenceChangeListener { _, newValue ->
                 MmkvManager.encodeSettings(AppConfig.PREF_ENABLE_BLUR, newValue as Boolean)
+                blurUseNative?.isEnabled = newValue && WindowBlurUtils.isNativeBlurSupported()
                 true
             }
+
+            blurUseNative?.setOnPreferenceChangeListener { _, newValue ->
+                MmkvManager.encodeSettings(AppConfig.PREF_BLUR_USE_NATIVE, newValue as Boolean)
+                true
+            }
+            setupBlurUseNativeState()
 
             blurBottomStatus?.setOnPreferenceChangeListener { _, newValue ->
                 MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_STATUS, newValue as Boolean)
@@ -1033,6 +1042,24 @@ class UiSettingsActivity : BaseActivity() {
             val savedBottomRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_RADIUS, AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS)
             val savedBottomRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS)
             blurBottomIntensity?.updateSummary(savedBottomRadius, savedBottomRounds)
+
+            setupBlurUseNativeState()
+        }
+
+        private fun setupBlurUseNativeState() {
+            val blurEnabled = enableBlur?.isChecked == true
+            val nativeSupported = WindowBlurUtils.isNativeBlurSupported()
+
+            blurUseNative?.apply {
+                isEnabled = blurEnabled && nativeSupported
+                if (!nativeSupported) {
+                    isChecked = false
+                    MmkvManager.encodeSettings(AppConfig.PREF_BLUR_USE_NATIVE, false)
+                    summary = getString(R.string.summary_pref_blur_use_native_unsupported)
+                } else {
+                    summary = getString(R.string.summary_pref_blur_use_native)
+                }
+            }
         }
 
         private fun updateTrueBlackState(isNight: Boolean) {

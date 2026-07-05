@@ -50,26 +50,6 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
         SettingsManager.setNightMode()
         SettingsManager.preloadAllBanners(this)
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler(this))
-        warmUpHokoBlur()
-    }
-
-    /**
-     * HokoBlur's NATIVE scheme loads a JNI .so on its very first call, which can take up to
-     * ~1s on some devices. Without this warm-up, the first blur dialog/overlay shown in the
-     * app's lifetime flashes its plain (unblurred) background before the blur pops in. Running
-     * one throwaway blur here, off the main thread, well before any UI needs it, hides that cost.
-     */
-    private fun warmUpHokoBlur() {
-        Thread {
-            try {
-                val warmupBitmap = android.graphics.Bitmap.createBitmap(32, 32, android.graphics.Bitmap.Config.ARGB_8888)
-                com.hoko.blur.HokoBlur.with(this).radius(5).blur(warmupBitmap)
-                warmupBitmap.recycle()
-            } catch (e: Exception) {
-                // Best-effort warm-up only; a failure here just means the first real blur call
-                // pays the cold-start cost instead.
-            }
-        }.start()
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {

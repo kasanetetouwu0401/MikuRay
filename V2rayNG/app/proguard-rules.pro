@@ -21,7 +21,3 @@
 
 -dontobfuscate
 -keepattributes SourceFile
-
-# HokoBlur - keep native/JNI bridge and OpenGL functor classes intact
--keep class com.hoko.blur.** { *; }
--keepclassmembers class com.hoko.blur.** { *; }
