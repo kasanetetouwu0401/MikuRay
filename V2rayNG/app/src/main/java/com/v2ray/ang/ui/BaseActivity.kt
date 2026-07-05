@@ -2,6 +2,7 @@ package com.v2ray.ang.ui
 
 import android.content.Context
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
@@ -34,11 +35,12 @@ import com.v2ray.ang.util.DPIController
 import com.v2ray.ang.util.MyContextWrapper
 import com.v2ray.ang.util.WindowBlurUtils
 import com.v2ray.ang.util.ThemeStateManager
-import com.v2ray.ang.util.LiquidGlassBlurView
+import com.qmdeve.blurview.widget.BlurView
 
 abstract class BaseActivity : AppCompatActivity() {
     private var loadingOverlay: FrameLayout? = null
     private lateinit var themeStateManager: ThemeStateManager
+    private var customResources: Resources? = null // Menyimpan custom resources untuk DPI
 
     override fun onCreate(savedInstanceState: Bundle?) {
         themeStateManager = ThemeStateManager(this)
@@ -104,7 +106,17 @@ abstract class BaseActivity : AppCompatActivity() {
         val dpi = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_DPI, 0)
         val localeWrapped = MyContextWrapper.wrap(base, SettingsManager.getLocale())
         val finalContext = if (dpi > 0) DPIController.wrapWithDpi(localeWrapped, dpi) else localeWrapped
+        
         super.attachBaseContext(finalContext)
+        
+        // Simpan referensi resource dari context yang sudah di-wrap (DPI + Locale)
+        customResources = finalContext.resources
+    }
+
+    // Override getResources secara eksplisit memaksa semua layout inflater
+    // dan View dalam Activity ini menggunakan resource dengan DPI yang benar
+    override fun getResources(): Resources {
+        return customResources ?: super.getResources()
     }
 
     override fun applyOverrideConfiguration(overrideConfiguration: Configuration?) {
@@ -177,7 +189,7 @@ abstract class BaseActivity : AppCompatActivity() {
             val isBlurEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
 
             if (isBlurEnabled) {
-                val blurView = LiquidGlassBlurView(this@BaseActivity, null).apply {
+                val blurView = BlurView(this@BaseActivity, null).apply {
                     layoutParams = FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT
@@ -242,3 +254,4 @@ abstract class BaseActivity : AppCompatActivity() {
         loadingOverlay = null
     }
 }
+
