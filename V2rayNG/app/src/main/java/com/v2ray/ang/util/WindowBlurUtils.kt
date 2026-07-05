@@ -30,7 +30,8 @@ object WindowBlurUtils {
         }
 
         try {
-            val activity = window.context.getActivity() ?: return
+            val context = window.context
+            val activity = context.getActivity() ?: return
             val decorView = activity.findViewById<ViewGroup>(android.R.id.content) ?: return
             
             decorView.findViewById<View>(BLUR_OVERLAY_ID)?.let {
