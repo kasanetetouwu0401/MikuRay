@@ -47,6 +47,7 @@ class LiveBlurView @JvmOverloads constructor(
     private var blurTarget: ViewGroup? = null
     private var blurredBitmap: Bitmap? = null
     private var snapshotBitmap: Bitmap? = null
+    private var hasShownFirstBlur = false
 
     private val srcRect = Rect()
     private val dstRectF = RectF()
@@ -82,6 +83,7 @@ class LiveBlurView @JvmOverloads constructor(
         overlayColor = overlay
 
         setWillNotDraw(false)
+        alpha = 0f
     }
 
     override fun onAttachedToWindow() {
@@ -167,12 +169,18 @@ class LiveBlurView @JvmOverloads constructor(
                     .mode(HokoBlur.MODE_STACK)
                     .radius(effectiveRadius)
                     .sampleFactor(1f)
-                    .forceCopy(false)
+                    .forceCopy(true)
+                    .processor()
                     .blur(result)
             }
 
             blurredBitmap = result
             invalidate()
+
+            if (!hasShownFirstBlur) {
+                hasShownFirstBlur = true
+                animate().alpha(1f).setDuration(180).start()
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
