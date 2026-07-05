@@ -9,14 +9,23 @@ object DPIController {
         if (dpiValue <= 0) return base
         val configuration = Configuration(base.resources.configuration)
         configuration.densityDpi = dpiValue
+        configuration.fontScale = base.resources.configuration.fontScale
         return base.createConfigurationContext(configuration)
     }
 
     fun applyDpi(context: Context, dpiValue: Int) {
         if (dpiValue <= 0) return
-        val configuration = Configuration(context.resources.configuration)
+        
+        val res = context.resources
+        val configuration = Configuration(res.configuration)
         configuration.densityDpi = dpiValue
+
+        val metrics = res.displayMetrics
+        metrics.densityDpi = dpiValue
+        metrics.density = dpiValue / 160f
+        metrics.scaledDensity = metrics.density * configuration.fontScale
+
         @Suppress("DEPRECATION")
-        context.resources.updateConfiguration(configuration, context.resources.displayMetrics)
+        res.updateConfiguration(configuration, metrics)
     }
 }

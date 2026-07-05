@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
-import android.widget.FrameLayout
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmdeve.blurview.widget.BlurView
@@ -32,7 +31,7 @@ object WindowBlurUtils {
         try {
             val context = window.context
             val activity = context.getActivity() ?: return
-            val decorView = activity.findViewById<ViewGroup>(android.R.id.content) ?: return
+            val decorView = activity.window?.decorView as? ViewGroup ?: return
             
             decorView.findViewById<View>(BLUR_OVERLAY_ID)?.let {
                 decorView.removeView(it)
@@ -40,9 +39,9 @@ object WindowBlurUtils {
 
             val blurView = BlurView(context, null).apply {
                 id = BLUR_OVERLAY_ID
-                layoutParams = FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 
                 val blurRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()

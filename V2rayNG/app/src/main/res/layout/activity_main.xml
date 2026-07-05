@@ -16,16 +16,15 @@
         <ImageView
             android:id="@+id/header_image"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:src="@drawable/uwu_banner_home"
-            android:layerType="software"
             android:scaleType="centerCrop" />
 
         <View
             android:id="@+id/header_image_fade"
             android:background="@drawable/uwu_bg_fade_bottom"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent" />
     </FrameLayout>
 
     <com.google.android.material.appbar.AppBarLayout

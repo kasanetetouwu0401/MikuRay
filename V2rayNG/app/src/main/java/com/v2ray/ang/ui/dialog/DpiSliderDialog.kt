@@ -53,7 +53,7 @@ class DpiSliderDialog @JvmOverloads constructor(
                 MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_DPI, valueToSave)
                 summary = if (valueToSave == 0) systemDpi.toString() else clamped.toString()
                 
-                DPIController.applyDpi(activity.applicationContext, clamped)
+                DPIController.applyDpi(activity, clamped)
                 
                 activity.recreate()
             }
