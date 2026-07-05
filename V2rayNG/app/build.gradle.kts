@@ -147,7 +147,7 @@ dependencies {
     implementation(libs.editorkit)
     implementation(libs.flexbox)
     implementation(libs.skydoves.colorpickerview)
-    implementation(libs.qmdeve.blurview)
+    implementation(libs.hoko.blur)
     implementation(libs.com.airbnb.android.lottie)
 
     // Data and Storage Libraries

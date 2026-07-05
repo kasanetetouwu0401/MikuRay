@@ -2,6 +2,12 @@
 <resources>
     <attr name="colorBg" format="color" />
     <attr name="colorCard" format="color" />
+
+    <declare-styleable name="LiveBlurView">
+        <attr name="blurRadius" format="dimension" />
+        <attr name="cornerRadius" format="dimension" />
+        <attr name="overlayColor" format="color" />
+    </declare-styleable>
     
     <attr name="siArrowPosition">
         <enum name="left" value="0" />

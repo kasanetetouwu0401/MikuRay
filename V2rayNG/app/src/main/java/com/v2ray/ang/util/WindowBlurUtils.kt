@@ -10,9 +10,9 @@ import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmdeve.blurview.widget.BlurView
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
+import com.v2ray.ang.widget.LiveBlurView
 
 object WindowBlurUtils {
 
@@ -37,7 +37,7 @@ object WindowBlurUtils {
                 decorView.removeView(it)
             }
 
-            val blurView = BlurView(context, null).apply {
+            val blurView = LiveBlurView(context, null).apply {
                 id = BLUR_OVERLAY_ID
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -79,7 +79,7 @@ object WindowBlurUtils {
         try {
             val activity = window.context.getActivity() ?: return
             val decorView = activity.window?.decorView as? ViewGroup ?: return
-            val blurView = decorView.findViewById<BlurView>(BLUR_OVERLAY_ID) ?: return
+            val blurView = decorView.findViewById<LiveBlurView>(BLUR_OVERLAY_ID) ?: return
             
             blurView.setBlurRadius(radius)
             blurView.setBlurRounds(rounds)

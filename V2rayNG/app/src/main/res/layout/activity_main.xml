@@ -352,7 +352,7 @@
         app:cardElevation="0dp"
         app:strokeWidth="0dp">
 
-        <com.qmdeve.blurview.widget.BlurView
+        <com.v2ray.ang.widget.LiveBlurView
             android:id="@+id/blur_bottom_status"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

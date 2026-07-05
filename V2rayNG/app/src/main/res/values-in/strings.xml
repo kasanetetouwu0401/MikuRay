@@ -775,7 +775,7 @@ yang kamu butuhin."</string>
     <string name="summary_blur_intensity_value">Radius: %1$d · Diulang: %2$d</string>
     <string name="pref_blur_bottom_intensity">Kekuatan Blur Kartu Bawah</string>
     <string name="title_blur_settings">Pengaturan Blur</string>
-    <string name="title_blur_warning">Pengulangan yang tinggi (10+) bisa bikin FPS ngedrop. Mending pakai 2-5 kali pengulangan aja dengan radius 25-40.</string>
+    <string name="title_blur_warning">Ini live blur — capture & blur ulang tiap frame. Yang paling ngaruh ke FPS itu jumlah iterasi, bukan radius. Disaranin 1–3 iterasi aja. 5+ udah mulai bikin ngedrop, apalagi di HP low-end.</string>
     <string name="toast_allow_insecure_deprecated">PERINGATAN: Lewati verifikasi sertifikat "allowInsecure" akan dinonaktifkan pada Agustus 2026. Segera gunakan certificate fingerprint. Fitur ini tidak akan tersedia setelah kedaluwarsa.</string>
 
     <!-- WelcomeActivity -->
