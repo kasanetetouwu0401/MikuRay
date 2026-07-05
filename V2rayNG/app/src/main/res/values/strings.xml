@@ -808,9 +808,6 @@ you need."</string>
     
     <string name="title_pref_enable_blur">Enable Blur</string>
     <string name="summary_pref_enable_blur">Enable background blur effect on windows</string>
-    <string name="title_pref_blur_use_native">Use Android\'s built-in blur</string>
-    <string name="summary_pref_blur_use_native">Use the system blur-behind effect (Android 12+) instead of the app\'s custom blur. Falls back to custom blur on older devices.</string>
-    <string name="summary_pref_blur_use_native_unsupported">Requires Android 12 or newer. Not available on this device.</string>
     <string name="title_pref_blur_bottom_status">Blur Status Bottom Card</string>
     <string name="summary_pref_blur_bottom_status">Enable blur effect on the status  bottom card</string>
     <string name="pref_blur_intensity">Blur Intensity</string>
