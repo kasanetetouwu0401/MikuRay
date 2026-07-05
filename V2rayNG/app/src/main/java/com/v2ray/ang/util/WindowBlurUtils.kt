@@ -18,7 +18,7 @@ object WindowBlurUtils {
 
     private const val BLUR_OVERLAY_ID = 2100000000
 
-    fun applyWindowBlur(window: Window?) {
+    fun applyWindowBlur(window: Window?, targetId: Int = android.R.id.content) {
         if (window == null) return
         
         val isBlurEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
@@ -29,15 +29,15 @@ object WindowBlurUtils {
         }
 
         try {
-            val context = window.context
-            val activity = context.getActivity() ?: return
-            val decorView = activity.window?.decorView as? ViewGroup ?: return
+            val dialogContext = window.context
+            val activity = dialogContext.getActivity() ?: return
+            val targetView = activity.findViewById<ViewGroup>(targetId) ?: return
             
-            decorView.findViewById<View>(BLUR_OVERLAY_ID)?.let {
-                decorView.removeView(it)
+            targetView.findViewById<View>(BLUR_OVERLAY_ID)?.let {
+                targetView.removeView(it)
             }
 
-            val blurView = BlurView(context, null).apply {
+            val blurView = BlurView(activity, null).apply {
                 id = BLUR_OVERLAY_ID
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -46,8 +46,9 @@ object WindowBlurUtils {
                 
                 val blurRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
                 val blurRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
-                setBlurRadius(blurRadius)
-                setBlurRounds(blurRounds)
+                
+                setBlurRadius(if (blurRadius > 0f) blurRadius else 10f)
+                setBlurRounds(if (blurRounds > 0) blurRounds else 1)
                 setOverlayColor(Color.argb(120, 0, 0, 0))
                 
                 isClickable = false
@@ -56,13 +57,14 @@ object WindowBlurUtils {
                 outlineProvider = null
             }
 
-            decorView.addView(blurView)          
+            targetView.addView(blurView)          
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
             window.decorView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
                 override fun onViewAttachedToWindow(v: View) {}
+                
                 override fun onViewDetachedFromWindow(v: View) {
-                    decorView.removeView(blurView)
+                    targetView.removeView(blurView)
                     window.decorView.removeOnAttachStateChangeListener(this)
                 }
             })
@@ -74,18 +76,19 @@ object WindowBlurUtils {
         }
     }
 
-    fun updateWindowBlur(window: Window?, radius: Float, rounds: Int) {
+    fun updateWindowBlur(window: Window?, targetId: Int = android.R.id.content, radius: Float, rounds: Int) {
         if (window == null) return
+        
         try {
             val activity = window.context.getActivity() ?: return
-            val decorView = activity.window?.decorView as? ViewGroup ?: return
-            val blurView = decorView.findViewById<BlurView>(BLUR_OVERLAY_ID) ?: return
+            val targetView = activity.findViewById<ViewGroup>(targetId) ?: return
+            val blurView = targetView.findViewById<BlurView>(BLUR_OVERLAY_ID) ?: return
             
-            blurView.setBlurRadius(radius)
-            blurView.setBlurRounds(rounds)
+            blurView.setBlurRadius(if (radius > 0f) radius else 10f)
+            blurView.setBlurRounds(if (rounds > 0) rounds else 1)
             
             blurView.invalidate()
-            decorView.invalidate()
+            targetView.invalidate()
             
         } catch (e: Exception) {
             e.printStackTrace()
@@ -99,16 +102,16 @@ tailrec fun Context.getActivity(): Activity? = when (this) {
     else -> null
 }
 
-fun MaterialAlertDialogBuilder.showBlur(): androidx.appcompat.app.AlertDialog {
+fun MaterialAlertDialogBuilder.showBlur(targetId: Int = android.R.id.content): AlertDialog {
     val dialog = this.create()
-    WindowBlurUtils.applyWindowBlur(dialog.window)
+    WindowBlurUtils.applyWindowBlur(dialog.window, targetId)
     dialog.show()
     return dialog
 }
 
-fun AlertDialog.Builder.showBlur(): AlertDialog {
+fun AlertDialog.Builder.showBlur(targetId: Int = android.R.id.content): AlertDialog {
     val dialog = this.create()
-    WindowBlurUtils.applyWindowBlur(dialog.window)
+    WindowBlurUtils.applyWindowBlur(dialog.window, targetId)
     dialog.show()
     return dialog
 }
