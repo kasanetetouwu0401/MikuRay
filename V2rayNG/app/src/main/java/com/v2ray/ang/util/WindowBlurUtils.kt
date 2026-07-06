@@ -6,13 +6,14 @@ import android.content.ContextWrapper
 import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.qmdeve.blurview.widget.BlurView
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.util.blur.LiveBlurView
 
 object WindowBlurUtils {
 
@@ -20,7 +21,7 @@ object WindowBlurUtils {
 
     fun applyWindowBlur(window: Window?) {
         if (window == null) return
-
+        
         val isBlurEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
         if (!isBlurEnabled) {
             window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
@@ -32,31 +33,31 @@ object WindowBlurUtils {
             val context = window.context
             val activity = context.getActivity() ?: return
             val decorView = activity.window?.decorView as? ViewGroup ?: return
-
+            
             decorView.findViewById<View>(BLUR_OVERLAY_ID)?.let {
                 decorView.removeView(it)
             }
 
-            val blurRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
-
-            val blurView = LiveBlurView(context).apply {
+            val blurView = BlurView(context, null).apply {
                 id = BLUR_OVERLAY_ID
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
+                layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
                 )
-                attachTo(decorView)
-                liquidGlassEnabled = false
-                overlayColor = Color.argb(120, 0, 0, 0)
-                blurRadiusPx = blurRadius
-
+                
+                val blurRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
+                val blurRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
+                setBlurRadius(blurRadius)
+                setBlurRounds(blurRounds)
+                setOverlayColor(Color.argb(120, 0, 0, 0))
+                
                 isClickable = false
                 isFocusable = false
                 elevation = 0f
                 outlineProvider = null
             }
 
-            decorView.addView(blurView)
+            decorView.addView(blurView)          
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
             window.decorView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
@@ -66,7 +67,7 @@ object WindowBlurUtils {
                     window.decorView.removeOnAttachStateChangeListener(this)
                 }
             })
-
+            
         } catch (e: Exception) {
             e.printStackTrace()
             window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
@@ -74,17 +75,19 @@ object WindowBlurUtils {
         }
     }
 
-    fun updateWindowBlur(window: Window?, radius: Float) {
+    fun updateWindowBlur(window: Window?, radius: Float, rounds: Int) {
         if (window == null) return
         try {
             val activity = window.context.getActivity() ?: return
             val decorView = activity.window?.decorView as? ViewGroup ?: return
-            val blurView = decorView.findViewById<LiveBlurView>(BLUR_OVERLAY_ID) ?: return
-
-            blurView.blurRadiusPx = radius
+            val blurView = decorView.findViewById<BlurView>(BLUR_OVERLAY_ID) ?: return
+            
+            blurView.setBlurRadius(radius)
+            blurView.setBlurRounds(rounds)
+            
             blurView.invalidate()
             decorView.invalidate()
-
+            
         } catch (e: Exception) {
             e.printStackTrace()
         }

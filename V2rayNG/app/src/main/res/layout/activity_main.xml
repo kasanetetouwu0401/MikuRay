@@ -352,10 +352,13 @@
         app:cardElevation="0dp"
         app:strokeWidth="0dp">
 
-        <com.v2ray.ang.util.blur.LiveBlurView
+        <com.qmdeve.blurview.widget.BlurViewGroup
             android:id="@+id/blur_bottom_status"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="90dp"
+            app:blurRadius="20dp"
+            app:cornerRadius="28dp"
+            app:overlayColor="@color/uwu_tint_blur">
 
         <RelativeLayout
             android:gravity="center_vertical"
@@ -433,6 +436,7 @@
                     style="?floatingActionButtonStyle" />
             </FrameLayout>
         </RelativeLayout>
+       </com.qmdeve.blurview.widget.BlurViewGroup>
     </com.google.android.material.card.MaterialCardView>
 
 </RelativeLayout>

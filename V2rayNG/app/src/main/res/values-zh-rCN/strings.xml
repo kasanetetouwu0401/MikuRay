@@ -769,10 +769,11 @@
     <string name="summary_pref_blur_bottom_status">开启底部状态卡片的模糊效果</string>
     <string name="pref_blur_intensity">模糊强度</string>
     <string name="blur_intensity_radius_label">模糊半径 (2–100)</string>
-    <string name="summary_blur_intensity_value">半径: %1$d</string>
+    <string name="blur_intensity_rounds_label">模糊迭代次数 (1–15)</string>
+    <string name="summary_blur_intensity_value">半径: %1$d · 迭代: %2$d</string>
     <string name="pref_blur_bottom_intensity">底部卡片模糊强度</string>
     <string name="title_blur_settings">模糊设置</string>
-    <string name="title_blur_warning">较高的半径可能会导致掉帧。建议：半径为 20-40。</string>
+    <string name="title_blur_warning">较高的迭代次数 (10+) 可能会导致掉帧。建议：迭代 2-5 次，半径为 25-40。</string>
     <string name="toast_allow_insecure_deprecated">警告：将在 2026.8.1 禁用跳过证书验证 "allowInsecure" ，请尽快改用证书指纹。到期后无法使用。 </string>
 
     <!-- WelcomeActivity -->

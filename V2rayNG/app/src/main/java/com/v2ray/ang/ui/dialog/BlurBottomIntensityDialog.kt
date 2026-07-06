@@ -30,11 +30,14 @@ class BlurBottomIntensityDialog @JvmOverloads constructor(
 
     override fun onClick() {
         val originalRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_RADIUS, AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS)
+        val originalRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS)
 
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_blur_intensity, null)
         val sliderRadius = dialogView.findViewById<Slider>(R.id.slider_blur_radius)
+        val sliderRounds = dialogView.findViewById<Slider>(R.id.slider_blur_rounds)
 
         sliderRadius.value = originalRadius.toFloat().coerceIn(2f, 100f)
+        sliderRounds.value = originalRounds.toFloat().coerceIn(1f, 15f)
 
         val dialog = MaterialAlertDialogBuilder(context)
             .setTitle(R.string.pref_blur_bottom_intensity)
@@ -49,23 +52,27 @@ class BlurBottomIntensityDialog @JvmOverloads constructor(
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val radius = sliderRadius.value.toInt()
+            val rounds = sliderRounds.value.toInt()
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_RADIUS, radius)
-            updateSummary(radius)
+            MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, rounds)
+            updateSummary(radius, rounds)
             dialog.dismiss()
         }
 
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_RADIUS, originalRadius)
-            updateSummary(originalRadius)
+            MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, originalRounds)
+            updateSummary(originalRadius, originalRounds)
             dialog.dismiss()
         }
 
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
             sliderRadius.value = AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS.toFloat()
+            sliderRounds.value = AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS.toFloat()
         }
     }
 
-    fun updateSummary(radius: Int) {
-        summary = context.getString(R.string.summary_blur_intensity_value, radius)
+    fun updateSummary(radius: Int, rounds: Int) {
+        summary = context.getString(R.string.summary_blur_intensity_value, radius, rounds)
     }
 }

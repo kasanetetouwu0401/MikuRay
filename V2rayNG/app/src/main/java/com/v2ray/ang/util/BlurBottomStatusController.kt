@@ -6,7 +6,6 @@ import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ActivityMainBinding
 import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.util.blur.LiveBlurView
 
 object BlurBottomStatusController {
 
@@ -23,15 +22,13 @@ object BlurBottomStatusController {
             AppConfig.PREF_BLUR_BOTTOM_RADIUS,
             AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS
         ).toFloat()
-
-        val blurView = binding.blurBottomStatus as LiveBlurView
-        blurView.attachTo(binding.root, exclude = binding.cardBottomStatus)
-        blurView.overlayColor = activity.getColorAttr(R.attr.colorSurface).withAlpha(60)
-        blurView.liquidGlassEnabled = true
-        blurView.liquidCornerRadiusPx = activity.resources.getDimension(R.dimen.blur_bottom_status_corner_radius)
-        blurView.blurRadiusPx = radius
-        blurView.invalidate()
-
+        val rounds = MmkvManager.decodeSettingsInt(
+            AppConfig.PREF_BLUR_BOTTOM_ROUNDS,
+            AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS
+        )
+        binding.blurBottomStatus.setBlurRadius(radius)
+        binding.blurBottomStatus.setBlurRounds(rounds)
+        binding.blurBottomStatus.invalidate()
         binding.blurBottomStatus.visibility = View.VISIBLE
         binding.cardBottomStatus.setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
         binding.tvIpState.setTextColor(
@@ -51,12 +48,9 @@ object BlurBottomStatusController {
         )
         val textColorOnPrimary = activity.getColorAttr(R.attr.colorOnPrimary)
         binding.tvIpState.setTextColor(textColorOnPrimary)
-        binding.tvIpState.alpha = 0.8f
+        binding.tvIpState.alpha = 0.8f 
         binding.tvTestState.setTextColor(textColorOnPrimary)
         binding.fab.visibility = View.GONE
         binding.fabNoBlur.visibility = View.VISIBLE
     }
-
-    private fun Int.withAlpha(alpha: Int): Int =
-        (this and 0x00FFFFFF) or (alpha shl 24)
 }
