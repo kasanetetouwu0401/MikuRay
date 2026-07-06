@@ -12,14 +12,21 @@ import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
+import com.v2ray.ang.util.blur.LiveBlurView
 
+/**
+ * Window/dialog background blur, ported in spirit from NagramXF-dev's blur3
+ * RenderNode pipeline (see [LiveBlurView]). Windows only ever use "blur
+ * biasa" (regular blur) — no liquid glass here, that's reserved for the
+ * bottom status card (see [BlurBottomStatusController]).
+ */
 object WindowBlurUtils {
 
     private const val BLUR_OVERLAY_ID = 2100000000
 
     fun applyWindowBlur(window: Window?) {
         if (window == null) return
-        
+
         val isBlurEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
         if (!isBlurEnabled) {
             window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
@@ -31,31 +38,31 @@ object WindowBlurUtils {
             val context = window.context
             val activity = context.getActivity() ?: return
             val decorView = activity.window?.decorView as? ViewGroup ?: return
-            
+
             decorView.findViewById<View>(BLUR_OVERLAY_ID)?.let {
                 decorView.removeView(it)
             }
 
-            val blurView = LiquidGlassBlurView(context, null).apply {
+            val blurRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
+
+            val blurView = LiveBlurView(context).apply {
                 id = BLUR_OVERLAY_ID
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
-                
-                val blurRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
-                val blurRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
-                setBlurRadius(blurRadius)
-                setBlurRounds(blurRounds)
-                setOverlayColor(Color.argb(120, 0, 0, 0))
-                
+                attachTo(decorView)
+                liquidGlassEnabled = false
+                overlayColor = Color.argb(120, 0, 0, 0)
+                blurRadiusPx = blurRadius
+
                 isClickable = false
                 isFocusable = false
                 elevation = 0f
                 outlineProvider = null
             }
 
-            decorView.addView(blurView)          
+            decorView.addView(blurView)
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
             window.decorView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
@@ -65,7 +72,7 @@ object WindowBlurUtils {
                     window.decorView.removeOnAttachStateChangeListener(this)
                 }
             })
-            
+
         } catch (e: Exception) {
             e.printStackTrace()
             window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
@@ -73,19 +80,17 @@ object WindowBlurUtils {
         }
     }
 
-    fun updateWindowBlur(window: Window?, radius: Float, rounds: Int) {
+    fun updateWindowBlur(window: Window?, radius: Float) {
         if (window == null) return
         try {
             val activity = window.context.getActivity() ?: return
             val decorView = activity.window?.decorView as? ViewGroup ?: return
-            val blurView = decorView.findViewById<LiquidGlassBlurView>(BLUR_OVERLAY_ID) ?: return
-            
-            blurView.setBlurRadius(radius)
-            blurView.setBlurRounds(rounds)
-            
+            val blurView = decorView.findViewById<LiveBlurView>(BLUR_OVERLAY_ID) ?: return
+
+            blurView.blurRadiusPx = radius
             blurView.invalidate()
             decorView.invalidate()
-            
+
         } catch (e: Exception) {
             e.printStackTrace()
         }

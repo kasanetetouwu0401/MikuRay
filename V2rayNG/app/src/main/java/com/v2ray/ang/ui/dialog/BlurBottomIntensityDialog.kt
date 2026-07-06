@@ -3,11 +3,8 @@ package com.v2ray.ang.ui.dialog
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import android.os.Build
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -31,31 +28,13 @@ class BlurBottomIntensityDialog @JvmOverloads constructor(
         return null
     }
 
-    // See BlurIntensityDialog - same reasoning, the bottom card uses the same
-    // LiquidGlassBlurView engine so this needs to match by tier here too.
-    private val usesLiquidGlassEffect = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-
     override fun onClick() {
         val originalRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_RADIUS, AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS)
-        val originalRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS)
 
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_blur_intensity, null)
         val sliderRadius = dialogView.findViewById<Slider>(R.id.slider_blur_radius)
-        val sliderRounds = dialogView.findViewById<Slider>(R.id.slider_blur_rounds)
-        val labelRounds = dialogView.findViewById<TextView>(R.id.label_blur_rounds)
-        val labelWarning = dialogView.findViewById<TextView>(R.id.label_blur_warning)
-
-        if (usesLiquidGlassEffect) {
-            labelRounds.setText(R.string.blur_intensity_thickness_label)
-            labelWarning.setText(R.string.title_blur_warning_thickness)
-        } else {
-            labelRounds.visibility = View.GONE
-            sliderRounds.visibility = View.GONE
-            labelWarning.visibility = View.GONE
-        }
 
         sliderRadius.value = originalRadius.toFloat().coerceIn(2f, 100f)
-        sliderRounds.value = originalRounds.toFloat().coerceIn(1f, 15f)
 
         val dialog = MaterialAlertDialogBuilder(context)
             .setTitle(R.string.pref_blur_bottom_intensity)
@@ -70,31 +49,23 @@ class BlurBottomIntensityDialog @JvmOverloads constructor(
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val radius = sliderRadius.value.toInt()
-            val rounds = sliderRounds.value.toInt()
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_RADIUS, radius)
-            MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, rounds)
-            updateSummary(radius, rounds)
+            updateSummary(radius)
             dialog.dismiss()
         }
 
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_RADIUS, originalRadius)
-            MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, originalRounds)
-            updateSummary(originalRadius, originalRounds)
+            updateSummary(originalRadius)
             dialog.dismiss()
         }
 
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
             sliderRadius.value = AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS.toFloat()
-            sliderRounds.value = AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS.toFloat()
         }
     }
 
-    fun updateSummary(radius: Int, rounds: Int) {
-        summary = if (usesLiquidGlassEffect) {
-            context.getString(R.string.summary_blur_intensity_value_thickness, radius, rounds)
-        } else {
-            context.getString(R.string.summary_blur_intensity_value_radius_only, radius)
-        }
+    fun updateSummary(radius: Int) {
+        summary = context.getString(R.string.summary_blur_intensity_value, radius)
     }
 }

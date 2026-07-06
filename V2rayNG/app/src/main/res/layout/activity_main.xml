@@ -352,12 +352,10 @@
         app:cardElevation="0dp"
         app:strokeWidth="0dp">
 
-        <com.v2ray.ang.util.LiquidGlassBlurView
+        <com.v2ray.ang.util.blur.LiveBlurView
             android:id="@+id/blur_bottom_status"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:lgCornerRadius="28dp"
-            app:lgOverlayColor="@color/uwu_tint_blur" />
+            android:layout_height="match_parent" />
 
         <RelativeLayout
             android:gravity="center_vertical"
