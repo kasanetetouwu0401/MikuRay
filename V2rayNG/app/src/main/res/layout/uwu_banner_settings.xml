@@ -1,63 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="fill_parent"
+    android:background="@android:color/transparent"
+    android:layout_width="match_parent"
     android:layout_height="250.0dip"
-    android:layout_marginStart="4.0dip"
-    android:layout_marginEnd="4.0dip"
     android:layout_marginTop="16.0dip"
     android:layout_marginBottom="8.0dip"
-    android:minHeight="?android:listPreferredItemHeightSmall"
-    app:cardBackgroundColor="?attr/colorCard"
-    app:cardCornerRadius="28.0dip"
-    app:cardElevation="0.0dip"
-    app:strokeWidth="0.0dip"
-    android:layerType="none">
+    android:minHeight="?android:listPreferredItemHeightSmall">
 
-    <ImageView
-        android:layout_gravity="end"
-        android:layout_width="150.0dip"
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
         android:layout_height="250.0dip"
-        android:scaleType="fitCenter"
-        android:src="@drawable/uwu_addon_logo"
-        android:tint="?attr/colorPrimary" />
+        android:layout_marginStart="4.0dip"
+        android:layout_marginEnd="4.0dip"
+        app:cardBackgroundColor="?attr/colorCard"
+        app:cardCornerRadius="28.0dip"
+        app:cardElevation="0.0dip"
+        app:strokeWidth="0.0dip">
 
-    <ImageView
-        android:layout_gravity="end"
-        android:layout_width="180.0dip"
-        android:layout_height="250.0dip"
-        android:layout_marginTop="10.0dip"
-        android:layout_marginBottom="0.0dip"
-        android:scaleType="fitCenter"
-        android:src="@drawable/uwu_banner_settings"
-        android:layout_marginEnd="-40.0dip" />
+        <!-- Logo Addon (Kecil) -->
+        <ImageView
+            android:layout_gravity="end"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/uwu_addon_logo"
+            android:adjustViewBounds="true"
+            android:scaleType="fitEnd"
+            app:tint="?attr/colorPrimary" />
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16.0dip">
-        
-        <TextView
-            android:textAppearance="?attr/textAppearanceTitleMedium"
-            android:textSize="17.0sp"
-            android:textColor="?attr/colorOnSurfaceVariant"
+        <!-- Banner Latar Belakang (Miku) -->
+        <ImageView
+            android:layout_gravity="end|center_vertical"
             android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10.0dip"
+            android:layout_marginBottom="0.0dip"
+            android:src="@drawable/uwu_banner_settings"
+            android:adjustViewBounds="true"
+            android:translationX="40.0dip" /> <!-- Perbaikan: Menggeser visual 40dp ke kanan, tetapi tetap dipotong oleh rounded corner -->
+
+        <!-- Container Teks -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/uwu_banner_settings_title"
-            android:includeFontPadding="false" />
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="20.0dip"
+            android:layout_marginTop="20.0dip"
+            android:layout_marginBottom="20.0dip"
+            android:layout_marginEnd="130.0dip"> <!-- Memberikan ruang di kanan agar teks turun ke bawah dan tidak tumpang tindih dengan Miku -->
             
-        <TextView
-            android:textAppearance="?attr/textAppearanceTitleMedium"
-            android:textSize="21.0sp"
-            android:textColor="?attr/colorOnSurface"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5.0dip"
-            android:text="@string/uwu_banner_settings_summary"
-            android:includeFontPadding="false"
-            android:layout_marginEnd="0.0dip" />
-            
-    </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+            <TextView
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textSize="17.0sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/uwu_banner_settings_title"
+                android:includeFontPadding="false" />
+                
+            <TextView
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textSize="21.0sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5.0dip"
+                android:text="@string/uwu_banner_settings_summary"
+                android:includeFontPadding="false" />
+                
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</RelativeLayout>
