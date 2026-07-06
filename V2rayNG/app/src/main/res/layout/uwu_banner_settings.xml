@@ -8,7 +8,7 @@
     android:minHeight="?android:listPreferredItemHeightSmall"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <com.neko.widget.ClippedMaterialCardView
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="fill_parent"
         android:layout_height="250.0dip"
         android:layout_marginStart="4.0dip"
@@ -17,20 +17,20 @@
         app:cardCornerRadius="28.0dip"
         app:cardElevation="0.0dip"
         app:strokeWidth="0.0dip">
-        <ImageView
+        <view
             android:layout_gravity="end"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:src="@drawable/uwu_addon_logo"
+            android:background="@drawable/uwu_addon_logo"
             android:adjustViewBounds="true"
             android:tint="?attr/colorPrimary" />
-        <ImageView
+        <view
             android:layout_gravity="end|center"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:layout_marginTop="10.0dip"
             android:layout_marginBottom="0.0dip"
-            android:src="@drawable/uwu_banner_settings"
+            android:background="@drawable/uwu_banner_settings"
             android:adjustViewBounds="true"
             android:layout_marginEnd="-40.0dip" />
         <LinearLayout
@@ -57,5 +57,5 @@
                 android:includeFontPadding="false"
                 android:layout_marginEnd="0.0dip" />
         </LinearLayout>
-    </com.neko.widget.ClippedMaterialCardView>
+    </com.google.android.material.card.MaterialCardView>
 </RelativeLayout>
