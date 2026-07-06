@@ -9,15 +9,13 @@
     android:layout_marginTop="16.0dip"
     android:layout_marginBottom="8.0dip"
     app:cardBackgroundColor="?attr/colorCard"
-    app:cardCornerRadius="28.0dip"
     app:cardElevation="0.0dip"
     app:strokeWidth="0.0dip"
-    android:clipToOutline="true"
-    android:clipChildren="true"
+    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Single"
     app:cardPreventCornerOverlap="false"
-    android:layerType="none">
+    app:contentPadding="0dp">
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:layout_gravity="end"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
@@ -25,7 +23,7 @@
         android:adjustViewBounds="true"
         android:tint="?attr/colorPrimary" />
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:layout_gravity="end|center"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
