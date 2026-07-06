@@ -54,7 +54,8 @@ object WindowBlurUtils {
                 isClickable = false
                 isFocusable = false
                 elevation = 0f
-                outlineProvider = null
+                clipToOutline = true
+                clipChildren = true
             }
 
             decorView.addView(blurView)          
