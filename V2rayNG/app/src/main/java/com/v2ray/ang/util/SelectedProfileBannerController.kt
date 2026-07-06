@@ -48,7 +48,7 @@ class SelectedProfileBannerController(private val context: Context) {
         if (target.getTag(TAG_KEY) == tagKey) return
 
         bitmapCache[bitmapKey]?.let { cached ->
-            target.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+            target.setLayerType(View.LAYER_TYPE_NONE, null)
             
             target.background = CenterCropDimDrawable(cached, dimColorFor(dimPercent), cornerRadiusPx)
             target.setTag(TAG_KEY, tagKey)
@@ -70,7 +70,7 @@ class SelectedProfileBannerController(private val context: Context) {
                         }
                         bitmapCache[bitmapKey] = safeCopy
 
-                        target.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                        target.setLayerType(View.LAYER_TYPE_NONE, null)
 
                         target.background = CenterCropDimDrawable(safeCopy, dimColorFor(dimPercent), cornerRadiusPx)
                         target.setTag(TAG_KEY, tagKey)
@@ -101,7 +101,7 @@ class SelectedProfileBannerController(private val context: Context) {
         val cacheKey = "selected_banner::default"
         val cached = bitmapCache[cacheKey]
         if (cached != null) {
-            target.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+            target.setLayerType(View.LAYER_TYPE_NONE, null)
             target.background = CenterCropDimDrawable(cached, dimColorFor(dimPercent), cornerRadiusPx)
             target.setTag(TAG_KEY, tagKey)
             return
@@ -111,7 +111,7 @@ class SelectedProfileBannerController(private val context: Context) {
             val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.uwu_banner_selected)
             if (bitmap != null) {
                 bitmapCache[cacheKey] = bitmap
-                target.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                target.setLayerType(View.LAYER_TYPE_NONE, null)
                 target.background = CenterCropDimDrawable(bitmap, dimColorFor(dimPercent), cornerRadiusPx)
                 target.setTag(TAG_KEY, tagKey)
             }

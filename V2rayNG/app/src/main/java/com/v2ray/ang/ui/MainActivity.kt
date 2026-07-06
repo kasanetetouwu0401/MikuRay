@@ -316,7 +316,7 @@ class MainActivity : HelperBaseActivity(),
         val headerImage = binding.headerImage
         val headerTopRow = binding.headerTopRow
 
-        headerImage.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+        headerImage.setLayerType(View.LAYER_TYPE_NONE, null)
 
         val paddingTopWithBanner = (16 * resources.displayMetrics.density).toInt()
         val paddingTopNoBanner = 0

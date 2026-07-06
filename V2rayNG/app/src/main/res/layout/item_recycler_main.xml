@@ -21,7 +21,7 @@
         app:cardElevation="0.0dip"
         app:strokeColor="?colorOutlineVariant"
         app:strokeWidth="0.0dip"
-        android:layerType="software">
+        android:layerType="none">
         <LinearLayout
             android:id="@+id/layout_indicator"
             android:layout_width="fill_parent"
