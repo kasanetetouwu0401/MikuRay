@@ -13,6 +13,7 @@
     app:cardCornerRadius="28.0dip"
     app:cardElevation="0.0dip"
     app:strokeWidth="0.0dip"
+    android:clipToOutline="true"
     android:layerType="none">
 
     <ImageView
@@ -20,7 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:src="@drawable/uwu_addon_logo"
-        android:adjustViewBounds="true"
+        android:layerType="none"
         android:tint="?attr/colorPrimary" />
 
     <ImageView
@@ -30,7 +31,7 @@
         android:layout_marginTop="10.0dip"
         android:layout_marginBottom="0.0dip"
         android:src="@drawable/uwu_banner_settings"
-        android:adjustViewBounds="true"
+        android:layerType="none"
         android:layout_marginEnd="-40.0dip" />
 
     <LinearLayout
