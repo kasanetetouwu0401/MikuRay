@@ -60,6 +60,7 @@ class SelectedProfileBannerController(private val context: Context) {
             Glide.with(context)
                 .asBitmap()
                 .load(uri)
+                .centerCrop()
                 .diskCacheStrategy(DiskCacheStrategy.DATA)
                 .into(object : CustomTarget<Bitmap>() {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {

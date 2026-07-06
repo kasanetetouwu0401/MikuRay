@@ -5,6 +5,7 @@
     android:layout_height="250.0dip"
     android:layout_marginTop="16.0dip"
     android:layout_marginBottom="8.0dip"
+    android:clipChildren="true"
     android:minHeight="?android:listPreferredItemHeightSmall"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -16,7 +17,9 @@
         app:cardBackgroundColor="?attr/colorCard"
         app:cardCornerRadius="28.0dip"
         app:cardElevation="0.0dip"
-        app:strokeWidth="0.0dip">
+        app:strokeWidth="0.0dip"
+        android:layerType="software"
+        android:clipToOutline="true">
         <ImageView
             android:layout_gravity="end"
             android:layout_width="wrap_content"
