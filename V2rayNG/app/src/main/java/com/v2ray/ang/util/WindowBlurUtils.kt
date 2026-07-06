@@ -54,6 +54,8 @@ object WindowBlurUtils {
                 isFocusable = false
                 elevation = 0f
                 outlineProvider = null
+                
+                setLayerType(View.LAYER_TYPE_NONE, null)
             }
 
             decorView.addView(blurView)          

@@ -185,6 +185,8 @@ abstract class BaseActivity : AppCompatActivity() {
                     setBlurRadius(MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat())
                     setBlurRounds(MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS))
                     setOverlayColor(Color.argb(120, 0, 0, 0))
+                    
+                    setLayerType(View.LAYER_TYPE_NONE, null)
                 }
                 addView(blurView)
             } else {
