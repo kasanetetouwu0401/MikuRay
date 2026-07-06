@@ -3,8 +3,11 @@ package com.v2ray.ang.ui.dialog
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.os.Build
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -28,6 +31,14 @@ class BlurIntensityDialog @JvmOverloads constructor(
         return null
     }
 
+    // Thickness only has any visible effect once the liquid-glass refraction shader
+    // is actually running (API 33+ - see BlurredBackgroundDrawableRenderNode, which
+    // only reads boundProps.liquidThickness inside its `liquidGlassEffect != null`
+    // branch). Below that there's no shader and, as of removing the old qmdeve
+    // fallback, no alternate blur engine either - so the rounds slider would just be
+    // dead weight. Hide it instead of showing a control that does nothing.
+    private val usesLiquidGlassEffect = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
     override fun onClick() {
         val originalRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS)
         val originalRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
@@ -35,6 +46,17 @@ class BlurIntensityDialog @JvmOverloads constructor(
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_blur_intensity, null)
         val sliderRadius = dialogView.findViewById<Slider>(R.id.slider_blur_radius)
         val sliderRounds = dialogView.findViewById<Slider>(R.id.slider_blur_rounds)
+        val labelRounds = dialogView.findViewById<TextView>(R.id.label_blur_rounds)
+        val labelWarning = dialogView.findViewById<TextView>(R.id.label_blur_warning)
+
+        if (usesLiquidGlassEffect) {
+            labelRounds.setText(R.string.blur_intensity_thickness_label)
+            labelWarning.setText(R.string.title_blur_warning_thickness)
+        } else {
+            labelRounds.visibility = View.GONE
+            sliderRounds.visibility = View.GONE
+            labelWarning.visibility = View.GONE
+        }
 
         sliderRadius.value = originalRadius.toFloat().coerceIn(2f, 100f)
         sliderRounds.value = originalRounds.toFloat().coerceIn(1f, 15f)
@@ -90,6 +112,10 @@ class BlurIntensityDialog @JvmOverloads constructor(
     }
 
     fun updateSummary(radius: Int, rounds: Int) {
-        summary = context.getString(R.string.summary_blur_intensity_value, radius, rounds)
+        summary = if (usesLiquidGlassEffect) {
+            context.getString(R.string.summary_blur_intensity_value_thickness, radius, rounds)
+        } else {
+            context.getString(R.string.summary_blur_intensity_value_radius_only, radius)
+        }
     }
 }
