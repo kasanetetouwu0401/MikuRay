@@ -2,7 +2,6 @@ package com.v2ray.ang.ui
 
 import android.content.Context
 import android.content.res.Configuration
-import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
@@ -40,7 +39,6 @@ import com.qmdeve.blurview.widget.BlurView
 abstract class BaseActivity : AppCompatActivity() {
     private var loadingOverlay: FrameLayout? = null
     private lateinit var themeStateManager: ThemeStateManager
-    private var customResources: Resources? = null // Menyimpan custom resources untuk DPI
 
     override fun onCreate(savedInstanceState: Bundle?) {
         themeStateManager = ThemeStateManager(this)
@@ -108,29 +106,19 @@ abstract class BaseActivity : AppCompatActivity() {
         val finalContext = if (dpi > 0) DPIController.wrapWithDpi(localeWrapped, dpi) else localeWrapped
         
         super.attachBaseContext(finalContext)
-        
-        // Simpan referensi resource dari context yang sudah di-wrap (DPI + Locale)
-        customResources = finalContext.resources
-    }
-
-    // Override getResources secara eksplisit memaksa semua layout inflater
-    // dan View dalam Activity ini menggunakan resource dengan DPI yang benar
-    override fun getResources(): Resources {
-        return customResources ?: super.getResources()
     }
 
     override fun applyOverrideConfiguration(overrideConfiguration: Configuration?) {
-        if (overrideConfiguration != null) {
-            val uiMode = overrideConfiguration.uiMode
-            overrideConfiguration.setTo(baseContext.resources.configuration)
-            overrideConfiguration.uiMode = uiMode
-
-            val dpi = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_DPI, 0)
-            if (dpi > 0) {
-                overrideConfiguration.densityDpi = dpi
-            }
+        // AndroidX: Modifikasi overrideConfiguration langsung tanpa menggunakan setTo()
+        // Menggunakan setTo(baseContext...) akan merusak/menimpa konfigurasi night-mode & layout inflator dari AndroidX
+        val config = overrideConfiguration ?: Configuration()
+        
+        val dpi = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_DPI, 0)
+        if (dpi > 0) {
+            config.densityDpi = dpi
         }
-        super.applyOverrideConfiguration(overrideConfiguration)
+        
+        super.applyOverrideConfiguration(config)
     }
 
     protected fun addCustomDividerToRecyclerView(recyclerView: RecyclerView, context: Context?, drawableResId: Int, orientation: Int = DividerItemDecoration.VERTICAL) {
@@ -254,4 +242,5 @@ abstract class BaseActivity : AppCompatActivity() {
         loadingOverlay = null
     }
 }
+
 
