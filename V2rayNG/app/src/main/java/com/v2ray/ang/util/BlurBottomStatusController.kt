@@ -8,12 +8,6 @@ import com.v2ray.ang.databinding.ActivityMainBinding
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.util.blur.LiveBlurView
 
-/**
- * Controls the bottom status card's blur. Unlike windows/dialogs (see
- * [WindowBlurUtils], which only ever use "blur biasa"), the bottom status
- * card layers the NagramXF-ported "liquid glass" refraction shader on top of
- * the regular blur (see [LiveBlurView]).
- */
 object BlurBottomStatusController {
 
     fun isEnabled(): Boolean =

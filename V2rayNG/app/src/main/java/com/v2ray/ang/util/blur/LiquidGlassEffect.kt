@@ -9,15 +9,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.v2ray.ang.R
 
-/**
- * Ported from NagramXF-dev (org.telegram.ui.Components.blur3.LiquidGlassEffect).
- *
- * This is the "liquid glass" refraction shader effect applied on top of an
- * already-rendered (and usually already-blurred) [RenderNode]. Unlike the
- * original, this version reads the AGSL source directly from resources
- * instead of going through Telegram's `AndroidUtilities.readRes`, since that
- * helper doesn't exist in MikuRay.
- */
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 class LiquidGlassEffect(context: Context, private val node: RenderNode) {
 

@@ -14,12 +14,6 @@ import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.util.blur.LiveBlurView
 
-/**
- * Window/dialog background blur, ported in spirit from NagramXF-dev's blur3
- * RenderNode pipeline (see [LiveBlurView]). Windows only ever use "blur
- * biasa" (regular blur) — no liquid glass here, that's reserved for the
- * bottom status card (see [BlurBottomStatusController]).
- */
 object WindowBlurUtils {
 
     private const val BLUR_OVERLAY_ID = 2100000000

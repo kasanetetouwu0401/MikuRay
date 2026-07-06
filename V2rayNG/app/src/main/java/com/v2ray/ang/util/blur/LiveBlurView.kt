@@ -10,27 +10,8 @@ import android.os.Build
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 
-/**
- * Self-contained "blur3-lite": a live background blur view, adapted in spirit
- * from NagramXF-dev's org.telegram.ui.Components.blur3 package
- * (BlurredBackgroundSourceRenderNode + BlurredBackgroundDrawableRenderNode),
- * with all of Telegram's Theme/AndroidUtilities/source-abstraction machinery
- * stripped out since it doesn't exist in MikuRay.
- *
- * How it works:
- * - [captureNode] records whatever [rootView] (minus [excludeView], if set)
- *   draws behind this view, then has a Gaussian [RenderEffect] blur applied
- *   to it directly (this is the "blur biasa" / regular blur).
- * - If [liquidGlassEnabled] is true (and the device is API 33+), a second
- *   node, [fillNode], draws the already-blurred [captureNode] output and then
- *   has the "liquid glass" refraction shader ([LiquidGlassEffect]) applied on
- *   top of it — matching how Nagram layers LiquidGlassEffect over an
- *   already-blurred source.
- *
- * On API < 31 (no RenderEffect/RenderNode blur support) this silently falls
- * back to drawing [overlayColor] as a flat scrim, same as the old behavior.
- */
 class LiveBlurView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
@@ -43,6 +24,11 @@ class LiveBlurView @JvmOverloads constructor(
     private var captureNode: RenderNode? = null
     private var fillNode: RenderNode? = null
     private var liquidGlass: LiquidGlassEffect? = null
+
+    private val preDrawListener = ViewTreeObserver.OnPreDrawListener {
+        updateBlurCapture()
+        true
+    }
 
     var overlayColor: Int = Color.argb(120, 0, 0, 0)
         set(value) {
@@ -87,29 +73,25 @@ class LiveBlurView @JvmOverloads constructor(
     private fun supportsBlur() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     private fun supportsLiquidGlass() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
-    /**
-     * @param root the view whose subtree should be captured & blurred (usually
-     *   the activity's decor view, or the screen's root layout).
-     * @param exclude an optional view (and its children) to hide during the
-     *   capture pass — typically the container this blur view itself sits
-     *   inside of (e.g. a card that also holds foreground text/buttons), so
-     *   that foreground content doesn't get captured as part of the "background".
-     */
     fun attachTo(root: ViewGroup, exclude: View? = null) {
+        rootView?.viewTreeObserver?.removeOnPreDrawListener(preDrawListener)
+        
         rootView = root
         excludeView = exclude
+        
+        root.viewTreeObserver.addOnPreDrawListener(preDrawListener)
+        invalidate()
     }
 
-    override fun onDraw(canvas: Canvas) {
-        if (capturing) return
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        rootView?.viewTreeObserver?.removeOnPreDrawListener(preDrawListener)
+    }
 
-        val root = rootView
-        val cNode = captureNode
-        val fNode = fillNode
-        if (root == null || cNode == null || fNode == null || !canvas.isHardwareAccelerated) {
-            if (Color.alpha(overlayColor) != 0) canvas.drawColor(overlayColor)
-            return
-        }
+    private fun updateBlurCapture() {
+        val root = rootView ?: return
+        val cNode = captureNode ?: return
+        val fNode = fillNode ?: return
 
         val w = width
         val h = height
@@ -129,13 +111,16 @@ class LiveBlurView @JvmOverloads constructor(
         excludeView?.visibility = INVISIBLE
 
         capturing = true
-        val recCanvas = cNode.beginRecording()
-        recCanvas.save()
-        recCanvas.translate(offsetX, offsetY)
-        root.draw(recCanvas)
-        recCanvas.restore()
-        cNode.endRecording()
-        capturing = false
+        try {
+            val recCanvas = cNode.beginRecording()
+            recCanvas.save()
+            recCanvas.translate(offsetX, offsetY)
+            root.draw(recCanvas)
+            recCanvas.restore()
+        } finally {
+            cNode.endRecording()
+            capturing = false
+        }
 
         excludeView?.visibility = prevExcludeVisibility ?: VISIBLE
 
@@ -156,8 +141,19 @@ class LiveBlurView @JvmOverloads constructor(
         } else {
             fNode.setRenderEffect(null)
         }
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        if (capturing) return
+
+        val fNode = fillNode
+        if (fNode == null || !canvas.isHardwareAccelerated) {
+            if (Color.alpha(overlayColor) != 0) canvas.drawColor(overlayColor)
+            return
+        }
 
         canvas.drawRenderNode(fNode)
+        
         if (Color.alpha(overlayColor) != 0) {
             canvas.drawColor(overlayColor)
         }
