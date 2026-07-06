@@ -2,7 +2,6 @@ package com.v2ray.ang.ui
 
 import android.content.Context
 import android.content.res.Configuration
-import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
@@ -40,9 +39,6 @@ import com.qmdeve.blurview.widget.BlurView
 abstract class BaseActivity : AppCompatActivity() {
     private var loadingOverlay: FrameLayout? = null
     private lateinit var themeStateManager: ThemeStateManager
-    
-    // Simpan referensi resource agar Dialog/BottomSheet tidak pakai resource sistem
-    private var customResources: Resources? = null 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         themeStateManager = ThemeStateManager(this)
@@ -108,26 +104,21 @@ abstract class BaseActivity : AppCompatActivity() {
         val dpi = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_DPI, 0)
         val localeWrapped = MyContextWrapper.wrap(base, SettingsManager.getLocale())
         val finalContext = if (dpi > 0) DPIController.wrapWithDpi(localeWrapped, dpi) else localeWrapped
-        
         super.attachBaseContext(finalContext)
-        customResources = finalContext.resources
-    }
-
-    // FIX DIALOG & BOTTOMSHEET:
-    // Wajib di-override agar BottomSheet mengkalkulasi rounded corner menggunakan DPI custom
-    override fun getResources(): Resources {
-        return customResources ?: super.getResources()
     }
 
     override fun applyOverrideConfiguration(overrideConfiguration: Configuration?) {
-        val config = overrideConfiguration ?: Configuration()
-        
-        val dpi = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_DPI, 0)
-        if (dpi > 0) {
-            config.densityDpi = dpi
+        if (overrideConfiguration != null) {
+            val uiMode = overrideConfiguration.uiMode
+            overrideConfiguration.setTo(baseContext.resources.configuration)
+            overrideConfiguration.uiMode = uiMode
+
+            val dpi = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_DPI, 0)
+            if (dpi > 0) {
+                overrideConfiguration.densityDpi = dpi
+            }
         }
-        
-        super.applyOverrideConfiguration(config)
+        super.applyOverrideConfiguration(overrideConfiguration)
     }
 
     protected fun addCustomDividerToRecyclerView(recyclerView: RecyclerView, context: Context?, drawableResId: Int, orientation: Int = DividerItemDecoration.VERTICAL) {
@@ -251,5 +242,3 @@ abstract class BaseActivity : AppCompatActivity() {
         loadingOverlay = null
     }
 }
-
-

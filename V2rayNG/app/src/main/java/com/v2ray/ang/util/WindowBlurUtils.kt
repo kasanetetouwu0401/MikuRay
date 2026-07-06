@@ -31,26 +31,13 @@ object WindowBlurUtils {
         try {
             val context = window.context
             val activity = context.getActivity() ?: return
-            
-            // --- FIX BOTTOMSHEET ZOOM & CORNER HILANG ---
-            // Dialog/BottomSheet secara default membuat context sendiri yang kadang kembali ke DPI sistem.
-            // Kita paksa context milik Window Dialog ini menggunakan Configuration dan Metrics milik Activity
-            // agar ukurannya 100% sinkron dan melengkungnya (rounded) tidak keluar layar.
-            val activityRes = activity.resources
-            @Suppress("DEPRECATION")
-            context.resources.updateConfiguration(activityRes.configuration, activityRes.displayMetrics)
-            // --------------------------------------------
-
             val decorView = activity.window?.decorView as? ViewGroup ?: return
             
             decorView.findViewById<View>(BLUR_OVERLAY_ID)?.let {
                 decorView.removeView(it)
             }
 
-            // --- FIX BLUR NGEZOOM ---
-            // Wajib menggunakan 'activity' sebagai context, BUKAN 'context' (milik dialog)
-            // agar library BlurView merender bitmap bayangan sesuai kepadatan (DPI) layar custom, bukan layar asli.
-            val blurView = BlurView(activity, null).apply {
+            val blurView = BlurView(context, null).apply {
                 id = BLUR_OVERLAY_ID
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -125,4 +112,3 @@ fun AlertDialog.Builder.showBlur(): AlertDialog {
     dialog.show()
     return dialog
 }
-
