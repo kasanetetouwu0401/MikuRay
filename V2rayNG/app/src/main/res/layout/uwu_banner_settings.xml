@@ -1,77 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<!-- Pastikan root layout (atau parent di luarnya) memberi padding/margin yang cukup -->
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@android:color/transparent"
     android:layout_width="match_parent"
-    android:layout_height="250.0dip"
-    android:layout_marginTop="16.0dip"
-    android:layout_marginBottom="8.0dip"
-    android:minHeight="?android:listPreferredItemHeightSmall">
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginBottom="8dp"
+    app:cardBackgroundColor="?attr/colorSecondaryContainer"
+    app:cardCornerRadius="28dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp">
 
-    <com.google.android.material.card.MaterialCardView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="250.0dip"
-        android:layout_marginStart="4.0dip"
-        android:layout_marginEnd="4.0dip"
-        app:cardBackgroundColor="?attr/colorCard"
-        app:cardCornerRadius="28.0dip"
-        app:cardElevation="0.0dip"
-        app:strokeWidth="0.0dip">
+        android:layout_height="wrap_content"
+        android:minHeight="220dp">
 
-        <!-- Logo Addon (Kecil) -->
+        <!-- Teks Judul -->
+        <TextView
+            android:id="@+id/tv_banner_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/uwu_banner_settings_title"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:textColor="?attr/colorOnSecondaryContainer"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/iv_banner_image"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Teks Deskripsi -->
+        <TextView
+            android:id="@+id/tv_banner_summary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp"
+            android:alpha="0.8"
+            android:text="@string/uwu_banner_settings_summary"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/colorOnSecondaryContainer"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/tv_banner_title"
+            app:layout_constraintStart_toStartOf="@+id/tv_banner_title"
+            app:layout_constraintTop_toBottomOf="@+id/tv_banner_title"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <!-- Gambar Karakter (Miku) -->
         <ImageView
-            android:layout_gravity="end"
+            android:id="@+id/iv_banner_image"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/uwu_banner_settings"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.4" /> <!-- Memakan 40% ruang di sebelah kanan -->
+
+        <!-- Logo Opsional (Jika masih ingin dipakai, ditumpuk di atas banner) -->
+        <ImageView
+            android:id="@+id/iv_addon_logo"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
             android:src="@drawable/uwu_addon_logo"
-            android:adjustViewBounds="true"
-            android:scaleType="fitEnd"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:tint="?attr/colorPrimary" />
 
-        <!-- Banner Latar Belakang (Miku) -->
-        <ImageView
-            android:layout_gravity="end|center_vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginTop="10.0dip"
-            android:layout_marginBottom="0.0dip"
-            android:src="@drawable/uwu_banner_settings"
-            android:adjustViewBounds="true"
-            android:translationX="40.0dip" /> <!-- Perbaikan: Menggeser visual 40dp ke kanan, tetapi tetap dipotong oleh rounded corner -->
-
-        <!-- Container Teks -->
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="20.0dip"
-            android:layout_marginTop="20.0dip"
-            android:layout_marginBottom="20.0dip"
-            android:layout_marginEnd="130.0dip"> <!-- Memberikan ruang di kanan agar teks turun ke bawah dan tidak tumpang tindih dengan Miku -->
-            
-            <TextView
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textSize="17.0sp"
-                android:textStyle="bold"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/uwu_banner_settings_title"
-                android:includeFontPadding="false" />
-                
-            <TextView
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textSize="21.0sp"
-                android:textStyle="bold"
-                android:textColor="?attr/colorOnSurface"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5.0dip"
-                android:text="@string/uwu_banner_settings_summary"
-                android:includeFontPadding="false" />
-                
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-</RelativeLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
