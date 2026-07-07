@@ -345,14 +345,22 @@ object MmkvManager {
         decodeAllServerList().forEach { guid -> resetProfileTraffic(guid) }
     }
 
+    /**
+     * Returns a formatted string of the combined traffic (upload + download)
+     * across all profiles, e.g. "1.23 GB". Returns null if no traffic has
+     * been recorded yet.
+     */
     fun getTotalTrafficString(): String? {
+        var uplinkTotal = 0L
         var downlinkTotal = 0L
         decodeAllServerList().forEach { guid ->
             val aff = decodeServerAffiliationInfo(guid) ?: return@forEach
+            uplinkTotal += aff.uplinkTotal
             downlinkTotal += aff.downlinkTotal
         }
-        if (downlinkTotal == 0L) return null
-        return formatTrafficBytes(downlinkTotal)
+        val total = uplinkTotal + downlinkTotal
+        if (total == 0L) return null
+        return formatTrafficBytes(total)
     }
 
     private fun formatTrafficBytes(bytes: Long): String {

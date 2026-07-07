@@ -553,8 +553,8 @@
     <string name="title_search_bar_chip">Плашка строки поиска</string>
     <string name="pref_show_weather_chip_title">Показывать плашку погоды</string>
     <string name="pref_show_weather_chip_summary">Показывать текущую температуру рядом со строкой поиска на основе вашего местоположения. Не может работать одновременно с плашкой общего объема скачивания</string>
-    <string name="pref_show_total_traffic_chip_title">Показывать плашку общего объема скачивания</string>
-    <string name="pref_show_total_traffic_chip_summary">Показывать общий объем скачивания для всех профилей рядом со строкой поиска. Не может работать одновременно с плашкой погоды</string>
+    <string name="pref_show_total_traffic_chip_title">Показывать плашку общего объема трафика</string>
+    <string name="pref_show_total_traffic_chip_summary">Показывать общий трафик (отправка + загрузка) для всех профилей рядом со строкой поиска. Не может работать одновременно с плашкой погоды</string>
     <string name="pref_search_chip_gradient_title">Градиентный фон плашки</string>
     <string name="pref_search_chip_gradient_summary">Применить градиентный фон (от цвета primary к tertiary) на плашке строки поиска, когда активна плашка погоды или общего трафика</string>
 
@@ -794,8 +794,6 @@
     <string name="summary_blur_intensity_value">Радиус: %1$d · Итерации: %2$d</string>
     <string name="pref_blur_bottom_intensity">Интенсивность размытия нижней карточки</string>
     <string name="title_blur_settings">Настройки размытия</string>
-    <string name="blur_intensity_glass_edge_label">Стеклянный край (0–40)</string>
-    <string name="blur_intensity_glass_edge_unsupported">Преломление стеклянного края требует Android 13 или новее на этом устройстве.</string>
     <string name="title_blur_warning">Высокое число итераций (10+) может снизить FPS. Рекомендуется: 2–5 итераций с радиусом 25–40</string>
     <string name="toast_allow_insecure_deprecated">ПРЕДУПРЕЖДЕНИЕ: Пропуск проверки сертификата «allowInsecure» будет отключён в августе 2026 г. Пожалуйста, как можно скорее перейдите на отпечаток сертификата. После истечения срока функция будет недоступна.</string>
 

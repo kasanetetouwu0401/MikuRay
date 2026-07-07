@@ -572,8 +572,8 @@
     <string name="title_search_bar_chip">Search Bar Chip</string>
     <string name="pref_show_weather_chip_title">Show weather chip</string>
     <string name="pref_show_weather_chip_summary">Show current temperature next to the search bar based on your location. Can\'t be active at the same time as the total download usage chip</string>
-    <string name="pref_show_total_traffic_chip_title">Show total download usage chip</string>
-    <string name="pref_show_total_traffic_chip_summary">Show total download usage across all profiles next to the search bar. Can\'t be active at the same time as the weather chip</string>
+    <string name="pref_show_total_traffic_chip_title">Show total traffic usage chip</string>
+    <string name="pref_show_total_traffic_chip_summary">Show total upload + download traffic across all profiles next to the search bar. Can\'t be active at the same time as the weather chip</string>
     <string name="pref_search_chip_gradient_title">Gradient chip background</string>
     <string name="pref_search_chip_gradient_summary">Apply a primary-to-tertiary gradient background on the search bar chip while the weather or total traffic chip is active</string>
 
@@ -816,8 +816,6 @@ you need."</string>
     <string name="summary_blur_intensity_value">Radius: %1$d · Iterations: %2$d</string>
     <string name="pref_blur_bottom_intensity">Bottom Card Blur Intensity</string>
     <string name="title_blur_settings">Blur Settings</string>
-    <string name="blur_intensity_glass_edge_label">Glass Edge (0–40)</string>
-    <string name="blur_intensity_glass_edge_unsupported">Glass edge refraction needs Android 13 or newer on this device.</string>
     <string name="title_blur_warning">High iterations (10+) may cause FPS drops. Recommended: 2-5 iterations with radius 25-40</string>
 
     <string name="sub_setting_tab_icon">Tab icon</string>

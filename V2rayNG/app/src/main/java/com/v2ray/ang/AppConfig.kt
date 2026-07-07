@@ -120,11 +120,6 @@ object AppConfig {
     const val PREF_BLUR_BOTTOM_ROUNDS = "pref_blur_bottom_rounds"
     const val DEFAULT_BLUR_BOTTOM_RADIUS = 20
     const val DEFAULT_BLUR_BOTTOM_ROUNDS = 3
-    // "Glass edge" — the InstallerX/Liquid-Glass rounded-rect refraction, only meaningful
-    // on the bottom status pill (a bounded shape). Needs API 33+; ignored on older devices.
-    const val PREF_BLUR_BOTTOM_GLASS_EDGE_AMOUNT = "pref_blur_bottom_glass_edge_amount"
-    const val DEFAULT_BLUR_BOTTOM_GLASS_EDGE_AMOUNT = 16
-    const val DEFAULT_BLUR_BOTTOM_CORNER_RADIUS_DP = 28
     const val PREF_ICON_SHAPE = "pref_icon_shape"
     const val PREF_ICON_SHAPE_DEFAULT = "uwu_shape_cookie"
     const val PREF_INDICATOR_STYLE = "pref_indicator_style"

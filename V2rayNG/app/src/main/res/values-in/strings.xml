@@ -535,8 +535,8 @@
     <string name="title_search_bar_chip">Chip Bar Pencarian</string>
     <string name="pref_show_weather_chip_title">Tampilin info cuaca</string>
     <string name="pref_show_weather_chip_summary">Tampilin suhu sekarang di sebelah bar pencarian sesuai lokasi kamu. Nggak bisa aktif barengan sama chip total pemakaian download</string>
-    <string name="pref_show_total_traffic_chip_title">Tampilin chip total pemakaian download</string>
-    <string name="pref_show_total_traffic_chip_summary">Tampilin total pemakaian download dari semua profil di sebelah bar pencarian. Nggak bisa aktif barengan sama chip info cuaca</string>
+    <string name="pref_show_total_traffic_chip_title">Tampilin chip total pemakaian traffic</string>
+    <string name="pref_show_total_traffic_chip_summary">Tampilin total traffic upload + download dari semua profil di sebelah bar pencarian. Nggak bisa aktif barengan sama chip info cuaca</string>
     <string name="pref_search_chip_gradient_title">Background chip gradasi</string>
     <string name="pref_search_chip_gradient_summary">Terapin background gradasi (warna primary ke tertiary) di chip bar pencarian pas chip cuaca atau chip total pemakaian lagi aktif</string>
 
@@ -775,8 +775,6 @@ yang kamu butuhin."</string>
     <string name="summary_blur_intensity_value">Radius: %1$d · Diulang: %2$d</string>
     <string name="pref_blur_bottom_intensity">Kekuatan Blur Kartu Bawah</string>
     <string name="title_blur_settings">Pengaturan Blur</string>
-    <string name="blur_intensity_glass_edge_label">Tepi Kaca (0–40)</string>
-    <string name="blur_intensity_glass_edge_unsupported">Efek refraksi tepi kaca butuh Android 13 ke atas di perangkat ini.</string>
     <string name="title_blur_warning">Pengulangan yang tinggi (10+) bisa bikin FPS ngedrop. Mending pakai 2-5 kali pengulangan aja dengan radius 25-40.</string>
     <string name="toast_allow_insecure_deprecated">PERINGATAN: Lewati verifikasi sertifikat "allowInsecure" akan dinonaktifkan pada Agustus 2026. Segera gunakan certificate fingerprint. Fitur ini tidak akan tersedia setelah kedaluwarsa.</string>
 
