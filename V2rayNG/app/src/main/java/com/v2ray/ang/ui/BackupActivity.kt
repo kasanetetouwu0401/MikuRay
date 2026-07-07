@@ -3,7 +3,6 @@ package com.v2ray.ang.ui
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.MaterialToolbar
@@ -23,8 +22,6 @@ import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.WebDavManager
-import com.v2ray.ang.ui.compose.screens.BackupRowsSection
-import com.v2ray.ang.ui.compose.theme.MikuComposeTheme
 import com.v2ray.ang.util.BannerColorExtractor
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.ZipUtil
@@ -50,60 +47,55 @@ class BackupActivity : HelperBaseActivity() {
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_configuration_backup_restore))
 
-        // 4 baris aksi (Backup, Share, Restore, WebDAV Config) sekarang dirender lewat
-        // Compose. Logic click listener-nya sama persis, cuma dipindah jadi lambda.
-        findViewById<ComposeView>(R.id.compose_backup_rows).apply {
-            setContent {
-                MikuComposeTheme {
-                    BackupRowsSection(
-                        onBackupClick = {
-                            MaterialAlertDialogBuilder(this@BackupActivity)
-                                .setTitle(R.string.title_configuration_backup)
-                                .setItems(config_backup_options) { _, which ->
-                                    when (which) {
-                                        0 -> backupViaLocal()
-                                        1 -> backupViaWebDav()
-                                    }
-                                }
-                                .showBlur()
-                        },
-                        onShareClick = {
-                            val ret = backupConfigurationToCache()
-                            if (ret.first) {
-                                startActivity(
-                                    Intent.createChooser(
-                                        Intent(Intent.ACTION_SEND).setType("application/zip")
-                                            .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                            .putExtra(
-                                                Intent.EXTRA_STREAM,
-                                                FileProvider.getUriForFile(
-                                                    this@BackupActivity, BuildConfig.APPLICATION_ID + ".cache", File(ret.second)
-                                                )
-                                            ), getString(R.string.title_configuration_share)
-                                    )
-                                )
-                            } else {
-                                snackbarError(
-                                    getString(R.string.title_configuration_share),
-                                    title = getString(R.string.title_alerter_error)
-                                )
-                            }
-                        },
-                        onRestoreClick = {
-                            MaterialAlertDialogBuilder(this@BackupActivity)
-                                .setTitle(R.string.title_configuration_restore)
-                                .setItems(config_backup_options) { _, which ->
-                                    when (which) {
-                                        0 -> restoreViaLocal()
-                                        1 -> restoreViaWebDav()
-                                    }
-                                }
-                                .showBlur()
-                        },
-                        onWebDavConfigClick = { showWebDavSettingsDialog() },
-                    )
+        binding.layoutBackup.setOnClickListener {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.title_configuration_backup)
+                .setItems(config_backup_options) { _, which ->
+                    when (which) {
+                        0 -> backupViaLocal()
+                        1 -> backupViaWebDav()
+                    }
                 }
+                .showBlur()
+        }
+
+        binding.layoutShare.setOnClickListener {
+            val ret = backupConfigurationToCache()
+            if (ret.first) {
+                startActivity(
+                    Intent.createChooser(
+                        Intent(Intent.ACTION_SEND).setType("application/zip")
+                            .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            .putExtra(
+                                Intent.EXTRA_STREAM,
+                                FileProvider.getUriForFile(
+                                    this, BuildConfig.APPLICATION_ID + ".cache", File(ret.second)
+                                )
+                            ), getString(R.string.title_configuration_share)
+                    )
+                )
+            } else {
+                snackbarError(
+                    getString(R.string.title_configuration_share), 
+                    title = getString(R.string.title_alerter_error)
+                )
             }
+        }
+
+        binding.layoutRestore.setOnClickListener {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.title_configuration_restore)
+                .setItems(config_backup_options) { _, which ->
+                    when (which) {
+                        0 -> restoreViaLocal()
+                        1 -> restoreViaWebDav()
+                    }
+                }
+                .showBlur()
+        }
+
+        binding.layoutWebdavConfigSetting.setOnClickListener {
+            showWebDavSettingsDialog()
         }
     }
 
