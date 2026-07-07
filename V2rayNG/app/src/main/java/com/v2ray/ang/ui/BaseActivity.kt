@@ -31,10 +31,11 @@ import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.CustomDividerItemDecoration
 import com.v2ray.ang.util.DPIController
+import com.v2ray.ang.util.GlassBlurView
+import com.v2ray.ang.util.GlassTintDefaults
 import com.v2ray.ang.util.MyContextWrapper
 import com.v2ray.ang.util.WindowBlurUtils
 import com.v2ray.ang.util.ThemeStateManager
-import com.qmdeve.blurview.widget.BlurView
 
 abstract class BaseActivity : AppCompatActivity() {
     private var loadingOverlay: FrameLayout? = null
@@ -177,14 +178,16 @@ abstract class BaseActivity : AppCompatActivity() {
             val isBlurEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
 
             if (isBlurEnabled) {
-                val blurView = BlurView(this@BaseActivity, null).apply {
+                val blurView = GlassBlurView(this@BaseActivity, null).apply {
                     layoutParams = FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT
                     )
                     setBlurRadius(MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat())
                     setBlurRounds(MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS))
-                    setOverlayColor(Color.argb(120, 0, 0, 0))
+                    // Same InstallerX-style layered tint used for the window/dialog blur;
+                    // this is also a full-screen scrim, not a bounded glass card.
+                    setGlassTint(GlassTintDefaults.forScrim())
                 }
                 addView(blurView)
             } else {

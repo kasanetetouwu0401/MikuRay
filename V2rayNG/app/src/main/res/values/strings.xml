@@ -816,6 +816,8 @@ you need."</string>
     <string name="summary_blur_intensity_value">Radius: %1$d · Iterations: %2$d</string>
     <string name="pref_blur_bottom_intensity">Bottom Card Blur Intensity</string>
     <string name="title_blur_settings">Blur Settings</string>
+    <string name="blur_intensity_glass_edge_label">Glass Edge (0–40)</string>
+    <string name="blur_intensity_glass_edge_unsupported">Glass edge refraction needs Android 13 or newer on this device.</string>
     <string name="title_blur_warning">High iterations (10+) may cause FPS drops. Recommended: 2-5 iterations with radius 25-40</string>
 
     <string name="sub_setting_tab_icon">Tab icon</string>

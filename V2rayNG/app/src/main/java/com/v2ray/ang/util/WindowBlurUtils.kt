@@ -3,14 +3,12 @@ package com.v2ray.ang.util
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.qmdeve.blurview.widget.BlurView
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
 
@@ -20,7 +18,7 @@ object WindowBlurUtils {
 
     fun applyWindowBlur(window: Window?) {
         if (window == null) return
-        
+
         val isBlurEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
         if (!isBlurEnabled) {
             window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
@@ -32,31 +30,36 @@ object WindowBlurUtils {
             val context = window.context
             val activity = context.getActivity() ?: return
             val decorView = activity.window?.decorView as? ViewGroup ?: return
-            
+
             decorView.findViewById<View>(BLUR_OVERLAY_ID)?.let {
                 decorView.removeView(it)
             }
 
-            val blurView = BlurView(context, null).apply {
+            val blurView = GlassBlurView(context, null).apply {
                 id = BLUR_OVERLAY_ID
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
-                
+
                 val blurRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat()
                 val blurRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
                 setBlurRadius(blurRadius)
                 setBlurRounds(blurRounds)
-                setOverlayColor(Color.argb(120, 0, 0, 0))
-                
+                // InstallerX-style layered tint instead of one flat overlay colour. This is
+                // a full-window backdrop (behind a dialog / the loading overlay), so we keep
+                // the same dark scrim it always had — just routed through the richer
+                // compositor — rather than the lighter "material" tint used for bounded
+                // glass surfaces like the bottom status pill.
+                setGlassTint(GlassTintDefaults.forScrim())
+
                 isClickable = false
                 isFocusable = false
                 elevation = 0f
                 outlineProvider = null
             }
 
-            decorView.addView(blurView)          
+            decorView.addView(blurView)
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
             window.decorView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
@@ -66,7 +69,7 @@ object WindowBlurUtils {
                     window.decorView.removeOnAttachStateChangeListener(this)
                 }
             })
-            
+
         } catch (e: Exception) {
             e.printStackTrace()
             window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
@@ -79,14 +82,14 @@ object WindowBlurUtils {
         try {
             val activity = window.context.getActivity() ?: return
             val decorView = activity.window?.decorView as? ViewGroup ?: return
-            val blurView = decorView.findViewById<BlurView>(BLUR_OVERLAY_ID) ?: return
-            
+            val blurView = decorView.findViewById<GlassBlurView>(BLUR_OVERLAY_ID) ?: return
+
             blurView.setBlurRadius(radius)
             blurView.setBlurRounds(rounds)
-            
+
             blurView.invalidate()
             decorView.invalidate()
-            
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
