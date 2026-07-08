@@ -125,6 +125,7 @@ object AppConfig {
     const val PREF_INDICATOR_STYLE = "pref_indicator_style"
     const val PREF_GROUP_ALL_DISPLAY = "pref_group_all_display"
     const val PREF_GROUP_ALL_TAB_ICON = "pref_group_all_tab_icon"
+    const val PREF_TAB_ACCORDION_LAYOUT = "pref_tab_accordion_layout"
     const val PREF_LANGUAGE = "pref_language"
     const val PREF_UI_MODE_NIGHT = "pref_ui_mode_night"
     const val PREF_CUSTOM_DPI = "pref_custom_dpi"
