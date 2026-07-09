@@ -48,8 +48,10 @@ import com.v2ray.ang.ui.dialog.HeaderTopRowPaddingDialog
 import com.v2ray.ang.ui.preference.CustomBannerPreference
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
 import com.v2ray.ang.util.BannerColorExtractor
+import com.v2ray.ang.util.BlurBottomStatusController
 import com.v2ray.ang.util.CustomFontManager
 import com.v2ray.ang.util.ThemeManager
+import com.v2ray.ang.util.WindowBlurUtils
 import com.v2ray.ang.ui.weather.WeatherHelper
 import com.v2ray.ang.util.showBlur
 import com.yalantis.ucrop.UCrop
@@ -1028,11 +1030,13 @@ class UiSettingsActivity : BaseActivity() {
             
             val savedRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS)
             val savedRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
-            blurIntensity?.updateSummary(savedRadius, savedRounds)
+            val savedOverlay = WindowBlurUtils.currentOverlayStrength()
+            blurIntensity?.updateSummary(savedRadius, savedRounds, savedOverlay)
             
             val savedBottomRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_RADIUS, AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS)
             val savedBottomRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_BOTTOM_ROUNDS, AppConfig.DEFAULT_BLUR_BOTTOM_ROUNDS)
-            blurBottomIntensity?.updateSummary(savedBottomRadius, savedBottomRounds)
+            val savedBottomOverlay = BlurBottomStatusController.currentOverlayStrength()
+            blurBottomIntensity?.updateSummary(savedBottomRadius, savedBottomRounds, savedBottomOverlay)
         }
 
         private fun updateTrueBlackState(isNight: Boolean) {

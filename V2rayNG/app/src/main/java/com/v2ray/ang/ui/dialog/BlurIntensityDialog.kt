@@ -79,7 +79,7 @@ class BlurIntensityDialog @JvmOverloads constructor(
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_RADIUS, radius)
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_ROUNDS, rounds)
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_OVERLAY_STRENGTH, overlay)
-            updateSummary(radius, rounds)
+            updateSummary(radius, rounds, overlay)
             dialog.dismiss()
         }
 
@@ -89,7 +89,7 @@ class BlurIntensityDialog @JvmOverloads constructor(
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_RADIUS, originalRadius)
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_ROUNDS, originalRounds)
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_OVERLAY_STRENGTH, originalOverlay)
-            updateSummary(originalRadius, originalRounds)
+            updateSummary(originalRadius, originalRounds, originalOverlay)
             dialog.dismiss()
         }
 
@@ -106,7 +106,7 @@ class BlurIntensityDialog @JvmOverloads constructor(
         }
     }
 
-    fun updateSummary(radius: Int, rounds: Int) {
-        summary = context.getString(R.string.summary_blur_intensity_value, radius, rounds)
+    fun updateSummary(radius: Int, rounds: Int, overlay: Int = WindowBlurUtils.currentOverlayStrength()) {
+        summary = context.getString(R.string.summary_blur_intensity_value, radius, rounds, overlay)
     }
 }

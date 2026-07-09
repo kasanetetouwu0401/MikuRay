@@ -124,6 +124,10 @@ object AppConfig {
     const val BLUR_OVERLAY_STRENGTH_DEFAULT = 47
     const val BLUR_OVERLAY_STRENGTH_MIN = 0
     const val BLUR_OVERLAY_STRENGTH_MAX = 100
+    const val PREF_BLUR_BOTTOM_OVERLAY_STRENGTH = "pref_blur_bottom_overlay_strength"
+    const val BLUR_BOTTOM_OVERLAY_STRENGTH_DEFAULT = 20
+    const val BLUR_BOTTOM_OVERLAY_STRENGTH_MIN = 0
+    const val BLUR_BOTTOM_OVERLAY_STRENGTH_MAX = 100
     const val PREF_ICON_SHAPE = "pref_icon_shape"
     const val PREF_ICON_SHAPE_DEFAULT = "uwu_shape_cookie"
     const val PREF_INDICATOR_STYLE = "pref_indicator_style"
