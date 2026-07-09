@@ -269,6 +269,7 @@
             android:visibility="gone" />
 
         <View
+            android:id="@+id/tab_wrapper_fade"
             android:layout_width="match_parent"
             android:layout_height="70dp"
             android:background="@drawable/uwu_bg_fade_top" />
@@ -325,21 +326,6 @@
 
                 </com.google.android.material.card.MaterialCardView>
             </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_tab_layout_style"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minWidth="55dp"
-                android:minHeight="55dp"
-                android:layout_marginStart="4dp"
-                android:contentDescription="@string/title_tab_layout_style"
-                app:backgroundTint="?colorCard"
-                app:icon="@drawable/ic_view_agenda_color"
-                app:iconGravity="textStart"
-                app:iconPadding="0dp"
-                app:iconTint="@null"
-                style="@style/Widget.Material3Expressive.Button.IconButton.Filled" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_add_sub"

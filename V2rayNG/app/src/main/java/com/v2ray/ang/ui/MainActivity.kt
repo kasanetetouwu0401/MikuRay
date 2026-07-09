@@ -108,6 +108,7 @@ class MainActivity : HelperBaseActivity(),
         }
         if (SettingsChangeManager.consumeSetupGroupTab()) {
             setupGroupTab()
+            applyTabLayoutStyle()
         }
     }
 
@@ -471,14 +472,15 @@ class MainActivity : HelperBaseActivity(),
 
     /**
      * Toggles the tab area between the classic horizontal tab pager and the expandable
-     * accordion list, persisting the choice so it's remembered next launch.
+     * accordion list, based on the "pref_tab_accordion_layout" setting (UI Settings).
+     * Visibility of layout_tab_wrapper itself is handled in setupGroupTab().
      */
     private fun applyTabLayoutStyle() {
         val useAccordion = MmkvManager.decodeSettingsBool(AppConfig.PREF_TAB_ACCORDION_LAYOUT, false)
 
         binding.viewPager.isVisible = !useAccordion
         binding.accordionList.isVisible = useAccordion
-        binding.cardTabPill.isVisible = !useAccordion
+        binding.tabWrapperFade.isVisible = !useAccordion
 
         if (useAccordion) {
             accordionGroupAdapter.setGroups(mainViewModel.getSubscriptions(this))
@@ -537,12 +539,6 @@ class MainActivity : HelperBaseActivity(),
         
         binding.btnAddSub.setOnClickListener {
             requestActivityLauncher.launch(Intent(this, SubEditActivity::class.java))
-        }
-
-        binding.btnTabLayoutStyle.setOnClickListener {
-            val current = MmkvManager.decodeSettingsBool(AppConfig.PREF_TAB_ACCORDION_LAYOUT, false)
-            MmkvManager.encodeSettings(AppConfig.PREF_TAB_ACCORDION_LAYOUT, !current)
-            applyTabLayoutStyle()
         }
 
         binding.layoutWeatherChip.setOnClickListener {
@@ -784,8 +780,9 @@ class MainActivity : HelperBaseActivity(),
         }
         
         val hasAnyGroup = groups.isNotEmpty()
+        val useAccordion = MmkvManager.decodeSettingsBool(AppConfig.PREF_TAB_ACCORDION_LAYOUT, false)
         
-        binding.layoutTabWrapper.isVisible = hasAnyGroup
+        binding.layoutTabWrapper.isVisible = hasAnyGroup && !useAccordion
         binding.tabGroup.isVisible = hasAnyGroup
         (binding.tabGroup.parent as? View)?.isVisible = hasAnyGroup
 
