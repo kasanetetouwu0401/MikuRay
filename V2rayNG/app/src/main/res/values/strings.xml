@@ -275,8 +275,6 @@
     <string name="title_pref_group_all_display">Enable show all groups</string>
     <string name="summary_pref_group_all_display">Add an extra "All Tabs" page</string>
     <string name="title_pref_group_all_tab_icon">"All" tab icon</string>
-    <string name="title_pref_tab_accordion_layout">Accordion group layout</string>
-    <string name="summary_pref_tab_accordion_layout">Show groups as an expandable list instead of tabs</string>
 
     <!-- AboutActivity -->
     <string name="title_pref_feedback">Feedback</string>
@@ -815,6 +813,7 @@ you need."</string>
     <string name="pref_blur_intensity">Blur Intensity</string>
     <string name="blur_intensity_radius_label">Blur Radius (2–100)</string>
     <string name="blur_intensity_rounds_label">Blur Iterations (1–15)</string>
+    <string name="blur_intensity_overlay_label">Overlay Strength (0–100)</string>
     <string name="summary_blur_intensity_value">Radius: %1$d · Iterations: %2$d</string>
     <string name="pref_blur_bottom_intensity">Bottom Card Blur Intensity</string>
     <string name="title_blur_settings">Blur Settings</string>

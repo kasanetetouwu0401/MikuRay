@@ -80,7 +80,6 @@ class MainActivity : HelperBaseActivity(),
 
     val mainViewModel: MainViewModel by viewModels()
     private lateinit var groupPagerAdapter: GroupPagerAdapter
-    private lateinit var accordionGroupAdapter: AccordionGroupAdapter
     private var tabMediator: TabLayoutMediator? = null
     
     private var bannerReceiver: android.content.BroadcastReceiver? = null 
@@ -108,7 +107,6 @@ class MainActivity : HelperBaseActivity(),
         }
         if (SettingsChangeManager.consumeSetupGroupTab()) {
             setupGroupTab()
-            applyTabLayoutStyle()
         }
     }
 
@@ -127,13 +125,11 @@ class MainActivity : HelperBaseActivity(),
         window.statusBarColor = android.graphics.Color.TRANSPARENT
 
         setupViewPager()
-        setupAccordionList()
         setupListeners()
         setupInlineSearchView()
         setupGroupTab()
         setupViewModel()
         setupBannerHome()
-        applyTabLayoutStyle()
         BlurBottomStatusController.applyState(this, binding)
 
         SubscriptionUpdater.sync()
@@ -433,93 +429,6 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
-    /**
-     * Sets up the accordion-style alternative to the horizontal tab pager: subscription
-     * groups are rendered as expandable cards, tapping the chevron reveals that group's
-     * server profiles inline instead of switching tab pages.
-     */
-    private fun setupAccordionList() {
-        accordionGroupAdapter = AccordionGroupAdapter(object : AccordionGroupAdapter.Listener {
-            override fun onResolveMembers(group: com.v2ray.ang.dto.GroupMapItem): List<com.v2ray.ang.dto.entities.ServersCache> {
-                val guids = if (group.id.isEmpty()) {
-                    MmkvManager.decodeAllServerList()
-                } else {
-                    MmkvManager.decodeServerList(group.id)
-                }
-                return guids.mapNotNull { guid ->
-                    MmkvManager.decodeServerConfig(guid)?.let { profile ->
-                        com.v2ray.ang.dto.entities.ServersCache(guid, profile)
-                    }
-                }
-            }
-
-            override fun onSelectMember(guid: String) = setSelectServerFromAccordion(guid)
-
-            override fun onEditMember(guid: String) = editServerFromAccordion(guid)
-
-            override fun onResolveIcon(iconName: String?): Int {
-                if (!iconName.isNullOrBlank()) {
-                    val resId = resources.getIdentifier(iconName, "drawable", packageName)
-                    if (resId != 0) return resId
-                }
-                return R.drawable.ic_group
-            }
-        })
-
-        binding.accordionList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-        binding.accordionList.adapter = accordionGroupAdapter
-    }
-
-    /**
-     * Toggles the tab area between the classic horizontal tab pager and the expandable
-     * accordion list, based on the "pref_tab_accordion_layout" setting (UI Settings).
-     * Visibility of layout_tab_wrapper itself is handled in setupGroupTab().
-     */
-    private fun applyTabLayoutStyle() {
-        val useAccordion = MmkvManager.decodeSettingsBool(AppConfig.PREF_TAB_ACCORDION_LAYOUT, false)
-
-        binding.viewPager.isVisible = !useAccordion
-        binding.accordionList.isVisible = useAccordion
-        binding.tabWrapperFade.isVisible = !useAccordion
-
-        if (useAccordion) {
-            accordionGroupAdapter.setGroups(mainViewModel.getSubscriptions(this))
-        }
-    }
-
-    private fun setSelectServerFromAccordion(guid: String) {
-        val selected = MmkvManager.getSelectServer()
-        if (guid != selected) {
-            MmkvManager.setSelectServer(guid)
-            if (mainViewModel.isRunning.value == true) {
-                restartV2Ray()
-            }
-        }
-        accordionGroupAdapter.refreshExpandedMembers()
-    }
-
-    private fun editServerFromAccordion(guid: String) {
-        val profile = MmkvManager.decodeServerConfig(guid) ?: return
-        val intent = Intent().putExtra("guid", guid)
-            .putExtra("isRunning", mainViewModel.isRunning.value)
-            .putExtra("createConfigType", profile.configType.value)
-            .putExtra("subscriptionId", profile.subscriptionId)
-        when (profile.configType) {
-            EConfigType.CUSTOM -> {
-                requestActivityLauncher.launch(intent.setClass(this, ServerCustomConfigActivity::class.java))
-            }
-            EConfigType.POLICYGROUP -> {
-                requestActivityLauncher.launch(intent.setClass(this, ServerGroupActivity::class.java))
-            }
-            EConfigType.PROXYCHAIN -> {
-                requestActivityLauncher.launch(intent.setClass(this, ServerProxyChainActivity::class.java))
-            }
-            else -> {
-                requestActivityLauncher.launch(intent.setClass(this, ServerActivity::class.java))
-            }
-        }
-    }
-
     private fun setupListeners() {
         binding.fab.setOnClickListener { handleFabAction() }
         binding.fabNoBlur.setOnClickListener { handleFabAction() }
@@ -780,15 +689,10 @@ class MainActivity : HelperBaseActivity(),
         }
         
         val hasAnyGroup = groups.isNotEmpty()
-        val useAccordion = MmkvManager.decodeSettingsBool(AppConfig.PREF_TAB_ACCORDION_LAYOUT, false)
         
-        binding.layoutTabWrapper.isVisible = hasAnyGroup && !useAccordion
+        binding.layoutTabWrapper.isVisible = hasAnyGroup
         binding.tabGroup.isVisible = hasAnyGroup
         (binding.tabGroup.parent as? View)?.isVisible = hasAnyGroup
-
-        if (::accordionGroupAdapter.isInitialized) {
-            accordionGroupAdapter.setGroups(groups)
-        }
     }
 
     fun refreshGroupTabTitles(refreshAll: Boolean = false) {
@@ -803,11 +707,6 @@ class MainActivity : HelperBaseActivity(),
             val count = groups.getOrNull(i)?.serverCount ?: 0
             val tabLabel = tab.customView?.findViewById<TextView>(R.id.tab_label) ?: continue
             setBadgeVisibility(tabBadge, tabLabel, count)
-        }
-
-        if (::accordionGroupAdapter.isInitialized) {
-            accordionGroupAdapter.setGroups(groups)
-            accordionGroupAdapter.refreshExpandedMembers()
         }
     }
 

@@ -48,7 +48,7 @@ object WindowBlurUtils {
                 val blurRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
                 setBlurRadius(blurRadius)
                 setBlurRounds(blurRounds)
-                setOverlayColor(Color.argb(120, 0, 0, 0))
+                setOverlayColor(overlayColorFor(currentOverlayStrength()))
                 
                 isClickable = false
                 isFocusable = false
@@ -90,6 +90,36 @@ object WindowBlurUtils {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    fun updateWindowBlurOverlay(window: Window?, strengthPercent: Int) {
+        if (window == null) return
+        try {
+            val activity = window.context.getActivity() ?: return
+            val decorView = activity.window?.decorView as? ViewGroup ?: return
+            val blurView = decorView.findViewById<BlurView>(BLUR_OVERLAY_ID) ?: return
+
+            blurView.setOverlayColor(overlayColorFor(strengthPercent))
+
+            blurView.invalidate()
+            decorView.invalidate()
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun currentOverlayStrength(): Int = MmkvManager.decodeSettingsInt(
+        AppConfig.PREF_BLUR_OVERLAY_STRENGTH,
+        AppConfig.BLUR_OVERLAY_STRENGTH_DEFAULT
+    ).coerceIn(AppConfig.BLUR_OVERLAY_STRENGTH_MIN, AppConfig.BLUR_OVERLAY_STRENGTH_MAX)
+
+    fun overlayColorFor(strengthPercent: Int): Int {
+        val alpha = (strengthPercent.coerceIn(
+            AppConfig.BLUR_OVERLAY_STRENGTH_MIN,
+            AppConfig.BLUR_OVERLAY_STRENGTH_MAX
+        ) * 255 / 100).coerceIn(0, 255)
+        return Color.argb(alpha, 0, 0, 0)
     }
 }
 

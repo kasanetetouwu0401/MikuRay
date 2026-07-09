@@ -28,6 +28,7 @@ import com.v2ray.ang.AngApplication
 import com.v2ray.ang.R
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
+import com.v2ray.ang.util.WindowBlurUtils
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.CustomDividerItemDecoration
 import com.v2ray.ang.util.DPIController
@@ -184,7 +185,7 @@ abstract class BaseActivity : AppCompatActivity() {
                     )
                     setBlurRadius(MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat())
                     setBlurRounds(MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS))
-                    setOverlayColor(Color.argb(120, 0, 0, 0))
+                    setOverlayColor(WindowBlurUtils.overlayColorFor(WindowBlurUtils.currentOverlayStrength()))
                 }
                 addView(blurView)
             } else {

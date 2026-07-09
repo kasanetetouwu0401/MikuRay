@@ -120,12 +120,15 @@ object AppConfig {
     const val PREF_BLUR_BOTTOM_ROUNDS = "pref_blur_bottom_rounds"
     const val DEFAULT_BLUR_BOTTOM_RADIUS = 20
     const val DEFAULT_BLUR_BOTTOM_ROUNDS = 3
+    const val PREF_BLUR_OVERLAY_STRENGTH = "pref_blur_overlay_strength"
+    const val BLUR_OVERLAY_STRENGTH_DEFAULT = 47
+    const val BLUR_OVERLAY_STRENGTH_MIN = 0
+    const val BLUR_OVERLAY_STRENGTH_MAX = 100
     const val PREF_ICON_SHAPE = "pref_icon_shape"
     const val PREF_ICON_SHAPE_DEFAULT = "uwu_shape_cookie"
     const val PREF_INDICATOR_STYLE = "pref_indicator_style"
     const val PREF_GROUP_ALL_DISPLAY = "pref_group_all_display"
     const val PREF_GROUP_ALL_TAB_ICON = "pref_group_all_tab_icon"
-    const val PREF_TAB_ACCORDION_LAYOUT = "pref_tab_accordion_layout"
     const val PREF_LANGUAGE = "pref_language"
     const val PREF_UI_MODE_NIGHT = "pref_ui_mode_night"
     const val PREF_CUSTOM_DPI = "pref_custom_dpi"

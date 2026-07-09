@@ -791,6 +791,7 @@
     <string name="pref_blur_intensity">Интенсивность размытия</string>
     <string name="blur_intensity_radius_label">Радиус размытия (2–100)</string>
     <string name="blur_intensity_rounds_label">Итерации размытия (1–15)</string>
+    <string name="blur_intensity_overlay_label">Сила наложения (0–100)</string>
     <string name="summary_blur_intensity_value">Радиус: %1$d · Итерации: %2$d</string>
     <string name="pref_blur_bottom_intensity">Интенсивность размытия нижней карточки</string>
     <string name="title_blur_settings">Настройки размытия</string>
