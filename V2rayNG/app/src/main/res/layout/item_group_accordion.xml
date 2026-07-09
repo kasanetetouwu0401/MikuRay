@@ -31,7 +31,6 @@
                 android:id="@+id/layout_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_icon_button"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
@@ -75,7 +74,7 @@
                         android:layout_height="wrap_content"
                         android:ellipsize="end"
                         android:maxLines="1"
-                        tools:text="PILIHAKUN" />
+                        tools:text="Select account" />
 
                     <TextView
                         android:id="@+id/tv_group_subtitle"
@@ -87,7 +86,7 @@
                         android:layout_marginTop="2dp"
                         android:ellipsize="end"
                         android:maxLines="1"
-                        tools:text="Selector \u00b7 VMESS (AU) DigitalOc\u2026" />
+                        tools:text="Selector VMESS (AU) DigitalOcean" />
                 </LinearLayout>
 
                 <com.google.android.material.card.MaterialCardView
