@@ -27,6 +27,7 @@ class AccordionGroupAdapter(
     }
 
     private var groups: List<GroupMapItem> = emptyList()
+    // Multiple groups can be expanded at the same time.
     private val expandedIds = mutableSetOf<String>()
 
     fun setGroups(newGroups: List<GroupMapItem>) {
@@ -36,13 +37,15 @@ class AccordionGroupAdapter(
         notifyDataSetChanged()
     }
 
-    /** Refresh selection / ping state for currently expanded groups without collapsing them. */
+    /**
+     * Refresh selection / ping state for all groups without collapsing them.
+     * The header subtitle reflects the globally selected server, so every group's
+     * header needs a rebind on selection change -- not just the expanded one --
+     * otherwise a collapsed group can keep showing a stale "selected server" preview
+     * until it's tapped open again.
+     */
     fun refreshExpandedMembers() {
-        groups.forEachIndexed { index, group ->
-            if (expandedIds.contains(group.id)) {
-                notifyItemChanged(index)
-            }
-        }
+        groups.indices.forEach { index -> notifyItemChanged(index) }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GroupViewHolder {
