@@ -28,7 +28,6 @@ import com.v2ray.ang.AngApplication
 import com.v2ray.ang.R
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.util.WindowBlurUtils
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.helper.CustomDividerItemDecoration
 import com.v2ray.ang.util.DPIController
