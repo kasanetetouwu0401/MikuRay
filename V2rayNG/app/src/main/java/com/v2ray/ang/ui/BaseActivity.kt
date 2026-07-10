@@ -17,6 +17,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.google.android.material.appbar.AppBarLayout
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -34,6 +36,8 @@ import com.v2ray.ang.util.DPIController
 import com.v2ray.ang.util.MyContextWrapper
 import com.v2ray.ang.util.WindowBlurUtils
 import com.v2ray.ang.util.ThemeStateManager
+import com.v2ray.ang.util.getColorAttr
+import com.v2ray.ang.util.roundTopCorners
 import com.qmdeve.blurview.widget.BlurView
 
 abstract class BaseActivity : AppCompatActivity() {
@@ -88,6 +92,29 @@ abstract class BaseActivity : AppCompatActivity() {
                 right  = maxOf(systemBars.right,  displayCutout.right)
             )
             insets
+        }
+        applyRoundedContentSheet(root)
+    }
+
+    /**
+     * Finds whichever child sits under the AppBarLayout/CollapsingToolbarLayout
+     * (i.e. the view carrying ScrollingViewBehavior — NestedScrollView,
+     * FragmentContainerView, RecyclerView, etc.) and clips its top corners so
+     * it reads as a rounded sheet docked under the toolbar, matching the
+     * treatment used on the home screen.
+     */
+    private fun applyRoundedContentSheet(root: View) {
+        val coordinator = root as? CoordinatorLayout ?: return
+        for (i in 0 until coordinator.childCount) {
+            val child = coordinator.getChildAt(i)
+            val params = child.layoutParams as? CoordinatorLayout.LayoutParams ?: continue
+            if (params.behavior is AppBarLayout.ScrollingViewBehavior) {
+                child.roundTopCorners(24f)
+                if (child.background == null) {
+                    child.setBackgroundColor(getColorAttr(R.attr.colorSurface))
+                }
+                break
+            }
         }
     }
 
@@ -184,7 +211,7 @@ abstract class BaseActivity : AppCompatActivity() {
                     )
                     setBlurRadius(MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS).toFloat())
                     setBlurRounds(MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS))
-                    setOverlayColor(WindowBlurUtils.overlayColorFor(WindowBlurUtils.currentOverlayStrength()))
+                    setOverlayColor(Color.argb(120, 0, 0, 0))
                 }
                 addView(blurView)
             } else {

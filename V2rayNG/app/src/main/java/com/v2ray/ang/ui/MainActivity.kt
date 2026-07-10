@@ -143,10 +143,6 @@ class MainActivity : HelperBaseActivity(),
     private fun weatherLocationReady(): Boolean =
         WeatherHelper.hasCustomLocation() || WeatherHelper.hasLocationPermission(this)
 
-    fun previewBottomBlurOverlayStrength(strengthPercent: Int) {
-        BlurBottomStatusController.updateOverlayStrength(this, binding, strengthPercent)
-    }
-
     private fun syncWeatherBackgroundUpdates() {
         val weatherEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)
         val canRunInBackground = WeatherHelper.hasCustomLocation() ||

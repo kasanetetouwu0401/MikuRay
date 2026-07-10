@@ -2,7 +2,6 @@ package com.v2ray.ang.util
 
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.ColorUtils
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ActivityMainBinding
@@ -12,25 +11,6 @@ object BlurBottomStatusController {
 
     fun isEnabled(): Boolean =
         MmkvManager.decodeSettingsBool(AppConfig.PREF_BLUR_BOTTOM_STATUS, false)
-
-    fun currentOverlayStrength(): Int = MmkvManager.decodeSettingsInt(
-        AppConfig.PREF_BLUR_BOTTOM_OVERLAY_STRENGTH,
-        AppConfig.BLUR_BOTTOM_OVERLAY_STRENGTH_DEFAULT
-    ).coerceIn(AppConfig.BLUR_BOTTOM_OVERLAY_STRENGTH_MIN, AppConfig.BLUR_BOTTOM_OVERLAY_STRENGTH_MAX)
-
-    fun overlayColorFor(activity: AppCompatActivity, strengthPercent: Int): Int {
-        val alpha = (strengthPercent.coerceIn(
-            AppConfig.BLUR_BOTTOM_OVERLAY_STRENGTH_MIN,
-            AppConfig.BLUR_BOTTOM_OVERLAY_STRENGTH_MAX
-        ) * 255 / 100).coerceIn(0, 255)
-        val baseColor = activity.getColorAttr(R.attr.colorPrimary)
-        return ColorUtils.setAlphaComponent(baseColor, alpha)
-    }
-
-    fun updateOverlayStrength(activity: AppCompatActivity, binding: ActivityMainBinding, strengthPercent: Int) {
-        binding.blurBottomStatus.setOverlayColor(overlayColorFor(activity, strengthPercent))
-        binding.blurBottomStatus.invalidate()
-    }
 
     fun applyState(activity: AppCompatActivity, binding: ActivityMainBinding) {
         if (isEnabled()) applyBlurOn(activity, binding)
@@ -48,7 +28,6 @@ object BlurBottomStatusController {
         )
         binding.blurBottomStatus.setBlurRadius(radius)
         binding.blurBottomStatus.setBlurRounds(rounds)
-        binding.blurBottomStatus.setOverlayColor(overlayColorFor(activity, currentOverlayStrength()))
         binding.blurBottomStatus.invalidate()
         binding.blurBottomStatus.visibility = View.VISIBLE
         binding.cardBottomStatus.setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
