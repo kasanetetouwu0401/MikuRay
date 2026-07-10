@@ -109,9 +109,9 @@ abstract class BaseActivity : AppCompatActivity() {
             val child = coordinator.getChildAt(i)
             val params = child.layoutParams as? CoordinatorLayout.LayoutParams ?: continue
             if (params.behavior is AppBarLayout.ScrollingViewBehavior) {
-                child.roundTopCorners(24f)
+                child.roundTopCorners(35f)
                 if (child.background == null) {
-                    child.setBackgroundColor(getColorAttr(R.attr.colorSurface))
+                    child.setBackgroundColor(getColorAttr(R.attr.colorBg))
                 }
                 break
             }
