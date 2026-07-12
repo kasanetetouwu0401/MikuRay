@@ -10,18 +10,17 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
-        android:background="?attr/colorCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:liftOnScroll="true">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
-            android:background="?attr/colorCard"
+            android:background="?attr/colorBg"
             style="?attr/collapsingToolbarLayoutLargeStyle"
             android:layout_width="match_parent"
             android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
-            app:contentScrim="?attr/colorCard"
+            app:contentScrim="?attr/colorBg"
             app:collapsedTitleTextAppearance="?attr/textAppearanceTitleLargeEmphasized"
             app:collapsedTitleTextColor="?attr/colorOnSurfaceVariant"
             app:expandedTitleMarginBottom="24dp"

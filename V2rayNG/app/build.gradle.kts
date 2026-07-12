@@ -4,8 +4,8 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-val appVersionName = "2.2.6"
-val appVersionCode = 736
+val appVersionName = "2.2.7"
+val appVersionCode = 737
 
 base {
     archivesName.set("MikuRay_$appVersionName")
