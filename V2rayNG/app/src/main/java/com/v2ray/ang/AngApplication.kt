@@ -14,7 +14,6 @@ import com.v2ray.ang.extension.ForegroundActivityTracker
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.util.ThemeManager
-import com.v2ray.ang.util.ThemeRecreateManager
 import com.v2ray.ang.util.CustomFontManager
 import com.v2ray.ang.util.AppFontResolver
 import com.neko.crashlog.CrashHandler
@@ -44,7 +43,6 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
     override fun onCreate() {
         super.onCreate()
         MMKV.initialize(this)
-        ThemeRecreateManager.init()
         ForegroundActivityTracker.register(this)
         registerActivityLifecycleCallbacks(this)
         WorkManager.initialize(this, workManagerConfiguration)
@@ -55,7 +53,6 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-        ThemeRecreateManager.track(activity)
         ThemeManager.applyTheme(activity)
 
         val useCustomFont = MmkvManager.decodeSettingsBool(AppConfig.PREF_APP_FONT_USE_CUSTOM, false)
@@ -114,7 +111,5 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
     override fun onActivityPaused(activity: Activity) {}
     override fun onActivityStopped(activity: Activity) {}
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
-    override fun onActivityDestroyed(activity: Activity) {
-        ThemeRecreateManager.untrack(activity)
-    }
+    override fun onActivityDestroyed(activity: Activity) {}
 }

@@ -34,14 +34,19 @@ import com.v2ray.ang.util.DPIController
 import com.v2ray.ang.util.MyContextWrapper
 import com.v2ray.ang.util.WindowBlurUtils
 import com.qmdeve.blurview.widget.BlurView
+import com.v2ray.ang.util.ThemeStateManager
 
 abstract class BaseActivity : AppCompatActivity() {
     private var loadingOverlay: FrameLayout? = null
+    
+    private lateinit var themeStateManager: ThemeStateManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        themeStateManager = ThemeStateManager(this)
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
@@ -53,6 +58,11 @@ abstract class BaseActivity : AppCompatActivity() {
             },
             true
         )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        themeStateManager.checkThemeChangedAndRecreate()
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
