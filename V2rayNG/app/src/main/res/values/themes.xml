@@ -885,16 +885,22 @@
     <style name="CustomDialogFilledButtonPrimary" parent="Widget.Material3Expressive.Button">
         <item name="backgroundTint">?attr/colorPrimary</item>
         <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingHorizontal">12dp</item>
     </style>
     
     <style name="CustomDialogFilledButtonSecondary" parent="Widget.Material3Expressive.Button">
         <item name="backgroundTint">?attr/colorSecondaryContainer</item>
         <item name="android:textColor">?attr/colorOnSecondaryContainer</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingHorizontal">12dp</item>
     </style>
     
     <style name="CustomDialogFilledButtonNeutral" parent="Widget.Material3Expressive.Button">
         <item name="backgroundTint">?attr/colorTertiary</item>
         <item name="android:textColor">?attr/colorOnTertiary</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingHorizontal">12dp</item>
     </style>
 
     <style name="AppThemeAlertDialogShape" parent="@style/ShapeAppearance.Material3.MediumComponent">
