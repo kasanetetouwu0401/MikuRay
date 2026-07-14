@@ -1,6 +1,7 @@
 package com.v2ray.ang.ui.bottomsheet
 
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.WindowManager
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -23,9 +24,14 @@ abstract class BaseBottomSheetFragment : BottomSheetDialogFragment() {
         sheetDialog.window?.let { window ->
             WindowBlurUtils.applyWindowBlur(window)
             
+            // 1. Wajib: Matikan batas window agar layout bisa tembus ke belakang area gestur
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
-            window.navigationBarColor = bgColor
+            
+            // 2. Ubah ini jadi transparan, biarkan background dari bottomSheet yang ambil alih
+            window.navigationBarColor = Color.TRANSPARENT 
         }
         
         val bottomSheet = sheetDialog.findViewById<android.view.View>(
@@ -41,11 +47,19 @@ abstract class BaseBottomSheetFragment : BottomSheetDialogFragment() {
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(bottomSheet) { view, insets ->
-            val statusBarInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val screenHeight = view.resources.displayMetrics.heightPixels
             val margin = (8 * view.resources.displayMetrics.density).toInt()
 
-            sheetDialog.behavior.maxHeight = screenHeight - statusBarInset - margin
+            sheetDialog.behavior.maxHeight = screenHeight - systemBars.top - margin
+
+            // 3. PERBAIKAN: Kembalikan padding bawah yang terhapus agar background memanjang menyentuh dasar layar
+            view.setPadding(
+                view.paddingLeft,
+                view.paddingTop,
+                view.paddingRight,
+                systemBars.bottom 
+            )
 
             insets
         }
