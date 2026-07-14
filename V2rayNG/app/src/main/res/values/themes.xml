@@ -840,6 +840,7 @@
     <!-- Bottom Sheet -->
     <style name="AppThemeBottomSheetDialog" parent="@style/ThemeOverlay.Material3.BottomSheetDialog">
         <item name="android:colorBackground">?attr/colorBg</item>
+        <item name="colorSurfaceContainerLow">?attr/colorBg</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowAnimationStyle">@style/Animation.Material3.BottomSheetDialog</item>
@@ -870,7 +871,7 @@
     <style name="AppThemeAlertDialog" parent="@style/ThemeOverlay.Material3Expressive.MaterialAlertDialog">
         <item name="shapeAppearance">@style/AppThemeAlertDialogShape</item>
         <item name="android:colorBackground">?attr/colorSurfaceContainer</item>
-        <item name="colorSurface">?attr/colorSurfaceContainer</item>
+        <item name="colorSurfaceContainerHigh">?attr/colorSurfaceContainer</item>
         <item name="android:windowAnimationStyle">@style/MaterialAlertDialog.Material3.Animation</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="dialogCornerRadius">28dp</item>
