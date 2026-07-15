@@ -63,22 +63,24 @@ android {
 
     signingConfigs {
         create("appSigning") {
-            val keystorePath = System.getenv("KEYSTORE_PATH")
-            if (keystorePath != null) {
-                storeFile = file(keystorePath)
-                storePassword = System.getenv("KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("KEY_ALIAS")
-                keyPassword = System.getenv("KEY_PASSWORD")
+            val ksPath = project.findProperty("KS_PATH") as? String
+            if (!ksPath.isNullOrEmpty()) {
+                storeFile = file(ksPath)
+                storePassword = project.findProperty("KS_PASS") as? String
+                keyAlias = project.findProperty("KS_ALIAS") as? String
+                keyPassword = project.findProperty("KEY_PASS") as? String
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
             }
-            enableV1Signing = true
-            enableV2Signing = true
-            enableV3Signing = true
         }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("appSigning")
+            if (project.hasProperty("KS_PATH")) {
+                signingConfig = signingConfigs.getByName("appSigning")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -88,7 +90,9 @@ android {
         }
         
         debug {
-            signingConfig = signingConfigs.getByName("appSigning")
+            if (project.hasProperty("KS_PATH")) {
+                signingConfig = signingConfigs.getByName("appSigning")
+            }
             isDebuggable = true
             isMinifyEnabled = false
             isShrinkResources = false
@@ -109,7 +113,7 @@ android {
 
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+            jvmTarget.set(org.jetbrains.kotlin.dsl.JvmTarget.JVM_17)
         }
     }
 

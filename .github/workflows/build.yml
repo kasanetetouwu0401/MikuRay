@@ -27,10 +27,7 @@ jobs:
       contents: write
 
     env:
-      BUILD_TYPE: ${{ github.event.inputs.build_type == 'release' && 'release' || 'debug' }}
-      KEYSTORE_PASSWORD: ${{ secrets.APP_KEYSTORE_PASSWORD }}
-      KEY_ALIAS: ${{ secrets.APP_KEYSTORE_ALIAS }}
-      KEY_PASSWORD: ${{ secrets.APP_KEY_PASSWORD }}
+      BUILD_TYPE: ${{ github.event.inputs.build_type == 'release' ? 'release' : 'debug' }}
 
     steps:
     - name: Checkout code
@@ -113,10 +110,18 @@ jobs:
         
         if [ "${{ env.BUILD_TYPE }}" == "debug" ]; then
           echo "Starting DEBUG build process..."
-          ./gradlew assembleDebug --console=plain
+          ./gradlew assembleDebug --console=plain \
+            -PKS_PATH="${{ steps.android_keystore.outputs.filePath }}" \
+            -PKS_PASS="${{ secrets.APP_KEYSTORE_PASSWORD }}" \
+            -PKS_ALIAS="${{ secrets.APP_KEYSTORE_ALIAS }}" \
+            -PKEY_PASS="${{ secrets.APP_KEY_PASSWORD }}"
         else
           echo "Starting RELEASE build process..."
-          ./gradlew assembleRelease --console=plain
+          ./gradlew assembleRelease --console=plain \
+            -PKS_PATH="${{ steps.android_keystore.outputs.filePath }}" \
+            -PKS_PASS="${{ secrets.APP_KEYSTORE_PASSWORD }}" \
+            -PKS_ALIAS="${{ secrets.APP_KEYSTORE_ALIAS }}" \
+            -PKEY_PASS="${{ secrets.APP_KEY_PASSWORD }}"
         fi
 
     - name: Upload arm64-v8a APK
