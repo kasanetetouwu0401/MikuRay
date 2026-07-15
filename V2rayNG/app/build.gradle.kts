@@ -31,12 +31,12 @@ android {
         versionCode = appVersionCode
         versionName = appVersionName
         
-        resValue("string", "uwu_version_name", appVersionName.toString())
-        resValue("string", "uwu_version_code", appVersionCode.toString())
-        resValue("string", "uwu_package_name", applicationId.toString())
+        resValue("string", "uwu_version_name", appVersionName)
+        resValue("string", "uwu_version_code", appVersionCode)
+        resValue("string", "uwu_package_name", applicationId)
         resValue("string", "uwu_build_date", appBuildDate)
 
-        val abiFilterList = (properties["ABI_FILTERS"] as? String)?.split(';')
+        val abiFilterList = (project.findProperty("ABI_FILTERS") as? String)?.split(';')
         splits {
             abi {
                 isEnable = true
@@ -101,7 +101,7 @@ android {
 
     sourceSets {
         getByName("main") {
-            jniLibs.srcDirs("libs")
+            jniLibs.directories.add("libs")
         }
     }
 
@@ -113,7 +113,7 @@ android {
 
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.dsl.JvmTarget.JVM_17)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
 
