@@ -32,8 +32,8 @@ android {
         versionName = appVersionName
         
         resValue("string", "uwu_version_name", appVersionName)
-        resValue("string", "uwu_version_code", appVersionCode)
-        resValue("string", "uwu_package_name", applicationId)
+        resValue("string", "uwu_version_code", appVersionCode.toString())
+        resValue("string", "uwu_package_name", applicationId ?: "com.miku.ray")
         resValue("string", "uwu_build_date", appBuildDate)
 
         val abiFilterList = (project.findProperty("ABI_FILTERS") as? String)?.split(';')
