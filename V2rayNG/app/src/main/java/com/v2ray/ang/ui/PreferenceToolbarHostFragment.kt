@@ -7,13 +7,6 @@ import android.view.ViewGroup
 import androidx.preference.PreferenceFragmentCompat
 import com.v2ray.ang.R
 
-/**
- * Wrapper fragment untuk halaman PreferenceActivity yang sudah jadi Fragment.
- *
- * Layout default = `R.layout.fragment_settings` (CoordinatorLayout + AppBarLayout +
- * CollapsingToolbarLayout + MaterialToolbar + FragmentContainerView). Sub-class
- * cukup supply title dan instance PreferenceFragmentCompat.
- */
 abstract class PreferenceToolbarHostFragment(
     private val layoutId: Int = R.layout.fragment_settings
 ) : ToolbarFragment() {

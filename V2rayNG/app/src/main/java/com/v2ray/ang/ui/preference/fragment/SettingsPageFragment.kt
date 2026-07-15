@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.bytehamster.lib.preferencesearch.SearchPreferenceActionView
@@ -22,12 +23,6 @@ import com.v2ray.ang.ui.weather.WeatherHelper
 import com.v2ray.ang.util.SearchChipGradientController
 import kotlinx.coroutines.launch
 
-/**
- * Halaman utama Settings (homepage of all preferences) yang di-host MainActivity.
- * Layout = `fragment_settings_search.xml` (collapsing toolbar + search bar + weather chip).
- *
- * Click pada tile navigasi akan panggil MainActivity.displayPreferenceFragment(...).
- */
 class SettingsPageFragment : ToolbarFragment(R.layout.fragment_settings_search) {
 
     private lateinit var searchActionView: SearchPreferenceActionView
@@ -71,7 +66,9 @@ class SettingsPageFragment : ToolbarFragment(R.layout.fragment_settings_search) 
         val root = requireView()
         searchActionView = root.findViewById(R.id.search_action_view)
         btnClearHistory = root.findViewById(R.id.btn_clear_history)
-        searchActionView.setActivity(requireActivity())
+        
+        searchActionView.setActivity(requireActivity() as AppCompatActivity)
+        
         searchActionView.getSearchConfiguration().apply {
             setHistoryEnabled(true)
             setBreadcrumbsEnabled(true)
@@ -136,7 +133,9 @@ class SettingsPageFragment : ToolbarFragment(R.layout.fragment_settings_search) 
     private fun refreshSearchBarChip() {
         val weatherEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_WEATHER_CHIP, false)
         val totalTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_TOTAL_TRAFFIC_CHIP, false)
-        SearchChipGradientController.applyState(requireContext(), chipViews())
+        
+        SearchChipGradientController.applyState(requireActivity() as AppCompatActivity, chipViews())
+        
         when {
             weatherEnabled -> {
                 hideTotalTrafficChip()

@@ -1115,20 +1115,11 @@ class MainActivity : HelperBaseActivity(),
         super.onDestroy()
     }
 
-    // ----------------------------------------------------------------------
-    // Preference-mode helpers (alia NekoBox: SettingsActivity -> MainActivity host)
-    // ----------------------------------------------------------------------
-
     var inPreferenceMode: Boolean = false
         private set
 
-    /**
-     * Tampilkan preference Fragment di dalam `R.id.fragment_container`.
-     * Host = MainActivity (pattern NekoBox), bukan Activity terpisah.
-     */
     fun displayPreferenceFragment(fragment: androidx.fragment.app.Fragment) {
         if (!inPreferenceMode) {
-            // Hide homepage widgets dulu
             binding.viewPager.isVisible = false
             binding.layoutTabWrapper.isVisible = false
             binding.cardBottomStatus.isVisible = false
@@ -1145,7 +1136,6 @@ class MainActivity : HelperBaseActivity(),
     private fun dismissPreferenceMode() {
         inPreferenceMode = false
         binding.fragmentContainer.isVisible = false
-        // restore homepage
         binding.viewPager.isVisible = true
         binding.layoutTabWrapper.isVisible = true
         binding.cardBottomStatus.isVisible = true
