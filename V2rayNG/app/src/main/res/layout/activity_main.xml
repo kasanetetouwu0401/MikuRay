@@ -438,4 +438,14 @@
         </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- Container untuk preference fragments (host = MainActivity, pattern NekoBox). -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/colorBg"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true" />
+
 </RelativeLayout>

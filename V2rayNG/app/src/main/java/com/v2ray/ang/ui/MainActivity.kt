@@ -46,7 +46,7 @@ import com.v2ray.ang.ui.bottomsheet.AddConfigBottomSheet
 import com.v2ray.ang.ui.bottomsheet.MainMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.MoreMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.ShareConfigBottomSheet
-import com.v2ray.ang.ui.preference.activity.SettingsActivity
+import com.v2ray.ang.ui.preference.fragment.SettingsPageFragment
 import com.v2ray.ang.util.BlurBottomStatusController
 import com.v2ray.ang.util.SearchChipGradientController
 import com.v2ray.ang.util.getColorAttr
@@ -477,7 +477,7 @@ class MainActivity : HelperBaseActivity(),
         when (viewId) {
             R.id.menu_sub_setting -> requestActivityLauncher.launch(Intent(this, SubSettingActivity::class.java))
             R.id.menu_routing_setting -> requestActivityLauncher.launch(Intent(this, RoutingSettingActivity::class.java))
-            R.id.menu_settings -> requestActivityLauncher.launch(Intent(this, SettingsActivity::class.java))
+            R.id.menu_settings -> displayPreferenceFragment(SettingsPageFragment())
             R.id.menu_logcat -> startActivity(Intent(this, LogcatActivity::class.java))
             R.id.menu_backup_restore -> requestActivityLauncher.launch(Intent(this, BackupActivity::class.java))
             R.id.menu_about -> startActivity(Intent(this, AboutActivity::class.java))
@@ -1113,5 +1113,57 @@ class MainActivity : HelperBaseActivity(),
         }
         
         super.onDestroy()
+    }
+
+    // ----------------------------------------------------------------------
+    // Preference-mode helpers (alia NekoBox: SettingsActivity -> MainActivity host)
+    // ----------------------------------------------------------------------
+
+    var inPreferenceMode: Boolean = false
+        private set
+
+    /**
+     * Tampilkan preference Fragment di dalam `R.id.fragment_container`.
+     * Host = MainActivity (pattern NekoBox), bukan Activity terpisah.
+     */
+    fun displayPreferenceFragment(fragment: androidx.fragment.app.Fragment) {
+        if (!inPreferenceMode) {
+            // Hide homepage widgets dulu
+            binding.viewPager.isVisible = false
+            binding.layoutTabWrapper.isVisible = false
+            binding.cardBottomStatus.isVisible = false
+            binding.fragmentContainer.isVisible = true
+            inPreferenceMode = true
+        }
+        supportFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack("pref")
+            .commit()
+    }
+
+    private fun dismissPreferenceMode() {
+        inPreferenceMode = false
+        binding.fragmentContainer.isVisible = false
+        // restore homepage
+        binding.viewPager.isVisible = true
+        binding.layoutTabWrapper.isVisible = true
+        binding.cardBottomStatus.isVisible = true
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("key_pref_mode", inPreferenceMode)
+    }
+
+    override fun onBackPressed() {
+        if (inPreferenceMode && supportFragmentManager.backStackEntryCount > 0) {
+            supportFragmentManager.popBackStack()
+            if (supportFragmentManager.backStackEntryCount == 0) {
+                dismissPreferenceMode()
+            }
+            return
+        }
+        super.onBackPressed()
     }
 }

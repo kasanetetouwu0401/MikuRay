@@ -839,6 +839,7 @@
 
     <!-- Bottom Sheet -->
     <style name="AppThemeBottomSheetDialog" parent="@style/ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="android:colorBackground">?attr/colorBg</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowAnimationStyle">@style/Animation.Material3.BottomSheetDialog</item>
@@ -854,8 +855,6 @@
 
     <style name="AppThemeBottomSheetStyle" parent="@style/Widget.Material3.BottomSheet.Modal">
         <item name="backgroundTint">?attr/colorBg</item>
-        <item name="android:background">?attr/colorBg</item>
-        <item name="enforceMaterialTheme">true</item>
         <item name="shapeAppearance">@style/AppThemeBottomSheetShape</item>
     </style>
 
