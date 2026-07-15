@@ -22,8 +22,6 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bytehamster.lib.preferencesearch.SearchPreferenceResult
-import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
 import com.v2ray.ang.AppConfig
@@ -48,13 +46,7 @@ import com.v2ray.ang.ui.bottomsheet.AddConfigBottomSheet
 import com.v2ray.ang.ui.bottomsheet.MainMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.MoreMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.ShareConfigBottomSheet
-import com.v2ray.ang.ui.preference.fragment.SettingsPageFragment
-import com.v2ray.ang.ui.preference.fragment.UiPreferenceFragment
-import com.v2ray.ang.ui.preference.fragment.VpnPreferenceFragment
-import com.v2ray.ang.ui.preference.fragment.CorePreferenceFragment
-import com.v2ray.ang.ui.preference.fragment.MuxPreferenceFragment
-import com.v2ray.ang.ui.preference.fragment.FragmentPreferenceFragment
-import com.v2ray.ang.ui.preference.fragment.AdvancedPreferenceFragment
+import com.v2ray.ang.ui.preference.activity.SettingsActivity
 import com.v2ray.ang.util.BlurBottomStatusController
 import com.v2ray.ang.util.SearchChipGradientController
 import com.v2ray.ang.util.getColorAttr
@@ -80,8 +72,7 @@ class MainActivity : HelperBaseActivity(),
     MainMenuBottomSheet.OnOptionClickListener,
     AddConfigBottomSheet.OnAddConfigClickListener,
     MoreMenuBottomSheet.OnMoreOptionClickListener,
-    ShareConfigBottomSheet.OnShareOptionClickListener,
-    SearchPreferenceResultListener {
+    ShareConfigBottomSheet.OnShareOptionClickListener {
 
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
@@ -486,7 +477,7 @@ class MainActivity : HelperBaseActivity(),
         when (viewId) {
             R.id.menu_sub_setting -> requestActivityLauncher.launch(Intent(this, SubSettingActivity::class.java))
             R.id.menu_routing_setting -> requestActivityLauncher.launch(Intent(this, RoutingSettingActivity::class.java))
-            R.id.menu_settings -> displayPreferenceFragment(SettingsPageFragment())
+            R.id.menu_settings -> requestActivityLauncher.launch(Intent(this, SettingsActivity::class.java))
             R.id.menu_logcat -> startActivity(Intent(this, LogcatActivity::class.java))
             R.id.menu_backup_restore -> requestActivityLauncher.launch(Intent(this, BackupActivity::class.java))
             R.id.menu_about -> startActivity(Intent(this, AboutActivity::class.java))
@@ -1122,64 +1113,5 @@ class MainActivity : HelperBaseActivity(),
         }
         
         super.onDestroy()
-    }
-
-    var inPreferenceMode: Boolean = false
-        private set
-
-    fun displayPreferenceFragment(fragment: androidx.fragment.app.Fragment) {
-        if (!inPreferenceMode) {
-            binding.viewPager.isVisible = false
-            binding.layoutTabWrapper.isVisible = false
-            binding.cardBottomStatus.isVisible = false
-            binding.fragmentContainer.isVisible = true
-            inPreferenceMode = true
-        }
-        supportFragmentManager.beginTransaction()
-            .setReorderingAllowed(true)
-            .replace(R.id.fragment_container, fragment)
-            .addToBackStack("pref")
-            .commit()
-    }
-
-    private fun dismissPreferenceMode() {
-        inPreferenceMode = false
-        binding.fragmentContainer.isVisible = false
-        binding.viewPager.isVisible = true
-        binding.layoutTabWrapper.isVisible = true
-        binding.cardBottomStatus.isVisible = true
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean("key_pref_mode", inPreferenceMode)
-    }
-
-    override fun onBackPressed() {
-        if (inPreferenceMode && supportFragmentManager.backStackEntryCount > 0) {
-            supportFragmentManager.popBackStack()
-            if (supportFragmentManager.backStackEntryCount == 0) {
-                dismissPreferenceMode()
-            }
-            return
-        }
-        super.onBackPressed()
-    }
-
-    override fun onSearchResultClicked(result: SearchPreferenceResult) {
-        val fragment = when (result.resourceFile) {
-            R.xml.pref_ui_settings -> UiPreferenceFragment()
-            R.xml.pref_vpn_settings -> VpnPreferenceFragment()
-            R.xml.pref_core_settings -> CorePreferenceFragment()
-            R.xml.pref_mux_settings -> MuxPreferenceFragment()
-            R.xml.pref_fragment_settings -> FragmentPreferenceFragment()
-            R.xml.pref_advanced_settings -> AdvancedPreferenceFragment()
-            else -> null
-        }
-
-        if (fragment != null) {
-            result.highlight(fragment)
-            displayPreferenceFragment(fragment)
-        }
     }
 }

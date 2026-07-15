@@ -108,11 +108,30 @@
             android:name=".ui.ServerProxyChainActivity"
             android:exported="false"
             android:windowSoftInputMode="stateUnchanged" />
-        <!-- Preference pages are now FRAGMENTS hosted by MainActivity; see -->
-        <!-- com.v2ray.ang.ui.preference.fragment.* and com.v2ray.ang.ui.ToolbarFragment -->
+        <activity
+            android:name=".ui.preference.activity.SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.preference.activity.UiSettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.preference.activity.VpnSettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.preference.activity.CoreSettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.preference.activity.MuxSettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.preference.activity.FragmentSettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.preference.activity.AdvancedSettingsActivity"
+            android:exported="false" />           
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
-            android:exported="false" />
+            android:exported="false" />      
         <activity
             android:name=".ui.PerAppProxyActivity"
             android:exported="false" />
