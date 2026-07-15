@@ -49,6 +49,12 @@ import com.v2ray.ang.ui.bottomsheet.MainMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.MoreMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.ShareConfigBottomSheet
 import com.v2ray.ang.ui.preference.fragment.SettingsPageFragment
+import com.v2ray.ang.ui.preference.fragment.UiPreferenceFragment
+import com.v2ray.ang.ui.preference.fragment.VpnPreferenceFragment
+import com.v2ray.ang.ui.preference.fragment.CorePreferenceFragment
+import com.v2ray.ang.ui.preference.fragment.MuxPreferenceFragment
+import com.v2ray.ang.ui.preference.fragment.FragmentPreferenceFragment
+import com.v2ray.ang.ui.preference.fragment.AdvancedPreferenceFragment
 import com.v2ray.ang.util.BlurBottomStatusController
 import com.v2ray.ang.util.SearchChipGradientController
 import com.v2ray.ang.util.getColorAttr
@@ -75,7 +81,7 @@ class MainActivity : HelperBaseActivity(),
     AddConfigBottomSheet.OnAddConfigClickListener,
     MoreMenuBottomSheet.OnMoreOptionClickListener,
     ShareConfigBottomSheet.OnShareOptionClickListener,
-    SearchPreferenceResultListener { // [DITAMBAHKAN] Interface listener untuk search
+    SearchPreferenceResultListener {
 
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
@@ -1161,6 +1167,19 @@ class MainActivity : HelperBaseActivity(),
     }
 
     override fun onSearchResultClicked(result: SearchPreferenceResult) {
-        result.highlight(supportFragmentManager)
+        val fragment = when (result.resourceFile) {
+            R.xml.pref_ui_settings -> UiPreferenceFragment()
+            R.xml.pref_vpn_settings -> VpnPreferenceFragment()
+            R.xml.pref_core_settings -> CorePreferenceFragment()
+            R.xml.pref_mux_settings -> MuxPreferenceFragment()
+            R.xml.pref_fragment_settings -> FragmentPreferenceFragment()
+            R.xml.pref_advanced_settings -> AdvancedPreferenceFragment()
+            else -> null
+        }
+
+        if (fragment != null) {
+            result.highlight(fragment)
+            displayPreferenceFragment(fragment)
+        }
     }
 }
