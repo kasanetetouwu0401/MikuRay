@@ -22,6 +22,8 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bytehamster.lib.preferencesearch.SearchPreferenceResult
+import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
 import com.v2ray.ang.AppConfig
@@ -72,7 +74,8 @@ class MainActivity : HelperBaseActivity(),
     MainMenuBottomSheet.OnOptionClickListener,
     AddConfigBottomSheet.OnAddConfigClickListener,
     MoreMenuBottomSheet.OnMoreOptionClickListener,
-    ShareConfigBottomSheet.OnShareOptionClickListener {
+    ShareConfigBottomSheet.OnShareOptionClickListener,
+    SearchPreferenceResultListener { // [DITAMBAHKAN] Interface listener untuk search
 
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
@@ -1155,5 +1158,9 @@ class MainActivity : HelperBaseActivity(),
             return
         }
         super.onBackPressed()
+    }
+
+    override fun onSearchResultClicked(result: SearchPreferenceResult) {
+        result.highlight(supportFragmentManager)
     }
 }
