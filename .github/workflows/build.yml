@@ -28,7 +28,6 @@ jobs:
 
     env:
       BUILD_TYPE: ${{ github.event.inputs.build_type == 'release' && 'release' || 'debug' }}
-      KEYSTORE_PATH: ${{ github.workspace }}/android_keystore.jks
       KEYSTORE_PASSWORD: ${{ secrets.APP_KEYSTORE_PASSWORD }}
       KEY_ALIAS: ${{ secrets.APP_KEYSTORE_ALIAS }}
       KEY_PASSWORD: ${{ secrets.APP_KEY_PASSWORD }}
