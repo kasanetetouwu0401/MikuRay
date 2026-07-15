@@ -27,7 +27,7 @@ jobs:
       contents: write
 
     env:
-      BUILD_TYPE: ${{ github.event.inputs.build_type == 'release' ? 'release' : 'debug' }}
+      BUILD_TYPE: ${{ github.event.inputs.build_type == 'release' && 'release' || 'debug' }}
 
     steps:
     - name: Checkout code
