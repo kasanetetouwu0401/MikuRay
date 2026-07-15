@@ -41,7 +41,7 @@ import com.v2ray.ang.ui.dialog.ThemeColorDialog
 import com.v2ray.ang.ui.preference.CategoryStyleHelper
 import com.v2ray.ang.ui.preference.CustomBannerPreference
 import com.v2ray.ang.ui.preference.SearchPreferenceHighlighter
-import com.v2ray.ang.ui.preference.TabIconPickerAdapter
+import com.v2ray.ang.ui.TabIconPickerAdapter
 import com.v2ray.ang.ui.weather.WeatherHelper
 import com.v2ray.ang.util.BannerColorExtractor
 import com.v2ray.ang.util.CustomFontManager
