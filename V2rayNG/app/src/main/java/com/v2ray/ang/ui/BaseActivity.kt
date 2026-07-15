@@ -3,6 +3,7 @@ package com.v2ray.ang.ui
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -10,6 +11,8 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -43,6 +46,9 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        enableEdgeToEdgeNoContrast()
+        
         WindowCompat.setDecorFitsSystemWindows(window, false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -58,6 +64,17 @@ abstract class BaseActivity : AppCompatActivity() {
             },
             true
         )
+    }
+
+    private fun enableEdgeToEdgeNoContrast() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            enableEdgeToEdge(
+                navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
+            )
+            window.isNavigationBarContrastEnforced = false
+        } else {
+            enableEdgeToEdge()
+        }
     }
 
     override fun onResume() {
@@ -83,9 +100,10 @@ abstract class BaseActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
+            
             view.updatePadding(
                 top    = maxOf(systemBars.top,    displayCutout.top),
-                bottom = 0,
+                bottom = maxOf(systemBars.bottom, displayCutout.bottom),
                 left   = maxOf(systemBars.left,   displayCutout.left),
                 right  = maxOf(systemBars.right,  displayCutout.right)
             )
