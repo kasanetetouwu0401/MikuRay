@@ -12,7 +12,7 @@ val appVersionCode = 737
 
 val jakartaTime = ZonedDateTime.now(ZoneId.of("Asia/Jakarta"))
 val appBuildDate = jakartaTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-val apkBuildDate = jakartaTime.format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
+val apkBuildDate = jakartaTime.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
 
 base {
     archivesName.set("MikuRay_$appVersionName")
