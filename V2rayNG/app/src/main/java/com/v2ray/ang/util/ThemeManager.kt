@@ -11,9 +11,9 @@ import androidx.annotation.ColorInt
 import androidx.annotation.StyleRes
 import androidx.core.content.ContextCompat
 import com.google.android.material.color.DynamicColors
-import com.google.android.material.color.DynamicColorsOptions
 import com.google.android.material.color.utilities.Hct
 import com.google.android.material.color.utilities.SchemeTonalSpot
+import com.jaredrummler.cyanea.Cyanea
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.MmkvManager
@@ -32,14 +32,7 @@ object ThemeManager {
         var themeApplied = false
 
         if (isDynamicBanner && bannerColor != 0) {
-            val builder = DynamicColorsOptions.Builder()
-                .setContentBasedSource(bannerColor)
-            
-            if (isTrueBlack) {
-                builder.setThemeOverlay(R.style.ThemeOverlay_App_TrueBlack)
-            }
-            
-            DynamicColors.applyToActivityIfAvailable(activity, builder.build())
+            applyCustomColorTheme(activity, bannerColor, isTrueBlack)
             themeApplied = true
         }
 
@@ -49,7 +42,8 @@ object ThemeManager {
                     DynamicColors.applyToActivityIfAvailable(activity)
                 }
                 useCustom && customColor != 0 -> {
-                    applyCustomColorTheme(activity, customColor)
+                    applyCustomColorTheme(activity, customColor, isTrueBlack)
+                    themeApplied = true
                 }
                 else -> {
                     val key = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "8"
@@ -86,15 +80,25 @@ object ThemeManager {
         }
     }
 
+    /**
+     * Apply a theme generated from a single seed color (banner color or user color pick).
+     *
+     * Unlike the system Material You path (which asks Android's own [DynamicColors] engine to
+     * build a themed overlay), this generates the Material3 color roles ourselves via
+     * [Cyanea.Editor.materialYou] and applies [R.style.AppTheme_Cyanea], whose attrs all point
+     * at Cyanea-intercepted `@color/cyanea_m3_*` resources (see [BaseActivity][com.v2ray.ang.ui.BaseActivity]'s
+     * `getResources()` override for how that interception works).
+     */
     fun applyCustomColorTheme(activity: Activity, @ColorInt seedColor: Int, isTrueBlack: Boolean = false) {
-        val optionsBuilder = DynamicColorsOptions.Builder()
-            .setContentBasedSource(seedColor)
+        Cyanea.instance.edit()
+            .materialYou(seedColor, isDarkMode(activity))
+            .apply()
+
+        activity.setTheme(R.style.AppTheme_Cyanea)
 
         if (isTrueBlack) {
-            optionsBuilder.setThemeOverlay(R.style.ThemeOverlay_App_TrueBlack)
+            activity.theme.applyStyle(R.style.ThemeOverlay_App_TrueBlack, true)
         }
-
-        DynamicColors.applyToActivityIfAvailable(activity, optionsBuilder.build())
     }
 
     fun getDynamicScheme(activity: Activity, @ColorInt seedColor: Int): SchemeTonalSpot {

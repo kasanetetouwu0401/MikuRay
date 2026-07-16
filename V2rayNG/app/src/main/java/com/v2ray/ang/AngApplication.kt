@@ -17,6 +17,7 @@ import com.v2ray.ang.util.ThemeManager
 import com.v2ray.ang.util.CustomFontManager
 import com.v2ray.ang.util.AppFontResolver
 import com.neko.crashlog.CrashHandler
+import com.jaredrummler.cyanea.Cyanea
 
 class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
     companion object {
@@ -43,6 +44,7 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
     override fun onCreate() {
         super.onCreate()
         MMKV.initialize(this)
+        Cyanea.init(this, resources)
         ForegroundActivityTracker.register(this)
         registerActivityLifecycleCallbacks(this)
         WorkManager.initialize(this, workManagerConfiguration)

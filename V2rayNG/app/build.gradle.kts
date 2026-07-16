@@ -176,6 +176,7 @@ dependencies {
 
     // UI Libraries
     implementation(libs.material)
+    implementation(project(":cyanea"))
     implementation(libs.editorkit)
     implementation(libs.flexbox)
     implementation(libs.skydoves.colorpickerview)

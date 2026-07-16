@@ -2,8 +2,8 @@ package com.v2ray.ang.ui
 
 import android.content.Context
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -11,8 +11,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.activity.SystemBarStyle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -38,17 +36,23 @@ import com.v2ray.ang.util.MyContextWrapper
 import com.v2ray.ang.util.WindowBlurUtils
 import com.qmdeve.blurview.widget.BlurView
 import com.v2ray.ang.util.ThemeStateManager
+import com.jaredrummler.cyanea.CyaneaResources
 
 abstract class BaseActivity : AppCompatActivity() {
     private var loadingOverlay: FrameLayout? = null
     
     private lateinit var themeStateManager: ThemeStateManager
 
+    // Routes ?attr/colorPrimary, ?attr/colorPrimaryContainer, etc. that point at
+    // @color/cyanea_m3_* through Cyanea, so a Cyanea-generated Material3 scheme (see
+    // ThemeManager.applyCustomColorTheme) can be applied without recompiling resources.
+    // Harmless for activities using a static preset theme; those colors aren't intercepted.
+    private val cyaneaResources: CyaneaResources by lazy { CyaneaResources(super.getResources()) }
+
+    override fun getResources(): Resources = cyaneaResources
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        enableEdgeToEdgeNoContrast()
-        
         WindowCompat.setDecorFitsSystemWindows(window, false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -64,17 +68,6 @@ abstract class BaseActivity : AppCompatActivity() {
             },
             true
         )
-    }
-
-    private fun enableEdgeToEdgeNoContrast() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            enableEdgeToEdge(
-                navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
-            )
-            window.isNavigationBarContrastEnforced = false
-        } else {
-            enableEdgeToEdge()
-        }
     }
 
     override fun onResume() {
@@ -100,10 +93,9 @@ abstract class BaseActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
-            
             view.updatePadding(
                 top    = maxOf(systemBars.top,    displayCutout.top),
-                bottom = maxOf(systemBars.bottom, displayCutout.bottom),
+                bottom = 0,
                 left   = maxOf(systemBars.left,   displayCutout.left),
                 right  = maxOf(systemBars.right,  displayCutout.right)
             )

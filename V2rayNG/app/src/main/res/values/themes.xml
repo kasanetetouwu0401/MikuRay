@@ -807,6 +807,62 @@
         <item name="colorSurfaceContainerHigh">@color/blueGrey_surfaceContainerHigh</item>
         <item name="colorSurfaceContainerHighest">@color/blueGrey_surfaceContainerHighest</item>
     </style>
+
+    <!--
+    Cyanea-backed theme: every Material3 color role below points at a @color/cyanea_m3_*
+    resource, which is intercepted at runtime by CyaneaResources and replaced with the value
+    ThemeManager.applyCustomColorTheme() generated via Cyanea.Editor.materialYou(seed, isDark).
+    Unlike AppTheme_Red/Pink/etc. (fixed presets), this theme's colors change without an APK
+    rebuild - only Cyanea.instance.edit()...apply() + activity recreate.
+    -->
+    <style name="AppTheme_Cyanea" parent="AppThemeBase">
+        <item name="colorPrimary">@color/cyanea_m3_primary</item>
+        <item name="colorOnPrimary">@color/cyanea_m3_on_primary</item>
+        <item name="colorPrimaryContainer">@color/cyanea_m3_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/cyanea_m3_on_primary_container</item>
+        <item name="colorSecondary">@color/cyanea_m3_secondary</item>
+        <item name="colorOnSecondary">@color/cyanea_m3_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/cyanea_m3_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/cyanea_m3_on_secondary_container</item>
+        <item name="colorTertiary">@color/cyanea_m3_tertiary</item>
+        <item name="colorOnTertiary">@color/cyanea_m3_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/cyanea_m3_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/cyanea_m3_on_tertiary_container</item>
+        <item name="colorError">@color/cyanea_m3_error</item>
+        <item name="colorOnError">@color/cyanea_m3_on_error</item>
+        <item name="colorErrorContainer">@color/cyanea_m3_error_container</item>
+        <item name="colorOnErrorContainer">@color/cyanea_m3_on_error_container</item>
+        <item name="android:colorBackground">@color/cyanea_m3_background</item>
+        <item name="colorOnBackground">@color/cyanea_m3_on_background</item>
+        <item name="colorSurface">@color/cyanea_m3_surface</item>
+        <item name="colorOnSurface">@color/cyanea_m3_on_surface</item>
+        <item name="colorSurfaceVariant">@color/cyanea_m3_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/cyanea_m3_on_surface_variant</item>
+        <item name="colorOutline">@color/cyanea_m3_outline</item>
+        <item name="colorOutlineVariant">@color/cyanea_m3_outline_variant</item>
+        <item name="colorSurfaceInverse">@color/cyanea_m3_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/cyanea_m3_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/cyanea_m3_inverse_primary</item>
+        <item name="colorPrimaryFixed">@color/cyanea_m3_primary_fixed</item>
+        <item name="colorOnPrimaryFixed">@color/cyanea_m3_on_primary_fixed</item>
+        <item name="colorPrimaryFixedDim">@color/cyanea_m3_primary_fixed_dim</item>
+        <item name="colorOnPrimaryFixedVariant">@color/cyanea_m3_on_primary_fixed_variant</item>
+        <item name="colorSecondaryFixed">@color/cyanea_m3_secondary_fixed</item>
+        <item name="colorOnSecondaryFixed">@color/cyanea_m3_on_secondary_fixed</item>
+        <item name="colorSecondaryFixedDim">@color/cyanea_m3_secondary_fixed_dim</item>
+        <item name="colorOnSecondaryFixedVariant">@color/cyanea_m3_on_secondary_fixed_variant</item>
+        <item name="colorTertiaryFixed">@color/cyanea_m3_tertiary_fixed</item>
+        <item name="colorOnTertiaryFixed">@color/cyanea_m3_on_tertiary_fixed</item>
+        <item name="colorTertiaryFixedDim">@color/cyanea_m3_tertiary_fixed_dim</item>
+        <item name="colorOnTertiaryFixedVariant">@color/cyanea_m3_on_tertiary_fixed_variant</item>
+        <item name="colorSurfaceDim">@color/cyanea_m3_surface_dim</item>
+        <item name="colorSurfaceBright">@color/cyanea_m3_surface_bright</item>
+        <item name="colorSurfaceContainerLowest">@color/cyanea_m3_surface_container_lowest</item>
+        <item name="colorSurfaceContainerLow">@color/cyanea_m3_surface_container_low</item>
+        <item name="colorSurfaceContainer">@color/cyanea_m3_surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/cyanea_m3_surface_container_high</item>
+        <item name="colorSurfaceContainerHighest">@color/cyanea_m3_surface_container_highest</item>
+    </style>
     
     <style name="Theme.App.Splash" parent="@style/AppThemeBase">
         <item name="android:windowSplashScreenBackground">?colorBg</item>
