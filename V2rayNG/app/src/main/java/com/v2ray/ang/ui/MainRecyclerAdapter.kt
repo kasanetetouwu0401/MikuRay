@@ -255,6 +255,7 @@ class MainRecyclerAdapter(
             val typePos = profile.policyGroupType?.toIntOrNull() ?: 0
             context.resources.getStringArray(R.array.policy_group_type)
                 .getOrNull(typePos)
+                ?.lowercase()
         } else {
             null
         }
