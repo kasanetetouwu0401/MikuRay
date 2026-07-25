@@ -229,10 +229,6 @@ class MainRecyclerAdapter(
         return profile.configType.name
     }
 
-    /**
-     * Buat item PolicyGroup, tv_statistics nampilin nama subscription sumber
-     * (sp_policy_group_sub_id) apa adanya, tanpa lewat sensor/masking alamat server.
-     */
     private fun getPolicyGroupSubText(context: android.content.Context, profile: ProfileItem): String {
         val subId = profile.policyGroupSubscriptionId
         if (subId.isNullOrEmpty()) {
