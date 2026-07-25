@@ -8,6 +8,9 @@ data class SubscriptionItem(
     var lastUpdated: Long = -1,
     var autoUpdate: Boolean = false,
     var updateInterval: Long = 1440, // in minutes, default to 24 hours
+    var autoTest: Boolean = false,
+    var testInterval: Long = 60, // in minutes, default to 1 hour
+    var lastTested: Long = -1,
     var prevProfile: String? = null,
     var nextProfile: String? = null,
     var filter: String? = null,

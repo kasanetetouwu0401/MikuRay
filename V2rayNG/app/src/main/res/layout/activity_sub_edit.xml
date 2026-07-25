@@ -233,6 +233,23 @@
                         tools:ignore="TextFields" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <com.google.android.material.textfield.TextInputLayout
+                    app:shapeAppearance="?shapeAppearanceCornerMedium"
+                    app:boxStrokeWidth="1.5dip"
+                    app:boxStrokeWidthFocused="1.5dip"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_spacing_dp16"
+                    android:hint="@string/title_pref_auto_test_interval">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_test_interval"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        tools:ignore="TextFields" />
+                </com.google.android.material.textfield.TextInputLayout>
+
                 <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -286,8 +303,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingTop="12.0dip"
-                    android:paddingBottom="8.0dip">
+                    android:paddingTop="12.0dip">
 
                     <TextView
                         android:layout_width="0dp"
@@ -299,6 +315,28 @@
                     <com.google.android.material.materialswitch.MaterialSwitch
                         app:thumbIcon="@drawable/mtrl_ic_check"
                         android:id="@+id/auto_update_check"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingTop="12.0dip"
+                    android:paddingBottom="8.0dip">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/sub_auto_test"
+                        android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        app:thumbIcon="@drawable/mtrl_ic_check"
+                        android:id="@+id/auto_test_check"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
                 </LinearLayout>

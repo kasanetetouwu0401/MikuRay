@@ -58,6 +58,11 @@ object SubscriptionUpdater {
                 subId = sub.guid,
                 existingWorkPolicy = existingWorkPolicy
             )
+            scheduleTestOne(
+                context = context,
+                subId = sub.guid,
+                existingWorkPolicy = existingWorkPolicy
+            )
         }
         LogUtil.i(
             AppConfig.TAG,
@@ -66,7 +71,7 @@ object SubscriptionUpdater {
     }
 
     /**
-     * Sync a single subscription's task.
+     * Sync a single subscription's tasks (both auto-update and auto-test).
      * Call from: SubEditActivity after saving, after a manual update (to reset the timer).
      */
     fun syncOne(context: Context = AngApplication.application, subId: String) {
@@ -75,15 +80,21 @@ object SubscriptionUpdater {
             subId = subId,
             existingWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE
         )
+        scheduleTestOne(
+            context = context,
+            subId = subId,
+            existingWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE
+        )
     }
 
     /**
-     * Cancel the auto-update task for a single subscription.
+     * Cancel the auto-update and auto-test tasks for a single subscription.
      * Call from: when a subscription is deleted.
      */
     fun cancelOne(context: Context = AngApplication.application, subId: String) {
-        RemoteWorkManager.getInstance(context)
-            .cancelUniqueWork(taskName(subId))
+        val rw = RemoteWorkManager.getInstance(context)
+        rw.cancelUniqueWork(taskName(subId))
+        rw.cancelUniqueWork(testTaskName(subId))
     }
 
     /**
@@ -129,6 +140,7 @@ object SubscriptionUpdater {
     private val updateSemaphore = Semaphore(2)
 
     private fun taskName(subId: String) = "${AppConfig.SUBSCRIPTION_UPDATE_TASK_NAME}_$subId"
+    private fun testTaskName(subId: String) = "${AppConfig.SUBSCRIPTION_TEST_TASK_NAME}_$subId"
 
     private fun scheduleOne(
         context: Context,
@@ -138,8 +150,8 @@ object SubscriptionUpdater {
         val subItem = MmkvManager.decodeSubscription(subId) ?: return
         val rw = RemoteWorkManager.getInstance(context)
         if (!subItem.autoUpdate) {
-            cancelOne(context, subId)
-            LogUtil.d(AppConfig.TAG, "SubscriptionUpdater: cancelled task for ${subItem.remarks}")
+            rw.cancelUniqueWork(taskName(subId))
+            LogUtil.d(AppConfig.TAG, "SubscriptionUpdater: cancelled update task for ${subItem.remarks}")
             return
         }
 
@@ -178,6 +190,58 @@ object SubscriptionUpdater {
         LogUtil.i(
             AppConfig.TAG,
             "SubscriptionUpdater: scheduled [${subItem.remarks}] interval=${intervalMinutes}min " +
+                    "initialDelay=${initialDelayMillis / 1000}s policy=$existingWorkPolicy"
+        )
+    }
+
+    private fun scheduleTestOne(
+        context: Context,
+        subId: String,
+        existingWorkPolicy: ExistingPeriodicWorkPolicy
+    ) {
+        val subItem = MmkvManager.decodeSubscription(subId) ?: return
+        val rw = RemoteWorkManager.getInstance(context)
+        if (!subItem.autoTest) {
+            rw.cancelUniqueWork(testTaskName(subId))
+            LogUtil.d(AppConfig.TAG, "SubscriptionUpdater: cancelled test task for ${subItem.remarks}")
+            return
+        }
+
+        val intervalMinutes = maxOf(
+            AppConfig.SUBSCRIPTION_MIN_INTERVAL_MINUTES,
+            subItem.testInterval
+        )
+
+        // Base initial delay on the last successful test time persisted in subscription.
+        val lastTested = subItem.lastTested
+        val intervalMillis = intervalMinutes * 60 * 1000L
+        val now = System.currentTimeMillis()
+        val initialDelayMillis = if (lastTested <= 0L) {
+            0L
+        } else {
+            maxOf(0L, lastTested + intervalMillis - now)
+        }
+
+        val request = PeriodicWorkRequestBuilder<TestTask>(intervalMinutes, TimeUnit.MINUTES)
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .setInputData(workDataOf(KEY_SUB_ID to subId))
+            .setInitialDelay(initialDelayMillis, TimeUnit.MILLISECONDS)
+            .addTag(AppConfig.SUBSCRIPTION_TEST_TASK_NAME)
+            .build()
+
+        rw.enqueueUniquePeriodicWork(
+            testTaskName(subId),
+            existingWorkPolicy,
+            request
+        )
+
+        LogUtil.i(
+            AppConfig.TAG,
+            "SubscriptionUpdater: scheduled test [${subItem.remarks}] interval=${intervalMinutes}min " +
                     "initialDelay=${initialDelayMillis / 1000}s policy=$existingWorkPolicy"
         )
     }
@@ -254,6 +318,72 @@ object SubscriptionUpdater {
             syncOne(applicationContext, subId)
 
             LogUtil.i(AppConfig.TAG, "SubscriptionUpdater update finished and rescheduled: ${subItem.remarks}")
+
+            return Result.success()
+        }
+    }
+
+    class TestTask(context: Context, params: WorkerParameters) :
+        CoroutineWorker(context, params) {
+
+        @SuppressLint("MissingPermission")
+        override suspend fun doWork(): Result = updateSemaphore.withPermit {
+            val subId = inputData.getString(KEY_SUB_ID)
+            LogUtil.i(AppConfig.TAG, "SubscriptionUpdater test starting: $subId")
+
+            if (subId.isNullOrEmpty()) {
+                LogUtil.w(AppConfig.TAG, "SubscriptionUpdater: missing subId in test worker input")
+                return Result.success()
+            }
+
+            val subItem = MmkvManager.decodeSubscription(subId)
+            if (subItem == null) {
+                LogUtil.w(AppConfig.TAG, "SubscriptionUpdater: no subscription found for $subId")
+                return Result.success()
+            }
+
+            if (!subItem.enabled) {
+                LogUtil.i(AppConfig.TAG, "SubscriptionUpdater: ${subItem.remarks} disabled, skip test")
+                return Result.success()
+            }
+
+            val sub = SubscriptionCache(subId, subItem)
+
+            LogUtil.i(AppConfig.TAG, "SubscriptionUpdater test: ---${subItem.remarks}")
+            testSubscriptionServers(applicationContext, sub)
+
+            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_REMOVE_INVALID_AFTER_TEST, false)) {
+                LogUtil.i(AppConfig.TAG, "SubscriptionUpdater: removing invalid servers for ${subItem.remarks}")
+                showNotification(
+                    applicationContext,
+                    R.string.title_del_invalid_config,
+                    sub.subscription.remarks
+                )
+                AngConfigManager.removeInvalidServer(subId)
+            }
+            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_SORT_AFTER_TEST, false)) {
+                LogUtil.i(AppConfig.TAG, "SubscriptionUpdater: sorting servers for ${subItem.remarks}")
+                showNotification(
+                    applicationContext,
+                    R.string.title_sort_by_test_results,
+                    sub.subscription.remarks
+                )
+                AngConfigManager.sortByTestResultsForSub(subId)
+            }
+
+            // Clear notification
+            NotificationHelper.cancel(NotificationChannelType.SUBSCRIPTION_UPDATE, applicationContext)
+
+            // Persist last test time and reset only the test task's own timer
+            subItem.lastTested = System.currentTimeMillis()
+            MmkvManager.encodeSubscription(subId, subItem)
+            scheduleTestOne(
+                context = applicationContext,
+                subId = subId,
+                existingWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE
+            )
+
+            LogUtil.i(AppConfig.TAG, "SubscriptionUpdater test finished and rescheduled: ${subItem.remarks}")
 
             return Result.success()
         }
