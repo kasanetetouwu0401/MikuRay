@@ -144,8 +144,6 @@ class SubEditActivity : BaseActivity() {
         binding.chkEnable.isChecked = subItem.enabled
         binding.autoUpdateCheck.isChecked = subItem.autoUpdate
         binding.etUpdateInterval.setText(Utils.getEditable(subItem.updateInterval.toString()))
-        binding.autoTestCheck.isChecked = subItem.autoTest
-        binding.etTestInterval.setText(Utils.getEditable(subItem.testInterval.toString()))
         binding.allowInsecureUrl.isChecked = subItem.allowInsecureUrl
         binding.etPreProfile.setText(subItem.prevProfile, false)
         binding.etNextProfile.setText(subItem.nextProfile, false)
@@ -162,8 +160,6 @@ class SubEditActivity : BaseActivity() {
         binding.chkEnable.isChecked = true
         binding.autoUpdateCheck.isChecked = false
         binding.etUpdateInterval.text = null
-        binding.autoTestCheck.isChecked = false
-        binding.etTestInterval.text = null
         binding.allowInsecureUrl.isChecked = false
         binding.etPreProfile.text = null
         binding.etNextProfile.text = null
@@ -234,29 +230,6 @@ class SubEditActivity : BaseActivity() {
             }
         }
 
-        subItem.autoTest = binding.autoTestCheck.isChecked
-
-        val testIntervalInput = binding.etTestInterval.text?.toString()?.trim().orEmpty()
-        val testIntervalMinutes = testIntervalInput.toLongOrNull()
-
-        if (subItem.autoTest) {
-            if (testIntervalMinutes == null) {
-                subItem.testInterval = SubscriptionItem().testInterval
-            } else if (testIntervalMinutes < AppConfig.SUBSCRIPTION_MIN_INTERVAL_MINUTES) {
-                snackbarError(
-                    getString(R.string.toast_invalid_test_interval),
-                    title = getString(R.string.title_alerter_error)
-                )
-                return false
-            } else {
-                subItem.testInterval = testIntervalMinutes
-            }
-        } else {
-            if (testIntervalMinutes != null && testIntervalMinutes >= AppConfig.SUBSCRIPTION_MIN_INTERVAL_MINUTES) {
-                subItem.testInterval = testIntervalMinutes
-            }
-        }
-
         subItem.prevProfile = binding.etPreProfile.text?.toString().orEmpty()
         subItem.nextProfile = binding.etNextProfile.text?.toString().orEmpty()
         subItem.allowInsecureUrl = binding.allowInsecureUrl.isChecked
@@ -286,8 +259,8 @@ class SubEditActivity : BaseActivity() {
             }
         }
 
-        val savedSubId = MmkvManager.encodeSubscription(editSubId, subItem)
-        SubscriptionUpdater.syncOne(subId = savedSubId)
+        MmkvManager.encodeSubscription(editSubId, subItem)
+        SubscriptionUpdater.syncOne(subId = editSubId)
         toastSuccess(R.string.toast_success)
         finish()
         return true

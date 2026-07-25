@@ -317,9 +317,6 @@
     <string name="sub_setting_filter">Filter Reguler Catatan</string>
     <string name="sub_setting_enable">Aktifin update</string>
     <string name="sub_auto_update">Biarin otomatis update</string>
-    <string name="sub_auto_test">Biarin otomatis test server</string>
-    <string name="title_pref_auto_test_interval">Jeda Test Otomatis (Dalem menit, Paling cepet 15)</string>
-    <string name="toast_invalid_test_interval">Jeda testnya ngaco. Paling dikit 15 menit ya.</string>
     <string name="sub_allow_insecure_url">Bolehin alamat HTTP ga aman</string>
     <string name="sub_setting_pre_profile">Catatan konfig proxy sebelumnya</string>
     <string name="sub_setting_next_profile">Catatan konfig proxy berikutnya</string>

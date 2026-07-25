@@ -322,9 +322,6 @@
     <string name="sub_setting_filter">Фильтр примечаний (регулярное выражение)</string>
     <string name="sub_setting_enable">Включить обновление</string>
     <string name="sub_auto_update">Включить автоматическое обновление</string>
-    <string name="sub_auto_test">Включить автоматическое тестирование</string>
-    <string name="title_pref_auto_test_interval">Интервал автотестирования (минуты, минимум 15)</string>
-    <string name="toast_invalid_test_interval">Неверный интервал тестирования. Минимальное значение — 15 минут.</string>
     <string name="sub_allow_insecure_url">Разрешить небезопасный HTTP-адрес</string>
     <string name="sub_setting_pre_profile">Примечания предыдущей прокси-конфигурации</string>
     <string name="sub_setting_next_profile">Примечания следующей прокси-конфигурации</string>

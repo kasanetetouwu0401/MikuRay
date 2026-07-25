@@ -316,9 +316,6 @@
     <string name="sub_setting_filter">别名正则过滤</string>
     <string name="sub_setting_enable">启用更新</string>
     <string name="sub_auto_update">启用自动更新</string>
-    <string name="sub_auto_test">启用自动测速</string>
-    <string name="title_pref_auto_test_interval">自动测速间隔（分钟，最小值 15）</string>
-    <string name="toast_invalid_test_interval">测速间隔无效，最小值为 15 分钟。</string>
     <string name="sub_allow_insecure_url">允许不安全的 HTTP 地址</string>
     <string name="sub_setting_pre_profile">前置代理配置别名</string>
     <string name="sub_setting_next_profile">落地代理配置別名</string>
