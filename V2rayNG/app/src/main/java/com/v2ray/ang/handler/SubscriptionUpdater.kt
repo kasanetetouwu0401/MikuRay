@@ -391,11 +391,13 @@ object SubscriptionUpdater {
 
     private suspend fun testSubscriptionServers(context: Context, sub: SubscriptionCache) {
         val subId = sub.guid
+        val appName = context.getString(R.string.app_name)
         LogUtil.i(AppConfig.TAG, "SubscriptionUpdater: starting test phase for ${sub.subscription.remarks}")
-        showNotification(
-            context,
-            R.string.title_real_ping_all_server,
-            sub.subscription.remarks
+        NotificationHelper.updateNotification(
+            channelType = NotificationChannelType.SUBSCRIPTION_UPDATE,
+            context = context,
+            title = appName,
+            content = context.getString(R.string.title_real_ping_all_server) + " — ${sub.subscription.remarks}"
         )
         CoreNativeManager.initCoreEnv(context)
         val guids = MmkvManager.decodeServerList(subId)
@@ -407,10 +409,12 @@ object SubscriptionUpdater {
                 onEvent = { event ->
                     when (event) {
                         is RealPingEvent.Progress -> {
-                            showNotification(
-                                context,
-                                R.string.title_real_ping_all_server,
-                                "${event.text} in ${sub.subscription.remarks}"
+                            NotificationHelper.updateNotification(
+                                channelType = NotificationChannelType.SUBSCRIPTION_UPDATE,
+                                context = context,
+                                title = appName,
+                                content = context.getString(R.string.connection_runing_task_left, event.text) +
+                                        " — ${sub.subscription.remarks}"
                             )
                             LogUtil.i(AppConfig.TAG, "SubscriptionUpdater: ${event.text} in ${sub.subscription.remarks}")
                         }
