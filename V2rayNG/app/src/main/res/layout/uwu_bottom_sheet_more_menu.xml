@@ -840,7 +840,6 @@
                                     </LinearLayout>
                                 </LinearLayout>
                             </com.google.android.material.card.MaterialCardView>
-                        </LinearLayout>
 
                             <com.google.android.material.card.MaterialCardView
                                 android:id="@+id/locate_selected_config"
@@ -947,6 +946,7 @@
                                     </LinearLayout>
                                 </LinearLayout>
                             </com.google.android.material.card.MaterialCardView>
+                          </LinearLayout>
 
                         <com.google.android.material.card.MaterialCardView
                             android:id="@+id/management_expand_header"
