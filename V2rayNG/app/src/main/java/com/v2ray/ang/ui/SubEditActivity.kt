@@ -286,8 +286,8 @@ class SubEditActivity : BaseActivity() {
             }
         }
 
-        MmkvManager.encodeSubscription(editSubId, subItem)
-        SubscriptionUpdater.syncOne(subId = editSubId)
+        val savedSubId = MmkvManager.encodeSubscription(editSubId, subItem)
+        SubscriptionUpdater.syncOne(subId = savedSubId)
         toastSuccess(R.string.toast_success)
         finish()
         return true

@@ -535,7 +535,7 @@ object MmkvManager {
      * @param guid The subscription GUID.
      * @param subItem The subscription item.
      */
-    fun encodeSubscription(guid: String, subItem: SubscriptionItem) {
+    fun encodeSubscription(guid: String, subItem: SubscriptionItem): String {
         val key = guid.ifBlank { Utils.getUuid() }
         subStorage.encode(key, JsonUtil.toJson(subItem))
 
@@ -544,6 +544,7 @@ object MmkvManager {
             subsList.add(key)
             encodeSubsList(subsList)
         }
+        return key
     }
 
     /**
