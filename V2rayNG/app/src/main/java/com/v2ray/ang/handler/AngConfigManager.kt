@@ -53,6 +53,29 @@ object AngConfigManager {
     }
 
     /**
+     * Shares the configuration to the clipboard.
+     *
+     * @param context The context.
+     * @param guid The GUID of the configuration.
+     * @return The result code.
+     */
+    fun share2Clipboard(context: Context, guid: String): Int {
+        try {
+            val conf = shareConfig(guid)
+            if (TextUtils.isEmpty(conf)) {
+                return -1
+            }
+
+            Utils.setClipboard(context, conf)
+
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "Failed to share config to clipboard", e)
+            return -1
+        }
+        return 0
+    }
+
+    /**
      * Shares the configuration to the clipboard, encrypted so it can only
      * be imported by MikuRay (not stock v2rayNG or other V2Ray/Xray
      * clients).
@@ -61,7 +84,7 @@ object AngConfigManager {
      * @param guid The GUID of the configuration.
      * @return The result code.
      */
-    fun share2Clipboard(context: Context, guid: String): Int {
+    fun share2ClipboardEncrypted(context: Context, guid: String): Int {
         try {
             val conf = shareConfig(guid)
             if (TextUtils.isEmpty(conf)) {
@@ -76,16 +99,14 @@ object AngConfigManager {
             Utils.setClipboard(context, payload)
 
         } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to share config to clipboard", e)
+            LogUtil.e(AppConfig.TAG, "Failed to share encrypted config to clipboard", e)
             return -1
         }
         return 0
     }
 
     /**
-     * Shares non-custom configurations to the clipboard, encrypted so the
-     * whole batch can only be imported by MikuRay - same as the single
-     * config share.
+     * Shares non-custom configurations to the clipboard.
      *
      * @param context The context.
      * @param serverList The list of server GUIDs.
@@ -102,15 +123,10 @@ object AngConfigManager {
                 sb.append(url)
                 sb.appendLine()
             }
-            val count = sb.lines().count() - 1
-            if (count > 0) {
-                val payload = CryptoUtils.encrypt(sb.toString())
-                if (TextUtils.isEmpty(payload)) {
-                    return -1
-                }
-                Utils.setClipboard(context, payload)
+            if (sb.count() > 0) {
+                Utils.setClipboard(context, sb.toString())
             }
-            return count
+            return sb.lines().count() - 1
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to share non-custom configs to clipboard", e)
             return -1

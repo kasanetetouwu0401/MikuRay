@@ -1120,6 +1120,13 @@ class MainActivity : HelperBaseActivity(),
                     snackbarError(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_error))
                 }
             }
+            R.id.share_clipboard_encrypted -> {
+                if (AngConfigManager.share2ClipboardEncrypted(this, guid) == 0) {
+                    snackbarSuccess(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_success))
+                } else {
+                    snackbarError(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_error))
+                }
+            }
             R.id.share_full_clipboard -> {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val result = AngConfigManager.shareFullContent2Clipboard(this@MainActivity, guid)
