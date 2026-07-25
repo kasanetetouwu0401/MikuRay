@@ -112,6 +112,9 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
         val isTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
         view.findViewById<View>(R.id.reset_traffic)?.visibility = if (isTrafficEnabled) View.VISIBLE else View.GONE
 
+        val hasTestResults = MmkvManager.hasAnyTestDelayResults()
+        view.findViewById<View>(R.id.clear_test_results)?.visibility = if (hasTestResults) View.VISIBLE else View.GONE
+
         view.findViewById<View>(R.id.card_order_origin)?.setOnClickListener {
             view.findViewById<View>(R.id.action_order_origin)?.performClick()
         }
