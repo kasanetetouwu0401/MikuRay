@@ -553,6 +553,7 @@
     <string name="share_qrcode">QRcode</string>
     <string name="export_to_clipboard">Export to clipboard</string>
     <string name="export_full_config_to_clipboard">Export full config to clipboard</string>
+    <string name="share_decrypt_failed">Not a valid MikuRay-exported config, or the data is corrupted</string>
     <string name="ruleset_management">Ruleset Management</string>
     <string name="title_pref_app_theme">App Color Theme</string>
     <string name="summary_pref_app_theme">Choose the accent color palette for the app</string>

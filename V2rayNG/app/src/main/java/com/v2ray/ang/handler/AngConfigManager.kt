@@ -25,6 +25,7 @@ import com.v2ray.ang.fmt.V2rayNFmt
 import com.v2ray.ang.fmt.VlessFmt
 import com.v2ray.ang.fmt.VmessFmt
 import com.v2ray.ang.fmt.WireguardFmt
+import com.v2ray.ang.util.CryptoUtils
 import com.v2ray.ang.util.HttpUtil
 import com.v2ray.ang.util.JsonUtil
 import com.v2ray.ang.util.LogUtil
@@ -52,7 +53,9 @@ object AngConfigManager {
     }
 
     /**
-     * Shares the configuration to the clipboard.
+     * Shares the configuration to the clipboard, encrypted so it can only
+     * be imported by MikuRay (not stock v2rayNG or other V2Ray/Xray
+     * clients).
      *
      * @param context The context.
      * @param guid The GUID of the configuration.
@@ -65,7 +68,12 @@ object AngConfigManager {
                 return -1
             }
 
-            Utils.setClipboard(context, conf)
+            val payload = CryptoUtils.encrypt(conf)
+            if (TextUtils.isEmpty(payload)) {
+                return -1
+            }
+
+            Utils.setClipboard(context, payload)
 
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to share config to clipboard", e)
@@ -75,7 +83,9 @@ object AngConfigManager {
     }
 
     /**
-     * Shares non-custom configurations to the clipboard.
+     * Shares non-custom configurations to the clipboard, encrypted so the
+     * whole batch can only be imported by MikuRay - same as the single
+     * config share.
      *
      * @param context The context.
      * @param serverList The list of server GUIDs.
@@ -92,10 +102,15 @@ object AngConfigManager {
                 sb.append(url)
                 sb.appendLine()
             }
-            if (sb.count() > 0) {
-                Utils.setClipboard(context, sb.toString())
+            val count = sb.lines().count() - 1
+            if (count > 0) {
+                val payload = CryptoUtils.encrypt(sb.toString())
+                if (TextUtils.isEmpty(payload)) {
+                    return -1
+                }
+                Utils.setClipboard(context, payload)
             }
-            return sb.lines().count() - 1
+            return count
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to share non-custom configs to clipboard", e)
             return -1
