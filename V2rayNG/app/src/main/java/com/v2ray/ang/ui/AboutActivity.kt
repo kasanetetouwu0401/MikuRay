@@ -22,11 +22,7 @@ class AboutActivity : BaseActivity() {
         binding.aboutContent.applyEdgeToEdgeListInsets()
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
-        setupToolbar(toolbar, showHomeAsUp = false, title = getString(R.string.title_about))
-
-        binding.btnBack.setOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
-        }
+        setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_about))
 
         binding.layoutSoureCcode.setOnClickListener {
             Utils.openUri(this, AppConfig.APP_URL)
