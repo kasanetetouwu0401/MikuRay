@@ -127,13 +127,6 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
         val sideSheetDialog = SideSheetDialog(this)
         sideSheetDialog.setContentView(dialogBinding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(dialogBinding.root) { view, insets ->
-            val statusBarInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
-            val navBarInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-            view.updatePadding(top = statusBarInset, bottom = navBarInset)
-            insets
-        }
-
         dialogBinding.btnCancel.setOnClickListener { sideSheetDialog.dismiss() }
         dialogBinding.btnClose.setOnClickListener { sideSheetDialog.dismiss() }
         dialogBinding.btnOk.setOnClickListener {
@@ -162,10 +155,19 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
         sideSheetDialog.window?.let { window ->
             WindowBlurUtils.applyWindowBlur(window)
             window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-            WindowCompat.setDecorFitsSystemWindows(window, false)
         }
 
         sideSheetDialog.show()
+
+        sideSheetDialog.findViewById<View>(R.id.side_sheet_root)?.let { rootView ->
+            ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
+                val statusBarInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+                val navBarInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+                view.updatePadding(top = statusBarInset, bottom = navBarInset)
+                insets
+            }
+            ViewCompat.requestApplyInsets(rootView)
+        }
     }
 
     override fun onShareSubOptionClicked(optionId: Int, url: String) {
