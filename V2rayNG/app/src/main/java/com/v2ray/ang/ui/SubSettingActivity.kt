@@ -9,6 +9,10 @@ import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.viewModels
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.google.android.material.sidesheet.SideSheetDialog
 import androidx.appcompat.app.AlertDialog
 import com.v2ray.ang.util.WindowBlurUtils
@@ -123,6 +127,13 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
         val sideSheetDialog = SideSheetDialog(this)
         sideSheetDialog.setContentView(dialogBinding.root)
 
+        ViewCompat.setOnApplyWindowInsetsListener(dialogBinding.root) { view, insets ->
+            val statusBarInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            val navBarInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            view.updatePadding(top = statusBarInset, bottom = navBarInset)
+            insets
+        }
+
         dialogBinding.btnCancel.setOnClickListener { sideSheetDialog.dismiss() }
         dialogBinding.btnClose.setOnClickListener { sideSheetDialog.dismiss() }
         dialogBinding.btnOk.setOnClickListener {
@@ -151,6 +162,7 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
         sideSheetDialog.window?.let { window ->
             WindowBlurUtils.applyWindowBlur(window)
             window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+            WindowCompat.setDecorFitsSystemWindows(window, false)
         }
 
         sideSheetDialog.show()
