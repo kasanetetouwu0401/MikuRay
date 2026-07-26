@@ -1,57 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<RelativeLayout
     android:id="@+id/main_content"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar"
+    <LinearLayout
+        android:id="@+id/toolbar_row"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:liftOnScroll="true">
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:id="@+id/collapsing_toolbar"
-            style="?attr/collapsingToolbarLayoutLargeStyle"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
-            android:background="?attr/colorBg"
-            app:collapsedTitleTextAppearance="?attr/textAppearanceTitleLargeEmphasized"
-            app:collapsedTitleTextColor="?attr/colorOnSurfaceVariant"
-            app:contentScrim="?attr/colorBg"
-            app:expandedTitleMarginBottom="24dp"
-            app:expandedTitleMarginEnd="24dp"
-            app:expandedTitleMarginStart="24dp"
-            app:expandedTitleMarginTop="96dp"
-            app:expandedTitleTextAppearance="?attr/textAppearanceDisplaySmallEmphasized"
-            app:expandedTitleTextColor="?attr/colorOnSurfaceVariant"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:maxLines="4"
-            app:titleCollapseMode="scale">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="55dp"
+            android:minHeight="55dp"
+            app:backgroundTint="?colorCard"
+            app:icon="@drawable/ic_arrow_back_24"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconTint="?colorOnSurface"
+            style="@style/Widget.Material3Expressive.Button.IconButton.Filled" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            app:cardBackgroundColor="?colorCard"
+            app:cardCornerRadius="28dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
             <com.google.android.material.appbar.MaterialToolbar
-                android:theme="@style/AppThemeToolbarCircleNavigationButton"
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
                 android:elevation="0dp"
-                app:layout_collapseMode="pin" />
+                app:navigationIcon="@null"
+                app:title="@string/title_about"
+                app:titleTextAppearance="?attr/textAppearanceTitleLargeEmphasized"
+                app:titleTextColor="?attr/colorOnSurfaceVariant" />
 
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-    </com.google.android.material.appbar.AppBarLayout>
+    </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/about_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar_row"
+        android:layout_marginTop="8dp"
         android:clipToPadding="false"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -1556,4 +1567,4 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</RelativeLayout>
