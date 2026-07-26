@@ -25,7 +25,6 @@ import com.v2ray.ang.fmt.V2rayNFmt
 import com.v2ray.ang.fmt.VlessFmt
 import com.v2ray.ang.fmt.VmessFmt
 import com.v2ray.ang.fmt.WireguardFmt
-import com.v2ray.ang.util.CryptoUtils
 import com.v2ray.ang.util.HttpUtil
 import com.v2ray.ang.util.JsonUtil
 import com.v2ray.ang.util.LogUtil
@@ -70,36 +69,6 @@ object AngConfigManager {
 
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to share config to clipboard", e)
-            return -1
-        }
-        return 0
-    }
-
-    /**
-     * Shares the configuration to the clipboard, encrypted so it can only
-     * be imported by MikuRay (not stock v2rayNG or other V2Ray/Xray
-     * clients).
-     *
-     * @param context The context.
-     * @param guid The GUID of the configuration.
-     * @return The result code.
-     */
-    fun share2ClipboardEncrypted(context: Context, guid: String): Int {
-        try {
-            val conf = shareConfig(guid)
-            if (TextUtils.isEmpty(conf)) {
-                return -1
-            }
-
-            val payload = CryptoUtils.encrypt(conf)
-            if (TextUtils.isEmpty(payload)) {
-                return -1
-            }
-
-            Utils.setClipboard(context, payload)
-
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to share encrypted config to clipboard", e)
             return -1
         }
         return 0

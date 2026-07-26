@@ -7,9 +7,11 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.WindowManager
 import androidx.activity.viewModels
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.sidesheet.SideSheetDialog
 import androidx.appcompat.app.AlertDialog
+import com.v2ray.ang.util.WindowBlurUtils
 import com.v2ray.ang.util.showBlur
 import com.v2ray.ang.util.showDeleteConfirmDialog
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -118,32 +120,40 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
             dialogBinding.switchSendHwid.toggle()
         }
 
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.title_sub_update)
-            .setView(dialogBinding.root)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                MmkvManager.encodeSettings(
-                    AppConfig.PREF_AUTO_TEST_AFTER_UPDATE_SUBSCRIPTION,
-                    dialogBinding.switchAutoTest.isChecked
-                )
-                MmkvManager.encodeSettings(
-                    AppConfig.PREF_AUTO_REMOVE_INVALID_AFTER_TEST,
-                    dialogBinding.switchAutoRemoveInvalid.isChecked
-                )
-                MmkvManager.encodeSettings(
-                    AppConfig.PREF_AUTO_SORT_AFTER_TEST,
-                    dialogBinding.switchAutoSort.isChecked
-                )
-                MmkvManager.encodeSettings(
-                    AppConfig.PREF_SEND_HWID,
-                    dialogBinding.switchSendHwid.isChecked
-                )
+        val sideSheetDialog = SideSheetDialog(this)
+        sideSheetDialog.setContentView(dialogBinding.root)
 
-                viewModel.updateSubscriptions()
-                toast(getString(R.string.subscription_updater_job_tips))
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .showBlur()
+        dialogBinding.btnCancel.setOnClickListener { sideSheetDialog.dismiss() }
+        dialogBinding.btnClose.setOnClickListener { sideSheetDialog.dismiss() }
+        dialogBinding.btnOk.setOnClickListener {
+            MmkvManager.encodeSettings(
+                AppConfig.PREF_AUTO_TEST_AFTER_UPDATE_SUBSCRIPTION,
+                dialogBinding.switchAutoTest.isChecked
+            )
+            MmkvManager.encodeSettings(
+                AppConfig.PREF_AUTO_REMOVE_INVALID_AFTER_TEST,
+                dialogBinding.switchAutoRemoveInvalid.isChecked
+            )
+            MmkvManager.encodeSettings(
+                AppConfig.PREF_AUTO_SORT_AFTER_TEST,
+                dialogBinding.switchAutoSort.isChecked
+            )
+            MmkvManager.encodeSettings(
+                AppConfig.PREF_SEND_HWID,
+                dialogBinding.switchSendHwid.isChecked
+            )
+
+            viewModel.updateSubscriptions()
+            toast(getString(R.string.subscription_updater_job_tips))
+            sideSheetDialog.dismiss()
+        }
+
+        sideSheetDialog.window?.let { window ->
+            WindowBlurUtils.applyWindowBlur(window)
+            window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        }
+
+        sideSheetDialog.show()
     }
 
     override fun onShareSubOptionClicked(optionId: Int, url: String) {

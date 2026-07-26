@@ -74,9 +74,6 @@ class ShareConfigBottomSheet : BaseBottomSheetFragment() {
         val shareClipboardView = view.findViewById<View>(R.id.share_clipboard)
         shareClipboardView?.setOnClickListener(clickListener)
 
-        val shareClipboardEncryptedView = view.findViewById<View>(R.id.share_clipboard_encrypted)
-        shareClipboardEncryptedView?.setOnClickListener(clickListener)
-
         view.findViewById<View>(R.id.share_full_clipboard)?.setOnClickListener(clickListener)
 
         val typeEnum = EConfigType.fromInt(configType)
@@ -84,7 +81,6 @@ class ShareConfigBottomSheet : BaseBottomSheetFragment() {
 
         if (isCustomConfig) {
             shareClipboardView?.visibility = View.GONE
-            shareClipboardEncryptedView?.visibility = View.GONE
         }
     }
 

@@ -509,8 +509,6 @@
     <string name="share_qrcode">二维码</string>
     <string name="export_to_clipboard">导出到剪贴板</string>
     <string name="export_full_config_to_clipboard">导出完整配置到剪贴板</string>
-    <string name="export_to_clipboard_encrypted">导出到剪贴板（加密）</string>
-    <string name="share_decrypt_failed">不是 MikuRay 导出的配置，或数据已损坏</string>
     <string name="ruleset_management">规则集管理</string>
     <string name="server_proxy_chain_members">代理链成员</string>
     <string name="server_proxy_chain_pick_members">点此选择成员</string>

@@ -57,7 +57,6 @@ import com.v2ray.ang.ui.bottomsheet.MoreMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.ShareConfigBottomSheet
 import com.v2ray.ang.ui.preference.activity.SettingsActivity
 import com.v2ray.ang.util.BlurBottomStatusController
-import com.v2ray.ang.util.CryptoUtils
 import com.v2ray.ang.util.SearchChipGradientController
 import com.v2ray.ang.util.getColorAttr
 import com.v2ray.ang.util.LogUtil
@@ -904,22 +903,7 @@ class MainActivity : HelperBaseActivity(),
 
     private fun importBatchConfig(server: String?) {
         if (server.isNullOrEmpty()) return
-
-        val payload = if (CryptoUtils.isEncrypted(server)) {
-            val decrypted = CryptoUtils.decrypt(server)
-            if (decrypted == null) {
-                snackbarError(getString(R.string.share_decrypt_failed), title = getString(R.string.title_alerter_error))
-                return
-            }
-            decrypted
-        } else {
-            server
-        }
-
-        runImportBatchConfig(payload)
-    }
-
-    private fun runImportBatchConfig(server: String) {
+        
         showLoading()
         lifecycleScope.launch(Dispatchers.IO) {
             try {
@@ -1115,13 +1099,6 @@ class MainActivity : HelperBaseActivity(),
             }
             R.id.share_clipboard -> {
                 if (AngConfigManager.share2Clipboard(this, guid) == 0) {
-                    snackbarSuccess(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_success))
-                } else {
-                    snackbarError(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_error))
-                }
-            }
-            R.id.share_clipboard_encrypted -> {
-                if (AngConfigManager.share2ClipboardEncrypted(this, guid) == 0) {
                     snackbarSuccess(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_success))
                 } else {
                     snackbarError(getString(R.string.menu_item_export_proxy_app), title = getString(R.string.title_alerter_error))
