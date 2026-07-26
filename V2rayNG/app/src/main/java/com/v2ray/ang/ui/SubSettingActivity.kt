@@ -168,6 +168,9 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
         }
 
         sideSheetDialog.show()
+        
+        val sideSheetContainer = sideSheetDialog.findViewById<View>(com.google.android.material.R.id.m3_side_sheet)
+        sideSheetContainer?.clipToOutline = true
     }
 
     override fun onShareSubOptionClicked(optionId: Int, url: String) {
