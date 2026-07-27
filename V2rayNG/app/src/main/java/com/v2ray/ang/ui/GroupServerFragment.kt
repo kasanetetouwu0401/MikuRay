@@ -58,7 +58,8 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
         binding.recyclerView.setHasFixedSize(true)
 
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), spanCount())
-        
+        applyGridEdgePadding(isDoubleColumnEnabled())
+
         binding.recyclerView.adapter = adapter
 
         val animator = binding.recyclerView.itemAnimator
@@ -90,6 +91,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
             layoutManager.spanCount = desiredSpanCount
         }
         adapter.setGridMode(doubleColumnEnabled)
+        applyGridEdgePadding(doubleColumnEnabled)
     }
 
     private fun isDoubleColumnEnabled(): Boolean {
@@ -98,6 +100,24 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
 
     private fun spanCount(): Int {
         return if (isDoubleColumnEnabled()) 2 else 1
+    }
+
+    /**
+     * Item grid (item_recycler_main_grid.xml) punya margin kiri-kanan 8dp
+     * sendiri buat celah antar kolom, gak diutak-atik. Padding tepi layar
+     * (kiri layar ke card kiri, kanan layar ke card kanan) mau dibikin
+     * 12dp total, jadi tinggal nambahin 4dp lagi lewat padding RecyclerView
+     * -- cuma pas mode grid aktif, mode list 1 kolom gak kepengaruh.
+     */
+    private fun applyGridEdgePadding(gridMode: Boolean) {
+        val density = resources.displayMetrics.density
+        val extraEdgePaddingPx = if (gridMode) (12 * density).toInt() else 0
+        binding.recyclerView.setPadding(
+            extraEdgePaddingPx,
+            binding.recyclerView.paddingTop,
+            extraEdgePaddingPx,
+            binding.recyclerView.paddingBottom
+        )
     }
 
     private fun editServer(guid: String, profile: ProfileItem) {
