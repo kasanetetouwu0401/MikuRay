@@ -11,16 +11,20 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.util.concurrent.CopyOnWriteArrayList
 
 object TrafficController {
 
-    private const val QUERY_INTERVAL_MS = 3000L
+    // 1 second so any subscriber (e.g. a real-time speed display) can refresh every second.
+    private const val QUERY_INTERVAL_MS = 1000L
 
     /**
      * The core's queryAllOutboundTrafficStats() resets its counters on every call, so only
-     * one place in the app may call it. NotificationManager subscribes here instead of
-     * querying independently, otherwise both consumers race for the same delta and each
-     * one ends up with incomplete/inaccurate numbers.
+     * one place in the app may call it. Consumers (NotificationManager, MainActivity's
+     * real-time speed display, etc.) subscribe here instead of querying independently,
+     * otherwise multiple consumers would race for the same delta and each one ends up
+     * with incomplete/inaccurate numbers. Multiple listeners may be registered at once;
+     * they all receive the same tick from the single query loop below.
      */
     interface Listener {
         fun onTraffic(
@@ -32,13 +36,26 @@ object TrafficController {
         )
     }
 
-    @Volatile private var listener: Listener? = null
+    private val listeners = CopyOnWriteArrayList<Listener>()
     @Volatile private var lastTickTime: Long = 0L
 
     private var job: Job? = null
 
+    /**
+     * Kept for backward compatibility; prefer [addListener]/[removeListener]
+     * since this object now supports more than one subscriber.
+     */
     fun setListener(listener: Listener?) {
-        this.listener = listener
+        listeners.clear()
+        if (listener != null) listeners.add(listener)
+    }
+
+    fun addListener(listener: Listener) {
+        if (!listeners.contains(listener)) listeners.add(listener)
+    }
+
+    fun removeListener(listener: Listener) {
+        listeners.remove(listener)
     }
 
     fun start() {
@@ -93,10 +110,12 @@ object TrafficController {
             return
         }
 
-        runCatching {
-            listener?.onTraffic(proxyUplink, proxyDownlink, directUplink, directDownlink, intervalMs)
-        }.onFailure { e ->
-            LogUtil.e(AppConfig.TAG, "TrafficController: listener failed", e)
+        listeners.forEach { l ->
+            runCatching {
+                l.onTraffic(proxyUplink, proxyDownlink, directUplink, directDownlink, intervalMs)
+            }.onFailure { e ->
+                LogUtil.e(AppConfig.TAG, "TrafficController: listener failed", e)
+            }
         }
 
         if (proxyUplink + proxyDownlink <= 0L) return

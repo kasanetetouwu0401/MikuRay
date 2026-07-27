@@ -54,6 +54,7 @@ object AppConfig {
     const val SUBSCRIPTION_MIN_INTERVAL_MINUTES = 15L
     const val PREF_SPEED_ENABLED = "pref_speed_enabled"
     const val PREF_TRAFFIC_ENABLED = "pref_traffic_enabled"
+    const val PREF_SHOW_REALTIME_SPEED = "pref_show_realtime_speed"
     const val PREF_NETWORK_SECURITY_ENABLED = "pref_network_security_enabled"
     const val PREF_SEND_HWID = "pref_send_hwid"
     const val PREF_HIDE_FROM_RECENT_APPS = "hide_from_recent_apps"

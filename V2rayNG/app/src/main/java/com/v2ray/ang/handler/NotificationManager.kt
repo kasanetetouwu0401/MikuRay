@@ -53,7 +53,7 @@ object NotificationManager : TrafficController.Listener {
         // Subscribe to TrafficController's single query loop instead of polling the core
         // independently — the core's stat query resets its counters on every call, so two
         // independent pollers would race for the same delta.
-        TrafficController.setListener(this)
+        TrafficController.addListener(this)
 
         timerNotificationJob = CoroutineScope(Dispatchers.IO).launch {
             while (isActive) {
@@ -162,14 +162,14 @@ object NotificationManager : TrafficController.Listener {
 
         mBuilder = null
         connectStartTime = 0L
-        TrafficController.setListener(null)
+        TrafficController.removeListener(this)
         timerNotificationJob?.cancel()
         timerNotificationJob = null
         mNotificationManager = null
     }
 
     fun stopSpeedNotification() {
-        TrafficController.setListener(null)
+        TrafficController.removeListener(this)
         timerNotificationJob?.let {
             it.cancel()
             timerNotificationJob = null
