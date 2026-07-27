@@ -124,8 +124,6 @@
                     android:layout_height="24.0dip"
                     android:layout_marginTop="4.0dip"
                     android:layout_gravity="start"
-                    android:paddingStart="6.0dip"
-                    android:paddingEnd="6.0dip"
                     android:visibility="gone">
                     <TextView
                         android:id="@+id/tv_network"

@@ -26,6 +26,7 @@ import java.util.Collections
 import com.v2ray.ang.util.IndicatorStyle
 import com.v2ray.ang.util.SelectedProfileBannerController
 import com.v2ray.ang.util.SensorTextController
+import com.v2ray.ang.util.getColorAttr
 import com.v2ray.ang.AppConfig
 
 class MainRecyclerAdapter(
@@ -170,7 +171,20 @@ class MainRecyclerAdapter(
             }
 
             //layoutIndicator & Card Background
-            if (isSelectedServer) {
+            if (isGridMode) {
+                selectedBannerController?.clear(holder.views.layoutIndicator)
+                holder.views.layoutIndicator.setBackgroundResource(0)
+                val typedValue = TypedValue()
+                context.theme.resolveAttribute(R.attr.colorCard, typedValue, true)
+                holder.views.layoutCard.setCardBackgroundColor(typedValue.data)
+                if (isSelectedServer) {
+                    val strokeWidthPx = (3 * context.resources.displayMetrics.density).toInt()
+                    holder.views.layoutCard.strokeWidth = strokeWidthPx
+                    holder.views.layoutCard.setStrokeColor(context.getColorAttr(R.attr.colorPrimary))
+                } else {
+                    holder.views.layoutCard.strokeWidth = 0
+                }
+            } else if (isSelectedServer) {
                 val styleName = MmkvManager.decodeSettingsString(
                     AppConfig.PREF_INDICATOR_STYLE,
                     IndicatorStyle.STYLE_0.name
@@ -186,12 +200,14 @@ class MainRecyclerAdapter(
                     bannerController?.clear(holder.views.layoutIndicator)
                     holder.views.layoutIndicator.setBackgroundResource(indicatorStyle.drawableRes)
                 }
+                holder.views.layoutCard.strokeWidth = 0
                 holder.views.layoutCard.setCardBackgroundColor(Color.TRANSPARENT)
             } else {
                 selectedBannerController?.clear(holder.views.layoutIndicator)
                 holder.views.layoutIndicator.setBackgroundResource(0)
                 val typedValue = TypedValue()
                 context.theme.resolveAttribute(R.attr.colorCard, typedValue, true)
+                holder.views.layoutCard.strokeWidth = 0
                 holder.views.layoutCard.setCardBackgroundColor(typedValue.data)
             }
 
@@ -361,12 +377,6 @@ class MainRecyclerAdapter(
         override fun onItemClear() {}
     }
 
-    /**
-     * Jembatan biar onBindViewHolder bisa pakai satu logic yang sama
-     * baik lagi nge-bind layout list (item_recycler_main) maupun
-     * layout grid/double-column (item_recycler_main_grid) -- dua
-     * layout beda file, jadi dua ViewBinding class beda juga.
-     */
     interface MainItemViews {
         val root: View
         val layoutCard: com.google.android.material.card.MaterialCardView

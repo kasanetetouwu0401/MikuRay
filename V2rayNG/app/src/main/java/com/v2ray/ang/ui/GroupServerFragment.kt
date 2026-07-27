@@ -102,13 +102,6 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
         return if (isDoubleColumnEnabled()) 2 else 1
     }
 
-    /**
-     * Item grid (item_recycler_main_grid.xml) punya margin kiri-kanan 8dp
-     * sendiri buat celah antar kolom, gak diutak-atik. Padding tepi layar
-     * (kiri layar ke card kiri, kanan layar ke card kanan) mau dibikin
-     * 12dp total, jadi tinggal nambahin 4dp lagi lewat padding RecyclerView
-     * -- cuma pas mode grid aktif, mode list 1 kolom gak kepengaruh.
-     */
     private fun applyGridEdgePadding(gridMode: Boolean) {
         val density = resources.displayMetrics.density
         val extraEdgePaddingPx = if (gridMode) (12 * density).toInt() else 0
