@@ -30,7 +30,7 @@ import com.v2ray.ang.databinding.ItemQrcodeBinding
 import com.v2ray.ang.extension.applyEdgeToEdgeListInsets
 import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.extension.snackbarError
-import com.v2ray.ang.extension.toast
+import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
 import com.v2ray.ang.util.LogUtil
@@ -101,6 +101,8 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
     private fun showSubUpdateOptionsDialog() {
         val dialogBinding = DialogSubUpdateOptionsBinding.inflate(layoutInflater)
 
+        dialogBinding.switchUpdateSubscription.isChecked =
+            MmkvManager.decodeSettingsBool(AppConfig.PREF_UPDATE_SUBSCRIPTION, false)
         dialogBinding.switchAutoTest.isChecked =
             MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_TEST_AFTER_UPDATE_SUBSCRIPTION, false)
         dialogBinding.switchAutoRemoveInvalid.isChecked =
@@ -111,6 +113,9 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
             MmkvManager.decodeSettingsBool(AppConfig.PREF_SEND_HWID, false)
 
         // Tapping anywhere on a row toggles its switch too, not just the thumb itself.
+        dialogBinding.rowUpdateSubscription.setOnClickListener {
+            dialogBinding.switchUpdateSubscription.toggle()
+        }
         dialogBinding.rowAutoTest.setOnClickListener {
             dialogBinding.switchAutoTest.toggle()
         }
@@ -128,8 +133,11 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
         sideSheetDialog.setContentView(dialogBinding.root)
 
         dialogBinding.btnCancel.setOnClickListener { sideSheetDialog.dismiss() }
-        dialogBinding.btnClose.setOnClickListener { sideSheetDialog.dismiss() }
         dialogBinding.btnOk.setOnClickListener {
+            MmkvManager.encodeSettings(
+                AppConfig.PREF_UPDATE_SUBSCRIPTION,
+                dialogBinding.switchUpdateSubscription.isChecked
+            )
             MmkvManager.encodeSettings(
                 AppConfig.PREF_AUTO_TEST_AFTER_UPDATE_SUBSCRIPTION,
                 dialogBinding.switchAutoTest.isChecked
@@ -148,7 +156,9 @@ class SubSettingActivity : BaseActivity(), ShareSubBottomSheet.OnShareSubOptionC
             )
 
             viewModel.updateSubscriptions()
-            toast(getString(R.string.subscription_updater_job_tips))
+            if (dialogBinding.switchUpdateSubscription.isChecked) {
+                toastSuccess(R.string.subscription_updater_job_tips)
+            }
             sideSheetDialog.dismiss()
         }
 

@@ -54,9 +54,10 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         adapter = MainRecyclerAdapter(mainViewModel, ActivityAdapterListener())
+        adapter.setGridMode(isDoubleColumnEnabled())
         binding.recyclerView.setHasFixedSize(true)
-        
-        binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
+
+        binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), spanCount())
         
         binding.recyclerView.adapter = adapter
 
@@ -81,6 +82,22 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
     override fun onResume() {
         super.onResume()
         mainViewModel.subscriptionIdChanged(subId)
+
+        val doubleColumnEnabled = isDoubleColumnEnabled()
+        val layoutManager = binding.recyclerView.layoutManager as? GridLayoutManager
+        val desiredSpanCount = if (doubleColumnEnabled) 2 else 1
+        if (layoutManager != null && layoutManager.spanCount != desiredSpanCount) {
+            layoutManager.spanCount = desiredSpanCount
+        }
+        adapter.setGridMode(doubleColumnEnabled)
+    }
+
+    private fun isDoubleColumnEnabled(): Boolean {
+        return MmkvManager.decodeSettingsBool(AppConfig.PREF_DOUBLE_COLUMN_DISPLAY, false)
+    }
+
+    private fun spanCount(): Int {
+        return if (isDoubleColumnEnabled()) 2 else 1
     }
 
     private fun editServer(guid: String, profile: ProfileItem) {
