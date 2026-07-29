@@ -112,7 +112,10 @@ internal object TetheringPlatformCompat {
     }
 
     private fun linkAddressOf(cidr: String): LinkAddress {
-        return LinkAddress(cidr)
+        val (addr, prefix) = cidr.split('/')
+        val ctor = LinkAddress::class.java.getConstructor(InetAddress::class.java, Int::class.javaPrimitiveType)
+        ctor.isAccessible = true
+        return ctor.newInstance(InetAddress.getByName(addr), prefix.toInt())
     }
 
     private fun findMethod(clazz: Class<*>, name: String, vararg params: Class<*>): Method {
