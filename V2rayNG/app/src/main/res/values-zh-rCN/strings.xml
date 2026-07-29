@@ -418,7 +418,7 @@
 
     <!-- BackupActivity -->
     <string name="title_configuration_backup_restore">备份 &amp; 还原</string>
-    <string name="title_shizuku_tethering">受保护热点 (Shizuku)</string>
+    <string name="title_shizuku_tethering">受保护热点</string>
     <string name="desc_shizuku_tethering">无需 root，让热点/USB 网络共享流量走代理</string>
     <string name="shizuku_status_not_installed">未安装 Shizuku</string>
     <string name="shizuku_status_not_installed_detail">请先安装 Shizuku 应用，以启用无 root 的受保护热点共享。</string>

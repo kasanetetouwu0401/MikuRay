@@ -422,7 +422,7 @@
     <string name="server_proxy_chain_members_invalid">Member chainnya ngaco: %1$s</string>
 
     <string name="title_configuration_backup_restore">Backup &amp; Restore</string>
-    <string name="title_shizuku_tethering">Tethering Terproteksi (Shizuku)</string>
+    <string name="title_shizuku_tethering">Tethering Terproteksi</string>
     <string name="desc_shizuku_tethering">Rutekan hotspot/tethering USB lewat proxy, tanpa root</string>
     <string name="shizuku_status_not_installed">Shizuku belum terpasang</string>
     <string name="shizuku_status_not_installed_detail">Pasang aplikasi Shizuku dulu buat pakai tethering terproteksi tanpa root.</string>

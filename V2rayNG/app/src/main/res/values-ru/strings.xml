@@ -429,7 +429,7 @@
 
     <!-- BackupActivity -->
     <string name="title_configuration_backup_restore">Резервное копирование и восстановление</string>
-    <string name="title_shizuku_tethering">Защищённая раздача (Shizuku)</string>
+    <string name="title_shizuku_tethering">Защищённая раздача</string>
     <string name="desc_shizuku_tethering">Пропускать трафик точки доступа/USB-модема через прокси без root</string>
     <string name="shizuku_status_not_installed">Shizuku не установлен</string>
     <string name="shizuku_status_not_installed_detail">Установите приложение Shizuku, чтобы включить защищённую раздачу без root.</string>
