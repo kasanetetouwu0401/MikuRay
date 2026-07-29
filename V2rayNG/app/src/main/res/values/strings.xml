@@ -93,6 +93,10 @@
     <string name="server_lab_ssh_certificate">Certificate (OpenSSH cert-pub)</string>
     <string name="server_lab_ssh_payload">Custom Payload (Optional)</string>
     <string name="server_lab_ssh_payload_helper">Placeholders: [host] [port] [crlf] [cr] [lf]</string>
+    <string name="server_lab_ssh_proxy">Proxy (Optional)</string>
+    <string name="server_lab_ssh_proxy_helper">SOCKS5 proxy the SSH connection is dialed through, format ip:port</string>
+    <string name="server_lab_ssh_sni">SNI (Optional)</string>
+    <string name="server_lab_ssh_sni_helper">Wraps the connection in TLS with this SNI before the SSH handshake</string>
     <string name="server_lab_encryption">encryption</string>
     <string name="server_lab_flow">flow</string>
     <string name="server_lab_public_key">PublicKey</string>

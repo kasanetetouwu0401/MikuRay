@@ -89,6 +89,10 @@
     <string name="server_lab_ssh_private_key_passphrase">Passphrase Private Key (Opsional)</string>
     <string name="server_lab_ssh_certificate">Sertifikat (OpenSSH cert-pub)</string>
     <string name="server_lab_ssh_payload">Custom Payload (Opsional)</string>
+    <string name="server_lab_ssh_proxy">Proxy (Opsional)</string>
+    <string name="server_lab_ssh_proxy_helper">Proxy SOCKS5 yang dilewati koneksi SSH, format ip:port</string>
+    <string name="server_lab_ssh_sni">SNI (Opsional)</string>
+    <string name="server_lab_ssh_sni_helper">Membungkus koneksi dengan TLS memakai SNI ini sebelum handshake SSH</string>
     <string name="server_lab_ssh_payload_helper">Placeholder: [host] [port] [crlf] [cr] [lf]</string>
     <string name="server_lab_encryption">Enkripsi</string>
     <string name="server_lab_flow">Flow</string>

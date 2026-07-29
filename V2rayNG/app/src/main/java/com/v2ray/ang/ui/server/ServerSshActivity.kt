@@ -49,6 +49,8 @@ class ServerSshActivity : BaseActivity() {
     private val etCertificate: EditText by lazy { findViewById(R.id.et_ssh_certificate) }
 
     private val etPayload: EditText by lazy { findViewById(R.id.et_ssh_payload) }
+    private val etProxy: EditText by lazy { findViewById(R.id.et_ssh_proxy) }
+    private val etSni: EditText by lazy { findViewById(R.id.et_ssh_sni) }
 
     private lateinit var addressPortFields: AddressPortFields
 
@@ -113,6 +115,8 @@ class ServerSshActivity : BaseActivity() {
         etPrivateKeyPassphrase.text = Utils.getEditable(config.sshPrivateKeyPassphrase.orEmpty())
         etCertificate.text = Utils.getEditable(config.sshCertificate.orEmpty())
         etPayload.text = Utils.getEditable(config.sshPayload.orEmpty())
+        etProxy.text = Utils.getEditable(config.sshProxy.orEmpty())
+        etSni.text = Utils.getEditable(config.sni.orEmpty())
         return true
     }
 
@@ -125,6 +129,8 @@ class ServerSshActivity : BaseActivity() {
         etPrivateKeyPassphrase.text = null
         etCertificate.text = null
         etPayload.text = null
+        etProxy.text = null
+        etSni.text = null
         return true
     }
 
@@ -161,6 +167,12 @@ class ServerSshActivity : BaseActivity() {
             return false
         }
 
+        val proxyText = etProxy.text.toString().trim()
+        if (proxyText.isNotEmpty() && (!proxyText.contains(":") || Utils.parseInt(proxyText.substringAfterLast(":")) <= 0)) {
+            snackbarError(getString(R.string.server_lab_ssh_proxy), title = getString(R.string.title_alerter_error))
+            return false
+        }
+
         val config = MmkvManager.decodeServerConfig(editGuid) ?: ProfileItem.create(EConfigType.SSH)
 
         addressPortFields.save(config)
@@ -171,6 +183,8 @@ class ServerSshActivity : BaseActivity() {
         config.sshPrivateKeyPassphrase = etPrivateKeyPassphrase.text.toString()
         config.sshCertificate = etCertificate.text.toString()
         config.sshPayload = etPayload.text.toString()
+        config.sshProxy = proxyText
+        config.sni = etSni.text.toString().trim()
 
         config.description = AngConfigManager.generateDescription(config)
 

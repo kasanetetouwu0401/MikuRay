@@ -78,6 +78,8 @@ data class ProfileItem(
     var sshPrivateKeyPassphrase: String? = null,
     var sshCertificate: String? = null, // OpenSSH certificate text (id_xxx-cert.pub content)
     var sshPayload: String? = null, // raw pre-handshake payload, supports [host][port][crlf][cr][lf]
+    var sshProxy: String? = null, // optional SOCKS5 proxy "ip:port" the SSH connection is dialed through
+    // sni (declared above) is reused here: when set, wraps the socket in TLS with this SNI before payload/SSH handshake
 
     ) {
     companion object {
@@ -140,6 +142,7 @@ data class ProfileItem(
                 && this.sshPrivateKeyPassphrase == obj.sshPrivateKeyPassphrase
                 && this.sshCertificate == obj.sshCertificate
                 && this.sshPayload == obj.sshPayload
+                && this.sshProxy == obj.sshProxy
                 )
     }
 }

@@ -103,7 +103,15 @@ object SshTunnelManager {
             newSession.setPassword(profile.password.orEmpty())
         }
 
-        newSession.setSocketFactory(SshPayloadSocketFactory(host, port, profile.sshPayload))
+        newSession.setSocketFactory(
+            SshPayloadSocketFactory(
+                targetHost = host,
+                targetPort = port,
+                payloadTemplate = profile.sshPayload,
+                proxyAddress = profile.sshProxy,
+                sni = profile.sni,
+            )
+        )
 
         LogUtil.i(AppConfig.TAG, "SshTunnelManager: connecting to $host:$port as $username (auth=$authType)")
         newSession.connect(15000)

@@ -91,6 +91,10 @@
     <string name="server_lab_ssh_private_key_passphrase">私钥密码 (可选)</string>
     <string name="server_lab_ssh_certificate">证书 (OpenSSH cert-pub)</string>
     <string name="server_lab_ssh_payload">自定义 Payload (可选)</string>
+    <string name="server_lab_ssh_proxy">代理 (可选)</string>
+    <string name="server_lab_ssh_proxy_helper">SSH 连接经由的 SOCKS5 代理，格式为 ip:port</string>
+    <string name="server_lab_ssh_sni">SNI (可选)</string>
+    <string name="server_lab_ssh_sni_helper">在 SSH 握手前使用此 SNI 将连接包装为 TLS</string>
     <string name="server_lab_ssh_payload_helper">占位符：[host] [port] [crlf] [cr] [lf]</string>
     <string name="server_lab_encryption">加密方式 (encryption)</string>
     <string name="server_lab_flow">流控 (flow)</string>

@@ -91,6 +91,10 @@
     <string name="server_lab_ssh_private_key_passphrase">Пароль приватного ключа (необязательно)</string>
     <string name="server_lab_ssh_certificate">Сертификат (OpenSSH cert-pub)</string>
     <string name="server_lab_ssh_payload">Пользовательский Payload (необязательно)</string>
+    <string name="server_lab_ssh_proxy">Прокси (необязательно)</string>
+    <string name="server_lab_ssh_proxy_helper">SOCKS5-прокси, через который проходит SSH-соединение, формат ip:port</string>
+    <string name="server_lab_ssh_sni">SNI (необязательно)</string>
+    <string name="server_lab_ssh_sni_helper">Оборачивает соединение в TLS с этим SNI перед SSH-рукопожатием</string>
     <string name="server_lab_ssh_payload_helper">Плейсхолдеры: [host] [port] [crlf] [cr] [lf]</string>
     <string name="server_lab_encryption">шифрование</string>
     <string name="server_lab_flow">поток</string>

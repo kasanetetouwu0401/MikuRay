@@ -262,6 +262,42 @@
                             android:inputType="textMultiLine" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <com.google.android.material.textfield.TextInputLayout
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:hint="@string/server_lab_ssh_proxy"
+                        app:helperTextEnabled="true"
+                        app:helperText="@string/server_lab_ssh_proxy_helper">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_ssh_proxy"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textUri" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:hint="@string/server_lab_ssh_sni"
+                        app:helperTextEnabled="true"
+                        app:helperText="@string/server_lab_ssh_sni_helper">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_ssh_sni"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textUri" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
