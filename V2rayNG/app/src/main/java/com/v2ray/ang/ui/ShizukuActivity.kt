@@ -11,12 +11,14 @@ import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ActivityShizukuTetheringBinding
 import com.v2ray.ang.extension.applyEdgeToEdgeListInsets
 import com.v2ray.ang.extension.snackbarError
+import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.util.MessageUtil
 import com.v2ray.ang.shizuku.ShizukuTetheringController
 import com.v2ray.ang.shizuku.ShizukuTetheringService
 import com.v2ray.ang.shizuku.TetheringPlatformCompat
 import com.v2ray.ang.util.Utils
 import rikka.shizuku.Shizuku
+import java.util.UUID
 
 /**
  * Rootless protected-tethering screen (Shizuku-powered). MikuRay uses classic Views
@@ -81,6 +83,11 @@ class ShizukuActivity : HelperBaseActivity() {
                     ShizukuTetheringController.requestPermission(REQUEST_CODE_PERMISSION)
                     return@setOnCheckedChangeListener
                 }
+                // Arm the sync token BEFORE binding/querying: TetheringCoreSync (running in
+                // the daemon process) gates every start/stop/snapshot broadcast behind
+                // "is there already a non-blank token", so without this the daemon has no
+                // way to ever begin sending events and routing stays stuck at idle forever.
+                MmkvManager.encodeSettings(AppConfig.PREF_SHIZUKU_SYNC_TOKEN, UUID.randomUUID().toString())
                 ShizukuTetheringController.bind(this)
                 // Ask the daemon process (if a core is already running) to (re)send a
                 // snapshot now that routing has been armed for this session.
