@@ -80,6 +80,10 @@ data class ProfileItem(
     var sshPayload: String? = null, // raw pre-handshake payload, supports [host][port][crlf][cr][lf]
     var sshProxy: String? = null, // optional SOCKS5 proxy "ip:port" the SSH connection is dialed through
     // sni (declared above) is reused here: when set, wraps the socket in TLS with this SNI before payload/SSH handshake
+    var sshConnectionType: String? = null, // AppConfig.SSH_TYPE_*, drives which of SNI/Payload/Proxy fields are shown
+    var sshCompression: Boolean? = null, // enables zlib compression on the SSH session (JSch compression.[cs]2c/s2c)
+    var sshUdpgwEnabled: Boolean? = null, // relays UDP (e.g. DNS, games) through a badvpn-udpgw server over the SSH tunnel
+    var sshUdpgwAddress: String? = null, // udpgw server "ip:port", reached through the SSH session like any other destination
 
     ) {
     companion object {
@@ -143,6 +147,10 @@ data class ProfileItem(
                 && this.sshCertificate == obj.sshCertificate
                 && this.sshPayload == obj.sshPayload
                 && this.sshProxy == obj.sshProxy
+                && this.sshConnectionType == obj.sshConnectionType
+                && this.sshCompression == obj.sshCompression
+                && this.sshUdpgwEnabled == obj.sshUdpgwEnabled
+                && this.sshUdpgwAddress == obj.sshUdpgwAddress
                 )
     }
 }

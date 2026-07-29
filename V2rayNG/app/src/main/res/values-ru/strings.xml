@@ -95,6 +95,14 @@
     <string name="server_lab_ssh_proxy_helper">SOCKS5-прокси, через который проходит SSH-соединение, формат ip:port</string>
     <string name="server_lab_ssh_sni">SNI (необязательно)</string>
     <string name="server_lab_ssh_sni_helper">Оборачивает соединение в TLS с этим SNI перед SSH-рукопожатием</string>
+    <string name="server_lab_ssh_connection_type">Тип соединения</string>
+    <string name="server_lab_ssh_connection_type_helper">Пресеты в стиле Neko Injector, определяют какие из полей SSL/Payload/Proxy ниже используются</string>
+    <string name="server_lab_ssh_compression">Сжатие SSH</string>
+    <string name="server_lab_ssh_compression_summary">Сжимает трафик внутри SSH-туннеля, может помочь на медленных соединениях</string>
+    <string name="server_lab_ssh_udpgw">UDPGW</string>
+    <string name="server_lab_ssh_udpgw_summary">Передаёт UDP-трафик (DNS, игры, звонки) через сервер udpgw поверх этого SSH-туннеля</string>
+    <string name="server_lab_ssh_udpgw_address">Сервер UDPGW (ip:port)</string>
+    <string name="server_lab_ssh_udpgw_address_helper">например 127.0.0.1:7300, доступен через само SSH-соединение</string>
     <string name="server_lab_ssh_payload_helper">Плейсхолдеры: [host] [port] [crlf] [cr] [lf]</string>
     <string name="server_lab_encryption">шифрование</string>
     <string name="server_lab_flow">поток</string>

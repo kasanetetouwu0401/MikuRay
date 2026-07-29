@@ -103,6 +103,14 @@ object SshTunnelManager {
             newSession.setPassword(profile.password.orEmpty())
         }
 
+        if (profile.sshCompression == true) {
+            // zlib@openssh.com falls back to plain zlib on servers that don't advertise the
+            // delayed variant; "none" keeps compression off entirely (the default).
+            newSession.setConfig("compression.s2c", "zlib@openssh.com,zlib,none")
+            newSession.setConfig("compression.c2s", "zlib@openssh.com,zlib,none")
+            newSession.setConfig("compression_level", "6")
+        }
+
         newSession.setSocketFactory(
             SshPayloadSocketFactory(
                 targetHost = host,
@@ -122,7 +130,8 @@ object SshTunnelManager {
         // JSch has no native "-D" dynamic/SOCKS forwarding (only setPortForwardingL/R),
         // so Socks5OverSsh implements a minimal local SOCKS5 server that tunnels each
         // connection through this session via direct-tcpip channels.
-        val newSocksServer = Socks5OverSsh(newSession)
+        val udpgwAddress = profile.sshUdpgwAddress?.trim().takeIf { profile.sshUdpgwEnabled == true && !it.isNullOrEmpty() }
+        val newSocksServer = Socks5OverSsh(newSession, udpgwAddress)
         val boundPort = newSocksServer.start("127.0.0.1", preferredPort)
 
         session = newSession

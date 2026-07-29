@@ -95,6 +95,14 @@
     <string name="server_lab_ssh_proxy_helper">SSH 连接经由的 SOCKS5 代理，格式为 ip:port</string>
     <string name="server_lab_ssh_sni">SNI (可选)</string>
     <string name="server_lab_ssh_sni_helper">在 SSH 握手前使用此 SNI 将连接包装为 TLS</string>
+    <string name="server_lab_ssh_connection_type">连接类型</string>
+    <string name="server_lab_ssh_connection_type_helper">Neko Injector 风格预设，决定下方 SSL/Payload/Proxy 哪些字段生效</string>
+    <string name="server_lab_ssh_compression">SSH 压缩</string>
+    <string name="server_lab_ssh_compression_summary">压缩 SSH 隧道内的流量，网速较慢时可能有帮助</string>
+    <string name="server_lab_ssh_udpgw">UDPGW</string>
+    <string name="server_lab_ssh_udpgw_summary">通过此 SSH 隧道上的 udpgw 服务器转发 UDP 流量 (DNS、游戏、通话)</string>
+    <string name="server_lab_ssh_udpgw_address">UDPGW 服务器 (ip:port)</string>
+    <string name="server_lab_ssh_udpgw_address_helper">例如 127.0.0.1:7300，通过 SSH 连接本身访问</string>
     <string name="server_lab_ssh_payload_helper">占位符：[host] [port] [crlf] [cr] [lf]</string>
     <string name="server_lab_encryption">加密方式 (encryption)</string>
     <string name="server_lab_flow">流控 (flow)</string>

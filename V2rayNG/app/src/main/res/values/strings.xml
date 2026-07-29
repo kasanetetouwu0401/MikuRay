@@ -97,6 +97,14 @@
     <string name="server_lab_ssh_proxy_helper">SOCKS5 proxy the SSH connection is dialed through, format ip:port</string>
     <string name="server_lab_ssh_sni">SNI (Optional)</string>
     <string name="server_lab_ssh_sni_helper">Wraps the connection in TLS with this SNI before the SSH handshake</string>
+    <string name="server_lab_ssh_connection_type">Connection Type</string>
+    <string name="server_lab_ssh_connection_type_helper">Neko Injector-style presets, chooses which of SSL/Payload/Proxy fields below apply</string>
+    <string name="server_lab_ssh_compression">SSH Compression</string>
+    <string name="server_lab_ssh_compression_summary">Compress traffic inside the SSH tunnel, can help on slow connections</string>
+    <string name="server_lab_ssh_udpgw">UDPGW</string>
+    <string name="server_lab_ssh_udpgw_summary">Relay UDP traffic (DNS, games, calls) through a udpgw server over this SSH tunnel</string>
+    <string name="server_lab_ssh_udpgw_address">UDPGW Server (ip:port)</string>
+    <string name="server_lab_ssh_udpgw_address_helper">e.g. 127.0.0.1:7300, reached through the SSH connection itself</string>
     <string name="server_lab_encryption">encryption</string>
     <string name="server_lab_flow">flow</string>
     <string name="server_lab_public_key">PublicKey</string>

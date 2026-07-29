@@ -48,13 +48,23 @@ class ServerSshActivity : BaseActivity() {
     private val tilCertificate: TextInputLayout by lazy { findViewById(R.id.til_ssh_certificate) }
     private val etCertificate: EditText by lazy { findViewById(R.id.et_ssh_certificate) }
 
+    private val spConnectionType: AutoCompleteTextView by lazy { findViewById(R.id.sp_ssh_connection_type) }
+    private val tilPayload: TextInputLayout by lazy { findViewById(R.id.til_ssh_payload) }
     private val etPayload: EditText by lazy { findViewById(R.id.et_ssh_payload) }
+    private val tilProxy: TextInputLayout by lazy { findViewById(R.id.til_ssh_proxy) }
     private val etProxy: EditText by lazy { findViewById(R.id.et_ssh_proxy) }
+    private val tilSni: TextInputLayout by lazy { findViewById(R.id.til_ssh_sni) }
     private val etSni: EditText by lazy { findViewById(R.id.et_ssh_sni) }
+
+    private val chkCompression: com.google.android.material.materialswitch.MaterialSwitch by lazy { findViewById(R.id.chk_ssh_compression) }
+    private val chkUdpgw: com.google.android.material.materialswitch.MaterialSwitch by lazy { findViewById(R.id.chk_ssh_udpgw) }
+    private val tilUdpgwAddress: TextInputLayout by lazy { findViewById(R.id.til_ssh_udpgw_address) }
+    private val etUdpgwAddress: EditText by lazy { findViewById(R.id.et_ssh_udpgw_address) }
 
     private lateinit var addressPortFields: AddressPortFields
 
     private val authTypes by lazy { resources.getStringArray(R.array.ssh_auth_types) }
+    private val connectionTypes by lazy { resources.getStringArray(R.array.ssh_connection_types) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +81,8 @@ class ServerSshActivity : BaseActivity() {
         setupToolbar(toolbar, showHomeAsUp = true, title = EConfigType.SSH.toString())
 
         spAuthType.setOnItemClickListener { _, _, _, _ -> updateAuthFieldsVisibility() }
+        spConnectionType.setOnItemClickListener { _, _, _, _ -> updateConnectionTypeFieldsVisibility() }
+        chkUdpgw.setOnCheckedChangeListener { _, checked -> tilUdpgwAddress.visibility = if (checked) View.VISIBLE else View.GONE }
 
         if (config != null) {
             bindingServer(config)
@@ -78,6 +90,24 @@ class ServerSshActivity : BaseActivity() {
             clearServer()
         }
         updateAuthFieldsVisibility()
+        updateConnectionTypeFieldsVisibility()
+    }
+
+    /**
+     * Neko Injector-style presets: each connection type shows only the fields relevant to
+     * that combination of tricks, instead of always showing SNI/Payload/Proxy at once.
+     */
+    private fun updateConnectionTypeFieldsVisibility() {
+        val type = connectionTypes.getOrElse(Utils.arrayFind(connectionTypes, spConnectionType.text?.toString().orEmpty()).takeIf { it >= 0 } ?: 0) {
+            AppConfig.SSH_TYPE_DIRECT
+        }
+        val showSni = type == AppConfig.SSH_TYPE_SSL || type == AppConfig.SSH_TYPE_SSL_PAYLOAD || type == AppConfig.SSH_TYPE_SSL_PAYLOAD_PROXY
+        val showPayload = type == AppConfig.SSH_TYPE_PAYLOAD || type == AppConfig.SSH_TYPE_SSL_PAYLOAD || type == AppConfig.SSH_TYPE_SSL_PAYLOAD_PROXY
+        val showProxy = type == AppConfig.SSH_TYPE_SSL_PAYLOAD_PROXY
+
+        tilSni.visibility = if (showSni) View.VISIBLE else View.GONE
+        tilPayload.visibility = if (showPayload) View.VISIBLE else View.GONE
+        tilProxy.visibility = if (showProxy) View.VISIBLE else View.GONE
     }
 
     private fun updateAuthFieldsVisibility() {
@@ -117,6 +147,26 @@ class ServerSshActivity : BaseActivity() {
         etPayload.text = Utils.getEditable(config.sshPayload.orEmpty())
         etProxy.text = Utils.getEditable(config.sshProxy.orEmpty())
         etSni.text = Utils.getEditable(config.sni.orEmpty())
+        // Configs saved before the Type selector existed have no sshConnectionType: infer one
+        // from whichever fields already hold values, so saving again doesn't silently wipe them.
+        val effectiveType = config.sshConnectionType.orEmpty().ifEmpty {
+            val hasProxy = !config.sshProxy.isNullOrEmpty()
+            val hasPayload = !config.sshPayload.isNullOrEmpty()
+            val hasSni = !config.sni.isNullOrEmpty()
+            when {
+                hasProxy -> AppConfig.SSH_TYPE_SSL_PAYLOAD_PROXY
+                hasSni && hasPayload -> AppConfig.SSH_TYPE_SSL_PAYLOAD
+                hasPayload -> AppConfig.SSH_TYPE_PAYLOAD
+                hasSni -> AppConfig.SSH_TYPE_SSL
+                else -> AppConfig.SSH_TYPE_DIRECT
+            }
+        }
+        val typePos = Utils.arrayFind(connectionTypes, effectiveType)
+        spConnectionType.setText(connectionTypes.getOrElse(typePos.takeIf { it >= 0 } ?: 0) { connectionTypes.first() }, false)
+        chkCompression.isChecked = config.sshCompression ?: false
+        chkUdpgw.isChecked = config.sshUdpgwEnabled ?: false
+        tilUdpgwAddress.visibility = if (chkUdpgw.isChecked) View.VISIBLE else View.GONE
+        etUdpgwAddress.text = Utils.getEditable(config.sshUdpgwAddress.orEmpty())
         return true
     }
 
@@ -131,6 +181,11 @@ class ServerSshActivity : BaseActivity() {
         etPayload.text = null
         etProxy.text = null
         etSni.text = null
+        spConnectionType.setText(connectionTypes.firstOrNull().orEmpty(), false)
+        chkCompression.isChecked = false
+        chkUdpgw.isChecked = false
+        tilUdpgwAddress.visibility = View.GONE
+        etUdpgwAddress.text = null
         return true
     }
 
@@ -167,9 +222,23 @@ class ServerSshActivity : BaseActivity() {
             return false
         }
 
-        val proxyText = etProxy.text.toString().trim()
+        val connectionType = connectionTypes.getOrElse(Utils.arrayFind(connectionTypes, spConnectionType.text?.toString().orEmpty()).takeIf { it >= 0 } ?: 0) {
+            AppConfig.SSH_TYPE_DIRECT
+        }
+        val showSni = connectionType == AppConfig.SSH_TYPE_SSL || connectionType == AppConfig.SSH_TYPE_SSL_PAYLOAD || connectionType == AppConfig.SSH_TYPE_SSL_PAYLOAD_PROXY
+        val showPayload = connectionType == AppConfig.SSH_TYPE_PAYLOAD || connectionType == AppConfig.SSH_TYPE_SSL_PAYLOAD || connectionType == AppConfig.SSH_TYPE_SSL_PAYLOAD_PROXY
+        val showProxy = connectionType == AppConfig.SSH_TYPE_SSL_PAYLOAD_PROXY
+
+        val proxyText = if (showProxy) etProxy.text.toString().trim() else ""
         if (proxyText.isNotEmpty() && (!proxyText.contains(":") || Utils.parseInt(proxyText.substringAfterLast(":")) <= 0)) {
             snackbarError(getString(R.string.server_lab_ssh_proxy), title = getString(R.string.title_alerter_error))
+            return false
+        }
+
+        val udpgwEnabled = chkUdpgw.isChecked
+        val udpgwAddress = etUdpgwAddress.text.toString().trim()
+        if (udpgwEnabled && (udpgwAddress.isEmpty() || !udpgwAddress.contains(":") || Utils.parseInt(udpgwAddress.substringAfterLast(":")) <= 0)) {
+            snackbarError(getString(R.string.server_lab_ssh_udpgw_address), title = getString(R.string.title_alerter_error))
             return false
         }
 
@@ -182,9 +251,13 @@ class ServerSshActivity : BaseActivity() {
         config.sshPrivateKey = etPrivateKey.text.toString()
         config.sshPrivateKeyPassphrase = etPrivateKeyPassphrase.text.toString()
         config.sshCertificate = etCertificate.text.toString()
-        config.sshPayload = etPayload.text.toString()
+        config.sshConnectionType = connectionType
+        config.sshPayload = if (showPayload) etPayload.text.toString() else ""
         config.sshProxy = proxyText
-        config.sni = etSni.text.toString().trim()
+        config.sni = if (showSni) etSni.text.toString().trim() else ""
+        config.sshCompression = chkCompression.isChecked
+        config.sshUdpgwEnabled = udpgwEnabled
+        config.sshUdpgwAddress = if (udpgwEnabled) udpgwAddress else ""
 
         config.description = AngConfigManager.generateDescription(config)
 

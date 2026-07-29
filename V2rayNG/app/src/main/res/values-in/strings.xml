@@ -93,6 +93,14 @@
     <string name="server_lab_ssh_proxy_helper">Proxy SOCKS5 yang dilewati koneksi SSH, format ip:port</string>
     <string name="server_lab_ssh_sni">SNI (Opsional)</string>
     <string name="server_lab_ssh_sni_helper">Membungkus koneksi dengan TLS memakai SNI ini sebelum handshake SSH</string>
+    <string name="server_lab_ssh_connection_type">Tipe Koneksi</string>
+    <string name="server_lab_ssh_connection_type_helper">Preset ala Neko Injector, nentuin field SSL/Payload/Proxy di bawah mana aja yang dipakai</string>
+    <string name="server_lab_ssh_compression">Kompresi SSH</string>
+    <string name="server_lab_ssh_compression_summary">Kompres traffic di dalam tunnel SSH, bisa bantu di koneksi lambat</string>
+    <string name="server_lab_ssh_udpgw">UDPGW</string>
+    <string name="server_lab_ssh_udpgw_summary">Relay traffic UDP (DNS, game, telepon) lewat server udpgw via tunnel SSH ini</string>
+    <string name="server_lab_ssh_udpgw_address">Server UDPGW (ip:port)</string>
+    <string name="server_lab_ssh_udpgw_address_helper">contoh: 127.0.0.1:7300, diakses lewat koneksi SSH itu sendiri</string>
     <string name="server_lab_ssh_payload_helper">Placeholder: [host] [port] [crlf] [cr] [lf]</string>
     <string name="server_lab_encryption">Enkripsi</string>
     <string name="server_lab_flow">Flow</string>

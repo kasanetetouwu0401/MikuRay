@@ -389,6 +389,14 @@ object AppConfig {
     const val SSH_AUTH_PASSWORD = "password"
     const val SSH_AUTH_PRIVATE_KEY = "privatekey"
     const val SSH_AUTH_CERTIFICATE = "certificate"
+
+    // Neko Injector-style connection "Type": each tier layers one more trick on top of
+    // plain SSH, and ServerSshActivity shows/hides the SNI/Payload/Proxy fields to match.
+    const val SSH_TYPE_DIRECT = "direct" // plain SSH, no SSL/payload/proxy
+    const val SSH_TYPE_SSL = "ssl" // SSH wrapped in TLS (SNI field shown)
+    const val SSH_TYPE_PAYLOAD = "payload" // SSH + custom pre-handshake payload
+    const val SSH_TYPE_SSL_PAYLOAD = "ssl_payload" // SSH + SSL + payload
+    const val SSH_TYPE_SSL_PAYLOAD_PROXY = "ssl_payload_proxy" // SSH + SSL + payload + SOCKS5 proxy chain
     const val V2RAYNFMTS = "v2rayn://"
 
     /** Give a good name to this, IDK*/

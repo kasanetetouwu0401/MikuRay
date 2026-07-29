@@ -245,9 +245,29 @@
                         app:shapeAppearance="?shapeAppearanceCornerMedium"
                         app:boxStrokeWidth="1.5dip"
                         app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/server_lab_ssh_connection_type"
+                        app:helperTextEnabled="true"
+                        app:helperText="@string/server_lab_ssh_connection_type_helper">
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/sp_ssh_connection_type"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            app:simpleItems="@array/ssh_connection_types" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_ssh_payload"
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
                         android:hint="@string/server_lab_ssh_payload"
                         app:helperTextEnabled="true"
                         app:helperText="@string/server_lab_ssh_payload_helper">
@@ -263,6 +283,7 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_ssh_proxy"
                         app:shapeAppearance="?shapeAppearanceCornerMedium"
                         app:boxStrokeWidth="1.5dip"
                         app:boxStrokeWidthFocused="1.5dip"
@@ -281,6 +302,7 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_ssh_sni"
                         app:shapeAppearance="?shapeAppearanceCornerMedium"
                         app:boxStrokeWidth="1.5dip"
                         app:boxStrokeWidthFocused="1.5dip"
@@ -293,6 +315,119 @@
                         app:helperText="@string/server_lab_ssh_sni_helper">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_ssh_sni"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textUri" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Compression + UDPGW, Neko Injector-style extras -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24.0dip"
+                android:layout_marginStart="16.0dip"
+                android:layout_marginEnd="16.0dip"
+                app:cardBackgroundColor="?colorCard"
+                app:cardCornerRadius="28.0dip"
+                app:cardElevation="0.0dip"
+                app:strokeWidth="0.0dip">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_spacing_dp16">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/server_lab_ssh_compression"
+                                android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/server_lab_ssh_compression_summary"
+                                android:textAppearance="?attr/textAppearanceBodySmall"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+                        </LinearLayout>
+
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            app:thumbIcon="@drawable/mtrl_ic_check"
+                            android:id="@+id/chk_ssh_compression"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:layout_marginBottom="@dimen/padding_spacing_dp16" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/server_lab_ssh_udpgw"
+                                android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/server_lab_ssh_udpgw_summary"
+                                android:textAppearance="?attr/textAppearanceBodySmall"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+                        </LinearLayout>
+
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            app:thumbIcon="@drawable/mtrl_ic_check"
+                            android:id="@+id/chk_ssh_udpgw"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_ssh_udpgw_address"
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:hint="@string/server_lab_ssh_udpgw_address"
+                        app:helperTextEnabled="true"
+                        app:helperText="@string/server_lab_ssh_udpgw_address_helper"
+                        android:visibility="gone">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_ssh_udpgw_address"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textUri" />

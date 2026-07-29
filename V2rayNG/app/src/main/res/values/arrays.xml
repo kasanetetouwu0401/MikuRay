@@ -27,6 +27,14 @@
         <item>certificate</item>
     </string-array>
 
+    <string-array name="ssh_connection_types" translatable="false">
+        <item>direct</item>
+        <item>ssl</item>
+        <item>payload</item>
+        <item>ssl_payload</item>
+        <item>ssl_payload_proxy</item>
+    </string-array>
+
     <string-array name="networks" translatable="false">
         <item>tcp</item>
         <item>kcp</item>
