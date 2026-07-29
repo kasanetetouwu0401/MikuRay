@@ -1,146 +1,333 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     android:id="@+id/main_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".ui.ShizukuActivity">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:liftOnScroll="true">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar"
+            android:background="?attr/colorBg"
+            style="?attr/collapsingToolbarLayoutLargeStyle"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:title="@string/title_shizuku_tethering" />
+            android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
+            app:contentScrim="?attr/colorBg"
+            app:collapsedTitleTextAppearance="?attr/textAppearanceTitleLargeEmphasized"
+            app:collapsedTitleTextColor="?attr/colorOnSurfaceVariant"
+            app:expandedTitleMarginBottom="24dp"
+            app:expandedTitleMarginEnd="24dp"
+            app:expandedTitleMarginStart="24dp"
+            app:expandedTitleMarginTop="96dp"
+            app:expandedTitleTextAppearance="?attr/textAppearanceDisplaySmallEmphasized"
+            app:expandedTitleTextColor="?attr/colorOnSurfaceVariant"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:maxLines="4"
+            app:titleCollapseMode="scale">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:theme="@style/AppThemeToolbarCircleNavigationButton"
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:elevation="0dp"
+                android:layout_marginLeft="8.0dip"
+                android:layout_marginRight="8.0dip"
+                app:layout_collapseMode="pin" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/shizuku_scroll_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="0dp"
+        android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardCornerRadius="16dp">
+                android:layout_marginTop="4.0dip"
+                android:layout_marginBottom="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                app:cardBackgroundColor="?colorCard"
+                app:cardElevation="0.0dip"
+                app:strokeWidth="0.0dip"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Single"
+                app:cardPreventCornerOverlap="false"
+                app:contentPadding="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:clipToPadding="false"
+                    android:baselineAligned="false"
+                    android:minHeight="?android:listPreferredItemHeightSmall">
 
-                    <TextView
-                        android:id="@+id/tv_shizuku_status"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/shizuku_status_not_installed"
-                        android:textAppearance="?attr/textAppearanceTitleMedium" />
-
-                    <TextView
-                        android:id="@+id/tv_shizuku_detail"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_shizuku_action"
+                    <LinearLayout
+                        android:gravity="center"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/shizuku_action_grant_permission" />
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp">
+                        <FrameLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp">
+                            <com.neko.widget.DynamicShapeImageView
+                                app:shapeBackgroundColor="?colorPrimary"
+                                android:layout_width="45dp"
+                                android:layout_height="45dp"
+                                android:scaleType="centerCrop" />
+                            <ImageView
+                                android:layout_gravity="center"
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:src="@drawable/ic_wifi_tethering_24dp"
+                                android:tint="?colorOnPrimary" />
+                        </FrameLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:layout_weight="1.0"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="16dp">
+                        <TextView
+                            android:id="@+id/tv_shizuku_status"
+                            android:textAppearance="?textAppearanceTitleMedium"
+                            android:textSize="17sp"
+                            android:textColor="?colorOnSurface"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/shizuku_status_not_installed" />
+                        <TextView
+                            android:id="@+id/tv_shizuku_detail"
+                            android:textAppearance="?textAppearanceBodySmall"
+                            android:textColor="?colorOnSurfaceVariant"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_shizuku_action"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:minHeight="0dp"
+                            android:text="@string/shizuku_action_grant_permission" />
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_enable_routing"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardCornerRadius="16dp">
+                android:layout_marginTop="0dp"
+                android:layout_marginBottom="4dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:focusable="true"
+                android:clickable="true"
+                android:foreground="?android:selectableItemBackground"
+                app:cardBackgroundColor="?colorCard"
+                app:cardElevation="0.0dip"
+                app:strokeWidth="0.0dip"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Top"
+                app:cardPreventCornerOverlap="false"
+                app:contentPadding="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:clipToPadding="false"
+                    android:baselineAligned="false"
+                    android:minHeight="?android:listPreferredItemHeightSmall">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:gravity="center"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp">
+                        <FrameLayout
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
+                            android:layout_marginStart="8dp">
+                            <com.neko.widget.DynamicShapeImageView
+                                app:shapeBackgroundColor="?colorPrimary"
+                                android:layout_width="45dp"
+                                android:layout_height="45dp"
+                                android:scaleType="centerCrop" />
+                            <ImageView
+                                android:layout_gravity="center"
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:src="@drawable/ic_device_hub_24dp"
+                                android:tint="?colorOnPrimary" />
+                        </FrameLayout>
+                    </LinearLayout>
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/shizuku_toggle_routing_title"
-                                android:textAppearance="?attr/textAppearanceTitleSmall" />
+                    <LinearLayout
+                        android:layout_gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:layout_weight="1.0"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="16dp">
+                        <TextView
+                            android:textAppearance="?textAppearanceTitleMedium"
+                            android:textSize="17sp"
+                            android:textColor="?colorOnSurface"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/shizuku_toggle_routing_title" />
+                        <TextView
+                            android:textAppearance="?textAppearanceBodySmall"
+                            android:textColor="?colorOnSurfaceVariant"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/shizuku_toggle_routing_summary" />
+                    </LinearLayout>
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/shizuku_toggle_routing_summary"
-                                android:textAppearance="?attr/textAppearanceBodySmall"
-                                android:textColor="?attr/colorOnSurfaceVariant" />
-                        </LinearLayout>
-
+                    <LinearLayout
+                        android:gravity="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="16dp">
                         <com.google.android.material.materialswitch.MaterialSwitch
                             android:id="@+id/switch_enable_routing"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                     </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="12dp"
-                        android:background="?attr/colorOutlineVariant" />
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_wifi_hotspot"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:layout_marginBottom="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:focusable="true"
+                android:clickable="true"
+                android:foreground="?android:selectableItemBackground"
+                app:cardBackgroundColor="?colorCard"
+                app:cardElevation="0.0dip"
+                app:strokeWidth="0.0dip"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Bottom"
+                app:cardPreventCornerOverlap="false"
+                app:contentPadding="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:clipToPadding="false"
+                    android:baselineAligned="false"
+                    android:minHeight="?android:listPreferredItemHeightSmall">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:gravity="center"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp">
+                        <FrameLayout
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
+                            android:layout_marginStart="8dp">
+                            <com.neko.widget.DynamicShapeImageView
+                                app:shapeBackgroundColor="?colorPrimary"
+                                android:layout_width="45dp"
+                                android:layout_height="45dp"
+                                android:scaleType="centerCrop" />
+                            <ImageView
+                                android:layout_gravity="center"
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:src="@drawable/ic_wifi_tethering_24dp"
+                                android:tint="?colorOnPrimary" />
+                        </FrameLayout>
+                    </LinearLayout>
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/shizuku_toggle_hotspot_title"
-                                android:textAppearance="?attr/textAppearanceTitleSmall" />
+                    <LinearLayout
+                        android:layout_gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:layout_weight="1.0"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="16dp">
+                        <TextView
+                            android:textAppearance="?textAppearanceTitleMedium"
+                            android:textSize="17sp"
+                            android:textColor="?colorOnSurface"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/shizuku_toggle_hotspot_title" />
+                        <TextView
+                            android:id="@+id/tv_active_devices"
+                            android:textAppearance="?textAppearanceBodySmall"
+                            android:textColor="?colorOnSurfaceVariant"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/shizuku_active_devices_none" />
+                    </LinearLayout>
 
-                            <TextView
-                                android:id="@+id/tv_active_devices"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/shizuku_active_devices_none"
-                                android:textAppearance="?attr/textAppearanceBodySmall"
-                                android:textColor="?attr/colorOnSurfaceVariant" />
-                        </LinearLayout>
-
+                    <LinearLayout
+                        android:gravity="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="16dp">
                         <com.google.android.material.materialswitch.MaterialSwitch
                             android:id="@+id/switch_wifi_hotspot"
                             android:layout_width="wrap_content"
@@ -149,13 +336,22 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/shizuku_explainer"
-                android:textAppearance="?attr/textAppearanceBodySmall"
-                android:textColor="?attr/colorOnSurfaceVariant" />
+                android:orientation="vertical"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="24dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/shizuku_explainer"
+                    android:textAppearance="?textAppearanceBodySmall"
+                    android:textColor="?colorOnSurfaceVariant" />
+            </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

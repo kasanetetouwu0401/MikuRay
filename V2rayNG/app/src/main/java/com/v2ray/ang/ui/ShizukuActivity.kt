@@ -66,11 +66,15 @@ class ShizukuActivity : HelperBaseActivity() {
 
         binding.btnShizukuAction.setOnClickListener { onActionClicked() }
 
+        // Tapping anywhere on the card toggles its switch too, not just the thumb itself.
+        binding.cardEnableRouting.setOnClickListener { binding.switchEnableRouting.performClick() }
+        binding.cardWifiHotspot.setOnClickListener { binding.switchWifiHotspot.performClick() }
+
         binding.switchEnableRouting.setOnCheckedChangeListener { switchView, checked ->
-            if (!switchView.isPressed) return@setOnCheckedChangeListener
+            if (suppressSwitchListener) return@setOnCheckedChangeListener
             if (checked) {
                 if (!ShizukuTetheringController.hasPermission()) {
-                    switchView.isChecked = false
+                    setSwitchCheckedSilently(switchView, false)
                     ShizukuTetheringController.requestPermission(REQUEST_CODE_PERMISSION)
                     return@setOnCheckedChangeListener
                 }
@@ -85,12 +89,21 @@ class ShizukuActivity : HelperBaseActivity() {
         }
 
         binding.switchWifiHotspot.setOnCheckedChangeListener { switchView, checked ->
-            if (!switchView.isPressed) return@setOnCheckedChangeListener
+            if (suppressSwitchListener) return@setOnCheckedChangeListener
             if (!ShizukuTetheringController.setWifiHotspotEnabled(checked)) {
-                switchView.isChecked = !checked
+                setSwitchCheckedSilently(switchView, !checked)
                 snackbarError(getString(R.string.shizuku_hotspot_toggle_failed), title = getString(R.string.title_alerter_error))
             }
         }
+    }
+
+    /** True while [refreshUi] is applying state to the switches programmatically. */
+    private var suppressSwitchListener = false
+
+    private fun setSwitchCheckedSilently(switchView: com.google.android.material.materialswitch.MaterialSwitch, checked: Boolean) {
+        suppressSwitchListener = true
+        switchView.isChecked = checked
+        suppressSwitchListener = false
     }
 
     override fun onStart() {
@@ -177,10 +190,10 @@ class ShizukuActivity : HelperBaseActivity() {
                     else -> getString(R.string.shizuku_status_idle)
                 }
                 binding.tvShizukuDetail.text = ShizukuTetheringController.routingDetail()
-                binding.switchEnableRouting.isChecked = state != ShizukuTetheringService.ROUTING_STATE_IDLE
+                setSwitchCheckedSilently(binding.switchEnableRouting, state != ShizukuTetheringService.ROUTING_STATE_IDLE)
 
                 val mask = ShizukuTetheringController.activeTetheringTypes()
-                binding.switchWifiHotspot.isChecked = (mask and TetheringPlatformCompat.TETHERING_WIFI) != 0
+                setSwitchCheckedSilently(binding.switchWifiHotspot, (mask and TetheringPlatformCompat.TETHERING_WIFI) != 0)
                 binding.tvActiveDevices.text = if (mask == 0) {
                     getString(R.string.shizuku_active_devices_none)
                 } else {
