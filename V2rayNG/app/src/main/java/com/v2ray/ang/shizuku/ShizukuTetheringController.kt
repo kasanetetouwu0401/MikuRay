@@ -30,6 +30,7 @@ object ShizukuTetheringController {
     private val listeners = CopyOnWriteArrayList<StateListener>()
     private var binder: IShizukuTetheringService? = null
     private var lastSnapshot: HotspotRoutingSync? = null
+    private var lastLease: ICoreTetheringLease? = null
     var lastWarning: String? = null
         private set
 
@@ -44,7 +45,17 @@ object ShizukuTetheringController {
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             binder = service?.let { IShizukuTetheringService.Stub.asInterface(it) }
-            notifyListeners()
+            // bindUserService() is async and can easily lose the race against a sync event
+            // that arrived (e.g. from MSG_QUERY_HOTSPOT_CONFIG) while we were still
+            // connecting. Replay whatever the last authenticated snapshot was so routing
+            // actually starts instead of silently staying idle.
+            val service2 = binder
+            val sync = lastSnapshot
+            if (service2 != null && sync != null) {
+                applyToService(service2, sync, lastLease)
+            } else {
+                notifyListeners()
+            }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -103,6 +114,8 @@ object ShizukuTetheringController {
         } catch (_: Throwable) {
         }
         binder = null
+        lastSnapshot = null
+        lastLease = null
         MmkvManager.encodeSettings(AppConfig.PREF_SHIZUKU_SYNC_TOKEN, "")
         notifyListeners()
     }
@@ -139,12 +152,23 @@ object ShizukuTetheringController {
         val storedToken = MmkvManager.decodeSettingsString(AppConfig.PREF_SHIZUKU_SYNC_TOKEN).orEmpty()
         if (storedToken.isBlank() || sync.token != storedToken) return
         lastSnapshot = sync
+        lastLease = lease
 
-        if (binder == null) {
+        val service = binder
+        if (service == null) {
+            // bind() is async (it spawns a dedicated shell UserService process), so on a
+            // fresh "Enable Routing" toggle this event routinely arrives before the bind
+            // completes. Don't drop it — just wait; onServiceConnected() replays
+            // lastSnapshot/lastLease as soon as the binder is actually ready.
             bind(context)
+            notifyListeners()
+            return
         }
-        val service = binder ?: run { notifyListeners(); return }
+        applyToService(service, sync, lease)
+    }
 
+    /** Forwards one authenticated sync event to an already-connected [IShizukuTetheringService]. */
+    private fun applyToService(service: IShizukuTetheringService, sync: HotspotRoutingSync, lease: ICoreTetheringLease?) {
         try {
             when (sync.event) {
                 HotspotRoutingSync.EVENT_CORE_STOPPING -> {

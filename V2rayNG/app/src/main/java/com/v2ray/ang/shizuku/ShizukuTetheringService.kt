@@ -107,6 +107,16 @@ class ShizukuTetheringService(private val context: Context) : IShizukuTetheringS
             TetheringPlatformCompat.setPreferTestNetworks(context, true)
             startHevEngine(hevConfigYaml, handle)
 
+            // Android only picks a tethering upstream once, when a downstream first comes
+            // up. If Wi-Fi hotspot was already running before protected routing existed,
+            // it already locked onto a physical/no upstream and setPreferTestNetworks()
+            // above does nothing for it retroactively. Bounce it so Android re-evaluates
+            // now that the test network is the preferred upstream.
+            if (ShellContextCompat.isWifiApEnabled(context)) {
+                TetheringApi36.stopTetheringType(context, TetheringPlatformCompat.TETHERING_WIFI)
+                startWifiTethering()
+            }
+
             unregisterCallback = TetheringApi36.registerEventCallback(context, executor) { mask ->
                 activeTypesMask = mask
             }

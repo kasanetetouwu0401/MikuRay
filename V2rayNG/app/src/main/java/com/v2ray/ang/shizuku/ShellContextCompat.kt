@@ -37,6 +37,22 @@ internal object ShellContextCompat {
         return context.getSystemService(Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager
     }
 
+    /**
+     * `WifiManager.getWifiApState()` is hidden but stable across AOSP versions.
+     * `WIFI_AP_STATE_ENABLED == 13`. Used to detect a hotspot that was already running
+     * *before* protected routing was armed, since Android does not retroactively
+     * reconsider tethering's upstream once it has already picked one.
+     */
+    fun isWifiApEnabled(context: Context): Boolean {
+        return try {
+            val wm = context.applicationContext.getSystemService(Context.WIFI_SERVICE) ?: return false
+            val method = wm.javaClass.getMethod("getWifiApState")
+            (method.invoke(wm) as? Int) == 13
+        } catch (_: Throwable) {
+            false
+        }
+    }
+
     val isApi36OrNewer: Boolean get() = Build.VERSION.SDK_INT >= 36
     val isApi33OrNewer: Boolean get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 }
