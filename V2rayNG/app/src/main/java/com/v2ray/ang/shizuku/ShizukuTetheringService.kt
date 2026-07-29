@@ -121,6 +121,16 @@ class ShizukuTetheringService(private val context: Context) : IShizukuTetheringS
                 activeTypesMask = mask
             }
 
+            // Fail-closed postcondition: we cannot reliably confirm which interface
+            // Android's tethering stack actually picked as upstream without OEM-fragile
+            // dumpsys parsing, but we CAN confirm our own protected test network is still
+            // alive before telling the user routing is active. If it died mid-setup
+            // (TUN closed, framework tore it down under memory pressure, etc.) report a
+            // real error instead of a false ACTIVE.
+            if (!waitForTestNetworkAlive(handle, 2000L)) {
+                throw IllegalStateException("test_network_died_during_setup")
+            }
+
             currentToken = syncToken
             state.set(ROUTING_STATE_ACTIVE)
             lastDetail = ""
@@ -154,6 +164,12 @@ class ShizukuTetheringService(private val context: Context) : IShizukuTetheringS
             // full rebuild if the existing test network is unusable.
             val handle = testNetwork
             if (handle != null) {
+                if (!waitForTestNetworkAlive(handle, 500L)) {
+                    // The retained TUN is dead (e.g. system reclaimed it while the core was
+                    // stopped) — rebuild from scratch instead of feeding HEV a broken fd.
+                    testNetwork = null
+                    return startRouting(hevConfigYaml, profileName, ipv6Enabled, syncToken, lease)
+                }
                 stopHevEngine()
                 startHevEngine(hevConfigYaml, handle)
             } else {
@@ -232,6 +248,19 @@ class ShizukuTetheringService(private val context: Context) : IShizukuTetheringS
             } catch (_: Throwable) {
             }
         }
+    }
+
+    private fun waitForTestNetworkAlive(handle: TetheringPlatformCompat.TestNetworkHandle, timeoutMillis: Long): Boolean {
+        val cm = ShellContextCompat.getConnectivityManager(context) ?: return false
+        val deadline = System.currentTimeMillis() + timeoutMillis
+        while (System.currentTimeMillis() < deadline) {
+            try {
+                if (cm.getNetworkCapabilities(handle.network) != null) return true
+            } catch (_: Throwable) {
+            }
+            Thread.sleep(200)
+        }
+        return false
     }
 
     private fun startWifiTethering(): Boolean {

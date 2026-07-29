@@ -31,6 +31,8 @@ class ShizukuActivity : HelperBaseActivity() {
 
     private val binding by lazy { ActivityShizukuTetheringBinding.inflate(layoutInflater) }
     private val mainHandler = Handler(Looper.getMainLooper())
+    private val bgExecutor = java.util.concurrent.Executors.newSingleThreadExecutor()
+    private var hotspotOperationInFlight = false
 
     private val stateListener = ShizukuTetheringController.StateListener { runOnUiThread { refreshUi() } }
 
@@ -91,9 +93,29 @@ class ShizukuActivity : HelperBaseActivity() {
 
         binding.switchWifiHotspot.setOnCheckedChangeListener { switchView, checked ->
             if (suppressSwitchListener) return@setOnCheckedChangeListener
-            if (!ShizukuTetheringController.setWifiHotspotEnabled(checked)) {
+            if (hotspotOperationInFlight) {
+                // Ignore re-entrant taps while a previous toggle (which may include a
+                // stop+start bounce) is still running against the shell process.
                 setSwitchCheckedSilently(switchView, !checked)
-                snackbarError(getString(R.string.shizuku_hotspot_toggle_failed), title = getString(R.string.title_alerter_error))
+                return@setOnCheckedChangeListener
+            }
+            hotspotOperationInFlight = true
+            switchView.isEnabled = false
+            bgExecutor.execute {
+                val ok = try {
+                    ShizukuTetheringController.setWifiHotspotEnabled(checked)
+                } catch (_: Throwable) {
+                    false
+                }
+                mainHandler.post {
+                    hotspotOperationInFlight = false
+                    switchView.isEnabled = true
+                    if (!ok) {
+                        setSwitchCheckedSilently(switchView, !checked)
+                        snackbarError(getString(R.string.shizuku_hotspot_toggle_failed), title = getString(R.string.title_alerter_error))
+                    }
+                    refreshUi()
+                }
             }
         }
     }
@@ -128,6 +150,11 @@ class ShizukuActivity : HelperBaseActivity() {
             Shizuku.removeBinderDeadListener(binderDeadListener)
         } catch (_: Throwable) {
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        bgExecutor.shutdown()
     }
 
     private fun onActionClicked() {
