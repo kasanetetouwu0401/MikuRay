@@ -61,7 +61,7 @@ internal object TetheringPlatformCompat {
             "setupTestNetwork",
             String::class.java,
             List::class.java,
-            Boolean::class.javaPrimitiveType,
+            Boolean::class.javaPrimitiveType!!,
             android.os.IBinder::class.java,
         )
         val binderToken = android.os.Binder()
@@ -112,8 +112,7 @@ internal object TetheringPlatformCompat {
     }
 
     private fun linkAddressOf(cidr: String): LinkAddress {
-        val (addr, prefix) = cidr.split('/')
-        return LinkAddress(InetAddress.getByName(addr), prefix.toInt())
+        return LinkAddress(cidr)
     }
 
     private fun findMethod(clazz: Class<*>, name: String, vararg params: Class<*>): Method {

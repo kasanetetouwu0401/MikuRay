@@ -111,10 +111,13 @@ object TetheringCoreSync {
             val activeLease = lease ?: object : ICoreTetheringLease.Stub() {
                 override fun ping() {}
             }.also { lease = it }
+            val leaseBundle = android.os.Bundle().apply {
+                putBinder(ShizukuRoutingSyncReceiver.EXTRA_LEASE, activeLease.asBinder())
+            }
             val intent = Intent(ShizukuRoutingSyncReceiver.ACTION_SYNC).apply {
                 setPackage(context.packageName)
                 putExtra(ShizukuRoutingSyncReceiver.EXTRA_SYNC, sync)
-                putExtra(ShizukuRoutingSyncReceiver.EXTRA_LEASE, activeLease.asBinder())
+                putExtra(ShizukuRoutingSyncReceiver.EXTRA_LEASE_BUNDLE, leaseBundle)
             }
             context.sendBroadcast(intent)
         } catch (e: Exception) {

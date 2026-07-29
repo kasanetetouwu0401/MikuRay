@@ -20,6 +20,7 @@ class ShizukuRoutingSyncReceiver : BroadcastReceiver() {
         const val ACTION_SYNC = "com.v2ray.ang.action.SHIZUKU_ROUTING_SYNC"
         const val EXTRA_SYNC = "extra_sync"
         const val EXTRA_LEASE = "extra_lease"
+        const val EXTRA_LEASE_BUNDLE = "extra_lease_bundle"
         const val EXTRA_FOREGROUND_NUDGE = "extra_foreground_nudge"
     }
 
@@ -33,14 +34,9 @@ class ShizukuRoutingSyncReceiver : BroadcastReceiver() {
 
         @Suppress("DEPRECATION")
         val sync = intent.getSerializableExtra(EXTRA_SYNC) as? HotspotRoutingSync ?: return
-        val leaseBinder = intent.getBinderExtra(EXTRA_LEASE)
+        val leaseBinder = intent.getBundleExtra(EXTRA_LEASE_BUNDLE)?.getBinder(EXTRA_LEASE)
         val lease = leaseBinder?.let { ICoreTetheringLease.Stub.asInterface(it) }
 
         ShizukuTetheringController.onCoreSync(context.applicationContext, sync, lease)
     }
-}
-
-/** [Intent] only exposes `getBinderExtra` on API 18+, which MikuRay's minSdk already exceeds. */
-private fun Intent.getBinderExtra(name: String): android.os.IBinder? {
-    return extras?.getBinder(name)
 }

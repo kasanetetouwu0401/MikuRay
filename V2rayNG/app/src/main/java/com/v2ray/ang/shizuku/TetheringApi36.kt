@@ -35,13 +35,14 @@ internal object TetheringApi36 {
             }
             register.invoke(tm, executor, proxy)
 
-            {
+            val unregisterFn: () -> Unit = {
                 try {
                     val unregister = tm.javaClass.getMethod("unregisterTetheringEventCallback", callbackInterface)
                     unregister.invoke(tm, proxy)
                 } catch (_: Throwable) {
                 }
             }
+            unregisterFn
         } catch (_: Throwable) {
             null
         }
