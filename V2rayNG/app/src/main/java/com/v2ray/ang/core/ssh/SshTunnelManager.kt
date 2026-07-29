@@ -110,7 +110,7 @@ object SshTunnelManager {
         val boundPort = Utils.findRandomFreePort()
         // "127.0.0.1" only: the dynamic SOCKS listener never needs to be reachable
         // from outside the device, Xray is the only client.
-        newSession.setPortForwardingD("127.0.0.1", boundPort)
+        newSession.setPortForwarding("127.0.0.1", boundPort)
 
         session = newSession
         localPort = boundPort
