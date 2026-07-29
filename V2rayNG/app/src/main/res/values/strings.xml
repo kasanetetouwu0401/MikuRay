@@ -45,6 +45,7 @@
     <string name="menu_item_import_config_manually_trojan">Add [Trojan]</string>
     <string name="menu_item_import_config_manually_wireguard">Add [Wireguard]</string>
     <string name="menu_item_import_config_manually_hysteria2">Add [Hysteria2]</string>
+    <string name="menu_item_import_config_manually_ssh">Add [SSH]</string>
     <string name="del_config_comfirm">Confirm delete ?</string>
     <string name="del_invalid_config_comfirm">Please test before deleting! Confirm delete ?</string>
     <string name="server_lab_remarks">remarks</string>
@@ -84,6 +85,14 @@
     <string name="server_lab_security3">security</string>
     <string name="server_lab_id4">Password(Optional)</string>
     <string name="server_lab_security4">User(Optional)</string>
+    <string name="server_lab_ssh_username">Username</string>
+    <string name="server_lab_ssh_auth_type">Authentication</string>
+    <string name="server_lab_ssh_password">Password</string>
+    <string name="server_lab_ssh_private_key">Private Key</string>
+    <string name="server_lab_ssh_private_key_passphrase">Private Key Passphrase (Optional)</string>
+    <string name="server_lab_ssh_certificate">Certificate (OpenSSH cert-pub)</string>
+    <string name="server_lab_ssh_payload">Custom Payload (Optional)</string>
+    <string name="server_lab_ssh_payload_helper">Placeholders: [host] [port] [crlf] [cr] [lf]</string>
     <string name="server_lab_encryption">encryption</string>
     <string name="server_lab_flow">flow</string>
     <string name="server_lab_public_key">PublicKey</string>
@@ -449,31 +458,6 @@
 
     <!-- BackupActivity -->
     <string name="title_configuration_backup_restore">Backup &amp; Restore</string>
-    <string name="title_shizuku_tethering">Protected Tethering</string>
-    <string name="desc_shizuku_tethering">Route hotspot/USB tethering through the proxy, rootless</string>
-    <string name="shizuku_status_not_installed">Shizuku is not installed</string>
-    <string name="shizuku_status_not_installed_detail">Install the Shizuku app to enable rootless protected tethering.</string>
-    <string name="shizuku_status_not_running">Shizuku is not running</string>
-    <string name="shizuku_status_not_running_detail">Start the Shizuku service (via ADB or wireless debugging), then come back here.</string>
-    <string name="shizuku_status_permission_needed">Permission needed</string>
-    <string name="shizuku_status_permission_needed_detail">Grant MikuRay permission in Shizuku to control tethering.</string>
-    <string name="shizuku_status_idle">Protected tethering is off</string>
-    <string name="shizuku_status_starting">Starting protected tethering\u2026</string>
-    <string name="shizuku_status_active">Protected \u2014 routed through %1$s</string>
-    <string name="shizuku_status_retrying">Reconnecting protected route\u2026</string>
-    <string name="shizuku_status_error">Protected tethering error</string>
-    <string name="shizuku_status_unsupported_os">Requires Android 13 or newer</string>
-    <string name="shizuku_status_unsupported_os_detail">Your device is on API %1$d. Shizuku tethering needs API 33+.</string>
-    <string name="shizuku_action_install">Install Shizuku</string>
-    <string name="shizuku_action_open_shizuku">Open Shizuku</string>
-    <string name="shizuku_action_grant_permission">Grant permission</string>
-    <string name="shizuku_toggle_routing_title">Protect tethered traffic</string>
-    <string name="shizuku_toggle_routing_summary">Sends hotspot/USB tethering traffic through MikuRay while it is running</string>
-    <string name="shizuku_toggle_hotspot_title">Wi\u2011Fi hotspot</string>
-    <string name="shizuku_active_devices_none">No devices connected</string>
-    <string name="shizuku_active_devices_some">Devices connected</string>
-    <string name="shizuku_hotspot_toggle_failed">Could not change the hotspot state</string>
-    <string name="shizuku_explainer">MikuRay creates a protected virtual network for tethering, separate from its own VPN connection, so devices connected to your hotspot or via USB are routed through the proxy too. This is an alternative to MikuRay\'s root-based LAN sharing \u2014 avoid enabling both at the same time.</string>
     <string name="title_configuration_backup">Backup config</string>
     <string name="title_configuration_restore">Restore config</string>
     <string name="title_configuration_share">Share config</string>
@@ -564,6 +548,7 @@
     <string name="protocol_socks">Socks</string>
     <string name="protocol_http">HTTP</string>
     <string name="protocol_hysteria2">Hysteria2</string>
+    <string name="protocol_ssh">SSH</string>
     <string name="protocol_wireguard">Wireguard</string>
     <string name="protocol_policy_group">Policy Group</string>
     <string name="protocol_proxy_chain">Proxy Chain</string>

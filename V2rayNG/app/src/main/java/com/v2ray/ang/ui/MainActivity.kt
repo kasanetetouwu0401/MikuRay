@@ -35,6 +35,7 @@ import com.v2ray.ang.ui.server.ServerHysteria2Activity
 import com.v2ray.ang.ui.server.ServerProxyChainActivity
 import com.v2ray.ang.ui.server.ServerShadowsocksActivity
 import com.v2ray.ang.ui.server.ServerSocksActivity
+import com.v2ray.ang.ui.server.ServerSshActivity
 import com.v2ray.ang.ui.server.ServerTrojanActivity
 import com.v2ray.ang.ui.server.ServerVlessActivity
 import com.v2ray.ang.ui.server.ServerVmessActivity
@@ -489,7 +490,6 @@ class MainActivity : HelperBaseActivity(),
             R.id.menu_settings -> requestActivityLauncher.launch(Intent(this, SettingsActivity::class.java))
             R.id.menu_logcat -> startActivity(Intent(this, LogcatActivity::class.java))
             R.id.menu_backup_restore -> requestActivityLauncher.launch(Intent(this, BackupActivity::class.java))
-            R.id.menu_shizuku_tethering -> requestActivityLauncher.launch(Intent(this, ShizukuActivity::class.java))
             R.id.menu_about -> startActivity(Intent(this, AboutActivity::class.java))
         }
     }
@@ -509,6 +509,7 @@ class MainActivity : HelperBaseActivity(),
             R.id.import_manually_trojan -> importManually(EConfigType.TROJAN.value)
             R.id.import_manually_wireguard -> importManually(EConfigType.WIREGUARD.value)
             R.id.import_manually_hysteria2 -> importManually(EConfigType.HYSTERIA2.value)
+            R.id.import_manually_ssh -> importManually(EConfigType.SSH.value)
         }
     }
 
@@ -823,6 +824,7 @@ class MainActivity : HelperBaseActivity(),
                 EConfigType.SOCKS, EConfigType.HTTP -> ServerSocksActivity::class.java
                 EConfigType.WIREGUARD -> ServerWireguardActivity::class.java
                 EConfigType.HYSTERIA2 -> ServerHysteria2Activity::class.java
+                EConfigType.SSH -> ServerSshActivity::class.java
                 else -> ServerVmessActivity::class.java
             }
             startActivity(

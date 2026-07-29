@@ -546,21 +546,6 @@ object SettingsManager {
     }
 
     /**
-     * Whether the local SOCKS/HTTP inbound is present in the generated Xray config.
-     * True for VPN+HEV mode and root mode regardless of the user preference (both need it
-     * internally), otherwise follows [AppConfig.PREF_ENABLE_LOCAL_PROXY] (default on).
-     * Independent of whether VPN mode uses HEV or native Xray TUN — mirrors the exact
-     * condition [com.v2ray.ang.core.CoreConfigManager] uses when building inbounds, so
-     * anything (e.g. Shizuku tethering) that needs to know if the socks inbound will exist
-     * should call this instead of re-deriving the condition.
-     */
-    fun isLocalSocksProxyEnabled(): Boolean {
-        val forcedByHev = isVpnMode() && isUsingHevTun()
-        val forcedBySocksRoot = isRootMode() || MmkvManager.decodeSettingsBool(AppConfig.PREF_ROOT_LAN_SHARING)
-        return forcedByHev || forcedBySocksRoot || MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_LOCAL_PROXY, true)
-    }
-
-    /**
      * Check if a root (system-wide) run mode is selected.
      */
     fun isRootMode(): Boolean {

@@ -44,6 +44,7 @@
     <string name="menu_item_import_config_manually_trojan">Добавить [Trojan]</string>
     <string name="menu_item_import_config_manually_wireguard">Добавить [Wireguard]</string>
     <string name="menu_item_import_config_manually_hysteria2">Добавить [Hysteria2]</string>
+    <string name="menu_item_import_config_manually_ssh">Добавить [SSH]</string>
     <string name="del_config_comfirm">Подтвердить удаление?</string>
     <string name="del_invalid_config_comfirm">Пожалуйста, протестируйте перед удалением! Подтвердить удаление?</string>
     <string name="server_lab_remarks">примечания</string>
@@ -83,6 +84,14 @@
     <string name="server_lab_security3">безопасность</string>
     <string name="server_lab_id4">Пароль (необязательно)</string>
     <string name="server_lab_security4">Пользователь (необязательно)</string>
+    <string name="server_lab_ssh_username">Имя пользователя</string>
+    <string name="server_lab_ssh_auth_type">Аутентификация</string>
+    <string name="server_lab_ssh_password">Пароль</string>
+    <string name="server_lab_ssh_private_key">Приватный ключ</string>
+    <string name="server_lab_ssh_private_key_passphrase">Пароль приватного ключа (необязательно)</string>
+    <string name="server_lab_ssh_certificate">Сертификат (OpenSSH cert-pub)</string>
+    <string name="server_lab_ssh_payload">Пользовательский Payload (необязательно)</string>
+    <string name="server_lab_ssh_payload_helper">Плейсхолдеры: [host] [port] [crlf] [cr] [lf]</string>
     <string name="server_lab_encryption">шифрование</string>
     <string name="server_lab_flow">поток</string>
     <string name="server_lab_public_key">PublicKey</string>
@@ -429,31 +438,6 @@
 
     <!-- BackupActivity -->
     <string name="title_configuration_backup_restore">Резервное копирование и восстановление</string>
-    <string name="title_shizuku_tethering">Защищённая раздача</string>
-    <string name="desc_shizuku_tethering">Пропускать трафик точки доступа/USB-модема через прокси без root</string>
-    <string name="shizuku_status_not_installed">Shizuku не установлен</string>
-    <string name="shizuku_status_not_installed_detail">Установите приложение Shizuku, чтобы включить защищённую раздачу без root.</string>
-    <string name="shizuku_status_not_running">Shizuku не запущен</string>
-    <string name="shizuku_status_not_running_detail">Запустите службу Shizuku (через ADB или беспроводную отладку) и вернитесь сюда.</string>
-    <string name="shizuku_status_permission_needed">Требуется разрешение</string>
-    <string name="shizuku_status_permission_needed_detail">Предоставьте MikuRay разрешение в Shizuku для управления раздачей.</string>
-    <string name="shizuku_status_idle">Защищённая раздача выключена</string>
-    <string name="shizuku_status_starting">Запуск защищённой раздачи\u2026</string>
-    <string name="shizuku_status_active">Защищено \u2014 через %1$s</string>
-    <string name="shizuku_status_retrying">Восстановление защищённого маршрута\u2026</string>
-    <string name="shizuku_status_error">Ошибка защищённой раздачи</string>
-    <string name="shizuku_status_unsupported_os">Требуется Android 13 или новее</string>
-    <string name="shizuku_status_unsupported_os_detail">На вашем устройстве API %1$d. Для Shizuku-раздачи нужен API 33+.</string>
-    <string name="shizuku_action_install">Установить Shizuku</string>
-    <string name="shizuku_action_open_shizuku">Открыть Shizuku</string>
-    <string name="shizuku_action_grant_permission">Предоставить разрешение</string>
-    <string name="shizuku_toggle_routing_title">Защищать трафик раздачи</string>
-    <string name="shizuku_toggle_routing_summary">Пропускает трафик точки доступа/USB-модема через MikuRay, пока он запущен</string>
-    <string name="shizuku_toggle_hotspot_title">Точка доступа Wi\u2011Fi</string>
-    <string name="shizuku_active_devices_none">Нет подключённых устройств</string>
-    <string name="shizuku_active_devices_some">Есть подключённые устройства</string>
-    <string name="shizuku_hotspot_toggle_failed">Не удалось изменить состояние точки доступа</string>
-    <string name="shizuku_explainer">MikuRay создаёт отдельную защищённую виртуальную сеть для раздачи интернета, независимую от собственного VPN-соединения, поэтому устройства, подключённые к точке доступа или через USB, тоже направляются через прокси. Это альтернатива раздаче по локальной сети на основе root \u2014 не включайте оба варианта одновременно.</string>
     <string name="title_configuration_backup">Резервная копия конфигурации</string>
     <string name="title_configuration_restore">Восстановить конфигурацию</string>
     <string name="title_configuration_share">Поделиться конфигурацией</string>
@@ -543,6 +527,7 @@
     <string name="protocol_socks">Socks</string>
     <string name="protocol_http">HTTP</string>
     <string name="protocol_hysteria2">Hysteria2</string>
+    <string name="protocol_ssh">SSH</string>
     <string name="protocol_wireguard">Wireguard</string>
     <string name="protocol_policy_group">Группа политик</string>
     <string name="protocol_proxy_chain">Цепочка прокси</string>

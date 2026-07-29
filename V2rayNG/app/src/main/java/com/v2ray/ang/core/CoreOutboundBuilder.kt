@@ -32,6 +32,7 @@ object CoreOutboundBuilder {
             EConfigType.WIREGUARD -> toOutboundWireguard(profileItem)
             EConfigType.HYSTERIA2 -> toOutboundHysteria2(profileItem)
             EConfigType.HTTP -> toOutboundHttp(profileItem)
+            EConfigType.SSH -> toOutboundSsh(profileItem)
             else -> null
         }
 
@@ -216,6 +217,26 @@ object CoreOutboundBuilder {
             }
         }
 
+        return outboundBean
+    }
+
+    private fun toOutboundSsh(profileItem: ProfileItem): OutboundBean? {
+        // Xray has no SSH protocol. SshTunnelManager.connect() (called from
+        // CoreServiceManager before the core loop starts) opens a local dynamic
+        // SOCKS5 forwarder through the SSH session; Xray's outbound is just a
+        // regular socks outbound pointing at that loopback port.
+        val localPort = com.v2ray.ang.core.ssh.SshTunnelManager.localPort
+        if (localPort <= 0) {
+            LogUtil.e(AppConfig.TAG, "toOutboundSsh: SSH tunnel is not connected, no local port available")
+            return null
+        }
+
+        val outboundBean = createInitOutbound(EConfigType.SOCKS)
+        outboundBean?.settings?.let { settings ->
+            settings.address = "127.0.0.1"
+            settings.port = localPort
+            settings.level = AppConfig.DEFAULT_LEVEL
+        }
         return outboundBean
     }
 

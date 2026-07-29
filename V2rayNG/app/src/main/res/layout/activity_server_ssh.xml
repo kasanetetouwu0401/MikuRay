@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    android:id="@+id/main_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.server.ServerSshActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:liftOnScroll="true">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar"
+            android:background="?attr/colorBg"
+            style="?attr/collapsingToolbarLayoutLargeStyle"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
+            app:contentScrim="?attr/colorBg"
+            app:collapsedTitleTextAppearance="?attr/textAppearanceTitleLargeEmphasized"
+            app:collapsedTitleTextColor="?attr/colorOnSurfaceVariant"
+            app:expandedTitleMarginBottom="24dp"
+            app:expandedTitleMarginEnd="24dp"
+            app:expandedTitleMarginStart="24dp"
+            app:expandedTitleMarginTop="96dp"
+            app:expandedTitleTextAppearance="?attr/textAppearanceDisplaySmallEmphasized"
+            app:expandedTitleTextColor="?attr/colorOnSurfaceVariant"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:maxLines="4"
+            app:titleCollapseMode="scale">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:theme="@style/AppThemeToolbarCircleNavigationButton"
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:elevation="0dp"
+                android:layout_marginLeft="8.0dip"
+                android:layout_marginRight="8.0dip"
+                app:layout_collapseMode="pin" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/server_scroll_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="5dp">
+
+                <com.neko.widget.UwuHeaderIconView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    app:sectionIcon="@drawable/ic_key"
+                    android:layout_marginEnd="12dp" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_server"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorPrimary"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- Connection: address, port, username, auth type, and the auth-type-specific fields -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5.0dip"
+                android:layout_marginBottom="16.0dip"
+                android:layout_marginStart="16.0dip"
+                android:layout_marginEnd="16.0dip"
+                app:cardBackgroundColor="?colorCard"
+                app:cardCornerRadius="28.0dip"
+                app:cardElevation="0.0dip"
+                app:strokeWidth="0.0dip">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_spacing_dp16">
+
+                    <include layout="@layout/layout_address_port" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:hint="@string/server_lab_ssh_username">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_ssh_username"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:hint="@string/server_lab_ssh_auth_type">
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/sp_ssh_auth_type"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            app:simpleItems="@array/ssh_auth_types" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_ssh_password"
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        app:passwordToggleEnabled="true"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:hint="@string/server_lab_ssh_password">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_ssh_password"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_ssh_private_key"
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:hint="@string/server_lab_ssh_private_key"
+                        android:visibility="gone">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_ssh_private_key"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="top|start"
+                            android:minLines="4"
+                            android:maxLines="10"
+                            android:typeface="monospace"
+                            android:inputType="textMultiLine" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_ssh_private_key_passphrase"
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        app:passwordToggleEnabled="true"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:hint="@string/server_lab_ssh_private_key_passphrase"
+                        android:visibility="gone">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_ssh_private_key_passphrase"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_ssh_certificate"
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:hint="@string/server_lab_ssh_certificate"
+                        android:visibility="gone">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_ssh_certificate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="top|start"
+                            android:minLines="3"
+                            android:maxLines="8"
+                            android:typeface="monospace"
+                            android:inputType="textMultiLine" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Custom payload, HTTP Injector style -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24.0dip"
+                android:layout_marginStart="16.0dip"
+                android:layout_marginEnd="16.0dip"
+                app:cardBackgroundColor="?colorCard"
+                app:cardCornerRadius="28.0dip"
+                app:cardElevation="0.0dip"
+                app:strokeWidth="0.0dip">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_spacing_dp16">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/server_lab_ssh_payload"
+                        app:helperTextEnabled="true"
+                        app:helperText="@string/server_lab_ssh_payload_helper">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_ssh_payload"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="top|start"
+                            android:minLines="4"
+                            android:maxLines="10"
+                            android:typeface="monospace"
+                            android:inputType="textMultiLine" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

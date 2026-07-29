@@ -1362,6 +1362,10 @@
             android:exported="false"
             android:windowSoftInputMode="stateUnchanged|adjustResize" />
         <activity
+            android:name=".ui.server.ServerSshActivity"
+            android:exported="false"
+            android:windowSoftInputMode="stateUnchanged|adjustResize" />
+        <activity
             android:name=".ui.server.ServerCustomConfigActivity"
             android:exported="false"
             android:windowSoftInputMode="stateUnchanged|adjustResize" />
@@ -1484,22 +1488,6 @@
         <activity
             android:name=".ui.LibraryActivity"
             android:exported="false" />
-
-        <activity
-            android:name=".ui.ShizukuActivity"
-            android:exported="false" />
-
-        <receiver
-            android:name=".shizuku.ShizukuRoutingSyncReceiver"
-            android:exported="false" />
-
-        <provider
-            android:name="rikka.shizuku.ShizukuProvider"
-            android:authorities="${applicationId}.shizuku"
-            android:multiprocess="false"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
         <activity
             android:name=".ui.weather.WeatherForecastActivity"

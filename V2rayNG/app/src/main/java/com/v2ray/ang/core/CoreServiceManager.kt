@@ -246,14 +246,13 @@ object CoreServiceManager {
         }
 
         try {
-            com.v2ray.ang.shizuku.TetheringCoreSync.onStarting()
             doStartCoreLoop(service, vpnInterface)
             return true
         } catch (e: Exception) {
+            com.v2ray.ang.core.ssh.SshTunnelManager.disconnect()
             val message = e.message?.takeUnless { it.isBlank() } ?: e.javaClass.simpleName
             LogUtil.e(AppConfig.TAG, "StartCore-Manager: $message", e)
             MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
-            com.v2ray.ang.shizuku.TetheringCoreSync.onStartFailed(service, message)
             NotificationManager.cancelNotification()
             return false
         }
@@ -265,6 +264,11 @@ object CoreServiceManager {
         val config = MmkvManager.decodeServerConfig(guid) ?: error("Failed to decode server config")
 
         LogUtil.i(AppConfig.TAG, "StartCore-Manager: Starting core loop for ${config.remarks}")
+
+        if (config.configType == com.v2ray.ang.enums.EConfigType.SSH) {
+            com.v2ray.ang.core.ssh.SshTunnelManager.connect(config)
+        }
+
         val result = CoreConfigManager.getV2rayConfig(service, guid)
         LogUtil.d(AppConfig.TAG, result.content)
         if (!result.status) {
@@ -309,7 +313,6 @@ object CoreServiceManager {
         }
 
         MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
-        com.v2ray.ang.shizuku.TetheringCoreSync.onStarted(service, config.remarks)
         NotificationManager.startSpeedNotification()
         LogUtil.i(AppConfig.TAG, "StartCore-Manager: Core started successfully")
     }
@@ -321,7 +324,8 @@ object CoreServiceManager {
      */
     fun stopCoreLoop(): Boolean {
         val service = getService() ?: return false
-        com.v2ray.ang.shizuku.TetheringCoreSync.onStopping(service)
+
+        com.v2ray.ang.core.ssh.SshTunnelManager.disconnect()
 
         if (coreController.isRunning) {
             CoroutineScope(Dispatchers.IO).launch {
@@ -535,17 +539,6 @@ object CoreServiceManager {
 
                 AppConfig.MSG_UNREGISTER_CLIENT -> {
                     // nothing to do
-                }
-
-                AppConfig.MSG_QUERY_HOTSPOT_CONFIG -> {
-                    com.v2ray.ang.shizuku.TetheringCoreSync.sendCurrentSnapshot(
-                        serviceControl.getService(),
-                        coreController.isRunning,
-                    )
-                }
-
-                AppConfig.MSG_SHIZUKU_APP_FOREGROUND -> {
-                    com.v2ray.ang.shizuku.TetheringCoreSync.onAppForegrounded(serviceControl.getService())
                 }
 
                 AppConfig.MSG_STATE_START -> {

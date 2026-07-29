@@ -23,6 +23,7 @@ import com.v2ray.ang.ui.server.ServerHysteria2Activity
 import com.v2ray.ang.ui.server.ServerProxyChainActivity
 import com.v2ray.ang.ui.server.ServerShadowsocksActivity
 import com.v2ray.ang.ui.server.ServerSocksActivity
+import com.v2ray.ang.ui.server.ServerSshActivity
 import com.v2ray.ang.ui.server.ServerTrojanActivity
 import com.v2ray.ang.ui.server.ServerVlessActivity
 import com.v2ray.ang.ui.server.ServerVmessActivity
@@ -157,6 +158,10 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
 
             EConfigType.HYSTERIA2 -> {
                 ownerActivity.startActivity(intent.setClass(ownerActivity, ServerHysteria2Activity::class.java))
+            }
+
+            EConfigType.SSH -> {
+                ownerActivity.startActivity(intent.setClass(ownerActivity, ServerSshActivity::class.java))
             }
 
             else -> {

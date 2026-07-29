@@ -72,6 +72,13 @@ data class ProfileItem(
 
     var browserDialerMode: String? = null,
 
+    // SSH custom-payload tunnel (server/serverPort/username/password reused from above)
+    var sshAuthType: String? = null, // AppConfig.SSH_AUTH_PASSWORD | SSH_AUTH_PRIVATE_KEY | SSH_AUTH_CERTIFICATE
+    var sshPrivateKey: String? = null, // PEM text
+    var sshPrivateKeyPassphrase: String? = null,
+    var sshCertificate: String? = null, // OpenSSH certificate text (id_xxx-cert.pub content)
+    var sshPayload: String? = null, // raw pre-handshake payload, supports [host][port][crlf][cr][lf]
+
     ) {
     companion object {
         fun create(configType: EConfigType): ProfileItem {
@@ -128,6 +135,11 @@ data class ProfileItem(
                 && this.portHoppingInterval == obj.portHoppingInterval
                 && this.pinnedCA256 == obj.pinnedCA256
                 && this.proxyChainProfiles == obj.proxyChainProfiles
+                && this.sshAuthType == obj.sshAuthType
+                && this.sshPrivateKey == obj.sshPrivateKey
+                && this.sshPrivateKeyPassphrase == obj.sshPrivateKeyPassphrase
+                && this.sshCertificate == obj.sshCertificate
+                && this.sshPayload == obj.sshPayload
                 )
     }
 }

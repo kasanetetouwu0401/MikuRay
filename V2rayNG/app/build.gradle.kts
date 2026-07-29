@@ -122,7 +122,6 @@ android {
         viewBinding = true
         buildConfig = true
         resValues = true
-        aidl = true
     }
 
     packaging {
@@ -165,8 +164,6 @@ dependencies {
 
     // AndroidX Core Libraries
     implementation(libs.androidx.core.ktx)
-    implementation(libs.shizuku.api)
-    implementation(libs.shizuku.provider)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
@@ -192,6 +189,7 @@ dependencies {
     implementation(libs.mmkv.static)
     implementation(libs.gson)
     implementation(libs.okhttp)
+    implementation(libs.mwiede.jsch) // SSH custom-payload tunnel (dynamic SOCKS forward)
 
     // Reactive and Utility Libraries
     implementation(libs.kotlinx.coroutines.android)

@@ -21,6 +21,12 @@
         <item>2022-blake3-chacha20-poly1305</item>
     </string-array>
 
+    <string-array name="ssh_auth_types" translatable="false">
+        <item>password</item>
+        <item>privatekey</item>
+        <item>certificate</item>
+    </string-array>
+
     <string-array name="networks" translatable="false">
         <item>tcp</item>
         <item>kcp</item>

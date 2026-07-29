@@ -34,7 +34,6 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
     override fun attachBaseContext(base: Context?) {
         super.attachBaseContext(base)
         application = this
-        rikka.shizuku.ShizukuProvider.enableMultiProcessSupport(false)
     }
 
     private val workManagerConfiguration: Configuration = Configuration.Builder()
