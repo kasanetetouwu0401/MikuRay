@@ -65,8 +65,12 @@ class MainMenuBottomSheet : BaseBottomSheetFragment() {
             R.id.menu_settings,
             R.id.menu_logcat,
             R.id.menu_backup_restore,
+            R.id.menu_shizuku_tethering,
             R.id.menu_about
         )
+
+        view.findViewById<View>(R.id.menu_shizuku_tethering)?.visibility =
+            if (resources.getBoolean(R.bool.shizuku_tethering_supported)) View.VISIBLE else View.GONE
 
         actionIds.forEach { id ->
             view.findViewById<View>(id)?.setOnClickListener(clickListener)

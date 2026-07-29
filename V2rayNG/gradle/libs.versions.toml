@@ -37,6 +37,7 @@ glide = "5.0.9"
 ucrop = "2.2.11"
 palette = "1.0.0"
 playServicesLocation = "21.4.0"
+shizuku = "13.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -58,6 +59,8 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesCore" }
 qmdeve-blurview = { module = "com.qmdeve.blurview:core", version.ref = "blurview" }
+shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
+shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizuku" }
 com-airbnb-android-lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
 editorkit = { module = "com.blacksquircle.ui:editorkit", version.ref = "editorkit" }
 language-base = { module = "com.blacksquircle.ui:language-base", version.ref = "editorkit" }

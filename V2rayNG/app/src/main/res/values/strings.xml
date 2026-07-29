@@ -249,8 +249,6 @@
     <string name="summary_pref_ip_api_url">Url</string>
     <string name="title_pref_show_isp_info">Show ISP name</string>
     <string name="summary_pref_show_isp_info">Display the ISP/organization name next to the detected IP</string>
-    <string name="title_pref_show_realtime_speed">Show real-time traffic speed</string>
-    <string name="summary_pref_show_realtime_speed">Replace the IP status text with live upload/download speed, updated every second</string>
 
     <string name="title_pref_proxy_sharing_enabled">Allow connections from the LAN</string>
     <string name="summary_pref_proxy_sharing_enabled">Other devices can connect to proxy by your IP address through local proxy. Only enable in trusted networks to avoid unauthorized connections</string>
@@ -451,6 +449,31 @@
 
     <!-- BackupActivity -->
     <string name="title_configuration_backup_restore">Backup &amp; Restore</string>
+    <string name="title_shizuku_tethering">Protected Tethering (Shizuku)</string>
+    <string name="desc_shizuku_tethering">Route hotspot/USB tethering through the proxy, rootless</string>
+    <string name="shizuku_status_not_installed">Shizuku is not installed</string>
+    <string name="shizuku_status_not_installed_detail">Install the Shizuku app to enable rootless protected tethering.</string>
+    <string name="shizuku_status_not_running">Shizuku is not running</string>
+    <string name="shizuku_status_not_running_detail">Start the Shizuku service (via ADB or wireless debugging), then come back here.</string>
+    <string name="shizuku_status_permission_needed">Permission needed</string>
+    <string name="shizuku_status_permission_needed_detail">Grant MikuRay permission in Shizuku to control tethering.</string>
+    <string name="shizuku_status_idle">Protected tethering is off</string>
+    <string name="shizuku_status_starting">Starting protected tethering\u2026</string>
+    <string name="shizuku_status_active">Protected \u2014 routed through %1$s</string>
+    <string name="shizuku_status_retrying">Reconnecting protected route\u2026</string>
+    <string name="shizuku_status_error">Protected tethering error</string>
+    <string name="shizuku_status_unsupported_os">Requires Android 13 or newer</string>
+    <string name="shizuku_status_unsupported_os_detail">Your device is on API %1$d. Shizuku tethering needs API 33+.</string>
+    <string name="shizuku_action_install">Install Shizuku</string>
+    <string name="shizuku_action_open_shizuku">Open Shizuku</string>
+    <string name="shizuku_action_grant_permission">Grant permission</string>
+    <string name="shizuku_toggle_routing_title">Protect tethered traffic</string>
+    <string name="shizuku_toggle_routing_summary">Sends hotspot/USB tethering traffic through MikuRay while it is running</string>
+    <string name="shizuku_toggle_hotspot_title">Wi\u2011Fi hotspot</string>
+    <string name="shizuku_active_devices_none">No devices connected</string>
+    <string name="shizuku_active_devices_some">Devices connected</string>
+    <string name="shizuku_hotspot_toggle_failed">Could not change the hotspot state</string>
+    <string name="shizuku_explainer">MikuRay creates a protected virtual network for tethering, separate from its own VPN connection, so devices connected to your hotspot or via USB are routed through the proxy too. This is an alternative to MikuRay\'s root-based LAN sharing \u2014 avoid enabling both at the same time.</string>
     <string name="title_configuration_backup">Backup config</string>
     <string name="title_configuration_restore">Restore config</string>
     <string name="title_configuration_share">Share config</string>

@@ -46,13 +46,11 @@ import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.extension.toastInfo
 import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.extension.toastError
-import com.v2ray.ang.extension.toSpeedString
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.SubscriptionUpdater
-import com.v2ray.ang.handler.TrafficController
 import com.v2ray.ang.ui.bottomsheet.AddConfigBottomSheet
 import com.v2ray.ang.ui.bottomsheet.MainMenuBottomSheet
 import com.v2ray.ang.ui.bottomsheet.MoreMenuBottomSheet
@@ -94,32 +92,6 @@ class MainActivity : HelperBaseActivity(),
     private var tabMediator: TabLayoutMediator? = null
     
     private var bannerReceiver: android.content.BroadcastReceiver? = null 
-
-    // Last IP text rendered by updateIpResultAction, kept so we can restore it on
-    // tv_ip_state when the real-time speed preference is switched back off.
-    private var lastIpText: String? = null
-
-    // Updates tv_ip_state with live upload/download speed every second while the
-    // "show real-time traffic speed" preference is enabled and the service is running.
-    private val realtimeSpeedListener = object : TrafficController.Listener {
-        override fun onTraffic(
-            proxyUplink: Long,
-            proxyDownlink: Long,
-            directUplink: Long,
-            directDownlink: Long,
-            intervalMs: Long,
-        ) {
-            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_REALTIME_SPEED) != true) return
-            val seconds = intervalMs / 1000.0
-            if (seconds <= 0) return
-            val uploadSpeed = ((proxyUplink + directUplink) / seconds).toLong()
-            val downloadSpeed = ((proxyDownlink + directDownlink) / seconds).toLong()
-            val speedText = "↑ ${uploadSpeed.toSpeedString()}  ↓ ${downloadSpeed.toSpeedString()}"
-            runOnUiThread {
-                binding.tvIpState.text = speedText
-            }
-        }
-    }
 
     private val tabSelectedListener = object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
         override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab) {
@@ -196,9 +168,6 @@ class MainActivity : HelperBaseActivity(),
     override fun onResume() {
         super.onResume()
         refreshSearchBarChip()
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_REALTIME_SPEED) != true) {
-            lastIpText?.let { binding.tvIpState.text = it }
-        }
     }
 
     private fun refreshSearchBarChip() {
@@ -520,6 +489,7 @@ class MainActivity : HelperBaseActivity(),
             R.id.menu_settings -> requestActivityLauncher.launch(Intent(this, SettingsActivity::class.java))
             R.id.menu_logcat -> startActivity(Intent(this, LogcatActivity::class.java))
             R.id.menu_backup_restore -> requestActivityLauncher.launch(Intent(this, BackupActivity::class.java))
+            R.id.menu_shizuku_tethering -> requestActivityLauncher.launch(Intent(this, ShizukuActivity::class.java))
             R.id.menu_about -> startActivity(Intent(this, AboutActivity::class.java))
         }
     }
@@ -622,22 +592,14 @@ class MainActivity : HelperBaseActivity(),
         mainViewModel.updateGroupBadgeAction.observe(this) { refreshTabBadges() }
         mainViewModel.updateTestResultAction.observe(this) { setTestState(it) }
         mainViewModel.updateIpResultAction.observe(this) { ip ->
-            lastIpText = if (ip.isNullOrEmpty()) {
+            binding.tvIpState.text = if (ip.isNullOrEmpty()) {
                 getString(R.string.ip_unknown)
             } else {
                 getString(R.string.ip_connected, ip)
             }
-            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_REALTIME_SPEED) != true) {
-                binding.tvIpState.text = lastIpText
-            }
         }
         mainViewModel.isRunning.observe(this) { isRunning ->
             applyRunningState(isLoading = false, isRunning = isRunning)
-            if (isRunning) {
-                TrafficController.addListener(realtimeSpeedListener)
-            } else {
-                TrafficController.removeListener(realtimeSpeedListener)
-            }
         }
         
         mainViewModel.alertAction.observe(this) { (isSuccess, message) ->
@@ -1165,9 +1127,7 @@ class MainActivity : HelperBaseActivity(),
 
     override fun onDestroy() {
         hideLoading()
-
-        TrafficController.removeListener(realtimeSpeedListener)
-
+        
         tabMediator?.detach()
         
         try {

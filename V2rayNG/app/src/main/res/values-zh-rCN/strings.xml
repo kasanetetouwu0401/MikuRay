@@ -226,8 +226,6 @@
     <string name="summary_pref_ip_api_url">URL</string>
     <string name="title_pref_show_isp_info">显示运营商名称</string>
     <string name="summary_pref_show_isp_info">在检测到的 IP 旁显示运营商/组织名称</string>
-    <string name="title_pref_show_realtime_speed">显示实时网速</string>
-    <string name="summary_pref_show_realtime_speed">用实时上传/下载速度替换 IP 状态文字，每秒更新一次</string>
 
     <string name="title_pref_proxy_sharing_enabled">允许来自局域网的连接</string>
     <string name="summary_pref_proxy_sharing_enabled">其他设备可以使用 socks/http 协议通过您的 IP 地址连接到代理, 仅在受信任的网络中启用以避免未经授权的连接</string>
@@ -420,6 +418,31 @@
 
     <!-- BackupActivity -->
     <string name="title_configuration_backup_restore">备份 &amp; 还原</string>
+    <string name="title_shizuku_tethering">受保护热点 (Shizuku)</string>
+    <string name="desc_shizuku_tethering">无需 root，让热点/USB 网络共享流量走代理</string>
+    <string name="shizuku_status_not_installed">未安装 Shizuku</string>
+    <string name="shizuku_status_not_installed_detail">请先安装 Shizuku 应用，以启用无 root 的受保护热点共享。</string>
+    <string name="shizuku_status_not_running">Shizuku 未运行</string>
+    <string name="shizuku_status_not_running_detail">请通过 ADB 或无线调试启动 Shizuku 服务，然后返回此页面。</string>
+    <string name="shizuku_status_permission_needed">需要授权</string>
+    <string name="shizuku_status_permission_needed_detail">请在 Shizuku 中授予 MikuRay 控制热点共享的权限。</string>
+    <string name="shizuku_status_idle">受保护热点共享已关闭</string>
+    <string name="shizuku_status_starting">正在启动受保护热点共享\u2026</string>
+    <string name="shizuku_status_active">已保护 \u2014 经由 %1$s</string>
+    <string name="shizuku_status_retrying">正在恢复受保护线路\u2026</string>
+    <string name="shizuku_status_error">受保护热点共享出错</string>
+    <string name="shizuku_status_unsupported_os">需要 Android 13 或更高版本</string>
+    <string name="shizuku_status_unsupported_os_detail">您的设备为 API %1$d。Shizuku 热点共享需要 API 33 及以上。</string>
+    <string name="shizuku_action_install">安装 Shizuku</string>
+    <string name="shizuku_action_open_shizuku">打开 Shizuku</string>
+    <string name="shizuku_action_grant_permission">授予权限</string>
+    <string name="shizuku_toggle_routing_title">保护共享流量</string>
+    <string name="shizuku_toggle_routing_summary">运行时将热点/USB 网络共享的流量通过 MikuRay 转发</string>
+    <string name="shizuku_toggle_hotspot_title">Wi\u2011Fi 热点</string>
+    <string name="shizuku_active_devices_none">暂无已连接设备</string>
+    <string name="shizuku_active_devices_some">已有设备连接</string>
+    <string name="shizuku_hotspot_toggle_failed">无法更改热点状态</string>
+    <string name="shizuku_explainer">MikuRay 会为热点共享创建一个独立于自身 VPN 连接的受保护虚拟网络，因此通过热点或 USB 连接的设备也会经由代理转发。这是 MikuRay 基于 root 的局域网共享功能的替代方案 \u2014 请勿同时启用两者。</string>
     <string name="title_configuration_backup">备份配置</string>
     <string name="title_configuration_restore">还原配置</string>
     <string name="title_configuration_share">分享配置</string>

@@ -229,8 +229,6 @@
     <string name="summary_pref_ip_api_url">URL</string>
     <string name="title_pref_show_isp_info">Tampilin nama ISP</string>
     <string name="summary_pref_show_isp_info">Tampilin nama ISP/organisasi di sebelah IP yang kedeteksi~</string>
-    <string name="title_pref_show_realtime_speed">Tampilin kecepatan traffic real-time</string>
-    <string name="summary_pref_show_realtime_speed">Ganti teks status IP jadi kecepatan upload/download real-time, update tiap 1 detik~</string>
 
     <string name="title_pref_proxy_sharing_enabled">Bolehin koneksi dari LAN</string>
     <string name="summary_pref_proxy_sharing_enabled">Device lain bisa numpang proxy pake IP HP lu via proxy lokal. Nyalain pas di jaringan yang lu percaya aja ya, biar ga ada yang nebeng diam-diam</string>
@@ -424,6 +422,31 @@
     <string name="server_proxy_chain_members_invalid">Member chainnya ngaco: %1$s</string>
 
     <string name="title_configuration_backup_restore">Backup &amp; Restore</string>
+    <string name="title_shizuku_tethering">Tethering Terproteksi (Shizuku)</string>
+    <string name="desc_shizuku_tethering">Rutekan hotspot/tethering USB lewat proxy, tanpa root</string>
+    <string name="shizuku_status_not_installed">Shizuku belum terpasang</string>
+    <string name="shizuku_status_not_installed_detail">Pasang aplikasi Shizuku dulu buat pakai tethering terproteksi tanpa root.</string>
+    <string name="shizuku_status_not_running">Shizuku belum jalan</string>
+    <string name="shizuku_status_not_running_detail">Nyalain layanan Shizuku (via ADB atau wireless debugging), terus balik lagi ke sini.</string>
+    <string name="shizuku_status_permission_needed">Butuh izin</string>
+    <string name="shizuku_status_permission_needed_detail">Kasih izin MikuRay di Shizuku buat ngatur tethering.</string>
+    <string name="shizuku_status_idle">Tethering terproteksi lagi mati</string>
+    <string name="shizuku_status_starting">Lagi nyalain tethering terproteksi\u2026</string>
+    <string name="shizuku_status_active">Terproteksi \u2014 lewat %1$s</string>
+    <string name="shizuku_status_retrying">Nyambungin ulang rute terproteksi\u2026</string>
+    <string name="shizuku_status_error">Error di tethering terproteksi</string>
+    <string name="shizuku_status_unsupported_os">Butuh Android 13 ke atas</string>
+    <string name="shizuku_status_unsupported_os_detail">HP lu di API %1$d. Shizuku tethering butuh API 33+.</string>
+    <string name="shizuku_action_install">Pasang Shizuku</string>
+    <string name="shizuku_action_open_shizuku">Buka Shizuku</string>
+    <string name="shizuku_action_grant_permission">Kasih izin</string>
+    <string name="shizuku_toggle_routing_title">Proteksi traffic tethering</string>
+    <string name="shizuku_toggle_routing_summary">Rutekan traffic hotspot/USB lewat MikuRay selagi aktif</string>
+    <string name="shizuku_toggle_hotspot_title">Hotspot Wi\u2011Fi</string>
+    <string name="shizuku_active_devices_none">Belum ada device yang nyambung</string>
+    <string name="shizuku_active_devices_some">Ada device yang nyambung</string>
+    <string name="shizuku_hotspot_toggle_failed">Gagal ubah status hotspot</string>
+    <string name="shizuku_explainer">MikuRay bikin virtual network terproteksi khusus buat tethering, terpisah dari koneksi VPN utamanya, jadi device yang nyambung ke hotspot atau via USB juga ikut lewat proxy. Ini alternatif dari LAN sharing berbasis root punya MikuRay \u2014 jangan nyalain dua-duanya bareng.</string>
     <string name="title_configuration_backup">Backup Konfig</string>
     <string name="title_configuration_restore">Balikin Konfig (Restore)</string>
     <string name="title_configuration_share">Bagi-bagi Konfig</string>

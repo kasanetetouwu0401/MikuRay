@@ -54,7 +54,6 @@ object AppConfig {
     const val SUBSCRIPTION_MIN_INTERVAL_MINUTES = 15L
     const val PREF_SPEED_ENABLED = "pref_speed_enabled"
     const val PREF_TRAFFIC_ENABLED = "pref_traffic_enabled"
-    const val PREF_SHOW_REALTIME_SPEED = "pref_show_realtime_speed"
     const val PREF_NETWORK_SECURITY_ENABLED = "pref_network_security_enabled"
     const val PREF_SEND_HWID = "pref_send_hwid"
     const val PREF_HIDE_FROM_RECENT_APPS = "hide_from_recent_apps"
@@ -92,6 +91,7 @@ object AppConfig {
     const val PREF_AUTO_REMOVE_INVALID_AFTER_TEST = "pref_auto_remove_invalid_after_test"
     const val PREF_AUTO_SORT_AFTER_TEST = "pref_auto_sort_after_test"
     const val PREF_REAL_PING_CONCURRENCY = "pref_real_ping_concurrency"
+    const val PREF_SHIZUKU_SYNC_TOKEN = "pref_shizuku_sync_token"
     
     const val PREF_NAVIGATE_UI_SETTINGS = "pref_navigate_ui_settings"
     const val PREF_NAVIGATE_CHECK_UPDATE = "pref_navigate_check_update"
@@ -360,6 +360,8 @@ object AppConfig {
     const val MSG_MEASURE_CONFIG_SUCCESS = 72
     const val MSG_MEASURE_CONFIG_NOTIFY = 73
     const val MSG_MEASURE_CONFIG_FINISH = 74
+    const val MSG_QUERY_HOTSPOT_CONFIG = 91
+    const val MSG_SHIZUKU_APP_FOREGROUND = 92
 
     const val MSG_SUB_UPDATE_START = 8
     const val MSG_SUB_UPDATE_CANCEL = 81
@@ -413,6 +415,14 @@ object AppConfig {
 
     /** hev-sock5-tunnel read-write-timeout value */
     const val HEVTUN_RW_TIMEOUT = "300,60"
+
+    /** Shizuku test-network TUN used as Android tethering's preferred upstream. */
+    const val SHIZUKU_TUN_ADDR_V4 = "192.0.2.2/24"
+    /**
+     * Android only delegates a /64 that it considers globally scoped. The documentation
+     * prefix satisfies that platform requirement without claiming a real public network.
+     */
+    const val SHIZUKU_TUN_ADDR_V6 = "2001:db8:9877::1/64"
 
     // Google API rule constants
     const val GOOGLEAPIS_CN_DOMAIN = "domain:googleapis.cn"

@@ -246,12 +246,14 @@ object CoreServiceManager {
         }
 
         try {
+            com.v2ray.ang.shizuku.TetheringCoreSync.onStarting()
             doStartCoreLoop(service, vpnInterface)
             return true
         } catch (e: Exception) {
             val message = e.message?.takeUnless { it.isBlank() } ?: e.javaClass.simpleName
             LogUtil.e(AppConfig.TAG, "StartCore-Manager: $message", e)
             MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
+            com.v2ray.ang.shizuku.TetheringCoreSync.onStartFailed(service, message)
             NotificationManager.cancelNotification()
             return false
         }
@@ -307,6 +309,7 @@ object CoreServiceManager {
         }
 
         MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
+        com.v2ray.ang.shizuku.TetheringCoreSync.onStarted(service, config.remarks, SettingsManager.isUsingHevTun())
         NotificationManager.startSpeedNotification()
         LogUtil.i(AppConfig.TAG, "StartCore-Manager: Core started successfully")
     }
@@ -318,6 +321,7 @@ object CoreServiceManager {
      */
     fun stopCoreLoop(): Boolean {
         val service = getService() ?: return false
+        com.v2ray.ang.shizuku.TetheringCoreSync.onStopping(service)
 
         if (coreController.isRunning) {
             CoroutineScope(Dispatchers.IO).launch {
@@ -531,6 +535,17 @@ object CoreServiceManager {
 
                 AppConfig.MSG_UNREGISTER_CLIENT -> {
                     // nothing to do
+                }
+
+                AppConfig.MSG_QUERY_HOTSPOT_CONFIG -> {
+                    com.v2ray.ang.shizuku.TetheringCoreSync.sendCurrentSnapshot(
+                        serviceControl.getService(),
+                        coreController.isRunning,
+                    )
+                }
+
+                AppConfig.MSG_SHIZUKU_APP_FOREGROUND -> {
+                    com.v2ray.ang.shizuku.TetheringCoreSync.onAppForegrounded(serviceControl.getService())
                 }
 
                 AppConfig.MSG_STATE_START -> {

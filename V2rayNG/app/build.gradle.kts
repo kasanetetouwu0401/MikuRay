@@ -122,6 +122,7 @@ android {
         viewBinding = true
         buildConfig = true
         resValues = true
+        aidl = true
     }
 
     packaging {
@@ -164,6 +165,8 @@ dependencies {
 
     // AndroidX Core Libraries
     implementation(libs.androidx.core.ktx)
+    implementation(libs.shizuku.api)
+    implementation(libs.shizuku.provider)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
