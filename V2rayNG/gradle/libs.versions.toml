@@ -37,7 +37,7 @@ glide = "5.0.9"
 ucrop = "2.2.11"
 palette = "1.0.0"
 playServicesLocation = "21.4.0"
-shizuku = "13.4.0"
+shizuku = "13.1.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
