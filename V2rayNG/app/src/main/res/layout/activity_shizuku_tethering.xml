@@ -236,7 +236,8 @@
                         <com.google.android.material.materialswitch.MaterialSwitch
                             android:id="@+id/switch_enable_routing"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            app:thumbIcon="@drawable/mtrl_ic_check" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -331,7 +332,8 @@
                         <com.google.android.material.materialswitch.MaterialSwitch
                             android:id="@+id/switch_wifi_hotspot"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            app:thumbIcon="@drawable/mtrl_ic_check" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
