@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.widget.CompoundButton
 import com.google.android.material.appbar.MaterialToolbar
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
@@ -100,7 +101,7 @@ class ShizukuActivity : HelperBaseActivity() {
     /** True while [refreshUi] is applying state to the switches programmatically. */
     private var suppressSwitchListener = false
 
-    private fun setSwitchCheckedSilently(switchView: com.google.android.material.materialswitch.MaterialSwitch, checked: Boolean) {
+    private fun setSwitchCheckedSilently(switchView: CompoundButton, checked: Boolean) {
         suppressSwitchListener = true
         switchView.isChecked = checked
         suppressSwitchListener = false
