@@ -39,9 +39,9 @@ object TetheringCoreSync {
         }
     }
 
-    fun onStarted(context: Context, profileName: String, usesHevTun: Boolean) {
+    fun onStarted(context: Context, profileName: String) {
         if (!isArmed()) return
-        val snapshot = buildSnapshot(profileName, usesHevTun)
+        val snapshot = buildSnapshot(profileName)
         broadcast(context, HotspotRoutingSync(token(), HotspotRoutingSync.EVENT_CORE_STARTED, snapshot))
     }
 
@@ -63,7 +63,7 @@ object TetheringCoreSync {
             return
         }
         val profileName = MmkvManager.decodeServerConfig(MmkvManager.getSelectServer() ?: "")?.remarks.orEmpty()
-        val snapshot = buildSnapshot(profileName, SettingsManager.isUsingHevTun())
+        val snapshot = buildSnapshot(profileName)
         broadcast(context, HotspotRoutingSync(token(), HotspotRoutingSync.EVENT_CORE_STARTED, snapshot))
     }
 
@@ -85,14 +85,19 @@ object TetheringCoreSync {
 
     private fun token(): String = MmkvManager.decodeSettingsString(AppConfig.PREF_SHIZUKU_SYNC_TOKEN).orEmpty()
 
-    private fun buildSnapshot(profileName: String, usesHevTun: Boolean): HotspotRoutingSnapshot {
+    private fun buildSnapshot(profileName: String): HotspotRoutingSnapshot {
         val timeouts = MmkvManager.decodeSettingsString(AppConfig.PREF_HEV_TUNNEL_RW_TIMEOUT)
             ?.split(',')
             ?.map { it.trim().toIntOrNull() }
             ?: emptyList()
         return HotspotRoutingSnapshot(
             running = true,
-            vpnMode = SettingsManager.isVpnMode() && usesHevTun,
+            // Tethering forwards into the local SOCKS inbound regardless of whether the
+            // main core itself uses HEV or native Xray TUN, so vpnMode no longer implies
+            // hev — localProxyEnabled below is the actual gate for whether that inbound
+            // exists.
+            vpnMode = SettingsManager.isVpnMode(),
+            localProxyEnabled = SettingsManager.isLocalSocksProxyEnabled(),
             profileName = profileName,
             ipv6Enabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_IPV6_ENABLED, false),
             vpnDnsServers = SettingsManager.getVpnDnsServers(),

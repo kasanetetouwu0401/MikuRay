@@ -309,7 +309,7 @@ object CoreServiceManager {
         }
 
         MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
-        com.v2ray.ang.shizuku.TetheringCoreSync.onStarted(service, config.remarks, SettingsManager.isUsingHevTun())
+        com.v2ray.ang.shizuku.TetheringCoreSync.onStarted(service, config.remarks)
         NotificationManager.startSpeedNotification()
         LogUtil.i(AppConfig.TAG, "StartCore-Manager: Core started successfully")
     }

@@ -13,7 +13,10 @@ import java.io.Serializable
  */
 data class HotspotRoutingSnapshot(
     val running: Boolean = false,
+    /** True whenever VPN mode is active — independent of whether it uses HEV or native Xray TUN. */
     val vpnMode: Boolean = false,
+    /** True if the running core's local SOCKS inbound exists (see [com.v2ray.ang.handler.SettingsManager.isLocalSocksProxyEnabled]). Tethering needs this regardless of TUN mechanism, since it always forwards into that inbound. */
+    val localProxyEnabled: Boolean = false,
     val profileName: String = "",
     val ipv6Enabled: Boolean = false,
     val vpnDnsServers: List<String> = emptyList(),

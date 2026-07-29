@@ -460,13 +460,7 @@ object CoreConfigManager {
      * Configure inbound listeners and related runtime options.
      */
     private fun configureInbounds(v2rayConfig: V2rayConfig) {
-        val vpn = SettingsManager.isVpnMode()
-        val useHev = SettingsManager.isUsingHevTun()
-        val forcedByHev = vpn && useHev
-        val forcedBySocksRoot = SettingsManager.isRootMode()
-                || MmkvManager.decodeSettingsBool(AppConfig.PREF_ROOT_LAN_SHARING)
-
-        val enableLocalProxy = forcedByHev || forcedBySocksRoot || MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_LOCAL_PROXY, true)
+        val enableLocalProxy = SettingsManager.isLocalSocksProxyEnabled()
 
         val socksPort = SettingsManager.getSocksPort()
         val socksUsername = SettingsManager.getSocksUsername()
@@ -605,19 +599,22 @@ object CoreConfigManager {
         }
 
         if (SettingsManager.isVpnMode()) {
-            if (SettingsManager.isUsingHevTun()) {
-                //hev-socks5-tunnel dns routing
+            val dnsHijackTags = arrayListOf<String>()
+            if (SettingsManager.isUsingHevTun() || SettingsManager.isLocalSocksProxyEnabled()) {
+                // hev-socks5-tunnel DNS routing. Also covers native-Xray-TUN sessions
+                // whenever the local SOCKS inbound is enabled: MikuRay's Shizuku tethering
+                // always forwards tethered-client traffic into the "socks" inbound
+                // regardless of which TUN mechanism the main VPN itself uses, so this rule
+                // needs to exist there too, not just in VPN+HEV mode.
+                dnsHijackTags.add("socks")
+            }
+            if (!SettingsManager.isUsingHevTun()) {
+                dnsHijackTags.add("tun")
+            }
+            if (dnsHijackTags.isNotEmpty()) {
                 v2rayConfig.routing.rules.add(
                     0, V2rayConfig.RoutingBean.RulesBean(
-                        inboundTag = arrayListOf("socks"),
-                        outboundTag = "dns-out",
-                        port = "53",
-                    )
-                )
-            } else {
-                v2rayConfig.routing.rules.add(
-                    0, V2rayConfig.RoutingBean.RulesBean(
-                        inboundTag = arrayListOf("tun"),
+                        inboundTag = dnsHijackTags,
                         outboundTag = "dns-out",
                         port = "53",
                     )
