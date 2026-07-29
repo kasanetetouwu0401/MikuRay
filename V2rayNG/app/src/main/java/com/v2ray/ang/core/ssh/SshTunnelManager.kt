@@ -20,6 +20,7 @@ import java.io.File
 object SshTunnelManager {
 
     private var session: Session? = null
+    private var socksServer: Socks5OverSsh? = null
 
     @Volatile
     var localPort: Int = 0
@@ -107,12 +108,17 @@ object SshTunnelManager {
         LogUtil.i(AppConfig.TAG, "SshTunnelManager: connecting to $host:$port as $username (auth=$authType)")
         newSession.connect(15000)
 
-        val boundPort = Utils.findRandomFreePort()
+        val preferredPort = Utils.findRandomFreePort()
         // "127.0.0.1" only: the dynamic SOCKS listener never needs to be reachable
         // from outside the device, Xray is the only client.
-        newSession.setPortForwarding("127.0.0.1", boundPort)
+        // JSch has no native "-D" dynamic/SOCKS forwarding (only setPortForwardingL/R),
+        // so Socks5OverSsh implements a minimal local SOCKS5 server that tunnels each
+        // connection through this session via direct-tcpip channels.
+        val newSocksServer = Socks5OverSsh(newSession)
+        val boundPort = newSocksServer.start("127.0.0.1", preferredPort)
 
         session = newSession
+        socksServer = newSocksServer
         localPort = boundPort
         LogUtil.i(AppConfig.TAG, "SshTunnelManager: connected, local SOCKS on 127.0.0.1:$boundPort")
         return boundPort
@@ -121,12 +127,18 @@ object SshTunnelManager {
     @Synchronized
     fun disconnect() {
         try {
+            socksServer?.stop()
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "SshTunnelManager: error while stopping SOCKS server", e)
+        }
+        try {
             session?.let {
                 if (it.isConnected) it.disconnect()
             }
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "SshTunnelManager: error while disconnecting", e)
         }
+        socksServer = null
         session = null
         localPort = 0
     }
