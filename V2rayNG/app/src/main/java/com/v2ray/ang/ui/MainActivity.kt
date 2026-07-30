@@ -509,6 +509,7 @@ class MainActivity : HelperBaseActivity(),
             R.id.import_manually_trojan -> importManually(EConfigType.TROJAN.value)
             R.id.import_manually_wireguard -> importManually(EConfigType.WIREGUARD.value)
             R.id.import_manually_hysteria2 -> importManually(EConfigType.HYSTERIA2.value)
+            R.id.import_manually_ssh -> importManually(EConfigType.SSH.value)
         }
     }
 
