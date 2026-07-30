@@ -38,7 +38,7 @@ ucrop = "2.2.11"
 palette = "1.0.0"
 playServicesLocation = "21.4.0"
 sshj = "0.40.0"
-bouncycastle = "1.78.1"
+bouncycastle = "1.85"
 slf4jAndroid = "1.7.36"
 
 [libraries]
