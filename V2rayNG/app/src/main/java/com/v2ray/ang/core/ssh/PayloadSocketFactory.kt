@@ -77,11 +77,17 @@ class PayloadSocketFactory(
             sock.connect(InetSocketAddress(firstHopHost, firstHopPort), effectiveTimeout)
             sock.soTimeout = effectiveTimeout
 
-            if (mode.usesProxy) {
-                sock = httpConnect(sock)
-            }
+            // When going through a proxy fronted by a CDN edge (e.g. a Cloudflare IP on
+            // port 443), that edge expects TLS immediately — sending a plaintext CONNECT
+            // before the TLS handshake gets rejected (Cloudflare replies with a "plain HTTP
+            // request sent to HTTPS port" 400). So TLS wraps the hop to the proxy first, and
+            // the CONNECT request travels *inside* that TLS tunnel, exactly like a normal
+            // HTTPS forward proxy.
             if (mode.usesSsl) {
                 sock = wrapTls(sock)
+            }
+            if (mode.usesProxy) {
+                sock = httpConnect(sock)
             }
             if (mode.usesPayload) {
                 sendPayload(sock)
