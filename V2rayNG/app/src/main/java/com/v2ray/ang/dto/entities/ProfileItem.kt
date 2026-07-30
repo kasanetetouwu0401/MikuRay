@@ -59,6 +59,7 @@ data class ProfileItem(
     var obfsPassword: String? = null,
     var portHopping: String? = null,
     var portHoppingInterval: String? = null,
+    @Deprecated("Use pinnedCA256")
     var pinSHA256: String? = null,
     var bandwidthDown: String? = null,
     var bandwidthUp: String? = null,
@@ -72,18 +73,18 @@ data class ProfileItem(
 
     var browserDialerMode: String? = null,
 
-    // SSH custom-payload tunnel (server/serverPort/username/password reused from above)
-    var sshAuthType: String? = null, // AppConfig.SSH_AUTH_PASSWORD | SSH_AUTH_PRIVATE_KEY | SSH_AUTH_CERTIFICATE
-    var sshPrivateKey: String? = null, // PEM text
-    var sshPrivateKeyPassphrase: String? = null,
-    var sshCertificate: String? = null, // OpenSSH certificate text (id_xxx-cert.pub content)
-    var sshPayload: String? = null, // raw pre-handshake payload, supports [host][port][crlf][cr][lf]
-    var sshProxy: String? = null, // optional SOCKS5 proxy "ip:port" the SSH connection is dialed through
-    // sni (declared above) is reused here: when set, wraps the socket in TLS with this SNI before payload/SSH handshake
-    var sshConnectionType: String? = null, // AppConfig.SSH_TYPE_*, drives which of SNI/Payload/Proxy fields are shown
-    var sshCompression: Boolean? = null, // enables zlib compression on the SSH session (JSch compression.[cs]2c/s2c)
-    var sshUdpgwEnabled: Boolean? = null, // relays UDP (e.g. DNS, games) through a badvpn-udpgw server over the SSH tunnel
-    var sshUdpgwAddress: String? = null, // udpgw server "ip:port", reached through the SSH session like any other destination
+    // SSH server (tunnel) fields. server/serverPort/username/password are reused as-is
+    // (SSH host/port/username/password). See ESshMode / ESshAuthType.
+    var sshMode: String? = null,
+    var sshAuthType: String? = null,
+    var sshPrivateKey: String? = null,
+    var sshPrivateKeyPassword: String? = null,
+    var sshCertificate: String? = null,
+    var sshPayload: String? = null,
+    var sshProxyHost: String? = null,
+    var sshProxyPort: String? = null,
+    var sshProxyUsername: String? = null,
+    var sshProxyPassword: String? = null,
 
     ) {
     companion object {
@@ -141,16 +142,14 @@ data class ProfileItem(
                 && this.portHoppingInterval == obj.portHoppingInterval
                 && this.pinnedCA256 == obj.pinnedCA256
                 && this.proxyChainProfiles == obj.proxyChainProfiles
+
+                && this.sshMode == obj.sshMode
                 && this.sshAuthType == obj.sshAuthType
                 && this.sshPrivateKey == obj.sshPrivateKey
-                && this.sshPrivateKeyPassphrase == obj.sshPrivateKeyPassphrase
                 && this.sshCertificate == obj.sshCertificate
                 && this.sshPayload == obj.sshPayload
-                && this.sshProxy == obj.sshProxy
-                && this.sshConnectionType == obj.sshConnectionType
-                && this.sshCompression == obj.sshCompression
-                && this.sshUdpgwEnabled == obj.sshUdpgwEnabled
-                && this.sshUdpgwAddress == obj.sshUdpgwAddress
+                && this.sshProxyHost == obj.sshProxyHost
+                && this.sshProxyPort == obj.sshProxyPort
                 )
     }
 }

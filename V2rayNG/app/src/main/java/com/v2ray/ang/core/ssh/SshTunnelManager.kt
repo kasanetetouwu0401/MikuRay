@@ -1,162 +1,162 @@
 package com.v2ray.ang.core.ssh
 
-import com.jcraft.jsch.JSch
-import com.jcraft.jsch.Session
-import com.v2ray.ang.AngApplication
-import com.v2ray.ang.AppConfig
 import com.v2ray.ang.dto.entities.ProfileItem
+import com.v2ray.ang.enums.ESshAuthType
+import com.v2ray.ang.enums.ESshMode
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.Utils
-import java.io.File
+import net.schmizz.sshj.SSHClient
+import net.schmizz.sshj.common.SecurityUtils
+import net.schmizz.sshj.transport.verification.PromiscuousVerifier
+import net.schmizz.sshj.userauth.password.PasswordFinder
+import net.schmizz.sshj.userauth.password.Resource
+import java.io.IOException
 
 /**
- * Owns a single SSH session used to tunnel MikuRay's Xray core through an SSH server,
- * with optional pre-handshake custom payload (see [SshPayloadSocketFactory]).
+ * Owns the sshj connection + local SOCKS5 listener for the currently active SSH server config.
  *
- * Xray never talks SSH itself: this class opens a local dynamic SOCKS5 listener
- * (JSch's `-D` equivalent) and Xray's outbound is just a plain `socks` outbound
- * pointing at that local port. See CoreOutboundBuilder.toOutboundSsh.
+ * MikuRay's core (Xray) has no native "ssh" outbound, so instead of feeding it an SSH config
+ * directly, this stands up a local SOCKS5 proxy (backed by SSH direct-tcpip channels, the
+ * equivalent of `ssh -D`) and Xray is given a plain SOCKS outbound pointing at
+ * 127.0.0.1:[localPort]. See [com.v2ray.ang.core.CoreOutboundBuilder.toOutboundSsh].
+ *
+ * Not thread-safe against concurrent start() calls from different threads; MikuRay only ever
+ * has one active server at a time so this mirrors that assumption (see SettingsManager /
+ * CoreServiceManager for the same pattern with the native core).
  */
 object SshTunnelManager {
 
-    private var session: Session? = null
-    private var socksServer: Socks5OverSsh? = null
+    private const val TAG = "SshTunnelManager"
+    private const val DEFAULT_CONNECT_TIMEOUT_MS = 8_000
 
     @Volatile
-    var localPort: Int = 0
-        private set
+    private var client: SSHClient? = null
 
-    val isConnected: Boolean
-        get() = session?.isConnected == true
+    @Volatile
+    private var socksServer: MiniSocks5Server? = null
+
+    @Volatile
+    private var activeGuid: String? = null
+
+    val isRunning: Boolean
+        get() = client?.isConnected == true && socksServer?.isRunning == true
+
+    val localPort: Int
+        get() = socksServer?.localPort ?: 0
 
     /**
-     * Connects the SSH session (blocking) and starts the local dynamic SOCKS forwarder.
-     * Must be called before Xray's core loop starts, and matched with [disconnect] when
-     * the core loop stops.
-     *
-     * @return the local port Xray's SSH outbound should point to.
+     * Connects (if not already connected for this [guid]) and returns the local SOCKS5 port to
+     * route Xray's outbound through. Blocking — must not be called from the main thread; see
+     * the caveat in CoreServiceManager's SSH hook about onStartCommand running on the main
+     * thread today.
      */
-    @Throws(Exception::class)
+    @Throws(IOException::class)
     @Synchronized
-    fun connect(profile: ProfileItem): Int {
-        disconnect()
+    fun start(guid: String, config: ProfileItem): Int {
+        if (guid == activeGuid && isRunning) {
+            return localPort
+        }
+        stop()
 
-        val host = profile.server?.trim().orEmpty()
-        if (host.isEmpty()) error("SSH: server address is empty")
-        val port = profile.serverPort?.trim()?.toIntOrNull() ?: 22
-        val username = profile.username?.trim().orEmpty()
-        if (username.isEmpty()) error("SSH: username is empty")
-        val authType = profile.sshAuthType ?: AppConfig.SSH_AUTH_PASSWORD
+        val host = config.server.orEmpty()
+        val port = Utils.parseInt(config.serverPort, 22)
+        if (host.isEmpty() || port <= 0) {
+            error("SSH host/port tidak valid")
+        }
+        val username = config.username.orEmpty()
+        val mode = ESshMode.fromName(config.sshMode)
+        val authType = ESshAuthType.fromName(config.sshAuthType)
 
-        val jsch = JSch()
-        val keyAlias = "mikuray-ssh-${profile.subscriptionId}-${System.identityHashCode(profile)}"
+        val sshConfig = net.schmizz.sshj.DefaultConfig()
+        val sshClient = SSHClient(sshConfig)
+        // Bug-host / VPS SSH endpoints used with this feature generally aren't pre-pinned by
+        // the user (no known_hosts UX in-app), so we don't verify the host key here — same
+        // tradeoff SSH-injector style apps make. Real auth is the password/key/cert below.
+        sshClient.addHostKeyVerifier(PromiscuousVerifier())
+        sshClient.connectTimeout = DEFAULT_CONNECT_TIMEOUT_MS
+        sshClient.timeout = DEFAULT_CONNECT_TIMEOUT_MS
 
-        when (authType) {
-            AppConfig.SSH_AUTH_PRIVATE_KEY -> {
-                val privateKey = profile.sshPrivateKey.orEmpty()
-                if (privateKey.isBlank()) error("SSH: private key is empty")
-                val passphrase = profile.sshPrivateKeyPassphrase?.takeIf { it.isNotEmpty() }
-                jsch.addIdentity(
-                    keyAlias,
-                    privateKey.toByteArray(),
-                    null,
-                    passphrase?.toByteArray()
-                )
-            }
+        sshClient.socketFactory = PayloadSocketFactory(
+            mode = mode,
+            targetHost = host,
+            targetPort = port,
+            sni = config.sni?.takeIf { it.isNotBlank() } ?: host,
+            payloadTemplate = config.sshPayload.orEmpty(),
+            proxyHost = config.sshProxyHost.orEmpty(),
+            proxyPort = Utils.parseInt(config.sshProxyPort, 8080),
+            proxyUsername = config.sshProxyUsername,
+            proxyPassword = config.sshProxyPassword,
+            connectTimeoutMs = DEFAULT_CONNECT_TIMEOUT_MS,
+        )
 
-            AppConfig.SSH_AUTH_CERTIFICATE -> {
-                val privateKey = profile.sshPrivateKey.orEmpty()
-                val certificate = profile.sshCertificate.orEmpty()
-                if (privateKey.isBlank()) error("SSH: private key is empty")
-                if (certificate.isBlank()) error("SSH: certificate is empty")
-                val passphrase = profile.sshPrivateKeyPassphrase?.takeIf { it.isNotEmpty() }
+        try {
+            // The socket factory above already reaches the right host:port (possibly via a
+            // proxy + TLS + payload first), so the host/port passed to connect() here just
+            // needs to be non-blank; PayloadSocketFactory ignores them and uses its own target.
+            sshClient.connect(host, port)
 
-                // JSch (mwiede fork) locates the OpenSSH certificate for a key via a
-                // sibling "<key>-cert.pub" file, so both are written to app-private
-                // cache storage using that naming convention before being loaded.
-                val cacheDir = File(AngApplication.application.cacheDir, "ssh_keys").apply { mkdirs() }
-                val keyFile = File(cacheDir, "$keyAlias")
-                val certFile = File(cacheDir, "$keyAlias-cert.pub")
-                keyFile.writeText(privateKey)
-                certFile.writeText(certificate)
+            when (authType) {
+                ESshAuthType.PASSWORD -> {
+                    sshClient.authPassword(username, config.password.orEmpty())
+                }
 
-                try {
-                    jsch.addIdentity(keyFile.absolutePath, passphrase)
-                } finally {
-                    // Best-effort cleanup; JSch has already read the bytes into memory by now.
-                    keyFile.delete()
-                    certFile.delete()
+                ESshAuthType.PRIVATE_KEY -> {
+                    val passphrase = config.sshPrivateKeyPassword
+                    val keyProvider = sshClient.loadKeys(
+                        config.sshPrivateKey.orEmpty(),
+                        null,
+                        passphrase?.takeIf { it.isNotEmpty() }?.let { staticPasswordFinder(it) }
+                    )
+                    sshClient.authPublickey(username, keyProvider)
+                }
+
+                ESshAuthType.CERTIFICATE -> {
+                    val passphrase = config.sshPrivateKeyPassword
+                    // sshj accepts an OpenSSH certificate (the "-cert.pub" content) as the
+                    // public-key half here; it gets attached to the keypair for cert auth.
+                    val keyProvider = sshClient.loadKeys(
+                        config.sshPrivateKey.orEmpty(),
+                        config.sshCertificate.orEmpty(),
+                        passphrase?.takeIf { it.isNotEmpty() }?.let { staticPasswordFinder(it) }
+                    )
+                    sshClient.authPublickey(username, keyProvider)
                 }
             }
 
-            else -> {
-                // password auth handled via session.setPassword below
-            }
+            val server = MiniSocks5Server(sshClient)
+            server.start()
+
+            client = sshClient
+            socksServer = server
+            activeGuid = guid
+            LogUtil.i(TAG, "SSH tunnel connected to $host:$port, local SOCKS on ${server.localPort}")
+            return server.localPort
+        } catch (e: Exception) {
+            LogUtil.e(TAG, "SSH tunnel failed to start: ${e.message}", e)
+            runCatching { sshClient.disconnect() }
+            client = null
+            activeGuid = null
+            throw IOException(e.message ?: "Gagal konek SSH", e)
         }
-
-        val newSession = jsch.getSession(username, host, port)
-        newSession.setConfig("StrictHostKeyChecking", "no")
-        newSession.setConfig("PreferredAuthentications", "publickey,password,keyboard-interactive")
-        newSession.timeout = 20000
-
-        if (authType == AppConfig.SSH_AUTH_PASSWORD || authType.isBlank()) {
-            newSession.setPassword(profile.password.orEmpty())
-        }
-
-        if (profile.sshCompression == true) {
-            // zlib@openssh.com falls back to plain zlib on servers that don't advertise the
-            // delayed variant; "none" keeps compression off entirely (the default).
-            newSession.setConfig("compression.s2c", "zlib@openssh.com,zlib,none")
-            newSession.setConfig("compression.c2s", "zlib@openssh.com,zlib,none")
-            newSession.setConfig("compression_level", "6")
-        }
-
-        newSession.setSocketFactory(
-            SshPayloadSocketFactory(
-                targetHost = host,
-                targetPort = port,
-                payloadTemplate = profile.sshPayload,
-                proxyAddress = profile.sshProxy,
-                sni = profile.sni,
-            )
-        )
-
-        LogUtil.i(AppConfig.TAG, "SshTunnelManager: connecting to $host:$port as $username (auth=$authType)")
-        newSession.connect(15000)
-
-        val preferredPort = Utils.findRandomFreePort()
-        // "127.0.0.1" only: the dynamic SOCKS listener never needs to be reachable
-        // from outside the device, Xray is the only client.
-        // JSch has no native "-D" dynamic/SOCKS forwarding (only setPortForwardingL/R),
-        // so Socks5OverSsh implements a minimal local SOCKS5 server that tunnels each
-        // connection through this session via direct-tcpip channels.
-        val udpgwAddress = profile.sshUdpgwAddress?.trim().takeIf { profile.sshUdpgwEnabled == true && !it.isNullOrEmpty() }
-        val newSocksServer = Socks5OverSsh(newSession, udpgwAddress)
-        val boundPort = newSocksServer.start("127.0.0.1", preferredPort)
-
-        session = newSession
-        socksServer = newSocksServer
-        localPort = boundPort
-        LogUtil.i(AppConfig.TAG, "SshTunnelManager: connected, local SOCKS on 127.0.0.1:$boundPort")
-        return boundPort
     }
 
     @Synchronized
-    fun disconnect() {
-        try {
-            socksServer?.stop()
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "SshTunnelManager: error while stopping SOCKS server", e)
-        }
-        try {
-            session?.let {
-                if (it.isConnected) it.disconnect()
-            }
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "SshTunnelManager: error while disconnecting", e)
-        }
+    fun stop() {
+        socksServer?.let { runCatching { it.stop() } }
+        client?.let { runCatching { it.disconnect() } }
         socksServer = null
-        session = null
-        localPort = 0
+        client = null
+        activeGuid = null
+    }
+
+    private fun staticPasswordFinder(value: String) = object : PasswordFinder {
+        override fun reqPassword(resource: Resource<*>?): CharArray = value.toCharArray()
+        override fun shouldRetry(resource: Resource<*>?): Boolean = false
+    }
+
+    init {
+        // Registering BouncyCastle widens the set of key/cert formats and algorithms sshj can
+        // parse (notably useful for certificate auth and newer OpenSSH key formats).
+        SecurityUtils.setRegisterBouncyCastle(true)
     }
 }

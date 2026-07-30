@@ -72,7 +72,7 @@
                 <com.neko.widget.UwuHeaderIconView
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    app:sectionIcon="@drawable/ic_key"
+                    app:sectionIcon="@drawable/ic_lan"
                     android:layout_marginEnd="12dp" />
 
                 <com.google.android.material.textview.MaterialTextView
@@ -85,7 +85,6 @@
 
             </LinearLayout>
 
-            <!-- Connection: address, port, username, auth type, and the auth-type-specific fields -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -114,9 +113,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/padding_spacing_dp16"
-                        android:hint="@string/server_lab_ssh_username">
+                        android:hint="@string/server_lab_security4">
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_ssh_username"
+                            android:id="@+id/et_security"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="text" />
@@ -135,12 +134,12 @@
                             android:id="@+id/sp_ssh_auth_type"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="none"
-                            app:simpleItems="@array/ssh_auth_types" />
+                            android:inputType="none" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <!-- Password auth -->
                     <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_ssh_password"
+                        android:id="@+id/layout_ssh_password"
                         app:shapeAppearance="?shapeAppearanceCornerMedium"
                         app:boxStrokeWidth="1.5dip"
                         app:boxStrokeWidthFocused="1.5dip"
@@ -149,16 +148,17 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/padding_spacing_dp16"
-                        android:hint="@string/server_lab_ssh_password">
+                        android:hint="@string/server_lab_id4">
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_ssh_password"
+                            android:id="@+id/et_id"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPassword" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <!-- Private key / certificate auth -->
                     <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_ssh_private_key"
+                        android:id="@+id/layout_ssh_private_key"
                         app:shapeAppearance="?shapeAppearanceCornerMedium"
                         app:boxStrokeWidth="1.5dip"
                         app:boxStrokeWidthFocused="1.5dip"
@@ -166,21 +166,18 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/padding_spacing_dp16"
-                        android:hint="@string/server_lab_ssh_private_key"
-                        android:visibility="gone">
+                        android:hint="@string/server_lab_ssh_private_key">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_ssh_private_key"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="top|start"
-                            android:minLines="4"
-                            android:maxLines="10"
-                            android:typeface="monospace"
+                            android:gravity="top"
+                            android:minLines="3"
                             android:inputType="textMultiLine" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_ssh_private_key_passphrase"
+                        android:id="@+id/layout_ssh_private_key_password"
                         app:shapeAppearance="?shapeAppearanceCornerMedium"
                         app:boxStrokeWidth="1.5dip"
                         app:boxStrokeWidthFocused="1.5dip"
@@ -189,17 +186,16 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/padding_spacing_dp16"
-                        android:hint="@string/server_lab_ssh_private_key_passphrase"
-                        android:visibility="gone">
+                        android:hint="@string/server_lab_ssh_private_key_password">
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_ssh_private_key_passphrase"
+                            android:id="@+id/et_ssh_private_key_password"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPassword" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_ssh_certificate"
+                        android:id="@+id/layout_ssh_certificate"
                         app:shapeAppearance="?shapeAppearanceCornerMedium"
                         app:boxStrokeWidth="1.5dip"
                         app:boxStrokeWidthFocused="1.5dip"
@@ -207,39 +203,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/padding_spacing_dp16"
-                        android:hint="@string/server_lab_ssh_certificate"
-                        android:visibility="gone">
+                        android:hint="@string/server_lab_ssh_certificate">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_ssh_certificate"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="top|start"
+                            android:gravity="top"
                             android:minLines="3"
-                            android:maxLines="8"
-                            android:typeface="monospace"
                             android:inputType="textMultiLine" />
                     </com.google.android.material.textfield.TextInputLayout>
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Custom payload, HTTP Injector style -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24.0dip"
-                android:layout_marginStart="16.0dip"
-                android:layout_marginEnd="16.0dip"
-                app:cardBackgroundColor="?colorCard"
-                app:cardCornerRadius="28.0dip"
-                app:cardElevation="0.0dip"
-                app:strokeWidth="0.0dip">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/padding_spacing_dp16">
 
                     <com.google.android.material.textfield.TextInputLayout
                         app:shapeAppearance="?shapeAppearanceCornerMedium"
@@ -248,19 +220,18 @@
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/server_lab_ssh_connection_type"
-                        app:helperTextEnabled="true"
-                        app:helperText="@string/server_lab_ssh_connection_type_helper">
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:hint="@string/server_lab_ssh_mode">
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                            android:id="@+id/sp_ssh_connection_type"
+                            android:id="@+id/sp_ssh_mode"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="none"
-                            app:simpleItems="@array/ssh_connection_types" />
+                            android:inputType="none" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <!-- SSL (SSH_SSL_PAYLOAD / SSH_SSL_PAYLOAD_PROXY) -->
                     <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_ssh_payload"
+                        android:id="@+id/layout_ssh_sni"
                         app:shapeAppearance="?shapeAppearanceCornerMedium"
                         app:boxStrokeWidth="1.5dip"
                         app:boxStrokeWidthFocused="1.5dip"
@@ -268,153 +239,17 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/padding_spacing_dp16"
-                        android:hint="@string/server_lab_ssh_payload"
-                        app:helperTextEnabled="true"
-                        app:helperText="@string/server_lab_ssh_payload_helper">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_ssh_payload"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="top|start"
-                            android:minLines="4"
-                            android:maxLines="10"
-                            android:typeface="monospace"
-                            android:inputType="textMultiLine" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_ssh_proxy"
-                        app:shapeAppearance="?shapeAppearanceCornerMedium"
-                        app:boxStrokeWidth="1.5dip"
-                        app:boxStrokeWidthFocused="1.5dip"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/padding_spacing_dp16"
-                        android:hint="@string/server_lab_ssh_proxy"
-                        app:helperTextEnabled="true"
-                        app:helperText="@string/server_lab_ssh_proxy_helper">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_ssh_proxy"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textUri" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_ssh_sni"
-                        app:shapeAppearance="?shapeAppearanceCornerMedium"
-                        app:boxStrokeWidth="1.5dip"
-                        app:boxStrokeWidthFocused="1.5dip"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/padding_spacing_dp16"
-                        android:hint="@string/server_lab_ssh_sni"
-                        app:helperTextEnabled="true"
-                        app:helperText="@string/server_lab_ssh_sni_helper">
+                        android:hint="@string/server_lab_sni">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_ssh_sni"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textUri" />
+                            android:inputType="text" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Compression + UDPGW, Neko Injector-style extras -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24.0dip"
-                android:layout_marginStart="16.0dip"
-                android:layout_marginEnd="16.0dip"
-                app:cardBackgroundColor="?colorCard"
-                app:cardCornerRadius="28.0dip"
-                app:cardElevation="0.0dip"
-                app:strokeWidth="0.0dip">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/padding_spacing_dp16">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/server_lab_ssh_compression"
-                                android:textAppearance="?attr/textAppearanceBodyLarge" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/server_lab_ssh_compression_summary"
-                                android:textAppearance="?attr/textAppearanceBodySmall"
-                                android:textColor="?attr/colorOnSurfaceVariant" />
-                        </LinearLayout>
-
-                        <com.google.android.material.materialswitch.MaterialSwitch
-                            app:thumbIcon="@drawable/mtrl_ic_check"
-                            android:id="@+id/chk_ssh_compression"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-                    </LinearLayout>
-
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/padding_spacing_dp16"
-                        android:layout_marginBottom="@dimen/padding_spacing_dp16" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/server_lab_ssh_udpgw"
-                                android:textAppearance="?attr/textAppearanceBodyLarge" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/server_lab_ssh_udpgw_summary"
-                                android:textAppearance="?attr/textAppearanceBodySmall"
-                                android:textColor="?attr/colorOnSurfaceVariant" />
-                        </LinearLayout>
-
-                        <com.google.android.material.materialswitch.MaterialSwitch
-                            app:thumbIcon="@drawable/mtrl_ic_check"
-                            android:id="@+id/chk_ssh_udpgw"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-                    </LinearLayout>
-
+                    <!-- Payload (SSH_PAYLOAD / SSH_SSL_PAYLOAD / SSH_SSL_PAYLOAD_PROXY) -->
                     <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_ssh_udpgw_address"
+                        android:id="@+id/layout_ssh_payload"
                         app:shapeAppearance="?shapeAppearanceCornerMedium"
                         app:boxStrokeWidth="1.5dip"
                         app:boxStrokeWidthFocused="1.5dip"
@@ -422,15 +257,84 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/padding_spacing_dp16"
-                        android:hint="@string/server_lab_ssh_udpgw_address"
-                        app:helperTextEnabled="true"
-                        app:helperText="@string/server_lab_ssh_udpgw_address_helper"
-                        android:visibility="gone">
+                        android:hint="@string/server_lab_ssh_payload">
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_ssh_udpgw_address"
+                            android:id="@+id/et_ssh_payload"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textUri" />
+                            android:gravity="top"
+                            android:minLines="3"
+                            android:inputType="textMultiLine" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Proxy (SSH_SSL_PAYLOAD_PROXY only) -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_ssh_proxy_host"
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:hint="@string/server_lab_ssh_proxy_host">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_ssh_proxy_host"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_ssh_proxy_port"
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:hint="@string/server_lab_ssh_proxy_port">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_ssh_proxy_port"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_ssh_proxy_username"
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:hint="@string/server_lab_ssh_proxy_username">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_ssh_proxy_username"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_ssh_proxy_password"
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        app:passwordToggleEnabled="true"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/padding_spacing_dp16"
+                        android:hint="@string/server_lab_ssh_proxy_password">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_ssh_proxy_password"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>

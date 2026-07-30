@@ -14,12 +14,16 @@ import androidx.core.content.ContextCompat
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.contracts.ServiceControl
+import com.v2ray.ang.core.ssh.SshTunnelManager
 import com.v2ray.ang.dto.OutboundTrafficStat
 import com.v2ray.ang.dto.entities.ProfileItem
+import com.v2ray.ang.enums.BrowserDialerMode
+import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.extension.snackbarDefault
 import com.v2ray.ang.extension.snackbarError
 import com.v2ray.ang.extension.snackbarSuccess
 import com.v2ray.ang.extension.isComplexType
+import com.v2ray.ang.extension.isNotNullEmpty
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.NotificationManager
 import com.v2ray.ang.root.RootManager
@@ -184,11 +188,12 @@ object CoreServiceManager {
 //        val result = V2rayConfigUtil.getV2rayConfig(context, guid)
 //        if (!result.status) error(result.errorMessage.ifBlank { "Failed to get V2Ray config" })
 
-        if (config.insecure == true) {
+        if (config.insecure == true && config.pinnedCA256.isNullOrEmpty()) {
             context.snackbarError(
                 context.getString(R.string.toast_allow_insecure_deprecated),
                 title = context.getString(R.string.title_alerter_error)
             )
+            Utils.setClipboard(context, context.getString(R.string.toast_allow_insecure_deprecated))
         }
 
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_PROXY_SHARING)) {
@@ -249,7 +254,6 @@ object CoreServiceManager {
             doStartCoreLoop(service, vpnInterface)
             return true
         } catch (e: Exception) {
-            com.v2ray.ang.core.ssh.SshTunnelManager.disconnect()
             val message = e.message?.takeUnless { it.isBlank() } ?: e.javaClass.simpleName
             LogUtil.e(AppConfig.TAG, "StartCore-Manager: $message", e)
             MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
@@ -265,8 +269,17 @@ object CoreServiceManager {
 
         LogUtil.i(AppConfig.TAG, "StartCore-Manager: Starting core loop for ${config.remarks}")
 
-        if (config.configType == com.v2ray.ang.enums.EConfigType.SSH) {
-            com.v2ray.ang.core.ssh.SshTunnelManager.connect(config)
+        // MikuRay's native core has no "ssh" outbound; when the active profile is an SSH
+        // server, bring up SshTunnelManager's local SOCKS5 proxy first (blocking — see the
+        // caveat on SshTunnelManager.start) so CoreOutboundBuilder.toOutboundSsh has a live
+        // port to point Xray's SOCKS outbound at. NOTE: onStartCommand for the VPN/proxy-only
+        // services runs on the main thread today, so a slow/unreachable SSH host can briefly
+        // block it (up to SshTunnelManager's connect timeout) — not addressed here, flagging
+        // it as a follow-up if it turns out to matter in practice.
+        if (config.configType == EConfigType.SSH) {
+            SshTunnelManager.start(guid, config)
+        } else {
+            SshTunnelManager.stop()
         }
 
         val result = CoreConfigManager.getV2rayConfig(service, guid)
@@ -283,17 +296,20 @@ object CoreServiceManager {
 
         currentConfig = config
         var tunFd = vpnInterface?.fd ?: 0
-        val dialerAddr = if (currentConfig?.browserDialerMode.isNullOrEmpty()) {
-            ""
-        } else {
+        val dialerMode = BrowserDialerMode.from(config.browserDialerMode)
+        val dialerAddr = if (dialerMode != null) {
             "127.0.0.1:${Utils.findRandomFreePort()}"
+        } else {
+            ""
         }
         if (SettingsManager.isUsingHevTun()) {
             tunFd = 0
         }
 
         NotificationManager.showNotification(currentConfig)
-        CoreNativeManager.reconcileBrowserDialer(dialerAddr)
+        if (dialerAddr.isNotNullEmpty()) {
+            CoreNativeManager.reconcileBrowserDialer(dialerAddr)
+        }
         coreController.startLoop(result.content, tunFd)
 
         if (!coreController.isRunning) {
@@ -304,12 +320,18 @@ object CoreServiceManager {
             browserDialer!!.stop()
             browserDialer = null
         }
-        if (config.browserDialerMode == "OkHttp") {
-            browserDialer = DialerNativeService()
-            browserDialer!!.start(service, dialerAddr)
-        } else if (config.browserDialerMode == "WebView") {
-            browserDialer = DialerWebviewService()
-            browserDialer!!.start(service, dialerAddr)
+        when (dialerMode) {
+            BrowserDialerMode.OKHTTP -> {
+                browserDialer = DialerNativeService()
+                browserDialer!!.start(service, dialerAddr)
+            }
+
+            BrowserDialerMode.WEBVIEW -> {
+                browserDialer = DialerWebviewService()
+                browserDialer!!.start(service, dialerAddr)
+            }
+
+            else -> {}
         }
 
         MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
@@ -325,7 +347,7 @@ object CoreServiceManager {
     fun stopCoreLoop(): Boolean {
         val service = getService() ?: return false
 
-        com.v2ray.ang.core.ssh.SshTunnelManager.disconnect()
+        SshTunnelManager.stop()
 
         if (coreController.isRunning) {
             CoroutineScope(Dispatchers.IO).launch {

@@ -189,7 +189,12 @@ dependencies {
     implementation(libs.mmkv.static)
     implementation(libs.gson)
     implementation(libs.okhttp)
-    implementation(libs.mwiede.jsch) // SSH custom-payload tunnel (dynamic SOCKS forward)
+    
+    // SSH server (tunnel) support
+    implementation(libs.sshj)
+    implementation(libs.bcprov.jdk18on)
+    implementation(libs.bcpkix.jdk18on)
+    implementation(libs.slf4j.android)
 
     // Reactive and Utility Libraries
     implementation(libs.kotlinx.coroutines.android)

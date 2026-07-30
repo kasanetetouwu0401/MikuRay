@@ -21,18 +21,17 @@
         <item>2022-blake3-chacha20-poly1305</item>
     </string-array>
 
-    <string-array name="ssh_auth_types" translatable="false">
-        <item>password</item>
-        <item>privatekey</item>
-        <item>certificate</item>
+    <string-array name="ssh_modes" translatable="false">
+        <item>SSH</item>
+        <item>SSH + Payload</item>
+        <item>SSH + SSL + Payload</item>
+        <item>SSH + SSL + Payload + Proxy</item>
     </string-array>
 
-    <string-array name="ssh_connection_types" translatable="false">
-        <item>direct</item>
-        <item>ssl</item>
-        <item>payload</item>
-        <item>ssl_payload</item>
-        <item>ssl_payload_proxy</item>
+    <string-array name="ssh_auth_types" translatable="false">
+        <item>Password</item>
+        <item>Private Key</item>
+        <item>Certificate</item>
     </string-array>
 
     <string-array name="networks" translatable="false">
