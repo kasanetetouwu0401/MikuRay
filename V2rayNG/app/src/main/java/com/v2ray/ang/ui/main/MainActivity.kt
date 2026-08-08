@@ -199,6 +199,10 @@ class MainActivity : HelperBaseActivity(),
         if (SettingsChangeManager.consumeRefreshDisplayPrefs()) {
             refreshAllGroupListDisplays()
         }
+        // Self-heal: if a state broadcast from the daemon was missed while we were away
+        // (or during a slow VPN start), this re-syncs isRunning so the FAB / bottom status
+        // card don't stay stuck reflecting a stale state.
+        mainViewModel.resyncState()
     }
 
     // Rebind every already-created group tab's list (not just the one currently
