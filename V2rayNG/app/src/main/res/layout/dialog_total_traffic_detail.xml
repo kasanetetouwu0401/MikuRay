@@ -17,6 +17,7 @@
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tv_dialog_title"
         style="?attr/textAppearanceTitleMedium"
+        android:textSize="17sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
@@ -25,7 +26,8 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tv_combined_value"
-        style="?attr/textAppearanceHeadlineSmall"
+        style="?attr/textAppearanceTitleMedium"
+        android:textSize="24sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
@@ -38,7 +40,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="1dp"
         android:text="@string/label_total_traffic_combined"
-        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textAppearance="?attr/textAppearanceTitleSmall"
+        android:textSize="14sp"
         android:textColor="?attr/colorOnSurfaceVariant" />
 
     <LinearLayout
