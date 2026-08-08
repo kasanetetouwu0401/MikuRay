@@ -30,7 +30,6 @@ import com.v2ray.ang.util.MessageUtil
 import com.v2ray.ang.util.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.jvm.Volatile
 import libv2ray.CoreCallbackHandler
@@ -52,20 +51,6 @@ object CoreServiceManager {
     @Volatile
     private var isReloading = false
 
-    /**
-     * Cached mirror of [nativeIsRunning], updated only by this object right after it starts
-     * or stops the core. gomobile/gobind exports (coreController.*) share a lock on the Go
-     * side, so a plain getter like coreController.isRunning blocks for as long as a heavy
-     * call like startLoop() (e.g. building a hybrid domainMatcher over a large
-     * geosite/geoip set) is still holding it - even though the getter itself does nothing.
-     * Every external caller of [isRunning] (widget, QS tile, shortcut activities,
-     * MSG_REGISTER_CLIENT) may run on the main thread, and this app runs the core in the
-     * same process as the UI, so that block reads as a frozen bottom status card / FAB.
-     * Reading this cached flag instead is lock-free and safe from any thread.
-     */
-    @Volatile
-    private var coreRunningFlag = false
-
     /** Tun descriptor the core was started with, null in the proxy only and root run modes. */
     private var currentVpnInterface: ParcelFileDescriptor? = null
 
@@ -81,19 +66,10 @@ object CoreServiceManager {
         }
 
     /**
-     * Checks if the V2Ray service is running. Safe to call from any thread, including the
-     * main thread - see [coreRunningFlag]. Callers that need the authoritative, freshly
-     * queried state right after starting/stopping the core (this object's own start/stop/
-     * reload routines, always off the main thread) should use [nativeIsRunning] instead.
+     * Checks if the V2Ray service is running.
      * @return True if the service is running, false otherwise.
      */
-    fun isRunning() = coreRunningFlag
-
-    /**
-     * Queries the native core directly. Blocks until any in-flight native call (e.g.
-     * startLoop()) releases the shared Go-side lock, so only call this off the main thread.
-     */
-    private fun nativeIsRunning() = coreController.isRunning
+    fun isRunning() = coreController.isRunning
 
     /**
      * Gets the name of the currently running server.
@@ -181,10 +157,9 @@ object CoreServiceManager {
         }
         coreController.startLoop(result.content, tunFd)
 
-        if (!nativeIsRunning()) {
+        if (!isRunning()) {
             error("Core failed to start")
         }
-        coreRunningFlag = true
 
         if (browserDialer != null) {
             browserDialer!!.stop()
@@ -219,14 +194,11 @@ object CoreServiceManager {
     fun stopCoreLoop(): Boolean {
         val service = getService() ?: return false
 
-        val wasRunning = coreRunningFlag
-        coreRunningFlag = false
-
         networkMonitor?.unregister()
         networkMonitor = null
         currentVpnInterface = null
 
-        if (wasRunning) {
+        if (isRunning()) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     coreController.stopLoop()
@@ -300,7 +272,6 @@ object CoreServiceManager {
         } catch (e: Exception) {
             val message = e.message?.takeUnless { it.isBlank() } ?: e.javaClass.simpleName
             LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to reload core: $message", e)
-            coreRunningFlag = false
             MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
             false
         } finally {
@@ -422,7 +393,6 @@ object CoreServiceManager {
          * @return 0 for success, any other value for failure.
          */
         override fun shutdown(): Long {
-            coreRunningFlag = false
             val serviceControl = serviceControl?.get() ?: return -1
             return try {
                 serviceControl.stopService()
@@ -513,23 +483,14 @@ object CoreServiceManager {
 
                 AppConfig.MSG_STATE_STOP -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Stop service")
-                    // onReceive() always runs on the main thread, and this app runs its
-                    // service in the same process as the UI. stopService() ultimately blocks
-                    // on Thread.sleep()/native teardown (see CoreVpnService.stopAllService),
-                    // so route it through a background thread instead of eating that block
-                    // on the thread the bottom status card and FAB are drawn on.
-                    CoroutineScope(Dispatchers.IO).launch {
-                        serviceControl.stopService()
-                    }
+                    serviceControl.stopService()
                 }
 
                 AppConfig.MSG_STATE_RESTART -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Restart service")
-                    CoroutineScope(Dispatchers.IO).launch {
-                        serviceControl.stopService()
-                        delay(500L)
-                        LauncherManager.startService(serviceControl.getService())
-                    }
+                    serviceControl.stopService()
+                    Thread.sleep(500L)
+                    LauncherManager.startService(serviceControl.getService())
                 }
 
                 AppConfig.MSG_MEASURE_DELAY -> {

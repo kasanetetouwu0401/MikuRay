@@ -62,12 +62,7 @@ class CoreVpnService : VpnService(), ServiceControl {
 
     override fun onRevoke() {
         LogUtil.w(AppConfig.TAG, "StartCore-VPN: Permission revoked")
-        // onRevoke() runs on the main thread. stopAllService() blocks on Thread.sleep()
-        // and native interface teardown, so keep it off the thread the bottom status
-        // card and FAB are drawn on (see serviceScope comment above).
-        serviceScope.launch {
-            stopAllService()
-        }
+        stopAllService()
     }
 
 //    override fun onLowMemory() {

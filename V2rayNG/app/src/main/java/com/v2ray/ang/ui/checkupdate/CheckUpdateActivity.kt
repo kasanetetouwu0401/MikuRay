@@ -19,9 +19,7 @@ import com.v2ray.ang.handler.UpdateCheckerManager
 import com.v2ray.ang.core.CoreNativeManager
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.Utils
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class CheckUpdateActivity : BaseActivity() {
 
@@ -46,10 +44,8 @@ class CheckUpdateActivity : BaseActivity() {
         }
         binding.checkPreRelease.isChecked = MmkvManager.decodeSettingsBool(AppConfig.PREF_CHECK_UPDATE_PRE_RELEASE, false)
 
-        // See AboutActivity: getLibVersion() can block on the core's shared native lock.
-        lifecycleScope.launch {
-            val libVersion = withContext(Dispatchers.IO) { CoreNativeManager.getLibVersion() }
-            binding.tvVersion.text = "v${BuildConfig.VERSION_NAME} ($libVersion)"
+        "v${BuildConfig.VERSION_NAME} (${CoreNativeManager.getLibVersion()})".also {
+            binding.tvVersion.text = it
         }
 
         checkForUpdates(binding.checkPreRelease.isChecked)
