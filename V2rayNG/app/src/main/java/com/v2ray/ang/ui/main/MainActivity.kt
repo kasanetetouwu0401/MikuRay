@@ -151,15 +151,7 @@ class MainActivity : HelperBaseActivity(),
 
         SubscriptionUpdater.sync()
         syncWeatherBackgroundUpdates()
-        // Preload: reloadServerList() decodes the active group's server list from MMKV and
-        // sorts it (updateCache()) - was called straight on the main thread here, which for a
-        // sizeable server list is exactly the kind of work that makes first cold-open feel
-        // laggy. It's already background-safe (see the postValue()/@Synchronized note in
-        // reloadServerList() itself), so just dispatch it like setupGroupTab() above and
-        // subscriptionIdChangedAsync() do.
-        lifecycleScope.launch(Dispatchers.IO) {
-            mainViewModel.reloadServerList()
-        }
+        mainViewModel.reloadServerList()
         refreshGroupTabTitles(true)
 
         checkAndRequestPermission(PermissionType.POST_NOTIFICATIONS) {}
