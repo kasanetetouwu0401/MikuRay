@@ -27,7 +27,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
-import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -484,51 +483,6 @@ class MainActivity : HelperBaseActivity(),
             adapter = groupPagerAdapter
             isUserInputEnabled = true
             offscreenPageLimit = 10
-            registerOnPageChangeCallback(pageChangeCallback)
-        }
-    }
-
-    // Ahead of (and independent from) the now-visible GroupServerFragment's own onResume() ->
-    // subscriptionIdChangedAsync() call. ViewPager2 only promotes the current item to RESUMED,
-    // so onResume there already covers this, but wiring it here too means the group/
-    // subscriptionId switch isn't left implicit in fragment lifecycle timing.
-    //
-    // onPageSelected() fires as soon as the target position is committed - roughly mid-swipe,
-    // well before the settle animation finishes - so the actual switch is deferred to
-    // onPageScrollStateChanged(IDLE) instead of applied immediately. Calling
-    // subscriptionIdChangedAsync() (MMKV decode/parse/sort + the RecyclerView diff it triggers)
-    // right at onPageSelected made the swipe itself feel delayed/janky, since that work was
-    // competing with the still-running page-settle animation on the main thread. A tap-driven
-    // switch also goes through a (non-animated-looking but still SETTLING->IDLE) scroll, so this
-    // covers both without a separate immediate-vs-deferred branch. subscriptionIdChangedAsync()
-    // no-ops if the id hasn't actually changed, so this and the fragment's own call never do the
-    // reload work twice.
-    private var pendingPageSelection: Int? = null
-    private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
-        override fun onPageSelected(position: Int) {
-            super.onPageSelected(position)
-            pendingPageSelection = position
-            // Non-animated jumps (setCurrentItem(x, false), e.g. initial group load) never
-            // transition through SCROLL_STATE_SETTLING, so onPageScrollStateChanged(IDLE) won't
-            // fire again to flush this. Apply right away when we're already idle.
-            if (binding.viewPager.scrollState == ViewPager2.SCROLL_STATE_IDLE) {
-                applyPendingPageSelection()
-            }
-        }
-
-        override fun onPageScrollStateChanged(state: Int) {
-            super.onPageScrollStateChanged(state)
-            if (state == ViewPager2.SCROLL_STATE_IDLE) {
-                applyPendingPageSelection()
-            }
-        }
-    }
-
-    private fun applyPendingPageSelection() {
-        val position = pendingPageSelection ?: return
-        pendingPageSelection = null
-        groupPagerAdapter.groups.getOrNull(position)?.let { group ->
-            mainViewModel.subscriptionIdChangedAsync(group.id)
         }
     }
 
@@ -1308,7 +1262,6 @@ class MainActivity : HelperBaseActivity(),
         urlTestProgressDialog.dismiss()
 
         tabMediator?.detach()
-        binding.viewPager.unregisterOnPageChangeCallback(pageChangeCallback)
         
         try {
             bannerReceiver?.let { unregisterReceiver(it) }
