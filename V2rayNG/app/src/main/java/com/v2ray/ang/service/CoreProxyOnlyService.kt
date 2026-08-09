@@ -90,10 +90,15 @@ class CoreProxyOnlyService : Service(), ServiceControl {
     /**
      * Binds the service.
      * @param intent The intent.
-     * @return The binder.
+     * @return The AIDL binder when a client is binding via [com.v2ray.ang.core.MikuRayConnection],
+     * null otherwise (e.g. system-internal bind attempts this service doesn't handle).
      */
     override fun onBind(intent: Intent?): IBinder? {
-        return null
+        return if (intent?.action == AppConfig.AIDL_SERVICE_ACTION) {
+            CoreServiceManager.binder
+        } else {
+            null
+        }
     }
 
     /**
