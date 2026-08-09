@@ -58,7 +58,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      * two-way channel rather than the fire-and-forget broadcast command channel:
      * [testCurrentServerRealPing] (blocking [IMikuRayService.urlTest]) and [resyncState]
      * (reading [IMikuRayService.isRunning] directly instead of the old, no-longer-handled
-     * MSG_REGISTER_CLIENT broadcast).
+     * MSG_REGISTER_CLIENT broadcast). [fetchCurrentIp] also dispatches through it: it used to
+     * send a plain MSG_MEASURE_IP broadcast that nothing has handled since the AIDL migration
+     * (see [core.CoreServiceManager]'s ReceiveMessageHandler), so the IP line silently never
+     * refreshed after connecting.
      */
     private val connection = MikuRayConnection()
     private val connectionCallback = object : MikuRayConnection.Callback {
@@ -72,6 +75,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         override fun stateNotRunning() {
             isRunning.value = false
+        }
+
+        override fun measureIpResult(ip: String) {
+            updateIpResultAction.value = ip
         }
     }
 
@@ -316,7 +323,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun fetchCurrentIp() {
-        MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_MEASURE_IP, "")
+        connection.service?.measureIp()
     }
 
     /**
