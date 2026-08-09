@@ -179,6 +179,8 @@ class MainActivity : HelperBaseActivity(),
     }
     private var lastTrafficSpeedText: String = ""
     private var lastTestResultText: String = ""
+    private var testTimeoutJob: kotlinx.coroutines.Job? = null
+    private var fabLoadingTimeoutJob: kotlinx.coroutines.Job? = null
 
     private fun refreshIpStateText() {
         val showRealtimeTraffic = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_REALTIME_TRAFFIC_IP, false)
@@ -655,6 +657,8 @@ class MainActivity : HelperBaseActivity(),
         }
         mainViewModel.updateGroupBadgeAction.observe(this) { refreshTabBadges() }
         mainViewModel.updateTestResultAction.observe(this) {
+            testTimeoutJob?.cancel()
+            testTimeoutJob = null
             lastTestResultText = it.orEmpty()
             setTestState(it)
         }
@@ -678,6 +682,8 @@ class MainActivity : HelperBaseActivity(),
             refreshIpStateText()
         }
         mainViewModel.isRunning.observe(this) { isRunning ->
+            fabLoadingTimeoutJob?.cancel()
+            fabLoadingTimeoutJob = null
             applyRunningState(isLoading = false, isRunning = isRunning)
         }
         
@@ -807,6 +813,7 @@ class MainActivity : HelperBaseActivity(),
 
     private fun handleFabAction() {
         applyRunningState(isLoading = true, isRunning = false)
+        armFabLoadingTimeout()
 
         if (mainViewModel.isRunning.value == true) {
             LauncherManager.stopService(this)
@@ -822,10 +829,66 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
+    /**
+     * Safety net for the FAB's loading (checkmark) state.
+     *
+     * The FAB is flipped to a loading icon as soon as the user taps it, and is only
+     * flipped back by the [MainViewModel.isRunning] observer once a state broadcast
+     * (running / not running / start failure / stop success) comes back from the
+     * background service. If that broadcast is ever lost or delayed indefinitely, the
+     * FAB used to stay stuck on the loading icon forever with no way to recover other
+     * than restarting the app. This re-queries the real service state after a timeout
+     * and forces the UI back in sync, showing an error if nothing came back.
+     */
+    private fun armFabLoadingTimeout() {
+        fabLoadingTimeoutJob?.cancel()
+        fabLoadingTimeoutJob = lifecycleScope.launch {
+            delay(8_000)
+            fabLoadingTimeoutJob = null
+            snackbarError(getString(R.string.toast_services_failure), title = getString(R.string.title_alerter_error))
+            // Re-sync with the actual service state instead of trusting the stale
+            // cached value, then reflect whatever comes back (or falls back to not
+            // running) in the UI so the FAB is never left frozen on the loading icon.
+            // This mirrors the existing onResume() self-heal (resyncState), but that one
+            // only runs when the activity is paused/resumed - it never fires if the user
+            // stays on this screen the whole time, which is exactly when a tap can get
+            // silently stuck with no other recovery path.
+            mainViewModel.resyncState()
+            applyRunningState(isLoading = false, isRunning = mainViewModel.isRunning.value == true)
+        }
+    }
+
     private fun handleLayoutTestClick() {
-        if (mainViewModel.isRunning.value == true) {
-            setTestState(getString(R.string.connection_test_testing))
-            mainViewModel.testCurrentServerRealPing()
+        // Re-sync first: if a state broadcast was missed while the app stayed in the
+        // foreground, mainViewModel.isRunning.value can be stale, which used to make
+        // this tap a silent no-op (card shows "Connected", nothing happens on tap, no
+        // error, nothing - looked completely dead to the user).
+        if (mainViewModel.isRunning.value != true) {
+            mainViewModel.resyncState()
+            snackbarError(getString(R.string.connection_not_connected), title = getString(R.string.title_alerter_error))
+            return
+        }
+
+        setTestState(getString(R.string.connection_test_testing))
+        armTestTimeout()
+        mainViewModel.testCurrentServerRealPing()
+    }
+
+    /**
+     * Safety net for a single connection test: if the background service never answers
+     * (e.g. it silently stopped, or the request was dropped), the status card used to
+     * stay on "Тестирование…"/be indistinguishable from doing nothing, with no way to
+     * tell the test ever ran. This reverts the card to a sensible state and surfaces an
+     * error instead of leaving it hanging indefinitely.
+     */
+    private fun armTestTimeout() {
+        testTimeoutJob?.cancel()
+        testTimeoutJob = lifecycleScope.launch {
+            delay(10_000)
+            testTimeoutJob = null
+            mainViewModel.resyncState()
+            setTestState(lastTestResultText.ifEmpty { getString(R.string.connection_connected) })
+            snackbarError(getString(R.string.connection_test_error, getString(R.string.toast_services_failure)), title = getString(R.string.title_alerter_error))
         }
     }
 
@@ -872,6 +935,8 @@ class MainActivity : HelperBaseActivity(),
             setTestState(lastTestResultText.ifEmpty { getString(R.string.connection_connected) })
             binding.cardBottomStatus.isFocusable = true
         } else {
+            testTimeoutJob?.cancel()
+            testTimeoutJob = null
             binding.fab.setImageResource(R.drawable.ic_play_24dp)
             binding.fab.contentDescription = getString(R.string.tasker_start_service)
             binding.fabNoBlur.setImageResource(R.drawable.ic_play_24dp)
