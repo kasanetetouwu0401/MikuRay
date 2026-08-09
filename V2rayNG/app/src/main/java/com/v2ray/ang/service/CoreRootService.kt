@@ -13,6 +13,7 @@ import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.TrafficController
 import com.v2ray.ang.root.RootProxyManager
 import com.v2ray.ang.util.LogUtil
+import com.v2ray.ang.util.MessageUtil
 import com.v2ray.ang.util.MyContextWrapper
 import com.v2ray.ang.util.SoundPlayer
 import kotlinx.coroutines.CoroutineScope
