@@ -72,7 +72,7 @@ object CoreServiceManager {
     // custom routing config is being built (first run especially, with cold geosite/geoip
     // caches) that ART reclaims SoftReferences well before the Service itself is destroyed.
     // When that happened, serviceControl?.get() silently returned null and every subsequent
-    // MSG_STATE_STOP / MSG_MEASURE_DELAY / MSG_REGISTER_CLIENT broadcast from the UI was
+    // MSG_STATE_STOP / MSG_REGISTER_CLIENT broadcast from the UI was
     // dropped with no log and no user-visible error - the FAB and bottom status card looked
     // "unresponsive" even though the receiver itself was alive and firing. A plain strong
     // reference is safe here because we explicitly null it out in each service's onDestroy()
@@ -346,47 +346,50 @@ object CoreServiceManager {
     }
 
     /**
-     * Measures the connection delay for the current V2Ray configuration.
-     * Tests with primary URL first, then falls back to alternative URL if needed.
-     * Also fetches remote IP information if the delay test was successful.
+     * Measures the connection delay for the current V2Ray configuration and returns the
+     * elapsed time in ms, throwing on failure. Ported from Exclave's
+     * `BaseService.Binder#urlTest()`: unlike the old broadcast-based measureV2rayDelay()
+     * this runs synchronously on the AIDL binder thread the caller invoked it from (see
+     * [Binder.urlTest]) and hands the result straight back over the return value/exception
+     * instead of a separate measureDelayResult() callback round-trip. Tests with the
+     * primary URL first, then falls back to the alternative URL if needed, and fires off a
+     * remote-IP lookup in the background on success (delivered via the existing
+     * measureIpResult callback/broadcast, same as before).
      */
-    private fun measureV2rayDelay() {
+    private fun measureV2rayDelay(): Long {
         if (!isRunning()) {
-            return
+            error("core not started")
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
-            val service = getService() ?: return@launch
-            var time = -1L
-            var errorStr = ""
-
+        var time = -1L
+        var lastError: Exception? = null
+        try {
+            time = coreController.measureDelay(SettingsManager.getDelayTestUrl())
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to measure delay", e)
+            lastError = e
+        }
+        if (time < 0) {
             try {
-                time = coreController.measureDelay(SettingsManager.getDelayTestUrl())
+                time = coreController.measureDelay(SettingsManager.getDelayTestUrl(true))
             } catch (e: Exception) {
                 LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to measure delay", e)
-                errorStr = e.message?.substringAfter("\":") ?: "empty message"
+                lastError = e
             }
-            if (time == -1L) {
-                try {
-                    time = coreController.measureDelay(SettingsManager.getDelayTestUrl(true))
-                } catch (e: Exception) {
-                    LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to measure delay", e)
-                    errorStr = e.message?.substringAfter("\":") ?: "empty message"
-                }
-            }
+        }
 
-            val result = if (time >= 0) {
-                service.getString(R.string.connection_test_available, time)
-            } else {
-                service.getString(R.string.connection_test_error, errorStr)
-            }
-            binder.broadcastMeasureDelayResult(service, result)
+        if (time < 0) {
+            throw lastError ?: IllegalStateException("timeout")
+        }
 
-            if (time >= 0) {
+        getService()?.let { service ->
+            CoroutineScope(Dispatchers.IO).launch {
                 val ip = SpeedtestManager.getRemoteIPInfo()
                 binder.broadcastMeasureIpResult(service, ip.orEmpty())
             }
         }
+
+        return time
     }
 
     private fun measureIpOnly() {
@@ -573,8 +576,12 @@ object CoreServiceManager {
             LauncherManager.startService(serviceControl.getService())
         }
 
-        override fun measureDelay() {
-            measureV2rayDelay()
+        // Blocking - runs on the AIDL binder thread the caller invoked it from (Binder
+        // transactions for non-oneway methods already execute off the caller's main
+        // thread), matching Exclave's BaseService.Binder#urlTest(). Any exception thrown
+        // here propagates transparently back to the caller through the AIDL transaction.
+        override fun urlTest(): Int {
+            return measureV2rayDelay().toInt()
         }
 
         override fun measureIp() {
@@ -620,11 +627,6 @@ object CoreServiceManager {
         fun broadcastStateStopSuccess(service: Service) {
             broadcast { it.stateStopSuccess() }
             MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_STOP_SUCCESS, "")
-        }
-
-        fun broadcastMeasureDelayResult(service: Service, result: String) {
-            broadcast { it.measureDelayResult(result) }
-            MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_DELAY_SUCCESS, result)
         }
 
         fun broadcastMeasureIpResult(service: Service, ip: String) {

@@ -25,7 +25,7 @@ import com.v2ray.ang.util.LogUtil
  * Ported from Exclave's SagerConnection. This replaces the old
  * sendBroadcast()/registerReceiver() command channel described in the comment on
  * CoreServiceManager.serviceControl: that channel could silently drop MSG_STATE_STOP /
- * MSG_MEASURE_DELAY / MSG_REGISTER_CLIENT if the daemon's receiver wasn't registered yet
+ * MSG_REGISTER_CLIENT if the daemon's receiver wasn't registered yet
  * (or a SoftReference had been reclaimed). bindService() has no such window - the
  * connection is only ever considered "up" once the system has actually handed back a live
  * Binder, and command calls go straight through it instead of relying on a receiver.
@@ -60,7 +60,6 @@ class MikuRayConnection : ServiceConnection {
         fun stateStartSuccess() {}
         fun stateStartFailure(errorMessage: String) {}
         fun stateStopSuccess() {}
-        fun measureDelayResult(result: String) {}
         fun measureIpResult(ip: String) {}
         fun trafficUpdated(guid: String) {}
         fun trafficSpeedUpdated(speedText: String) {}
@@ -82,8 +81,6 @@ class MikuRayConnection : ServiceConnection {
             runOnMain { callback?.stateStartFailure(errorMessage) }
 
         override fun stateStopSuccess() = runOnMain { callback?.stateStopSuccess() }
-        override fun measureDelayResult(result: String) =
-            runOnMain { callback?.measureDelayResult(result) }
 
         override fun measureIpResult(ip: String) = runOnMain { callback?.measureIpResult(ip) }
         override fun trafficUpdated(guid: String) = runOnMain { callback?.trafficUpdated(guid) }

@@ -14,6 +14,11 @@ interface IMikuRayService {
 
     oneway void requestStop();
     oneway void requestRestart();
-    oneway void measureDelay();
+
+    // Blocking, like Exclave's ISagerNetService#urlTest(): runs the real ping test on the
+    // AIDL binder thread and returns the elapsed time directly, throwing on failure
+    // (timeout/refused/etc). Replaces the old oneway measureDelay() + measureDelayResult()
+    // callback round-trip.
+    int urlTest();
     oneway void measureIp();
 }

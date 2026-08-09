@@ -9,7 +9,6 @@ oneway interface IMikuRayServiceCallback {
     void stateStartFailure(String errorMessage);
     void stateStopSuccess();
 
-    void measureDelayResult(String result);
     void measureIpResult(String ip);
 
     void trafficUpdated(String guid);
