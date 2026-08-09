@@ -5,7 +5,6 @@ import com.v2ray.ang.AppConfig
 import com.v2ray.ang.core.CoreServiceManager
 import com.v2ray.ang.extension.toSpeedString
 import com.v2ray.ang.util.LogUtil
-import com.v2ray.ang.util.MessageUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -107,7 +106,7 @@ object TrafficController {
             val downSpeed = ((proxyDownlink + directDownlink) / sinceLastQueryInSeconds).toLong()
             val speedText = "↑ ${upSpeed.toSpeedString()}  ↓ ${downSpeed.toSpeedString()}"
             getService()?.let { svc ->
-                MessageUtil.sendMsg2UI(svc, AppConfig.MSG_TRAFFIC_SPEED_UPDATED, speedText)
+                CoreServiceManager.binder.broadcastTrafficSpeedUpdated(svc, speedText)
             }
         }
 
@@ -117,7 +116,7 @@ object TrafficController {
         MmkvManager.addProfileTraffic(guid, proxyUplink, proxyDownlink)
 
         getService()?.let { svc ->
-            MessageUtil.sendMsg2UI(svc, AppConfig.MSG_TRAFFIC_UPDATED, guid)
+            CoreServiceManager.binder.broadcastTrafficUpdated(svc, guid)
         }
     }
 

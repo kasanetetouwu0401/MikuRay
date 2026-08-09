@@ -417,6 +417,9 @@
     <string name="connection_test_testing">测试中…</string>
     <string name="connection_test_testing_count">正在测试 %d 个配置…</string>
     <string name="connection_test_available">连接成功：%dms</string>
+    <string name="connection_test_available_http">连接成功（HTTP）：%dms</string>
+    <string name="connection_test_timeout">超时</string>
+    <string name="connection_test_refused">连接被拒绝</string>
     <string name="connection_test_error">错误：%s</string>
     <string name="connection_test_fail">无网络</string>
     <string name="connection_test_error_status_code">错误代码：#%d</string>

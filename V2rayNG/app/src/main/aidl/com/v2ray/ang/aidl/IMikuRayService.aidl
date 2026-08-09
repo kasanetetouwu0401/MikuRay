@@ -1,0 +1,24 @@
+// Ported from Exclave's ISagerNetService.aidl, scoped to MikuRay's control set
+// (start/stop/test/traffic). Runs across the app <-> :RunSoLibV2RayDaemon process
+// boundary via bindService(), replacing the old sendBroadcast/registerReceiver channel.
+package com.v2ray.ang.aidl;
+
+import com.v2ray.ang.aidl.IMikuRayServiceCallback;
+
+interface IMikuRayService {
+    boolean isRunning();
+    String getRunningServerName();
+
+    void registerCallback(in IMikuRayServiceCallback cb);
+    oneway void unregisterCallback(in IMikuRayServiceCallback cb);
+
+    oneway void requestStop();
+    oneway void requestRestart();
+
+    // Blocking, like Exclave's ISagerNetService#urlTest(): runs the real ping test on the
+    // AIDL binder thread and returns the elapsed time directly, throwing on failure
+    // (timeout/refused/etc). Replaces the old oneway measureDelay() + measureDelayResult()
+    // callback round-trip.
+    int urlTest();
+    oneway void measureIp();
+}

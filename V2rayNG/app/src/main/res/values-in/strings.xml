@@ -418,6 +418,9 @@ Nama Paket — cuma bisa kalo lu pake Xray TUN, routeOnly aktif, dan Android 10+
     <string name="connection_test_testing">Lagi ngecek…</string>
     <string name="connection_test_testing_count">Ngecek %d konfig…</string>
     <string name="connection_test_available">Sukses konek: %dms</string>
+    <string name="connection_test_available_http">Sukses konek (HTTP): %dms</string>
+    <string name="connection_test_timeout">Waktu habis</string>
+    <string name="connection_test_refused">Koneksi ditolak</string>
     <string name="connection_test_error">Error: %s</string>
     <string name="connection_test_fail">Gak ada internet</string>
     <string name="connection_test_error_status_code">Kode error: #%d</string>

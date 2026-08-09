@@ -27,6 +27,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -483,6 +484,23 @@ class MainActivity : HelperBaseActivity(),
             adapter = groupPagerAdapter
             isUserInputEnabled = true
             offscreenPageLimit = 10
+            registerOnPageChangeCallback(pageChangeCallback)
+        }
+    }
+
+    // Fires the moment a swipe settles on a new page, ahead of (and independent from) the
+    // now-visible GroupServerFragment's own onResume() -> subscriptionIdChangedAsync() call.
+    // ViewPager2 only promotes the current item to RESUMED, so onResume there already covers
+    // this, but wiring it here too means the group/subscriptionId switch isn't left implicit
+    // in fragment lifecycle timing - it's driven directly by the page-selection event, same as
+    // a TabLayout tap. subscriptionIdChangedAsync() no-ops if the id hasn't actually changed,
+    // so this and the fragment's own call never do the reload work twice.
+    private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
+        override fun onPageSelected(position: Int) {
+            super.onPageSelected(position)
+            groupPagerAdapter.groups.getOrNull(position)?.let { group ->
+                mainViewModel.subscriptionIdChangedAsync(group.id)
+            }
         }
     }
 
@@ -657,6 +675,7 @@ class MainActivity : HelperBaseActivity(),
         mainViewModel.updateTestResultAction.observe(this) {
             lastTestResultText = it.orEmpty()
             setTestState(it)
+            binding.cardBottomStatus.isEnabled = mainViewModel.isRunning.value == true
         }
         mainViewModel.testProgressAction.observe(this) { info ->
             if (info == null) {
@@ -805,12 +824,23 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
+    // Ported from Exclave's `binding.fab.setOnClickListener { if (state.canStop) stopService()
+    // else connect.launch(null) }`: a single state-based decision. The VPN-permission check
+    // stays inline here (MikuRay has no VpnRequestActivity contract like Exclave's `connect`
+    // launcher to delegate it to).
     private fun handleFabAction() {
+        val isRunning = mainViewModel.isRunning.value == true
         applyRunningState(isLoading = true, isRunning = false)
 
-        if (mainViewModel.isRunning.value == true) {
+        if (isRunning) {
             LauncherManager.stopService(this)
-        } else if (SettingsManager.isVpnMode()) {
+        } else {
+            connectAndStart()
+        }
+    }
+
+    private fun connectAndStart() {
+        if (SettingsManager.isVpnMode()) {
             val intent = VpnService.prepare(this)
             if (intent == null) {
                 startV2Ray()
@@ -822,8 +852,12 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
+    // Ported from Exclave's `StatsBar#testConnection()`: disables the card so a second tap
+    // can't fire another test while one is already in flight over the AIDL urlTest() call,
+    // re-enabled once updateTestResultAction delivers a result (see setupViewModel()).
     private fun handleLayoutTestClick() {
         if (mainViewModel.isRunning.value == true) {
+            binding.cardBottomStatus.isEnabled = false
             setTestState(getString(R.string.connection_test_testing))
             mainViewModel.testCurrentServerRealPing()
         }
@@ -1246,6 +1280,7 @@ class MainActivity : HelperBaseActivity(),
         urlTestProgressDialog.dismiss()
 
         tabMediator?.detach()
+        binding.viewPager.unregisterOnPageChangeCallback(pageChangeCallback)
         
         try {
             bannerReceiver?.let { unregisterReceiver(it) }

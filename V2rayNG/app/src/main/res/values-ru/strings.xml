@@ -423,6 +423,9 @@
     <string name="connection_test_testing">Тестирование…</string>
     <string name="connection_test_testing_count">Тестирование %d конфигураций…</string>
     <string name="connection_test_available">Подключение успешно: %d мс</string>
+    <string name="connection_test_available_http">Подключение успешно (HTTP): %d мс</string>
+    <string name="connection_test_timeout">Тайм-аут</string>
+    <string name="connection_test_refused">Соединение отклонено</string>
     <string name="connection_test_error">Ошибка: %s</string>
     <string name="connection_test_fail">Нет интернета</string>
     <string name="connection_test_error_status_code">Код ошибки: #%d</string>

@@ -279,6 +279,16 @@ object AppConfig {
     const val BROADCAST_ACTION_PARTICLES_CHANGED = "$ANG_PACKAGE.action.particles_changed"
     const val BROADCAST_ACTION_CATEGORY_STYLE_CHANGED = "$ANG_PACKAGE.action.category_style_changed"
 
+    /**
+     * bindService() intent action for [com.v2ray.ang.aidl.IMikuRayService]. Ported from
+     * Exclave/SagerNet's Action.SERVICE: replaces the old sendBroadcast/registerReceiver
+     * command channel (MSG_STATE_STOP / MSG_REGISTER_CLIENT below) for
+     * every control that originates from a live UI (start/stop/test/traffic). Notification
+     * and widget action buttons still use plain broadcasts since those are PendingIntents
+     * with no bindable caller context - see MSG_STATE_STOP / MSG_STATE_RESTART.
+     */
+    const val AIDL_SERVICE_ACTION = "$ANG_PACKAGE.action.aidl_service"
+
     /** Tasker extras. */
     const val TASKER_EXTRA_BUNDLE = "com.twofortyfouram.locale.intent.extra.BUNDLE"
     const val TASKER_EXTRA_STRING_BLURB = "com.twofortyfouram.locale.intent.extra.BLURB"
@@ -357,8 +367,6 @@ object AppConfig {
     const val MSG_STATE_STOP = 4
     const val MSG_STATE_STOP_SUCCESS = 41
     const val MSG_STATE_RESTART = 5
-    const val MSG_MEASURE_DELAY = 6
-    const val MSG_MEASURE_DELAY_SUCCESS = 61
     const val MSG_MEASURE_IP = 62
     const val MSG_MEASURE_IP_SUCCESS = 63
     const val MSG_MEASURE_CONFIG_START = 7
