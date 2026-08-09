@@ -657,7 +657,6 @@ class MainActivity : HelperBaseActivity(),
         mainViewModel.updateTestResultAction.observe(this) {
             lastTestResultText = it.orEmpty()
             setTestState(it)
-            binding.cardBottomStatus.isEnabled = mainViewModel.isRunning.value == true
         }
         mainViewModel.testProgressAction.observe(this) { info ->
             if (info == null) {
@@ -806,23 +805,12 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
-    // Ported from Exclave's `binding.fab.setOnClickListener { if (state.canStop) stopService()
-    // else connect.launch(null) }`: a single state-based decision. The VPN-permission check
-    // stays inline here (MikuRay has no VpnRequestActivity contract like Exclave's `connect`
-    // launcher to delegate it to).
     private fun handleFabAction() {
-        val isRunning = mainViewModel.isRunning.value == true
         applyRunningState(isLoading = true, isRunning = false)
 
-        if (isRunning) {
+        if (mainViewModel.isRunning.value == true) {
             LauncherManager.stopService(this)
-        } else {
-            connectAndStart()
-        }
-    }
-
-    private fun connectAndStart() {
-        if (SettingsManager.isVpnMode()) {
+        } else if (SettingsManager.isVpnMode()) {
             val intent = VpnService.prepare(this)
             if (intent == null) {
                 startV2Ray()
@@ -834,12 +822,8 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
-    // Ported from Exclave's `StatsBar#testConnection()`: disables the card so a second tap
-    // can't fire another test while one is already in flight over the AIDL urlTest() call,
-    // re-enabled once updateTestResultAction delivers a result (see setupViewModel()).
     private fun handleLayoutTestClick() {
         if (mainViewModel.isRunning.value == true) {
-            binding.cardBottomStatus.isEnabled = false
             setTestState(getString(R.string.connection_test_testing))
             mainViewModel.testCurrentServerRealPing()
         }

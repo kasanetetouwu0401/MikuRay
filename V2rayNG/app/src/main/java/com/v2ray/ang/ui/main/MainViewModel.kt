@@ -13,8 +13,6 @@ import androidx.lifecycle.viewModelScope
 import com.v2ray.ang.AngApplication
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import com.v2ray.ang.aidl.IMikuRayService
-import com.v2ray.ang.core.MikuRayConnection
 import com.v2ray.ang.dto.GroupMapItem
 import com.v2ray.ang.dto.entities.ServersCache
 import com.v2ray.ang.dto.entities.SubscriptionCache
@@ -52,30 +50,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val updateGroupBadgeAction by lazy { MutableLiveData<Unit>() }
 
     /**
-     * AIDL binding to the running core service, ported from Exclave's persistent
-     * `SagerConnection` held by MainActivity. Bound for as long as this ViewModel lives
-     * (see [startListenBroadcast]/[onCleared]) and used for the two calls that need a live
-     * two-way channel rather than the fire-and-forget broadcast command channel:
-     * [testCurrentServerRealPing] (blocking [IMikuRayService.urlTest]) and [resyncState]
-     * (reading [IMikuRayService.isRunning] directly instead of the old, no-longer-handled
-     * MSG_REGISTER_CLIENT broadcast).
-     */
-    private val connection = MikuRayConnection()
-    private val connectionCallback = object : MikuRayConnection.Callback {
-        override fun onServiceConnected(service: IMikuRayService) {
-            isRunning.value = service.isRunning()
-        }
-
-        override fun stateRunning() {
-            isRunning.value = true
-        }
-
-        override fun stateNotRunning() {
-            isRunning.value = false
-        }
-    }
-
-    /**
      * Refer to the official documentation for [registerReceiver](https://developer.android.com/reference/androidx/core/content/ContextCompat#registerReceiver(android.content.Context,android.content.BroadcastReceiver,android.content.IntentFilter,int):\
      * `registerReceiver(Context, BroadcastReceiver, IntentFilter, int)`.
      */
@@ -83,7 +57,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         isRunning.value = false
         val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
         ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
-        connection.connect(getApplication(), connectionCallback)
+        MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
     /**
@@ -95,7 +69,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      * instead of leaving the FAB/status card stuck reflecting a stale state.
      */
     fun resyncState() {
-        connection.service?.let { isRunning.value = it.isRunning() }
+        MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
     /**
@@ -107,7 +81,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         } catch (e: IllegalArgumentException) {
             e.printStackTrace()
         }
-        connection.disconnect(getApplication())
         LogUtil.i(AppConfig.TAG, "Main ViewModel is cleared")
         super.onCleared()
     }
@@ -275,44 +248,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Tests the real ping for the current server over the live [connection] to the running
-     * core service. Ported from Exclave's `StatsBar#testConnection()`: [IMikuRayService.urlTest]
-     * is a blocking AIDL call, so it's dispatched on [Dispatchers.IO] and its result/exception
-     * posted straight to [updateTestResultAction] - no more MSG_MEASURE_DELAY broadcast that
-     * nothing was listening for.
+     * Tests the real ping for the current server.
      */
     fun testCurrentServerRealPing() {
-        val app = getApplication<AngApplication>()
-        val service = connection.service
-        if (service == null) {
-            updateTestResultAction.value = app.getString(R.string.connection_test_error, app.getString(R.string.connection_not_connected))
-            return
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val result = try {
-                val elapsed = service.urlTest()
-                val urlRes = if (SettingsManager.getDelayTestUrl().startsWith("https://", ignoreCase = true)) {
-                    R.string.connection_test_available
-                } else {
-                    R.string.connection_test_available_http
-                }
-                app.getString(urlRes, elapsed)
-            } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "MainViewModel: Failed to test connection", e)
-                val msg = e.message ?: e.javaClass.simpleName
-                when {
-                    msg.contains("timeout", ignoreCase = true) || msg.contains("deadline", ignoreCase = true) ->
-                        app.getString(R.string.connection_test_timeout)
-
-                    msg.contains("refused", ignoreCase = true) || msg.contains("closed pipe", ignoreCase = true) ->
-                        app.getString(R.string.connection_test_refused)
-
-                    else -> app.getString(R.string.connection_test_error, msg)
-                }
-            }
-            updateTestResultAction.postValue(result)
-        }
+        MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_MEASURE_DELAY, "")
     }
 
     fun fetchCurrentIp() {
@@ -646,6 +585,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 AppConfig.MSG_STATE_STOP_SUCCESS -> {
                     isRunning.value = false
+                }
+
+                AppConfig.MSG_MEASURE_DELAY_SUCCESS -> {
+                    updateTestResultAction.value = intent.getStringExtra("content").orEmpty()
                 }
 
                 AppConfig.MSG_MEASURE_IP_SUCCESS -> {

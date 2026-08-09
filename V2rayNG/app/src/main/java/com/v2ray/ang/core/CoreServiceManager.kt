@@ -8,14 +8,10 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.ParcelFileDescriptor
-import android.os.RemoteCallbackList
-import android.os.RemoteException
 import android.system.OsConstants
 import androidx.core.content.ContextCompat
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import com.v2ray.ang.aidl.IMikuRayService
-import com.v2ray.ang.aidl.IMikuRayServiceCallback
 import com.v2ray.ang.contracts.ServiceControl
 import com.v2ray.ang.dto.OutboundTrafficStat
 import com.v2ray.ang.dto.entities.ProfileItem
@@ -46,16 +42,6 @@ object CoreServiceManager {
 
     private val coreController: CoreController = CoreNativeManager.newCoreController(CoreCallback())
     private val mMsgReceive = ReceiveMessageHandler()
-
-    /**
-     * AIDL binder for [IMikuRayService]. Bound by [MikuRayConnection] from MainViewModel /
-     * QSTileService. See the class doc on MikuRayConnection for why this replaces the old
-     * broadcast command channel. Each broadcastXxx() below also still fires the legacy
-     * MessageUtil.sendMsg2UI() so WidgetProvider (a stateless AppWidgetProvider that can't
-     * hold a bound connection) keeps working unchanged.
-     */
-    val binder = Binder()
-
     private var currentConfig: ProfileItem? = null
     private var processFinder: XrayProcessFinder? = null
     private var browserDialer: IDialerService? = null
@@ -72,7 +58,7 @@ object CoreServiceManager {
     // custom routing config is being built (first run especially, with cold geosite/geoip
     // caches) that ART reclaims SoftReferences well before the Service itself is destroyed.
     // When that happened, serviceControl?.get() silently returned null and every subsequent
-    // MSG_STATE_STOP / MSG_REGISTER_CLIENT broadcast from the UI was
+    // MSG_STATE_STOP / MSG_MEASURE_DELAY / MSG_REGISTER_CLIENT broadcast from the UI was
     // dropped with no log and no user-visible error - the FAB and bottom status card looked
     // "unresponsive" even though the receiver itself was alive and firing. A plain strong
     // reference is safe here because we explicitly null it out in each service's onDestroy()
@@ -134,7 +120,7 @@ object CoreServiceManager {
         } catch (e: Exception) {
             val message = e.message?.takeUnless { it.isBlank() } ?: e.javaClass.simpleName
             LogUtil.e(AppConfig.TAG, "StartCore-Manager: $message", e)
-            binder.broadcastStateStartFailure(service, message)
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
             NotificationManager.cancelNotification()
             return false
         }
@@ -214,7 +200,7 @@ object CoreServiceManager {
         }
 
         if (!isReload) {
-            binder.broadcastStateStartSuccess(service)
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
         }
         NotificationManager.startSpeedNotification()
         LogUtil.i(AppConfig.TAG, "StartCore-Manager: Core started successfully")
@@ -249,7 +235,7 @@ object CoreServiceManager {
             browserDialer = null
         }
 
-        binder.broadcastStateStopSuccess(service)
+        MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_STOP_SUCCESS, "")
         NotificationManager.cancelNotification()
 
         try {
@@ -306,7 +292,7 @@ object CoreServiceManager {
         } catch (e: Exception) {
             val message = e.message?.takeUnless { it.isBlank() } ?: e.javaClass.simpleName
             LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to reload core: $message", e)
-            binder.broadcastStateStartFailure(service, message)
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
             false
         } finally {
             isReloading = false
@@ -346,50 +332,47 @@ object CoreServiceManager {
     }
 
     /**
-     * Measures the connection delay for the current V2Ray configuration and returns the
-     * elapsed time in ms, throwing on failure. Ported from Exclave's
-     * `BaseService.Binder#urlTest()`: unlike the old broadcast-based measureV2rayDelay()
-     * this runs synchronously on the AIDL binder thread the caller invoked it from (see
-     * [Binder.urlTest]) and hands the result straight back over the return value/exception
-     * instead of a separate measureDelayResult() callback round-trip. Tests with the
-     * primary URL first, then falls back to the alternative URL if needed, and fires off a
-     * remote-IP lookup in the background on success (delivered via the existing
-     * measureIpResult callback/broadcast, same as before).
+     * Measures the connection delay for the current V2Ray configuration.
+     * Tests with primary URL first, then falls back to alternative URL if needed.
+     * Also fetches remote IP information if the delay test was successful.
      */
-    private fun measureV2rayDelay(): Long {
+    private fun measureV2rayDelay() {
         if (!isRunning()) {
-            error("core not started")
+            return
         }
 
-        var time = -1L
-        var lastError: Exception? = null
-        try {
-            time = coreController.measureDelay(SettingsManager.getDelayTestUrl())
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to measure delay", e)
-            lastError = e
-        }
-        if (time < 0) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val service = getService() ?: return@launch
+            var time = -1L
+            var errorStr = ""
+
             try {
-                time = coreController.measureDelay(SettingsManager.getDelayTestUrl(true))
+                time = coreController.measureDelay(SettingsManager.getDelayTestUrl())
             } catch (e: Exception) {
                 LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to measure delay", e)
-                lastError = e
+                errorStr = e.message?.substringAfter("\":") ?: "empty message"
             }
-        }
+            if (time == -1L) {
+                try {
+                    time = coreController.measureDelay(SettingsManager.getDelayTestUrl(true))
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to measure delay", e)
+                    errorStr = e.message?.substringAfter("\":") ?: "empty message"
+                }
+            }
 
-        if (time < 0) {
-            throw lastError ?: IllegalStateException("timeout")
-        }
+            val result = if (time >= 0) {
+                service.getString(R.string.connection_test_available, time)
+            } else {
+                service.getString(R.string.connection_test_error, errorStr)
+            }
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_DELAY_SUCCESS, result)
 
-        getService()?.let { service ->
-            CoroutineScope(Dispatchers.IO).launch {
+            if (time >= 0) {
                 val ip = SpeedtestManager.getRemoteIPInfo()
-                binder.broadcastMeasureIpResult(service, ip.orEmpty())
+                MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_IP_SUCCESS, ip.orEmpty())
             }
         }
-
-        return time
     }
 
     private fun measureIpOnly() {
@@ -400,7 +383,7 @@ object CoreServiceManager {
         CoroutineScope(Dispatchers.IO).launch {
             val service = getService() ?: return@launch
             val ip = SpeedtestManager.getRemoteIPInfo()
-            binder.broadcastMeasureIpResult(service, ip.orEmpty())
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_IP_SUCCESS, ip.orEmpty())
         }
     }
 
@@ -489,16 +472,13 @@ object CoreServiceManager {
     }
 
     /**
-     * Broadcast receiver for the small set of messages that can only ever arrive as a
-     * broadcast: notification/widget action buttons (PendingIntent.getBroadcast(), which
-     * has no bindable caller context to hang an AIDL connection off) and OS screen-on/off
-     * events. Every other control (register/stop/restart/test/traffic) that originates from
-     * a live UI now goes through [binder] via [MikuRayConnection] instead - see its class
-     * doc for why.
+     * Broadcast receiver for handling messages sent to the service.
+     * Handles registration, service control, and screen events.
      */
     private class ReceiveMessageHandler : BroadcastReceiver() {
         /**
          * Handles received broadcast messages.
+         * Processes service control messages and screen state changes.
          * @param ctx The context in which the receiver is running.
          * @param intent The intent being received.
          */
@@ -511,6 +491,22 @@ object CoreServiceManager {
                 return
             }
             when (intent?.getIntExtra("key", 0)) {
+                AppConfig.MSG_REGISTER_CLIENT -> {
+                    if (isRunning()) {
+                        MessageUtil.sendMsg2UI(serviceControl.getService(), AppConfig.MSG_STATE_RUNNING, "")
+                    } else {
+                        MessageUtil.sendMsg2UI(serviceControl.getService(), AppConfig.MSG_STATE_NOT_RUNNING, "")
+                    }
+                }
+
+                AppConfig.MSG_UNREGISTER_CLIENT -> {
+                    // nothing to do
+                }
+
+                AppConfig.MSG_STATE_START -> {
+                    // nothing to do
+                }
+
                 AppConfig.MSG_STATE_STOP -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Stop service")
                     serviceControl.stopService()
@@ -521,6 +517,14 @@ object CoreServiceManager {
                     serviceControl.stopService()
                     Thread.sleep(500L)
                     LauncherManager.startService(serviceControl.getService())
+                }
+
+                AppConfig.MSG_MEASURE_DELAY -> {
+                    measureV2rayDelay()
+                }
+
+                AppConfig.MSG_MEASURE_IP -> {
+                    measureIpOnly()
                 }
             }
 
@@ -535,113 +539,6 @@ object CoreServiceManager {
                     NotificationManager.startSpeedNotification()
                 }
             }
-        }
-    }
-
-    /**
-     * [IMikuRayService] implementation returned from each core service's onBind(). Ported
-     * from Exclave's BaseService.Binder, minus the Data/proxy-instance plumbing MikuRay
-     * doesn't need since CoreServiceManager itself is already the single daemon-process
-     * singleton (see the serviceControl comment above for why a plain object works here).
-     */
-    class Binder : IMikuRayService.Stub() {
-        private val callbacks = RemoteCallbackList<IMikuRayServiceCallback>()
-
-        override fun isRunning(): Boolean = CoreServiceManager.isRunning()
-        override fun getRunningServerName(): String = CoreServiceManager.getRunningServerName()
-
-        override fun registerCallback(cb: IMikuRayServiceCallback) {
-            callbacks.register(cb)
-            // WidgetProvider can't hold a bound connection (see the class doc on
-            // MikuRayConnection), so it relies on an opportunistic MSG_STATE_RUNNING/
-            // NOT_RUNNING broadcast whenever a real client (MainViewModel, QSTileService)
-            // shows up - previously sent in reply to MSG_REGISTER_CLIENT, now sent here on
-            // every AIDL registration instead, same trigger points (app open, tile shown).
-            val service = serviceControl?.getService() ?: return
-            if (isRunning()) broadcastStateRunning(service) else broadcastStateNotRunning(service)
-        }
-
-        override fun unregisterCallback(cb: IMikuRayServiceCallback) {
-            callbacks.unregister(cb)
-        }
-
-        override fun requestStop() {
-            serviceControl?.stopService()
-        }
-
-        override fun requestRestart() {
-            val serviceControl = serviceControl ?: return
-            serviceControl.stopService()
-            Thread.sleep(500L)
-            LauncherManager.startService(serviceControl.getService())
-        }
-
-        // Blocking - runs on the AIDL binder thread the caller invoked it from (Binder
-        // transactions for non-oneway methods already execute off the caller's main
-        // thread), matching Exclave's BaseService.Binder#urlTest(). Any exception thrown
-        // here propagates transparently back to the caller through the AIDL transaction.
-        override fun urlTest(): Int {
-            return measureV2rayDelay().toInt()
-        }
-
-        override fun measureIp() {
-            measureIpOnly()
-        }
-
-        private inline fun broadcast(action: (IMikuRayServiceCallback) -> Unit) {
-            val count = callbacks.beginBroadcast()
-            try {
-                repeat(count) {
-                    try {
-                        action(callbacks.getBroadcastItem(it))
-                    } catch (_: RemoteException) {
-                    }
-                }
-            } finally {
-                callbacks.finishBroadcast()
-            }
-        }
-
-        fun broadcastStateRunning(service: Service) {
-            broadcast { it.stateRunning() }
-            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_RUNNING, "")
-        }
-
-        fun broadcastStateNotRunning(service: Service) {
-            broadcast { it.stateNotRunning() }
-            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_NOT_RUNNING, "")
-        }
-
-        // stateStartSuccess()/etc. below are still pushed on real transitions; the two
-        // methods above only exist for the registerCallback() sync described there.
-        fun broadcastStateStartSuccess(service: Service) {
-            broadcast { it.stateStartSuccess() }
-            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
-        }
-
-        fun broadcastStateStartFailure(service: Service, message: String) {
-            broadcast { it.stateStartFailure(message) }
-            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
-        }
-
-        fun broadcastStateStopSuccess(service: Service) {
-            broadcast { it.stateStopSuccess() }
-            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_STOP_SUCCESS, "")
-        }
-
-        fun broadcastMeasureIpResult(service: Service, ip: String) {
-            broadcast { it.measureIpResult(ip) }
-            MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_IP_SUCCESS, ip)
-        }
-
-        fun broadcastTrafficUpdated(service: Service, guid: String) {
-            broadcast { it.trafficUpdated(guid) }
-            MessageUtil.sendMsg2UI(service, AppConfig.MSG_TRAFFIC_UPDATED, guid)
-        }
-
-        fun broadcastTrafficSpeedUpdated(service: Service, speedText: String) {
-            broadcast { it.trafficSpeedUpdated(speedText) }
-            MessageUtil.sendMsg2UI(service, AppConfig.MSG_TRAFFIC_SPEED_UPDATED, speedText)
         }
     }
 }
