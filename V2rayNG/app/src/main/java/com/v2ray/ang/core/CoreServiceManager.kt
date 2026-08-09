@@ -180,7 +180,12 @@ object CoreServiceManager {
     fun stopCoreLoop(): Boolean {
         val service = getService() ?: return false
 
-        networkMonitor?.unregister()
+        try {
+            networkMonitor?.unregister()
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to unregister network monitor", e)
+        }
+        
         networkMonitor = null
         currentVpnInterface = null
 

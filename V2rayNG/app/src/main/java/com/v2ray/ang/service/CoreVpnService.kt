@@ -191,9 +191,6 @@ class CoreVpnService : VpnService(), ServiceControl {
                 ).also { it.acquire() }
                 LogUtil.i(AppConfig.TAG, "StartCore-VPN: WakeLock acquired")
             }
-            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
-                SoundPlayer.playConnect(this)
-            }
             return true
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to establish VPN interface", e)
@@ -301,14 +298,18 @@ class CoreVpnService : VpnService(), ServiceControl {
             }
         }
         wakeLock = null
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
-            SoundPlayer.playDisconnect(this)
-        }
 
         val tun2socks = tun2SocksService
         tun2SocksService = null
 
         CoroutineScope(Dispatchers.IO).launch {
+            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
+                try {
+                    SoundPlayer.playDisconnect(this@CoreVpnService)
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "StartCore-VPN: Sound error", e)
+                }
+            }
             try {
                 tun2socks?.stopTun2Socks()
             } catch (e: Exception) {

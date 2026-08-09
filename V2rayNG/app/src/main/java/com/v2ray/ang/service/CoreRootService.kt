@@ -95,14 +95,17 @@ class CoreRootService : Service(), ServiceControl {
     private fun stopAllService(isForced: Boolean = true) {
         isRunning = false
 
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
-            SoundPlayer.playDisconnect(this)
-        }
-
         val jobToCancel = setupJob
         setupJob = null
 
         CoroutineScope(Dispatchers.IO).launch {
+            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
+                try {
+                    SoundPlayer.playDisconnect(this@CoreRootService)
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "StartCore-Root: Sound error", e)
+                }
+            }
             jobToCancel?.cancelAndJoin()
             try {
                 RootProxyManager.stopFull(this@CoreRootService)
