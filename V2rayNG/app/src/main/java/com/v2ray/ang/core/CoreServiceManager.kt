@@ -338,6 +338,18 @@ object CoreServiceManager {
      */
     private fun measureV2rayDelay() {
         if (!isRunning()) {
+            // Previously this just returned - if isRunning() reads false during a
+            // start/restart race, the UI never gets a reply and the "testing..." label
+            // (set optimistically by handleLayoutTestClick()) is stuck forever with no
+            // way to recover except restarting the app. Always answer back.
+            val service = getService()
+            if (service != null) {
+                MessageUtil.sendMsg2UI(
+                    service,
+                    AppConfig.MSG_MEASURE_DELAY_SUCCESS,
+                    service.getString(R.string.connection_test_error, "core not running")
+                )
+            }
             return
         }
 
@@ -484,10 +496,31 @@ object CoreServiceManager {
          */
         override fun onReceive(ctx: Context?, intent: Intent?) {
             val serviceControl = serviceControl ?: run {
-                LogUtil.w(
-                    AppConfig.TAG,
-                    "StartCore-Manager: Dropped msg key=${intent?.getIntExtra("key", 0)}, serviceControl is null"
-                )
+                val key = intent?.getIntExtra("key", 0)
+                LogUtil.w(AppConfig.TAG, "StartCore-Manager: Dropped msg key=$key, serviceControl is null")
+                // Previously this returned with no reply at all. If the FAB/test UI is
+                // waiting on a broadcast that can now never arrive (daemon process not
+                // ready yet / already torn down), it would stay stuck in its "loading" or
+                // "testing..." state forever with no way to recover except restarting the
+                // app. Fall back to the app context so we can still answer the UI.
+                val fallbackCtx = ctx ?: return
+                when (key) {
+                    AppConfig.MSG_STATE_STOP, AppConfig.MSG_STATE_RESTART ->
+                        MessageUtil.sendMsg2UI(fallbackCtx, AppConfig.MSG_STATE_NOT_RUNNING, "")
+
+                    AppConfig.MSG_MEASURE_DELAY ->
+                        MessageUtil.sendMsg2UI(
+                            fallbackCtx,
+                            AppConfig.MSG_MEASURE_DELAY_SUCCESS,
+                            fallbackCtx.getString(R.string.connection_test_error, "service not ready")
+                        )
+
+                    AppConfig.MSG_MEASURE_IP ->
+                        MessageUtil.sendMsg2UI(fallbackCtx, AppConfig.MSG_MEASURE_IP_SUCCESS, "")
+
+                    AppConfig.MSG_REGISTER_CLIENT ->
+                        MessageUtil.sendMsg2UI(fallbackCtx, AppConfig.MSG_STATE_NOT_RUNNING, "")
+                }
                 return
             }
             when (intent?.getIntExtra("key", 0)) {

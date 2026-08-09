@@ -124,7 +124,15 @@ class CoreVpnService : VpnService(), ServiceControl {
                     stopSelf()
                 }
             } else {
-                startService()
+                try {
+                    startService()
+                } finally {
+                    // Always release the start lock once setup+core-start has finished,
+                    // success or not - otherwise a later start (e.g. after the OS restarts
+                    // this service) can find isStartingLock still true and silently no-op,
+                    // leaving the FAB stuck in the "loading" state forever.
+                    withContext(Dispatchers.Main) { unlockStart() }
+                }
             }
         }
         return START_STICKY
