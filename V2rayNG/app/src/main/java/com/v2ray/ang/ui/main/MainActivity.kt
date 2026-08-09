@@ -690,10 +690,6 @@ class MainActivity : HelperBaseActivity(),
             }
         }
 
-        // Show the same "loading" FAB icon used for handleFabAction() taps while the
-        // service connection is still resolving (isRunning.value == null - see the comment
-        // on MainViewModel.startListenBroadcast()), instead of defaulting to "not running".
-        applyRunningState(isLoading = true, isRunning = false)
         mainViewModel.startListenBroadcast()
         mainViewModel.initAssets(assets)
     }
@@ -810,14 +806,6 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun handleFabAction() {
-        // Ignore taps while the AIDL connection hasn't resolved the real state yet
-        // (isRunning.value == null - see MainViewModel.startListenBroadcast()). Without
-        // this guard a tap here would fall into the "start" branch below even if the VPN
-        // is actually already connected, since null == true is false.
-        if (mainViewModel.isRunning.value == null) {
-            return
-        }
-
         applyRunningState(isLoading = true, isRunning = false)
 
         if (mainViewModel.isRunning.value == true) {
