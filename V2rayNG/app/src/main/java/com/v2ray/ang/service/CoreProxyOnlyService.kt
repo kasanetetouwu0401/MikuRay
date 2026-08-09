@@ -13,14 +13,24 @@ import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.MyContextWrapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 class CoreProxyOnlyService : Service(), ServiceControl {
     // startCoreLoop() blocks on the native core startup; keep it off onStartCommand's
     // main thread so it doesn't stall the rest of the (same-process) app UI.
     private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+
+    // Tracks the in-flight startCoreLoop() job so stopService() can cancelAndJoin() it
+    // before tearing down, instead of racing a still-connecting core (same reasoning as
+    // CoreVpnService.connectJob - ported from SagerNet/Exclave's BaseService.stopRunner()).
+    private var connectJob: Job? = null
+    private val isStoppingLock = AtomicBoolean(false)
+
     /**
      * Initializes the service.
      */
@@ -40,7 +50,7 @@ class CoreProxyOnlyService : Service(), ServiceControl {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         NotificationManager.ensureForeground()
         LogUtil.i(AppConfig.TAG, "StartCore-Proxy: Service command received")
-        serviceScope.launch {
+        connectJob = serviceScope.launch {
             CoreServiceManager.startCoreLoop(null)
         }
         return START_STICKY
@@ -51,7 +61,12 @@ class CoreProxyOnlyService : Service(), ServiceControl {
      */
     override fun onDestroy() {
         super.onDestroy()
-        CoreServiceManager.stopCoreLoop()
+        // Safety net for when the service is killed/destroyed without going through
+        // stopService() first (e.g. system low-memory kill). Guarded so it doesn't
+        // double-run stopCoreLoop() when stopService() already handled it.
+        if (isStoppingLock.compareAndSet(false, true)) {
+            CoreServiceManager.stopCoreLoop()
+        }
         CoreServiceManager.clearServiceControl(this)
         serviceScope.cancel()
     }
@@ -75,7 +90,18 @@ class CoreProxyOnlyService : Service(), ServiceControl {
      * Stops the service.
      */
     override fun stopService() {
-        stopSelf()
+        serviceScope.launch {
+            if (isStoppingLock.compareAndSet(false, true)) {
+                // See connectJob above: wait for any in-flight connect to actually finish
+                // before tearing down, so a disconnect tap can't land while startCoreLoop()
+                // is still mid-flight (more likely with a slow-to-build custom routing
+                // config) and tear the core down under it.
+                connectJob?.cancelAndJoin()
+                connectJob = null
+                CoreServiceManager.stopCoreLoop()
+            }
+            stopSelf()
+        }
     }
 
     /**

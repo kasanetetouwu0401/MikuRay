@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Foreground service for Root mode (system-wide proxy without VpnService).
@@ -36,6 +37,7 @@ class CoreRootService : Service(), ServiceControl {
 
     private var isRunning = false
     private var setupJob: Job? = null
+    private val isStoppingLock = AtomicBoolean(false)
 
     override fun onCreate() {
         super.onCreate()
@@ -115,6 +117,10 @@ class CoreRootService : Service(), ServiceControl {
     // ---- private -----------------------------------------------------------
 
     private fun stopAllService(isForced: Boolean = true) {
+        if (!isStoppingLock.compareAndSet(false, true)) {
+            LogUtil.w(AppConfig.TAG, "StartCore-Root: Stop already in progress")
+            return
+        }
         isRunning = false
 
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
@@ -135,15 +141,19 @@ class CoreRootService : Service(), ServiceControl {
         val jobToCancel = setupJob
         setupJob = null
         CoroutineScope(Dispatchers.IO).launch {
-            jobToCancel?.cancelAndJoin()
             try {
-                RootProxyManager.stopFull(this@CoreRootService)
-            } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "StartCore-Root: teardown error", e)
-            }
-            CoreServiceManager.stopCoreLoop()
-            if (isForced) {
-                stopSelf()
+                jobToCancel?.cancelAndJoin()
+                try {
+                    RootProxyManager.stopFull(this@CoreRootService)
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "StartCore-Root: teardown error", e)
+                }
+                CoreServiceManager.stopCoreLoop()
+                if (isForced) {
+                    stopSelf()
+                }
+            } finally {
+                isStoppingLock.set(false)
             }
         }
     }

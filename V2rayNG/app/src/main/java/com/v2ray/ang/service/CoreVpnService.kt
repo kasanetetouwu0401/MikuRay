@@ -29,8 +29,10 @@ import com.v2ray.ang.util.SoundPlayer
 import com.v2ray.ang.util.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
@@ -42,6 +44,19 @@ class CoreVpnService : VpnService(), ServiceControl {
     private var tun2SocksService: Tun2SocksControl? = null
     private var wakeLock: PowerManager.WakeLock? = null
     private val isStartingLock = AtomicBoolean(false)
+    private val isStoppingLock = AtomicBoolean(false)
+
+    // The job started in onStartCommand() (setupVpnService() + native startService()).
+    // With a large/complex custom routing config (big geosite/geoip sets, domainMatcher:
+    // hybrid) this can legitimately take several seconds. If stopService() ran teardown
+    // concurrently with this job - e.g. the user taps disconnect while the connect is
+    // still finishing - it could close mInterface / tear down the core out from under an
+    // in-flight establish()/startLoop() call, leaving the native core or tun2socks in a
+    // stuck, half-torn-down state that never reports back to the UI (ported from
+    // SagerNet/Exclave's BaseService, which cancelAndJoin()s its connectingJob before
+    // tearing down for the same reason). connectJob tracks that in-flight work so
+    // stopAllService() can cancel and wait for it first instead of racing it.
+    private var connectJob: Job? = null
 
     // setupVpnService() (Builder.establish()) and startService() (native core startLoop)
     // both do blocking work. onStartCommand() always runs on the main thread, and since
@@ -61,7 +76,10 @@ class CoreVpnService : VpnService(), ServiceControl {
 
     override fun onRevoke() {
         LogUtil.w(AppConfig.TAG, "StartCore-VPN: Permission revoked")
-        stopAllService()
+        // Route through stopService() (not stopAllService() directly) so this also
+        // cancelAndJoin()s connectJob - onRevoke() can fire while a connect is still
+        // in flight too.
+        stopService()
     }
 
 //    override fun onLowMemory() {
@@ -110,7 +128,7 @@ class CoreVpnService : VpnService(), ServiceControl {
         TrafficController.start()
 
         // Off the main thread: see comment on serviceScope above.
-        serviceScope.launch {
+        connectJob = serviceScope.launch {
             val ok = try {
                 setupVpnService()
             } catch (e: Exception) {
@@ -146,8 +164,36 @@ class CoreVpnService : VpnService(), ServiceControl {
         }
     }
 
+    // Runs on serviceScope (see stopService() below), never on the caller's thread, so it's
+    // safe for this to suspend while waiting on connectJob.
+    private suspend fun stopServiceInternal() {
+        if (!isStoppingLock.compareAndSet(false, true)) {
+            LogUtil.w(AppConfig.TAG, "StartCore-VPN: Stop already in progress")
+            return
+        }
+        try {
+            // Cancel and wait for any in-flight connect before tearing down - otherwise a
+            // disconnect tap that lands while setupVpnService()/startService() is still
+            // running (very possible with a slow-to-build custom routing config) races the
+            // teardown against the still-running connect and can leave the native core /
+            // tun2socks stuck half-torn-down, with no broadcast ever coming back to unstick
+            // the UI. Ported from SagerNet/Exclave's BaseService.stopRunner(), which
+            // cancelAndJoin()s its connectingJob for the same reason.
+            connectJob?.cancelAndJoin()
+            connectJob = null
+            stopAllService(true)
+        } finally {
+            isStoppingLock.set(false)
+        }
+    }
+
     override fun stopService() {
-        stopAllService(true)
+        // See stopServiceInternal(): needs to run on serviceScope so it can cancelAndJoin()
+        // connectJob without blocking whatever thread called stopService() (e.g. the IO
+        // coroutine CoreServiceManager dispatches MSG_STATE_STOP onto).
+        serviceScope.launch {
+            stopServiceInternal()
+        }
     }
 
     override fun vpnProtect(socket: Int): Boolean {
