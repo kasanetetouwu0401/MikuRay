@@ -104,7 +104,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      * class doc for why bindService() can't drop this the way the broadcast could.
      */
     fun startListenBroadcast() {
-        isRunning.value = false
+        // Deliberately NOT resetting isRunning to false here: this is now an async
+        // cross-process bindService() (unlike the old broadcast reply, which usually came
+        // back near-instantly), so forcing false first meant real state could still be
+        // "connected" while the FAB/test button briefly believed otherwise - see
+        // MainActivity.handleFabAction()/handleLayoutTestClick(), which both branch on
+        // isRunning.value == true and would silently misfire during that window. Leaving
+        // isRunning null until the connection actually resolves lets MainActivity show a
+        // neutral "loading" state instead of an incorrect "not running" one.
         coreConnection.connect(getApplication(), coreCallback)
         val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
         ContextCompat.registerReceiver(getApplication(), testServiceReceiver, mFilter, Utils.receiverFlags())
