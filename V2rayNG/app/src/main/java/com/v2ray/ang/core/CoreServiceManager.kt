@@ -90,9 +90,11 @@ object CoreServiceManager {
             return true
         } catch (e: Exception) {
             val message = e.message?.takeUnless { it.isBlank() } ?: e.javaClass.simpleName
-            LogUtil.e(AppConfig.TAG, "StartCore-Manager: $message", e)
+            LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to start core loop", e)
             MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
-            NotificationManager.cancelNotification()
+            try { NotificationManager.cancelNotification() } catch (ex: Exception) {
+                LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to cancel notification", ex)
+            }
             return false
         }
     }
@@ -103,7 +105,12 @@ object CoreServiceManager {
         mFilter.addAction(Intent.ACTION_SCREEN_ON)
         mFilter.addAction(Intent.ACTION_SCREEN_OFF)
         mFilter.addAction(Intent.ACTION_USER_PRESENT)
-        ContextCompat.registerReceiver(service, mMsgReceive, mFilter, Utils.receiverFlags())
+        
+        try {
+            ContextCompat.registerReceiver(service, mMsgReceive, mFilter, Utils.receiverFlags())
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to register receiver", e)
+        }
 
         currentVpnInterface = vpnInterface
         launchCore(service, vpnInterface)
@@ -125,7 +132,6 @@ object CoreServiceManager {
 
         LogUtil.i(AppConfig.TAG, "StartCore-Manager: Starting core loop for ${config.remarks}")
         val result = CoreConfigManager.getV2rayConfig(service, guid)
-        LogUtil.d(AppConfig.TAG, result.content)
         if (!result.status) {
             error(result.errorMessage.ifBlank { "Failed to get V2Ray config" })
         }
@@ -146,6 +152,7 @@ object CoreServiceManager {
         if (dialerAddr.isNotNullEmpty()) {
             CoreNativeManager.reconcileBrowserDialer(dialerAddr)
         }
+        
         coreController.startLoop(result.content, tunFd)
 
         if (!isRunning()) {
@@ -153,20 +160,23 @@ object CoreServiceManager {
         }
 
         if (browserDialer != null) {
-            browserDialer!!.stop()
+            try { 
+                browserDialer!!.stop() 
+            } catch (e: Exception) {
+                LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to stop old dialer", e)
+            }
             browserDialer = null
         }
+        
         when (dialerMode) {
             BrowserDialerMode.OKHTTP -> {
                 browserDialer = DialerNativeService()
                 browserDialer!!.start(service, dialerAddr)
             }
-
             BrowserDialerMode.WEBVIEW -> {
                 browserDialer = DialerWebviewService()
                 browserDialer!!.start(service, dialerAddr)
             }
-
             else -> {}
         }
 
@@ -180,12 +190,11 @@ object CoreServiceManager {
     fun stopCoreLoop(): Boolean {
         val service = getService() ?: return false
 
-        try {
-            networkMonitor?.unregister()
+        try { 
+            networkMonitor?.unregister() 
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to unregister network monitor", e)
         }
-        
         networkMonitor = null
         currentVpnInterface = null
 
@@ -193,13 +202,14 @@ object CoreServiceManager {
         browserDialer = null
 
         CoroutineScope(Dispatchers.IO).launch {
-            if (isRunning()) {
-                try {
+            try {
+                if (isRunning()) {
                     coreController.stopLoop()
-                } catch (e: Exception) {
-                    LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to stop V2Ray loop", e)
                 }
+            } catch (e: Exception) {
+                LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to stop V2Ray loop", e)
             }
+            
             try {
                 CoreNativeManager.reconcileBrowserDialer("")
                 dialer?.stop()
@@ -208,11 +218,20 @@ object CoreServiceManager {
             }
         }
 
-        MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_STOP_SUCCESS, "")
-        NotificationManager.cancelNotification()
-
-        try {
-            service.unregisterReceiver(mMsgReceive)
+        try { 
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_STOP_SUCCESS, "") 
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to send stop success msg", e)
+        }
+        
+        try { 
+            NotificationManager.cancelNotification() 
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to cancel notification", e)
+        }
+        
+        try { 
+            service.unregisterReceiver(mMsgReceive) 
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to unregister receiver", e)
         }
@@ -239,13 +258,10 @@ object CoreServiceManager {
 
         return try {
             val tunFd = currentVpnInterface
-
             isReloading = true
             LogUtil.i(AppConfig.TAG, "StartCore-Manager: Core reload start...")
-
             coreController.stopLoop()
             launchCore(service, tunFd, isReload = true)
-
             LogUtil.i(AppConfig.TAG, "StartCore-Manager: Core reload finished")
             true
         } catch (e: Exception) {
@@ -262,15 +278,12 @@ object CoreServiceManager {
         if (!isRunning()) return emptyList()
 
         val payload = coreController.queryAllOutboundTrafficStats()
-
         val result = ArrayList<OutboundTrafficStat>()
 
         payload.split(';').forEach { entry ->
             if (entry.isBlank()) return@forEach
-
             val parts = entry.split(',', limit = 3)
             if (parts.size != 3) return@forEach
-
             val value = parts[2].toLongOrNull() ?: return@forEach
 
             result.add(
@@ -285,12 +298,13 @@ object CoreServiceManager {
     }
 
     private fun measureV2rayDelay() {
+        val service = getService() ?: return
         if (!isRunning()) {
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_DELAY_SUCCESS, service.getString(R.string.connection_test_error, ""))
             return
         }
 
         CoroutineScope(Dispatchers.IO).launch {
-            val service = getService() ?: return@launch
             var time = -1L
             var errorStr = ""
 
@@ -304,7 +318,7 @@ object CoreServiceManager {
                 try {
                     time = coreController.measureDelay(SettingsManager.getDelayTestUrl(true))
                 } catch (e: Exception) {
-                    LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to measure delay", e)
+                    LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to measure delay (fallback)", e)
                     errorStr = e.message?.substringAfter("\":") ?: "empty message"
                 }
             }
@@ -324,12 +338,13 @@ object CoreServiceManager {
     }
 
     private fun measureIpOnly() {
+        val service = getService() ?: return
         if (!isRunning()) {
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_IP_SUCCESS, "")
             return
         }
 
         CoroutineScope(Dispatchers.IO).launch {
-            val service = getService() ?: return@launch
             val ip = SpeedtestManager.getRemoteIPInfo()
             MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_IP_SUCCESS, ip.orEmpty())
         }
@@ -350,7 +365,7 @@ object CoreServiceManager {
                 serviceControl.stopService()
                 0
             } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to stop service", e)
+                LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to stop service in callback", e)
                 -1
             }
         }
@@ -373,20 +388,17 @@ object CoreServiceManager {
             }
 
             if (destIP.isBlank() || destPort == 0L) {
-                LogUtil.d(AppConfig.TAG, "ProcessFinder: Find $network connection from $srcIP:$srcPort to :$destPort, (no dest)")
                 return -1L
             }
 
             return try {
-                val uid = cm.getConnectionOwnerUid(
+                cm.getConnectionOwnerUid(
                     proto,
                     InetSocketAddress(srcIP, srcPort.toInt()),
                     InetSocketAddress(destIP, destPort.toInt())
                 ).toLong()
-                LogUtil.d(AppConfig.TAG, "ProcessFinder: Find $network connection from $srcIP:$srcPort to $destIP:$destPort, uid=$uid")
-
-                uid
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                LogUtil.d(AppConfig.TAG, "ProcessFinder: Failed to get connection owner UID", e)
                 -1L
             }
         }
@@ -394,59 +406,56 @@ object CoreServiceManager {
 
     private class ReceiveMessageHandler : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
-            val serviceControl = serviceControl ?: run {
-                LogUtil.w(
-                    AppConfig.TAG,
-                    "StartCore-Manager: Dropped msg key=${intent?.getIntExtra("key", 0)}, serviceControl is null"
-                )
+            val key = intent?.getIntExtra("key", 0) ?: return
+            val currentServiceControl = serviceControl
+            
+            if (currentServiceControl == null) {
+                LogUtil.w(AppConfig.TAG, "StartCore-Manager: Dropped msg key=$key, serviceControl is null")
+                if (key == AppConfig.MSG_STATE_STOP) {
+                    ctx?.let { MessageUtil.sendMsg2UI(it, AppConfig.MSG_STATE_STOP_SUCCESS, "") }
+                } else if (key == AppConfig.MSG_MEASURE_DELAY) {
+                    ctx?.let { MessageUtil.sendMsg2UI(it, AppConfig.MSG_MEASURE_DELAY_SUCCESS, "") }
+                }
                 return
             }
-            when (intent?.getIntExtra("key", 0)) {
+            
+            when (key) {
                 AppConfig.MSG_REGISTER_CLIENT -> {
                     if (isRunning()) {
-                        MessageUtil.sendMsg2UI(serviceControl.getService(), AppConfig.MSG_STATE_RUNNING, "")
+                        MessageUtil.sendMsg2UI(currentServiceControl.getService(), AppConfig.MSG_STATE_RUNNING, "")
                     } else {
-                        MessageUtil.sendMsg2UI(serviceControl.getService(), AppConfig.MSG_STATE_NOT_RUNNING, "")
+                        MessageUtil.sendMsg2UI(currentServiceControl.getService(), AppConfig.MSG_STATE_NOT_RUNNING, "")
                     }
                 }
-
-                AppConfig.MSG_UNREGISTER_CLIENT -> {
-                }
-
-                AppConfig.MSG_STATE_START -> {
-                }
-
+                AppConfig.MSG_UNREGISTER_CLIENT -> {}
+                AppConfig.MSG_STATE_START -> {}
                 AppConfig.MSG_STATE_STOP -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Stop service")
-                    serviceControl.stopService()
+                    currentServiceControl.stopService()
                 }
-
                 AppConfig.MSG_STATE_RESTART -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Restart service")
-                    val serviceContext = serviceControl.getService()
-                    serviceControl.stopService()
+                    val serviceContext = currentServiceControl.getService()
+                    currentServiceControl.stopService()
 
                     CoroutineScope(Dispatchers.Main).launch {
                         kotlinx.coroutines.delay(500L)
                         LauncherManager.startService(serviceContext)
                     }
                 }
-
                 AppConfig.MSG_MEASURE_DELAY -> {
                     measureV2rayDelay()
                 }
-
                 AppConfig.MSG_MEASURE_IP -> {
                     measureIpOnly()
                 }
             }
 
-            when (intent?.action) {
+            when (intent.action) {
                 Intent.ACTION_SCREEN_OFF -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Screen off")
                     NotificationManager.stopSpeedNotification()
                 }
-
                 Intent.ACTION_SCREEN_ON -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Screen on")
                     NotificationManager.startSpeedNotification()

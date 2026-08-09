@@ -75,7 +75,11 @@ class CoreVpnService : VpnService(), ServiceControl {
         }
 
         unlockStart()
-        NotificationManager.cancelNotification()
+        try { 
+            NotificationManager.cancelNotification() 
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "StartCore-VPN: Failed to cancel notification in onDestroy", e)
+        }
         TrafficController.stop()
         serviceScope.cancel()
     }
@@ -167,7 +171,6 @@ class CoreVpnService : VpnService(), ServiceControl {
         val builder = Builder()
 
         configureNetworkSettings(builder)
-
         configurePerAppProxy(builder)
 
         try {
@@ -183,6 +186,7 @@ class CoreVpnService : VpnService(), ServiceControl {
         try {
             mInterface = builder.establish()!!
             isRunning = true
+            
             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_KEEP_AWAKE, false)) {
                 val pm = getSystemService(POWER_SERVICE) as PowerManager
                 wakeLock = pm.newWakeLock(
@@ -191,6 +195,17 @@ class CoreVpnService : VpnService(), ServiceControl {
                 ).also { it.acquire() }
                 LogUtil.i(AppConfig.TAG, "StartCore-VPN: WakeLock acquired")
             }
+
+            CoroutineScope(Dispatchers.Main).launch {
+                if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
+                    try { 
+                        SoundPlayer.playConnect(this@CoreVpnService) 
+                    } catch (e: Exception) {
+                        LogUtil.e(AppConfig.TAG, "StartCore-VPN: Sound error", e)
+                    }
+                }
+            }
+            
             return true
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to establish VPN interface", e)
@@ -283,33 +298,55 @@ class CoreVpnService : VpnService(), ServiceControl {
             tun2SocksService = null
         }
 
-        tun2SocksService?.startTun2Socks()
-        RootLanSharing.startClientSharing(this)
+        try {
+            tun2SocksService?.startTun2Socks()
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "StartCore-VPN: Failed to start tun2socks", e)
+        }
+        
+        try {
+            RootLanSharing.startClientSharing(this)
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "StartCore-VPN: Failed to start root lan sharing", e)
+        }
     }
 
     private fun stopAllService(isForced: Boolean = true) {
         unlockStart()
         isRunning = false
-        RootLanSharing.stopClientSharing(this)
-        wakeLock?.let {
-            if (it.isHeld) {
-                it.release()
-                LogUtil.i(AppConfig.TAG, "StartCore-VPN: WakeLock released")
+        
+        try {
+            RootLanSharing.stopClientSharing(this)
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "StartCore-VPN: Failed to stop root lan sharing", e)
+        }
+        
+        try {
+            wakeLock?.let {
+                if (it.isHeld) {
+                    it.release()
+                    LogUtil.i(AppConfig.TAG, "StartCore-VPN: WakeLock released")
+                }
             }
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "StartCore-VPN: Failed to release wakelock", e)
         }
         wakeLock = null
+
+        CoroutineScope(Dispatchers.Main).launch {
+            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
+                try { 
+                    SoundPlayer.playDisconnect(this@CoreVpnService) 
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "StartCore-VPN: Sound disconnect error", e)
+                }
+            }
+        }
 
         val tun2socks = tun2SocksService
         tun2SocksService = null
 
         CoroutineScope(Dispatchers.IO).launch {
-            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
-                try {
-                    SoundPlayer.playDisconnect(this@CoreVpnService)
-                } catch (e: Exception) {
-                    LogUtil.e(AppConfig.TAG, "StartCore-VPN: Sound error", e)
-                }
-            }
             try {
                 tun2socks?.stopTun2Socks()
             } catch (e: Exception) {
@@ -317,18 +354,26 @@ class CoreVpnService : VpnService(), ServiceControl {
             }
         }
 
-        CoreServiceManager.stopCoreLoop()
+        try {
+            CoreServiceManager.stopCoreLoop()
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "StartCore-VPN: Failed to stop core loop", e)
+            try { MessageUtil.sendMsg2UI(this, AppConfig.MSG_STATE_STOP_SUCCESS, "") } catch (ex: Exception) {
+                LogUtil.e(AppConfig.TAG, "StartCore-VPN: Failed to send force stop msg", ex)
+            }
+        }
 
         if (isForced) {
-            stopSelf()
+            try {
+                stopSelf()
+            } catch (e: Exception) {
+                LogUtil.e(AppConfig.TAG, "StartCore-VPN: Failed to stop self", e)
+            }
 
             CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    Thread.sleep(100)
-                } catch (e: InterruptedException) {
+                try { Thread.sleep(100) } catch (e: Exception) {
                     LogUtil.w(AppConfig.TAG, "StartCore-VPN: Sleep interrupted", e)
                 }
-
                 try {
                     if (::mInterface.isInitialized) {
                         mInterface.close()

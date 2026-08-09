@@ -47,8 +47,14 @@ class CoreRootService : Service(), ServiceControl {
 
             isRunning = true
 
-            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
-                SoundPlayer.playConnect(this@CoreRootService)
+            CoroutineScope(Dispatchers.Main).launch {
+                if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
+                    try { 
+                        SoundPlayer.playConnect(this@CoreRootService) 
+                    } catch (e: Exception) {
+                        LogUtil.e(AppConfig.TAG, "StartCore-Root: Sound error", e)
+                    }
+                }
             }
 
             try {
@@ -94,19 +100,26 @@ class CoreRootService : Service(), ServiceControl {
 
     private fun stopAllService(isForced: Boolean = true) {
         isRunning = false
+        
+        CoroutineScope(Dispatchers.Main).launch {
+            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
+                try { 
+                    SoundPlayer.playDisconnect(this@CoreRootService) 
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "StartCore-Root: Sound disconnect error", e)
+                }
+            }
+        }
 
         val jobToCancel = setupJob
         setupJob = null
 
         CoroutineScope(Dispatchers.IO).launch {
-            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SOUND_ON_CONNECT, true)) {
-                try {
-                    SoundPlayer.playDisconnect(this@CoreRootService)
-                } catch (e: Exception) {
-                    LogUtil.e(AppConfig.TAG, "StartCore-Root: Sound error", e)
-                }
+            try { 
+                jobToCancel?.cancelAndJoin() 
+            } catch (e: Exception) {
+                LogUtil.e(AppConfig.TAG, "StartCore-Root: Failed to cancel setup job", e)
             }
-            jobToCancel?.cancelAndJoin()
             try {
                 RootProxyManager.stopFull(this@CoreRootService)
             } catch (e: Exception) {
@@ -114,10 +127,21 @@ class CoreRootService : Service(), ServiceControl {
             }
         }
 
-        CoreServiceManager.stopCoreLoop()
+        try {
+            CoreServiceManager.stopCoreLoop()
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "StartCore-Root: Failed to stop core loop", e)
+            try { MessageUtil.sendMsg2UI(this, AppConfig.MSG_STATE_STOP_SUCCESS, "") } catch (ex: Exception) {
+                LogUtil.e(AppConfig.TAG, "StartCore-Root: Failed to send force stop msg", ex)
+            }
+        }
 
         if (isForced) {
-            stopSelf()
+            try { 
+                stopSelf() 
+            } catch (e: Exception) {
+                LogUtil.e(AppConfig.TAG, "StartCore-Root: Failed to stop self", e)
+            }
         }
     }
 }
