@@ -8,14 +8,10 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.ParcelFileDescriptor
-import android.os.RemoteCallbackList
-import android.os.RemoteException
 import android.system.OsConstants
 import androidx.core.content.ContextCompat
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import com.v2ray.ang.aidl.IMikuRayService
-import com.v2ray.ang.aidl.IMikuRayServiceCallback
 import com.v2ray.ang.contracts.ServiceControl
 import com.v2ray.ang.dto.OutboundTrafficStat
 import com.v2ray.ang.dto.entities.ProfileItem
@@ -46,16 +42,6 @@ object CoreServiceManager {
 
     private val coreController: CoreController = CoreNativeManager.newCoreController(CoreCallback())
     private val mMsgReceive = ReceiveMessageHandler()
-
-    /**
-     * AIDL binder for [IMikuRayService]. Bound by [MikuRayConnection] from MainViewModel /
-     * QSTileService. See the class doc on MikuRayConnection for why this replaces the old
-     * broadcast command channel. Each broadcastXxx() below also still fires the legacy
-     * MessageUtil.sendMsg2UI() so WidgetProvider (a stateless AppWidgetProvider that can't
-     * hold a bound connection) keeps working unchanged.
-     */
-    val binder = Binder()
-
     private var currentConfig: ProfileItem? = null
     private var processFinder: XrayProcessFinder? = null
     private var browserDialer: IDialerService? = null
@@ -106,20 +92,6 @@ object CoreServiceManager {
     fun isRunning() = coreController.isRunning
 
     /**
-     * High-level UI-facing state (see [MikuRayState]), distinct from [isRunning] which is the
-     * raw native core flag used for internal start/stop guards. [currentState] only moves
-     * through Connecting -> Connected -> Stopping -> Stopped via [changeState]; it never goes
-     * back to [MikuRayState.Idle] once a client has bound - Idle is a UI-only seed value.
-     */
-    private var currentState = MikuRayState.Stopped
-
-    private fun changeState(newState: MikuRayState, msg: String? = null) {
-        currentState = newState
-        val service = getService() ?: return
-        binder.broadcastStateChanged(service, newState, msg)
-    }
-
-    /**
      * Gets the name of the currently running server.
      * @return The name of the running server.
      */
@@ -142,14 +114,13 @@ object CoreServiceManager {
             return false
         }
 
-        changeState(MikuRayState.Connecting)
         try {
             doStartCoreLoop(service, vpnInterface)
             return true
         } catch (e: Exception) {
             val message = e.message?.takeUnless { it.isBlank() } ?: e.javaClass.simpleName
             LogUtil.e(AppConfig.TAG, "StartCore-Manager: $message", e)
-            changeState(MikuRayState.Stopped, message)
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
             NotificationManager.cancelNotification()
             return false
         }
@@ -229,7 +200,7 @@ object CoreServiceManager {
         }
 
         if (!isReload) {
-            changeState(MikuRayState.Connected)
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
         }
         NotificationManager.startSpeedNotification()
         LogUtil.i(AppConfig.TAG, "StartCore-Manager: Core started successfully")
@@ -242,7 +213,6 @@ object CoreServiceManager {
      */
     fun stopCoreLoop(): Boolean {
         val service = getService() ?: return false
-        changeState(MikuRayState.Stopping)
 
         networkMonitor?.unregister()
         networkMonitor = null
@@ -265,7 +235,7 @@ object CoreServiceManager {
             browserDialer = null
         }
 
-        changeState(MikuRayState.Stopped)
+        MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_STOP_SUCCESS, "")
         NotificationManager.cancelNotification()
 
         try {
@@ -322,7 +292,7 @@ object CoreServiceManager {
         } catch (e: Exception) {
             val message = e.message?.takeUnless { it.isBlank() } ?: e.javaClass.simpleName
             LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to reload core: $message", e)
-            changeState(MikuRayState.Stopped, message)
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
             false
         } finally {
             isReloading = false
@@ -396,11 +366,11 @@ object CoreServiceManager {
             } else {
                 service.getString(R.string.connection_test_error, errorStr)
             }
-            binder.broadcastMeasureDelayResult(service, result)
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_DELAY_SUCCESS, result)
 
             if (time >= 0) {
                 val ip = SpeedtestManager.getRemoteIPInfo()
-                binder.broadcastMeasureIpResult(service, ip.orEmpty())
+                MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_IP_SUCCESS, ip.orEmpty())
             }
         }
     }
@@ -413,7 +383,7 @@ object CoreServiceManager {
         CoroutineScope(Dispatchers.IO).launch {
             val service = getService() ?: return@launch
             val ip = SpeedtestManager.getRemoteIPInfo()
-            binder.broadcastMeasureIpResult(service, ip.orEmpty())
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_IP_SUCCESS, ip.orEmpty())
         }
     }
 
@@ -502,16 +472,13 @@ object CoreServiceManager {
     }
 
     /**
-     * Broadcast receiver for the small set of messages that can only ever arrive as a
-     * broadcast: notification/widget action buttons (PendingIntent.getBroadcast(), which
-     * has no bindable caller context to hang an AIDL connection off) and OS screen-on/off
-     * events. Every other control (register/stop/restart/test/traffic) that originates from
-     * a live UI now goes through [binder] via [MikuRayConnection] instead - see its class
-     * doc for why.
+     * Broadcast receiver for handling messages sent to the service.
+     * Handles registration, service control, and screen events.
      */
     private class ReceiveMessageHandler : BroadcastReceiver() {
         /**
          * Handles received broadcast messages.
+         * Processes service control messages and screen state changes.
          * @param ctx The context in which the receiver is running.
          * @param intent The intent being received.
          */
@@ -524,6 +491,22 @@ object CoreServiceManager {
                 return
             }
             when (intent?.getIntExtra("key", 0)) {
+                AppConfig.MSG_REGISTER_CLIENT -> {
+                    if (isRunning()) {
+                        MessageUtil.sendMsg2UI(serviceControl.getService(), AppConfig.MSG_STATE_RUNNING, "")
+                    } else {
+                        MessageUtil.sendMsg2UI(serviceControl.getService(), AppConfig.MSG_STATE_NOT_RUNNING, "")
+                    }
+                }
+
+                AppConfig.MSG_UNREGISTER_CLIENT -> {
+                    // nothing to do
+                }
+
+                AppConfig.MSG_STATE_START -> {
+                    // nothing to do
+                }
+
                 AppConfig.MSG_STATE_STOP -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Stop service")
                     serviceControl.stopService()
@@ -534,6 +517,14 @@ object CoreServiceManager {
                     serviceControl.stopService()
                     Thread.sleep(500L)
                     LauncherManager.startService(serviceControl.getService())
+                }
+
+                AppConfig.MSG_MEASURE_DELAY -> {
+                    measureV2rayDelay()
+                }
+
+                AppConfig.MSG_MEASURE_IP -> {
+                    measureIpOnly()
                 }
             }
 
@@ -548,110 +539,6 @@ object CoreServiceManager {
                     NotificationManager.startSpeedNotification()
                 }
             }
-        }
-    }
-
-    /**
-     * [IMikuRayService] implementation returned from each core service's onBind(). Ported
-     * from Exclave's BaseService.Binder, minus the Data/proxy-instance plumbing MikuRay
-     * doesn't need since CoreServiceManager itself is already the single daemon-process
-     * singleton (see the serviceControl comment above for why a plain object works here).
-     */
-    class Binder : IMikuRayService.Stub() {
-        private val callbacks = RemoteCallbackList<IMikuRayServiceCallback>()
-
-        override fun getState(): Int = currentState.ordinal
-        override fun getRunningServerName(): String = CoreServiceManager.getRunningServerName()
-
-        override fun registerCallback(cb: IMikuRayServiceCallback) {
-            callbacks.register(cb)
-            // WidgetProvider can't hold a bound connection (see the class doc on
-            // MikuRayConnection), so it relies on an opportunistic state broadcast whenever
-            // a real client (MainViewModel, QSTileService) shows up - previously sent in
-            // reply to MSG_REGISTER_CLIENT, now sent here on every AIDL registration
-            // instead, same trigger points (app open, tile shown).
-            val service = serviceControl?.getService() ?: return
-            broadcastStateChanged(service, currentState, null)
-        }
-
-        override fun unregisterCallback(cb: IMikuRayServiceCallback) {
-            callbacks.unregister(cb)
-        }
-
-        override fun requestStop() {
-            serviceControl?.stopService()
-        }
-
-        override fun requestRestart() {
-            val serviceControl = serviceControl ?: return
-            serviceControl.stopService()
-            Thread.sleep(500L)
-            LauncherManager.startService(serviceControl.getService())
-        }
-
-        override fun measureDelay() {
-            measureV2rayDelay()
-        }
-
-        override fun measureIp() {
-            measureIpOnly()
-        }
-
-        private inline fun broadcast(action: (IMikuRayServiceCallback) -> Unit) {
-            val count = callbacks.beginBroadcast()
-            try {
-                repeat(count) {
-                    try {
-                        action(callbacks.getBroadcastItem(it))
-                    } catch (_: RemoteException) {
-                    }
-                }
-            } finally {
-                callbacks.finishBroadcast()
-            }
-        }
-
-        /**
-         * Pushes a [MikuRayState] transition to every bound AIDL client (see [MikuRayState]
-         * for why Connecting/Stopping being distinct from Connected/Stopped matters). Also
-         * still fires the old MessageUtil.sendMsg2UI() broadcast for the two states
-         * WidgetProvider actually distinguishes between (it only ever understood
-         * running/not-running, never a mid-transition state, so Connecting/Stopping are
-         * intentionally not translated - the widget just keeps showing its last known state
-         * until the terminal Connected/Stopped transition below).
-         */
-        fun broadcastStateChanged(service: Service, state: MikuRayState, msg: String?) {
-            broadcast { it.stateChanged(state.ordinal, msg) }
-            when (state) {
-                MikuRayState.Connected -> MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
-                MikuRayState.Stopped -> if (msg != null) {
-                    MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, msg)
-                } else {
-                    MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_STOP_SUCCESS, "")
-                }
-
-                MikuRayState.Idle, MikuRayState.Connecting, MikuRayState.Stopping -> {}
-            }
-        }
-
-        fun broadcastMeasureDelayResult(service: Service, result: String) {
-            broadcast { it.measureDelayResult(result) }
-            MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_DELAY_SUCCESS, result)
-        }
-
-        fun broadcastMeasureIpResult(service: Service, ip: String) {
-            broadcast { it.measureIpResult(ip) }
-            MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_IP_SUCCESS, ip)
-        }
-
-        fun broadcastTrafficUpdated(service: Service, guid: String) {
-            broadcast { it.trafficUpdated(guid) }
-            MessageUtil.sendMsg2UI(service, AppConfig.MSG_TRAFFIC_UPDATED, guid)
-        }
-
-        fun broadcastTrafficSpeedUpdated(service: Service, speedText: String) {
-            broadcast { it.trafficSpeedUpdated(speedText) }
-            MessageUtil.sendMsg2UI(service, AppConfig.MSG_TRAFFIC_SPEED_UPDATED, speedText)
         }
     }
 }

@@ -1,57 +1,23 @@
 package com.v2ray.ang.service
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.drawable.Icon
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import androidx.core.content.ContextCompat
+import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import com.v2ray.ang.aidl.IMikuRayService
 import com.v2ray.ang.core.CoreServiceManager
 import com.v2ray.ang.core.LauncherManager
-import com.v2ray.ang.core.MikuRayConnection
-import com.v2ray.ang.core.MikuRayState
-import com.v2ray.ang.util.AppNameHelper
+import com.v2ray.ang.util.LogUtil
+import com.v2ray.ang.util.MessageUtil
+import com.v2ray.ang.util.Utils
+import java.lang.ref.SoftReference
 
 class QSTileService : TileService() {
-
-    /**
-     * Ported from Exclave/SagerConnection via MikuRayConnection. Replaces the old
-     * SoftReference<QSTileService>-held ReceiveMessageHandler - see the comment on
-     * CoreServiceManager.serviceControl and MikuRayConnection's class doc for why that
-     * pattern could silently stop updating this tile once the reference was reclaimed.
-     * onStartListening()/onStopListening() already have the same connect/disconnect
-     * symmetry as bindService()/unbindService(), so this maps across 1:1.
-     */
-    private val connection = MikuRayConnection()
-    private val connectionCallback = object : MikuRayConnection.Callback {
-        override fun onServiceConnected(service: IMikuRayService) {
-            val state = runCatching { MikuRayState.entries[service.state] }.getOrDefault(MikuRayState.Stopped)
-            applyState(state)
-        }
-
-        override fun onServiceDisconnected() {
-            applyState(MikuRayState.Idle)
-        }
-
-        override fun stateChanged(state: MikuRayState, msg: String?) {
-            applyState(state)
-        }
-    }
-
-    /**
-     * Maps [MikuRayState] to the tile's Active/Inactive display - see [MikuRayState] for why
-     * Connecting/Stopping being distinct from Idle matters: this used to eagerly guess
-     * Tile.STATE_INACTIVE from CoreServiceManager.isRunning() in onStartListening() before
-     * the connection resolved, which could flash the wrong state (the same class of bug
-     * fixed on the FAB/test button - see MainViewModel.startListenBroadcast()). Now the tile
-     * just keeps its last displayed state until a real one arrives.
-     */
-    private fun applyState(state: MikuRayState) {
-        when (state) {
-            MikuRayState.Connected -> setState(Tile.STATE_ACTIVE)
-            MikuRayState.Stopped -> setState(Tile.STATE_INACTIVE)
-            MikuRayState.Idle, MikuRayState.Connecting, MikuRayState.Stopping -> {}
-        }
-    }
 
     /**
      * Sets the state of the tile.
@@ -61,7 +27,7 @@ class QSTileService : TileService() {
         qsTile?.icon = Icon.createWithResource(applicationContext, R.drawable.ic_stat_name)
         if (state == Tile.STATE_INACTIVE) {
             qsTile?.state = Tile.STATE_INACTIVE
-            qsTile?.label = AppNameHelper.getDisplayName(applicationContext)
+            qsTile?.label = com.v2ray.ang.util.AppNameHelper.getDisplayName(applicationContext)
         } else if (state == Tile.STATE_ACTIVE) {
             qsTile?.state = Tile.STATE_ACTIVE
             qsTile?.label = CoreServiceManager.getRunningServerName()
@@ -70,9 +36,22 @@ class QSTileService : TileService() {
         qsTile?.updateTile()
     }
 
+    /**
+     * Refer to the official documentation for [registerReceiver](https://developer.android.com/reference/androidx/core/content/ContextCompat#registerReceiver(android.content.Context,android.content.BroadcastReceiver,android.content.IntentFilter,int):
+     * `registerReceiver(Context, BroadcastReceiver, IntentFilter, int)`.
+     */
     override fun onStartListening() {
         super.onStartListening()
-        connection.connect(applicationContext, connectionCallback)
+
+        if (CoreServiceManager.isRunning()) {
+            setState(Tile.STATE_ACTIVE)
+        } else {
+            setState(Tile.STATE_INACTIVE)
+        }
+        mMsgReceive = ReceiveMessageHandler(this)
+        val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
+        ContextCompat.registerReceiver(applicationContext, mMsgReceive, mFilter, Utils.receiverFlags())
+        MessageUtil.sendMsg2Service(this, AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
     /**
@@ -80,7 +59,14 @@ class QSTileService : TileService() {
      */
     override fun onStopListening() {
         super.onStopListening()
-        connection.disconnect(applicationContext)
+
+        try {
+            applicationContext.unregisterReceiver(mMsgReceive)
+            mMsgReceive = null
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "Failed to unregister receiver", e)
+        }
+
     }
 
     /**
@@ -95,6 +81,36 @@ class QSTileService : TileService() {
 
             Tile.STATE_ACTIVE -> {
                 LauncherManager.stopService(this)
+            }
+        }
+    }
+
+    private var mMsgReceive: BroadcastReceiver? = null
+
+    private class ReceiveMessageHandler(context: QSTileService) : BroadcastReceiver() {
+        var mReference: SoftReference<QSTileService> = SoftReference(context)
+        override fun onReceive(ctx: Context?, intent: Intent?) {
+            val context = mReference.get()
+            when (intent?.getIntExtra("key", 0)) {
+                AppConfig.MSG_STATE_RUNNING -> {
+                    context?.setState(Tile.STATE_ACTIVE)
+                }
+
+                AppConfig.MSG_STATE_NOT_RUNNING -> {
+                    context?.setState(Tile.STATE_INACTIVE)
+                }
+
+                AppConfig.MSG_STATE_START_SUCCESS -> {
+                    context?.setState(Tile.STATE_ACTIVE)
+                }
+
+                AppConfig.MSG_STATE_START_FAILURE -> {
+                    context?.setState(Tile.STATE_INACTIVE)
+                }
+
+                AppConfig.MSG_STATE_STOP_SUCCESS -> {
+                    context?.setState(Tile.STATE_INACTIVE)
+                }
             }
         }
     }

@@ -13,9 +13,6 @@ import androidx.lifecycle.viewModelScope
 import com.v2ray.ang.AngApplication
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import com.v2ray.ang.aidl.IMikuRayService
-import com.v2ray.ang.core.MikuRayConnection
-import com.v2ray.ang.core.MikuRayState
 import com.v2ray.ang.dto.GroupMapItem
 import com.v2ray.ang.dto.entities.ServersCache
 import com.v2ray.ang.dto.entities.SubscriptionCache
@@ -36,7 +33,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Collections
 import java.util.regex.PatternSyntaxException
-import android.os.RemoteException
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var serverList = mutableListOf<String>() // MmkvManager.decodeServerList()
@@ -44,15 +40,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     var keywordFilter = ""
     val serversCache = mutableListOf<ServersCache>()
     
-    /**
-     * [isRunning] is kept as a plain derived Boolean (== [MikuRayState.canStop]) purely so
-     * MainActivity's many existing `isRunning.value == true` checks keep working unchanged.
-     * [state] is the real source of truth - see [MikuRayState] for why Idle/Connecting being
-     * distinguishable from Connected/Stopped is what actually fixes the FAB/test-button race,
-     * and MainActivity's loading guards should check [state] directly, not [isRunning].
-     */
-    val state by lazy { MutableLiveData(MikuRayState.Idle) }
-    val isRunning by lazy { MutableLiveData(false) }
+    val isRunning by lazy { MutableLiveData<Boolean>() }
     val updateListAction by lazy { MutableLiveData<Int>() }
     val updateTestResultAction by lazy { MutableLiveData<String>() }
     val testProgressAction by lazy { MutableLiveData<TestProgressInfo?>() }
@@ -61,99 +49,35 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val alertAction by lazy { MutableLiveData<Pair<Boolean, String>>() }
     val updateGroupBadgeAction by lazy { MutableLiveData<Unit>() }
 
-    private fun updateState(newState: MikuRayState) {
-        state.value = newState
-        isRunning.value = newState.canStop
-    }
-
-    private val coreConnection = MikuRayConnection()
-    private val coreCallback = object : MikuRayConnection.Callback {
-        override fun onServiceConnected(service: IMikuRayService) {
-            // Direct synchronous read instead of waiting for a push - see the comment on
-            // CoreServiceManager.Binder.getState() for why this doesn't need a broadcast.
-            val remoteState = runCatching { MikuRayState.entries[service.state] }.getOrDefault(MikuRayState.Stopped)
-            updateState(remoteState)
-        }
-
-        override fun onServiceDisconnected() {
-            // Connection to the daemon process was lost (not necessarily that the tunnel
-            // itself stopped) - back to Idle/unknown rather than guessing Stopped, so the
-            // FAB/test-button guard below holds off again until a real state comes back.
-            updateState(MikuRayState.Idle)
-        }
-
-        override fun stateChanged(state: MikuRayState, msg: String?) {
-            val app = getApplication<AngApplication>()
-            when (state) {
-                MikuRayState.Connected -> {
-                    alertAction.value = Pair(true, app.getString(R.string.toast_services_success))
-                }
-
-                MikuRayState.Stopped -> if (msg != null) {
-                    alertAction.value = Pair(false, msg.ifBlank { app.getString(R.string.toast_services_failure) })
-                }
-
-                MikuRayState.Idle, MikuRayState.Connecting, MikuRayState.Stopping -> {}
-            }
-            updateState(state)
-        }
-
-        override fun measureDelayResult(result: String) {
-            updateTestResultAction.value = result
-        }
-
-        override fun measureIpResult(ip: String) {
-            updateIpResultAction.value = ip
-        }
-
-        override fun trafficUpdated(guid: String) {
-            updateListAction.postValue(getPosition(guid))
-        }
-
-        override fun trafficSpeedUpdated(speedText: String) {
-            updateTrafficSpeedAction.postValue(speedText)
-        }
-    }
-
     /**
-     * Binds to whichever core service is active for the current run mode. Ported from the
-     * old sendBroadcast(MSG_REGISTER_CLIENT)/registerReceiver() pair - see MikuRayConnection's
-     * class doc for why bindService() can't drop this the way the broadcast could.
+     * Refer to the official documentation for [registerReceiver](https://developer.android.com/reference/androidx/core/content/ContextCompat#registerReceiver(android.content.Context,android.content.BroadcastReceiver,android.content.IntentFilter,int):\
+     * `registerReceiver(Context, BroadcastReceiver, IntentFilter, int)`.
      */
     fun startListenBroadcast() {
-        // Deliberately NOT resetting state to Stopped here: this is now an async
-        // cross-process bindService() (unlike the old broadcast reply, which usually came
-        // back near-instantly), so forcing a "not running" guess first meant real state
-        // could still be Connected while the FAB/test button briefly believed otherwise -
-        // see MainActivity.handleFabAction()/handleLayoutTestClick(). state already starts
-        // at MikuRayState.Idle from the property initializer above, which those guard
-        // against explicitly instead of guessing Stopped.
-        coreConnection.connect(getApplication(), coreCallback)
+        isRunning.value = false
         val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
-        ContextCompat.registerReceiver(getApplication(), testServiceReceiver, mFilter, Utils.receiverFlags())
+        ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
+        MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
     /**
-     * Re-queries the daemon for the current state without resetting [state] first (unlike
-     * [startListenBroadcast]). Safe to call repeatedly (e.g. from onResume) - it's a cheap
-     * synchronous getter over the existing connection, not a poller. Exists so a missed
-     * state update (e.g. the daemon process briefly wasn't there) self-corrects the next
-     * time the user is back on this screen, instead of leaving the FAB/status card stuck
-     * reflecting a stale state.
+     * Re-queries the daemon for the current running state without resetting [isRunning]
+     * first (unlike [startListenBroadcast]). Safe to call repeatedly (e.g. from onResume) -
+     * it's a cheap one-shot request/response, not a poller. Exists so a missed
+     * MSG_STATE_RUNNING/MSG_STATE_START_SUCCESS broadcast (e.g. the daemon process was
+     * briefly unreachable) self-corrects the next time the user is back on this screen,
+     * instead of leaving the FAB/status card stuck reflecting a stale state.
      */
     fun resyncState() {
-        val service = coreConnection.service ?: return
-        val remoteState = runCatching { MikuRayState.entries[service.state] }.getOrNull() ?: return
-        updateState(remoteState)
+        MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
     /**
      * Called when the ViewModel is cleared.
      */
     override fun onCleared() {
-        coreConnection.disconnect(getApplication())
         try {
-            getApplication<AngApplication>().unregisterReceiver(testServiceReceiver)
+            getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
         } catch (e: IllegalArgumentException) {
             e.printStackTrace()
         }
@@ -327,19 +251,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      * Tests the real ping for the current server.
      */
     fun testCurrentServerRealPing() {
-        try {
-            coreConnection.service?.measureDelay()
-        } catch (e: RemoteException) {
-            LogUtil.e(AppConfig.TAG, "MainViewModel: Failed to request delay test", e)
-        }
+        MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_MEASURE_DELAY, "")
     }
 
     fun fetchCurrentIp() {
-        try {
-            coreConnection.service?.measureIp()
-        } catch (e: RemoteException) {
-            LogUtil.e(AppConfig.TAG, "MainViewModel: Failed to request IP fetch", e)
-        }
+        MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_MEASURE_IP, "")
     }
 
     /**
@@ -637,15 +553,49 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         updateListAction.postValue(-1)
     }
 
-    /**
-     * Handles the batch URL-test progress/result messages broadcast by CoreTestService
-     * (MSG_MEASURE_CONFIG_*). That's a separate, already-working intent-based service, not
-     * part of the daemon start/stop/test/traffic control channel migrated to AIDL above -
-     * see the class doc on MikuRayConnection.
-     */
-    private val testServiceReceiver = object : BroadcastReceiver() {
+    private val mMsgReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
             when (intent?.getIntExtra("key", 0)) {
+                AppConfig.MSG_STATE_RUNNING -> {
+                    isRunning.value = true
+                }
+
+                AppConfig.MSG_STATE_NOT_RUNNING -> {
+                    isRunning.value = false
+                }
+
+                AppConfig.MSG_STATE_START_SUCCESS -> {
+                    val app = getApplication<AngApplication>()
+                    alertAction.value = Pair(true, app.getString(R.string.toast_services_success))
+                    isRunning.value = true
+                }
+
+                AppConfig.MSG_STATE_START_FAILURE -> {
+                    val app = getApplication<AngApplication>()
+                    val errorMessage = intent.getStringExtra("content")
+                    val msg = if (!errorMessage.isNullOrBlank()) {
+                        errorMessage
+                    } else {
+                        app.getString(R.string.toast_services_failure)
+                    }
+                    
+                    alertAction.value = Pair(false, msg)
+                    isRunning.value = false
+                }
+
+                AppConfig.MSG_STATE_STOP_SUCCESS -> {
+                    isRunning.value = false
+                }
+
+                AppConfig.MSG_MEASURE_DELAY_SUCCESS -> {
+                    updateTestResultAction.value = intent.getStringExtra("content").orEmpty()
+                }
+
+                AppConfig.MSG_MEASURE_IP_SUCCESS -> {
+                    val ip = intent.getStringExtra("content")
+                    updateIpResultAction.value = ip
+                }
+
                 AppConfig.MSG_MEASURE_CONFIG_SUCCESS -> {
                     val content = intent.getStringExtra("content")
                     updateListAction.value = getPosition(content ?: "")
@@ -658,6 +608,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 AppConfig.MSG_MEASURE_CONFIG_FINISH -> {
                     testProgressAction.value = null
                     onTestsFinished()
+                }
+
+                AppConfig.MSG_TRAFFIC_UPDATED -> {
+                    val guid = intent.getStringExtra("content") ?: return
+                    updateListAction.postValue(getPosition(guid))
+                }
+
+                AppConfig.MSG_TRAFFIC_SPEED_UPDATED -> {
+                    val speedText = intent.getStringExtra("content") ?: return
+                    updateTrafficSpeedAction.postValue(speedText)
                 }
             }
         }

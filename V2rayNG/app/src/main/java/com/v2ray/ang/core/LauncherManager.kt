@@ -4,11 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.os.RemoteException
 import androidx.core.content.ContextCompat
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import com.v2ray.ang.aidl.IMikuRayService
 import com.v2ray.ang.extension.isComplexType
 import com.v2ray.ang.extension.snackbarDefault
 import com.v2ray.ang.extension.snackbarError
@@ -20,6 +18,7 @@ import com.v2ray.ang.service.CoreProxyOnlyService
 import com.v2ray.ang.service.CoreRootService
 import com.v2ray.ang.service.CoreVpnService
 import com.v2ray.ang.util.LogUtil
+import com.v2ray.ang.util.MessageUtil
 import com.v2ray.ang.util.Utils
 
 object LauncherManager {
@@ -87,34 +86,10 @@ object LauncherManager {
 
     /**
      * Stops the V2Ray service.
-     *
-     * Ported from the old sendBroadcast(MSG_STATE_STOP) call: binds briefly to whichever
-     * core service is running, issues requestStop() over AIDL, then unbinds. Uses
-     * BIND_AUTO_CREATE (see MikuRayConnection's class doc), but since callers only invoke
-     * this when a service is believed to be running (isRunning checks at every call site:
-     * MainActivity, QSTileService, WidgetProvider, ScStopActivity, ScSwitchActivity), the
-     * worst case of a stale check is a harmless idle bind that tears itself down again.
      * @param context The context from which the service is stopped.
      */
     fun stopService(context: Context) {
-        val appContext = context.applicationContext
-        val connection = MikuRayConnection()
-        connection.connect(appContext, object : MikuRayConnection.Callback {
-            override fun onServiceConnected(service: IMikuRayService) {
-                try {
-                    service.requestStop()
-                } catch (e: RemoteException) {
-                    LogUtil.e(AppConfig.TAG, "LauncherManager: Failed to request stop", e)
-                } finally {
-                    connection.disconnect(appContext)
-                }
-            }
-
-            override fun onServiceDisconnected() {
-                // nothing to do - connect() already guards against a double connect,
-                // and disconnect() above is idempotent if this fires after it.
-            }
-        })
+        MessageUtil.sendMsg2Service(context, AppConfig.MSG_STATE_STOP, "")
     }
 
     /**

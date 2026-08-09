@@ -12,7 +12,6 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.os.PowerManager
 import android.os.StrictMode
-import android.os.IBinder
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.LOOPBACK
 import com.v2ray.ang.BuildConfig
@@ -133,20 +132,6 @@ class CoreVpnService : VpnService(), ServiceControl {
 
     override fun getService(): Service {
         return this
-    }
-
-    /**
-     * Returns the AIDL control binder for [com.v2ray.ang.core.MikuRayConnection] clients.
-     * VpnService itself doesn't otherwise rely on onBind (protect()/prepare() are called
-     * directly on this instance in-process), so it's safe to claim only our own action here
-     * and fall back to null for anything else, same as the previous default.
-     */
-    override fun onBind(intent: Intent?): IBinder? {
-        return if (intent?.action == AppConfig.AIDL_SERVICE_ACTION) {
-            CoreServiceManager.binder
-        } else {
-            super.onBind(intent)
-        }
     }
 
     override fun startService() {

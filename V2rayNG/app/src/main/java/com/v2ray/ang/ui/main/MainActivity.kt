@@ -24,7 +24,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.content.ContextCompat
-import androidx.viewpager2.widget.ViewPager2
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
@@ -35,7 +34,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
 import com.v2ray.ang.core.LauncherManager
-import com.v2ray.ang.core.MikuRayState
 import com.v2ray.ang.databinding.ActivityMainBinding
 import com.v2ray.ang.databinding.ItemQrcodeBinding
 import com.v2ray.ang.enums.EConfigType
@@ -485,21 +483,6 @@ class MainActivity : HelperBaseActivity(),
             adapter = groupPagerAdapter
             isUserInputEnabled = true
             offscreenPageLimit = 10
-            // With offscreenPageLimit this high, ViewPager2/FragmentStateAdapter resumes
-            // every preloaded GroupServerFragment once up front - GroupServerFragment.onResume()
-            // then only fires again for a tab that was actually torn down and recreated, not
-            // every time the user swipes back to an already-resumed one. Relying on onResume()
-            // to keep mainViewModel.subscriptionId in sync with the *visible* tab meant it could
-            // get stuck on whichever fragment happened to resume last (often not the one on
-            // screen), which is what made "test this group" silently test the wrong group after
-            // switching tabs. onPageSelected() fires exactly once per real page change regardless
-            // of preload state, so it's the reliable source of truth here.
-            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    val group = groupPagerAdapter.groups.getOrNull(position) ?: return
-                    mainViewModel.subscriptionIdChangedAsync(group.id)
-                }
-            })
         }
     }
 
@@ -694,11 +677,8 @@ class MainActivity : HelperBaseActivity(),
             lastTrafficSpeedText = speedText
             refreshIpStateText()
         }
-        mainViewModel.state.observe(this) { state ->
-            applyRunningState(
-                isLoading = state == MikuRayState.Idle || state == MikuRayState.Connecting || state == MikuRayState.Stopping,
-                isRunning = state.canStop,
-            )
+        mainViewModel.isRunning.observe(this) { isRunning ->
+            applyRunningState(isLoading = false, isRunning = isRunning)
         }
         
         mainViewModel.alertAction.observe(this) { (isSuccess, message) ->
@@ -710,11 +690,6 @@ class MainActivity : HelperBaseActivity(),
             }
         }
 
-        // Show the same "loading" FAB icon used for handleFabAction() taps while the
-        // service connection is still resolving (mainViewModel.state.value == Idle - see
-        // MikuRayState and the comment on MainViewModel.startListenBroadcast()), instead of
-        // defaulting to "not running".
-        applyRunningState(isLoading = true, isRunning = false)
         mainViewModel.startListenBroadcast()
         mainViewModel.initAssets(assets)
     }
@@ -831,16 +806,6 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun handleFabAction() {
-        // Ignore taps while the AIDL connection hasn't resolved the real state yet or is
-        // mid-transition (state == Idle/Connecting/Stopping - see MikuRayState). Without
-        // this guard a tap here could fall into the "start" branch below even if the VPN
-        // is actually already connected, since Idle.canStop/Connecting mid-flight isn't
-        // "stopped" either - it's "don't know yet, don't guess".
-        when (mainViewModel.state.value) {
-            MikuRayState.Idle, MikuRayState.Connecting, MikuRayState.Stopping, null -> return
-            else -> {}
-        }
-
         applyRunningState(isLoading = true, isRunning = false)
 
         if (mainViewModel.isRunning.value == true) {
@@ -858,10 +823,7 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun handleLayoutTestClick() {
-        // Only when fully Connected, not mid-Connecting (isRunning.value would still be
-        // true then too, since MikuRayState.Connecting.canStop is also true - see
-        // MikuRayState) - testing a tunnel that isn't actually up yet doesn't make sense.
-        if (mainViewModel.state.value == MikuRayState.Connected) {
+        if (mainViewModel.isRunning.value == true) {
             setTestState(getString(R.string.connection_test_testing))
             mainViewModel.testCurrentServerRealPing()
         }
