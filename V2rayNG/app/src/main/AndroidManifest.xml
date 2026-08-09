@@ -53,12 +53,10 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
         android:theme="@style/AppThemeBase"
+        android:hardwareAccelerated="true"
+        android:largeHeap="true"
         android:usesCleartextTraffic="true">
 
-        <!--
-        QR scanner (ZXingLite/CameraScan, CameraX-based) - kept in portrait to
-        match the rest of the app.
-        -->
         <activity
             android:name=".ui.scanner.QrCaptureActivity"
             android:screenOrientation="portrait" />
