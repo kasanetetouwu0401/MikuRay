@@ -30,6 +30,7 @@ import com.v2ray.ang.util.MessageUtil
 import com.v2ray.ang.util.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.jvm.Volatile
 import libv2ray.CoreCallbackHandler
@@ -509,14 +510,31 @@ object CoreServiceManager {
 
                 AppConfig.MSG_STATE_STOP -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Stop service")
-                    serviceControl.stopService()
+                    // serviceControl.stopService() can block for a while (native tun2socks
+                    // teardown, or in root mode a wait for an in-flight setup job) -
+                    // especially with a large/complex custom routing config where core
+                    // start/stop simply takes longer. onReceive() runs on this process's
+                    // single-threaded broadcast dispatch, so running that work inline here
+                    // used to stall every *other* queued broadcast behind it too - including
+                    // MSG_MEASURE_DELAY from a "test connection" tap - making the FAB and
+                    // bottom status card look permanently unresponsive. Kick it to a
+                    // background coroutine so onReceive() returns immediately and later
+                    // broadcasts keep flowing.
+                    CoroutineScope(Dispatchers.IO).launch {
+                        serviceControl.stopService()
+                    }
                 }
 
                 AppConfig.MSG_STATE_RESTART -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Restart service")
-                    serviceControl.stopService()
-                    Thread.sleep(500L)
-                    LauncherManager.startService(serviceControl.getService())
+                    val service = serviceControl.getService()
+                    // Same reasoning as MSG_STATE_STOP above: don't block the receiver's
+                    // dispatch thread with a synchronous stop + Thread.sleep.
+                    CoroutineScope(Dispatchers.IO).launch {
+                        serviceControl.stopService()
+                        delay(500L)
+                        LauncherManager.startService(service)
+                    }
                 }
 
                 AppConfig.MSG_MEASURE_DELAY -> {

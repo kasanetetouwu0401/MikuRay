@@ -20,7 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 /**
  * Foreground service for Root mode (system-wide proxy without VpnService).
@@ -122,28 +121,30 @@ class CoreRootService : Service(), ServiceControl {
             SoundPlayer.playDisconnect(this)
         }
 
-        // Wait for any in-flight setup to finish before tearing down.
-        // If setup is still running when we try to tear down, teardown would finish
-        // first and setup would then re-install the rules into a dead core,
-        // leaving orphan iptables chains and a tun that black-holes all traffic.
-        runBlocking {
-            setupJob?.cancelAndJoin()
-        }
+        // Wait for any in-flight setup to finish before tearing down (if setup is still
+        // running when we tear down, it would re-install rules into a dead core afterwards,
+        // leaving orphan iptables chains and a tun that black-holes all traffic). This used
+        // to be a runBlocking{} on the *caller's* thread - fine when the caller was already
+        // a background coroutine, but stopService()/stopAllService() can also be reached
+        // from CoreServiceManager's single-threaded broadcast receiver dispatch, where
+        // blocking that thread for as long as setup takes (longer with a large/complex
+        // custom routing config) stalls every other queued command - e.g. a "test
+        // connection" tap - behind it, making the UI look frozen. Do the wait + teardown
+        // entirely inside the async job instead so stopAllService() itself never blocks
+        // its caller.
+        val jobToCancel = setupJob
         setupJob = null
-
-        // Tear down iptables/tun/hev
         CoroutineScope(Dispatchers.IO).launch {
+            jobToCancel?.cancelAndJoin()
             try {
                 RootProxyManager.stopFull(this@CoreRootService)
             } catch (e: Exception) {
                 LogUtil.e(AppConfig.TAG, "StartCore-Root: teardown error", e)
             }
-        }
-
-        CoreServiceManager.stopCoreLoop()
-
-        if (isForced) {
-            stopSelf()
+            CoreServiceManager.stopCoreLoop()
+            if (isForced) {
+                stopSelf()
+            }
         }
     }
 }
