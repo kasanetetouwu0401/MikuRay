@@ -104,7 +104,11 @@ class CoreRootService : Service(), ServiceControl {
 
     override fun vpnProtect(socket: Int): Boolean = true
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    /**
+     * Returns the AIDL control binder for [com.v2ray.ang.core.MikuRayConnection] clients.
+     */
+    override fun onBind(intent: Intent?): IBinder? =
+        if (intent?.action == AppConfig.AIDL_SERVICE_ACTION) CoreServiceManager.binder else null
 
     override fun attachBaseContext(newBase: Context?) {
         val context = newBase?.let {
