@@ -867,6 +867,8 @@ class MainActivity : HelperBaseActivity(),
         if (mainViewModel.isRunning.value == true) {
             setTestState(getString(R.string.connection_test_testing))
             mainViewModel.testCurrentServerRealPing()
+        } else {
+            mainViewModel.resyncState()
         }
     }
 
