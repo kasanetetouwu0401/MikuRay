@@ -705,6 +705,14 @@
     <string name="summary_pref_dynamic_color_banner">主题配色方案将根据您的主页横幅图片进行动态调整。</string>
     <string name="title_pref_keep_awake">保持设备唤醒</string>
     <string name="summary_pref_keep_awake">在 VPN 连接时保持部分唤醒锁 (partial wake lock)。小米/HyperOS 设备需要开启此项；在三星/Pixel 上开启只会徒增耗电 —— 建议保持关闭。</string>
+    <string name="title_dialog_battery_optimization">让 VPN 在后台保持连接？</string>
+    <string name="message_dialog_battery_optimization">屏幕熄灭一段时间后，系统可能会休眠本应用并断开 VPN。允许它在后台运行，以保持连接持续有效。</string>
+    <string name="button_dialog_allow">允许</string>
+    <string name="button_dialog_later">稍后</string>
+    <string name="button_dialog_dont_ask_again">不再询问</string>
+    <string name="title_dialog_autostart">你的手机还需要一步</string>
+    <string name="message_dialog_autostart">你手机厂商额外的电池管理器，即使关闭了电池优化，仍可能停止 VPN。请打开自启动 / 后台活动设置并允许本应用。</string>
+    <string name="button_dialog_open_settings">打开设置</string>
     <string name="title_reset_traffic">重置数据用量</string>
     <string name="reset_traffic_scope_profile">仅限选中的配置</string>
     <string name="reset_traffic_scope_group">仅限“%1$s”分组</string>

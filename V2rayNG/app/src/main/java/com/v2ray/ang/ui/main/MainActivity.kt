@@ -77,6 +77,7 @@ import com.v2ray.ang.util.showBlur
 import com.v2ray.ang.util.showDeleteConfirmDialog
 import com.v2ray.ang.util.showSubUpdateDiffDialog
 import com.v2ray.ang.util.UrlTestProgressDialogController
+import com.v2ray.ang.util.BatteryOptimizationHelper
 import com.king.camera.scan.CameraScan
 import com.v2ray.ang.ui.scanner.QrCaptureActivity
 import kotlinx.coroutines.Dispatchers
@@ -155,6 +156,56 @@ class MainActivity : HelperBaseActivity(),
         refreshGroupTabTitles(true)
 
         checkAndRequestPermission(PermissionType.POST_NOTIFICATIONS) {}
+        maybeShowBatteryOptimizationPrompt()
+    }
+
+    private fun maybeShowBatteryOptimizationPrompt() {
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_BATTERY_OPTIMIZATION_PROMPT_DISMISSED, false)) {
+            maybeShowAutostartPrompt()
+            return
+        }
+        if (BatteryOptimizationHelper.isIgnoringBatteryOptimizations(this)) {
+            maybeShowAutostartPrompt()
+            return
+        }
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.title_dialog_battery_optimization)
+            .setMessage(R.string.message_dialog_battery_optimization)
+            .setCancelable(true)
+            .setPositiveButton(R.string.button_dialog_allow) { _, _ ->
+                BatteryOptimizationHelper.requestIgnoreBatteryOptimizations(this)
+                maybeShowAutostartPrompt()
+            }
+            .setNeutralButton(R.string.button_dialog_dont_ask_again) { _, _ ->
+                MmkvManager.encodeSettings(AppConfig.PREF_BATTERY_OPTIMIZATION_PROMPT_DISMISSED, true)
+            }
+            .setNegativeButton(R.string.button_dialog_later) { _, _ ->
+                maybeShowAutostartPrompt()
+            }
+            .setOnCancelListener {
+                maybeShowAutostartPrompt()
+            }
+            .show()
+    }
+
+    private fun maybeShowAutostartPrompt() {
+        if (!BatteryOptimizationHelper.isAggressiveBatteryManufacturer()) return
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTOSTART_PROMPT_DISMISSED, false)) return
+        if (!BatteryOptimizationHelper.isIgnoringBatteryOptimizations(this)) return
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.title_dialog_autostart)
+            .setMessage(R.string.message_dialog_autostart)
+            .setCancelable(true)
+            .setPositiveButton(R.string.button_dialog_open_settings) { _, _ ->
+                BatteryOptimizationHelper.openAutostartSettings(this)
+            }
+            .setNeutralButton(R.string.button_dialog_dont_ask_again) { _, _ ->
+                MmkvManager.encodeSettings(AppConfig.PREF_AUTOSTART_PROMPT_DISMISSED, true)
+            }
+            .setNegativeButton(R.string.button_dialog_later, null)
+            .show()
     }
 
     private fun weatherLocationReady(): Boolean =
