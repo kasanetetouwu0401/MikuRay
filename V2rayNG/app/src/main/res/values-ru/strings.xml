@@ -726,10 +726,6 @@
     <string name="summary_pref_dynamic_color_banner">Цветовая схема темы будет динамически подстраиваться под изображение баннера на главном экране.</string>
     <string name="title_pref_keep_awake">Не давать устройству уснуть</string>
     <string name="summary_pref_keep_awake">Удерживать частичную блокировку сна (partial wake lock) при подключенном VPN. Необходимо на Xiaomi/HyperOS; на Samsung/Pixel это только разряжает батарею — оставьте выключенным.</string>
-    <string name="title_dialog_battery_optimization">Оставить VPN подключённым в фоне?</string>
-    <string name="message_dialog_battery_optimization">Android может усыпить приложение и отключить VPN, если экран долго выключен. Разрешите приложению работать в фоне, чтобы соединение оставалось активным.</string>
-    <string name="button_dialog_allow">Разрешить</string>
-    <string name="button_dialog_later">Позже</string>
     <string name="title_reset_traffic">Сброс статистики трафика</string>
     <string name="reset_traffic_scope_profile">Только выбранный профиль</string>
     <string name="reset_traffic_scope_group">Только в группе \"%1$s\"</string>

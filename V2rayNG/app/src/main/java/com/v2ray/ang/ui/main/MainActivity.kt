@@ -77,7 +77,6 @@ import com.v2ray.ang.util.showBlur
 import com.v2ray.ang.util.showDeleteConfirmDialog
 import com.v2ray.ang.util.showSubUpdateDiffDialog
 import com.v2ray.ang.util.UrlTestProgressDialogController
-import com.v2ray.ang.util.BatteryOptimizationHelper
 import com.king.camera.scan.CameraScan
 import com.v2ray.ang.ui.scanner.QrCaptureActivity
 import kotlinx.coroutines.Dispatchers
@@ -115,14 +114,6 @@ class MainActivity : HelperBaseActivity(),
     private val requestVpnPermission = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_OK) {
             startV2Ray()
-        }
-    }
-
-    private val requestIgnoreBatteryOptimizations = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        // The system dialog doesn't report whether the user tapped Allow or
-        // Don't allow via resultCode, so check the actual exemption state.
-        if (!BatteryOptimizationHelper.isIgnoringBatteryOptimizations(this)) {
-            showBatteryOptimizationDialog()
         }
     }
 
@@ -164,31 +155,6 @@ class MainActivity : HelperBaseActivity(),
         refreshGroupTabTitles(true)
 
         checkAndRequestPermission(PermissionType.POST_NOTIFICATIONS) {}
-        maybeShowBatteryOptimizationPrompt()
-    }
-
-    private fun maybeShowBatteryOptimizationPrompt() {
-        if (BatteryOptimizationHelper.isIgnoringBatteryOptimizations(this)) {
-            return
-        }
-        showBatteryOptimizationDialog()
-    }
-
-    private fun showBatteryOptimizationDialog() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.title_dialog_battery_optimization)
-            .setMessage(R.string.message_dialog_battery_optimization)
-            .setCancelable(true)
-            .setPositiveButton(R.string.button_dialog_allow) { _, _ ->
-                val intent = BatteryOptimizationHelper.buildIgnoreBatteryOptimizationsIntent(this)
-                if (intent != null) {
-                    requestIgnoreBatteryOptimizations.launch(intent)
-                } else {
-                    BatteryOptimizationHelper.requestIgnoreBatteryOptimizations(this)
-                }
-            }
-            .setNegativeButton(R.string.button_dialog_later, null)
-            .showBlur()
     }
 
     private fun weatherLocationReady(): Boolean =
@@ -850,8 +816,6 @@ class MainActivity : HelperBaseActivity(),
         if (mainViewModel.isRunning.value == true) {
             setTestState(getString(R.string.connection_test_testing))
             mainViewModel.testCurrentServerRealPing()
-        } else {
-            mainViewModel.resyncState()
         }
     }
 

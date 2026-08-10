@@ -76,7 +76,6 @@ object CoreServiceManager {
     fun startCoreLoop(vpnInterface: ParcelFileDescriptor?): Boolean {
         if (isRunning()) {
             LogUtil.w(AppConfig.TAG, "StartCore-Manager: Core already running")
-            getService()?.let { MessageUtil.sendMsg2UI(it, AppConfig.MSG_STATE_RUNNING, "") }
             return false
         }
 

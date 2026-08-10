@@ -748,10 +748,6 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="summary_pref_dynamic_color_banner">The theme color scheme will dynamically adapt to your Home Banner image.</string>
     <string name="title_pref_keep_awake">Keep device awake</string>
     <string name="summary_pref_keep_awake">Hold a partial wake lock while the VPN is connected. Needed on Xiaomi/HyperOS; on Samsung/Pixel it just drains battery — leave off.</string>
-    <string name="title_dialog_battery_optimization">Keep the VPN connected in the background?</string>
-    <string name="message_dialog_battery_optimization">Android may put this app to sleep and disconnect the VPN when the screen is off for a while. Allow it to run in the background so your connection stays active.</string>
-    <string name="button_dialog_allow">Allow</string>
-    <string name="button_dialog_later">Later</string>
     <string name="title_reset_traffic">Reset Data Usage</string>
     <string name="reset_traffic_scope_profile">Selected profile only</string>
     <string name="reset_traffic_scope_group">Only in \"%1$s\" group</string>

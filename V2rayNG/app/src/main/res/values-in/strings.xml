@@ -716,10 +716,6 @@ Nama Paket — cuma bisa kalo lu pake Xray TUN, routeOnly aktif, dan Android 10+
     <string name="summary_pref_dynamic_color_banner">Skema warna tema bakal otomatis nyesuaiin sama gambar Banner Beranda kamu.</string>
     <string name="title_pref_keep_awake">Bikin HP tetep aktif</string>
     <string name="summary_pref_keep_awake">Nahan partial wake lock pas VPN lagi nyambung. Dibutuhin buat HP Xiaomi/HyperOS; kalau di Samsung/Pixel malah bikin boros baterai — mending biarin mati aja.</string>
-    <string name="title_dialog_battery_optimization">Biar VPN tetap nyambung di background?</string>
-    <string name="message_dialog_battery_optimization">Android bisa nge-tidurin app ini dan mutusin VPN kalau layar mati agak lama. Izinin app ini jalan di background biar koneksi tetap aktif.</string>
-    <string name="button_dialog_allow">Izinkan</string>
-    <string name="button_dialog_later">Nanti</string>
     <string name="title_reset_traffic">Reset Penggunaan Data</string>
     <string name="reset_traffic_scope_profile">Cuma profil yang dipilih</string>
     <string name="reset_traffic_scope_group">Cuma di grup \"%1$s\"</string>
