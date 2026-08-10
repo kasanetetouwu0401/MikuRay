@@ -5,6 +5,7 @@ import com.v2ray.ang.AppConfig
 import com.v2ray.ang.core.CoreServiceManager
 import com.v2ray.ang.extension.toSpeedString
 import com.v2ray.ang.util.LogUtil
+import com.v2ray.ang.util.MessageUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,12 +17,6 @@ object TrafficController {
 
     private const val QUERY_INTERVAL_MS = 3000L
 
-    /**
-     * The core's queryAllOutboundTrafficStats() resets its counters on every call, so only
-     * one place in the app may call it. NotificationManager subscribes here instead of
-     * querying independently, otherwise both consumers race for the same delta and each
-     * one ends up with incomplete/inaccurate numbers.
-     */
     interface Listener {
         fun onTraffic(
             proxyUplink: Long,
@@ -80,7 +75,6 @@ object TrafficController {
                         }
                     }
 
-                    // Accumulate stats for all proxy outbounds (including custom subscription tags)
                     stat.tag != AppConfig.TAG_BLOCKED -> {
                         when (stat.direction) {
                             AppConfig.UPLINK -> proxyUplink += stat.value
@@ -106,7 +100,7 @@ object TrafficController {
             val downSpeed = ((proxyDownlink + directDownlink) / sinceLastQueryInSeconds).toLong()
             val speedText = "↑ ${upSpeed.toSpeedString()}  ↓ ${downSpeed.toSpeedString()}"
             getService()?.let { svc ->
-                CoreServiceManager.binder.broadcastTrafficSpeedUpdated(svc, speedText)
+                MessageUtil.sendMsg2UI(svc, AppConfig.MSG_TRAFFIC_SPEED_UPDATED, speedText)
             }
         }
 
@@ -116,7 +110,7 @@ object TrafficController {
         MmkvManager.addProfileTraffic(guid, proxyUplink, proxyDownlink)
 
         getService()?.let { svc ->
-            CoreServiceManager.binder.broadcastTrafficUpdated(svc, guid)
+            MessageUtil.sendMsg2UI(svc, AppConfig.MSG_TRAFFIC_UPDATED, guid)
         }
     }
 
