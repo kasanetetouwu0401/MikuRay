@@ -730,7 +730,6 @@
     <string name="message_dialog_battery_optimization">Android может усыпить приложение и отключить VPN, если экран долго выключен. Разрешите приложению работать в фоне, чтобы соединение оставалось активным.</string>
     <string name="button_dialog_allow">Разрешить</string>
     <string name="button_dialog_later">Позже</string>
-    <string name="button_dialog_dont_ask_again">Больше не спрашивать</string>
     <string name="title_reset_traffic">Сброс статистики трафика</string>
     <string name="reset_traffic_scope_profile">Только выбранный профиль</string>
     <string name="reset_traffic_scope_group">Только в группе \"%1$s\"</string>

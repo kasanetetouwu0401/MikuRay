@@ -10,11 +10,8 @@ import android.provider.Settings
 import com.v2ray.ang.AppConfig
 
 /**
- * Helper to reduce the odds of CoreVpnService being killed in the background by:
- *  1. Requesting exemption from standard Android Doze/App Standby battery optimizations.
- *  2. Deep-linking the user to vendor-specific "autostart" / "background activity"
- *     screens (MIUI, ColorOS, FuntouchOS/OriginOS, EMUI/MagicOS, One UI, etc.) which
- *     are NOT covered by the standard Android battery optimization API.
+ * Helper to reduce the odds of CoreVpnService being killed in the background by
+ * requesting exemption from standard Android Doze/App Standby battery optimizations.
  */
 object BatteryOptimizationHelper {
 
@@ -26,6 +23,30 @@ object BatteryOptimizationHelper {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true
         val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager ?: return true
         return pm.isIgnoringBatteryOptimizations(context.packageName)
+    }
+
+    /**
+     * Launches the system dialog asking the user to whitelist this app from
+     * battery optimizations. Requires the REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+     * permission to be declared in the manifest.
+     *
+     * @return true if an intent was launched, false if it couldn't be (e.g. already
+     * exempt, unsupported API level, or no activity found to handle it).
+     */
+    /**
+     * Builds the intent for the system "ignore battery optimizations" dialog,
+     * or null if it can't be resolved (unsupported API level, already exempt,
+     * or no activity to handle it — check openAppBatterySettingsFallback as a
+     * manual fallback in that case).
+     */
+    fun buildIgnoreBatteryOptimizationsIntent(context: Context): Intent? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return null
+        if (isIgnoringBatteryOptimizations(context)) return null
+
+        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+            data = Uri.parse("package:${context.packageName}")
+        }
+        return if (intent.resolveActivity(context.packageManager) != null) intent else null
     }
 
     /**

@@ -97,7 +97,6 @@ object AppConfig {
     const val PREF_NAVIGATE_ADVANCED_SETTINGS = "pref_navigate_advanced_settings"
     const val PREF_NAVIGATE_OBSERVATORY_SETTINGS = "pref_navigate_observatory_settings"
     const val PREF_NAVIGATE_PER_APP_PROXY_SETTINGS = "pref_navigate_per_app_proxy_settings"
-    const val PREF_BATTERY_OPTIMIZATION_PROMPT_DISMISSED = "pref_battery_optimization_prompt_dismissed"
     const val PREF_SERVER_ORDER = "pref_server_order"
 
     const val PREF_APP_THEME = "pref_app_theme"

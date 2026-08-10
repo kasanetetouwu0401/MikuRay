@@ -118,6 +118,14 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
+    private val requestIgnoreBatteryOptimizations = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        // The system dialog doesn't report whether the user tapped Allow or
+        // Don't allow via resultCode, so check the actual exemption state.
+        if (!BatteryOptimizationHelper.isIgnoringBatteryOptimizations(this)) {
+            showBatteryOptimizationDialog()
+        }
+    }
+
     private val requestActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (SettingsChangeManager.consumeRestartService() && mainViewModel.isRunning.value == true) {
             restartV2Ray()
@@ -160,22 +168,24 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun maybeShowBatteryOptimizationPrompt() {
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_BATTERY_OPTIMIZATION_PROMPT_DISMISSED, false)) {
-            return
-        }
         if (BatteryOptimizationHelper.isIgnoringBatteryOptimizations(this)) {
             return
         }
+        showBatteryOptimizationDialog()
+    }
 
+    private fun showBatteryOptimizationDialog() {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.title_dialog_battery_optimization)
             .setMessage(R.string.message_dialog_battery_optimization)
             .setCancelable(true)
             .setPositiveButton(R.string.button_dialog_allow) { _, _ ->
-                BatteryOptimizationHelper.requestIgnoreBatteryOptimizations(this)
-            }
-            .setNeutralButton(R.string.button_dialog_dont_ask_again) { _, _ ->
-                MmkvManager.encodeSettings(AppConfig.PREF_BATTERY_OPTIMIZATION_PROMPT_DISMISSED, true)
+                val intent = BatteryOptimizationHelper.buildIgnoreBatteryOptimizationsIntent(this)
+                if (intent != null) {
+                    requestIgnoreBatteryOptimizations.launch(intent)
+                } else {
+                    BatteryOptimizationHelper.requestIgnoreBatteryOptimizations(this)
+                }
             }
             .setNegativeButton(R.string.button_dialog_later, null)
             .showBlur()

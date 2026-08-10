@@ -709,7 +709,6 @@
     <string name="message_dialog_battery_optimization">屏幕熄灭一段时间后，系统可能会休眠本应用并断开 VPN。允许它在后台运行，以保持连接持续有效。</string>
     <string name="button_dialog_allow">允许</string>
     <string name="button_dialog_later">稍后</string>
-    <string name="button_dialog_dont_ask_again">不再询问</string>
     <string name="title_reset_traffic">重置数据用量</string>
     <string name="reset_traffic_scope_profile">仅限选中的配置</string>
     <string name="reset_traffic_scope_group">仅限“%1$s”分组</string>

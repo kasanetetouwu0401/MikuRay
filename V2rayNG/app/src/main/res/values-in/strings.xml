@@ -720,7 +720,6 @@ Nama Paket — cuma bisa kalo lu pake Xray TUN, routeOnly aktif, dan Android 10+
     <string name="message_dialog_battery_optimization">Android bisa nge-tidurin app ini dan mutusin VPN kalau layar mati agak lama. Izinin app ini jalan di background biar koneksi tetap aktif.</string>
     <string name="button_dialog_allow">Izinkan</string>
     <string name="button_dialog_later">Nanti</string>
-    <string name="button_dialog_dont_ask_again">Jangan tanya lagi</string>
     <string name="title_reset_traffic">Reset Penggunaan Data</string>
     <string name="reset_traffic_scope_profile">Cuma profil yang dipilih</string>
     <string name="reset_traffic_scope_group">Cuma di grup \"%1$s\"</string>
