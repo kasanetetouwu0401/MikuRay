@@ -731,9 +731,6 @@
     <string name="button_dialog_allow">Разрешить</string>
     <string name="button_dialog_later">Позже</string>
     <string name="button_dialog_dont_ask_again">Больше не спрашивать</string>
-    <string name="title_dialog_autostart">Ещё один шаг для вашего телефона</string>
-    <string name="message_dialog_autostart">У вашего телефона есть дополнительный менеджер батареи, который может остановить VPN даже после отключения оптимизации батареи. Откройте настройки автозапуска / фоновой активности и разрешите приложение.</string>
-    <string name="button_dialog_open_settings">Открыть настройки</string>
     <string name="title_reset_traffic">Сброс статистики трафика</string>
     <string name="reset_traffic_scope_profile">Только выбранный профиль</string>
     <string name="reset_traffic_scope_group">Только в группе \"%1$s\"</string>

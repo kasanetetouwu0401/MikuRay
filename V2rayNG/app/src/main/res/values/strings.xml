@@ -753,9 +753,6 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="button_dialog_allow">Allow</string>
     <string name="button_dialog_later">Later</string>
     <string name="button_dialog_dont_ask_again">Don\'t ask again</string>
-    <string name="title_dialog_autostart">One more step for your phone</string>
-    <string name="message_dialog_autostart">Your phone\'s manufacturer has an extra battery manager that can still stop the VPN even after background optimization is disabled. Open autostart / background activity settings and allow this app.</string>
-    <string name="button_dialog_open_settings">Open settings</string>
     <string name="title_reset_traffic">Reset Data Usage</string>
     <string name="reset_traffic_scope_profile">Selected profile only</string>
     <string name="reset_traffic_scope_group">Only in \"%1$s\" group</string>

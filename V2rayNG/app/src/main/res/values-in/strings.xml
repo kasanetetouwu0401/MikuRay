@@ -721,9 +721,6 @@ Nama Paket — cuma bisa kalo lu pake Xray TUN, routeOnly aktif, dan Android 10+
     <string name="button_dialog_allow">Izinkan</string>
     <string name="button_dialog_later">Nanti</string>
     <string name="button_dialog_dont_ask_again">Jangan tanya lagi</string>
-    <string name="title_dialog_autostart">Satu langkah lagi buat HP kamu</string>
-    <string name="message_dialog_autostart">HP kamu punya battery manager tambahan yang masih bisa matiin VPN walau optimasi baterai udah dimatiin. Buka pengaturan autostart / background activity dan izinin app ini.</string>
-    <string name="button_dialog_open_settings">Buka pengaturan</string>
     <string name="title_reset_traffic">Reset Penggunaan Data</string>
     <string name="reset_traffic_scope_profile">Cuma profil yang dipilih</string>
     <string name="reset_traffic_scope_group">Cuma di grup \"%1$s\"</string>

@@ -710,9 +710,6 @@
     <string name="button_dialog_allow">允许</string>
     <string name="button_dialog_later">稍后</string>
     <string name="button_dialog_dont_ask_again">不再询问</string>
-    <string name="title_dialog_autostart">你的手机还需要一步</string>
-    <string name="message_dialog_autostart">你手机厂商额外的电池管理器，即使关闭了电池优化，仍可能停止 VPN。请打开自启动 / 后台活动设置并允许本应用。</string>
-    <string name="button_dialog_open_settings">打开设置</string>
     <string name="title_reset_traffic">重置数据用量</string>
     <string name="reset_traffic_scope_profile">仅限选中的配置</string>
     <string name="reset_traffic_scope_group">仅限“%1$s”分组</string>
