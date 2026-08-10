@@ -186,7 +186,7 @@ class MainActivity : HelperBaseActivity(),
             .setOnCancelListener {
                 maybeShowAutostartPrompt()
             }
-            .show()
+            .showBlur()
     }
 
     private fun maybeShowAutostartPrompt() {
@@ -205,7 +205,7 @@ class MainActivity : HelperBaseActivity(),
                 MmkvManager.encodeSettings(AppConfig.PREF_AUTOSTART_PROMPT_DISMISSED, true)
             }
             .setNegativeButton(R.string.button_dialog_later, null)
-            .show()
+            .showBlur()
     }
 
     private fun weatherLocationReady(): Boolean =
