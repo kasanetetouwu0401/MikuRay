@@ -265,7 +265,6 @@
     <string name="summary_pref_show_isp_info">Показывать название провайдера/организации рядом с обнаруженным IP</string>
     <string name="title_pref_hide_scroll_buttons">Скрыть плавающие кнопки прокрутки</string>
     <string name="summary_pref_hide_scroll_buttons">Скрывает плавающие кнопки прокрутки вверх/вниз/к выбранному профилю над списком серверов. Если включено, используйте пункт \"Перейти к выбранному профилю\" в меню \"ещё\"</string>
-    <string name="title_pref_predictive_back_animation">Анимация жеста возврата</string>
 
     <string name="title_pref_proxy_sharing_enabled">Разрешить подключения из локальной сети</string>
     <string name="summary_pref_proxy_sharing_enabled">Другие устройства могут подключаться к прокси по вашему IP через локальный прокси. Включайте только в доверенных сетях во избежание несанкционированных подключений</string>
@@ -407,6 +406,9 @@
     <string name="btn_scroll_to_bottom">Прокрутить вниз</string>
     <string name="toast_fragment_not_available">Не удалось найти текущий вид</string>
     <string name="title_clear_test_results">Очистить результаты тестов</string>
+    <string name="title_country_code_all_server">Проверить коды стран всех серверов</string>
+    <string name="title_clear_country_codes">Очистить коды стран</string>
+    <string name="country_code_unknown">—</string>
 
     <string name="tasker_start_service">Запустить службу</string>
     <string name="tasker_setting_confirm">Подтвердить</string>
@@ -539,13 +541,6 @@
         <item>Светлая</item>
         <item>Тёмная</item>
         <item>Авто (день/ночь)</item>
-    </string-array>
-
-    <string-array name="predictive_back_animation_entries">
-        <item>Нет</item>
-        <item>AOSP</item>
-        <item>Масштаб</item>
-        <item>Классика</item>
     </string-array>
 
     <string-array name="preset_rulesets">

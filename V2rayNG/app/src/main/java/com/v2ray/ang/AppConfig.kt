@@ -247,8 +247,6 @@ object AppConfig {
 
     const val PREF_TOOLBAR_CENTER_SUBTITLE_MODE = "pref_toolbar_center_subtitle_mode"
 
-    const val PREF_PREDICTIVE_BACK_ANIMATION = "pref_predictive_back_animation"
-
     const val PREF_PARTICLES_SETTINGS = "pref_particles_settings"
 
     const val PREF_PARTICLES_FRAME_DELAY = "pref_particles_frame_delay"
@@ -379,6 +377,11 @@ object AppConfig {
     const val MSG_MEASURE_CONFIG_SUCCESS = 72
     const val MSG_MEASURE_CONFIG_NOTIFY = 73
     const val MSG_MEASURE_CONFIG_FINISH = 74
+    const val MSG_COUNTRY_CODE_START = 90
+    const val MSG_COUNTRY_CODE_CANCEL = 91
+    const val MSG_COUNTRY_CODE_SUCCESS = 92
+    const val MSG_COUNTRY_CODE_NOTIFY = 93
+    const val MSG_COUNTRY_CODE_FINISH = 94
 
     const val MSG_SUB_UPDATE_START = 8
     const val MSG_SUB_UPDATE_CANCEL = 81

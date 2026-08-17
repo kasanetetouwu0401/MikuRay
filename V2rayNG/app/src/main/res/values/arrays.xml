@@ -193,13 +193,6 @@
         <item>3</item>
     </string-array>
 
-    <string-array name="predictive_back_animation_value" translatable="false">
-        <item>none</item>
-        <item>aosp</item>
-        <item>scale</item>
-        <item>classic</item>
-    </string-array>
-
     <string-array name="outbound_tag" translatable="false">
         <item>proxy</item>
         <item>direct</item>

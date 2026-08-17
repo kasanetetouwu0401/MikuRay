@@ -267,7 +267,6 @@
     <string name="summary_pref_show_isp_info">Tampilin nama ISP/organisasi di sebelah IP yang kedeteksi</string>
     <string name="title_pref_hide_scroll_buttons">Sembunyiin tombol scroll yang ngambang</string>
     <string name="summary_pref_hide_scroll_buttons">Sembunyiin tombol scroll ke atas/bawah/server terpilih yang ngambang di list server. Kalo dinyalain, pake \"Menuju profile terpilih\" di menu lainnya aja ya.</string>
-    <string name="title_pref_predictive_back_animation">Animasi gestur kembali prediktif</string>
 
     <string name="title_pref_proxy_sharing_enabled">Bolehin koneksi dari LAN</string>
     <string name="summary_pref_proxy_sharing_enabled">Device lain bisa numpang proxy pake IP HP kamu via proxy lokal. Nyalain pas di jaringan yang kamu percaya aja ya, biar ga ada yang nebeng diam-diam</string>
@@ -409,6 +408,9 @@
     <string name="btn_scroll_to_bottom">Scroll ke bawah</string>
     <string name="toast_fragment_not_available">Waduh, ga nemu nih tampilan yang lagi kamu buka</string>
     <string name="title_clear_test_results">Hapus hasil tes</string>
+    <string name="title_country_code_all_server">Uji kode negara semua server</string>
+    <string name="title_clear_country_codes">Hapus semua kode negara</string>
+    <string name="country_code_unknown">—</string>
 
     <string name="tasker_start_service">Nyalain Servis</string>
     <string name="tasker_setting_confirm">Sip, Konfirmasi</string>
@@ -541,13 +543,6 @@ Nama Paket — cuma bisa kalo kamu pake Xray TUN, routeOnly aktif, dan Android 1
         <item>Terang</item>
         <item>Gelap</item>
         <item>Otomatis (Siang/Malam)</item>
-    </string-array>
-
-    <string-array name="predictive_back_animation_entries">
-        <item>Tidak ada</item>
-        <item>AOSP</item>
-        <item>Skala</item>
-        <item>Klasik</item>
     </string-array>
 
     <string-array name="preset_rulesets">

@@ -259,7 +259,6 @@
     <string name="summary_pref_show_isp_info">在检测到的 IP 旁显示运营商/组织名称</string>
     <string name="title_pref_hide_scroll_buttons">隐藏悬浮滚动按钮</string>
     <string name="summary_pref_hide_scroll_buttons">隐藏服务器列表上悬浮的滚动到顶部/底部/选中项按钮。开启后，可在\"更多\"菜单中使用「前往选中的配置」代替</string>
-    <string name="title_pref_predictive_back_animation">预测性返回动画</string>
 
     <string name="title_pref_proxy_sharing_enabled">允许来自局域网的连接</string>
     <string name="summary_pref_proxy_sharing_enabled">其他设备可以使用 socks/http 协议通过您的 IP 地址连接到代理, 仅在受信任的网络中启用以避免未经授权的连接</string>
@@ -403,6 +402,9 @@
     <string name="btn_scroll_to_bottom">滚动到底部</string>
     <string name="toast_fragment_not_available">无法定位当前视图</string>
     <string name="title_clear_test_results">清除测试结果</string>
+    <string name="title_country_code_all_server">测试所有服务器的国家代码</string>
+    <string name="title_clear_country_codes">清除国家代码</string>
+    <string name="country_code_unknown">—</string>
 
     <string name="tasker_start_service">启动服务</string>
     <string name="tasker_setting_confirm">确定</string>
@@ -522,13 +524,6 @@
         <item>浅色</item>
         <item>深色</item>
         <item>自动（白天/夜间）</item>
-    </string-array>
-
-    <string-array name="predictive_back_animation_entries">
-        <item>无</item>
-        <item>AOSP</item>
-        <item>缩放</item>
-        <item>经典</item>
     </string-array>
 
     <string-array name="preset_rulesets">

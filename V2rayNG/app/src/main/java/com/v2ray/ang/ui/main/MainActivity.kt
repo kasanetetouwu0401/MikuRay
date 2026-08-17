@@ -79,6 +79,7 @@ import com.v2ray.ang.ui.subscription.SubSettingActivity
 import com.v2ray.ang.ui.weather.WeatherForecastActivity
 import com.v2ray.ang.ui.weather.WeatherHelper
 import com.v2ray.ang.util.BlurBottomStatusController
+import com.v2ray.ang.util.CountryCodeProgressDialogController
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.MikuRayFileCrypto
 import com.v2ray.ang.util.QRCodeDecoder
@@ -119,6 +120,10 @@ class MainActivity : HelperBaseActivity(),
 
     private val urlTestProgressDialog: UrlTestProgressDialogController by lazy {
         UrlTestProgressDialogController(this) { mainViewModel.cancelRealPingTest() }
+    }
+
+    private val countryCodeProgressDialog: CountryCodeProgressDialogController by lazy {
+        CountryCodeProgressDialogController(this) { mainViewModel.cancelCountryCodeTest() }
     }
 
     private val TAG_HOME_BANNER_DEFAULT = "DEFAULT_HOME_BANNER"
@@ -606,6 +611,10 @@ class MainActivity : HelperBaseActivity(),
                 urlTestProgressDialog.show(mainViewModel.serversCache.count(), R.string.title_real_ping_all_server)
                 mainViewModel.testAllRealPing()
             }
+            R.id.country_code_all -> {
+                countryCodeProgressDialog.show(mainViewModel.serversCache.count())
+                mainViewModel.testAllCountryCodes()
+            }
             R.id.tcping_all -> {
                 urlTestProgressDialog.show(mainViewModel.serversCache.count(), R.string.title_ping_all_server)
                 mainViewModel.testAllRealPing(true)
@@ -618,6 +627,10 @@ class MainActivity : HelperBaseActivity(),
             R.id.sub_update -> importConfigViaSub()
             R.id.clear_test_results -> {
                 mainViewModel.clearTestResults()
+                refreshAllGroupListDisplays()
+            }
+            R.id.clear_country_codes -> {
+                mainViewModel.clearCountryCodes()
                 refreshAllGroupListDisplays()
             }
             R.id.reset_traffic -> {
@@ -696,6 +709,14 @@ class MainActivity : HelperBaseActivity(),
                 urlTestProgressDialog.finish()
             } else {
                 urlTestProgressDialog.update(info)
+            }
+        }
+
+        mainViewModel.countryCodeProgressAction.observe(this) { info ->
+            if (info == null) {
+                countryCodeProgressDialog.finish()
+            } else {
+                countryCodeProgressDialog.update(info)
             }
         }
 
