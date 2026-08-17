@@ -11,7 +11,6 @@ import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.UnknownHostException
-import java.net.URLEncoder
 
 object SpeedtestManager {
 
@@ -44,43 +43,28 @@ object SpeedtestManager {
     }
 
     /**
-     * Resolves the server host and asks the configured IP API for its country code.
-     * The configured URL may contain an `{ip}` placeholder; otherwise the default
-     * api.ip.sb endpoint receives the IP as a path segment and custom endpoints
-     * receive it as the `ip` query parameter.
+     * Reads the country of the outbound currently exposed by a temporary profile core.
+     * The request must use the profile's local HTTP inbound; httpPort == 0 is rejected
+     * to prevent accidentally querying through the device connection.
      */
-    fun getServerCountryCode(server: String?): String? {
-        val host = server?.trim()
-            ?.removePrefix("[")
-            ?.removeSuffix("]")
-            ?.takeIf { it.isNotEmpty() }
-            ?: return null
-        val ip = if (Utils.isPureIpAddress(host)) {
-            host
-        } else {
-            HttpUtil.resolveHostToIP(host)?.firstOrNull()
-        } ?: return null
+    fun getCountryCodeThroughProxy(httpPort: Int): String? {
+        if (httpPort <= 0) return null
 
         val configuredUrl = MmkvManager.decodeSettingsString(AppConfig.PREF_IP_API_URL)
             .takeIf { !it.isNullOrBlank() } ?: AppConfig.IP_API_URL
-        val encodedIp = URLEncoder.encode(ip, Charsets.UTF_8.name())
-        val url = when {
-            configuredUrl.contains("{ip}", ignoreCase = true) ->
-                configuredUrl.replace("{ip}", encodedIp, ignoreCase = true)
-            configuredUrl == AppConfig.IP_API_URL ->
-                "${configuredUrl.trimEnd('/')}/$encodedIp"
-            else -> {
-                val separator = if (configuredUrl.contains("?")) "&" else "?"
-                "$configuredUrl${separator}ip=$encodedIp"
-            }
-        }
-
+        val url = configuredUrl.replace("{ip}", "", ignoreCase = true)
         val content = HttpUtil.getUrlContent(
-            UrlContentRequest(url = url, timeout = 5000, httpPort = 0)
+            UrlContentRequest(
+                url = url,
+                timeout = 5000,
+                httpPort = httpPort
+            )
         ) ?: return null
         val ipInfo = JsonUtil.fromJsonSafe(content, IPAPIInfo::class.java) ?: return null
+
         return listOf(
             ipInfo.country_code,
+            ipInfo.country,
             ipInfo.countryCode,
             ipInfo.location?.country_code
         ).firstOrNull { !it.isNullOrBlank() }

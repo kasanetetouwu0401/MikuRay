@@ -1,22 +1,30 @@
 package com.v2ray.ang.service
 
-import com.miku.ray.remixicon.R as RemixR
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.miku.ray.remixicon.R as RemixR
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
+import com.v2ray.ang.core.CoreConfigManager
+import com.v2ray.ang.core.CoreNativeManager
 import com.v2ray.ang.dto.CountryCodeTestMessage
 import com.v2ray.ang.dto.TestProgressInfo
 import com.v2ray.ang.enums.NotificationChannelType
 import com.v2ray.ang.extension.serializable
 import com.v2ray.ang.handler.MmkvManager
+import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.SpeedtestManager
 import com.v2ray.ang.helper.NotificationHelper
+import com.v2ray.ang.util.JsonUtil
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.MessageUtil
+import com.v2ray.ang.util.Utils
+import libv2ray.CoreCallbackHandler
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
@@ -93,16 +101,14 @@ class CountryCodeTestService : Service() {
 
         worker = thread(name = "CountryCodeTest", start = true) {
             try {
+                SettingsManager.initAssets(this, assets)
+                CoreNativeManager.initCoreEnv(this)
                 guids.forEachIndexed { index, guid ->
                     if (cancelled.get() || Thread.currentThread().isInterrupted) return@thread
-                    val server = MmkvManager.decodeServerConfig(guid)?.server
-                    val countryCode = SpeedtestManager.getServerCountryCode(server)
+
+                    val countryCode = lookupThroughProfile(guid)
                     MmkvManager.encodeServerCountryCode(guid, countryCode)
-                    MessageUtil.sendMsg2UI(
-                        this,
-                        AppConfig.MSG_COUNTRY_CODE_SUCCESS,
-                        guid
-                    )
+                    MessageUtil.sendMsg2UI(this, AppConfig.MSG_COUNTRY_CODE_SUCCESS, guid)
                     MessageUtil.sendMsg2UI(
                         this,
                         AppConfig.MSG_COUNTRY_CODE_NOTIFY,
@@ -120,6 +126,61 @@ class CountryCodeTestService : Service() {
         }
     }
 
+    private fun lookupThroughProfile(guid: String): String? {
+        val result = CoreConfigManager.getV2rayConfig4Speedtest(this, guid)
+        if (!result.status || result.content.isBlank()) return null
+
+        val config = JsonUtil.parseString(result.content) ?: return null
+        val inbounds = JsonArray()
+        config.add("inbounds", inbounds)
+
+        val httpPort = Utils.findRandomFreePort()
+        var socksPort = Utils.findRandomFreePort()
+        while (socksPort == httpPort) {
+            socksPort = Utils.findRandomFreePort()
+        }
+        inbounds.add(createSocksInbound(socksPort))
+        inbounds.add(createHttpInbound(httpPort))
+
+        val controller = CoreNativeManager.newCoreController(CountryCallback())
+        return try {
+            controller.startLoop(JsonUtil.toJson(config), 0)
+            var countryCode: String? = null
+            repeat(5) {
+                if (countryCode == null && !cancelled.get()) {
+                    Thread.sleep(300)
+                    countryCode = SpeedtestManager.getCountryCodeThroughProxy(httpPort)
+                }
+            }
+            countryCode
+        } finally {
+            runCatching { controller.stopLoop() }
+        }
+    }
+
+    private fun createSocksInbound(port: Int): JsonObject {
+        return JsonObject().apply {
+            addProperty("tag", "country-socks")
+            addProperty("listen", AppConfig.LOOPBACK)
+            addProperty("port", port)
+            addProperty("protocol", "socks")
+            add("settings", JsonObject().apply {
+                addProperty("auth", "noauth")
+                addProperty("udp", true)
+            })
+        }
+    }
+
+    private fun createHttpInbound(port: Int): JsonObject {
+        return JsonObject().apply {
+            addProperty("tag", "country-http")
+            addProperty("listen", AppConfig.LOOPBACK)
+            addProperty("port", port)
+            addProperty("protocol", "http")
+            add("settings", JsonObject())
+        }
+    }
+
     private fun handleCancel() {
         cancelled.set(true)
         worker?.interrupt()
@@ -131,6 +192,14 @@ class CountryCodeTestService : Service() {
 
     private fun sendFinish() {
         MessageUtil.sendMsg2UI(this, AppConfig.MSG_COUNTRY_CODE_FINISH, "0")
+    }
+
+    private class CountryCallback : CoreCallbackHandler {
+        override fun startup(): Long = 0L
+        override fun shutdown(): Long = 0L
+        override fun onEmitStatus(l: Long, s: String?): Long {
+            return 0L
+        }
     }
 }
 
