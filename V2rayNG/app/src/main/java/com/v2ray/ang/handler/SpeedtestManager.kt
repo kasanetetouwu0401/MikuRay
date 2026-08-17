@@ -47,7 +47,7 @@ object SpeedtestManager {
      * The request must use the profile's local HTTP inbound; httpPort == 0 is rejected
      * to prevent accidentally querying through the device connection.
      */
-    fun getCountryCodeThroughProxy(httpPort: Int): String? {
+    fun getCountryCodeThroughProxy(httpPort: Int, timeoutMs: Int = 3500): String? {
         if (httpPort <= 0) return null
 
         val configuredUrl = MmkvManager.decodeSettingsString(AppConfig.PREF_IP_API_URL)
@@ -56,7 +56,7 @@ object SpeedtestManager {
         val content = HttpUtil.getUrlContent(
             UrlContentRequest(
                 url = url,
-                timeout = 5000,
+                timeout = timeoutMs,
                 httpPort = httpPort
             )
         ) ?: return null

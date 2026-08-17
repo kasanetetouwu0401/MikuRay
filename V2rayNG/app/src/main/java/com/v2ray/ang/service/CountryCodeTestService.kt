@@ -25,6 +25,8 @@ import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.MessageUtil
 import com.v2ray.ang.util.Utils
 import libv2ray.CoreCallbackHandler
+import java.net.InetSocketAddress
+import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
@@ -145,17 +147,33 @@ class CountryCodeTestService : Service() {
         val controller = CoreNativeManager.newCoreController(CountryCallback())
         return try {
             controller.startLoop(JsonUtil.toJson(config), 0)
-            var countryCode: String? = null
-            repeat(5) {
-                if (countryCode == null && !cancelled.get()) {
-                    Thread.sleep(300)
-                    countryCode = SpeedtestManager.getCountryCodeThroughProxy(httpPort)
-                }
+            if (!waitForProxy(httpPort)) return null
+
+            val countryCode = SpeedtestManager.getCountryCodeThroughProxy(httpPort)
+            if (countryCode != null || cancelled.get()) {
+                countryCode
+            } else {
+                Thread.sleep(120)
+                SpeedtestManager.getCountryCodeThroughProxy(httpPort, timeoutMs = 2500)
             }
-            countryCode
         } finally {
             runCatching { controller.stopLoop() }
         }
+    }
+
+    private fun waitForProxy(port: Int, timeoutMs: Int = 1800): Boolean {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (!cancelled.get() && System.currentTimeMillis() < deadline) {
+            try {
+                Socket().use { socket ->
+                    socket.connect(InetSocketAddress(AppConfig.LOOPBACK, port), 120)
+                }
+                return true
+            } catch (_: Exception) {
+                Thread.sleep(60)
+            }
+        }
+        return false
     }
 
     private fun createSocksInbound(port: Int): JsonObject {
