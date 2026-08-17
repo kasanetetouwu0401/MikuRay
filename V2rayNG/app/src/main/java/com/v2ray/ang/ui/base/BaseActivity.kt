@@ -32,6 +32,7 @@ import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.helper.CustomDividerItemDecoration
 import com.v2ray.ang.util.DPIController
 import com.v2ray.ang.util.FontSizeController
+import com.v2ray.ang.util.PredictiveBackController
 import com.v2ray.ang.util.WindowBlurUtils
 import com.qmdeve.blurview.widget.BlurView
 import com.v2ray.ang.util.ThemeStateManager
@@ -50,6 +51,8 @@ abstract class BaseActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         themeStateManager = ThemeStateManager(this)
+
+        PredictiveBackController(this).attach(this)
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {

@@ -118,6 +118,17 @@
             android:title="@string/title_pref_hide_scroll_buttons" />
 
         <ListPreference
+            android:icon="@drawable/rmx_arrow_go_back_line"
+            app:dialogIcon="@drawable/rmx_arrow_go_back_line"
+            app:layout="@layout/uwu_mid"
+            android:defaultValue="aosp"
+            android:entries="@array/predictive_back_animation_entries"
+            android:entryValues="@array/predictive_back_animation_value"
+            android:key="pref_predictive_back_animation"
+            android:summary="%s"
+            android:title="@string/title_pref_predictive_back_animation" />
+
+        <ListPreference
             android:icon="@drawable/rmx_translate"
             app:dialogIcon="@drawable/rmx_translate"
             app:layout="@layout/uwu_bot"

@@ -281,6 +281,7 @@
     <string name="summary_pref_show_isp_info">Display the ISP/organization name next to the detected IP</string>
     <string name="title_pref_hide_scroll_buttons">Hide floating scroll buttons</string>
     <string name="summary_pref_hide_scroll_buttons">Hide the scroll-to-top/bottom/selected buttons that float over the server list. When enabled, use \"Go to selected profile\" from the more menu instead.</string>
+    <string name="title_pref_predictive_back_animation">Predictive back animation</string>
 
     <string name="title_pref_proxy_sharing_enabled">Allow connections from the LAN</string>
     <string name="summary_pref_proxy_sharing_enabled">Other devices can connect to proxy by your IP address through local proxy. Only enable in trusted networks to avoid unauthorized connections</string>
@@ -558,6 +559,13 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
         <item>Light</item>
         <item>Dark</item>
         <item>Auto (day/night)</item>
+    </string-array>
+
+    <string-array name="predictive_back_animation_entries">
+        <item>None</item>
+        <item>AOSP</item>
+        <item>Scale</item>
+        <item>Classic</item>
     </string-array>
 
     <string-array name="preset_rulesets">

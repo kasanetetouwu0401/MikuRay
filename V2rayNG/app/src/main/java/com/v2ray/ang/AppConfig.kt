@@ -247,6 +247,8 @@ object AppConfig {
 
     const val PREF_TOOLBAR_CENTER_SUBTITLE_MODE = "pref_toolbar_center_subtitle_mode"
 
+    const val PREF_PREDICTIVE_BACK_ANIMATION = "pref_predictive_back_animation"
+
     const val PREF_PARTICLES_SETTINGS = "pref_particles_settings"
 
     const val PREF_PARTICLES_FRAME_DELAY = "pref_particles_frame_delay"
