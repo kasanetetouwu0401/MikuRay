@@ -1,11 +1,11 @@
 package com.v2ray.ang.util
 
-import android.app.Activity
 import android.graphics.Outline
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import androidx.activity.BackEventCompat
+import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
@@ -18,18 +18,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-/**
- * Drives the predictive back gesture visuals for an Activity's content root, matching
- * whichever [PredictiveBackAnimation] style is selected in Settings.
- *
- * This transforms the whole content root under android.R.id.content (toolbar + body move
- * together as one unit), so it works the same way regardless of which layout/toolbar setup
- * a given activity uses. Follow-through on release (cancel or commit) is spring-driven rather
- * than a fixed-duration tween, so it inherits the finger's velocity instead of snapping into a
- * canned animation - closer to how the gesture feels in InstallerX-Revived's Compose-based
- * predictive back transitions, even though the two implementations don't share any code.
- */
-class PredictiveBackController(private val activity: Activity) {
+class PredictiveBackController(private val activity: ComponentActivity) {
 
     private var root: View? = null
     private var swipeFromLeft = true
@@ -39,7 +28,7 @@ class PredictiveBackController(private val activity: Activity) {
 
     private var lastProgress = 0f
     private var lastProgressTimeNanos = 0L
-    private var progressVelocity = 0f // progress units (0..1) per second
+    private var progressVelocity = 0f
 
     private val activeSprings = mutableListOf<SpringAnimation>()
 
@@ -167,7 +156,6 @@ class PredictiveBackController(private val activity: Activity) {
         target.alpha = 1f - style.alphaDrop * eased
     }
 
-    /** Springs the content root back to its resting state, inheriting the gesture's velocity. */
     private fun settleBack(target: View, style: PredictiveBackAnimation) {
         cancelSprings()
         val tuning = style.cancelSpring
@@ -206,7 +194,6 @@ class PredictiveBackController(private val activity: Activity) {
         activeSprings.forEach { it.start() }
     }
 
-    /** Springs the content root the rest of the way closed, then finishes the activity. */
     private fun commitClose(target: View, style: PredictiveBackAnimation) {
         committing = true
         cancelSprings()
@@ -292,7 +279,6 @@ class PredictiveBackController(private val activity: Activity) {
     }
 }
 
-/** Spring tuning for a settle phase: higher stiffness snaps faster, lower dampingRatio bounces more. */
 private data class SpringTuning(
     val stiffness: Float,
     val dampingRatio: Float,
@@ -314,7 +300,7 @@ private val PredictiveBackAnimation.maxDriftDp: Float
     get() = when (this) {
         PredictiveBackAnimation.AOSP -> 8f
         PredictiveBackAnimation.SCALE -> 48f
-        PredictiveBackAnimation.CLASSIC -> 0f // unused, classic uses 1:1 slide instead
+        PredictiveBackAnimation.CLASSIC -> 0f
         PredictiveBackAnimation.NONE -> 0f
     }
 
@@ -335,7 +321,6 @@ private val PredictiveBackAnimation.cornerRadiusDp: Float
 private val PredictiveBackAnimation.alphaDrop: Float
     get() = 0f
 
-/** No-bounce, snap-to-place spring used when the gesture is cancelled (finger released, no commit). */
 private val PredictiveBackAnimation.cancelSpring: SpringTuning
     get() = when (this) {
         PredictiveBackAnimation.AOSP -> SpringTuning(stiffness = 800f, dampingRatio = 0.9f)
@@ -344,7 +329,6 @@ private val PredictiveBackAnimation.cancelSpring: SpringTuning
         PredictiveBackAnimation.NONE -> SpringTuning(stiffness = 1000f, dampingRatio = 1f)
     }
 
-/** Spring used when the gesture commits (finger released past the threshold, activity closes). */
 private val PredictiveBackAnimation.commitSpring: SpringTuning
     get() = when (this) {
         PredictiveBackAnimation.AOSP -> SpringTuning(stiffness = 1200f, dampingRatio = 0.7f, extraScaleDrop = 0.05f)
