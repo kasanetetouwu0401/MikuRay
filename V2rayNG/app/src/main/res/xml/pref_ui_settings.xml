@@ -362,16 +362,6 @@
             android:title="@string/title_pref_enable_blur"
             android:summary="@string/summary_pref_enable_blur" />
 
-        <androidx.preference.SwitchPreferenceCompat
-            android:icon="@drawable/rmx_blur_line"
-            app:layout="@layout/uwu_mid_switch"
-            app:widgetLayout="@layout/uwu_widget_material_switch"
-            android:defaultValue="false"
-            android:key="pref_use_system_window_blur"
-            android:title="@string/title_pref_use_system_window_blur"
-            android:summary="@string/summary_pref_use_system_window_blur"
-            app:dependency="pref_enable_blur" />
-
         <com.v2ray.ang.ui.dialog.BlurIntensityDialog
             android:icon="@drawable/rmx_blur_line"
             app:layout="@layout/uwu_mid"

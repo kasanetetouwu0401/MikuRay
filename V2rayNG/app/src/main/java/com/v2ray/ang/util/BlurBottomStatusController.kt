@@ -5,7 +5,7 @@ import android.graphics.drawable.GradientDrawable
 import android.view.View
 import android.view.ViewOutlineProvider
 import androidx.appcompat.app.AppCompatActivity
-import com.qmdeve.blurview.widget.BlurView
+import eightbitlab.com.blurview.BlurView
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.databinding.ActivityMainBinding
 import com.v2ray.ang.handler.MmkvManager
@@ -76,8 +76,9 @@ object BlurBottomStatusController {
             foreground = strokeDrawable
             outlineProvider = ViewOutlineProvider.BACKGROUND
             clipToOutline = true
-            setBlurRadius(blurRadius)
-            setOverlayColor(Color.TRANSPARENT)
+            setupWith(binding.mainBlurTarget)
+                .setBlurRadius(blurRadius)
+                .setOverlayColor(Color.TRANSPARENT)
             visibility = View.VISIBLE
         }
 
