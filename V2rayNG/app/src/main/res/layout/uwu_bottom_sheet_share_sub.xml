@@ -204,6 +204,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8.0dip">
                                 <com.neko.widget.DynamicShapeImageView
+                                    app:shapeTarget="icon"
                                     app:shapeBackgroundColor="?colorPrimary"
                                     android:layout_width="45.0dip"
                                     android:layout_height="45.0dip"
@@ -259,8 +260,6 @@
                                 android:layout_gravity="center"
                                 android:layout_width="24.0dip"
                                 android:layout_height="24.0dip"
-                                android:layout_marginStart="2.0dip"
-                                android:layout_marginTop="1.0dip"
                                 android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                 android:tint="?colorOnSurfaceVariant" />
                         </FrameLayout>
@@ -307,6 +306,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8.0dip">
                                 <com.neko.widget.DynamicShapeImageView
+                                    app:shapeTarget="icon"
                                     app:shapeBackgroundColor="?colorPrimary"
                                     android:layout_width="45.0dip"
                                     android:layout_height="45.0dip"
@@ -362,8 +362,6 @@
                                 android:layout_gravity="center"
                                 android:layout_width="24.0dip"
                                 android:layout_height="24.0dip"
-                                android:layout_marginStart="2.0dip"
-                                android:layout_marginTop="1.0dip"
                                 android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                 android:tint="?colorOnSurfaceVariant" />
                         </FrameLayout>

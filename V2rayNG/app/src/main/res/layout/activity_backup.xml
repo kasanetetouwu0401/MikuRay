@@ -118,6 +118,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp">
                                 <com.neko.widget.DynamicShapeImageView
+                                    app:shapeTarget="icon"
                                     app:shapeBackgroundColor="?colorPrimary"
                                     android:layout_width="45dp"
                                     android:layout_height="45dp"
@@ -173,8 +174,6 @@
                                 android:layout_gravity="center"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
-                                android:layout_marginStart="2dp"
-                                android:layout_marginTop="1dp"
                                 android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                 android:tint="?colorOnSurfaceVariant" />
                         </FrameLayout>
@@ -221,6 +220,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp">
                                 <com.neko.widget.DynamicShapeImageView
+                                    app:shapeTarget="icon"
                                     app:shapeBackgroundColor="?colorPrimary"
                                     android:layout_width="45dp"
                                     android:layout_height="45dp"
@@ -276,8 +276,6 @@
                                 android:layout_gravity="center"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
-                                android:layout_marginStart="2dp"
-                                android:layout_marginTop="1dp"
                                 android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                 android:tint="?colorOnSurfaceVariant" />
                         </FrameLayout>
@@ -324,6 +322,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp">
                                 <com.neko.widget.DynamicShapeImageView
+                                    app:shapeTarget="icon"
                                     app:shapeBackgroundColor="?colorPrimary"
                                     android:layout_width="45dp"
                                     android:layout_height="45dp"
@@ -379,8 +378,6 @@
                                 android:layout_gravity="center"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
-                                android:layout_marginStart="2dp"
-                                android:layout_marginTop="1dp"
                                 android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                 android:tint="?colorOnSurfaceVariant" />
                         </FrameLayout>
@@ -427,6 +424,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp">
                                 <com.neko.widget.DynamicShapeImageView
+                                    app:shapeTarget="icon"
                                     app:shapeBackgroundColor="?colorPrimary"
                                     android:layout_width="45dp"
                                     android:layout_height="45dp"
@@ -482,8 +480,6 @@
                                 android:layout_gravity="center"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
-                                android:layout_marginStart="2dp"
-                                android:layout_marginTop="1dp"
                                 android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                 android:tint="?colorOnSurfaceVariant" />
                         </FrameLayout>
@@ -530,6 +526,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp">
                                 <com.neko.widget.DynamicShapeImageView
+                                    app:shapeTarget="icon"
                                     app:shapeBackgroundColor="?colorPrimary"
                                     android:layout_width="45dp"
                                     android:layout_height="45dp"
@@ -585,8 +582,6 @@
                                 android:layout_gravity="center"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
-                                android:layout_marginStart="2dp"
-                                android:layout_marginTop="1dp"
                                 android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                 android:tint="?colorOnSurfaceVariant" />
                         </FrameLayout>
