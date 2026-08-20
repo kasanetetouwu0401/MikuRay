@@ -38,10 +38,8 @@ class DynamicShapeImageView @JvmOverloads constructor(
     private val prefKey: String
         get() = if (shapeTarget == ShapeTarget.ARROW) AppConfig.PREF_ARROW_SHAPE else AppConfig.PREF_ICON_SHAPE
 
-    // Icon and arrow share the same default shape (cookie), so a single
-    // constant covers both targets — no per-target branching needed.
     private val defaultShapeKey: String
-        get() = AppConfig.PREF_ICON_SHAPE_DEFAULT
+        get() = if (shapeTarget == ShapeTarget.ARROW) AppConfig.PREF_ARROW_SHAPE_DEFAULT else AppConfig.PREF_ICON_SHAPE_DEFAULT
 
     private val broadcastAction: String
         get() = if (shapeTarget == ShapeTarget.ARROW) AppConfig.BROADCAST_ACTION_ARROW_SHAPE_CHANGED else AppConfig.BROADCAST_ACTION_ICON_SHAPE_CHANGED
@@ -170,6 +168,6 @@ class DynamicShapeImageView @JvmOverloads constructor(
         "uwu_shape_hive"           -> R.raw.uwu_shape_hive
         "uwu_shape_pill"           -> R.raw.uwu_shape_pill
         "uwu_shape_scallop"        -> R.raw.uwu_shape_scallop
-        else                       -> R.raw.uwu_shape_cookie
+        else                       -> if (shapeTarget == ShapeTarget.ARROW) R.raw.uwu_shape_circle else R.raw.uwu_shape_cookie
     }
 }
