@@ -135,7 +135,7 @@ object AppConfig {
     const val PREF_ICON_SHAPE = "pref_icon_shape"
     const val PREF_ICON_SHAPE_DEFAULT = "uwu_shape_cookie"
     const val PREF_ARROW_SHAPE = "pref_arrow_shape"
-    const val PREF_ARROW_SHAPE_DEFAULT = "uwu_shape_circle"
+    const val PREF_ARROW_SHAPE_DEFAULT = "uwu_shape_cookie"
 
     const val PREF_APP_ICON = "pref_app_icon"
     const val APP_ICON_DEFAULT = "default"

@@ -38,8 +38,10 @@ class DynamicShapeImageView @JvmOverloads constructor(
     private val prefKey: String
         get() = if (shapeTarget == ShapeTarget.ARROW) AppConfig.PREF_ARROW_SHAPE else AppConfig.PREF_ICON_SHAPE
 
+    // Icon and arrow share the same default shape (cookie), so a single
+    // constant covers both targets — no per-target branching needed.
     private val defaultShapeKey: String
-        get() = if (shapeTarget == ShapeTarget.ARROW) AppConfig.PREF_ARROW_SHAPE_DEFAULT else AppConfig.PREF_ICON_SHAPE_DEFAULT
+        get() = AppConfig.PREF_ICON_SHAPE_DEFAULT
 
     private val broadcastAction: String
         get() = if (shapeTarget == ShapeTarget.ARROW) AppConfig.BROADCAST_ACTION_ARROW_SHAPE_CHANGED else AppConfig.BROADCAST_ACTION_ICON_SHAPE_CHANGED
@@ -89,6 +91,16 @@ class DynamicShapeImageView @JvmOverloads constructor(
         currentShapeKey = defaultShapeKey
 
         scaleType = ScaleType.CENTER_CROP
+
+        // ShaderImageView's own init block already called createImageViewHelper()
+        // during the super() constructor call above, i.e. before shapeTarget and
+        // customBgColor (parsed just above) even existed yet — so that first
+        // helper was always built with the ICON defaults. Force a rebuild now
+        // that this view's real target/color are known, so arrow badges (and any
+        // non-default color) render correctly from the very first frame instead
+        // of only after the user actively changes the shape preference.
+        reloadShape()
+
         loadColorBitmap()
     }
 
@@ -158,6 +170,6 @@ class DynamicShapeImageView @JvmOverloads constructor(
         "uwu_shape_hive"           -> R.raw.uwu_shape_hive
         "uwu_shape_pill"           -> R.raw.uwu_shape_pill
         "uwu_shape_scallop"        -> R.raw.uwu_shape_scallop
-        else                       -> if (shapeTarget == ShapeTarget.ARROW) R.raw.uwu_shape_circle else R.raw.uwu_shape_cookie
+        else                       -> R.raw.uwu_shape_cookie
     }
 }

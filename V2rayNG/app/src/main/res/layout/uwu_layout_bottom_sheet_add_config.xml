@@ -255,8 +255,10 @@
 
                             <ImageView
                                 android:layout_gravity="center"
-                                android:layout_width="18.0dip"
-                                android:layout_height="18.0dip"
+                                android:layout_width="24.0dip"
+                                android:layout_height="24.0dip"
+                                android:layout_marginStart="2.0dip"
+                                android:layout_marginTop="1.0dip"
                                 android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                 android:tint="?colorOnSurfaceVariant" />
                         </FrameLayout>
@@ -354,8 +356,10 @@
 
                             <ImageView
                                 android:layout_gravity="center"
-                                android:layout_width="18.0dip"
-                                android:layout_height="18.0dip"
+                                android:layout_width="24.0dip"
+                                android:layout_height="24.0dip"
+                                android:layout_marginStart="2.0dip"
+                                android:layout_marginTop="1.0dip"
                                 android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                 android:tint="?colorOnSurfaceVariant" />
                         </FrameLayout>
@@ -453,8 +457,10 @@
 
                             <ImageView
                                 android:layout_gravity="center"
-                                android:layout_width="18.0dip"
-                                android:layout_height="18.0dip"
+                                android:layout_width="24.0dip"
+                                android:layout_height="24.0dip"
+                                android:layout_marginStart="2.0dip"
+                                android:layout_marginTop="1.0dip"
                                 android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                 android:tint="?colorOnSurfaceVariant" />
                         </FrameLayout>

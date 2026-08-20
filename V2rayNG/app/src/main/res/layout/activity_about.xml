@@ -274,8 +274,10 @@
                                         <ImageView
                                         android:id="@+id/arrow_button"
                                             android:layout_gravity="center"
-                                            android:layout_width="18dp"
-                                            android:layout_height="18dp"
+                                            android:layout_width="24dp"
+                                            android:layout_height="24dp"
+                                            android:layout_marginStart="2dp"
+                                            android:layout_marginTop="1dp"
                                             android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                             android:tint="?colorPrimary" />
                                     </FrameLayout>
@@ -403,8 +405,10 @@
 
                                         <ImageView
                                             android:layout_gravity="center"
-                                            android:layout_width="18dp"
-                                            android:layout_height="18dp"
+                                            android:layout_width="24dp"
+                                            android:layout_height="24dp"
+                                            android:layout_marginStart="2dp"
+                                            android:layout_marginTop="1dp"
                                             android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                             android:tint="?colorOnSurfaceVariant" />
                                     </FrameLayout>
@@ -511,8 +515,10 @@
 
                                         <ImageView
                                             android:layout_gravity="center"
-                                            android:layout_width="18dp"
-                                            android:layout_height="18dp"
+                                            android:layout_width="24dp"
+                                            android:layout_height="24dp"
+                                            android:layout_marginStart="2dp"
+                                            android:layout_marginTop="1dp"
                                             android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                             android:tint="?colorOnSurfaceVariant" />
                                     </FrameLayout>
@@ -619,8 +625,10 @@
 
                                         <ImageView
                                             android:layout_gravity="center"
-                                            android:layout_width="18dp"
-                                            android:layout_height="18dp"
+                                            android:layout_width="24dp"
+                                            android:layout_height="24dp"
+                                            android:layout_marginStart="2dp"
+                                            android:layout_marginTop="1dp"
                                             android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                             android:tint="?colorOnSurfaceVariant" />
                                     </FrameLayout>
@@ -727,8 +735,10 @@
 
                                         <ImageView
                                             android:layout_gravity="center"
-                                            android:layout_width="18dp"
-                                            android:layout_height="18dp"
+                                            android:layout_width="24dp"
+                                            android:layout_height="24dp"
+                                            android:layout_marginStart="2dp"
+                                            android:layout_marginTop="1dp"
                                             android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                             android:tint="?colorOnSurfaceVariant" />
                                     </FrameLayout>
@@ -835,8 +845,10 @@
 
                                         <ImageView
                                             android:layout_gravity="center"
-                                            android:layout_width="18dp"
-                                            android:layout_height="18dp"
+                                            android:layout_width="24dp"
+                                            android:layout_height="24dp"
+                                            android:layout_marginStart="2dp"
+                                            android:layout_marginTop="1dp"
                                             android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                             android:tint="?colorOnSurfaceVariant" />
                                     </FrameLayout>
