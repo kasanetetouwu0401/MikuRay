@@ -67,8 +67,8 @@ object BlurBottomStatusController {
             setCornerRadius(glassRadiusPx)
             setStrokeWidthTop(1f * density)
             setStrokeWidthBottom((2f / 3f) * density)
-            setStrokeColorTop(withAlpha(activity.getColorAttr("colorOutline"), 0xA8))
-            setStrokeColorBottom(withAlpha(activity.getColorAttr("colorOutline"), 0x70))
+            setStrokeColorTop(withAlpha(activity.getColorAttr("strokeDrawable"), 0xA8))
+            setStrokeColorBottom(withAlpha(activity.getColorAttr("strokeDrawable"), 0x70))
         }
 
         binding.blurBottomStatus.apply {

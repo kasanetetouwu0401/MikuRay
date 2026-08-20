@@ -38,34 +38,18 @@ object ShadowsocksFmt : FmtBase() {
 
         if (!uri.rawQuery.isNullOrEmpty()) {
             val queryParam = getQueryParam(uri)
-
-            getItemFormQuery(config, queryParam)
-
-            val pluginParam = queryParam["plugin"]
-            if (pluginParam != null) {
+            if (queryParam["plugin"]?.contains("obfs=http") == true) {
                 val queryPairs = HashMap<String, String>()
-                for (pair in pluginParam.split(";")) {
+                for (pair in queryParam["plugin"]?.split(";") ?: listOf()) {
                     val idx = pair.split("=")
                     if (idx.count() == 2) {
                         queryPairs.put(idx.first(), idx.last())
                     }
                 }
-                when {
-                    pluginParam.contains("obfs=http") -> {
-                        config.network = NetworkType.TCP.type
-                        config.headerType = "http"
-                        config.host = queryPairs["obfs-host"] ?: config.host
-                        config.path = queryPairs["path"] ?: config.path
-                    }
-                    pluginParam.startsWith("v2ray-plugin") -> {
-                        config.network = NetworkType.WS.type
-                        config.host = queryPairs["host"] ?: config.host
-                        config.path = queryPairs["path"] ?: config.path
-                        if (pluginParam.contains(";tls")) {
-                            config.security = AppConfig.TLS
-                        }
-                    }
-                }
+                config.network = NetworkType.TCP.type
+                config.headerType = "http"
+                config.host = queryPairs["obfs-host"]
+                config.path = queryPairs["path"]
             }
         }
 
