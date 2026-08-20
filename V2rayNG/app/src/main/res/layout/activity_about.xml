@@ -260,24 +260,25 @@
                                     android:layout_marginTop="16dp"
                                     android:gravity="center">
 
-                                    <com.google.android.material.card.MaterialCardView
+                                    <FrameLayout
                                         android:layout_width="28dp"
-                                        android:layout_height="28dp"
-                                        app:cardBackgroundColor="?colorOnPrimary"
-                                        app:cardCornerRadius="99dp"
-                                        app:cardElevation="0dp"
-                                        app:strokeWidth="0dp">
+                                        android:layout_height="28dp">
+
+                                        <com.neko.widget.DynamicShapeImageView
+                                            app:shapeTarget="arrow"
+                                            app:shapeBackgroundColor="?colorOnPrimary"
+                                            android:layout_width="28dp"
+                                            android:layout_height="28dp"
+                                            android:scaleType="centerCrop" />
 
                                         <ImageView
-                                            android:id="@+id/arrow_button"
-                                            android:layout_width="25dp"
-                                            android:layout_height="25dp"
-                                            android:layout_marginStart="2dp"
-                                            android:layout_marginTop="1dp"
+                                        android:id="@+id/arrow_button"
+                                            android:layout_gravity="center"
+                                            android:layout_width="18dp"
+                                            android:layout_height="18dp"
                                             android:src="@drawable/rmx_arrows_arrow_right_double_line"
                                             android:tint="?colorPrimary" />
-
-                                    </com.google.android.material.card.MaterialCardView>
+                                    </FrameLayout>
 
                                 </LinearLayout>
 
@@ -389,22 +390,24 @@
                                     android:layout_marginTop="16dp"
                                     android:gravity="center">
 
-                                    <com.google.android.material.card.MaterialCardView
+                                    <FrameLayout
                                         android:layout_width="28dp"
-                                        android:layout_height="28dp"
-                                        app:cardBackgroundColor="?colorSurfaceContainerHighest"
-                                        app:cardCornerRadius="99dp"
-                                        app:cardElevation="0dp"
-                                        app:strokeWidth="0dp">
+                                        android:layout_height="28dp">
+
+                                        <com.neko.widget.DynamicShapeImageView
+                                            app:shapeTarget="arrow"
+                                            app:shapeBackgroundColor="?colorSurfaceContainerHighest"
+                                            android:layout_width="28dp"
+                                            android:layout_height="28dp"
+                                            android:scaleType="centerCrop" />
 
                                         <ImageView
-                                            android:layout_width="25dp"
-                                            android:layout_height="25dp"
-                                            android:layout_marginStart="2dp"
-                                            android:layout_marginTop="1dp"
+                                            android:layout_gravity="center"
+                                            android:layout_width="18dp"
+                                            android:layout_height="18dp"
                                             android:src="@drawable/rmx_arrows_arrow_right_double_line"
-                                            app:tint="?colorOnSurfaceVariant" />
-                                    </com.google.android.material.card.MaterialCardView>
+                                            android:tint="?colorOnSurfaceVariant" />
+                                    </FrameLayout>
                                 </LinearLayout>
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
@@ -495,22 +498,24 @@
                                     android:layout_marginTop="16dp"
                                     android:gravity="center">
 
-                                    <com.google.android.material.card.MaterialCardView
+                                    <FrameLayout
                                         android:layout_width="28dp"
-                                        android:layout_height="28dp"
-                                        app:cardBackgroundColor="?colorSurfaceContainerHighest"
-                                        app:cardCornerRadius="99dp"
-                                        app:cardElevation="0dp"
-                                        app:strokeWidth="0dp">
+                                        android:layout_height="28dp">
+
+                                        <com.neko.widget.DynamicShapeImageView
+                                            app:shapeTarget="arrow"
+                                            app:shapeBackgroundColor="?colorSurfaceContainerHighest"
+                                            android:layout_width="28dp"
+                                            android:layout_height="28dp"
+                                            android:scaleType="centerCrop" />
 
                                         <ImageView
-                                            android:layout_width="25dp"
-                                            android:layout_height="25dp"
-                                            android:layout_marginStart="2dp"
-                                            android:layout_marginTop="1dp"
+                                            android:layout_gravity="center"
+                                            android:layout_width="18dp"
+                                            android:layout_height="18dp"
                                             android:src="@drawable/rmx_arrows_arrow_right_double_line"
-                                            app:tint="?colorOnSurfaceVariant" />
-                                    </com.google.android.material.card.MaterialCardView>
+                                            android:tint="?colorOnSurfaceVariant" />
+                                    </FrameLayout>
                                 </LinearLayout>
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
@@ -601,22 +606,24 @@
                                     android:layout_marginTop="16dp"
                                     android:gravity="center">
 
-                                    <com.google.android.material.card.MaterialCardView
+                                    <FrameLayout
                                         android:layout_width="28dp"
-                                        android:layout_height="28dp"
-                                        app:cardBackgroundColor="?colorSurfaceContainerHighest"
-                                        app:cardCornerRadius="99dp"
-                                        app:cardElevation="0dp"
-                                        app:strokeWidth="0dp">
+                                        android:layout_height="28dp">
+
+                                        <com.neko.widget.DynamicShapeImageView
+                                            app:shapeTarget="arrow"
+                                            app:shapeBackgroundColor="?colorSurfaceContainerHighest"
+                                            android:layout_width="28dp"
+                                            android:layout_height="28dp"
+                                            android:scaleType="centerCrop" />
 
                                         <ImageView
-                                            android:layout_width="25dp"
-                                            android:layout_height="25dp"
-                                            android:layout_marginStart="2dp"
-                                            android:layout_marginTop="1dp"
+                                            android:layout_gravity="center"
+                                            android:layout_width="18dp"
+                                            android:layout_height="18dp"
                                             android:src="@drawable/rmx_arrows_arrow_right_double_line"
-                                            app:tint="?colorOnSurfaceVariant" />
-                                    </com.google.android.material.card.MaterialCardView>
+                                            android:tint="?colorOnSurfaceVariant" />
+                                    </FrameLayout>
                                 </LinearLayout>
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
@@ -707,22 +714,24 @@
                                     android:layout_marginTop="16dp"
                                     android:gravity="center">
 
-                                    <com.google.android.material.card.MaterialCardView
+                                    <FrameLayout
                                         android:layout_width="28dp"
-                                        android:layout_height="28dp"
-                                        app:cardBackgroundColor="?colorSurfaceContainerHighest"
-                                        app:cardCornerRadius="99dp"
-                                        app:cardElevation="0dp"
-                                        app:strokeWidth="0dp">
+                                        android:layout_height="28dp">
+
+                                        <com.neko.widget.DynamicShapeImageView
+                                            app:shapeTarget="arrow"
+                                            app:shapeBackgroundColor="?colorSurfaceContainerHighest"
+                                            android:layout_width="28dp"
+                                            android:layout_height="28dp"
+                                            android:scaleType="centerCrop" />
 
                                         <ImageView
-                                            android:layout_width="25dp"
-                                            android:layout_height="25dp"
-                                            android:layout_marginStart="2dp"
-                                            android:layout_marginTop="1dp"
+                                            android:layout_gravity="center"
+                                            android:layout_width="18dp"
+                                            android:layout_height="18dp"
                                             android:src="@drawable/rmx_arrows_arrow_right_double_line"
-                                            app:tint="?colorOnSurfaceVariant" />
-                                    </com.google.android.material.card.MaterialCardView>
+                                            android:tint="?colorOnSurfaceVariant" />
+                                    </FrameLayout>
                                 </LinearLayout>
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
@@ -813,22 +822,24 @@
                                     android:layout_marginTop="16dp"
                                     android:gravity="center">
 
-                                    <com.google.android.material.card.MaterialCardView
+                                    <FrameLayout
                                         android:layout_width="28dp"
-                                        android:layout_height="28dp"
-                                        app:cardBackgroundColor="?colorSurfaceContainerHighest"
-                                        app:cardCornerRadius="99dp"
-                                        app:cardElevation="0dp"
-                                        app:strokeWidth="0dp">
+                                        android:layout_height="28dp">
+
+                                        <com.neko.widget.DynamicShapeImageView
+                                            app:shapeTarget="arrow"
+                                            app:shapeBackgroundColor="?colorSurfaceContainerHighest"
+                                            android:layout_width="28dp"
+                                            android:layout_height="28dp"
+                                            android:scaleType="centerCrop" />
 
                                         <ImageView
-                                            android:layout_width="25dp"
-                                            android:layout_height="25dp"
-                                            android:layout_marginStart="2dp"
-                                            android:layout_marginTop="1dp"
+                                            android:layout_gravity="center"
+                                            android:layout_width="18dp"
+                                            android:layout_height="18dp"
                                             android:src="@drawable/rmx_arrows_arrow_right_double_line"
-                                            app:tint="?colorOnSurfaceVariant" />
-                                    </com.google.android.material.card.MaterialCardView>
+                                            android:tint="?colorOnSurfaceVariant" />
+                                    </FrameLayout>
                                 </LinearLayout>
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
