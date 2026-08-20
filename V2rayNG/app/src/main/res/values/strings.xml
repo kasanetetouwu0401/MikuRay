@@ -961,6 +961,11 @@ you need."</string>
 
     <string name="title_pref_enable_blur">Enable Blur</string>
     <string name="summary_pref_enable_blur">Enable background blur effect on windows</string>
+    <string name="summary_pref_enable_blur_system">Uses Android system window blur when supported (Android 12+); otherwise uses a compatible fallback</string>
+    <string name="summary_pref_enable_blur_fallback">System window blur requires Android 12+; a compatible fallback is used on this device</string>
+    <string name="title_pref_use_system_window_blur">Use System Window Blur</string>
+    <string name="summary_pref_use_system_window_blur">Use Android native window blur on Android 12+; turn off to use the compatible QmBlurView fallback</string>
+    <string name="summary_pref_use_system_window_blur_unavailable">Native system window blur is only available on Android 12+</string>
     <string name="title_pref_blur_bottom_status">Blur Status Bottom Card</string>
     <string name="summary_pref_blur_bottom_status">Enable blur effect on the status  bottom card</string>
     <string name="pref_blur_intensity">Blur Intensity</string>

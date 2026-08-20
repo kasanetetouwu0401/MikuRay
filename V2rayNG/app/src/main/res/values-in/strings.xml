@@ -925,6 +925,11 @@ yang kamu butuhin."</string>
 
     <string name="title_pref_enable_blur">Aktifin Blur</string>
     <string name="summary_pref_enable_blur">Nyalain efek blur di background window</string>
+    <string name="summary_pref_enable_blur_system">Pakai blur window bawaan Android kalau didukung (Android 12+); kalau tidak, pakai fallback yang kompatibel</string>
+    <string name="summary_pref_enable_blur_fallback">Blur window bawaan sistem butuh Android 12+; perangkat ini memakai fallback yang kompatibel</string>
+    <string name="title_pref_use_system_window_blur">Pakai Blur Window Sistem</string>
+    <string name="summary_pref_use_system_window_blur">Pakai blur window bawaan Android 12+; matikan untuk memakai fallback QmBlurView yang kompatibel</string>
+    <string name="summary_pref_use_system_window_blur_unavailable">Blur window bawaan sistem hanya tersedia di Android 12+</string>
     <string name="title_pref_blur_bottom_status">Blur Card Status Bawah</string>
     <string name="summary_pref_blur_bottom_status">Aktifin efek blur di card status bagian bawah</string>
     <string name="pref_blur_intensity">Kekuatan Blur</string>

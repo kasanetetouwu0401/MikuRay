@@ -56,6 +56,7 @@ import com.v2ray.ang.util.AppNameHelper
 import com.v2ray.ang.util.BannerColorExtractor
 import com.v2ray.ang.util.CustomFontManager
 import com.v2ray.ang.util.ThemeManager
+import com.v2ray.ang.util.SystemWindowBlurPreferenceController
 import com.v2ray.ang.ui.weather.WeatherHelper
 import com.v2ray.ang.util.showBlur
 import com.yalantis.ucrop.UCrop
@@ -95,6 +96,7 @@ class UiSettingsActivity : BaseActivity() {
         private val showHomeBanner by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_HOME_BANNER) }
         private val trueBlack by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_TRUE_BLACK) }
         private val enableBlur by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_ENABLE_BLUR) }
+        private val useSystemWindowBlur by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_USE_SYSTEM_WINDOW_BLUR) }
         private val blurBottomStatus by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_BLUR_BOTTOM_STATUS) }
         private val appLanguage by lazy { findPreference<ListPreference>(AppConfig.PREF_LANGUAGE) }
         private val nightTheme by lazy { findPreference<ListPreference>(AppConfig.PREF_UI_MODE_NIGHT) }
@@ -405,6 +407,8 @@ class UiSettingsActivity : BaseActivity() {
                 MmkvManager.encodeSettings(AppConfig.PREF_ENABLE_BLUR, newValue as Boolean)
                 true
             }
+
+            SystemWindowBlurPreferenceController.bind(useSystemWindowBlur, requireContext())
 
             blurBottomStatus?.setOnPreferenceChangeListener { _, newValue ->
                 MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_STATUS, newValue as Boolean)
