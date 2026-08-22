@@ -31,8 +31,6 @@ import com.miku.ray.util.LogUtil
 import com.miku.ray.util.MessageUtil
 import com.miku.ray.util.Utils
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Collections
@@ -40,15 +38,9 @@ import java.util.regex.PatternSyntaxException
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var serverList = mutableListOf<String>()
-    @Volatile
     var subscriptionId: String = MmkvManager.decodeSettingsString(AppConfig.CACHE_SUBSCRIPTION_ID, "").orEmpty()
-    @Volatile
     var keywordFilter = ""
     val serversCache = mutableListOf<ServersCache>()
-
-    private val reloadLock = Any()
-    private var reloadGeneration = 0L
-    private var reloadJob: Job? = null
 
     val isRunning by lazy { MutableLiveData<Boolean>() }
     val updateListAction by lazy { MutableLiveData<Int>() }
@@ -82,64 +74,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         super.onCleared()
     }
 
+    @Synchronized
     fun reloadServerList() {
-        scheduleReload()
-    }
-
-    private fun cancelPendingReload() {
-        synchronized(reloadLock) {
-            reloadGeneration++
-            reloadJob?.cancel()
-            reloadJob = null
-        }
-    }
-
-    private fun scheduleReload(delayMillis: Long = 0L) {
-        val requestedSubscriptionId = subscriptionId
-        val requestedKeyword = keywordFilter
-        val generation: Long
-        synchronized(reloadLock) {
-            generation = ++reloadGeneration
-            reloadJob?.cancel()
-            reloadJob = viewModelScope.launch(Dispatchers.IO) {
-                if (delayMillis > 0L) delay(delayMillis)
-
-                val subId = requestedSubscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
-                val order = MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)
-                if (order == 0) {
-                    if (requestedSubscriptionId.isEmpty()) {
-                        MmkvManager.decodeSubsList().forEach { MmkvManager.restoreOriginServerList(it) }
-                    } else {
-                        MmkvManager.restoreOriginServerList(requestedSubscriptionId)
-                    }
-                }
-
-                val nextServerList = if (requestedSubscriptionId.isEmpty()) {
-                    MmkvManager.decodeAllServerList()
-                } else {
-                    MmkvManager.decodeServerList(requestedSubscriptionId)
-                }
-                val nextCache = buildServerCache(nextServerList, requestedKeyword, order)
-
-                withContext(Dispatchers.Main.immediate) {
-                    val isCurrent = synchronized(reloadLock) {
-                        generation == reloadGeneration &&
-                            requestedSubscriptionId == subscriptionId &&
-                            requestedKeyword == keywordFilter
-                    }
-                    if (!isCurrent) return@withContext
-
-                    serverList = nextServerList.toMutableList()
-                    serversCache.clear()
-                    serversCache.addAll(nextCache)
-                    updateListAction.value = -1
-                }
+        val subId = subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
+        val order = MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)
+        if (order == 0) {
+            if (subscriptionId.isEmpty()) {
+                MmkvManager.decodeSubsList().forEach { MmkvManager.restoreOriginServerList(it) }
+            } else {
+                MmkvManager.restoreOriginServerList(subscriptionId)
             }
         }
+
+        serverList = if (subscriptionId.isEmpty()) {
+            MmkvManager.decodeAllServerList()
+        } else {
+            MmkvManager.decodeServerList(subscriptionId)
+        }
+
+        updateCache()
+        updateListAction.postValue(-1)
     }
 
     fun removeServer(guid: String) {
-        cancelPendingReload()
         serverList.remove(guid)
         MmkvManager.removeServer(guid)
         val index = getPosition(guid)
@@ -154,80 +111,58 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        cancelPendingReload()
         Collections.swap(serverList, fromPosition, toPosition)
         Collections.swap(serversCache, fromPosition, toPosition)
 
         MmkvManager.encodeServerList(serverList, subscriptionId)
     }
 
+    @Synchronized
     fun updateCache() {
-        scheduleReload()
-    }
-
-    private fun buildServerCache(
-        sourceServerList: List<String>,
-        keyword: String,
-        order: Int,
-    ): List<ServersCache> {
-        val kw = keyword.trim()
+        serversCache.clear()
+        val kw = keywordFilter.trim()
         val searchRegex = try {
             if (kw.isNotEmpty()) Regex(kw, setOf(RegexOption.IGNORE_CASE)) else null
         } catch (e: PatternSyntaxException) {
             null
         }
-        val pinnedServers = MmkvManager.decodePinnedServers()
-        val trafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
-        val subscriptionRemarks = MmkvManager.decodeSubscriptions()
-            .associate { it.guid to it.subscription.remarks }
-        val result = ArrayList<ServersCache>(sourceServerList.size)
+        for (guid in serverList) {
+            val profile = MmkvManager.decodeServerConfig(guid) ?: continue
+            if (kw.isEmpty()) {
+                serversCache.add(ServersCache(guid, profile))
+                continue
+            }
 
-        sourceServerList.forEach { guid ->
-            val profile = MmkvManager.decodeServerConfig(guid) ?: return@forEach
-            val matches = kw.isEmpty() ||
-                profile.remarks.matchesPattern(searchRegex, kw) ||
-                profile.description.orEmpty().matchesPattern(searchRegex, kw) ||
-                profile.server.orEmpty().matchesPattern(searchRegex, kw) ||
-                profile.configType.name.matchesPattern(searchRegex, kw)
-            if (!matches) return@forEach
-
-            val affiliation = MmkvManager.decodeServerAffiliationInfo(guid)
-            val traffic = if (trafficEnabled && affiliation != null &&
-                (affiliation.uplinkTotal != 0L || affiliation.downlinkTotal != 0L)
+            val remarks = profile.remarks
+            val description = profile.description.orEmpty()
+            val server = profile.server.orEmpty()
+            val protocol = profile.configType.name
+            if (remarks.matchesPattern(searchRegex, kw)
+                || description.matchesPattern(searchRegex, kw)
+                || server.matchesPattern(searchRegex, kw)
+                || protocol.matchesPattern(searchRegex, kw)
             ) {
-                "↑ ${MmkvManager.formatTrafficBytesPublic(affiliation.uplinkTotal)}  ↓ " +
-                    MmkvManager.formatTrafficBytesPublic(affiliation.downlinkTotal)
-            } else {
-                null
+                serversCache.add(ServersCache(guid, profile))
             }
-            val remarks = when {
-                profile.configType == com.miku.ray.enums.EConfigType.POLICYGROUP ->
-                    profile.policyGroupSubscriptionId?.let { subscriptionRemarks[it] }
-                else -> subscriptionRemarks[profile.subscriptionId]
-            }
-            result.add(
-                ServersCache(
-                    guid = guid,
-                    profile = profile,
-                    affiliation = affiliation,
-                    traffic = traffic,
-                    isPinned = pinnedServers.contains(guid),
-                    subscriptionRemarks = remarks,
-                )
-            )
         }
 
+        val subId = subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
+        val order = MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)
         when (order) {
-            1 -> result.sortWith(compareBy { it.profile.remarks.lowercase() })
-            2 -> result.sortWith(compareBy {
-                val delay = it.affiliation?.testDelayMillis ?: 0L
+            1 -> serversCache.sortWith(compareBy { it.profile.remarks.lowercase() })
+            2 -> serversCache.sortWith(compareBy {
+                val delay = MmkvManager.decodeServerAffiliationInfo(it.guid)?.testDelayMillis ?: 0L
                 if (delay <= 0L) Long.MAX_VALUE else delay
             })
         }
+
+        // Pinned servers float to the top regardless of the active order above.
+        // sortByDescending is stable, so it only reshuffles the pinned/unpinned
+        // partitions without disturbing the relative order within each.
+        val pinnedServers = MmkvManager.decodePinnedServers()
         if (pinnedServers.isNotEmpty()) {
-            result.sortByDescending { it.isPinned }
+            serversCache.sortByDescending { pinnedServers.contains(it.guid) }
         }
-        return result
     }
 
     /**
@@ -236,7 +171,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun togglePinServer(guid: String): Boolean {
         val nowPinned = MmkvManager.togglePinnedServer(guid)
-        reloadServerList()
+        updateCache()
+        updateListAction.postValue(-1)
         return nowPinned
     }
 
@@ -269,12 +205,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             getApplication(),
             TestServiceMessage(key = AppConfig.MSG_MEASURE_CONFIG_CANCEL)
         )
-        val targetGuids = serversCache.map { it.guid }.toList()
-        MmkvManager.clearAllTestDelayResults(targetGuids)
+        MmkvManager.clearAllTestDelayResults(serversCache.map { it.guid }.toList())
         updateListAction.value = -1
 
         viewModelScope.launch(Dispatchers.Default) {
-            if (targetGuids.isEmpty()) {
+            if (serversCache.isEmpty()) {
                 return@launch
             }
             MessageUtil.sendMsg2TestService(
@@ -282,7 +217,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 TestServiceMessage(
                     key = AppConfig.MSG_MEASURE_CONFIG_START,
                     subscriptionId = subscriptionId,
-                    serverGuids = if (keywordFilter.isNotEmpty()) targetGuids else emptyList(),
+                    serverGuids = if (keywordFilter.isNotEmpty()) serversCache.map { it.guid } else emptyList(),
                     onlyTcp = onlyTcp
                 )
             )
@@ -345,7 +280,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             subscriptionId = id
             MmkvManager.encodeSettings(AppConfig.CACHE_SUBSCRIPTION_ID, subscriptionId)
         }
-        reloadServerList()
+        viewModelScope.launch(Dispatchers.IO) {
+            reloadServerList()
+        }
     }
 
     fun getSubscriptions(context: Context): List<GroupMapItem> {
@@ -494,7 +431,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         keywordFilter = keyword
-        scheduleReload(delayMillis = 120L)
+        reloadServerList()
     }
 
     fun findSubscriptionIdBySelect(): String? {
@@ -564,7 +501,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             TestServiceMessage(key = AppConfig.MSG_MEASURE_CONFIG_CANCEL)
         )
         MmkvManager.clearAllTestDelayResults(MmkvManager.decodeAllServerList())
-        reloadServerList()
+        // Re-sort serversCache immediately so order=by-delay drops back to its
+        // tie-break order right away, instead of waiting for a reload/restart.
+        updateCache()
+        updateListAction.postValue(-1)
     }
 
     private val mMsgReceiver = object : BroadcastReceiver() {

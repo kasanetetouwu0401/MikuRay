@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
 import com.miku.ray.R
@@ -49,10 +48,6 @@ class MainRecyclerAdapter(
 
     private var data: MutableList<ServersCache> = mutableListOf()
     private var isGridMode: Boolean = false
-    private var networkSecurityEnabled = false
-    private var trafficEnabled = false
-    private var indicatorStyle = IndicatorStyle.STYLE_0
-    private var subscriptionRemarksById: Map<String, String> = emptyMap()
 
     val isServerListEmpty: Boolean
         get() = data.isEmpty()
@@ -67,69 +62,25 @@ class MainRecyclerAdapter(
 
     @SuppressLint("NotifyDataSetChanged")
     fun refreshDisplayPrefs() {
-        refreshDisplayCaches()
         notifyDataSetChanged()
-    }
-
-    private fun refreshDisplayCaches() {
-        networkSecurityEnabled = MmkvManager.decodeSettingsBool(
-            AppConfig.PREF_NETWORK_SECURITY_ENABLED
-        ) == true
-        trafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
-        val styleName = MmkvManager.decodeSettingsString(
-            AppConfig.PREF_INDICATOR_STYLE,
-            IndicatorStyle.STYLE_0.name
-        ) ?: IndicatorStyle.STYLE_0.name
-        indicatorStyle = runCatching { IndicatorStyle.valueOf(styleName) }
-            .getOrDefault(IndicatorStyle.STYLE_0)
-        subscriptionRemarksById = MmkvManager.decodeSubscriptions()
-            .associate { it.guid to it.subscription.remarks }
     }
 
     private var isRunningObserver: androidx.lifecycle.Observer<Boolean>? = null
     private var selectedBannerController: SelectedProfileBannerController? = null
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setData(newData: MutableList<ServersCache>?, position: Int = -1) {
-        val oldData = data.toList()
-        val nextData = newData?.toMutableList() ?: mutableListOf()
+        data = newData?.toMutableList() ?: mutableListOf()
 
-        if (position >= 0 && position in nextData.indices) {
-            val item = nextData[position]
-            val affiliation = MmkvManager.decodeServerAffiliationInfo(item.guid)
-            nextData[position] = item.copy(
-                affiliation = affiliation,
-                traffic = if (trafficEnabled) formatTraffic(affiliation) else null,
-                isPinned = MmkvManager.isServerPinned(item.guid),
-            )
-            data = nextData
+        if (position >= 0 && position in data.indices) {
             notifyItemChanged(position)
-            return
+        } else {
+            notifyDataSetChanged()
         }
-
-        refreshDisplayCaches()
-        data = nextData
-        val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-            override fun getOldListSize(): Int = oldData.size + 1
-            override fun getNewListSize(): Int = nextData.size + 1
-
-            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                if (oldItemPosition == oldData.size || newItemPosition == nextData.size) {
-                    return oldItemPosition == oldData.size && newItemPosition == nextData.size
-                }
-                return oldData[oldItemPosition].guid == nextData[newItemPosition].guid
-            }
-
-            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                if (oldItemPosition == oldData.size || newItemPosition == nextData.size) return true
-                return oldData[oldItemPosition] == nextData[newItemPosition]
-            }
-        })
-        diff.dispatchUpdatesTo(this)
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
-        refreshDisplayCaches()
         val lifecycleOwner = recyclerView.context as? androidx.lifecycle.LifecycleOwner
         if (lifecycleOwner != null) {
             isRunningObserver = androidx.lifecycle.Observer { _ ->
@@ -195,9 +146,10 @@ class MainRecyclerAdapter(
             }
             holder.views.tvType.text = getProtocolName(profile)
 
-            bindNetworkSecurity(holder, profile, networkSecurityEnabled)
+            val isNetSecEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_NETWORK_SECURITY_ENABLED) == true
+            bindNetworkSecurity(holder, profile, isNetSecEnabled)
 
-            val aff = data[position].affiliation
+            val aff = MmkvManager.decodeServerAffiliationInfo(guid)
             holder.views.tvTestResult.text = aff?.getTestDelayString().orEmpty()
             val countryCode = aff?.countryCode?.trim()?.uppercase()?.takeIf { it.length == 2 }
             val countryFlag = Utils.countryCodeToFlag(countryCode)
@@ -213,16 +165,17 @@ class MainRecyclerAdapter(
                 holder.views.tvTestResult.setTextColor(ContextCompat.getColor(context, R.color.colorPing))
             }
 
-            val trafficStr = data[position].traffic
+            val isTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
+            val trafficStr = MmkvManager.getProfileTrafficString(guid)
 
-            if (trafficEnabled && !trafficStr.isNullOrEmpty()) {
+            if (isTrafficEnabled && !trafficStr.isNullOrEmpty()) {
                 holder.views.tvTraffic.text = trafficStr
                 holder.views.tvTraffic.visibility = View.VISIBLE
             } else {
                 holder.views.tvTraffic.visibility = View.GONE
             }
 
-            val isPinned = data[position].isPinned
+            val isPinned = MmkvManager.isServerPinned(guid)
             holder.views.ivPinIndicator.visibility = if (isPinned) View.VISIBLE else View.GONE
 
             val isSelectedServer = (guid == MmkvManager.getSelectServer())
@@ -262,6 +215,14 @@ class MainRecyclerAdapter(
                     holder.views.layoutCard.strokeWidth = 0
                 }
             } else if (isSelectedServer) {
+                val styleName = MmkvManager.decodeSettingsString(
+                    AppConfig.PREF_INDICATOR_STYLE,
+                    IndicatorStyle.STYLE_0.name
+                ) ?: IndicatorStyle.STYLE_0.name
+                val indicatorStyle = runCatching {
+                    IndicatorStyle.valueOf(styleName)
+                }.getOrDefault(IndicatorStyle.STYLE_0)
+
                 val bannerController = selectedBannerController
                 if (bannerController != null && bannerController.isEnabled() && bannerController.hasBanner()) {
                     bannerController.applyTo(holder.views.layoutIndicator)
@@ -290,24 +251,15 @@ class MainRecyclerAdapter(
             holder.views.layoutRemove.visibility = View.VISIBLE
 
             holder.views.layoutShare.setOnClickListener {
-                val currentPosition = holder.bindingAdapterPosition
-                if (currentPosition != RecyclerView.NO_POSITION) {
-                    adapterListener?.onShare(guid, profile, currentPosition, false)
-                }
+                adapterListener?.onShare(guid, profile, position, false)
             }
 
             holder.views.layoutEdit.setOnClickListener {
-                val currentPosition = holder.bindingAdapterPosition
-                if (currentPosition != RecyclerView.NO_POSITION) {
-                    adapterListener?.onEdit(guid, currentPosition, profile)
-                }
+                adapterListener?.onEdit(guid, position, profile)
             }
 
             holder.views.layoutRemove.setOnClickListener {
-                val currentPosition = holder.bindingAdapterPosition
-                if (currentPosition != RecyclerView.NO_POSITION) {
-                    adapterListener?.onRemove(guid, currentPosition)
-                }
+                adapterListener?.onRemove(guid, position)
             }
 
             val gestureDetector = android.view.GestureDetector(
@@ -327,10 +279,7 @@ class MainRecyclerAdapter(
                         if (isSelectedServer) {
                             // Double-tapping the currently selected server opens
                             // the pin/unpin dialog instead of re-selecting it.
-                            val currentPosition = holder.bindingAdapterPosition
-                            if (currentPosition != RecyclerView.NO_POSITION) {
-                                adapterListener?.onPinToggle(guid, currentPosition, isPinned)
-                            }
+                            adapterListener?.onPinToggle(guid, position, isPinned)
                         } else {
                             adapterListener?.onSelectServer(guid)
                         }
@@ -346,17 +295,13 @@ class MainRecyclerAdapter(
     }
 
     private fun getSubscriptionRemarks(profile: ProfileItem): String {
-        return subscriptionRemarksById[profile.subscriptionId]?.take(5) ?: ""
-    }
+        val subRemarks =
+            if (mainViewModel.subscriptionId.isEmpty())
+                MmkvManager.decodeSubscription(profile.subscriptionId)?.remarks
+            else
+                null
 
-    private fun formatTraffic(affiliation: com.miku.ray.dto.entities.ServerAffiliationInfo?): String? {
-        if (affiliation == null ||
-            (affiliation.uplinkTotal == 0L && affiliation.downlinkTotal == 0L)
-        ) {
-            return null
-        }
-        return "↑ ${MmkvManager.formatTrafficBytesPublic(affiliation.uplinkTotal)}  ↓ " +
-            MmkvManager.formatTrafficBytesPublic(affiliation.downlinkTotal)
+        return subRemarks?.take(5) ?: ""
     }
 
     private fun getProtocolName(profile: ProfileItem): String {
@@ -368,7 +313,9 @@ class MainRecyclerAdapter(
         if (subId.isNullOrEmpty()) {
             return context.getString(R.string.filter_config_all)
         }
-        return subscriptionRemarksById[subId]?.takeIf { it.isNotBlank() } ?: subId
+        val sub = MmkvManager.decodeSubscriptions().firstOrNull { it.guid == subId }
+        val name = sub?.subscription?.remarks?.takeIf { it.isNotBlank() }
+        return name ?: subId
     }
 
     private fun bindNetworkSecurity(
@@ -442,16 +389,13 @@ class MainRecyclerAdapter(
         if (idx >= 0) {
             data.removeAt(idx)
             notifyItemRemoved(idx)
+            notifyItemRangeChanged(idx, data.size - idx)
         }
     }
 
     fun setSelectServer(fromPosition: Int, toPosition: Int) {
-        if (fromPosition >= 0 && fromPosition < data.size) {
-            notifyItemChanged(fromPosition)
-        }
-        if (toPosition >= 0 && toPosition < data.size) {
-            notifyItemChanged(toPosition)
-        }
+        notifyItemChanged(fromPosition)
+        notifyItemChanged(toPosition)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
