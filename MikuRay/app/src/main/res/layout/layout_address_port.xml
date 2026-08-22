@@ -7,7 +7,10 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_remarks"
-        style="?attr/textInputOutlinedStyle"
+        app:shapeAppearance="?shapeAppearanceCornerMedium"
+        app:boxStrokeWidth="1.5dip"
+        app:boxStrokeWidthFocused="1.5dip"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="@string/server_lab_remarks"
@@ -27,7 +30,10 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_address"
-        style="?attr/textInputOutlinedStyle"
+        app:shapeAppearance="?shapeAppearanceCornerMedium"
+        app:boxStrokeWidth="1.5dip"
+        app:boxStrokeWidthFocused="1.5dip"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
@@ -48,7 +54,10 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_port"
-        style="?attr/textInputOutlinedStyle"
+        app:shapeAppearance="?shapeAppearanceCornerMedium"
+        app:boxStrokeWidth="1.5dip"
+        app:boxStrokeWidthFocused="1.5dip"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"

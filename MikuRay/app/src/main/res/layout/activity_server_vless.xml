@@ -123,7 +123,10 @@
                     <include layout="@layout/layout_address_port" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="?attr/textInputOutlinedStyle"
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/padding_spacing_dp16"
@@ -140,7 +143,10 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="?attr/textInputOutlinedExposedDropdownMenuStyle"
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         app:endIconMode="dropdown_menu"
                         app:endIconDrawable="@drawable/ic_dropdown_selector"
                         app:endIconTint="?attr/colorOnSurfaceVariant"
@@ -161,7 +167,10 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="?attr/textInputOutlinedStyle"
+                        app:shapeAppearance="?shapeAppearanceCornerMedium"
+                        app:boxStrokeWidth="1.5dip"
+                        app:boxStrokeWidthFocused="1.5dip"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/padding_spacing_dp16"
