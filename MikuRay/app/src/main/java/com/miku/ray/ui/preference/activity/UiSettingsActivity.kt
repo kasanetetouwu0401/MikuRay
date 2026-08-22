@@ -29,6 +29,7 @@ import com.miku.ray.AppConfig
 import com.miku.ray.SearchBarChipMode
 import com.miku.ray.R
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
+import com.miku.ray.extension.snackbarDefault
 import com.miku.ray.extension.snackbarSuccess
 import com.miku.ray.extension.toastError
 import com.miku.ray.extension.toastInfo
@@ -532,6 +533,11 @@ class UiSettingsActivity : BaseActivity() {
                     }
                     updateChipPreferenceEnabledState()
                     updateClearTotalTrafficSummary()
+                    when (mode) {
+                        SearchBarChipMode.WEATHER -> requireContext().snackbarDefault(R.string.pref_search_bar_chip_info_weather, title = getString(R.string.title_alerter_info))
+                        SearchBarChipMode.TOTAL_TRAFFIC -> requireContext().snackbarDefault(R.string.pref_search_bar_chip_info_traffic, title = getString(R.string.title_alerter_info))
+                        SearchBarChipMode.DUAL_SWIPE -> requireContext().snackbarDefault(R.string.pref_search_bar_chip_info_dual, title = getString(R.string.title_alerter_info))
+                    }
                     true
                 }
             }

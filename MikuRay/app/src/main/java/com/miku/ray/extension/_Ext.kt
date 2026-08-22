@@ -292,11 +292,21 @@ private fun showSnackbar(
 }
 
 fun Context.snackbarDefault(message: Int, title: CharSequence = "") {
-    showSnackbar(this, title, getString(message), RemixR.drawable.rmx_information_line, null, null, Snackbar.LENGTH_LONG)
+    showSnackbar(
+        this, title, getString(message), RemixR.drawable.rmx_information_line,
+        "colorTertiary",
+        "colorOnTertiary",
+        Snackbar.LENGTH_LONG
+    )
 }
 
 fun Context.snackbarDefault(message: CharSequence, title: CharSequence = "") {
-    showSnackbar(this, title, message, RemixR.drawable.rmx_information_line, null, null, Snackbar.LENGTH_LONG)
+    showSnackbar(
+        this, title, message, RemixR.drawable.rmx_information_line,
+        "colorTertiary",
+        "colorOnTertiary",
+        Snackbar.LENGTH_LONG
+    )
 }
 
 fun Context.snackbarSuccess(message: Int, title: CharSequence = "") {
