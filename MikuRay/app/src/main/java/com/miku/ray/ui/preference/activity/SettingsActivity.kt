@@ -202,8 +202,12 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
             }
         })
 
-        layoutWeatherChip.setOnTouchListener { _, event ->
+        layoutWeatherChip.setOnTouchListener { view, event ->
             if (SearchBarChipMode.current() == SearchBarChipMode.DUAL_SWIPE) {
+                when (event.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> view.parent?.requestDisallowInterceptTouchEvent(true)
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> view.parent?.requestDisallowInterceptTouchEvent(false)
+                }
                 gestureDetector.onTouchEvent(event)
                 true
             } else {
