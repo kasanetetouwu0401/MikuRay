@@ -303,8 +303,8 @@
         app:sectionIcon="@drawable/rmx_search_line">
 
         <androidx.preference.ListPreference
-            android:icon="@drawable/rmx_sun_line"
-            app:dialogIcon="@drawable/rmx_sun_line"
+            android:icon="@drawable/rmx_editor_list_check_3"
+            app:dialogIcon="@drawable/rmx_editor_list_check_3"
             app:layout="@layout/uwu_top"
             android:defaultValue="disabled"
             android:entries="@array/search_bar_chip_entries"

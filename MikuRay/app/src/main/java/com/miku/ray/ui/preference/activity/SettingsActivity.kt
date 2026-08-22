@@ -4,8 +4,10 @@ package com.miku.ray.ui.preference.activity
 import com.miku.ray.remixicon.R as RemixR
 import android.content.Intent
 import android.os.Bundle
+import android.view.GestureDetector
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -43,6 +45,7 @@ import com.miku.ray.ui.weather.WeatherHelper
 import com.miku.ray.util.showDeleteConfirmDialog
 import com.miku.ray.util.showTotalTrafficDetailDialog
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
@@ -55,6 +58,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     private lateinit var tvTotalTraffic: TextView
 
     private var isColdStart = true
+    private var dualSwipeChipSelection = SearchBarChipMode.WEATHER
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,6 +68,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
         setupSearchActionView()
         setupWeatherTrafficChip()
+        setupSearchBarChipSwipe()
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
@@ -166,9 +171,66 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     private fun weatherLocationReady(): Boolean =
         WeatherHelper.hasCustomLocation() || WeatherHelper.hasLocationPermission(this)
 
+    private fun setupSearchBarChipSwipe() {
+        val swipeThreshold = 64 * resources.displayMetrics.density
+        val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onDown(event: MotionEvent): Boolean = true
+
+            override fun onSingleTapUp(event: MotionEvent): Boolean {
+                layoutWeatherChip.performClick()
+                return true
+            }
+
+            override fun onFling(
+                firstEvent: MotionEvent?,
+                lastEvent: MotionEvent,
+                velocityX: Float,
+                velocityY: Float
+            ): Boolean {
+                if (firstEvent == null) return false
+                val distanceX = lastEvent.x - firstEvent.x
+                val distanceY = lastEvent.y - firstEvent.y
+                if (abs(distanceY) <= abs(distanceX) || abs(distanceY) < swipeThreshold) return false
+
+                // With two items, both vertical directions advance the carousel with wrap-around.
+                dualSwipeChipSelection = if (dualSwipeChipSelection == SearchBarChipMode.WEATHER) {
+                    SearchBarChipMode.TOTAL_TRAFFIC
+                } else {
+                    SearchBarChipMode.WEATHER
+                }
+                refreshSearchBarChip()
+                return true
+            }
+        })
+
+        layoutWeatherChip.setOnTouchListener { _, event ->
+            if (SearchBarChipMode.current() == SearchBarChipMode.DUAL_SWIPE) {
+                gestureDetector.onTouchEvent(event)
+            } else {
+                false
+            }
+        }
+    }
+
+    private fun isWeatherChipSelected(): Boolean {
+        val mode = SearchBarChipMode.current()
+        return mode == SearchBarChipMode.WEATHER ||
+            (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.WEATHER)
+    }
+
+    private fun isTotalTrafficChipSelected(): Boolean {
+        val mode = SearchBarChipMode.current()
+        return mode == SearchBarChipMode.TOTAL_TRAFFIC ||
+            (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.TOTAL_TRAFFIC)
+    }
+
     private fun refreshSearchBarChip() {
-        val weatherEnabled = SearchBarChipMode.current() == SearchBarChipMode.WEATHER
-        val totalTrafficEnabled = SearchBarChipMode.current() == SearchBarChipMode.TOTAL_TRAFFIC
+        val mode = SearchBarChipMode.current()
+        if (mode != SearchBarChipMode.DUAL_SWIPE) {
+            dualSwipeChipSelection = SearchBarChipMode.WEATHER
+        }
+        val weatherEnabled = isWeatherChipSelected()
+        val totalTrafficEnabled = isTotalTrafficChipSelected()
 
         SearchChipGradientController.applyState(this, chipViews())
 
@@ -204,13 +266,15 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
             return
         }
         tvTotalTraffic.text = totalTraffic
-        ivTotalTrafficIcon.isVisible = true
-        tvTotalTraffic.isVisible = true
-        layoutWeatherChip.isVisible = true
+        if (isTotalTrafficChipSelected()) {
+            ivTotalTrafficIcon.isVisible = true
+            tvTotalTraffic.isVisible = true
+            layoutWeatherChip.isVisible = true
+        }
     }
 
     private fun refreshWeatherChip() {
-        if (SearchBarChipMode.current() != SearchBarChipMode.WEATHER) {
+        if (!isWeatherChipSelected()) {
             layoutWeatherChip.isVisible = false
             return
         }
@@ -225,7 +289,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     }
 
     private fun forceRefreshWeatherChip() {
-        if (SearchBarChipMode.current() != SearchBarChipMode.WEATHER) return
+        if (!isWeatherChipSelected()) return
 
         if (!weatherLocationReady()) {
             checkAndRequestPermission(PermissionType.LOCATION) {
@@ -248,7 +312,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@SettingsActivity, force = true)
             if (weather == null) {
-                if (cached == null) layoutWeatherChip.isVisible = false
+                if (cached == null && isWeatherChipSelected()) layoutWeatherChip.isVisible = false
                 return@launch
             }
             applyWeatherToChip(weather)
@@ -256,6 +320,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     }
 
     private fun loadWeatherChip() {
+        if (!isWeatherChipSelected()) return
         layoutWeatherChip.isVisible = true
 
         val fresh = WeatherHelper.getCachedWeather()
@@ -275,7 +340,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@SettingsActivity)
             if (weather == null) {
-                if (stale == null) layoutWeatherChip.isVisible = false
+                if (stale == null && isWeatherChipSelected()) layoutWeatherChip.isVisible = false
                 return@launch
             }
             applyWeatherToChip(weather)
@@ -285,9 +350,11 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     private fun applyWeatherToChip(weather: WeatherHelper.WeatherResult) {
         ivWeatherIcon.setImageResource(weather.iconRes)
         tvWeatherTemp.text = weather.getTemperatureString(WeatherHelper.isCelsius())
-        ivWeatherIcon.isVisible = true
-        tvWeatherTemp.isVisible = true
-        layoutWeatherChip.isVisible = true
+        if (isWeatherChipSelected()) {
+            ivWeatherIcon.isVisible = true
+            tvWeatherTemp.isVisible = true
+            layoutWeatherChip.isVisible = true
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
