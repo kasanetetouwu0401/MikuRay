@@ -115,10 +115,18 @@ object Utils {
                 }
             }
 
+            // Normalize bracketed IPv6 literals, including the endpoint form [addr]:port.
+            if (addr.startsWith("[")) {
+                val closingBracket = addr.indexOf(']')
+                if (closingBracket > 0 &&
+                    (closingBracket == addr.lastIndex || addr[closingBracket + 1] == ':')
+                ) {
+                    addr = addr.substring(1, closingBracket)
+                }
+            }
+
             if (addr.startsWith("::ffff:") && '.' in addr) {
                 addr = addr.drop(7)
-            } else if (addr.startsWith("[::ffff:") && '.' in addr) {
-                addr = addr.drop(8).replace("]", "")
             }
 
             val octets = addr.split('.')
