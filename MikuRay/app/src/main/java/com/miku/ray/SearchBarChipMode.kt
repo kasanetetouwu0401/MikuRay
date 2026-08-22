@@ -30,4 +30,18 @@ object SearchBarChipMode {
         MmkvManager.encodeSettings(AppConfig.PREF_SEARCH_BAR_CHIP, normalized)
         return normalized
     }
+
+    fun currentDualSelection(): String {
+        val stored = MmkvManager.decodeSettingsString(
+            AppConfig.PREF_SEARCH_BAR_CHIP_DUAL_SELECTION,
+            WEATHER
+        )
+        return if (stored == TOTAL_TRAFFIC) TOTAL_TRAFFIC else WEATHER
+    }
+
+    fun saveDualSelection(value: String): String {
+        val normalized = if (value == TOTAL_TRAFFIC) TOTAL_TRAFFIC else WEATHER
+        MmkvManager.encodeSettings(AppConfig.PREF_SEARCH_BAR_CHIP_DUAL_SELECTION, normalized)
+        return normalized
+    }
 }

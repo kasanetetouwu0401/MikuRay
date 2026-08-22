@@ -196,6 +196,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
                 } else {
                     SearchBarChipMode.WEATHER
                 }
+                SearchBarChipMode.saveDualSelection(dualSwipeChipSelection)
                 refreshSearchBarChip()
                 return true
             }
@@ -204,6 +205,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         layoutWeatherChip.setOnTouchListener { _, event ->
             if (SearchBarChipMode.current() == SearchBarChipMode.DUAL_SWIPE) {
                 gestureDetector.onTouchEvent(event)
+                true
             } else {
                 false
             }
@@ -224,7 +226,9 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
     private fun refreshSearchBarChip() {
         val mode = SearchBarChipMode.current()
-        if (mode != SearchBarChipMode.DUAL_SWIPE) {
+        if (mode == SearchBarChipMode.DUAL_SWIPE) {
+            dualSwipeChipSelection = SearchBarChipMode.currentDualSelection()
+        } else {
             dualSwipeChipSelection = SearchBarChipMode.WEATHER
         }
         val weatherEnabled = isWeatherChipSelected()
