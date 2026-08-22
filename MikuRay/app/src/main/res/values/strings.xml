@@ -5,27 +5,18 @@
     <string name="widget_status_connected">Connected</string>
     <string name="widget_status_disconnected">Disconnected</string>
     <string name="widget_no_server_selected">No server selected</string>
-    <string name="empty_server_list_title">No profile</string>
     <string name="empty_server_list_message">No profile, please add a profile</string>
-    <string name="empty_subscription_list_title">No subscription</string>
     <string name="empty_subscription_list_message">No subscription, please add a subscription</string>
-    <string name="empty_routing_list_title">No routing rule</string>
     <string name="empty_routing_list_message">No routing rule, please add a rule</string>
     <string name="app_tile_name">Switch</string>
     <string name="app_tile_first_use">First use of this feature, please use the app to add server</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="migration_success">Data migration success!</string>
     <string name="action_stop_service">Stop service</string>
-    <string name="migration_fail">Data migration failed!</string>
     <string name="pull_down_to_refresh">Please pull down to refresh!</string>
 
     <string name="notification_action_stop_v2ray">Stop</string>
     <string name="notification_connect_time">timer : %s</string>
     <string name="notification_data_usage" formatted="false">total : ↑ %s  ↓ %s</string>
     <string name="toast_permission_denied">Unable to obtain the permission</string>
-    <string name="toast_permission_denied_notification">Unable to obtain the notification permission</string>
-    <string name="notification_action_more">Click for more</string>
     <string name="toast_services_start">Start Services</string>
     <string name="toast_services_stop">Stop Services</string>
     <string name="toast_services_success">Start Services Success</string>
@@ -55,7 +46,6 @@
     <string name="server_lab_address">address</string>
     <string name="server_lab_port">port</string>
     <string name="server_lab_id">id</string>
-    <string name="server_lab_alterid">alterId</string>
     <string name="server_lab_security">security</string>
     <string name="server_lab_network">Network</string>
     <string name="server_lab_more_function">Transport</string>
@@ -67,14 +57,12 @@
     <string name="server_lab_request_host_httpupgrade">httpupgrade host</string>
     <string name="server_lab_request_host_xhttp">xhttp host</string>
     <string name="server_lab_request_host_h2">h2 host</string>
-    <string name="server_lab_request_host_quic">QUIC security</string>
     <string name="server_lab_request_host_grpc">gRPC Authority</string>
     <string name="server_lab_path">path</string>
     <string name="server_lab_path_ws">ws path</string>
     <string name="server_lab_path_httpupgrade">httpupgrade path</string>
     <string name="server_lab_path_xhttp">xhttp path</string>
     <string name="server_lab_path_h2">h2 path</string>
-    <string name="server_lab_path_quic">QUIC key</string>
     <string name="server_lab_path_kcp">kcp seed</string>
     <string name="server_lab_path_grpc">gRPC serviceName</string>
     <string name="server_lab_stream_security">TLS</string>
@@ -112,19 +100,15 @@
     <string name="toast_success">Success</string>
     <string name="toast_failure">Failure</string>
     <string name="toast_none_data">There is nothing</string>
-    <string name="toast_incorrect_protocol">Incorrect protocol</string>
     <string name="toast_decoding_failed">Decoding failed</string>
     <string name="title_file_chooser">Select a config</string>
     <string name="toast_require_file_manager">Please install a File Manager.</string>
-    <string name="server_customize_config">Customize config</string>
     <string name="toast_config_file_invalid">Invalid config</string>
     <string name="server_lab_content">Content</string>
-    <string name="toast_none_data_clipboard">There is no data in the clipboard</string>
     <string name="toast_invalid_url">Invalid URL</string>
     <string name="toast_insecure_url_protocol">Please do not use the insecure HTTP protocol subscription address</string>
     <string name="server_lab_need_inbound">Ensure inbounds port is consistent with the settings</string>
     <string name="toast_malformed_josn">Config malformed</string>
-    <string name="server_lab_request_host6">Host(SNI)(Optional)</string>
     <string name="toast_action_not_allowed">Action not allowed</string>
     <string name="server_obfs_password">Obfs password</string>
     <string name="server_lab_port_hop">Port Hopping</string>
@@ -172,12 +156,9 @@
     <string name="msg_file_not_found">File not found</string>
     <string name="msg_remark_is_duplicate">The remarks already exists</string>
     <string name="asset_geo_files_sources">Geo files source</string>
-
-    <string name="msg_dialog_progress">Loading</string>
     <string name="menu_item_search">Search</string>
     <string name="menu_item_select_all">Select all</string>
     <string name="menu_item_invert_selection">Invert selection</string>
-    <string name="msg_enter_keywords">Enter keywords</string>
     <string name="switch_bypass_apps_mode">Bypass Mode</string>
     <string name="menu_item_select_proxy_app">Auto select proxy app</string>
     <string name="msg_downloading_content">Downloading content</string>
@@ -191,7 +172,6 @@
     <string name="title_advanced">Advanced Settings</string>
     <string name="title_core_settings">Core Settings</string>
     <string name="title_vpn_settings">VPN Settings</string>
-    <string name="title_pref_per_app_proxy">Per-app proxy</string>
     <string name="summary_pref_per_app_proxy">General: Checked apps use proxy, unchecked apps connect directly; \nBypass mode: checked apps connect directly, unchecked apps use proxy. \nThe option to automatically select proxy applications is in the menu</string>
     <string name="title_pref_is_booted">Auto connect at startup</string>
     <string name="summary_pref_is_booted">Automatically connects to the selected server at startup, which may be unsuccessful</string>
@@ -246,7 +226,6 @@
     <string name="title_pref_remote_dns">Remote DNS</string>
 
     <string name="title_pref_remote_dns_tip">udp/tcp/https/quic, Optional</string>
-    <string name="summary_pref_remote_dns">DNS</string>
 
     <string name="title_pref_vpn_dns">VPN DNS</string>
 
@@ -261,9 +240,6 @@
 
 
     <string name="title_pref_domestic_dns">Domestic DNS</string>
-
-
-    <string name="title_pref_domestic_dns_tip">Optional</string>
     <string name="summary_pref_domestic_dns">DNS</string>
 
     <string name="title_pref_dns_hosts">DNS hosts</string>
@@ -286,7 +262,6 @@
     <string name="title_pref_proxy_sharing_enabled">Allow connections from the LAN</string>
     <string name="summary_pref_proxy_sharing_enabled">Other devices can connect to proxy by your IP address through local proxy. Only enable in trusted networks to avoid unauthorized connections</string>
     <string name="toast_warning_pref_proxysharing_short">Allow connections from the LAN. Make sure you are in a trusted network</string>
-    <string name="title_pref_socks_port">Local proxy port</string>
     <string name="title_pref_enable_local_proxy">Enable local proxy</string>
     <string name="summary_pref_enable_local_proxy">When disabled, no SOCKS proxy is available, so subscription updates and similar actions cannot use the proxy</string>
     <string name="title_pref_socks_enable_udp">SOCKS5 UDP</string>
@@ -295,14 +270,9 @@
     <string name="title_pref_dynamic_socks_port">Enable dynamic local proxy port</string>
     <string name="summary_pref_dynamic_socks_port">Generate a random local proxy port each time the inbound is created</string>
     <string name="title_pref_socks_username">Local proxy username</string>
-    <string name="title_pref_socks_username_tip">Optional</string>
     <string name="summary_pref_socks_username">Username</string>
     <string name="title_pref_socks_password">Local proxy password</string>
-    <string name="title_pref_socks_password_tip">Optional</string>
     <string name="summary_pref_socks_password">Password</string>
-
-    <string name="title_pref_local_dns_port">Local DNS port</string>
-    <string name="summary_pref_local_dns_port">Local DNS port</string>
 
     <string name="title_pref_confirm_remove">Delete config confirmation</string>
     <string name="summary_pref_confirm_remove">Whether deleting a config requires a second confirmation by the user</string>
@@ -321,9 +291,6 @@
     <string name="title_pref_group_all_tab_icon">"All" tab icon</string>
 
     <string name="title_pref_feedback">Feedback</string>
-    <string name="summary_pref_feedback">Feedback enhancements or bugs to GitHub</string>
-    <string name="summary_pref_tg_group">Join Telegram Group</string>
-    <string name="toast_tg_app_not_found">Telegram app not found</string>
     <string name="title_privacy_policy">Privacy policy</string>
     <string name="title_qr_code">QR code</string>
     <string name="title_about">About</string>
@@ -331,10 +298,7 @@
     <string name="title_oss_license">Open Source licenses</string>
     <string name="title_tg_channel">Telegram channel</string>
 
-    <string name="title_pref_promotion">Promotion</string>
-
     <string name="title_pref_auto_update_subscription">Automatic update subscriptions</string>
-    <string name="summary_pref_auto_update_subscription">Update your subscriptions automatically at set intervals in the background. Depending on the device, this feature may not always work</string>
     <string name="title_pref_auto_update_interval">Auto Update Interval</string>
     <string name="title_pref_auto_update_interval_tip">Minutes, Min value 15</string>
 
@@ -409,7 +373,6 @@
     <string name="title_country_code_all_server">Test country code</string>
     <string name="title_user_asset_setting">Asset files</string>
     <string name="title_sort_by_test_results">Sorting by test results</string>
-    <string name="title_filter_config">Filter config</string>
     <string name="filter_config_all">All</string>
     <string name="title_del_duplicate_config_count">Delete %d duplicate configs</string>
     <string name="title_del_config_count">Delete %d configs</string>
@@ -429,16 +392,12 @@
     <string name="toast_fragment_not_available">Unable to locate current view</string>
     <string name="title_clear_test_results">Clear test results</string>
     <string name="title_clear_country_codes">Clear country codes</string>
-    <string name="country_code_unknown">—</string>
 
     <string name="tasker_start_service">Start Service</string>
-    <string name="tasker_setting_confirm">Confirm</string>
 
     <string name="routing_settings_domain_strategy">Domain strategy</string>
     <string name="routing_settings_title">Routing</string>
     <string name="routing_settings_tips">Separated by commas(,), \nchoose domain or ip or process</string>
-    <string name="routing_settings_save">Save</string>
-    <string name="routing_settings_delete">Clear</string>
     <string name="routing_settings_rule_title">Routing Rule</string>
     <string name="routing_settings_add_rule">Add rule</string>
     <string name="routing_settings_import_predefined_rulesets">Import predefined rulesets</string>
@@ -458,16 +417,13 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="routing_settings_protocol_tip">[http,tls,bittorrent]</string>
     <string name="routing_settings_network">network</string>
     <string name="routing_settings_network_tip">[udp|tcp]</string>
-    <string name="routing_settings_outbound_tag_hint" translatable="false">proxy / direct / block / &lt;remarks&gt;</string>
     <string name="routing_settings_outbound_tag">outboundTag</string>
 
     <string name="connection_test_pending">Check Connection</string>
     <string name="connection_test_testing">Testing…</string>
-    <string name="connection_test_testing_count">Testing %d configs…</string>
     <string name="connection_test_available">Success connected: %dms</string>
     <string name="connection_test_error">Error: %s</string>
     <string name="connection_test_fail">No Internet</string>
-    <string name="connection_test_error_status_code">Error code: #%d</string>
     <string name="connection_connected">Connected. Tap to test</string>
     <string name="connection_not_connected">Disconnected</string>
     <string name="connection_runing_task_left">Running tests: %s</string>
@@ -480,7 +436,6 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="title_fragment_settings">Fragment Settings</string>
     <string name="title_pref_fragment_packets">Fragment Packets</string>
     <string name="title_pref_fragment_length">Fragment Length</string>
-    <string name="title_pref_fragment_length_tip">min-max</string>
     <string name="title_pref_fragment_interval">Fragment Interval</string>
     <string name="title_pref_fragment_interval_tip">min-max</string>
     <string name="title_pref_fragment_maxsplit">Fragment Max Split</string>
@@ -500,7 +455,6 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="update_new_version_found">New version found: %s</string>
     <string name="update_now">Update now</string>
     <string name="update_check_pre_release">Check Pre-release</string>
-    <string name="update_checking_for_update">Checking for update…</string>
 
     <string name="title_policy_group_type">Policy group type</string>
     <string name="title_policy_group_subscription_id">From subscription group</string>
@@ -508,9 +462,6 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="title_policy_group_test_outbounds">Test outbounds</string>
     <string name="title_policy_group_fallback">Fallback outbound</string>
     <string name="title_policy_group_fallback_tip">Optional</string>
-
-    <string name="server_proxy_chain_members">Proxy chain members</string>
-    <string name="server_proxy_chain_pick_members">Tap here to pick member</string>
     <string name="server_proxy_chain_member_unselected">Select a member</string>
     <string name="server_proxy_chain_members_unselected">Please select member for each chain row</string>
     <string name="server_proxy_chain_members_insufficient">Insufficient members</string>
@@ -533,28 +484,7 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="title_webdav_config_setting">WebDAV Settings</string>
     <string name="title_webdav_config_setting_unknown">Please configure WebDAV first.</string>
     <string name="title_webdav_url">WebDAV server URL</string>
-    <string name="title_webdav_user">Username</string>
-    <string name="title_webdav_pass">Password</string>
     <string name="title_webdav_remote_path">Remote directory (optional)</string>
-
-    <string-array name="share_method">
-        <item>QRcode</item>
-        <item>Export to clipboard</item>
-        <item>Export full config to clipboard</item>
-    </string-array>
-
-    <string-array name="share_method_more">
-        <item>QRcode</item>
-        <item>Export to clipboard</item>
-        <item>Export full config to clipboard</item>
-        <item>Edit</item>
-        <item>Delete</item>
-    </string-array>
-
-    <string-array name="share_sub_method">
-        <item>QRcode</item>
-        <item>Export to clipboard</item>
-    </string-array>
 
     <string-array name="mode_entries">
         <item>VPN</item>
@@ -623,13 +553,9 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="quick_actions_and_testing">Quick Actions &amp; Testing</string>
     <string name="management">Management</string>
     <string name="action_export">Export</string>
-    <string name="action_duplicates">Duplicates</string>
-    <string name="action_clean_invalid">Clean Invalid</string>
-    <string name="action_delete_all">Delete All</string>
     <string name="app_settings">App Settings</string>
     <string name="tools_and_info">Tools &amp; Info</string>
     <string name="desc_logcat">View connection and app error logs</string>
-    <string name="desc_check_update">Check and install the latest version</string>
     <string name="desc_backup_restore">Export or import your configurations</string>
     <string name="desc_about">Version info and open-source licenses</string>
     <string name="share_configuration">Share Configuration</string>
@@ -664,7 +590,6 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="pref_true_black_only_in_night_mode">Only available in dark mode</string>
     <string name="title_pref_icon_shape">Icon Shape</string>
     <string name="title_pref_arrow_shape">Arrow Shape</string>
-    <string name="summary_pref_icon_shape">Choose the shape style for profile icons</string>
     <string name="pref_custom_dpi">Custom App DPI</string>
     <string name="pref_font_size">Font Size</string>
     <string name="pref_font_size_preview_format">Aa · %s</string>
@@ -693,18 +618,17 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="del_button_dialog_comfirm">Delete</string>
     <string name="menu_item_search_main">Search config</string>
     <string name="title_vpn_sound_settings">Sound</string>
-    <string name="weather_temp_format">%d°C</string>
     <string name="title_search_bar_chip">Search Bar Chip</string>
-    <string name="pref_show_weather_chip_title">Show weather chip</string>
-    <string name="pref_show_weather_chip_summary">Show current temperature next to the search bar based on your location. Can\'t be active at the same time as the total traffic chip</string>
-    <string name="pref_show_total_traffic_chip_title">Show total traffic usage chip</string>
-    <string name="pref_show_total_traffic_chip_summary">Show accumulated upload + download traffic next to the search bar. Can\'t be active at the same time as the weather chip</string>
     <string name="pref_action_clear_total_traffic_title">Clear traffic chip data</string>
     <string name="pref_action_clear_total_traffic_summary_empty">No traffic chip data recorded yet</string>
     <string name="pref_action_clear_total_traffic_summary_set">Current: %1$s</string>
     <string name="summary_pref_action_clear_total_traffic_disabled">Enable \"%1$s\" first to start recording traffic here</string>
     <string name="confirm_clear_total_traffic">Clear traffic chip data along with its daily/monthly history?</string>
     <string name="toast_total_traffic_cleared">Traffic chip data cleared</string>
+    <string name="pref_search_bar_chip_title">Search bar chip</string>
+    <string name="pref_search_bar_chip_disabled">Disabled</string>
+    <string name="pref_search_bar_chip_weather">Weather</string>
+    <string name="pref_search_bar_chip_total_traffic">Traffic</string>
     <string name="pref_search_chip_gradient_title">Gradient chip background</string>
     <string name="pref_search_chip_gradient_summary">Apply a primary-to-tertiary gradient background on the search bar chip while the weather or total traffic chip is active</string>
 
@@ -721,7 +645,6 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="weather_condition_rain_heavy">Heavy Rain</string>
     <string name="weather_condition_snow">Snow</string>
     <string name="weather_condition_thunder">Thunderstorm</string>
-    <string name="weather_condition_thunder_hail">Thunderstorm with Hail</string>
     <string name="weather_condition_unknown">Unknown</string>
     <string name="weather_forecast_title">Weather Forecast</string>
     <string name="weather_feels_like">Feels like %1$s</string>
@@ -836,7 +759,6 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="title_pref_tcp_keepalive_idle">TCP Keepalive idle</string>
     <string name="title_pref_tcp_keepalive_idle_tip">Seconds, 0 = disabled</string>
     <string name="title_pref_ws_heartbeat_period">WS Ping Interval</string>
-    <string name="title_pref_ws_heartbeat_period_tip">Seconds, 0 = disabled</string>
 
     <string name="title_banner_settings_character">Settings banner character</string>
     <string name="summary_banner_settings_character">Choose which Hatsune Miku artwork appears on the settings banner</string>
@@ -921,7 +843,6 @@ you need."</string>
     <string name="home_banner_updated">Home banner updated successfully.</string>
     <string name="theme_banner_updated">Banner updated successfully.</string>
     <string name="theme_banner_delete_title">Remove custom banner</string>
-    <string name="theme_banner_delete_summary">Custom banner removed. Default banner will be used instead</string>
     <string name="pref_home_banner_height_title">Banner height</string>
     <string name="pref_home_banner_height_summary_value">%1$ddp</string>
     <string name="pref_header_top_row_padding_title">Header top padding</string>
@@ -955,7 +876,6 @@ you need."</string>
     <string name="summary_pref_toolbar_center_subtitle_mode">Show a centered subtitle with fade animation instead of the plain standard title</string>
     <string name="selected_banner_dim_title">Banner overlay strength</string>
     <string name="selected_banner_dim_summary_value">%1$d%%</string>
-    <string name="sheet_banner_dim_title">Banner overlay strength</string>
     <string name="sheet_banner_dim_summary_value">%1$d%%</string>
     <string name="selected_banner_custom_title">Change selected profile banner</string>
     <string name="selected_banner_custom_summary">Set a custom image for the selected server card (optional)</string>
@@ -1005,7 +925,6 @@ you need."</string>
     <string name="app_icon_updated">App icon updated. It may take a moment to appear on your home screen.</string>
 
     <string name="title_pref_custom_app_name">App Name</string>
-    <string name="summary_pref_custom_app_name">Also renames the launcher/app-drawer icon. Some launchers cache the old name until you restart them or reboot.</string>
     <string name="app_name_variant_miku1">HatsuneRay</string>
     <string name="app_name_variant_miku2">MikuNG</string>
     <string name="app_name_variant_miku3">HatsuneNG</string>

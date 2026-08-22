@@ -61,7 +61,7 @@
             app:dialogIcon="@drawable/rmx_server_line"
             app:layout="@layout/uwu_mid"
             android:key="pref_vpn_dns"
-            android:summary="@string/summary_pref_remote_dns"
+            android:summary="@string/summary_pref_domestic_dns"
             android:title="@string/title_pref_vpn_dns"
             android:dialogMessage="@string/title_pref_vpn_dns_tip" />
 
@@ -115,7 +115,7 @@
             android:key="pref_ws_heartbeat_period"
             android:defaultValue="60"
             android:title="@string/title_pref_ws_heartbeat_period"
-            android:dialogMessage="@string/title_pref_ws_heartbeat_period_tip" />
+            android:dialogMessage="@string/title_pref_tcp_keepalive_idle_tip" />
 
         <Preference
             android:icon="@drawable/rmx_apps_line"

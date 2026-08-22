@@ -2,30 +2,7 @@
 <resources>
     <color name="colorPing">#009966</color>
     <color name="colorPingRed">#FF0099</color>
-    <color name="colorConfigType">#f97910</color>
-    <color name="colorWhite">#FFFFFF</color>
     <color name="color_fab_active">#f97910</color>
-    <color name="color_fab_inactive">#9C9C9C</color>
-    <color name="colorIndicator">#f97910</color>
-
-    <color name="palette_red">#F44336</color>
-    <color name="palette_pink">#E91E63</color>
-    <color name="palette_purple">#9C27B0</color>
-    <color name="palette_deep_purple">#673AB7</color>
-    <color name="palette_indigo">#3F51B5</color>
-    <color name="palette_blue">#2196F3</color>
-    <color name="palette_light_blue">#03A9F4</color>
-    <color name="palette_cyan">#00BCD4</color>
-    <color name="palette_teal">#009688</color>
-    <color name="palette_green">#4CAF50</color>
-    <color name="palette_light_green">#8BC34A</color>
-    <color name="palette_lime">#CDDC39</color>
-    <color name="palette_yellow">#FFEB3B</color>
-    <color name="palette_amber">#FFC107</color>
-    <color name="palette_orange">#FF9800</color>
-    <color name="palette_deep_orange">#FF5722</color>
-    <color name="palette_brown">#795548</color>
-    <color name="palette_blue_grey">#607D8B</color>
 
     <color name="red_primary">#904A42</color>
     <color name="red_onPrimary">#FFFFFF</color>
