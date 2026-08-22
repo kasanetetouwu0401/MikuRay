@@ -458,7 +458,7 @@
             android:icon="@drawable/rmx_design_contrast_2_line"
             app:layout="@layout/uwu_mid"
             app:key="pref_sheet_banner_dim"
-            app:title="@string/selected_banner_dim_title" />
+            app:title="@string/sheet_banner_dim_title" />
 
         <Preference
             android:icon="@drawable/rmx_image_edit_line"

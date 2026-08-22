@@ -333,13 +333,13 @@ class UiSettingsActivity : BaseActivity() {
                     MaterialAlertDialogBuilder(requireContext())
                         .setTitle(R.string.theme_banner_delete_title)
                         .setIcon(RemixR.drawable.rmx_delete_bin_line)
-                        .setMessage(R.string.selected_banner_delete_summary)
+                        .setMessage(R.string.theme_banner_delete_summary)
                         .setPositiveButton(android.R.string.ok) { _, _ ->
                             lifecycleScope.launch {
                                 deleteOldFile(savedUri)
                                 MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_THEME_BANNER_URI, "")
                                 navigateCheckUpdate?.refresh()
-                                requireContext().snackbarSuccess(getString(R.string.selected_banner_delete_summary), title = getString(R.string.title_alerter_success))
+                                requireContext().snackbarSuccess(getString(R.string.theme_banner_delete_summary), title = getString(R.string.title_alerter_success))
                             }
                         }
                         .setNegativeButton(android.R.string.cancel, null)

@@ -135,6 +135,12 @@
         <item>Proxy only</item>
     </string-array>
 
+    <string-array name="browser_dialer_mode_value" translatable="false">
+        <item>Disable</item>
+        <item>OkHttp</item>
+        <item>WebView</item>
+    </string-array>
+
     <string-array name="hev_tunnel_loglevel" translatable="false">
         <item>error</item>
         <item>warn</item>
@@ -185,6 +191,12 @@
         <item>1</item>
         <item>2</item>
         <item>3</item>
+    </string-array>
+
+    <string-array name="outbound_tag" translatable="false">
+        <item>proxy</item>
+        <item>direct</item>
+        <item>block</item>
     </string-array>
 
     <string-array name="xhttp_mode" translatable="false">
@@ -330,6 +342,19 @@
         <item>miku12</item>
     </string-array>
 
+    <string-array name="uwu_random_text">
+        <item>@string/uwu_random_text_1</item>
+        <item>@string/uwu_random_text_2</item>
+        <item>@string/uwu_random_text_3</item>
+        <item>@string/uwu_random_text_4</item>
+        <item>@string/uwu_random_text_5</item>
+        <item>@string/uwu_random_text_6</item>
+        <item>@string/uwu_random_text_7</item>
+        <item>@string/uwu_random_text_8</item>
+        <item>@string/uwu_random_text_9</item>
+        <item>@string/uwu_random_text_10</item>
+    </string-array>
+
     <string-array name="app_font_entries" translatable="false">
         <item>Default</item>
         <item>IOS 15</item>
@@ -408,6 +433,5 @@
         <item>false</item>
         <item></item>
     </string-array>
-
 
 </resources>

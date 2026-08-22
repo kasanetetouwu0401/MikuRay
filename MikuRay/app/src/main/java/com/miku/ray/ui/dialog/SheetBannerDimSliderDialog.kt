@@ -35,7 +35,7 @@ class SheetBannerDimSliderDialog @JvmOverloads constructor(
         slider.value = current.toFloat()
 
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.selected_banner_dim_title)
+            .setTitle(R.string.sheet_banner_dim_title)
             .setIcon(RemixR.drawable.rmx_design_contrast_2_line)
             .setView(dialogView)
             .setPositiveButton(android.R.string.ok) { _, _ ->

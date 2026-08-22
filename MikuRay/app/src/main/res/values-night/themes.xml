@@ -32,4 +32,33 @@
         <item name="textAppearanceTitleSmall">@style/TextAppearance.App.TitleSmall</item>
     </style>
 
+    <style name="ThemeOverlay.App.TrueBlack" parent="@style/ThemeOverlay.Material3Expressive">
+        <item name="android:colorBackground">#ff000000</item>
+        <item name="colorBg">#ff000000</item>
+        <item name="colorCard">#ff131313</item>
+        <item name="colorSurface">#ff000000</item>
+        <item name="colorSurfaceVariant">#ff1a1a1a</item>
+        <item name="colorSurfaceContainerLow">#ff131313</item>
+        <item name="colorSurfaceContainerHigh">#ff212121</item>
+        <item name="colorSurfaceContainerHighest">#ff212121</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.App.TrueBlack.AlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.TrueBlack.AlertDialog</item>
+    </style>
+
+    <style name="ThemeOverlay.App.TrueBlack.AlertDialog" parent="@style/ThemeOverlay.Material3Expressive.MaterialAlertDialog.Centered">
+        <item name="shapeAppearance">@style/AppThemeAlertDialogShape</item>
+        <item name="android:colorBackground">#ff131313</item>
+        <item name="colorSurfaceContainerHigh">#ff131313</item>
+        <item name="android:windowAnimationStyle">@style/MaterialAlertDialog.Material3.Animation</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="buttonBarPositiveButtonStyle">@style/CustomDialogFilledButtonPrimary</item>
+        <item name="buttonBarNegativeButtonStyle">@style/CustomDialogFilledButtonSecondary</item>
+        <item name="buttonBarNeutralButtonStyle">@style/CustomDialogFilledButtonNeutral</item>
+        <item name="dialogCornerRadius">28dp</item>
+        <item name="android:listPreferredItemHeightSmall">60dp</item>
+        <item name="android:windowMinWidthMajor">91%</item>
+        <item name="android:windowMinWidthMinor">91%</item>
+        <item name="materialAlertDialogTitleIconStyle">@style/AppThemeAlertDialogTitleIcon</item>
+    </style>
+
 </resources>

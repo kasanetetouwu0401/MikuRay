@@ -21,7 +21,7 @@
             android:key="pref_fragment_length"
             android:summary="50-100"
             android:title="@string/title_pref_fragment_length"
-            android:dialogMessage="@string/title_pref_fragment_interval_tip" />
+            android:dialogMessage="@string/title_pref_fragment_length_tip" />
 
         <EditTextPreference
             android:icon="@drawable/rmx_hashtag"
