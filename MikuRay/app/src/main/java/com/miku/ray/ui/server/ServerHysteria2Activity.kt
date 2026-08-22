@@ -20,7 +20,6 @@ import com.miku.ray.handler.CertificateFingerprintManager
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.ui.base.BaseActivity
 import com.miku.ray.ui.server.fields.AddressPortFields
-import com.miku.ray.ui.server.fields.ServerAdvancedFieldsLoader
 import com.miku.ray.ui.server.fields.TlsFields
 import com.miku.ray.util.Utils
 import com.miku.ray.util.showDeleteConfirmDialog
@@ -50,7 +49,6 @@ class ServerHysteria2Activity : BaseActivity() {
 
     private lateinit var addressPortFields: AddressPortFields
     private lateinit var tlsFields: TlsFields
-    private lateinit var advancedFieldsLoader: ServerAdvancedFieldsLoader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,25 +60,22 @@ class ServerHysteria2Activity : BaseActivity() {
         findViewById<androidx.core.widget.NestedScrollView>(R.id.server_scroll_content).applyEdgeToEdgeListInsets()
 
         addressPortFields = AddressPortFields(this)
+        tlsFields = TlsFields(this)
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = (config?.configType ?: createConfigType).toString(), subtitle = getString(R.string.subtitle_server_config))
-        if (config != null) {
-            bindBasicServer(config)
-        } else {
-            clearBasicServer()
-        }
 
-        advancedFieldsLoader = ServerAdvancedFieldsLoader(this, includeTransport = false, includeTls = true) { _, tls ->
-            tlsFields = tls ?: error("TLS fields were not inflated")
-            tlsFields.setOnSecurityChanged { security -> tlsFields.updateForSecurity(security) }
-            tlsFields.setOnFetchCertClick { fetchPinnedCA256ForCurrentConfig() }
-            if (config != null) bindAdvancedServer(config) else clearAdvancedServer()
+        tlsFields.setOnSecurityChanged { security -> tlsFields.updateForSecurity(security) }
+        tlsFields.setOnFetchCertClick { fetchPinnedCA256ForCurrentConfig() }
+
+        if (config != null) {
+            bindingServer(config)
+        } else {
+            clearServer()
         }
-        advancedFieldsLoader.schedule()
     }
 
-    private fun bindBasicServer(config: ProfileItem): Boolean {
+    private fun bindingServer(config: ProfileItem): Boolean {
         addressPortFields.bind(config)
         et_id.text = Utils.getEditable(config.password.orEmpty())
 
@@ -89,27 +84,20 @@ class ServerHysteria2Activity : BaseActivity() {
         et_port_hop_interval?.text = Utils.getEditable(config.portHoppingInterval)
         et_bandwidth_down?.text = Utils.getEditable(config.bandwidthDown)
         et_bandwidth_up?.text = Utils.getEditable(config.bandwidthUp)
-        return true
-    }
 
-    private fun bindAdvancedServer(config: ProfileItem): Boolean {
         tlsFields.bind(config)
         return true
     }
 
-    private fun clearBasicServer(): Boolean {
+    private fun clearServer(): Boolean {
         addressPortFields.clear()
         et_id.text = null
-        return true
-    }
 
-    private fun clearAdvancedServer(): Boolean {
         tlsFields.clear()
         return true
     }
 
     private fun saveServer(): Boolean {
-        advancedFieldsLoader.ensure()
         if (TextUtils.isEmpty(addressPortFields.remarksText)) {
             snackbarError(getString(R.string.server_lab_remarks), title = getString(R.string.title_alerter_error))
             return false
@@ -151,7 +139,6 @@ class ServerHysteria2Activity : BaseActivity() {
     }
 
     private fun fetchPinnedCA256ForCurrentConfig() {
-        advancedFieldsLoader.ensure()
         val config = buildCurrentProfileForCertificateFetch() ?: return
 
         lifecycleScope.launch {
@@ -179,7 +166,6 @@ class ServerHysteria2Activity : BaseActivity() {
     }
 
     private fun buildCurrentProfileForCertificateFetch(): ProfileItem? {
-        advancedFieldsLoader.ensure()
         if (TextUtils.isEmpty(addressPortFields.addressText)) {
             snackbarError(getString(R.string.server_lab_address), title = getString(R.string.title_alerter_error))
             return null

@@ -22,7 +22,6 @@ import com.miku.ray.handler.CertificateFingerprintManager
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.ui.base.BaseActivity
 import com.miku.ray.ui.server.fields.AddressPortFields
-import com.miku.ray.ui.server.fields.ServerAdvancedFieldsLoader
 import com.miku.ray.ui.server.fields.TlsFields
 import com.miku.ray.ui.server.fields.TransportFields
 import com.miku.ray.util.JsonUtil
@@ -53,7 +52,6 @@ class ServerVmessActivity : BaseActivity() {
     private lateinit var addressPortFields: AddressPortFields
     private lateinit var transportFields: TransportFields
     private lateinit var tlsFields: TlsFields
-    private lateinit var advancedFieldsLoader: ServerAdvancedFieldsLoader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,56 +63,46 @@ class ServerVmessActivity : BaseActivity() {
         findViewById<androidx.core.widget.NestedScrollView>(R.id.server_scroll_content).applyEdgeToEdgeListInsets()
 
         addressPortFields = AddressPortFields(this)
+        transportFields = TransportFields(this)
+        tlsFields = TlsFields(this)
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = (config?.configType ?: createConfigType).toString(), subtitle = getString(R.string.subtitle_server_config))
-        if (config != null) {
-            bindBasicServer(config)
-        } else {
-            clearBasicServer()
-        }
 
-        advancedFieldsLoader = ServerAdvancedFieldsLoader(this, includeTransport = true, includeTls = true) { transport, tls ->
-            transportFields = transport ?: error("Transport fields were not inflated")
-            tlsFields = tls ?: error("TLS fields were not inflated")
-            transportFields.setOnNetworkChanged { network -> transportFields.updateForNetwork(network, config) }
-            tlsFields.setOnSecurityChanged { security -> tlsFields.updateForSecurity(security) }
-            tlsFields.setOnFetchCertClick { fetchPinnedCA256ForCurrentConfig() }
-            if (config != null) bindAdvancedServer(config) else clearAdvancedServer()
+        transportFields.setOnNetworkChanged { network -> transportFields.updateForNetwork(network, config) }
+        tlsFields.setOnSecurityChanged { security -> tlsFields.updateForSecurity(security) }
+        tlsFields.setOnFetchCertClick { fetchPinnedCA256ForCurrentConfig() }
+
+        if (config != null) {
+            bindingServer(config)
+        } else {
+            clearServer()
         }
-        advancedFieldsLoader.schedule()
     }
 
-    private fun bindBasicServer(config: ProfileItem): Boolean {
+    private fun bindingServer(config: ProfileItem): Boolean {
         addressPortFields.bind(config)
         et_id.text = Utils.getEditable(config.password.orEmpty())
 
         val securityPos = Utils.arrayFind(securitys, config.method.orEmpty())
         if (securityPos >= 0) sp_security?.setText(securitys[securityPos], false)
-        return true
-    }
 
-    private fun bindAdvancedServer(config: ProfileItem): Boolean {
         tlsFields.bind(config)
         transportFields.bind(config)
         return true
     }
 
-    private fun clearBasicServer(): Boolean {
+    private fun clearServer(): Boolean {
         addressPortFields.clear()
         et_id.text = null
         sp_security?.setText(securitys.firstOrNull().orEmpty(), false)
-        return true
-    }
 
-    private fun clearAdvancedServer(): Boolean {
         transportFields.clear()
         tlsFields.clear()
         return true
     }
 
     private fun saveServer(): Boolean {
-        advancedFieldsLoader.ensure()
         if (TextUtils.isEmpty(addressPortFields.remarksText)) {
             snackbarError(getString(R.string.server_lab_remarks), title = getString(R.string.title_alerter_error))
             return false
@@ -166,7 +154,6 @@ class ServerVmessActivity : BaseActivity() {
     }
 
     private fun fetchPinnedCA256ForCurrentConfig() {
-        advancedFieldsLoader.ensure()
         val config = buildCurrentProfileForCertificateFetch() ?: return
 
         lifecycleScope.launch {
@@ -194,7 +181,6 @@ class ServerVmessActivity : BaseActivity() {
     }
 
     private fun buildCurrentProfileForCertificateFetch(): ProfileItem? {
-        advancedFieldsLoader.ensure()
         if (TextUtils.isEmpty(addressPortFields.addressText)) {
             snackbarError(getString(R.string.server_lab_address), title = getString(R.string.title_alerter_error))
             return null
