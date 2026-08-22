@@ -152,9 +152,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
                     startActivity(Intent(this, WeatherForecastActivity::class.java))
                 }
                 isTotalTrafficChipSelected() -> {
-                    if (MmkvManager.getTotalTrafficDetail() != null) {
-                        showTotalTrafficDetailDialog(this)
-                    }
+                    showTotalTrafficDetailDialog(this)
                 }
             }
         }
@@ -261,10 +259,6 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
     private fun refreshTotalTrafficChip() {
         val totalTraffic = MmkvManager.getTotalTrafficString()
-        if (totalTraffic == null) {
-            layoutWeatherChip.isVisible = false
-            return
-        }
         tvTotalTraffic.text = totalTraffic
         if (isTotalTrafficChipSelected()) {
             ivTotalTrafficIcon.isVisible = true

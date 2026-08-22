@@ -361,10 +361,6 @@ class MainActivity : HelperBaseActivity(),
 
     private fun refreshTotalTrafficChip() {
         val totalTraffic = MmkvManager.getTotalTrafficString()
-        if (totalTraffic == null) {
-            binding.layoutWeatherChip.isVisible = false
-            return
-        }
         
         binding.tvTotalTraffic.text = totalTraffic
         if (isTotalTrafficChipSelected()) {
@@ -629,9 +625,7 @@ class MainActivity : HelperBaseActivity(),
                     startActivity(Intent(this, WeatherForecastActivity::class.java))
                 }
                 isTotalTrafficChipSelected() -> {
-                    if (MmkvManager.getTotalTrafficDetail() != null) {
-                        showTotalTrafficDetailDialog(this)
-                    }
+                    showTotalTrafficDetailDialog(this)
                 }
             }
         }
