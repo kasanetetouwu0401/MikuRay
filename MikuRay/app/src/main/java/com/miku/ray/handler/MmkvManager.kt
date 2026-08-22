@@ -52,14 +52,17 @@ object MmkvManager {
     private val profileRevision = AtomicLong(0L)
     private val serverIndexRevision = AtomicLong(0L)
     private val subscriptionRevision = AtomicLong(0L)
+    private val pinnedRevision = AtomicLong(0L)
 
     fun getProfileRevision(): Long = profileRevision.get()
     fun getServerIndexRevision(): Long = serverIndexRevision.get()
     fun getSubscriptionRevision(): Long = subscriptionRevision.get()
+    fun getPinnedRevision(): Long = pinnedRevision.get()
 
     private fun markProfileChanged() { profileRevision.incrementAndGet() }
     private fun markServerIndexChanged() { serverIndexRevision.incrementAndGet() }
     private fun markSubscriptionChanged() { subscriptionRevision.incrementAndGet() }
+    private fun markPinnedChanged() { pinnedRevision.incrementAndGet() }
 
     private val recoveryHandler = object : MMKVHandler {
         override fun onMMKVCRCCheckFail(mmapID: String) =
@@ -394,6 +397,7 @@ object MmkvManager {
         val pinnedServers = decodePinnedServers()
         if (pinnedServers.removeAll(guids.toSet())) {
             settingsStorage.encode(KEY_PINNED_SERVERS, pinnedServers)
+            markPinnedChanged()
         }
 
         val selectedServer = getSelectServer()
@@ -992,6 +996,7 @@ object MmkvManager {
             true
         }
         settingsStorage.encode(KEY_PINNED_SERVERS, pinnedServers)
+        markPinnedChanged()
         return nowPinned
     }
 
@@ -999,10 +1004,14 @@ object MmkvManager {
         val pinnedServers = decodePinnedServers()
         if (pinnedServers.remove(guid)) {
             settingsStorage.encode(KEY_PINNED_SERVERS, pinnedServers)
+            markPinnedChanged()
         }
     }
 
     fun clearAllSettings() {
+        if (settingsStorage.containsKey(KEY_PINNED_SERVERS)) {
+            markPinnedChanged()
+        }
         settingsStorage.clearAll()
     }
 
