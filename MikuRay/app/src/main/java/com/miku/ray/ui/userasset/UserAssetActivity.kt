@@ -12,7 +12,6 @@ import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.contracts.BaseAdapterListener
@@ -49,7 +48,7 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
         setContentView(binding.root)
 
         binding.userAssetScrollContent.applyEdgeToEdgeListInsets()
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_user_asset_setting), subtitle = getString(R.string.subtitle_user_asset))
 
         binding.recyclerView.setHasFixedSize(true)

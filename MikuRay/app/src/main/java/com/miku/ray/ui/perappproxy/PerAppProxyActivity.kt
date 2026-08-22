@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.AppConfig.ANG_PACKAGE
 import com.miku.ray.R
@@ -47,7 +46,7 @@ class PerAppProxyActivity : BaseActivity() {
 
         binding.recyclerView.applyEdgeToEdgeListInsets()
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.per_app_proxy_settings), subtitle = getString(R.string.subtitle_per_app_proxy))
 
         initList()

@@ -17,7 +17,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.R
 import com.miku.ray.databinding.ActivityLogcatBinding
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
@@ -41,7 +40,7 @@ class LogcatActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
 
         binding.recyclerView.applyEdgeToEdgeListInsets()
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_logcat), subtitle = getString(R.string.subtitle_logcat))
 
         adapter = LogcatRecyclerAdapter(viewModel, ::onLogLongClick)
