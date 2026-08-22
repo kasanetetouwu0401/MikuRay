@@ -320,7 +320,6 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
             .setIcon(RemixR.drawable.rmx_map_pushpin_line)
             .setItems(arrayOf(actionLabel)) { _, _ ->
                 val nowPinned = mainViewModel.togglePinServer(guid)
-                adapter.refreshPinState()
                 ownerActivity.snackbarSuccess(
                     getString(if (nowPinned) R.string.toast_server_pinned else R.string.toast_server_unpinned),
                     title = getString(R.string.title_alerter_success)

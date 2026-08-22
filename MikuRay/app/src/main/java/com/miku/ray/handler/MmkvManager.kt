@@ -22,7 +22,6 @@ import com.miku.ray.dto.entities.SubscriptionItem
 import com.miku.ray.dto.entities.WebDavConfig
 import com.miku.ray.util.JsonUtil
 import com.miku.ray.util.Utils
-import java.util.concurrent.atomic.AtomicLong
 
 internal class ProfileStorageException(message: String) : IllegalStateException(message)
 
@@ -47,22 +46,6 @@ object MmkvManager {
     private const val KEY_SUB_IDS = "SUB_IDS"
     private const val KEY_WEBDAV_CONFIG = "WEBDAV_CONFIG"
     private const val KEY_PINNED_SERVERS = "PINNED_SERVERS"
-
-    // Process-local revisions distinguish profile/index changes from affiliation-only updates.
-    private val profileRevision = AtomicLong(0L)
-    private val serverIndexRevision = AtomicLong(0L)
-    private val subscriptionRevision = AtomicLong(0L)
-    private val pinnedRevision = AtomicLong(0L)
-
-    fun getProfileRevision(): Long = profileRevision.get()
-    fun getServerIndexRevision(): Long = serverIndexRevision.get()
-    fun getSubscriptionRevision(): Long = subscriptionRevision.get()
-    fun getPinnedRevision(): Long = pinnedRevision.get()
-
-    private fun markProfileChanged() { profileRevision.incrementAndGet() }
-    private fun markServerIndexChanged() { serverIndexRevision.incrementAndGet() }
-    private fun markSubscriptionChanged() { subscriptionRevision.incrementAndGet() }
-    private fun markPinnedChanged() { pinnedRevision.incrementAndGet() }
 
     private val recoveryHandler = object : MMKVHandler {
         override fun onMMKVCRCCheckFail(mmapID: String) =
@@ -135,7 +118,6 @@ object MmkvManager {
         profileFullStorage.removeValuesForKeys(keys)
         serverAffStorage.removeValuesForKeys(keys)
         serverRawStorage.removeValuesForKeys(keys)
-        markProfileChanged()
     }
 
     fun readLegacyServerList(): String? {
@@ -154,10 +136,7 @@ object MmkvManager {
     fun encodeServerList(serverList: MutableList<String>, subscriptionId: String) {
         val subId = getSubscriptionId(subscriptionId)
         val key = "$KEY_SUB_SERVER_PREFIX$subId"
-        val json = JsonUtil.toJson(serverList)
-        if (mainStorage.decodeString(key) == json) return
-        mainStorage.encode(key, json)
-        markServerIndexChanged()
+        mainStorage.encode(key, JsonUtil.toJson(serverList))
     }
 
     fun saveOriginServerList(subscriptionId: String) {
@@ -225,11 +204,7 @@ object MmkvManager {
 
     fun encodeServerConfig(guid: String, config: ProfileItem): String {
         val key = guid.ifBlank { Utils.getUuid() }
-        val json = JsonUtil.toJson(config)
-        if (profileFullStorage.decodeString(key) != json) {
-            profileFullStorage.encode(key, json)
-            markProfileChanged()
-        }
+        profileFullStorage.encode(key, JsonUtil.toJson(config))
 
         val subId = getSubscriptionId(config.subscriptionId)
         val serverList = decodeServerList(subId)
@@ -246,9 +221,7 @@ object MmkvManager {
     }
 
     fun encodeProfileDirect(key: String, configJson: String) {
-        if (profileFullStorage.decodeString(key) == configJson) return
         profileFullStorage.encode(key, configJson)
-        markProfileChanged()
     }
 
     /**
@@ -291,29 +264,19 @@ object MmkvManager {
                 selectedProfile = selectedProfile,
             )
 
-            // Write every changed payload first; identical subscription results keep
-            // the existing profile revision and therefore do not force a UI reload.
-            var payloadChanged = false
+            // Write every new payload first; nothing old is touched yet.
             profiles.forEach { (guid, profile) ->
-                val profileJson = JsonUtil.toJson(profile)
-                if (profileFullStorage.decodeString(guid) != profileJson) {
-                    requireStorageWrite(
-                        profileFullStorage.encode(guid, profileJson),
-                        "Failed to save profile payload",
-                    )
-                    payloadChanged = true
-                }
+                requireStorageWrite(
+                    profileFullStorage.encode(guid, JsonUtil.toJson(profile)),
+                    "Failed to save profile payload",
+                )
                 rawConfigs[guid]?.let { raw ->
-                    if (serverRawStorage.decodeString(guid) != raw) {
-                        requireStorageWrite(
-                            serverRawStorage.encode(guid, raw),
-                            "Failed to save raw profile payload",
-                        )
-                        payloadChanged = true
-                    }
+                    requireStorageWrite(
+                        serverRawStorage.encode(guid, raw),
+                        "Failed to save raw profile payload",
+                    )
                 }
             }
-            if (payloadChanged) markProfileChanged()
 
             // Pinned servers among the ones being replaced must survive the update, the
             // same way the selected server does: neither their payload nor their spot in
@@ -384,7 +347,6 @@ object MmkvManager {
         profileFullStorage.remove(guid)
         serverAffStorage.remove(guid)
         unpinServer(guid)
-        markProfileChanged()
     }
 
     fun removeServers(guids: List<String>, subscriptionId: String) {
@@ -397,7 +359,6 @@ object MmkvManager {
         val pinnedServers = decodePinnedServers()
         if (pinnedServers.removeAll(guids.toSet())) {
             settingsStorage.encode(KEY_PINNED_SERVERS, pinnedServers)
-            markPinnedChanged()
         }
 
         val selectedServer = getSelectServer()
@@ -408,7 +369,6 @@ object MmkvManager {
             profileFullStorage.remove(guid)
             serverAffStorage.remove(guid)
         }
-        markProfileChanged()
     }
 
     fun removeServerViaSubid(subscriptionId: String?) {
@@ -425,7 +385,6 @@ object MmkvManager {
 
         serverList.clear()
         encodeServerList(serverList, subId)
-        markProfileChanged()
     }
 
     fun decodeServerAffiliationInfo(guid: String): ServerAffiliationInfo? {
@@ -825,7 +784,6 @@ object MmkvManager {
 
     fun removeSubscription(subid: String) {
         subStorage.remove(subid)
-        markSubscriptionChanged()
         val subsList = decodeSubsList()
         subsList.remove(subid)
         encodeSubsList(subsList)
@@ -835,11 +793,7 @@ object MmkvManager {
 
     fun encodeSubscription(guid: String, subItem: SubscriptionItem) {
         val key = guid.ifBlank { Utils.getUuid() }
-        val json = JsonUtil.toJson(subItem)
-        if (subStorage.decodeString(key) != json) {
-            subStorage.encode(key, json)
-            markSubscriptionChanged()
-        }
+        subStorage.encode(key, JsonUtil.toJson(subItem))
 
         val subsList = decodeSubsList()
         if (!subsList.contains(key)) {
@@ -854,10 +808,7 @@ object MmkvManager {
     }
 
     fun encodeSubsList(subsList: MutableList<String>) {
-        val json = JsonUtil.toJson(subsList)
-        if (mainStorage.decodeString(KEY_SUB_IDS) == json) return
-        mainStorage.encode(KEY_SUB_IDS, json)
-        markSubscriptionChanged()
+        mainStorage.encode(KEY_SUB_IDS, JsonUtil.toJson(subsList))
     }
 
     fun decodeSubsList(): MutableList<String> {
@@ -996,7 +947,6 @@ object MmkvManager {
             true
         }
         settingsStorage.encode(KEY_PINNED_SERVERS, pinnedServers)
-        markPinnedChanged()
         return nowPinned
     }
 
@@ -1004,14 +954,10 @@ object MmkvManager {
         val pinnedServers = decodePinnedServers()
         if (pinnedServers.remove(guid)) {
             settingsStorage.encode(KEY_PINNED_SERVERS, pinnedServers)
-            markPinnedChanged()
         }
     }
 
     fun clearAllSettings() {
-        if (settingsStorage.containsKey(KEY_PINNED_SERVERS)) {
-            markPinnedChanged()
-        }
         settingsStorage.clearAll()
     }
 

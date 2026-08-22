@@ -49,41 +49,6 @@ class MainRecyclerAdapter(
     private var data: MutableList<ServersCache> = mutableListOf()
     private var isGridMode: Boolean = false
 
-    // These values are shared by all visible rows. Reading MMKV/JSON for every
-    // bind makes RecyclerView startup unnecessarily expensive.
-    private var networkSecurityEnabled = false
-    private var trafficEnabled = false
-    private var selectedGuid: String? = null
-    private var pinnedGuids: Set<String> = emptySet()
-    private var selectedIndicatorStyle = IndicatorStyle.STYLE_0
-    private var subscriptionRemarksById: Map<String, String> = emptyMap()
-    private var bindCacheInitialized = false
-    private var cachedSubscriptionRevision = -1L
-    private var cachedPinnedRevision = -1L
-
-    private fun refreshBindCache() {
-        networkSecurityEnabled = MmkvManager.decodeSettingsBool(
-            AppConfig.PREF_NETWORK_SECURITY_ENABLED
-        ) == true
-        trafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
-        selectedGuid = MmkvManager.getSelectServer()
-        pinnedGuids = MmkvManager.decodePinnedServers()
-        selectedIndicatorStyle = runCatching {
-            IndicatorStyle.valueOf(
-                MmkvManager.decodeSettingsString(
-                    AppConfig.PREF_INDICATOR_STYLE,
-                    IndicatorStyle.STYLE_0.name
-                ) ?: IndicatorStyle.STYLE_0.name
-            )
-        }.getOrDefault(IndicatorStyle.STYLE_0)
-        subscriptionRemarksById = MmkvManager.decodeSubscriptions().associate { sub ->
-            sub.guid to sub.subscription.remarks
-        }
-        cachedSubscriptionRevision = MmkvManager.getSubscriptionRevision()
-        cachedPinnedRevision = MmkvManager.getPinnedRevision()
-        bindCacheInitialized = true
-    }
-
     val isServerListEmpty: Boolean
         get() = data.isEmpty()
 
@@ -91,20 +56,12 @@ class MainRecyclerAdapter(
     fun setGridMode(gridMode: Boolean) {
         if (isGridMode != gridMode) {
             isGridMode = gridMode
-            refreshBindCache()
             notifyDataSetChanged()
         }
     }
 
     @SuppressLint("NotifyDataSetChanged")
     fun refreshDisplayPrefs() {
-        refreshBindCache()
-        notifyDataSetChanged()
-    }
-
-    fun refreshPinState() {
-        pinnedGuids = MmkvManager.decodePinnedServers()
-        cachedPinnedRevision = MmkvManager.getPinnedRevision()
         notifyDataSetChanged()
     }
 
@@ -113,12 +70,6 @@ class MainRecyclerAdapter(
 
     @SuppressLint("NotifyDataSetChanged")
     fun setData(newData: MutableList<ServersCache>?, position: Int = -1) {
-        if (!bindCacheInitialized ||
-            cachedSubscriptionRevision != MmkvManager.getSubscriptionRevision() ||
-            cachedPinnedRevision != MmkvManager.getPinnedRevision()
-        ) {
-            refreshBindCache()
-        }
         data = newData?.toMutableList() ?: mutableListOf()
 
         if (position >= 0 && position in data.indices) {
@@ -130,7 +81,6 @@ class MainRecyclerAdapter(
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
-        refreshBindCache()
         val lifecycleOwner = recyclerView.context as? androidx.lifecycle.LifecycleOwner
         if (lifecycleOwner != null) {
             isRunningObserver = androidx.lifecycle.Observer { _ ->
@@ -196,7 +146,8 @@ class MainRecyclerAdapter(
             }
             holder.views.tvType.text = getProtocolName(profile)
 
-            bindNetworkSecurity(holder, profile, networkSecurityEnabled)
+            val isNetSecEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_NETWORK_SECURITY_ENABLED) == true
+            bindNetworkSecurity(holder, profile, isNetSecEnabled)
 
             val aff = MmkvManager.decodeServerAffiliationInfo(guid)
             holder.views.tvTestResult.text = aff?.getTestDelayString().orEmpty()
@@ -214,25 +165,20 @@ class MainRecyclerAdapter(
                 holder.views.tvTestResult.setTextColor(ContextCompat.getColor(context, R.color.colorPing))
             }
 
-            val trafficStr = if (trafficEnabled) {
-                aff?.takeIf { it.uplinkTotal != 0L || it.downlinkTotal != 0L }?.let {
-                    "↑ ${MmkvManager.formatTrafficBytesPublic(it.uplinkTotal)}  ↓ ${MmkvManager.formatTrafficBytesPublic(it.downlinkTotal)}"
-                }
-            } else {
-                null
-            }
+            val isTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
+            val trafficStr = MmkvManager.getProfileTrafficString(guid)
 
-            if (!trafficStr.isNullOrEmpty()) {
+            if (isTrafficEnabled && !trafficStr.isNullOrEmpty()) {
                 holder.views.tvTraffic.text = trafficStr
                 holder.views.tvTraffic.visibility = View.VISIBLE
             } else {
                 holder.views.tvTraffic.visibility = View.GONE
             }
 
-            val isPinned = pinnedGuids.contains(guid)
+            val isPinned = MmkvManager.isServerPinned(guid)
             holder.views.ivPinIndicator.visibility = if (isPinned) View.VISIBLE else View.GONE
 
-            val isSelectedServer = (guid == selectedGuid)
+            val isSelectedServer = (guid == MmkvManager.getSelectServer())
             val isVpnConnected = mainViewModel.isRunning.value == true
 
             if (isSelectedServer && isVpnConnected) {
@@ -269,7 +215,13 @@ class MainRecyclerAdapter(
                     holder.views.layoutCard.strokeWidth = 0
                 }
             } else if (isSelectedServer) {
-                val indicatorStyle = selectedIndicatorStyle
+                val styleName = MmkvManager.decodeSettingsString(
+                    AppConfig.PREF_INDICATOR_STYLE,
+                    IndicatorStyle.STYLE_0.name
+                ) ?: IndicatorStyle.STYLE_0.name
+                val indicatorStyle = runCatching {
+                    IndicatorStyle.valueOf(styleName)
+                }.getOrDefault(IndicatorStyle.STYLE_0)
 
                 val bannerController = selectedBannerController
                 if (bannerController != null && bannerController.isEnabled() && bannerController.hasBanner()) {
@@ -327,13 +279,7 @@ class MainRecyclerAdapter(
                         if (isSelectedServer) {
                             // Double-tapping the currently selected server opens
                             // the pin/unpin dialog instead of re-selecting it.
-                            // Read this at dialog-open time so the action label never
-                            // depends on a stale value captured during an earlier bind.
-                            adapterListener?.onPinToggle(
-                                guid,
-                                position,
-                                MmkvManager.isServerPinned(guid)
-                            )
+                            adapterListener?.onPinToggle(guid, position, isPinned)
                         } else {
                             adapterListener?.onSelectServer(guid)
                         }
@@ -351,7 +297,7 @@ class MainRecyclerAdapter(
     private fun getSubscriptionRemarks(profile: ProfileItem): String {
         val subRemarks =
             if (mainViewModel.subscriptionId.isEmpty())
-                subscriptionRemarksById[profile.subscriptionId]
+                MmkvManager.decodeSubscription(profile.subscriptionId)?.remarks
             else
                 null
 
@@ -367,7 +313,8 @@ class MainRecyclerAdapter(
         if (subId.isNullOrEmpty()) {
             return context.getString(R.string.filter_config_all)
         }
-        val name = subscriptionRemarksById[subId]?.takeIf { it.isNotBlank() }
+        val sub = MmkvManager.decodeSubscriptions().firstOrNull { it.guid == subId }
+        val name = sub?.subscription?.remarks?.takeIf { it.isNotBlank() }
         return name ?: subId
     }
 
@@ -447,7 +394,6 @@ class MainRecyclerAdapter(
     }
 
     fun setSelectServer(fromPosition: Int, toPosition: Int) {
-        selectedGuid = MmkvManager.getSelectServer()
         notifyItemChanged(fromPosition)
         notifyItemChanged(toPosition)
     }

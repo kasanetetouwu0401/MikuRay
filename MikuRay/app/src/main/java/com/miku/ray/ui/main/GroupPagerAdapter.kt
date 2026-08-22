@@ -13,7 +13,6 @@ class GroupPagerAdapter(activity: FragmentActivity, var groups: List<GroupMapIte
 
     @SuppressLint("NotifyDataSetChanged")
     fun update(groups: List<GroupMapItem>) {
-        if (this.groups == groups) return
         this.groups = groups
         notifyDataSetChanged()
     }
