@@ -59,6 +59,7 @@ class MainRecyclerAdapter(
     private var subscriptionRemarksById: Map<String, String> = emptyMap()
     private var bindCacheInitialized = false
     private var cachedSubscriptionRevision = -1L
+    private var cachedPinnedRevision = -1L
 
     private fun refreshBindCache() {
         networkSecurityEnabled = MmkvManager.decodeSettingsBool(
@@ -79,6 +80,7 @@ class MainRecyclerAdapter(
             sub.guid to sub.subscription.remarks
         }
         cachedSubscriptionRevision = MmkvManager.getSubscriptionRevision()
+        cachedPinnedRevision = MmkvManager.getPinnedRevision()
         bindCacheInitialized = true
     }
 
@@ -100,12 +102,21 @@ class MainRecyclerAdapter(
         notifyDataSetChanged()
     }
 
+    fun refreshPinState() {
+        pinnedGuids = MmkvManager.decodePinnedServers()
+        cachedPinnedRevision = MmkvManager.getPinnedRevision()
+        notifyDataSetChanged()
+    }
+
     private var isRunningObserver: androidx.lifecycle.Observer<Boolean>? = null
     private var selectedBannerController: SelectedProfileBannerController? = null
 
     @SuppressLint("NotifyDataSetChanged")
     fun setData(newData: MutableList<ServersCache>?, position: Int = -1) {
-        if (!bindCacheInitialized || cachedSubscriptionRevision != MmkvManager.getSubscriptionRevision()) {
+        if (!bindCacheInitialized ||
+            cachedSubscriptionRevision != MmkvManager.getSubscriptionRevision() ||
+            cachedPinnedRevision != MmkvManager.getPinnedRevision()
+        ) {
             refreshBindCache()
         }
         data = newData?.toMutableList() ?: mutableListOf()
@@ -316,7 +327,13 @@ class MainRecyclerAdapter(
                         if (isSelectedServer) {
                             // Double-tapping the currently selected server opens
                             // the pin/unpin dialog instead of re-selecting it.
-                            adapterListener?.onPinToggle(guid, position, isPinned)
+                            // Read this at dialog-open time so the action label never
+                            // depends on a stale value captured during an earlier bind.
+                            adapterListener?.onPinToggle(
+                                guid,
+                                position,
+                                MmkvManager.isServerPinned(guid)
+                            )
                         } else {
                             adapterListener?.onSelectServer(guid)
                         }
