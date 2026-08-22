@@ -64,9 +64,6 @@ class FontSizeSliderDialog @JvmOverloads constructor(
                 MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT_SIZE, valueToSave)
                 summary = formatPercent(valueToSave)
 
-                // Apply the saved font scale only when the activity is recreated.
-                // Mutating application resources here can trigger an intermediate
-                // layout pass while Material text-field hints are visible.
                 activity.recreate()
             }
             .setNeutralButton(R.string.reset, null)
@@ -85,7 +82,6 @@ class FontSizeSliderDialog @JvmOverloads constructor(
             MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT_SIZE, default)
             summary = formatPercent(default)
 
-            // The reset is picked up by BaseActivity.attachBaseContext after recreate.
             dialog.dismiss()
             activity.recreate()
         }

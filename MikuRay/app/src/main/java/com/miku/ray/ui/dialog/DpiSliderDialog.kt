@@ -55,9 +55,6 @@ class DpiSliderDialog @JvmOverloads constructor(
                 MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_DPI, valueToSave)
                 summary = if (valueToSave == 0) systemDpi.toString() else clamped.toString()
 
-                // Apply the saved density only when the activity is recreated.
-                // Mutating application resources here causes the visible view tree
-                // to re-measure before recreate, which can make TextInputLayout hints blink.
                 activity.recreate()
             }
             .setNeutralButton(R.string.reset, null)
@@ -73,7 +70,6 @@ class DpiSliderDialog @JvmOverloads constructor(
             MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_DPI, 0)
             summary = systemDpi.toString()
 
-            // The reset is picked up by BaseActivity.attachBaseContext after recreate.
             dialog.dismiss()
             activity.recreate()
         }
