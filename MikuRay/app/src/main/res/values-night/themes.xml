@@ -29,6 +29,9 @@
         <item name="android:homeAsUpIndicator">@drawable/rmx_arrows_arrow_left_double_line</item>
         <item name="actionOverflowButtonStyle">@style/AppTheme.OverflowButton</item>
         
+        <item name="textInputOutlinedExposedDropdownMenuStyle">@style/AppTheme.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>
+        <item name="textInputOutlinedStyle">@style/AppTheme.TextInputLayout.OutlinedBox</item>
+        
         <item name="textAppearanceDisplayLarge">@style/TextAppearance.App.DisplayLarge</item>
         <item name="textAppearanceDisplayMedium">@style/TextAppearance.App.DisplayMedium</item>
         <item name="textAppearanceDisplaySmall">@style/TextAppearance.App.DisplaySmall</item>

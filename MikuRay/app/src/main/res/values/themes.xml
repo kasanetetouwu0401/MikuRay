@@ -28,6 +28,9 @@
         <item name="android:homeAsUpIndicator">@drawable/rmx_arrows_arrow_left_double_line</item>
         <item name="actionOverflowButtonStyle">@style/AppTheme.OverflowButton</item>
         
+        <item name="textInputOutlinedExposedDropdownMenuStyle">@style/AppTheme.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>
+        <item name="textInputOutlinedStyle">@style/AppTheme.TextInputLayout.OutlinedBox</item>
+        
         <item name="textAppearanceDisplayLarge">@style/TextAppearance.App.DisplayLarge</item>
         <item name="textAppearanceDisplayMedium">@style/TextAppearance.App.DisplayMedium</item>
         <item name="textAppearanceDisplaySmall">@style/TextAppearance.App.DisplaySmall</item>
@@ -50,6 +53,25 @@
         <item name="android:textAppearanceMedium">@style/TextAppearance.App.BodyMedium</item>
         <item name="android:textAppearanceSmall">@style/TextAppearance.App.BodySmall</item>
         
+    </style>
+    
+    <style name="AppTheme.TextInputLayout.OutlinedBox" parent="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="helperTextTextAppearance">@style/TextAppearance.App.BodySmall</item>
+        <item name="hintTextAppearance">@style/TextAppearance.App.BodySmall</item>
+        <item name="shapeAppearance">?shapeAppearanceCornerMedium</item>
+        <item name="boxStrokeWidth">1.5dip</item>
+        <item name="boxStrokeWidthFocused">1.5dip</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3.TextInputEditText.OutlinedBox</item>
+    </style>
+    
+    <style name="AppTheme.TextInputLayout.OutlinedBox.ExposedDropdownMenu" parent="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="helperTextTextAppearance">@style/TextAppearance.App.BodySmall</item>
+        <item name="hintTextAppearance">@style/TextAppearance.App.BodySmall</item>
+        <item name="shapeAppearance">?shapeAppearanceCornerMedium</item>
+        <item name="boxStrokeWidth">1.5dip</item>
+        <item name="boxStrokeWidthFocused">1.5dip</item>
+        <item name="endIconMode">dropdown_menu</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3.AutoCompleteTextView.OutlinedBox</item>
     </style>
 
     <style name="AppTheme.OverflowButton" parent="Widget.AppCompat.ActionButton.Overflow">

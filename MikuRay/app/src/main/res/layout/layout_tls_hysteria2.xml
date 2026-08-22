@@ -7,11 +7,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/lay_stream_security"
-        app:shapeAppearance="?shapeAppearanceCornerMedium"
-        app:boxStrokeWidth="1.5dip"
-        app:boxStrokeWidthFocused="1.5dip"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        app:endIconMode="dropdown_menu"
+        style="?attr/textInputOutlinedExposedDropdownMenuStyle"
         app:endIconDrawable="@drawable/ic_dropdown_selector"
         app:endIconTint="?attr/colorOnSurfaceVariant"
         android:layout_width="0dp"
@@ -35,10 +31,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/lay_sni"
-        app:shapeAppearance="?shapeAppearanceCornerMedium"
-        app:boxStrokeWidth="1.5dip"
-        app:boxStrokeWidthFocused="1.5dip"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        style="?attr/textInputOutlinedStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
@@ -60,11 +53,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/lay_allow_insecure"
-        app:shapeAppearance="?shapeAppearanceCornerMedium"
-        app:boxStrokeWidth="1.5dip"
-        app:boxStrokeWidthFocused="1.5dip"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        app:endIconMode="dropdown_menu"
+        style="?attr/textInputOutlinedExposedDropdownMenuStyle"
         app:endIconDrawable="@drawable/ic_dropdown_selector"
         app:endIconTint="?attr/colorOnSurfaceVariant"
         android:layout_width="0dp"
@@ -88,10 +77,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/lay_pinned_ca256"
-        app:shapeAppearance="?shapeAppearanceCornerMedium"
-        app:boxStrokeWidth="1.5dip"
-        app:boxStrokeWidthFocused="1.5dip"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        style="?attr/textInputOutlinedStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
