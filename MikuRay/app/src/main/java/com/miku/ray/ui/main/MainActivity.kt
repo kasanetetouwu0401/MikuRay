@@ -187,8 +187,8 @@ class MainActivity : HelperBaseActivity(),
         SubscriptionUpdater.sync()
         syncWeatherBackgroundUpdates()
         
-        mainViewModel.reloadServerList()
-        refreshGroupTabTitles(true)
+        // The active GroupServerFragment loads its list asynchronously in onResume().
+        // Do not decode every profile synchronously during MainActivity.onCreate().
 
         checkAndRequestPermission(PermissionType.POST_NOTIFICATIONS) {}
     }
@@ -202,7 +202,9 @@ class MainActivity : HelperBaseActivity(),
         if (SettingsChangeManager.consumeRefreshDisplayPrefs()) {
             refreshAllGroupListDisplays()
         }
-        
+
+        // Re-read persisted profiles only when MmkvManager reports a changed revision.
+        mainViewModel.reloadServerListIfChanged()
         mainViewModel.resyncState()
     }
 
@@ -600,7 +602,9 @@ class MainActivity : HelperBaseActivity(),
         binding.viewPager.apply {
             adapter = groupPagerAdapter
             isUserInputEnabled = true
-            offscreenPageLimit = 10
+            // Keep only the adjacent page warm. A large value eagerly creates many
+            // GroupServerFragment instances and repeats server-list binding work.
+            offscreenPageLimit = 1
         }
     }
 
@@ -762,14 +766,15 @@ class MainActivity : HelperBaseActivity(),
             R.id.action_order_origin,
             R.id.action_order_by_name,
             R.id.action_order_by_delay -> {
-                mainViewModel.reloadServerList()
+                mainViewModel.reloadServerListIfChanged()
             }
         }
     }
 
     private fun setupViewModel() {
         mainViewModel.updateListAction.observe(this) {
-            refreshTabBadges()
+            // This event is also emitted for ping/country-code/traffic changes.
+            // Group badges are refreshed only through updateGroupBadgeAction.
             if (SearchBarChipMode.current() in setOf(
                     SearchBarChipMode.TOTAL_TRAFFIC,
                     SearchBarChipMode.DUAL_SWIPE
@@ -782,7 +787,7 @@ class MainActivity : HelperBaseActivity(),
         mainViewModel.updateGroupBadgeAction.observe(this) { refreshTabBadges() }
 
         mainViewModel.updateGroupOrderAction.observe(this) {
-            mainViewModel.reloadServerList()
+            mainViewModel.reloadServerListIfChanged()
             refreshGroupTabTitles()
         }
         
@@ -1161,7 +1166,7 @@ class MainActivity : HelperBaseActivity(),
                                 getString(R.string.title_import_config_count, count),
                                 title = getString(R.string.title_alerter_success)
                             )
-                            mainViewModel.reloadServerList()
+                            mainViewModel.reloadServerListIfChanged()
                             refreshGroupTabTitles()
                         }
                         countSub > 0 -> setupGroupTab()
@@ -1221,7 +1226,7 @@ class MainActivity : HelperBaseActivity(),
                     }
                     
                     if (result.configCount > 0) {
-                        mainViewModel.reloadServerList()
+                        mainViewModel.reloadServerListIfChanged()
                         refreshGroupTabTitles()
                     }
                     if (result.addedProfiles.isNotEmpty() || result.deletedProfiles.isNotEmpty()) {
@@ -1362,7 +1367,7 @@ class MainActivity : HelperBaseActivity(),
                             if (payload.type == MikuRayExportPayload.TYPE_GROUP) {
                                 setupGroupTab()
                             } else {
-                                mainViewModel.reloadServerList()
+                                mainViewModel.reloadServerListIfChanged()
                                 refreshGroupTabTitles()
                             }
                         } else {
@@ -1402,7 +1407,7 @@ class MainActivity : HelperBaseActivity(),
                 try {
                     val ret = mainViewModel.removeAllServer()
                     withContext(Dispatchers.Main) {
-                        mainViewModel.reloadServerList()
+                        mainViewModel.reloadServerListIfChanged()
                         refreshGroupTabTitles()
                         snackbarSuccess(
                             getString(R.string.title_del_config_count, ret),
@@ -1431,7 +1436,7 @@ class MainActivity : HelperBaseActivity(),
                 try {
                     val ret = mainViewModel.removeDuplicateServer()
                     withContext(Dispatchers.Main) {
-                        mainViewModel.reloadServerList()
+                        mainViewModel.reloadServerListIfChanged()
                         refreshGroupTabTitles()
                         snackbarSuccess(
                             getString(R.string.title_del_duplicate_config_count, ret),
@@ -1460,7 +1465,7 @@ class MainActivity : HelperBaseActivity(),
                 try {
                     val ret = mainViewModel.removeInvalidServer()
                     withContext(Dispatchers.Main) {
-                        mainViewModel.reloadServerList()
+                        mainViewModel.reloadServerListIfChanged()
                         refreshGroupTabTitles()
                         snackbarSuccess(
                             getString(R.string.title_del_config_count, ret),
