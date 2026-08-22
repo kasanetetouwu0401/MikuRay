@@ -59,27 +59,19 @@ internal object ProfileReplacement {
      * Finds replaced payloads that are safe to remove once the replacement batch is
      * already published.
      *
-     * A null cross-group reference set means that at least one group index could not be
-     * read. In that case cleanup fails closed and preserves every replaced payload.
-     *
      * @param replacedServers GUIDs that were indexed under the group before this replacement.
      * @param replacementServers GUIDs of the newly published batch.
-     * @param protectedServers GUIDs that are never removed: the selected server (new or old)
-     * plus any pinned server.
-     * @param serversReferencedByOtherGroups GUIDs referenced by all other active group indexes.
+     * @param protectedServers GUIDs that are never removed: the currently selected server
+     * (new or old) plus any pinned server. Pinned servers survive subscription updates the
+     * same way the selected server does.
      */
     fun findRemovablePayloads(
         replacedServers: Collection<String>,
         replacementServers: Set<String>,
         protectedServers: Set<String>,
-        serversReferencedByOtherGroups: Set<String>?,
     ): Set<String> {
-        if (serversReferencedByOtherGroups == null) return emptySet()
-
         return replacedServers.filterTo(linkedSetOf()) { guid ->
-            guid !in protectedServers &&
-                    guid !in replacementServers &&
-                    guid !in serversReferencedByOtherGroups
+            guid !in protectedServers && guid !in replacementServers
         }
     }
 

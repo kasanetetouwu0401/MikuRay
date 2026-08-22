@@ -85,11 +85,11 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
         itemTouchHelper = ItemTouchHelper(SimpleItemTouchHelperCallback(adapter, allowSwipe = false))
         itemTouchHelper?.attachToRecyclerView(binding.recyclerView)
 
-        mainViewModel.updateListAction.observe(viewLifecycleOwner) {
-            // The shared ViewModel cache follows whichever pager tab was last resumed.
-            // Read this fragment's own group directly so per-item URL/TCPing/country-code
-            // results are rendered immediately even when another tab changed that state.
-            adapter.setData(mainViewModel.getServerCacheFor(subId))
+        mainViewModel.updateListAction.observe(viewLifecycleOwner) { index ->
+            if (mainViewModel.subscriptionId != subId) {
+                return@observe
+            }
+            adapter.setData(mainViewModel.serversCache, index)
             hasLoadedData = true
             updateEmptyState()
         }
@@ -130,8 +130,6 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
         bottomStatusCard?.addOnLayoutChangeListener(bottomStatusLayoutListener)
         bottomStatusCard?.post { syncButtonMarginWithBottomStatus() }
 
-        adapter.setData(mainViewModel.getServerCacheFor(subId))
-        hasLoadedData = true
         updateEmptyState()
     }
 
@@ -335,9 +333,8 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
         val selected = MmkvManager.getSelectServer()
         if (guid != selected) {
             MmkvManager.setSelectServer(guid)
-            val currentCache = mainViewModel.getServerCacheFor(subId)
-            val fromPosition = currentCache.indexOfFirst { it.guid == selected }
-            val toPosition = currentCache.indexOfFirst { it.guid == guid }
+            val fromPosition = mainViewModel.getPosition(selected.orEmpty())
+            val toPosition = mainViewModel.getPosition(guid)
             adapter.setSelectServer(fromPosition, toPosition)
 
             LauncherManager.restartService(ownerActivity)
@@ -388,7 +385,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
             return
         }
 
-        val serversCache = mainViewModel.getServerCacheFor(subId)
+        val serversCache = mainViewModel.serversCache
         val position = serversCache.indexOfFirst { it.guid == selectedGuid }
         val recyclerView = binding.recyclerView
 

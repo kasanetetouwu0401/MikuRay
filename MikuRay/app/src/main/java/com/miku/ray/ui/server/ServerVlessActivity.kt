@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.AutoCompleteTextView
+import android.widget.EditText
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.databinding.ActivityServerVlessBinding
 import com.miku.ray.dto.entities.ProfileItem
 import com.miku.ray.enums.EConfigType
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
@@ -30,7 +32,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ServerVlessActivity : BaseActivity() {
-    private val binding by lazy { ActivityServerVlessBinding.inflate(layoutInflater) }
 
     private val editGuid by lazy { intent.getStringExtra("guid").orEmpty() }
     private val isRunning by lazy {
@@ -45,6 +46,9 @@ class ServerVlessActivity : BaseActivity() {
 
     private val flows: Array<out String> by lazy { resources.getStringArray(R.array.flows) }
 
+    private val et_id: EditText by lazy { findViewById(R.id.et_id) }
+    private val et_security: EditText? by lazy { findViewById(R.id.et_security) }
+    private val sp_flow: AutoCompleteTextView? by lazy { findViewById(R.id.sp_flow) }
 
     private lateinit var addressPortFields: AddressPortFields
     private lateinit var transportFields: TransportFields
@@ -55,15 +59,15 @@ class ServerVlessActivity : BaseActivity() {
 
         val config = MmkvManager.decodeServerConfig(editGuid)
 
-        setContentView(binding.root)
+        setContentView(R.layout.activity_server_vless)
 
-        binding.serverScrollContent.applyEdgeToEdgeListInsets()
+        findViewById<androidx.core.widget.NestedScrollView>(R.id.server_scroll_content).applyEdgeToEdgeListInsets()
 
-        addressPortFields = AddressPortFields(binding.addressPortFields)
-        transportFields = TransportFields(binding.transportFields)
-        tlsFields = TlsFields(binding.tlsFields)
+        addressPortFields = AddressPortFields(this)
+        transportFields = TransportFields(this)
+        tlsFields = TlsFields(this)
 
-        val toolbar = binding.toolbar
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = (config?.configType ?: createConfigType).toString(), subtitle = getString(R.string.subtitle_server_config))
 
         transportFields.setOnNetworkChanged { network -> transportFields.updateForNetwork(network, config) }
@@ -79,11 +83,11 @@ class ServerVlessActivity : BaseActivity() {
 
     private fun bindingServer(config: ProfileItem): Boolean {
         addressPortFields.bind(config)
-        binding.etId.text = Utils.getEditable(config.password.orEmpty())
+        et_id.text = Utils.getEditable(config.password.orEmpty())
 
-        binding.etSecurity?.text = Utils.getEditable(config.method.orEmpty())
+        et_security?.text = Utils.getEditable(config.method.orEmpty())
         val flow = Utils.arrayFind(flows, config.flow.orEmpty())
-        if (flow >= 0) binding.spFlow?.setText(flows[flow], false)
+        if (flow >= 0) sp_flow?.setText(flows[flow], false)
 
         tlsFields.bind(config)
         transportFields.bind(config)
@@ -92,8 +96,8 @@ class ServerVlessActivity : BaseActivity() {
 
     private fun clearServer(): Boolean {
         addressPortFields.clear()
-        binding.etId.text = null
-        binding.spFlow?.setText(flows.firstOrNull().orEmpty(), false)
+        et_id.text = null
+        sp_flow?.setText(flows.firstOrNull().orEmpty(), false)
 
         transportFields.clear()
         tlsFields.clear()
@@ -115,7 +119,7 @@ class ServerVlessActivity : BaseActivity() {
         }
         val config = MmkvManager.decodeServerConfig(editGuid) ?: ProfileItem.create(createConfigType)
 
-        if (TextUtils.isEmpty(binding.etId.text.toString())) {
+        if (TextUtils.isEmpty(et_id.text.toString())) {
             snackbarError(getString(R.string.server_lab_id), title = getString(R.string.title_alerter_error))
             return false
         }
@@ -145,10 +149,10 @@ class ServerVlessActivity : BaseActivity() {
 
     private fun saveCommon(config: ProfileItem) {
         addressPortFields.save(config)
-        config.password = binding.etId.text.toString().trim()
+        config.password = et_id.text.toString().trim()
 
-        config.method = binding.etSecurity?.text.toString().trim()
-        val flowPos = Utils.arrayFind(flows, binding.spFlow?.text.toString())
+        config.method = et_security?.text.toString().trim()
+        val flowPos = Utils.arrayFind(flows, sp_flow?.text.toString())
         config.flow = flows[if (flowPos >= 0) flowPos else 0]
     }
 

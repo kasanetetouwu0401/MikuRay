@@ -4,9 +4,10 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.EditText
+import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.databinding.ActivityServerSocksBinding
 import com.miku.ray.dto.entities.ProfileItem
 import com.miku.ray.enums.EConfigType
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
@@ -20,7 +21,6 @@ import com.miku.ray.util.Utils
 import com.miku.ray.util.showDeleteConfirmDialog
 
 class ServerSocksActivity : BaseActivity() {
-    private val binding by lazy { ActivityServerSocksBinding.inflate(layoutInflater) }
 
     private val editGuid by lazy { intent.getStringExtra("guid").orEmpty() }
     private val isRunning by lazy {
@@ -33,6 +33,8 @@ class ServerSocksActivity : BaseActivity() {
     }
     private val subscriptionId by lazy { intent.getStringExtra("subscriptionId") }
 
+    private val et_id: EditText by lazy { findViewById(R.id.et_id) }
+    private val et_security: EditText? by lazy { findViewById(R.id.et_security) }
 
     private lateinit var addressPortFields: AddressPortFields
 
@@ -41,13 +43,13 @@ class ServerSocksActivity : BaseActivity() {
 
         val config = MmkvManager.decodeServerConfig(editGuid)
 
-        setContentView(binding.root)
+        setContentView(R.layout.activity_server_socks)
 
-        binding.serverScrollContent.applyEdgeToEdgeListInsets()
+        findViewById<androidx.core.widget.NestedScrollView>(R.id.server_scroll_content).applyEdgeToEdgeListInsets()
 
-        addressPortFields = AddressPortFields(binding.addressPortFields)
+        addressPortFields = AddressPortFields(this)
 
-        val toolbar = binding.toolbar
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = (config?.configType ?: createConfigType).toString(), subtitle = getString(R.string.subtitle_server_config))
 
         if (config != null) {
@@ -59,14 +61,14 @@ class ServerSocksActivity : BaseActivity() {
 
     private fun bindingServer(config: ProfileItem): Boolean {
         addressPortFields.bind(config)
-        binding.etId.text = Utils.getEditable(config.password.orEmpty())
-        binding.etSecurity?.text = Utils.getEditable(config.username.orEmpty())
+        et_id.text = Utils.getEditable(config.password.orEmpty())
+        et_security?.text = Utils.getEditable(config.username.orEmpty())
         return true
     }
 
     private fun clearServer(): Boolean {
         addressPortFields.clear()
-        binding.etId.text = null
+        et_id.text = null
         return true
     }
 
@@ -100,10 +102,10 @@ class ServerSocksActivity : BaseActivity() {
 
     private fun saveCommon(config: ProfileItem) {
         addressPortFields.save(config)
-        config.password = binding.etId.text.toString().trim()
+        config.password = et_id.text.toString().trim()
 
-        if (!TextUtils.isEmpty(binding.etSecurity?.text) || !TextUtils.isEmpty(binding.etId.text)) {
-            config.username = binding.etSecurity?.text.toString().trim()
+        if (!TextUtils.isEmpty(et_security?.text) || !TextUtils.isEmpty(et_id.text)) {
+            config.username = et_security?.text.toString().trim()
         }
     }
 

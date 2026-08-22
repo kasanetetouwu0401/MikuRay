@@ -120,39 +120,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     @Synchronized
     fun updateCache() {
         serversCache.clear()
-        serversCache.addAll(buildServerCache(subscriptionId, serverList))
-    }
-
-    /**
-     * Returns a fresh snapshot for a particular group without changing the shared
-     * active subscription state. This is used by every visible group fragment when
-     * a test result is broadcast, so rows are refreshed from MMKV immediately even
-     * when another ViewPager fragment last changed the global subscriptionId.
-     */
-    fun getServerCacheFor(targetSubscriptionId: String): MutableList<ServersCache> {
-        val source = if (targetSubscriptionId.isEmpty()) {
-            MmkvManager.decodeAllServerList()
-        } else {
-            MmkvManager.decodeServerList(targetSubscriptionId)
-        }
-        return buildServerCache(targetSubscriptionId, source)
-    }
-
-    private fun buildServerCache(
-        targetSubscriptionId: String,
-        sourceServerList: List<String>
-    ): MutableList<ServersCache> {
-        val cache = mutableListOf<ServersCache>()
         val kw = keywordFilter.trim()
         val searchRegex = try {
             if (kw.isNotEmpty()) Regex(kw, setOf(RegexOption.IGNORE_CASE)) else null
         } catch (e: PatternSyntaxException) {
             null
         }
-        for (guid in sourceServerList) {
+        for (guid in serverList) {
             val profile = MmkvManager.decodeServerConfig(guid) ?: continue
             if (kw.isEmpty()) {
-                cache.add(ServersCache(guid, profile))
+                serversCache.add(ServersCache(guid, profile))
                 continue
             }
 
@@ -165,15 +142,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 || server.matchesPattern(searchRegex, kw)
                 || protocol.matchesPattern(searchRegex, kw)
             ) {
-                cache.add(ServersCache(guid, profile))
+                serversCache.add(ServersCache(guid, profile))
             }
         }
 
-        val subId = targetSubscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
+        val subId = subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
         val order = MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)
         when (order) {
-            1 -> cache.sortWith(compareBy { it.profile.remarks.lowercase() })
-            2 -> cache.sortWith(compareBy {
+            1 -> serversCache.sortWith(compareBy { it.profile.remarks.lowercase() })
+            2 -> serversCache.sortWith(compareBy {
                 val delay = MmkvManager.decodeServerAffiliationInfo(it.guid)?.testDelayMillis ?: 0L
                 if (delay <= 0L) Long.MAX_VALUE else delay
             })
@@ -184,9 +161,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         // partitions without disturbing the relative order within each.
         val pinnedServers = MmkvManager.decodePinnedServers()
         if (pinnedServers.isNotEmpty()) {
-            cache.sortByDescending { pinnedServers.contains(it.guid) }
+            serversCache.sortByDescending { pinnedServers.contains(it.guid) }
         }
-        return cache
     }
 
     /**
@@ -277,21 +253,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    fun clearCountryCodesForGroup() {
-        cancelCountryCodeTest()
-        val groupId = subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
-        MmkvManager.clearAllCountryCodes(MmkvManager.decodeServerList(groupId))
-        updateListAction.postValue(-1)
-    }
-
-    fun clearCountryCodesForAll() {
+    fun clearCountryCodes() {
         cancelCountryCodeTest()
         MmkvManager.clearAllCountryCodes(MmkvManager.decodeAllServerList())
         updateListAction.postValue(-1)
     }
 
-    /** Kept as the all-server compatibility action for existing callers. */
-    fun clearCountryCodes() = clearCountryCodesForAll()
+    fun clearCountryCodesForGroup() {
+        cancelCountryCodeTest()
+        MmkvManager.clearAllCountryCodes(MmkvManager.decodeServerList(subscriptionId))
+        updateListAction.postValue(-1)
+    }
 
     fun testCurrentServerRealPing() {
         MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_MEASURE_DELAY, "")
@@ -529,23 +501,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    fun clearTestResultsForGroup() {
-        clearTestResults(MmkvManager.decodeServerList(subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }))
-    }
-
-    fun clearTestResultsForAll() {
-        clearTestResults(MmkvManager.decodeAllServerList())
-    }
-
-    /** Kept as the all-server compatibility action for existing callers. */
-    fun clearTestResults() = clearTestResultsForAll()
-
-    private fun clearTestResults(keys: List<String>) {
+    fun clearTestResults() {
         MessageUtil.sendMsg2TestService(
             getApplication(),
             TestServiceMessage(key = AppConfig.MSG_MEASURE_CONFIG_CANCEL)
         )
-        MmkvManager.clearAllTestDelayResults(keys)
+        MmkvManager.clearAllTestDelayResults(MmkvManager.decodeAllServerList())
+        // Re-sort serversCache immediately so order=by-delay drops back to its
+        // tie-break order right away, instead of waiting for a reload/restart.
+        updateCache()
+        updateListAction.postValue(-1)
+    }
+
+    fun clearTestResultsForGroup() {
+        MessageUtil.sendMsg2TestService(
+            getApplication(),
+            TestServiceMessage(key = AppConfig.MSG_MEASURE_CONFIG_CANCEL)
+        )
+        MmkvManager.clearAllTestDelayResults(MmkvManager.decodeServerList(subscriptionId))
         // Re-sort serversCache immediately so order=by-delay drops back to its
         // tie-break order right away, instead of waiting for a reload/restart.
         updateCache()
@@ -596,8 +569,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_SUCCESS -> {
-                    // The receiving fragments rebuild their own group snapshot from MMKV.
-                    updateListAction.postValue(-1)
+                    val content = intent.getStringExtra("content")
+                    updateListAction.value = getPosition(content ?: "")
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_NOTIFY -> {
@@ -610,8 +583,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 AppConfig.MSG_COUNTRY_CODE_SUCCESS -> {
-                    // Country-code results are persisted before this broadcast; refresh rows now.
-                    updateListAction.postValue(-1)
+                    val content = intent.getStringExtra("content")
+                    updateListAction.value = getPosition(content ?: "")
                 }
 
                 AppConfig.MSG_COUNTRY_CODE_NOTIFY -> {

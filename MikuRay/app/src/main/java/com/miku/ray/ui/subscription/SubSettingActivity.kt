@@ -24,6 +24,7 @@ import com.miku.ray.util.showBlur
 import com.miku.ray.util.showDeleteConfirmDialog
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.contracts.BaseAdapterListener
@@ -64,7 +65,7 @@ class SubSettingActivity : BaseActivity(),
         setContentView(binding.root)
 
         binding.recyclerView.applyEdgeToEdgeListInsets()
-        val toolbar = binding.toolbar
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_sub_setting), subtitle = getString(R.string.subtitle_sub_setting))
 
         adapter = SubSettingRecyclerAdapter(viewModel, ActivityAdapterListener())
@@ -212,7 +213,7 @@ class SubSettingActivity : BaseActivity(),
             ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, insets ->
                 val statusBarInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
                 val navBarInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-                dialogBinding.root.updatePadding(
+                window.findViewById<View>(R.id.side_sheet_root)?.updatePadding(
                     top = statusBarInset,
                     bottom = navBarInset
                 )
@@ -222,7 +223,8 @@ class SubSettingActivity : BaseActivity(),
 
         sideSheetDialog.show()
 
-        (dialogBinding.root.parent as? View)?.clipToOutline = true
+        val sideSheetContainer = sideSheetDialog.findViewById<View>(com.google.android.material.R.id.m3_side_sheet)
+        sideSheetContainer?.clipToOutline = true
     }
 
     @SuppressLint("NotifyDataSetChanged")
