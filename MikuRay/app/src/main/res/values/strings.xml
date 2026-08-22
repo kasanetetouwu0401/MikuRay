@@ -429,6 +429,12 @@
     <string name="toast_fragment_not_available">Unable to locate current view</string>
     <string name="title_clear_test_results">Clear test results</string>
     <string name="title_clear_country_codes">Clear country codes</string>
+    <string name="clear_results_scope_group">Only in "%1$s" group</string>
+    <string name="clear_results_scope_all">In all groups</string>
+    <string name="confirm_clear_test_results_group">Clear test results for all servers in this group?</string>
+    <string name="confirm_clear_test_results_all">Clear test results for all groups? This cannot be undone</string>
+    <string name="confirm_clear_country_codes_group">Clear country codes for all servers in this group?</string>
+    <string name="confirm_clear_country_codes_all">Clear country codes for all groups? This cannot be undone</string>
     <string name="country_code_unknown">—</string>
 
     <string name="tasker_start_service">Start Service</string>

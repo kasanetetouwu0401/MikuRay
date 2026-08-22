@@ -404,6 +404,12 @@
     <string name="title_clear_test_results">清除测试结果</string>
     <string name="title_country_code_all_server">测试所有服务器的国家代码</string>
     <string name="title_clear_country_codes">清除国家代码</string>
+    <string name="clear_results_scope_group">仅在“%1$s”组中</string>
+    <string name="clear_results_scope_all">所有组</string>
+    <string name="confirm_clear_test_results_group">清除该组中所有服务器的测试结果？</string>
+    <string name="confirm_clear_test_results_all">清除所有组的测试结果？此操作无法撤销</string>
+    <string name="confirm_clear_country_codes_group">清除该组中所有服务器的国家代码？</string>
+    <string name="confirm_clear_country_codes_all">清除所有组的国家代码？此操作无法撤销</string>
     <string name="country_code_unknown">—</string>
 
     <string name="tasker_start_service">启动服务</string>

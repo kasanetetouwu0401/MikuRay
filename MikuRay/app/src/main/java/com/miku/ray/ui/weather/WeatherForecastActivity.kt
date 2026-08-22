@@ -5,15 +5,12 @@ import com.miku.ray.remixicon.R as RemixR
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.R
+import com.miku.ray.databinding.ActivityWeatherForecastBinding
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
 import com.miku.ray.ui.base.BaseActivity
 import kotlinx.coroutines.Job
@@ -47,55 +44,24 @@ data class DailyForecastItem(
 )
 
 class WeatherForecastActivity : BaseActivity() {
+    private val binding by lazy { ActivityWeatherForecastBinding.inflate(layoutInflater) }
     private var job: Job? = null
-
-    private lateinit var ivIcon: ImageView
-    private lateinit var tvCondition: TextView
-    private lateinit var tvTemp: TextView
-    private lateinit var tvFeelsLike: TextView
-    private lateinit var tvMaxMin: TextView
-    private lateinit var tvError: TextView
-    private lateinit var tvSummary: TextView
-    private lateinit var cardCurrent: android.view.View
-    private lateinit var cardDetails: android.view.View
-    private lateinit var recyclerDetails: RecyclerView
-    private lateinit var cardSummary: android.view.View
-    private lateinit var cardHourly: android.view.View
-    private lateinit var cardDaily: android.view.View
-    private lateinit var recyclerHourly: RecyclerView
-    private lateinit var recyclerDaily: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_weather_forecast)
+        setContentView(binding.root)
 
-        findViewById<androidx.core.widget.NestedScrollView>(R.id.weather_forecast_content).applyEdgeToEdgeListInsets()
+        binding.weatherForecastContent.applyEdgeToEdgeListInsets()
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.weather_forecast_title), subtitle = getString(R.string.subtitle_weather_forecast))
 
-        ivIcon = findViewById(R.id.ivForecastCurrentIcon)
-        tvCondition = findViewById(R.id.tvForecastCurrentCondition)
-        tvTemp = findViewById(R.id.tvForecastCurrentTemp)
-        tvFeelsLike = findViewById(R.id.tvForecastFeelsLike)
-        tvMaxMin = findViewById(R.id.tvForecastMaxMin)
-        tvError = findViewById(R.id.tvForecastError)
-        tvSummary = findViewById(R.id.tvForecastSummary)
-        cardCurrent = findViewById(R.id.cardForecastCurrent)
-        cardDetails = findViewById(R.id.cardForecastDetails)
-        recyclerDetails = findViewById(R.id.recyclerForecastDetails)
-        cardSummary = findViewById(R.id.cardForecastSummary)
-        cardHourly = findViewById(R.id.cardForecastHourly)
-        cardDaily = findViewById(R.id.cardForecastDaily)
-        recyclerHourly = findViewById(R.id.recyclerForecastHourly)
-        recyclerDaily = findViewById(R.id.recyclerForecastDaily)
-
-        recyclerDetails.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-        recyclerDetails.isNestedScrollingEnabled = false
-        recyclerHourly.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        recyclerDaily.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        recyclerHourly.isNestedScrollingEnabled = false
-        recyclerDaily.isNestedScrollingEnabled = false
+        binding.recyclerForecastDetails.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        binding.recyclerForecastDetails.isNestedScrollingEnabled = false
+        binding.recyclerForecastHourly.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.recyclerForecastDaily.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.recyclerForecastHourly.isNestedScrollingEnabled = false
+        binding.recyclerForecastDaily.isNestedScrollingEnabled = false
 
         val cached = WeatherHelper.getCachedWeatherEntry()
         if (cached != null) {
@@ -129,8 +95,8 @@ class WeatherForecastActivity : BaseActivity() {
             }
             if (fresh != null) {
                 render(fresh)
-            } else if (!cardCurrent.isVisible) {
-                tvError.isVisible = true
+            } else if (!binding.cardForecastCurrent.isVisible) {
+                binding.tvForecastError.isVisible = true
             }
         }
     }
@@ -141,22 +107,22 @@ class WeatherForecastActivity : BaseActivity() {
     }
 
     private fun render(entry: WeatherHelper.WeatherCacheEntry) {
-        tvError.isVisible = false
-        cardCurrent.isVisible = true
+        binding.tvForecastError.isVisible = false
+        binding.cardForecastCurrent.isVisible = true
 
-        ivIcon.setImageResource(WeatherHelper.iconResForCode(entry.weatherCode, entry.isDay))
-        tvCondition.text = getString(WeatherHelper.conditionLabelRes(entry.weatherCode))
-        tvTemp.text = "${Math.round(entry.temperatureCelsius)}\u00b0"
-        tvFeelsLike.text = getString(
+        binding.ivForecastCurrentIcon.setImageResource(WeatherHelper.iconResForCode(entry.weatherCode, entry.isDay))
+        binding.tvForecastCurrentCondition.text = getString(WeatherHelper.conditionLabelRes(entry.weatherCode))
+        binding.tvForecastCurrentTemp.text = "${Math.round(entry.temperatureCelsius)}\u00b0"
+        binding.tvForecastFeelsLike.text = getString(
             R.string.weather_feels_like,
             "${Math.round(entry.apparentTemperatureCelsius)}\u00b0"
         )
 
         val todayMax = entry.dailyTemperatureMaxCelsius.getOrNull(0)
         val todayMin = entry.dailyTemperatureMinCelsius.getOrNull(0)
-        tvMaxMin.isVisible = todayMax != null && todayMin != null
+        binding.tvForecastMaxMin.isVisible = todayMax != null && todayMin != null
         if (todayMax != null && todayMin != null) {
-            tvMaxMin.text = getString(
+            binding.tvForecastMaxMin.text = getString(
                 R.string.weather_max_min,
                 "${Math.round(todayMax)}\u00b0",
                 "${Math.round(todayMin)}\u00b0"
@@ -164,19 +130,19 @@ class WeatherForecastActivity : BaseActivity() {
         }
 
         val detailItems = buildDetailItems(entry)
-        cardDetails.isVisible = detailItems.isNotEmpty()
-        recyclerDetails.adapter = WeatherDetailAdapter(this, detailItems)
+        binding.cardForecastDetails.isVisible = detailItems.isNotEmpty()
+        binding.recyclerForecastDetails.adapter = WeatherDetailAdapter(this, detailItems)
 
-        cardSummary.isVisible = true
-        tvSummary.text = buildDaySummary(entry)
+        binding.cardForecastSummary.isVisible = true
+        binding.tvForecastSummary.text = buildDaySummary(entry)
 
         val hourlyItems = buildHourlyItems(entry)
-        cardHourly.isVisible = hourlyItems.isNotEmpty()
-        recyclerHourly.adapter = WeatherHourlyAdapter(this, hourlyItems)
+        binding.cardForecastHourly.isVisible = hourlyItems.isNotEmpty()
+        binding.recyclerForecastHourly.adapter = WeatherHourlyAdapter(this, hourlyItems)
 
         val dailyItems = buildDailyItems(entry)
-        cardDaily.isVisible = dailyItems.isNotEmpty()
-        recyclerDaily.adapter = WeatherDailyAdapter(this, dailyItems)
+        binding.cardForecastDaily.isVisible = dailyItems.isNotEmpty()
+        binding.recyclerForecastDaily.adapter = WeatherDailyAdapter(this, dailyItems)
     }
 
     private fun buildDaySummary(entry: WeatherHelper.WeatherCacheEntry): String {

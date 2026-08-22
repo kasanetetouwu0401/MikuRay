@@ -5,9 +5,9 @@ import android.view.View
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
-import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.databinding.ActivitySettingsBinding
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
 import com.miku.ray.extension.snackbarError
 import com.miku.ray.helper.MmkvPreferenceDataStore
@@ -16,16 +16,17 @@ import com.miku.ray.ui.preference.SearchPreferenceHighlighter
 import com.miku.ray.ui.preference.CategoryStyleHelper
 
 class ObservatorySettingsActivity : BaseActivity() {
+    private val binding by lazy { ActivitySettingsBinding.inflate(layoutInflater) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        setContentView(binding.root)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_observatory_settings), subtitle = getString(R.string.subtitle_observatory_settings))
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, ObservatorySettingsFragment())
+                .replace(binding.settingsContainer.id, ObservatorySettingsFragment())
                 .commit()
         }
     }

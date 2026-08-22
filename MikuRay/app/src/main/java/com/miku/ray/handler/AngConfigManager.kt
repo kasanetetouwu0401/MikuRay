@@ -268,6 +268,7 @@ object AngConfigManager {
                             continue
                         }
                         config.subscriptionId = subid
+                        config.description = generateDescription(config)
                         configs.add(ParsedProfile(config, JsonUtil.toJsonPretty(srv) ?: ""))
                     }
                     if (configs.isNotEmpty()) {
@@ -287,6 +288,7 @@ object AngConfigManager {
                     return 0
                 }
                 config.subscriptionId = subid
+                config.description = generateDescription(config)
                 commitProfiles(listOf(ParsedProfile(config, server)), subid, append)
                 return 1
             } catch (e: ProfileStorageException) {
@@ -305,6 +307,7 @@ object AngConfigManager {
                 // never got tagged with their subscription, so they couldn't be matched
                 // or removed together with the rest of the group on re-import.
                 config.subscriptionId = subid
+                config.description = generateDescription(config)
                 commitProfiles(listOf(ParsedProfile(config, server)), subid, append)
                 return 1
             } catch (e: ProfileStorageException) {
@@ -382,6 +385,7 @@ object AngConfigManager {
             }
 
             config.subscriptionId = subid
+            config.description = generateDescription(config)
 
             if (str.startsWith(AppConfig.V2RAYNFMTS, ignoreCase = true)
                 && config.policyGroupSubscriptionId == "self") {
@@ -574,10 +578,19 @@ object AngConfigManager {
     }
 
     fun generateDescription(profile: ProfileItem): String {
+        // Keep the list useful without exposing a complete endpoint in profile metadata.
         val server = profile.server
         val port = profile.serverPort
         if (server.isNullOrBlank() && port.isNullOrBlank()) return ""
 
-        return "$server : ${port ?: ""}"
+        val addrPart = server?.let {
+            if (it.contains(":")) {
+                it.split(":").take(2).joinToString(":", postfix = ":***")
+            } else {
+                it.split('.').dropLast(1).joinToString(".", postfix = ".***")
+            }
+        } ?: ""
+
+        return "$addrPart : ${port ?: ""}"
     }
 }

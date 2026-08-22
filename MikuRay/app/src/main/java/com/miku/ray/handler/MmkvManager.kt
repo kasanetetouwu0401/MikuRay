@@ -120,6 +120,42 @@ object MmkvManager {
         serverRawStorage.removeValuesForKeys(keys)
     }
 
+    /** Persists one group index; callers that mutate several related keys hold the index lock. */
+    private fun persistServerList(serverList: List<String>, subscriptionId: String): Boolean {
+        return mainStorage.encode(serverListKey(subscriptionId), JsonUtil.toJson(serverList))
+    }
+
+    private fun serverListKey(subscriptionId: String): String {
+        return "$KEY_SUB_SERVER_PREFIX${getSubscriptionId(subscriptionId)}"
+    }
+
+    /**
+     * Returns every profile referenced outside [subscriptionId]. A null result is deliberately
+     * treated as "unknown" so cleanup never deletes data when an index is unreadable.
+     * Origin snapshots are rollback data, not active group indexes.
+     */
+    private fun decodeServersReferencedByOtherGroups(subscriptionId: String): Set<String>? {
+        val targetKey = serverListKey(subscriptionId)
+        val keys = mainStorage.allKeys() ?: return null
+        if (targetKey !in keys) return null
+
+        val referencedServers = mutableSetOf<String>()
+        for (key in keys) {
+            if (!key.startsWith(KEY_SUB_SERVER_PREFIX) ||
+                key == targetKey ||
+                key.startsWith("${KEY_SUB_SERVER_PREFIX}ORIGIN_")
+            ) {
+                continue
+            }
+
+            val json = mainStorage.decodeString(key)
+            if (json.isNullOrBlank()) return null
+            val serverIds = JsonUtil.fromJsonSafe(json, Array<String>::class.java) ?: return null
+            referencedServers.addAll(serverIds)
+        }
+        return referencedServers
+    }
+
     fun readLegacyServerList(): String? {
         return mainStorage.decodeString(KEY_ANG_CONFIGS)
     }
@@ -130,31 +166,51 @@ object MmkvManager {
     }
 
     fun setSelectServer(guid: String) {
-        mainStorage.encode(KEY_SELECTED_SERVER, guid)
+        withProfileIndexLock {
+            requireStorageWrite(
+                mainStorage.encode(KEY_SELECTED_SERVER, guid),
+                "Failed to update selected profile",
+            )
+        }
     }
 
     fun encodeServerList(serverList: MutableList<String>, subscriptionId: String) {
-        val subId = getSubscriptionId(subscriptionId)
-        val key = "$KEY_SUB_SERVER_PREFIX$subId"
-        mainStorage.encode(key, JsonUtil.toJson(serverList))
+        withProfileIndexLock {
+            requireStorageWrite(
+                persistServerList(serverList, subscriptionId),
+                "Failed to publish server index",
+            )
+        }
     }
 
     fun saveOriginServerList(subscriptionId: String) {
-        val subId = getSubscriptionId(subscriptionId)
-        val current = decodeServerList(subId)
-        if (current.isNotEmpty()) {
-            mainStorage.encode("${KEY_SUB_SERVER_PREFIX}ORIGIN_$subId", JsonUtil.toJson(current))
+        withProfileIndexLock {
+            val subId = getSubscriptionId(subscriptionId)
+            val current = decodeServerList(subId)
+            if (current.isNotEmpty()) {
+                requireStorageWrite(
+                    mainStorage.encode("${KEY_SUB_SERVER_PREFIX}ORIGIN_$subId", JsonUtil.toJson(current)),
+                    "Failed to save origin server index",
+                )
+            }
         }
     }
 
     fun restoreOriginServerList(subscriptionId: String): Boolean {
-        val subId = getSubscriptionId(subscriptionId)
-        val key = "${KEY_SUB_SERVER_PREFIX}ORIGIN_$subId"
-        val json = mainStorage.decodeString(key) ?: return false
-        val origin = JsonUtil.fromJsonSafe(json, Array<String>::class.java)?.toMutableList() ?: return false
-        encodeServerList(origin, subId)
-        mainStorage.remove(key)
-        return true
+        return withProfileIndexLock {
+            val subId = getSubscriptionId(subscriptionId)
+            val key = "${KEY_SUB_SERVER_PREFIX}ORIGIN_$subId"
+            val json = mainStorage.decodeString(key) ?: return@withProfileIndexLock false
+            val origin = JsonUtil.fromJsonSafe(json, Array<String>::class.java)
+                ?.toMutableList()
+                ?: return@withProfileIndexLock false
+            requireStorageWrite(
+                persistServerList(origin, subId),
+                "Failed to restore origin server index",
+            )
+            mainStorage.remove(key)
+            true
+        }
     }
 
     fun hasOriginServerList(subscriptionId: String): Boolean {
@@ -204,16 +260,26 @@ object MmkvManager {
 
     fun encodeServerConfig(guid: String, config: ProfileItem): String {
         val key = guid.ifBlank { Utils.getUuid() }
-        profileFullStorage.encode(key, JsonUtil.toJson(config))
+        withProfileIndexLock {
+            requireStorageWrite(
+                profileFullStorage.encode(key, JsonUtil.toJson(config)),
+                "Failed to save profile payload",
+            )
 
-        val subId = getSubscriptionId(config.subscriptionId)
-        val serverList = decodeServerList(subId)
-
-        if (!serverList.contains(key)) {
-            serverList.add(0, key)
-            encodeServerList(serverList, subId)
-            if (getSelectServer().isNullOrBlank()) {
-                mainStorage.encode(KEY_SELECTED_SERVER, key)
+            val subId = getSubscriptionId(config.subscriptionId)
+            val serverList = decodeServerList(subId)
+            if (!serverList.contains(key)) {
+                serverList.add(0, key)
+                requireStorageWrite(
+                    persistServerList(serverList, subId),
+                    "Failed to publish profile index",
+                )
+                if (getSelectServer().isNullOrBlank()) {
+                    requireStorageWrite(
+                        mainStorage.encode(KEY_SELECTED_SERVER, key),
+                        "Failed to update selected profile",
+                    )
+                }
             }
         }
 
@@ -307,7 +373,10 @@ object MmkvManager {
                     serverList.add(guid)
                 }
             }
-            encodeServerList(serverList, subscriptionId)
+            requireStorageWrite(
+                persistServerList(serverList, subscriptionId),
+                "Failed to publish profile index",
+            )
 
             replacementSelection?.let { guid ->
                 requireStorageWrite(
@@ -324,67 +393,108 @@ object MmkvManager {
                 replacedServers = replacedServers,
                 replacementServers = profiles.keys,
                 protectedServers = protectedServers,
+                serversReferencedByOtherGroups = decodeServersReferencedByOtherGroups(subscriptionId),
             )
             removeProfilePayloads(removablePayloads)
         }
     }
 
     fun removeServer(guid: String) {
-        if (guid.isBlank()) {
-            return
+        if (guid.isBlank()) return
+
+        withProfileIndexLock {
+            val config = decodeServerConfig(guid)
+            val subId = getSubscriptionId(config?.subscriptionId)
+            val serverList = decodeServerList(subId)
+            if (serverList.remove(guid)) {
+                requireStorageWrite(
+                    persistServerList(serverList, subId),
+                    "Failed to publish server index",
+                )
+            }
+
+            if (getSelectServer() == guid) {
+                mainStorage.remove(KEY_SELECTED_SERVER)
+            }
+
+            // An old profile may also be indexed by another group. Only remove its payload
+            // when the remaining indexes prove that it is no longer reachable.
+            val removable = ProfileReplacement.findRemovablePayloads(
+                replacedServers = listOf(guid),
+                replacementServers = emptySet(),
+                protectedServers = emptySet(),
+                serversReferencedByOtherGroups = decodeServersReferencedByOtherGroups(subId),
+            )
+            removeProfilePayloads(removable)
+            if (guid in removable) {
+                unpinServer(guid)
+            }
         }
-
-        val config = decodeServerConfig(guid)
-        val subId = getSubscriptionId(config?.subscriptionId)
-
-        val serverList = decodeServerList(subId)
-        serverList.remove(guid)
-        encodeServerList(serverList, subId)
-
-        if (getSelectServer() == guid) {
-            mainStorage.remove(KEY_SELECTED_SERVER)
-        }
-        profileFullStorage.remove(guid)
-        serverAffStorage.remove(guid)
-        unpinServer(guid)
     }
 
     fun removeServers(guids: List<String>, subscriptionId: String) {
         if (guids.isEmpty()) return
-        val subId = getSubscriptionId(subscriptionId)
-        val serverList = decodeServerList(subId)
-        if (serverList.removeAll(guids)) {
-            encodeServerList(serverList, subId)
-        }
-        val pinnedServers = decodePinnedServers()
-        if (pinnedServers.removeAll(guids.toSet())) {
-            settingsStorage.encode(KEY_PINNED_SERVERS, pinnedServers)
-        }
+        withProfileIndexLock {
+            val subId = getSubscriptionId(subscriptionId)
+            val serverList = decodeServerList(subId)
+            val requested = guids.toSet()
+            if (serverList.removeAll(requested)) {
+                requireStorageWrite(
+                    persistServerList(serverList, subId),
+                    "Failed to publish server index",
+                )
+            }
 
-        val selectedServer = getSelectServer()
-        guids.forEach { guid ->
-            if (selectedServer == guid) {
+            if (getSelectServer()?.let { it in requested } == true) {
                 mainStorage.remove(KEY_SELECTED_SERVER)
             }
-            profileFullStorage.remove(guid)
-            serverAffStorage.remove(guid)
+
+            val removable = ProfileReplacement.findRemovablePayloads(
+                replacedServers = requested,
+                replacementServers = emptySet(),
+                protectedServers = emptySet(),
+                serversReferencedByOtherGroups = decodeServersReferencedByOtherGroups(subId),
+            )
+            removeProfilePayloads(removable)
+
+            val pinnedServers = decodePinnedServers()
+            if (pinnedServers.removeAll(removable)) {
+                settingsStorage.encode(KEY_PINNED_SERVERS, pinnedServers)
+            }
+        }
+    }
+
+    private fun removeServerViaSubidLocked(subId: String) {
+        val serverList = decodeServerList(subId)
+        val removedServers = serverList.toList()
+        serverList.clear()
+        requireStorageWrite(
+            persistServerList(serverList, subId),
+            "Failed to publish server index",
+        )
+
+        if (getSelectServer()?.let { it in removedServers } == true) {
+            mainStorage.remove(KEY_SELECTED_SERVER)
+        }
+        mainStorage.remove("${KEY_SUB_SERVER_PREFIX}ORIGIN_$subId")
+
+        val removable = ProfileReplacement.findRemovablePayloads(
+            replacedServers = removedServers,
+            replacementServers = emptySet(),
+            protectedServers = emptySet(),
+            serversReferencedByOtherGroups = decodeServersReferencedByOtherGroups(subId),
+        )
+        removeProfilePayloads(removable)
+        val pinnedServers = decodePinnedServers()
+        if (pinnedServers.removeAll(removable)) {
+            settingsStorage.encode(KEY_PINNED_SERVERS, pinnedServers)
         }
     }
 
     fun removeServerViaSubid(subscriptionId: String?) {
-        val subId = getSubscriptionId(subscriptionId)
-        val serverList = decodeServerList(subId)
-
-        serverList.forEach { guid ->
-            if (getSelectServer() == guid) {
-                mainStorage.remove(KEY_SELECTED_SERVER)
-            }
-            profileFullStorage.remove(guid)
-            serverAffStorage.remove(guid)
+        withProfileIndexLock {
+            removeServerViaSubidLocked(getSubscriptionId(subscriptionId))
         }
-
-        serverList.clear()
-        encodeServerList(serverList, subId)
     }
 
     fun decodeServerAffiliationInfo(guid: String): ServerAffiliationInfo? {
@@ -637,11 +747,16 @@ object MmkvManager {
      * Removes every server, except pinned ones, which are always kept regardless of
      * which group/subscription they belong to.
      */
-    fun removeAllServer(): Int {
+    fun removeAllServer(): Int = withProfileIndexLock {
         val pinnedServers = decodePinnedServers()
         val subsList = decodeSubsList().toMutableList()
         if (!subsList.contains(DEFAULT_SUBSCRIPTION_ID)) {
             subsList.add(DEFAULT_SUBSCRIPTION_ID)
+        }
+
+        val selectedServer = getSelectServer()
+        if (selectedServer != null && selectedServer !in pinnedServers) {
+            mainStorage.remove(KEY_SELECTED_SERVER)
         }
 
         var removedCount = 0
@@ -649,17 +764,23 @@ object MmkvManager {
             val serverList = decodeServerList(subId)
             val (kept, removed) = serverList.partition { pinnedServers.contains(it) }
             if (removed.isNotEmpty()) {
-                removed.forEach { guid ->
-                    if (getSelectServer() == guid) {
-                        mainStorage.remove(KEY_SELECTED_SERVER)
-                    }
+                if (getSelectServer()?.let { it in removed } == true) {
+                    mainStorage.remove(KEY_SELECTED_SERVER)
                 }
-                removeProfilePayloads(removed)
+                requireStorageWrite(
+                    persistServerList(kept, subId),
+                    "Failed to publish server index",
+                )
+                mainStorage.remove("${KEY_SUB_SERVER_PREFIX}ORIGIN_$subId")
                 removedCount += removed.size
-                encodeServerList(kept.toMutableList(), subId)
             }
         }
-        return removedCount
+
+        // All non-pinned profiles are no longer reachable from any active group index.
+        val removable = profileFullStorage.allKeys().orEmpty()
+            .filterNot { it in pinnedServers }
+        removeProfilePayloads(removable)
+        removedCount
     }
 
     /**
@@ -783,22 +904,34 @@ object MmkvManager {
     }
 
     fun removeSubscription(subid: String) {
-        subStorage.remove(subid)
-        val subsList = decodeSubsList()
-        subsList.remove(subid)
-        encodeSubsList(subsList)
-
-        removeServerViaSubid(subid)
+        withProfileIndexLock {
+            subStorage.remove(subid)
+            val subsList = decodeSubsList()
+            subsList.remove(subid)
+            requireStorageWrite(
+                persistSubscriptionsList(subsList),
+                "Failed to publish subscription index",
+            )
+            removeServerViaSubidLocked(getSubscriptionId(subid))
+        }
     }
 
     fun encodeSubscription(guid: String, subItem: SubscriptionItem) {
         val key = guid.ifBlank { Utils.getUuid() }
-        subStorage.encode(key, JsonUtil.toJson(subItem))
+        withProfileIndexLock {
+            requireStorageWrite(
+                subStorage.encode(key, JsonUtil.toJson(subItem)),
+                "Failed to save subscription payload",
+            )
 
-        val subsList = decodeSubsList()
-        if (!subsList.contains(key)) {
-            subsList.add(key)
-            encodeSubsList(subsList)
+            val subsList = decodeSubsList()
+            if (!subsList.contains(key)) {
+                subsList.add(key)
+                requireStorageWrite(
+                    persistSubscriptionsList(subsList),
+                    "Failed to publish subscription index",
+                )
+            }
         }
     }
 
@@ -807,8 +940,17 @@ object MmkvManager {
         return JsonUtil.fromJsonSafe(json, SubscriptionItem::class.java)
     }
 
+    private fun persistSubscriptionsList(subsList: List<String>): Boolean {
+        return mainStorage.encode(KEY_SUB_IDS, JsonUtil.toJson(subsList))
+    }
+
     fun encodeSubsList(subsList: MutableList<String>) {
-        mainStorage.encode(KEY_SUB_IDS, JsonUtil.toJson(subsList))
+        withProfileIndexLock {
+            requireStorageWrite(
+                persistSubscriptionsList(subsList),
+                "Failed to publish subscription index",
+            )
+        }
     }
 
     fun decodeSubsList(): MutableList<String> {

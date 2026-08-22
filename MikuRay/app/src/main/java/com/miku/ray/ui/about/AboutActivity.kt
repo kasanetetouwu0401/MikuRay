@@ -3,7 +3,6 @@ package com.miku.ray.ui.about
 import com.miku.ray.ui.base.BaseActivity
 import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.BuildConfig
 import com.miku.ray.R
@@ -22,7 +21,7 @@ class AboutActivity : BaseActivity() {
 
         binding.aboutContent.applyEdgeToEdgeListInsets()
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_about), subtitle = getString(R.string.subtitle_about))
 
         binding.layoutSoureCcode.setOnClickListener {

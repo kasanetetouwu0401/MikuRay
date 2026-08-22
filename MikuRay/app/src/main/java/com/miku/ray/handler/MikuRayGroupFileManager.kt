@@ -4,6 +4,7 @@ import android.content.Context
 import com.miku.ray.AppConfig
 import com.miku.ray.dto.entities.MikuRayExportPayload
 import com.miku.ray.dto.entities.MikuRayExportedProfile
+import com.miku.ray.dto.entities.ProfileItem
 import com.miku.ray.dto.entities.SubscriptionItem
 import com.miku.ray.enums.EConfigType
 import com.miku.ray.util.JsonUtil
@@ -97,16 +98,25 @@ object MikuRayGroupFileManager {
             targetSubscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
         }
 
-        var count = 0
+        val profiles = linkedMapOf<String, ProfileItem>()
+        val rawConfigs = mutableMapOf<String, String>()
         payload.profiles.forEach { exported ->
             val profile = exported.profile.copy(subscriptionId = subId)
-            val newGuid = MmkvManager.encodeServerConfig("", profile)
+            val newGuid = Utils.getUuid()
+            profiles[newGuid] = profile
             if (profile.configType == EConfigType.CUSTOM && !exported.raw.isNullOrBlank()) {
-                MmkvManager.encodeServerRaw(newGuid, exported.raw)
+                rawConfigs[newGuid] = exported.raw
             }
-            count++
         }
-        return count
+
+        if (profiles.isEmpty()) return 0
+        MmkvManager.saveServerProfiles(
+            profiles = profiles,
+            rawConfigs = rawConfigs,
+            subscriptionId = subId,
+            append = true,
+        )
+        return profiles.size
     }
 
     fun sanitizeFileName(name: String): String {

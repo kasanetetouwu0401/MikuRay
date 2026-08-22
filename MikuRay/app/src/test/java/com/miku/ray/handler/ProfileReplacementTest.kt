@@ -108,6 +108,7 @@ class ProfileReplacementTest {
             replacedServers = listOf("orphan", "selected", "replacement"),
             replacementServers = setOf("replacement"),
             protectedServers = setOf("selected"),
+            serversReferencedByOtherGroups = emptySet(),
         )
 
         assertEquals(setOf("orphan"), result)
@@ -119,6 +120,7 @@ class ProfileReplacementTest {
             replacedServers = emptyList(),
             replacementServers = emptySet(),
             protectedServers = emptySet(),
+            serversReferencedByOtherGroups = emptySet(),
         )
 
         assertEquals(emptySet<String>(), result)
@@ -130,9 +132,34 @@ class ProfileReplacementTest {
             replacedServers = listOf("orphan", "pinned", "selected", "replacement"),
             replacementServers = setOf("replacement"),
             protectedServers = setOf("selected", "pinned"),
+            serversReferencedByOtherGroups = emptySet(),
         )
 
         assertEquals(setOf("orphan"), result)
+    }
+
+    @Test
+    fun `keeps profiles referenced by another group`() {
+        val result = ProfileReplacement.findRemovablePayloads(
+            replacedServers = listOf("orphan", "cross-group", "replacement"),
+            replacementServers = setOf("replacement"),
+            protectedServers = emptySet(),
+            serversReferencedByOtherGroups = setOf("cross-group"),
+        )
+
+        assertEquals(setOf("orphan"), result)
+    }
+
+    @Test
+    fun `keeps all payloads when another group index is unreadable`() {
+        val result = ProfileReplacement.findRemovablePayloads(
+            replacedServers = listOf("candidate"),
+            replacementServers = emptySet(),
+            protectedServers = emptySet(),
+            serversReferencedByOtherGroups = null,
+        )
+
+        assertEquals(emptySet<String>(), result)
     }
 
     private fun profile(

@@ -40,6 +40,7 @@ import com.miku.ray.BuildConfig
 import com.miku.ray.R
 import com.miku.ray.core.LauncherManager
 import com.miku.ray.databinding.ActivityMainBinding
+import com.miku.ray.databinding.ItemTabGroupBinding
 import com.miku.ray.databinding.ItemQrcodeBinding
 import com.miku.ray.dto.entities.MikuRayExportPayload
 import com.miku.ray.enums.EConfigType
@@ -209,7 +210,7 @@ class MainActivity : HelperBaseActivity(),
     override fun onContentChanged() {
         super.onContentChanged()
 
-        val root = findViewById<View>(R.id.main_content) ?: return
+        val root = binding.mainContent
 
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -225,8 +226,7 @@ class MainActivity : HelperBaseActivity(),
             val bottomInset = maxOf(systemBars.bottom, displayCutout.bottom)
             binding.cardBottomStatus.updatePadding(bottom = bottomInset)
 
-            val headerContent = view.findViewById<View>(R.id.header_content)
-            headerContent?.updatePadding(top = systemBars.top)
+            binding.headerContent.updatePadding(top = systemBars.top)
 
             insets
         }
@@ -684,6 +684,50 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
+    private fun showClearResultsScopeDialog(countryCodeOnly: Boolean) {
+        val titleRes = if (countryCodeOnly) {
+            R.string.title_clear_country_codes
+        } else {
+            R.string.title_clear_test_results
+        }
+        val currentGroupName = mainViewModel.getSubscriptions(this)
+            .firstOrNull { it.id == mainViewModel.subscriptionId }
+            ?.remarks
+            ?: getString(R.string.filter_config_all)
+        val options = arrayOf(
+            getString(R.string.clear_results_scope_group, currentGroupName),
+            getString(R.string.clear_results_scope_all)
+        )
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(titleRes)
+            .setIcon(RemixR.drawable.rmx_refresh_line)
+            .setItems(options) { _, which ->
+                val messageRes = if (countryCodeOnly) {
+                    if (which == 0) R.string.confirm_clear_country_codes_group
+                    else R.string.confirm_clear_country_codes_all
+                } else {
+                    if (which == 0) R.string.confirm_clear_test_results_group
+                    else R.string.confirm_clear_test_results_all
+                }
+                showDeleteConfirmDialog(
+                    context = this,
+                    titleRes = titleRes,
+                    messageRes = messageRes
+                ) {
+                    if (countryCodeOnly) {
+                        if (which == 0) mainViewModel.clearCountryCodesForGroup()
+                        else mainViewModel.clearCountryCodesForAll()
+                    } else {
+                        if (which == 0) mainViewModel.clearTestResultsForGroup()
+                        else mainViewModel.clearTestResultsForAll()
+                    }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .showBlur()
+    }
+
     override fun onMoreOptionClicked(viewId: Int) {
         when (viewId) {
             R.id.export_all -> exportAll()
@@ -706,14 +750,8 @@ class MainActivity : HelperBaseActivity(),
             R.id.del_duplicate_config -> delDuplicateConfig()
             R.id.del_invalid_config -> delInvalidConfig()
             R.id.sub_update -> importConfigViaSub()
-            R.id.clear_test_results -> {
-                mainViewModel.clearTestResults()
-                refreshAllGroupListDisplays()
-            }
-            R.id.clear_country_codes -> {
-                mainViewModel.clearCountryCodes()
-                refreshAllGroupListDisplays()
-            }
+            R.id.clear_test_results -> showClearResultsScopeDialog(countryCodeOnly = false)
+            R.id.clear_country_codes -> showClearResultsScopeDialog(countryCodeOnly = true)
             R.id.reset_traffic -> {
                 val currentGroupName = mainViewModel.getSubscriptions(this)
                     .firstOrNull { it.id == mainViewModel.subscriptionId }
@@ -755,8 +793,9 @@ class MainActivity : HelperBaseActivity(),
                             context = this,
                             titleRes = R.string.title_reset_traffic,
                             messageRes = msgRes
-                        ) { action() }
+                        ) { action()                         }
                     }
+                    .setNegativeButton(android.R.string.cancel, null)
                     .showBlur()
             }
             R.id.action_order_origin,
@@ -903,17 +942,13 @@ class MainActivity : HelperBaseActivity(),
                 tabMediator = TabLayoutMediator(binding.tabGroup, binding.viewPager) { tab, position ->
                     groupPagerAdapter.groups.getOrNull(position)?.let { group ->
                         tab.tag = group.id
-                        val tabView = LayoutInflater.from(this@MainActivity).inflate(R.layout.item_tab_group, null)
+                        val tabBinding = ItemTabGroupBinding.inflate(LayoutInflater.from(this@MainActivity))
                         
-                        val tabIcon = tabView.findViewById<ImageView>(R.id.tab_icon)
-                        val tabLabel = tabView.findViewById<TextView>(R.id.tab_label)
-                        val tabBadge = tabView.findViewById<TextView>(R.id.tab_badge)
+                        tabBinding.tabLabel.text = group.remarks
+                        setTabIcon(tabBinding.tabIcon, group.icon)
+                        setBadgeVisibility(tabBinding.tabBadge, tabBinding.tabLabel, group.serverCount)
                         
-                        tabLabel.text = group.remarks
-                        setTabIcon(tabIcon, group.icon)
-                        setBadgeVisibility(tabBadge, tabLabel, group.serverCount)
-                        
-                        tab.customView = tabView
+                        tab.customView = tabBinding.root
                     }
                 }.also { it.attach() }
 
@@ -956,11 +991,10 @@ class MainActivity : HelperBaseActivity(),
                 
                 for (i in groups.indices) {
                     val tab = binding.tabGroup.getTabAt(i) ?: continue
-                    val tabBadge = tab.customView?.findViewById<TextView>(R.id.tab_badge) ?: continue
-                    val tabLabel = tab.customView?.findViewById<TextView>(R.id.tab_label) ?: continue
+                    val tabBinding = tab.customView?.let { ItemTabGroupBinding.bind(it) } ?: continue
                     
                     val count = groups.getOrNull(i)?.serverCount ?: 0
-                    setBadgeVisibility(tabBadge, tabLabel, count)
+                    setBadgeVisibility(tabBinding.tabBadge, tabBinding.tabLabel, count)
                 }
             }
         }
