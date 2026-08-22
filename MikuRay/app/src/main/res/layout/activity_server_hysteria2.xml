@@ -286,7 +286,11 @@
                     android:orientation="vertical"
                     android:padding="@dimen/padding_spacing_dp16">
 
-                    <include layout="@layout/layout_tls_hysteria2" />
+                    <ViewStub
+                        android:id="@+id/stub_tls"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout="@layout/layout_tls_hysteria2" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

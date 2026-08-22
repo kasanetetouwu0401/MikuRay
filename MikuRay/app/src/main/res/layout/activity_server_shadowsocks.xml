@@ -211,7 +211,11 @@
                     android:orientation="vertical"
                     android:padding="@dimen/padding_spacing_dp16">
 
-                    <include layout="@layout/layout_transport" />
+                    <ViewStub
+                        android:id="@+id/stub_transport"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout="@layout/layout_transport" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -260,7 +264,11 @@
                     android:orientation="vertical"
                     android:padding="@dimen/padding_spacing_dp16">
 
-                    <include layout="@layout/layout_tls" />
+                    <ViewStub
+                        android:id="@+id/stub_tls"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout="@layout/layout_tls" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
