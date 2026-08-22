@@ -625,10 +625,10 @@ class MainActivity : HelperBaseActivity(),
 
         binding.layoutWeatherChip.setOnClickListener {
             when {
-                SearchBarChipMode.current() == SearchBarChipMode.WEATHER -> {
+                isWeatherChipSelected() -> {
                     startActivity(Intent(this, WeatherForecastActivity::class.java))
                 }
-                SearchBarChipMode.current() == SearchBarChipMode.TOTAL_TRAFFIC -> {
+                isTotalTrafficChipSelected() -> {
                     if (MmkvManager.getTotalTrafficDetail() != null) {
                         showTotalTrafficDetailDialog(this)
                     }
