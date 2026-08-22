@@ -361,6 +361,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun refreshServerListAfterTest() {
+        viewModelScope.launch(Dispatchers.IO) {
+            reloadServerList(force = true)
+        }
+    }
+
     @Synchronized
     fun getSubscriptions(context: Context): List<GroupMapItem> {
         val showAllGroup = MmkvManager.decodeSettingsBool(AppConfig.PREF_GROUP_ALL_DISPLAY)
@@ -540,10 +546,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onTestsFinished() {
         viewModelScope.launch(Dispatchers.Default) {
-            var serverStructureChanged = false
-
             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_REMOVE_INVALID_AFTER_TEST)) {
-                serverStructureChanged = removeInvalidServer() > 0
+                removeInvalidServer()
             }
 
             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_SORT_AFTER_TEST)) {
@@ -559,15 +563,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     MmkvManager.encodeSettings("${AppConfig.PREF_SERVER_ORDER}_$subIdToSave", 2)
                 }
                 sortByTestResults()
-                serverStructureChanged = true
             }
 
-            // Ping/country-code results already update their affected row through
-            // MSG_MEASURE_CONFIG_SUCCESS / MSG_COUNTRY_CODE_SUCCESS. Only reload the
-            // source cache when this completion handler changed membership or order.
-            if (serverStructureChanged) {
-                reloadServerList()
-            }
+            // Always refresh once after the complete URL test. This keeps the
+            // configured group order authoritative while avoiding reloads per result.
+            reloadServerList(force = true)
         }
     }
 
@@ -677,6 +677,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 AppConfig.MSG_COUNTRY_CODE_FINISH -> {
                     countryCodeProgressAction.value = null
+                    refreshServerListAfterTest()
                 }
 
                 AppConfig.MSG_TRAFFIC_UPDATED -> {

@@ -602,9 +602,6 @@ class MainActivity : HelperBaseActivity(),
         binding.viewPager.apply {
             adapter = groupPagerAdapter
             isUserInputEnabled = true
-            // Keep only the adjacent page warm. A large value eagerly creates many
-            // GroupServerFragment instances and repeats server-list binding work.
-            offscreenPageLimit = 1
         }
     }
 
