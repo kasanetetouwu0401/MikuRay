@@ -40,7 +40,6 @@ import com.miku.ray.BuildConfig
 import com.miku.ray.R
 import com.miku.ray.core.LauncherManager
 import com.miku.ray.databinding.ActivityMainBinding
-import com.miku.ray.databinding.ItemTabGroupBinding
 import com.miku.ray.databinding.ItemQrcodeBinding
 import com.miku.ray.dto.entities.MikuRayExportPayload
 import com.miku.ray.enums.EConfigType
@@ -210,7 +209,7 @@ class MainActivity : HelperBaseActivity(),
     override fun onContentChanged() {
         super.onContentChanged()
 
-        val root = binding.mainContent
+        val root = findViewById<View>(R.id.main_content) ?: return
 
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -226,7 +225,8 @@ class MainActivity : HelperBaseActivity(),
             val bottomInset = maxOf(systemBars.bottom, displayCutout.bottom)
             binding.cardBottomStatus.updatePadding(bottom = bottomInset)
 
-            binding.headerContent.updatePadding(top = systemBars.top)
+            val headerContent = view.findViewById<View>(R.id.header_content)
+            headerContent?.updatePadding(top = systemBars.top)
 
             insets
         }
@@ -903,13 +903,17 @@ class MainActivity : HelperBaseActivity(),
                 tabMediator = TabLayoutMediator(binding.tabGroup, binding.viewPager) { tab, position ->
                     groupPagerAdapter.groups.getOrNull(position)?.let { group ->
                         tab.tag = group.id
-                        val tabBinding = ItemTabGroupBinding.inflate(LayoutInflater.from(this@MainActivity))
+                        val tabView = LayoutInflater.from(this@MainActivity).inflate(R.layout.item_tab_group, null)
                         
-                        tabBinding.tabLabel.text = group.remarks
-                        setTabIcon(tabBinding.tabIcon, group.icon)
-                        setBadgeVisibility(tabBinding.tabBadge, tabBinding.tabLabel, group.serverCount)
+                        val tabIcon = tabView.findViewById<ImageView>(R.id.tab_icon)
+                        val tabLabel = tabView.findViewById<TextView>(R.id.tab_label)
+                        val tabBadge = tabView.findViewById<TextView>(R.id.tab_badge)
                         
-                        tab.customView = tabBinding.root
+                        tabLabel.text = group.remarks
+                        setTabIcon(tabIcon, group.icon)
+                        setBadgeVisibility(tabBadge, tabLabel, group.serverCount)
+                        
+                        tab.customView = tabView
                     }
                 }.also { it.attach() }
 
@@ -952,10 +956,11 @@ class MainActivity : HelperBaseActivity(),
                 
                 for (i in groups.indices) {
                     val tab = binding.tabGroup.getTabAt(i) ?: continue
-                    val tabBinding = tab.customView?.let { ItemTabGroupBinding.bind(it) } ?: continue
+                    val tabBadge = tab.customView?.findViewById<TextView>(R.id.tab_badge) ?: continue
+                    val tabLabel = tab.customView?.findViewById<TextView>(R.id.tab_label) ?: continue
                     
                     val count = groups.getOrNull(i)?.serverCount ?: 0
-                    setBadgeVisibility(tabBinding.tabBadge, tabBinding.tabLabel, count)
+                    setBadgeVisibility(tabBadge, tabLabel, count)
                 }
             }
         }

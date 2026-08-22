@@ -7,6 +7,7 @@ import android.view.MenuItem
 import com.miku.ray.util.showDeleteConfirmDialog
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.contracts.BaseAdapterListener
@@ -49,7 +50,7 @@ class ServerProxyChainActivity : BaseActivity() {
         binding.serverScrollContent.applyEdgeToEdgeListInsets()
 
 
-        val toolbar = binding.toolbar
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = EConfigType.PROXYCHAIN.toString(), subtitle = getString(R.string.subtitle_server_config))
 
         loadAvailableRemarks()

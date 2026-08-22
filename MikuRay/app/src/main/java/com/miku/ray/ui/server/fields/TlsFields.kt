@@ -1,6 +1,6 @@
 package com.miku.ray.ui.server.fields
 
-import android.content.res.Resources
+import android.app.Activity
 import android.text.TextUtils
 import android.view.View
 import android.widget.AutoCompleteTextView
@@ -9,134 +9,43 @@ import android.widget.EditText
 import com.miku.ray.AppConfig.REALITY
 import com.miku.ray.AppConfig.TLS
 import com.miku.ray.R
-import com.miku.ray.databinding.LayoutTlsBinding
-import com.miku.ray.databinding.LayoutTlsHysteria2Binding
 import com.miku.ray.dto.entities.ProfileItem
 import com.miku.ray.util.Utils
 
-class TlsFields private constructor(
-    private val resources: Resources,
-    views: Views
-) {
+class TlsFields(activity: Activity) {
 
-    private data class Views(
-        val spStreamSecurity: AutoCompleteTextView,
-        val spAllowInsecure: AutoCompleteTextView?,
-        val spStreamFingerprint: AutoCompleteTextView?,
-        val spStreamAlpn: AutoCompleteTextView?,
-        val etSni: EditText?,
-        val etPublicKey: EditText?,
-        val etShortId: EditText?,
-        val etSpiderX: EditText?,
-        val etMldsa65Verify: EditText?,
-        val etEchConfigList: EditText?,
-        val etVerifyPeerCertByName: EditText?,
-        val etPinnedCa256: EditText?,
-        val btnPinnedCa256Action: Button?,
-        val containerAllowInsecure: View?,
-        val containerSni: View?,
-        val containerFingerprint: View?,
-        val containerAlpn: View?,
-        val containerPublicKey: View?,
-        val containerShortId: View?,
-        val containerSpiderX: View?,
-        val containerMldsa65Verify: View?,
-        val containerEchConfigList: View?,
-        val containerVerifyPeerCertByName: View?,
-        val containerPinnedCa256: View?
-    )
+    private val streamSecuritys: Array<out String> = activity.resources.getStringArray(R.array.streamsecurityxs)
+    private val allowinsecures: Array<out String> = activity.resources.getStringArray(R.array.allowinsecures)
+    private val uTlsItems: Array<out String> = activity.resources.getStringArray(R.array.streamsecurity_utls)
+    private val alpns: Array<out String> = activity.resources.getStringArray(R.array.streamsecurity_alpn)
 
-    constructor(binding: LayoutTlsBinding) : this(
-        binding.root.resources,
-        Views(
-            spStreamSecurity = binding.spStreamSecurity,
-            spAllowInsecure = binding.spAllowInsecure,
-            spStreamFingerprint = binding.spStreamFingerprint,
-            spStreamAlpn = binding.spStreamAlpn,
-            etSni = binding.etSni,
-            etPublicKey = binding.etPublicKey,
-            etShortId = binding.etShortId,
-            etSpiderX = binding.etSpiderX,
-            etMldsa65Verify = binding.etMldsa65Verify,
-            etEchConfigList = binding.etEchConfigList,
-            etVerifyPeerCertByName = binding.etVerifyPeerCertByName,
-            etPinnedCa256 = binding.etPinnedCa256,
-            btnPinnedCa256Action = binding.btnPinnedCa256Action,
-            containerAllowInsecure = binding.layAllowInsecure,
-            containerSni = binding.laySni,
-            containerFingerprint = binding.layStreamFingerprint,
-            containerAlpn = binding.layStreamAlpn,
-            containerPublicKey = binding.layPublicKey,
-            containerShortId = binding.layShortId,
-            containerSpiderX = binding.laySpiderX,
-            containerMldsa65Verify = binding.layMldsa65Verify,
-            containerEchConfigList = binding.layEchConfigList,
-            containerVerifyPeerCertByName = binding.layVerifyPeerCertByName,
-            containerPinnedCa256 = binding.layPinnedCa256
-        )
-    )
+    private val spStreamSecurity: AutoCompleteTextView? = activity.findViewById(R.id.sp_stream_security)
+    private val spAllowInsecure: AutoCompleteTextView? = activity.findViewById(R.id.sp_allow_insecure)
+    private val spStreamFingerprint: AutoCompleteTextView? = activity.findViewById(R.id.sp_stream_fingerprint)
+    private val spStreamAlpn: AutoCompleteTextView? = activity.findViewById(R.id.sp_stream_alpn)
+    private val etSni: EditText? = activity.findViewById(R.id.et_sni)
+    private val etPublicKey: EditText? = activity.findViewById(R.id.et_public_key)
+    private val etShortId: EditText? = activity.findViewById(R.id.et_short_id)
+    private val etSpiderX: EditText? = activity.findViewById(R.id.et_spider_x)
+    private val etMldsa65Verify: EditText? = activity.findViewById(R.id.et_mldsa65_verify)
+    private val etEchConfigList: EditText? = activity.findViewById(R.id.et_ech_config_list)
+    private val etVerifyPeerCertByName: EditText? = activity.findViewById(R.id.et_verify_peer_cert_by_name)
+    private val etPinnedCa256: EditText? = activity.findViewById(R.id.et_pinned_ca256)
+    private val btnPinnedCa256Action: Button? = activity.findViewById(R.id.btn_pinned_ca256_action)
 
-    constructor(binding: LayoutTlsHysteria2Binding) : this(
-        binding.root.resources,
-        Views(
-            spStreamSecurity = binding.spStreamSecurity,
-            spAllowInsecure = binding.spAllowInsecure,
-            spStreamFingerprint = null,
-            spStreamAlpn = null,
-            etSni = binding.etSni,
-            etPublicKey = null,
-            etShortId = null,
-            etSpiderX = null,
-            etMldsa65Verify = null,
-            etEchConfigList = null,
-            etVerifyPeerCertByName = null,
-            etPinnedCa256 = binding.etPinnedCa256,
-            btnPinnedCa256Action = binding.btnPinnedCa256Action,
-            containerAllowInsecure = binding.layAllowInsecure,
-            containerSni = binding.laySni,
-            containerFingerprint = null,
-            containerAlpn = null,
-            containerPublicKey = null,
-            containerShortId = null,
-            containerSpiderX = null,
-            containerMldsa65Verify = null,
-            containerEchConfigList = null,
-            containerVerifyPeerCertByName = null,
-            containerPinnedCa256 = binding.layPinnedCa256
-        )
-    )
+    private val containerAllowInsecure: View? = activity.findViewById(R.id.lay_allow_insecure)
+    private val containerSni: View? = activity.findViewById(R.id.lay_sni)
+    private val containerFingerprint: View? = activity.findViewById(R.id.lay_stream_fingerprint)
+    private val containerAlpn: View? = activity.findViewById(R.id.lay_stream_alpn)
+    private val containerPublicKey: View? = activity.findViewById(R.id.lay_public_key)
+    private val containerShortId: View? = activity.findViewById(R.id.lay_short_id)
+    private val containerSpiderX: View? = activity.findViewById(R.id.lay_spider_x)
+    private val containerMldsa65Verify: View? = activity.findViewById(R.id.lay_mldsa65_verify)
+    private val containerEchConfigList: View? = activity.findViewById(R.id.lay_ech_config_list)
+    private val containerVerifyPeerCertByName: View? = activity.findViewById(R.id.lay_verify_peer_cert_by_name)
+    private val containerPinnedCa256: View? = activity.findViewById(R.id.lay_pinned_ca256)
 
-    private val spStreamSecurity = views.spStreamSecurity
-    private val spAllowInsecure = views.spAllowInsecure
-    private val spStreamFingerprint = views.spStreamFingerprint
-    private val spStreamAlpn = views.spStreamAlpn
-    private val etSni = views.etSni
-    private val etPublicKey = views.etPublicKey
-    private val etShortId = views.etShortId
-    private val etSpiderX = views.etSpiderX
-    private val etMldsa65Verify = views.etMldsa65Verify
-    private val etEchConfigList = views.etEchConfigList
-    private val etVerifyPeerCertByName = views.etVerifyPeerCertByName
-    private val etPinnedCa256 = views.etPinnedCa256
-    private val btnPinnedCa256Action = views.btnPinnedCa256Action
-    private val containerAllowInsecure = views.containerAllowInsecure
-    private val containerSni = views.containerSni
-    private val containerFingerprint = views.containerFingerprint
-    private val containerAlpn = views.containerAlpn
-    private val containerPublicKey = views.containerPublicKey
-    private val containerShortId = views.containerShortId
-    private val containerSpiderX = views.containerSpiderX
-    private val containerMldsa65Verify = views.containerMldsa65Verify
-    private val containerEchConfigList = views.containerEchConfigList
-    private val containerVerifyPeerCertByName = views.containerVerifyPeerCertByName
-    private val containerPinnedCa256 = views.containerPinnedCa256
-
-    private val streamSecuritys: Array<out String> = resources.getStringArray(R.array.streamsecurityxs)
-    private val allowinsecures: Array<out String> = resources.getStringArray(R.array.allowinsecures)
-    private val uTlsItems: Array<out String> = resources.getStringArray(R.array.streamsecurity_utls)
-    private val alpns: Array<out String> = resources.getStringArray(R.array.streamsecurity_alpn)
-
-    val selectedSecurityText: String get() = spStreamSecurity.text?.toString().orEmpty()
+    val selectedSecurityText: String get() = spStreamSecurity?.text?.toString().orEmpty()
     val pinnedCa256Text: String? get() = etPinnedCa256?.text?.toString()
 
     fun setPinnedCa256Text(value: String) {
@@ -148,7 +57,7 @@ class TlsFields private constructor(
     }
 
     fun setOnSecurityChanged(onChanged: (security: String) -> Unit) {
-        spStreamSecurity.setOnItemClickListener { parent, _, position, _ ->
+        spStreamSecurity?.setOnItemClickListener { parent, _, position, _ ->
             onChanged(parent.getItemAtPosition(position).toString())
         }
     }
@@ -225,12 +134,12 @@ class TlsFields private constructor(
     fun bind(config: ProfileItem) {
         val streamSecurity = Utils.arrayFind(streamSecuritys, config.security.orEmpty())
         if (streamSecurity < 0) {
-            spStreamSecurity.setText("", false)
+            spStreamSecurity?.setText("", false)
             updateForSecurity("")
             return
         }
 
-        spStreamSecurity.setText(streamSecuritys[streamSecurity], false)
+        spStreamSecurity?.setText(streamSecuritys[streamSecurity], false)
         updateForSecurity(streamSecuritys[streamSecurity])
 
         etSni?.text = Utils.getEditable(config.sni)
@@ -259,7 +168,7 @@ class TlsFields private constructor(
 
     fun clear() {
         if (streamSecuritys.isNotEmpty()) {
-            spStreamSecurity.setText(streamSecuritys[0], false)
+            spStreamSecurity?.setText(streamSecuritys[0], false)
             updateForSecurity(streamSecuritys[0])
         }
         if (allowinsecures.isNotEmpty()) {

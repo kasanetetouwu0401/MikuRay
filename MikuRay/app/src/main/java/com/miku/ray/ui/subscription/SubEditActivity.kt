@@ -10,14 +10,16 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import android.widget.ImageView
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.miku.ray.util.showDeleteConfirmDialog
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.databinding.ActivitySubEditBinding
-import com.miku.ray.databinding.DialogTabIconPickerBinding
 import com.miku.ray.dto.entities.SubscriptionItem
 import com.miku.ray.enums.EConfigType
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
@@ -52,7 +54,7 @@ class SubEditActivity : BaseActivity() {
 
         binding.editScrollContent.applyEdgeToEdgeListInsets()
 
-        val toolbar = binding.toolbar
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_sub_setting), subtitle = getString(R.string.subtitle_sub_edit))
 
         setupProfileRemarkInputs()
@@ -73,10 +75,10 @@ class SubEditActivity : BaseActivity() {
     }
 
     private fun showIconPickerDialog() {
-        val dialogBinding = DialogTabIconPickerBinding.inflate(layoutInflater)
-        val rowNone = dialogBinding.rowNone
-        val checkNone = dialogBinding.checkNone
-        val rv = dialogBinding.rvIcons
+        val dialogView = layoutInflater.inflate(R.layout.dialog_tab_icon_picker, null)
+        val rowNone    = dialogView.findViewById<android.view.View>(R.id.row_none)
+        val checkNone  = dialogView.findViewById<ImageView>(R.id.check_none)
+        val rv         = dialogView.findViewById<RecyclerView>(R.id.rv_icons)
 
         val adapter = TabIconPickerAdapter(
             context     = this,
@@ -106,7 +108,7 @@ class SubEditActivity : BaseActivity() {
         dialog = MaterialAlertDialogBuilder(this)
             .setTitle(R.string.sub_setting_tab_icon)
             .setIcon(RemixR.drawable.rmx_apps_line)
-            .setView(dialogBinding.root)
+            .setView(dialogView)
             .setNegativeButton(android.R.string.cancel, null)
             .create()
 

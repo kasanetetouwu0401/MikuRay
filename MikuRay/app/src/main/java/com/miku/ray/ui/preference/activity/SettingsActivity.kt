@@ -9,6 +9,9 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityOptionsCompat
@@ -19,13 +22,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import com.miku.ray.ui.preference.preferencesearch.SearchPreferenceActionView
 import com.miku.ray.ui.preference.preferencesearch.SearchPreferenceFragment
 import com.miku.ray.ui.preference.preferencesearch.SearchPreferenceResult
 import com.miku.ray.ui.preference.preferencesearch.SearchPreferenceResultListener
+import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.SearchBarChipMode
 import com.miku.ray.R
-import com.miku.ray.databinding.ActivitySettingsSearchBinding
 import com.miku.ray.enums.PermissionType
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
 import com.miku.ray.extension.toastSuccess
@@ -44,15 +48,22 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
-    private val binding by lazy { ActivitySettingsSearchBinding.inflate(layoutInflater) }
+
+    private lateinit var searchActionView: SearchPreferenceActionView
+    private lateinit var btnClearHistory: com.google.android.material.button.MaterialButton
+    private lateinit var layoutWeatherChip: LinearLayout
+    private lateinit var ivWeatherIcon: ImageView
+    private lateinit var tvWeatherTemp: TextView
+    private lateinit var ivTotalTrafficIcon: ImageView
+    private lateinit var tvTotalTraffic: TextView
 
     private var isColdStart = true
     private var dualSwipeChipSelection = SearchBarChipMode.WEATHER
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(binding.root)
-        val toolbar = binding.toolbar
+        setContentView(R.layout.activity_settings_search)
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_settings), subtitle = getString(R.string.subtitle_settings))
 
         setupSearchActionView()
@@ -61,7 +72,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(binding.settingsContainer.id, SettingsFragment())
+                .replace(R.id.settings_container, SettingsFragment())
                 .commit()
         }
 
@@ -72,7 +83,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
                 }
 
                 if (searchFragment != null && searchFragment.isVisible) {
-                    binding.searchActionView.cancelSearch()
+                    searchActionView.cancelSearch()
                 } else {
                     finish()
                 }
@@ -86,8 +97,10 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     }
 
     private fun setupSearchActionView() {
-        binding.searchActionView.setActivity(this)
-        binding.searchActionView.getSearchConfiguration().apply {
+        searchActionView = findViewById(R.id.search_action_view)
+        btnClearHistory = findViewById(R.id.btn_clear_history)
+        searchActionView.setActivity(this)
+        searchActionView.getSearchConfiguration().apply {
             setHistoryEnabled(true)
             setBreadcrumbsEnabled(true)
             setFragmentContainerViewId(R.id.settings_container)
@@ -100,22 +113,22 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
             index(R.xml.pref_observatory_settings).addBreadcrumb(R.string.title_observatory_settings)
         }
 
-        binding.btnClearHistory.setOnClickListener {
+        btnClearHistory.setOnClickListener {
             currentSearchFragment()?.clearHistory()
-            binding.btnClearHistory.isVisible = false
+            btnClearHistory.isVisible = false
         }
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
                 override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
                     if (f is SearchPreferenceFragment) {
-                        binding.btnClearHistory.isVisible = f.hasHistory()
+                        btnClearHistory.isVisible = f.hasHistory()
                     }
                 }
 
                 override fun onFragmentViewDestroyed(fm: FragmentManager, f: Fragment) {
                     if (f is SearchPreferenceFragment) {
-                        binding.btnClearHistory.isVisible = false
+                        btnClearHistory.isVisible = false
                     }
                 }
             },
@@ -127,8 +140,13 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         supportFragmentManager.fragments.filterIsInstance<SearchPreferenceFragment>().firstOrNull()
 
     private fun setupWeatherTrafficChip() {
+        layoutWeatherChip = findViewById(R.id.layout_weather_chip)
+        ivWeatherIcon = findViewById(R.id.iv_weather_icon)
+        tvWeatherTemp = findViewById(R.id.tv_weather_temp)
+        ivTotalTrafficIcon = findViewById(R.id.iv_total_traffic_icon)
+        tvTotalTraffic = findViewById(R.id.tv_total_traffic)
 
-        binding.layoutWeatherChip.setOnClickListener {
+        layoutWeatherChip.setOnClickListener {
             when {
                 isWeatherChipSelected() -> {
                     startActivity(Intent(this, WeatherForecastActivity::class.java))
@@ -141,11 +159,11 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     }
 
     private fun chipViews() = SearchChipGradientController.ChipViews(
-        layoutWeatherChip = binding.layoutWeatherChip,
-        ivWeatherIcon = binding.ivWeatherIcon,
-        tvWeatherTemp = binding.tvWeatherTemp,
-        ivTotalTrafficIcon = binding.ivTotalTrafficIcon,
-        tvTotalTraffic = binding.tvTotalTraffic
+        layoutWeatherChip = layoutWeatherChip,
+        ivWeatherIcon = ivWeatherIcon,
+        tvWeatherTemp = tvWeatherTemp,
+        ivTotalTrafficIcon = ivTotalTrafficIcon,
+        tvTotalTraffic = tvTotalTraffic
     )
 
     private fun weatherLocationReady(): Boolean =
@@ -157,7 +175,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
             override fun onDown(event: MotionEvent): Boolean = true
 
             override fun onSingleTapUp(event: MotionEvent): Boolean {
-                binding.layoutWeatherChip.performClick()
+                layoutWeatherChip.performClick()
                 return true
             }
 
@@ -184,7 +202,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
             }
         })
 
-        binding.layoutWeatherChip.setOnTouchListener { view, event ->
+        layoutWeatherChip.setOnTouchListener { view, event ->
             if (SearchBarChipMode.current() == SearchBarChipMode.DUAL_SWIPE) {
                 when (event.actionMasked) {
                     MotionEvent.ACTION_DOWN -> view.parent?.requestDisallowInterceptTouchEvent(true)
@@ -232,34 +250,34 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
                 refreshTotalTrafficChip()
             }
             else -> {
-                binding.layoutWeatherChip.isVisible = false
+                layoutWeatherChip.isVisible = false
             }
         }
     }
 
     private fun hideWeatherChipViews() {
-        binding.ivWeatherIcon.isVisible = false
-        binding.tvWeatherTemp.isVisible = false
+        ivWeatherIcon.isVisible = false
+        tvWeatherTemp.isVisible = false
     }
 
     private fun hideTotalTrafficChip() {
-        binding.ivTotalTrafficIcon.isVisible = false
-        binding.tvTotalTraffic.isVisible = false
+        ivTotalTrafficIcon.isVisible = false
+        tvTotalTraffic.isVisible = false
     }
 
     private fun refreshTotalTrafficChip() {
         val totalTraffic = MmkvManager.getTotalTrafficString()
-        binding.tvTotalTraffic.text = totalTraffic
+        tvTotalTraffic.text = totalTraffic
         if (isTotalTrafficChipSelected()) {
-            binding.ivTotalTrafficIcon.isVisible = true
-            binding.tvTotalTraffic.isVisible = true
-            binding.layoutWeatherChip.isVisible = true
+            ivTotalTrafficIcon.isVisible = true
+            tvTotalTraffic.isVisible = true
+            layoutWeatherChip.isVisible = true
         }
     }
 
     private fun refreshWeatherChip() {
         if (!isWeatherChipSelected()) {
-            binding.layoutWeatherChip.isVisible = false
+            layoutWeatherChip.isVisible = false
             return
         }
         val coldStart = isColdStart.also { isColdStart = false }
@@ -283,20 +301,20 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         }
 
         val cached = WeatherHelper.getCachedWeatherStale()
-        binding.layoutWeatherChip.isVisible = true
+        layoutWeatherChip.isVisible = true
         if (cached != null) {
             applyWeatherToChip(cached)
         } else {
-            binding.ivWeatherIcon.setImageResource(RemixR.drawable.rmx_cloud_line)
-            binding.ivWeatherIcon.isVisible = true
-            binding.tvWeatherTemp.text = getString(R.string.weather_loading)
-            binding.tvWeatherTemp.isVisible = true
+            ivWeatherIcon.setImageResource(RemixR.drawable.rmx_cloud_line)
+            ivWeatherIcon.isVisible = true
+            tvWeatherTemp.text = getString(R.string.weather_loading)
+            tvWeatherTemp.isVisible = true
         }
 
         lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@SettingsActivity, force = true)
             if (weather == null) {
-                if (cached == null && isWeatherChipSelected()) binding.layoutWeatherChip.isVisible = false
+                if (cached == null && isWeatherChipSelected()) layoutWeatherChip.isVisible = false
                 return@launch
             }
             applyWeatherToChip(weather)
@@ -305,7 +323,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
     private fun loadWeatherChip() {
         if (!isWeatherChipSelected()) return
-        binding.layoutWeatherChip.isVisible = true
+        layoutWeatherChip.isVisible = true
 
         val fresh = WeatherHelper.getCachedWeather()
         val stale = fresh ?: WeatherHelper.getCachedWeatherStale()
@@ -313,10 +331,10 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         if (stale != null) {
             applyWeatherToChip(stale)
         } else {
-            binding.ivWeatherIcon.setImageResource(RemixR.drawable.rmx_cloud_line)
-            binding.ivWeatherIcon.isVisible = true
-            binding.tvWeatherTemp.text = getString(R.string.weather_loading)
-            binding.tvWeatherTemp.isVisible = true
+            ivWeatherIcon.setImageResource(RemixR.drawable.rmx_cloud_line)
+            ivWeatherIcon.isVisible = true
+            tvWeatherTemp.text = getString(R.string.weather_loading)
+            tvWeatherTemp.isVisible = true
         }
 
         if (fresh != null) return
@@ -324,7 +342,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@SettingsActivity)
             if (weather == null) {
-                if (stale == null && isWeatherChipSelected()) binding.layoutWeatherChip.isVisible = false
+                if (stale == null && isWeatherChipSelected()) layoutWeatherChip.isVisible = false
                 return@launch
             }
             applyWeatherToChip(weather)
@@ -332,12 +350,12 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     }
 
     private fun applyWeatherToChip(weather: WeatherHelper.WeatherResult) {
-        binding.ivWeatherIcon.setImageResource(weather.iconRes)
-        binding.tvWeatherTemp.text = weather.getTemperatureString(WeatherHelper.isCelsius())
+        ivWeatherIcon.setImageResource(weather.iconRes)
+        tvWeatherTemp.text = weather.getTemperatureString(WeatherHelper.isCelsius())
         if (isWeatherChipSelected()) {
-            binding.ivWeatherIcon.isVisible = true
-            binding.tvWeatherTemp.isVisible = true
-            binding.layoutWeatherChip.isVisible = true
+            ivWeatherIcon.isVisible = true
+            tvWeatherTemp.isVisible = true
+            layoutWeatherChip.isVisible = true
         }
     }
 
@@ -367,7 +385,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     }
 
     override fun onSearchResultClicked(@NonNull result: SearchPreferenceResult) {
-        binding.searchActionView.cancelSearch()
+        searchActionView.cancelSearch()
 
         val targetActivity: Class<*>? = when (result.resourceFile) {
             R.xml.pref_ui_settings       -> UiSettingsActivity::class.java

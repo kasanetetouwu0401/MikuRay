@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.miku.ray.util.showBlur
 import com.tencent.mmkv.MMKV
@@ -49,7 +50,7 @@ class BackupActivity : HelperBaseActivity() {
 
         binding.backupScrollContent.applyEdgeToEdgeListInsets()
 
-        val toolbar = binding.toolbar
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_configuration_backup_restore), subtitle = getString(R.string.subtitle_backup))
 
         binding.layoutBackup.setOnClickListener {

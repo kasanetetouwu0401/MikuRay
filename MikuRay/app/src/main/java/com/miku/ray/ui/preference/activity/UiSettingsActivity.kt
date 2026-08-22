@@ -23,11 +23,11 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.miku.ray.AppConfig
 import com.miku.ray.SearchBarChipMode
 import com.miku.ray.R
-import com.miku.ray.databinding.ActivitySettingsBinding
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
 import com.miku.ray.extension.snackbarDefault
 import com.miku.ray.extension.snackbarSuccess
@@ -68,17 +68,16 @@ import java.io.File
 import java.io.IOException
 
 class UiSettingsActivity : BaseActivity() {
-    private val binding by lazy { ActivitySettingsBinding.inflate(layoutInflater) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(binding.root)
-        val toolbar = binding.toolbar
+        setContentView(R.layout.activity_settings)
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_ui_settings), subtitle = getString(R.string.subtitle_ui_settings))
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(binding.settingsContainer.id, UiSettingsFragment())
+                .replace(R.id.settings_container, UiSettingsFragment())
                 .commit()
         }
     }

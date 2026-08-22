@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.ListView
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.databinding.ActivityTaskerBinding
@@ -16,7 +18,7 @@ import com.miku.ray.util.LogUtil
 class TaskerActivity : BaseActivity() {
     private val binding by lazy { ActivityTaskerBinding.inflate(layoutInflater) }
 
-    private val listview by lazy { binding.listview }
+    private var listview: ListView? = null
     private var lstData: ArrayList<String> = ArrayList()
     private var lstGuid: ArrayList<String> = ArrayList()
 
@@ -37,6 +39,7 @@ class TaskerActivity : BaseActivity() {
             this,
             android.R.layout.simple_list_item_single_choice, lstData
         )
+        listview = findViewById<View>(R.id.listview) as ListView
         listview?.adapter = adapter
         listview?.applyEdgeToEdgeListInsets()
 

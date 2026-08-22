@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import com.miku.ray.util.showBlur
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.BuildConfig
 import com.miku.ray.R
@@ -33,7 +34,7 @@ class CheckUpdateActivity : BaseActivity() {
 
         binding.checkUpdateScrollContent.applyEdgeToEdgeListInsets()
 
-        val toolbar = binding.toolbar
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.update_check_for_update), subtitle = getString(R.string.subtitle_check_update))
 
         binding.layoutCheckUpdate.setOnClickListener {
