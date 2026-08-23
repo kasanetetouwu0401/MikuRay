@@ -406,8 +406,7 @@ class MainActivity : HelperBaseActivity(),
         val storage = getAppStorageInfo()
         binding.tvAppStorage.text = getString(
             R.string.app_storage_chip_format,
-            formatStorageBytes(storage.dataBytes),
-            formatStorageBytes(storage.cacheBytes)
+            formatStorageBytes(storage.totalBytes)
         )
         binding.ivAppStorageIcon.isVisible = true
         binding.tvAppStorage.isVisible = true

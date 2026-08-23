@@ -12,11 +12,15 @@ import java.util.Locale
  * every Android version.
  */
 data class AppStorageInfo(
+    val appBytes: Long,
     val dataBytes: Long,
     val cacheBytes: Long
 ) {
-    val totalBytes: Long
+    val dataAndCacheBytes: Long
         get() = dataBytes + cacheBytes
+
+    val totalBytes: Long
+        get() = appBytes + dataAndCacheBytes
 }
 
 fun Context.getAppStorageInfo(): AppStorageInfo {
@@ -29,8 +33,13 @@ fun Context.getAppStorageInfo(): AppStorageInfo {
         path != null && path !in cacheRootPaths && path != codeCachePath
     }
     val cacheBytes = cacheRoots.sumOf(::directorySize)
+    val appBytes = listOfNotNull(
+        applicationInfo.sourceDir,
+        *applicationInfo.splitSourceDirs.orEmpty()
+    ).distinct().sumOf { path -> File(path).length() }
 
     return AppStorageInfo(
+        appBytes = appBytes,
         dataBytes = dataBytes,
         cacheBytes = cacheBytes
     )

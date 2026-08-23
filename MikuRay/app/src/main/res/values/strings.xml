@@ -718,9 +718,11 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="pref_search_bar_chip_info_dual">Swipe vertically on the chip to switch between weather, traffic, and storage. Tap to open details</string>
     <string name="pref_search_chip_gradient_title">Gradient chip background</string>
     <string name="pref_search_chip_gradient_summary">Apply a primary-to-tertiary gradient background on the search bar chip while the weather, total traffic, or storage chip is active</string>
-    <string name="app_storage_chip_format">D %1$s · C %2$s</string>
-    <string name="label_app_storage_total">Total app storage</string>
-    <string name="label_app_storage_data">App data</string>
+    <string name="app_storage_chip_format">%1$s</string>
+    <string name="storage_dialog_title">Storage–MikuRay</string>
+    <string name="label_app_storage_total">Total</string>
+    <string name="label_app_storage_app_size">App size</string>
+    <string name="label_app_storage_data">User data</string>
     <string name="label_app_storage_cache">Cache</string>
     <string name="action_clear_app_cache">Clear cache</string>
     <string name="toast_app_cache_cleared">App cache cleared</string>

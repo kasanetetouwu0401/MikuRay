@@ -686,9 +686,11 @@ Nama Paket — cuma bisa kalo kamu pake Xray TUN, routeOnly aktif, dan Android 1
     <string name="pref_search_bar_chip_info_dual">Swipe atas/bawah di chip untuk ganti antara cuaca, traffic, dan penyimpanan. Tap untuk buka detail</string>
     <string name="pref_search_chip_gradient_title">Background chip gradasi</string>
     <string name="pref_search_chip_gradient_summary">Terapin background gradasi (warna primary ke tertiary) di chip bar pencarian pas chip cuaca, total pemakaian, atau penyimpanan lagi aktif</string>
-    <string name="app_storage_chip_format">D %1$s · C %2$s</string>
-    <string name="label_app_storage_total">Total penyimpanan aplikasi</string>
-    <string name="label_app_storage_data">Data aplikasi</string>
+    <string name="app_storage_chip_format">%1$s</string>
+    <string name="storage_dialog_title">Penyimpanan–MikuRay</string>
+    <string name="label_app_storage_total">Total</string>
+    <string name="label_app_storage_app_size">Ukuran apl</string>
+    <string name="label_app_storage_data">Data pengguna</string>
     <string name="label_app_storage_cache">Cache</string>
     <string name="action_clear_app_cache">Hapus cache</string>
     <string name="toast_app_cache_cleared">Cache aplikasi sudah dihapus</string>

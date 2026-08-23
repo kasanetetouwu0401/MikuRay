@@ -2,12 +2,13 @@ package com.miku.ray.util
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.widget.Toast
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.miku.ray.R
 import com.miku.ray.databinding.DialogAppStorageDetailBinding
+import com.miku.ray.extension.snackbarError
+import com.miku.ray.extension.snackbarSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -25,6 +26,7 @@ fun showAppStorageDetailDialog(
 
     fun renderStorageInfo(info: AppStorageInfo) {
         binding.tvStorageTotalValue.text = formatStorageBytes(info.totalBytes)
+        binding.tvStorageAppValue.text = formatStorageBytes(info.appBytes)
         binding.tvStorageDataValue.text = formatStorageBytes(info.dataBytes)
         binding.tvStorageCacheValue.text = formatStorageBytes(info.cacheBytes)
         binding.btnClearCache.isEnabled = info.cacheBytes > 0L
@@ -46,11 +48,18 @@ fun showAppStorageDetailDialog(
             val updatedInfo = withContext(Dispatchers.IO) { context.getAppStorageInfo() }
             renderStorageInfo(updatedInfo)
             onStorageChanged?.invoke()
-            Toast.makeText(
-                context,
-                if (cleared) R.string.toast_app_cache_cleared else R.string.toast_app_cache_clear_failed,
-                Toast.LENGTH_SHORT
-            ).show()
+            if (cleared) {
+                context.snackbarSuccess(
+                    R.string.toast_app_cache_cleared,
+                    title = context.getString(R.string.title_alerter_success)
+                )
+                dialog.dismiss()
+            } else {
+                context.snackbarError(
+                    R.string.toast_app_cache_clear_failed,
+                    title = context.getString(R.string.title_alerter_error)
+                )
+            }
         }
     }
 

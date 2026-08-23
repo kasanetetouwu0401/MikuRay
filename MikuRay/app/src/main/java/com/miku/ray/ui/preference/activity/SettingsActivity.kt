@@ -314,8 +314,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         val storage = getAppStorageInfo()
         tvAppStorage.text = getString(
             R.string.app_storage_chip_format,
-            formatStorageBytes(storage.dataBytes),
-            formatStorageBytes(storage.cacheBytes)
+            formatStorageBytes(storage.totalBytes)
         )
         ivAppStorageIcon.isVisible = true
         tvAppStorage.isVisible = true
