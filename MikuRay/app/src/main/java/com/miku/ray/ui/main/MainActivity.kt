@@ -129,7 +129,8 @@ class MainActivity : HelperBaseActivity(),
     private var lastIpStateText: String = ""
     private var lastTrafficSpeedText: String = ""
     private var lastTestResultText: String = ""
-    private var appStorageRefreshJob: Job? = null
+    private var realtimeChipRefreshJob: Job? = null
+    private var weatherFetchJob: Job? = null
 
     private val urlTestProgressDialog: TestProgressDialogController by lazy {
         TestProgressDialogController(this, TestProgressDialogController.Mode.URL_TEST) { mainViewModel.cancelRealPingTest() }
@@ -191,7 +192,7 @@ class MainActivity : HelperBaseActivity(),
         setupGroupTab()
         setupViewModel()
         setupBannerHome()
-        startAppStorageRefreshLoop()
+        startRealtimeChipRefreshLoop()
         
         BlurBottomStatusController.applyState(this, binding)
         SubscriptionUpdater.sync()
@@ -407,13 +408,15 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
-    private fun startAppStorageRefreshLoop() {
-        appStorageRefreshJob?.cancel()
-        appStorageRefreshJob = lifecycleScope.launch {
+    private fun startRealtimeChipRefreshLoop() {
+        realtimeChipRefreshJob?.cancel()
+        realtimeChipRefreshJob = lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 while (isActive) {
+                    refreshTotalTrafficChip()
                     refreshAppStorageChip()
-                    delay(APP_STORAGE_REFRESH_INTERVAL_MS)
+                    if (isWeatherChipSelected()) loadWeatherChip()
+                    delay(REALTIME_CHIP_REFRESH_INTERVAL_MS)
                 }
             }
         }
@@ -443,7 +446,7 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private companion object {
-        const val APP_STORAGE_REFRESH_INTERVAL_MS = 1000L
+        const val REALTIME_CHIP_REFRESH_INTERVAL_MS = 1000L
     }
 
     private fun refreshWeatherChip() {
@@ -485,7 +488,8 @@ class MainActivity : HelperBaseActivity(),
             binding.tvWeatherTemp.isVisible = true
         }
 
-        lifecycleScope.launch {
+        weatherFetchJob?.cancel()
+        weatherFetchJob = lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@MainActivity, force = true)
             if (weather == null) {
                 if (cached == null && isWeatherChipSelected()) binding.layoutWeatherChip.isVisible = false
@@ -511,9 +515,9 @@ class MainActivity : HelperBaseActivity(),
             binding.tvWeatherTemp.isVisible = true
         }
 
-        if (fresh != null) return
+        if (fresh != null || weatherFetchJob?.isActive == true) return
 
-        lifecycleScope.launch {
+        weatherFetchJob = lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@MainActivity)
             if (weather == null) {
                 if (stale == null && isWeatherChipSelected()) binding.layoutWeatherChip.isVisible = false
@@ -1742,7 +1746,8 @@ class MainActivity : HelperBaseActivity(),
     }
 
     override fun onDestroy() {
-        appStorageRefreshJob?.cancel()
+        realtimeChipRefreshJob?.cancel()
+        weatherFetchJob?.cancel()
         hideLoading()
         urlTestProgressDialog.dismiss()
         tabMediator?.detach()
