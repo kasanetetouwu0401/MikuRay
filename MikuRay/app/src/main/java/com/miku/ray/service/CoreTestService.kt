@@ -77,14 +77,15 @@ class CoreTestService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val message = intent?.serializable<TestServiceMessage>("content")
+        val isTcping = message?.onlyTcp == true
         NotificationHelper.startForeground(
             this,
             NotificationChannelType.CORE_TEST,
             getString(R.string.app_name),
-            getString(R.string.title_real_ping_all_server),
+            getString(if (isTcping) R.string.title_ping_all_server else R.string.title_real_ping_all_server),
             cancelAction,
         )
-        val message = intent?.serializable<TestServiceMessage>("content")
         if (message == null) {
             stopSelf(startId)
             return START_NOT_STICKY
@@ -176,11 +177,16 @@ class CoreTestService : Service() {
         when (event) {
             is RealPingEvent.Progress -> {
                 val progressText = "${event.completed} / ${event.total}"
+                val progressTextRes = if (message.onlyTcp) {
+                    R.string.connection_runing_tcping_task_left
+                } else {
+                    R.string.connection_runing_real_delay_task_left
+                }
                 NotificationHelper.updateNotification(
                     channelType = NotificationChannelType.CORE_TEST,
                     context = this,
-                    title = getString(R.string.app_name),
-                    content = getString(R.string.connection_runing_task_left, progressText),
+                    title = getString(if (message.onlyTcp) R.string.title_ping_all_server else R.string.title_real_ping_all_server),
+                    content = getString(progressTextRes, progressText),
                 )
                 MessageUtil.sendMsg2UI(
                     this,

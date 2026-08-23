@@ -207,13 +207,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun testAllRealPing(onlyTcp: Boolean = false) {
         val testId = UUID.randomUUID().toString()
-        MessageUtil.sendMsg2TestService(
-            getApplication(),
-            TestServiceMessage(
-                key = AppConfig.MSG_MEASURE_CONFIG_CANCEL,
-                testId = activeTestId.orEmpty(),
-            )
-        )
+        // CoreTestService replaces an active batch itself and redelivers the
+        // newest start intent from the fresh disposable probe process. Sending
+        // a separate cancel here races that replacement and can drop the URL test.
         activeTestId = testId
         MmkvManager.clearAllTestDelayResults(serversCache.map { it.guid }.toList())
         updateListAction.value = -1
@@ -508,11 +504,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun cancelRealPingTest() {
+        val testId = activeTestId.orEmpty()
+        activeTestId = null
+        testProgressAction.value = null
         MessageUtil.sendMsg2TestService(
             getApplication(),
             TestServiceMessage(
                 key = AppConfig.MSG_MEASURE_CONFIG_CANCEL,
-                testId = activeTestId.orEmpty(),
+                testId = testId,
             )
         )
     }
