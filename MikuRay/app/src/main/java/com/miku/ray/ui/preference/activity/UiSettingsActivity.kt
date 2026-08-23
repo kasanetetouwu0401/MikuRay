@@ -60,6 +60,7 @@ import com.miku.ray.util.CustomFontManager
 import com.miku.ray.util.ThemeManager
 import com.miku.ray.ui.weather.WeatherHelper
 import com.miku.ray.util.showBlur
+import com.miku.ray.util.showAppStorageDetailDialog
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -536,7 +537,7 @@ class UiSettingsActivity : BaseActivity() {
                     when (mode) {
                         SearchBarChipMode.WEATHER -> requireContext().snackbarDefault(R.string.pref_search_bar_chip_info_weather, title = getString(R.string.title_alerter_info))
                         SearchBarChipMode.TOTAL_TRAFFIC -> requireContext().snackbarDefault(R.string.pref_search_bar_chip_info_traffic, title = getString(R.string.title_alerter_info))
-                        SearchBarChipMode.CACHE -> requireContext().snackbarDefault(R.string.pref_search_bar_chip_info_cache, title = getString(R.string.title_alerter_info))
+                        SearchBarChipMode.APP_STORAGE -> requireContext().snackbarDefault(R.string.pref_search_bar_chip_info_app_storage, title = getString(R.string.title_alerter_info))
                         SearchBarChipMode.DUAL_SWIPE -> requireContext().snackbarDefault(R.string.pref_search_bar_chip_info_dual, title = getString(R.string.title_alerter_info))
                     }
                     true

@@ -678,14 +678,21 @@ Nama Paket — cuma bisa kalo kamu pake Xray TUN, routeOnly aktif, dan Android 1
     <string name="pref_search_bar_chip_disabled">Nonaktif</string>
     <string name="pref_search_bar_chip_weather">Cuaca</string>
     <string name="pref_search_bar_chip_total_traffic">Total penggunaan traffic</string>
-    <string name="pref_search_bar_chip_cache">Pemakaian penyimpanan</string>
+    <string name="pref_search_bar_chip_app_storage">Ukuran data + cache aplikasi</string>
     <string name="pref_search_bar_chip_dual_swipe">Dual (swipe)</string>
     <string name="pref_search_bar_chip_info_weather">Chip cuaca bisa diklik untuk buka detail prakiraan</string>
     <string name="pref_search_bar_chip_info_traffic">Chip traffic bisa diklik untuk buka detail pemakaian data</string>
-    <string name="pref_search_bar_chip_info_cache">Chip penyimpanan bisa diklik untuk buka detail data dan cache aplikasi</string>
-    <string name="pref_search_bar_chip_info_dual">Swipe atas/bawah di chip untuk ganti konten. Tap untuk buka detail</string>
+    <string name="pref_search_bar_chip_info_app_storage">Chip penyimpanan bisa diklik untuk melihat ukuran data dan cache, serta menghapus cache</string>
+    <string name="pref_search_bar_chip_info_dual">Swipe atas/bawah di chip untuk ganti antara cuaca, traffic, dan penyimpanan. Tap untuk buka detail</string>
     <string name="pref_search_chip_gradient_title">Background chip gradasi</string>
-    <string name="pref_search_chip_gradient_summary">Terapin background gradasi (warna primary ke tertiary) di chip bar pencarian pas chip cuaca atau chip total pemakaian lagi aktif</string>
+    <string name="pref_search_chip_gradient_summary">Terapin background gradasi (warna primary ke tertiary) di chip bar pencarian pas chip cuaca, total pemakaian, atau penyimpanan lagi aktif</string>
+    <string name="app_storage_chip_format">D %1$s · C %2$s</string>
+    <string name="label_app_storage_total">Total penyimpanan aplikasi</string>
+    <string name="label_app_storage_data">Data aplikasi</string>
+    <string name="label_app_storage_cache">Cache</string>
+    <string name="action_clear_app_cache">Hapus cache</string>
+    <string name="toast_app_cache_cleared">Cache aplikasi sudah dihapus</string>
+    <string name="toast_app_cache_clear_failed">Sebagian file cache tidak bisa dihapus</string>
 
     <string name="pref_weather_unit_title">Satuan Suhu</string>
     <string name="pref_weather_custom_location_title">Lokasi Kustom</string>
@@ -808,19 +815,6 @@ Nama Paket — cuma bisa kalo kamu pake Xray TUN, routeOnly aktif, dan Android 1
     <string name="label_total_traffic_month">Bulan Ini</string>
     <string name="title_total_traffic_history">7 Hari Terakhir</string>
     <string name="label_total_traffic_no_history">Belum ada data pemakaian</string>
-
-    <string name="title_storage_detail">Pemakaian Penyimpanan</string>
-    <string name="label_storage_data_size">Data</string>
-    <string name="label_storage_cache_size">Cache</string>
-    <string name="label_storage_calculating">Menghitung…</string>
-    <string name="action_clear_cache">Hapus Cache</string>
-    <string name="clear_cache_confirm_title">Hapus cache?</string>
-    <string name="clear_cache_confirm_summary">Ini bakal hapus file cache sementara (thumbnail, banner yang kedownload, dll). Server, pengaturan, dan profil kamu gak kena efek</string>
-    <string name="clear_cache_success">Cache berhasil dihapus</string>
-    <string name="clear_cache_failed">Sebagian file cache gagal dihapus</string>
-    <string name="label_total_traffic_data_size">Data</string>
-    <string name="label_total_traffic_cache_size">Cache</string>
-    <string name="label_calculating">Menghitung…</string>
     <string name="pref_network_security_enabled_title">Tampilin Jaringan dan Keamanan</string>
     <string name="pref_network_security_enabled_summary">Tampilin info transport dan keamanan di tiap server</string>
     <string name="pref_disable_sensor_text_title">Tampilin Alamat Lengkap</string>

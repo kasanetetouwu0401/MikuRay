@@ -12,17 +12,28 @@
     <com.google.android.material.imageview.ShapeableImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/rmx_device_database_line"
+        android:src="@drawable/rmx_device_database_2_line"
         app:tint="?attr/colorOnSurface" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tv_storage_total_value"
+        style="?attr/textAppearanceTitleMedium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        tools:text="128 MB" />
 
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/title_storage_detail"
-        android:textAppearance="?attr/textAppearanceTitleMedium"
-        android:textColor="?attr/colorOnSurface"
-        android:textStyle="bold" />
+        android:layout_marginTop="1dp"
+        android:text="@string/label_app_storage_total"
+        android:textAppearance="?attr/textAppearanceTitleSmall"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="14sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -48,27 +59,27 @@
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="14dp">
 
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@drawable/rmx_device_database_line"
+                    android:src="@drawable/rmx_device_database_2_line"
                     app:tint="?attr/colorOnTertiaryContainer" />
 
                 <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/tv_data_size_value"
+                    android:id="@+id/tv_storage_data_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
                     android:textColor="?attr/colorOnTertiaryContainer"
                     android:textStyle="bold"
-                    tools:text="42.1 MB" />
+                    tools:text="96 MB" />
 
                 <com.google.android.material.textview.MaterialTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="1dp"
-                    android:text="@string/label_storage_data_size"
+                    android:text="@string/label_app_storage_data"
                     android:textAppearance="?attr/textAppearanceBodySmall"
                     android:textColor="?attr/colorOnTertiaryContainer" />
             </LinearLayout>
@@ -92,27 +103,27 @@
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="14dp">
 
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@drawable/rmx_document_folder_line"
+                    android:src="@drawable/rmx_delete_bin_line"
                     app:tint="?attr/colorOnPrimaryContainer" />
 
                 <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/tv_cache_size_value"
+                    android:id="@+id/tv_storage_cache_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
                     android:textColor="?attr/colorOnPrimaryContainer"
                     android:textStyle="bold"
-                    tools:text="8.4 MB" />
+                    tools:text="32 MB" />
 
                 <com.google.android.material.textview.MaterialTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="1dp"
-                    android:text="@string/label_storage_cache_size"
+                    android:text="@string/label_app_storage_cache"
                     android:textAppearance="?attr/textAppearanceBodySmall"
                     android:textColor="?attr/colorOnPrimaryContainer" />
             </LinearLayout>
@@ -121,11 +132,12 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_clear_cache"
-        style="@style/Widget.Material3Expressive.Button.OutlinedButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/action_clear_cache"
-        app:icon="@drawable/rmx_delete_bin_line" />
+        android:text="@string/action_clear_app_cache"
+        app:icon="@drawable/rmx_delete_bin_line"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp" />
 
 </LinearLayout>

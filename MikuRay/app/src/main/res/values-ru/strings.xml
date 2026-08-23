@@ -687,14 +687,21 @@
     <string name="pref_search_bar_chip_disabled">Отключено</string>
     <string name="pref_search_bar_chip_weather">Погода</string>
     <string name="pref_search_bar_chip_total_traffic">Общий трафик</string>
-    <string name="pref_search_bar_chip_cache">Использование памяти</string>
+    <string name="pref_search_bar_chip_app_storage">Размер данных и кэша приложения</string>
     <string name="pref_search_bar_chip_dual_swipe">Двойной режим (свайп)</string>
     <string name="pref_search_bar_chip_info_weather">Нажмите на плашку погоды, чтобы открыть подробности прогноза</string>
     <string name="pref_search_bar_chip_info_traffic">Нажмите на плашку трафика, чтобы открыть подробности использования данных</string>
-    <string name="pref_search_bar_chip_info_cache">Нажмите на плашку памяти, чтобы открыть данные приложения и кэш</string>
-    <string name="pref_search_bar_chip_info_dual">Проведите по плашке вверх или вниз, чтобы сменить содержимое. Нажмите, чтобы открыть подробности</string>
+    <string name="pref_search_bar_chip_info_app_storage">Нажмите на плашку хранилища, чтобы посмотреть размер данных и кэша и очистить кэш</string>
+    <string name="pref_search_bar_chip_info_dual">Проведите по плашке вверх или вниз, чтобы переключаться между погодой, трафиком и хранилищем. Нажмите, чтобы открыть подробности</string>
     <string name="pref_search_chip_gradient_title">Градиентный фон плашки</string>
-    <string name="pref_search_chip_gradient_summary">Применить градиентный фон (от цвета primary к tertiary) на плашке строки поиска, когда активна плашка погоды или общего трафика</string>
+    <string name="pref_search_chip_gradient_summary">Применять градиентный фон (от цвета primary к tertiary) на плашке строки поиска, когда активна плашка погоды, общего трафика или хранилища</string>
+    <string name="app_storage_chip_format">D %1$s · C %2$s</string>
+    <string name="label_app_storage_total">Общий размер хранилища приложения</string>
+    <string name="label_app_storage_data">Данные приложения</string>
+    <string name="label_app_storage_cache">Кэш</string>
+    <string name="action_clear_app_cache">Очистить кэш</string>
+    <string name="toast_app_cache_cleared">Кэш приложения очищен</string>
+    <string name="toast_app_cache_clear_failed">Не удалось удалить некоторые файлы кэша</string>
 
     <string name="pref_weather_unit_title">Единица измерения температуры</string>
     <string name="pref_weather_custom_location_title">Свое местоположение</string>
@@ -818,19 +825,6 @@
     <string name="label_total_traffic_month">В этом месяце</string>
     <string name="title_total_traffic_history">Последние 7 дней</string>
     <string name="label_total_traffic_no_history">Данных пока нет</string>
-
-    <string name="title_storage_detail">Использование памяти</string>
-    <string name="label_storage_data_size">Данные</string>
-    <string name="label_storage_cache_size">Кэш</string>
-    <string name="label_storage_calculating">Подсчёт…</string>
-    <string name="action_clear_cache">Очистить кэш</string>
-    <string name="clear_cache_confirm_title">Очистить кэш?</string>
-    <string name="clear_cache_confirm_summary">Это удалит временные файлы кэша (миниатюры, загруженные баннеры и т.д.). Ваши серверы, настройки и профили не пострадают.</string>
-    <string name="clear_cache_success">Кэш очищен</string>
-    <string name="clear_cache_failed">Не удалось очистить часть файлов кэша</string>
-    <string name="label_total_traffic_data_size">Данные</string>
-    <string name="label_total_traffic_cache_size">Кэш</string>
-    <string name="label_calculating">Подсчёт…</string>
     <string name="pref_network_security_enabled_title">Показывать сеть и безопасность</string>
     <string name="pref_network_security_enabled_summary">Показывать информацию о транспорте и безопасности на каждом сервере</string>
     <string name="pref_disable_sensor_text_title">Показывать полный адрес</string>
