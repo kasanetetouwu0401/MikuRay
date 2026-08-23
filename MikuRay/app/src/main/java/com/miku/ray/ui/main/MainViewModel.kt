@@ -45,6 +45,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     var subscriptionId: String = MmkvManager.decodeSettingsString(AppConfig.CACHE_SUBSCRIPTION_ID, "").orEmpty()
     var keywordFilter = ""
     private var activeTestId: String? = null
+    private var activeTestCompleted = 0
+    private var activeTestTotal = 0
     val serversCache = mutableListOf<ServersCache>()
 
     val isRunning by lazy { MutableLiveData<Boolean>() }
@@ -211,6 +213,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         // newest start intent from the fresh disposable probe process. Sending
         // a separate cancel here races that replacement and can drop the URL test.
         activeTestId = testId
+        activeTestCompleted = 0
+        activeTestTotal = serversCache.size
         MmkvManager.clearAllTestDelayResults(serversCache.map { it.guid }.toList())
         updateListAction.value = -1
 
@@ -594,6 +598,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     if (result != null) {
                         if (acceptsTestEvent(result.testId)) {
                             updateListAction.value = getPosition(result.guid)
+                            // Result events also drive the dialog's detail list.
+                            // The old adapter only receives TestProgressInfo rows,
+                            // so forwarding only updateListAction leaves it empty.
+                            activeTestCompleted += 1
+                            activeTestTotal = maxOf(activeTestTotal, activeTestCompleted)
+                            testProgressAction.value = TestProgressInfo(
+                                guid = result.guid,
+                                delayMillis = result.delayMillis,
+                                current = activeTestCompleted,
+                                total = activeTestTotal,
+                            )
                         }
                     } else {
                         val content = intent.getStringExtra("content")
@@ -605,11 +620,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val progress = intent.serializable<RealPingProgress>("content")
                     if (progress != null) {
                         if (acceptsTestEvent(progress.testId)) {
+                            activeTestCompleted = maxOf(activeTestCompleted, progress.completed)
+                            activeTestTotal = maxOf(activeTestTotal, progress.total)
                             testProgressAction.value = TestProgressInfo(
                                 guid = "",
                                 delayMillis = -1L,
-                                current = progress.completed,
-                                total = progress.total,
+                                current = activeTestCompleted,
+                                total = activeTestTotal,
                             )
                         }
                     } else {
