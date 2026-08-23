@@ -667,8 +667,8 @@
     <string name="pref_search_bar_chip_disabled">关闭</string>
     <string name="pref_search_bar_chip_weather">天气</string>
     <string name="pref_search_bar_chip_total_traffic">总流量使用</string>
-    <string name="pref_search_bar_chip_app_storage">应用数据和缓存大小</string>
-    <string name="pref_search_bar_chip_dual_swipe">双模式（滑动）</string>
+    <string name="pref_search_bar_chip_app_storage">应用数据</string>
+    <string name="pref_search_bar_chip_dual_swipe">多功能 (滑动)</string>
     <string name="pref_search_bar_chip_info_weather">点击天气组件可打开天气预报详情</string>
     <string name="pref_search_bar_chip_info_traffic">点击流量组件可打开流量使用详情</string>
     <string name="pref_search_bar_chip_info_app_storage">点击存储组件可查看数据和缓存大小，并清除缓存</string>

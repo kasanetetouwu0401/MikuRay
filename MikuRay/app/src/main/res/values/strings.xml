@@ -710,8 +710,8 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="pref_search_bar_chip_disabled">Disabled</string>
     <string name="pref_search_bar_chip_weather">Weather</string>
     <string name="pref_search_bar_chip_total_traffic">Total traffic usage</string>
-    <string name="pref_search_bar_chip_app_storage">App data + cache size</string>
-    <string name="pref_search_bar_chip_dual_swipe">Dual (swipe)</string>
+    <string name="pref_search_bar_chip_app_storage">App data</string>
+    <string name="pref_search_bar_chip_dual_swipe">Multi (swipe)</string>
     <string name="pref_search_bar_chip_info_weather">Weather chip can be clicked to open forecast details</string>
     <string name="pref_search_bar_chip_info_traffic">Traffic chip can be clicked to open data usage details</string>
     <string name="pref_search_bar_chip_info_app_storage">Storage chip can be clicked to view data and cache size, and clear cache</string>

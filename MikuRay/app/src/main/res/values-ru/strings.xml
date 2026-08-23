@@ -687,8 +687,8 @@
     <string name="pref_search_bar_chip_disabled">Отключено</string>
     <string name="pref_search_bar_chip_weather">Погода</string>
     <string name="pref_search_bar_chip_total_traffic">Общий трафик</string>
-    <string name="pref_search_bar_chip_app_storage">Размер данных и кэша приложения</string>
-    <string name="pref_search_bar_chip_dual_swipe">Двойной режим (свайп)</string>
+    <string name="pref_search_bar_chip_app_storage">Данные приложения</string>
+    <string name="pref_search_bar_chip_dual_swipe">Мульти (свайп)</string>
     <string name="pref_search_bar_chip_info_weather">Нажмите на плашку погоды, чтобы открыть подробности прогноза</string>
     <string name="pref_search_bar_chip_info_traffic">Нажмите на плашку трафика, чтобы открыть подробности использования данных</string>
     <string name="pref_search_bar_chip_info_app_storage">Нажмите на плашку хранилища, чтобы посмотреть размер данных и кэша и очистить кэш</string>
