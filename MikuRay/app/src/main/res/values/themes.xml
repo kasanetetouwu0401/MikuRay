@@ -932,6 +932,10 @@
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
     </style>
+    
+    <style name="BrandedSwitch" parent="AppThemeBase">
+        <item name="colorPrimary">@color/color_fab_active</item>
+    </style>
 
     <style name="ShapeAppearance.App.SmallComponent" parent="ShapeAppearance.Material3.SmallComponent">
         <item name="cornerFamily">rounded</item>
