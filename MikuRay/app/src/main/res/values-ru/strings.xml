@@ -696,7 +696,7 @@
     <string name="pref_search_chip_gradient_title">Градиентный фон плашки</string>
     <string name="pref_search_chip_gradient_summary">Применять градиентный фон (от цвета primary к tertiary) на плашке строки поиска, когда активна плашка погоды, общего трафика или хранилища</string>
     <string name="app_storage_chip_format">%1$s</string>
-    <string name="storage_dialog_title">Хранилище–MikuRay</string>
+    <string name="storage_dialog_title">Хранилище</string>
     <string name="label_app_storage_total">Всего</string>
     <string name="label_app_storage_app_size">Размер приложения</string>
     <string name="label_app_storage_data">Данные пользователя</string>
