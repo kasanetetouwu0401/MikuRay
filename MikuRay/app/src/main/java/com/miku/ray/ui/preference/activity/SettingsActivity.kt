@@ -57,6 +57,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
+/** How often the App Storage search-bar chip re-measures storage while active. */
+private const val APP_STORAGE_CHIP_REFRESH_INTERVAL_MS = 5_000L
+
 class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
     private lateinit var searchActionView: SearchPreferenceActionView
@@ -71,8 +74,6 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
     private var isColdStart = true
     private var dualSwipeChipSelection = SearchBarChipMode.WEATHER
-    private var realtimeChipRefreshJob: Job? = null
-    private var weatherFetchJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,7 +84,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         setupSearchActionView()
         setupWeatherTrafficChip()
         setupSearchBarChipSwipe()
-        startRealtimeChipRefreshLoop()
+        startAppStorageAutoRefresh()
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
@@ -308,58 +309,53 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         tvAppStorage.isVisible = false
     }
 
-    private fun startRealtimeChipRefreshLoop() {
-        realtimeChipRefreshJob?.cancel()
-        realtimeChipRefreshJob = lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                while (isActive) {
-                    refreshTotalTrafficChip(updateVisibility = false)
-                    refreshAppStorageChip(updateVisibility = false)
-                    if (isWeatherChipSelected()) loadWeatherChip(updateVisibility = false)
-                    delay(REALTIME_CHIP_REFRESH_INTERVAL_MS)
-                }
-            }
-        }
-    }
-
-    private fun refreshTotalTrafficChip(updateVisibility: Boolean = true) {
+    private fun refreshTotalTrafficChip() {
         val totalTraffic = MmkvManager.getTotalTrafficString()
-        if (tvTotalTraffic.text?.toString() != totalTraffic) {
-            tvTotalTraffic.text = totalTraffic
-        }
-        if (updateVisibility && isTotalTrafficChipSelected()) {
+        tvTotalTraffic.text = totalTraffic
+        if (isTotalTrafficChipSelected()) {
             ivTotalTrafficIcon.isVisible = true
             tvTotalTraffic.isVisible = true
             layoutWeatherChip.isVisible = true
         }
     }
 
-    private fun refreshAppStorageChip(updateVisibility: Boolean = true) {
+    private var appStorageChipJob: Job? = null
+
+    private fun refreshAppStorageChip() {
         if (!isAppStorageChipSelected()) return
 
-        lifecycleScope.launch {
-            val storage = withContext(Dispatchers.IO) {
-                applicationContext.getAppStorageInfo()
-            }
-            if (!isFinishing && !isDestroyed && isAppStorageChipSelected()) {
-                val storageText = getString(
-                    R.string.app_storage_chip_format,
-                    formatStorageBytes(storage.totalBytes)
-                )
-                if (tvAppStorage.text?.toString() != storageText) {
-                    tvAppStorage.text = storageText
-                }
-                if (updateVisibility) {
-                    ivAppStorageIcon.isVisible = true
-                    tvAppStorage.isVisible = true
-                    layoutWeatherChip.isVisible = true
-                }
-            }
+        // Measuring storage walks the app's data/cache directories on disk,
+        // so it must be computed off the main thread to avoid jank.
+        appStorageChipJob?.cancel()
+        appStorageChipJob = lifecycleScope.launch {
+            val storage = withContext(Dispatchers.IO) { getAppStorageInfo() }
+            if (!isAppStorageChipSelected()) return@launch
+            tvAppStorage.text = getString(
+                R.string.app_storage_chip_format,
+                formatStorageBytes(storage.totalBytes)
+            )
+            ivAppStorageIcon.isVisible = true
+            tvAppStorage.isVisible = true
+            layoutWeatherChip.isVisible = true
         }
     }
 
-    private companion object {
-        const val REALTIME_CHIP_REFRESH_INTERVAL_MS = 1000L
+    /**
+     * Keeps the App Storage chip figure current while it's the active chip,
+     * instead of only updating on mode switches. Uses repeatOnLifecycle so
+     * the loop automatically pauses while the Activity isn't visible.
+     */
+    private fun startAppStorageAutoRefresh() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (isActive) {
+                    if (isAppStorageChipSelected()) {
+                        refreshAppStorageChip()
+                    }
+                    delay(APP_STORAGE_CHIP_REFRESH_INTERVAL_MS)
+                }
+            }
+        }
     }
 
     private fun refreshWeatherChip() {
@@ -398,8 +394,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
             tvWeatherTemp.isVisible = true
         }
 
-        weatherFetchJob?.cancel()
-        weatherFetchJob = lifecycleScope.launch {
+        lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@SettingsActivity, force = true)
             if (weather == null) {
                 if (cached == null && isWeatherChipSelected()) layoutWeatherChip.isVisible = false
@@ -409,31 +404,25 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         }
     }
 
-    private fun loadWeatherChip(updateVisibility: Boolean = true) {
+    private fun loadWeatherChip() {
         if (!isWeatherChipSelected()) return
-        if (updateVisibility) layoutWeatherChip.isVisible = true
+        layoutWeatherChip.isVisible = true
 
         val fresh = WeatherHelper.getCachedWeather()
         val stale = fresh ?: WeatherHelper.getCachedWeatherStale()
 
         if (stale != null) {
-            applyWeatherToChip(stale, updateVisibility)
+            applyWeatherToChip(stale)
         } else {
-            if (ivWeatherIcon.tag != RemixR.drawable.rmx_cloud_line) {
-                ivWeatherIcon.setImageResource(RemixR.drawable.rmx_cloud_line)
-                ivWeatherIcon.tag = RemixR.drawable.rmx_cloud_line
-            }
-            if (updateVisibility) ivWeatherIcon.isVisible = true
-            val loadingText = getString(R.string.weather_loading)
-            if (tvWeatherTemp.text?.toString() != loadingText) {
-                tvWeatherTemp.text = loadingText
-            }
-            if (updateVisibility) tvWeatherTemp.isVisible = true
+            ivWeatherIcon.setImageResource(RemixR.drawable.rmx_cloud_line)
+            ivWeatherIcon.isVisible = true
+            tvWeatherTemp.text = getString(R.string.weather_loading)
+            tvWeatherTemp.isVisible = true
         }
 
-        if (fresh != null || weatherFetchJob?.isActive == true) return
+        if (fresh != null) return
 
-        weatherFetchJob = lifecycleScope.launch {
+        lifecycleScope.launch {
             val weather = WeatherHelper.fetchCurrentWeather(this@SettingsActivity)
             if (weather == null) {
                 if (stale == null && isWeatherChipSelected()) layoutWeatherChip.isVisible = false
@@ -443,16 +432,10 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         }
     }
 
-    private fun applyWeatherToChip(weather: WeatherHelper.WeatherResult, updateVisibility: Boolean = true) {
-        if (ivWeatherIcon.tag != weather.iconRes) {
-            ivWeatherIcon.setImageResource(weather.iconRes)
-            ivWeatherIcon.tag = weather.iconRes
-        }
-        val temperatureText = weather.getTemperatureString(WeatherHelper.isCelsius())
-        if (tvWeatherTemp.text?.toString() != temperatureText) {
-            tvWeatherTemp.text = temperatureText
-        }
-        if (updateVisibility && isWeatherChipSelected()) {
+    private fun applyWeatherToChip(weather: WeatherHelper.WeatherResult) {
+        ivWeatherIcon.setImageResource(weather.iconRes)
+        tvWeatherTemp.text = weather.getTemperatureString(WeatherHelper.isCelsius())
+        if (isWeatherChipSelected()) {
             ivWeatherIcon.isVisible = true
             tvWeatherTemp.isVisible = true
             layoutWeatherChip.isVisible = true
@@ -511,12 +494,6 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
             startActivity(intent, options.toBundle())
         }
-    }
-
-    override fun onDestroy() {
-        realtimeChipRefreshJob?.cancel()
-        weatherFetchJob?.cancel()
-        super.onDestroy()
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
