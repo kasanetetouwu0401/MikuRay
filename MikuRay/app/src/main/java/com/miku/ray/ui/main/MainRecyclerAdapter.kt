@@ -65,6 +65,7 @@ class MainRecyclerAdapter(
         notifyDataSetChanged()
     }
 
+    private var isRunningObserver: androidx.lifecycle.Observer<Boolean>? = null
     private var selectedBannerController: SelectedProfileBannerController? = null
 
     @SuppressLint("NotifyDataSetChanged")
@@ -78,29 +79,19 @@ class MainRecyclerAdapter(
         }
     }
 
-    /**
-     * Re-binds the currently selected server's row so its status dot picks up
-     * the latest [MainViewModel.isRunning] value.
-     *
-     * This used to be driven by an observer the adapter registered on itself by
-     * casting `recyclerView.context` to a [androidx.lifecycle.LifecycleOwner].
-     * That cast is not guaranteed to succeed (or to reflect the right
-     * lifecycle) depending on how the hosting Fragment/RecyclerView context is
-     * set up, so the dot could silently stop refreshing even though the VPN
-     * was actually connected. The caller (the Fragment that owns this
-     * adapter's RecyclerView) now observes isRunning itself with its own
-     * viewLifecycleOwner and calls this method directly, which is reliable.
-     */
-    fun refreshConnectionStatus() {
-        val selectedGuid = MmkvManager.getSelectServer()
-        val position = data.indexOfFirst { it.guid == selectedGuid }
-        if (position >= 0) {
-            notifyItemChanged(position)
-        }
-    }
-
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
+        val lifecycleOwner = recyclerView.context as? androidx.lifecycle.LifecycleOwner
+        if (lifecycleOwner != null) {
+            isRunningObserver = androidx.lifecycle.Observer { _ ->
+                val selectedGuid = MmkvManager.getSelectServer()
+                val position = data.indexOfFirst { it.guid == selectedGuid }
+                if (position >= 0) {
+                    notifyItemChanged(position)
+                }
+            }
+            mainViewModel.isRunning.observe(lifecycleOwner, isRunningObserver!!)
+        }
 
         val controller = SelectedProfileBannerController(recyclerView.context)
         selectedBannerController = controller
@@ -115,6 +106,9 @@ class MainRecyclerAdapter(
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
+        isRunningObserver?.let {
+            mainViewModel.isRunning.removeObserver(it)
+        }
         selectedBannerController?.unregisterChangeListener()
         selectedBannerController = null
     }

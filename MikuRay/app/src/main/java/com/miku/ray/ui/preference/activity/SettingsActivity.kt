@@ -18,9 +18,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -49,16 +47,8 @@ import com.miku.ray.util.showTotalTrafficDetailDialog
 import com.miku.ray.util.showAppStorageDetailDialog
 import com.miku.ray.util.formatStorageBytes
 import com.miku.ray.util.getAppStorageInfo
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.math.abs
-
-/** How often the App Storage search-bar chip re-measures storage while active. */
-private const val APP_STORAGE_CHIP_REFRESH_INTERVAL_MS = 5_000L
 
 class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
@@ -84,7 +74,6 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         setupSearchActionView()
         setupWeatherTrafficChip()
         setupSearchBarChipSwipe()
-        startAppStorageAutoRefresh()
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
@@ -319,43 +308,17 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         }
     }
 
-    private var appStorageChipJob: Job? = null
-
     private fun refreshAppStorageChip() {
         if (!isAppStorageChipSelected()) return
 
-        // Measuring storage walks the app's data/cache directories on disk,
-        // so it must be computed off the main thread to avoid jank.
-        appStorageChipJob?.cancel()
-        appStorageChipJob = lifecycleScope.launch {
-            val storage = withContext(Dispatchers.IO) { getAppStorageInfo() }
-            if (!isAppStorageChipSelected()) return@launch
-            tvAppStorage.text = getString(
-                R.string.app_storage_chip_format,
-                formatStorageBytes(storage.totalBytes)
-            )
-            ivAppStorageIcon.isVisible = true
-            tvAppStorage.isVisible = true
-            layoutWeatherChip.isVisible = true
-        }
-    }
-
-    /**
-     * Keeps the App Storage chip figure current while it's the active chip,
-     * instead of only updating on mode switches. Uses repeatOnLifecycle so
-     * the loop automatically pauses while the Activity isn't visible.
-     */
-    private fun startAppStorageAutoRefresh() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                while (isActive) {
-                    if (isAppStorageChipSelected()) {
-                        refreshAppStorageChip()
-                    }
-                    delay(APP_STORAGE_CHIP_REFRESH_INTERVAL_MS)
-                }
-            }
-        }
+        val storage = getAppStorageInfo()
+        tvAppStorage.text = getString(
+            R.string.app_storage_chip_format,
+            formatStorageBytes(storage.totalBytes)
+        )
+        ivAppStorageIcon.isVisible = true
+        tvAppStorage.isVisible = true
+        layoutWeatherChip.isVisible = true
     }
 
     private fun refreshWeatherChip() {
