@@ -5,7 +5,6 @@ import android.content.DialogInterface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import java.util.ArrayDeque
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -35,30 +34,6 @@ class TestProgressDialogController(
     private var dialog: AlertDialog? = null
     private var binding: DialogUrlTestProgressBinding? = null
     private val adapter = ResultAdapter()
-    private val pendingRows = ArrayDeque<ResultRow>()
-    private var rowDrainScheduled = false
-    private var finishRequested = false
-
-    private val rowDrainRunnable = object : Runnable {
-        override fun run() {
-            rowDrainScheduled = false
-            val b = binding ?: return
-            val row = if (pendingRows.isEmpty()) null else pendingRows.removeFirst()
-            if (row != null) {
-                adapter.append(row)
-                if (adapter.itemCount > 0) {
-                    b.listView.smoothScrollToPosition(adapter.itemCount - 1)
-                }
-            }
-
-            if (pendingRows.isNotEmpty()) {
-                rowDrainScheduled = true
-                b.listView.postDelayed(this, ROW_REVEAL_INTERVAL_MS)
-            } else if (finishRequested) {
-                applyFinishedState(b)
-            }
-        }
-    }
 
     val isShowing: Boolean
         get() = dialog?.isShowing == true
@@ -66,10 +41,6 @@ class TestProgressDialogController(
     fun show(total: Int, @StringRes titleResId: Int = defaultTitleResId()) {
         if (isShowing) {
             val b = binding ?: return
-            b.listView.removeCallbacks(rowDrainRunnable)
-            pendingRows.clear()
-            rowDrainScheduled = false
-            finishRequested = false
             adapter.clear()
             b.tvTitle.setText(titleResId)
             b.progressIndicator.visibility = View.VISIBLE
@@ -87,9 +58,6 @@ class TestProgressDialogController(
         b.progressIndicator.isIndeterminate = true
         b.listView.layoutManager = LinearLayoutManager(context)
         b.listView.adapter = adapter
-        pendingRows.clear()
-        rowDrainScheduled = false
-        finishRequested = false
         adapter.clear()
 
         val d = MaterialAlertDialogBuilder(context)
@@ -117,7 +85,7 @@ class TestProgressDialogController(
         if (info.guid.isNotEmpty()) {
             val profile = MmkvManager.decodeServerConfig(info.guid)
             val content = rowContentFor(info)
-            pendingRows.addLast(
+            adapter.append(
                 ResultRow(
                     remarks = profile?.remarks.orEmpty(),
                     protocol = profile?.configType?.name.orEmpty(),
@@ -125,7 +93,9 @@ class TestProgressDialogController(
                     resultColorRes = content.colorRes
                 )
             )
-            scheduleRowDrain(b)
+            b.listView.post {
+                if (adapter.itemCount > 0) b.listView.smoothScrollToPosition(adapter.itemCount - 1)
+            }
         }
 
         if (b.progressIndicator.isIndeterminate) b.progressIndicator.isIndeterminate = false
@@ -141,33 +111,17 @@ class TestProgressDialogController(
         val b = binding ?: return
         b.progressIndicator.isIndeterminate = false
         b.progressIndicator.setProgressCompat(100, true)
-        finishRequested = true
-        if (pendingRows.isEmpty()) applyFinishedState(b)
-        else scheduleRowDrain(b)
+        b.progressIndicator.visibility = View.GONE
+        
+        dialog?.getButton(DialogInterface.BUTTON_NEGATIVE)?.visibility = View.GONE
+        dialog?.getButton(DialogInterface.BUTTON_POSITIVE)?.setText(android.R.string.ok)
     }
 
     fun dismiss() {
-        binding?.listView?.removeCallbacks(rowDrainRunnable)
-        pendingRows.clear()
-        rowDrainScheduled = false
-        finishRequested = false
         dialog?.dismiss()
         dialog = null
         binding = null
         adapter.clear()
-    }
-
-    private fun scheduleRowDrain(b: DialogUrlTestProgressBinding) {
-        if (rowDrainScheduled || binding !== b) return
-        rowDrainScheduled = true
-        b.listView.post(rowDrainRunnable)
-    }
-
-    private fun applyFinishedState(b: DialogUrlTestProgressBinding) {
-        finishRequested = false
-        b.progressIndicator.visibility = View.GONE
-        dialog?.getButton(DialogInterface.BUTTON_NEGATIVE)?.visibility = View.GONE
-        dialog?.getButton(DialogInterface.BUTTON_POSITIVE)?.setText(android.R.string.ok)
     }
 
     private fun defaultTitleResId() = when (mode) {
@@ -210,10 +164,6 @@ class TestProgressDialogController(
         val resultText: String,
         @androidx.annotation.ColorRes val resultColorRes: Int
     )
-
-    private companion object {
-        const val ROW_REVEAL_INTERVAL_MS = 70L
-    }
 
     private inner class ResultAdapter : RecyclerView.Adapter<ResultAdapter.RowHolder>() {
         private val rows = mutableListOf<ResultRow>()

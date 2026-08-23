@@ -1,6 +1,7 @@
 package com.miku.ray.service
 
 import android.content.Context
+import android.os.SystemClock
 import com.miku.ray.core.CoreConfigContextBuilder
 import com.miku.ray.core.CoreConfigManager
 import com.miku.ray.core.CoreNativeManager
@@ -43,6 +44,7 @@ internal object RealPingExecutionLimiter {
 
 private class RealPingProgressState(private val total: Int) {
     private var completed = 0
+    private var lastProgressAt = SystemClock.elapsedRealtime()
 
     fun initial(): RealPingEvent.Progress = RealPingEvent.Progress(completed = 0, total = total)
 
@@ -50,7 +52,15 @@ private class RealPingProgressState(private val total: Int) {
     fun record(): RealPingEvent.Progress? {
         if (completed >= total) return null
         completed++
+
+        val now = SystemClock.elapsedRealtime()
+        if (completed < total && now - lastProgressAt < PROGRESS_UPDATE_INTERVAL_MS) return null
+        lastProgressAt = now
         return RealPingEvent.Progress(completed = completed, total = total)
+    }
+
+    private companion object {
+        const val PROGRESS_UPDATE_INTERVAL_MS = 100L
     }
 }
 
@@ -121,23 +131,23 @@ class RealPingWorkerService(
     private val scope = CoroutineScope(job + dispatcher + CoroutineName("RealPingBatchWorker"))
     private val finished = AtomicBoolean(false)
     private val resultLock = Any()
-    private val eventLock = Any()
     private val probeDelays = mutableMapOf<String, Long>()
     private val sourceDelays = mutableMapOf<String, Long>()
 
     fun start() {
         scope.launch {
             val plan = RealPingProbePlan.build(guids)
-            val progress = RealPingProgressState(plan.sources.size)
+            val progress = RealPingProgressState(plan.probeGuids.size)
             onEvent(progress.initial())
-            emitCompletedSources(plan.sources.filter { it.memberGuids.isEmpty() }, progress)
+            emitCompletedSources(plan.sources.filter { it.memberGuids.isEmpty() })
 
             val jobs = plan.probeGuids.map { guid ->
                 scope.launch {
                     val delayMillis = safelyProbe(guid)
                     currentCoroutineContext().ensureActive()
                     synchronized(resultLock) { probeDelays[guid] = delayMillis }
-                    emitCompletedSources(plan.sourcesByMemberGuid[guid].orEmpty(), progress)
+                    emitCompletedSources(plan.sourcesByMemberGuid[guid].orEmpty())
+                    progress.record()?.let(onEvent)
                 }
             }
             jobs.joinAll()
@@ -153,10 +163,7 @@ class RealPingWorkerService(
         return summary()
     }
 
-    private fun emitCompletedSources(
-        sources: List<RealPingProbeSource>,
-        progress: RealPingProgressState,
-    ) {
+    private fun emitCompletedSources(sources: List<RealPingProbeSource>) {
         val results = synchronized(resultLock) {
             sources.mapNotNull { source ->
                 if (source.guid in sourceDelays ||
@@ -169,16 +176,7 @@ class RealPingWorkerService(
                 RealPingEvent.Result(source.guid, delayMillis)
             }
         }
-
-        synchronized(eventLock) {
-            if (!finished.get()) {
-                results.forEach { result ->
-                    if (finished.get()) return@forEach
-                    onEvent(result)
-                    progress.record()?.let(onEvent)
-                }
-            }
-        }
+        if (!finished.get()) results.forEach(onEvent)
     }
 
     private fun summary(): RealPingEvent.Finish = synchronized(resultLock) {
