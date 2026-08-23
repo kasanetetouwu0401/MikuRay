@@ -21,9 +21,7 @@ object SearchChipGradientController {
         val ivWeatherIcon: ImageView,
         val tvWeatherTemp: TextView,
         val ivTotalTrafficIcon: ImageView,
-        val tvTotalTraffic: TextView,
-        val ivAppStorageIcon: ImageView,
-        val tvAppStorage: TextView
+        val tvTotalTraffic: TextView
     )
 
     fun isEnabled(): Boolean {
@@ -40,9 +38,7 @@ object SearchChipGradientController {
                 ivWeatherIcon = binding.ivWeatherIcon,
                 tvWeatherTemp = binding.tvWeatherTemp,
                 ivTotalTrafficIcon = binding.ivTotalTrafficIcon,
-                tvTotalTraffic = binding.tvTotalTraffic,
-                ivAppStorageIcon = binding.ivAppStorageIcon,
-                tvAppStorage = binding.tvAppStorage
+                tvTotalTraffic = binding.tvTotalTraffic
             )
         )
     }
@@ -73,10 +69,8 @@ object SearchChipGradientController {
         val tintList = ColorStateList.valueOf(activity.getColorAttr("colorOnPrimary"))
         ImageViewCompat.setImageTintList(chip.ivWeatherIcon, tintList)
         ImageViewCompat.setImageTintList(chip.ivTotalTrafficIcon, tintList)
-        ImageViewCompat.setImageTintList(chip.ivAppStorageIcon, tintList)
         chip.tvWeatherTemp.setTextColor(tintList.defaultColor)
         chip.tvTotalTraffic.setTextColor(tintList.defaultColor)
-        chip.tvAppStorage.setTextColor(tintList.defaultColor)
     }
 
     private fun applyGradientOff(activity: AppCompatActivity, chip: ChipViews) {
@@ -85,9 +79,7 @@ object SearchChipGradientController {
         val tintList = ColorStateList.valueOf(activity.getColorAttr("colorOnSurfaceVariant"))
         ImageViewCompat.setImageTintList(chip.ivWeatherIcon, tintList)
         ImageViewCompat.setImageTintList(chip.ivTotalTrafficIcon, tintList)
-        ImageViewCompat.setImageTintList(chip.ivAppStorageIcon, tintList)
         chip.tvWeatherTemp.setTextColor(tintList.defaultColor)
         chip.tvTotalTraffic.setTextColor(tintList.defaultColor)
-        chip.tvAppStorage.setTextColor(tintList.defaultColor)
     }
 }

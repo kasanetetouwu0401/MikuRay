@@ -95,9 +95,6 @@ import com.miku.ray.util.showMikuRayExportPasswordDialog
 import com.miku.ray.util.showMikuRayImportPasswordDialog
 import com.miku.ray.util.showSubUpdateDiffDialog
 import com.miku.ray.util.showTotalTrafficDetailDialog
-import com.miku.ray.util.showAppStorageDetailDialog
-import com.miku.ray.util.formatStorageBytes
-import com.miku.ray.util.getAppStorageInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -295,11 +292,11 @@ class MainActivity : HelperBaseActivity(),
                 val distanceY = lastEvent.y - firstEvent.y
                 if (abs(distanceY) <= abs(distanceX) || abs(distanceY) < swipeThreshold) return false
 
-                // Advance through all three chip contents with wrap-around.
-                dualSwipeChipSelection = when (dualSwipeChipSelection) {
-                    SearchBarChipMode.WEATHER -> SearchBarChipMode.TOTAL_TRAFFIC
-                    SearchBarChipMode.TOTAL_TRAFFIC -> SearchBarChipMode.APP_STORAGE
-                    else -> SearchBarChipMode.WEATHER
+                // With two items, both vertical directions advance the carousel with wrap-around.
+                dualSwipeChipSelection = if (dualSwipeChipSelection == SearchBarChipMode.WEATHER) {
+                    SearchBarChipMode.TOTAL_TRAFFIC
+                } else {
+                    SearchBarChipMode.WEATHER
                 }
                 SearchBarChipMode.saveDualSelection(dualSwipeChipSelection)
                 refreshSearchBarChip()
@@ -333,12 +330,6 @@ class MainActivity : HelperBaseActivity(),
             (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.TOTAL_TRAFFIC)
     }
 
-    private fun isAppStorageChipSelected(): Boolean {
-        val mode = SearchBarChipMode.current()
-        return mode == SearchBarChipMode.APP_STORAGE ||
-            (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.APP_STORAGE)
-    }
-
     private fun refreshSearchBarChip() {
         val mode = SearchBarChipMode.current()
         if (mode == SearchBarChipMode.DUAL_SWIPE) {
@@ -348,25 +339,17 @@ class MainActivity : HelperBaseActivity(),
         }
         val weatherEnabled = isWeatherChipSelected()
         val totalTrafficEnabled = isTotalTrafficChipSelected()
-        val appStorageEnabled = isAppStorageChipSelected()
 
         SearchChipGradientController.applyState(this, binding)
 
         when {
             weatherEnabled -> {
                 hideTotalTrafficChip()
-                hideAppStorageChip()
                 refreshWeatherChip()
             }
             totalTrafficEnabled -> {
                 hideWeatherChipViews()
-                hideAppStorageChip()
                 refreshTotalTrafficChip()
-            }
-            appStorageEnabled -> {
-                hideWeatherChipViews()
-                hideTotalTrafficChip()
-                refreshAppStorageChip()
             }
             else -> {
                 binding.layoutWeatherChip.isVisible = false
@@ -384,11 +367,6 @@ class MainActivity : HelperBaseActivity(),
         binding.tvTotalTraffic.isVisible = false
     }
 
-    private fun hideAppStorageChip() {
-        binding.ivAppStorageIcon.isVisible = false
-        binding.tvAppStorage.isVisible = false
-    }
-
     private fun refreshTotalTrafficChip() {
         val totalTraffic = MmkvManager.getTotalTrafficString()
         
@@ -398,19 +376,6 @@ class MainActivity : HelperBaseActivity(),
             binding.tvTotalTraffic.isVisible = true
             binding.layoutWeatherChip.isVisible = true
         }
-    }
-
-    private fun refreshAppStorageChip() {
-        if (!isAppStorageChipSelected()) return
-
-        val storage = getAppStorageInfo()
-        binding.tvAppStorage.text = getString(
-            R.string.app_storage_chip_format,
-            formatStorageBytes(storage.totalBytes)
-        )
-        binding.ivAppStorageIcon.isVisible = true
-        binding.tvAppStorage.isVisible = true
-        binding.layoutWeatherChip.isVisible = true
     }
 
     private fun refreshWeatherChip() {
@@ -670,11 +635,6 @@ class MainActivity : HelperBaseActivity(),
                 isTotalTrafficChipSelected() -> {
                     showTotalTrafficDetailDialog(this)
                 }
-                isAppStorageChipSelected() -> {
-                    showAppStorageDetailDialog(this) {
-                        if (isAppStorageChipSelected()) refreshAppStorageChip()
-                    }
-                }
             }
         }
     }
@@ -878,14 +838,10 @@ class MainActivity : HelperBaseActivity(),
             refreshTabBadges()
             if (SearchBarChipMode.current() in setOf(
                     SearchBarChipMode.TOTAL_TRAFFIC,
-                    SearchBarChipMode.APP_STORAGE,
                     SearchBarChipMode.DUAL_SWIPE
                 )) {
                 SearchChipGradientController.applyState(this, binding)
-                when {
-                    isTotalTrafficChipSelected() -> refreshTotalTrafficChip()
-                    isAppStorageChipSelected() -> refreshAppStorageChip()
-                }
+                if (isTotalTrafficChipSelected()) refreshTotalTrafficChip()
             }
         }
 

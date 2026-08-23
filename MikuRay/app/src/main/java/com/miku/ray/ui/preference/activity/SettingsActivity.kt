@@ -44,9 +44,6 @@ import com.miku.ray.util.SearchChipGradientController
 import com.miku.ray.ui.weather.WeatherHelper
 import com.miku.ray.util.showDeleteConfirmDialog
 import com.miku.ray.util.showTotalTrafficDetailDialog
-import com.miku.ray.util.showAppStorageDetailDialog
-import com.miku.ray.util.formatStorageBytes
-import com.miku.ray.util.getAppStorageInfo
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -59,8 +56,6 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     private lateinit var tvWeatherTemp: TextView
     private lateinit var ivTotalTrafficIcon: ImageView
     private lateinit var tvTotalTraffic: TextView
-    private lateinit var ivAppStorageIcon: ImageView
-    private lateinit var tvAppStorage: TextView
 
     private var isColdStart = true
     private var dualSwipeChipSelection = SearchBarChipMode.WEATHER
@@ -150,8 +145,6 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         tvWeatherTemp = findViewById(R.id.tv_weather_temp)
         ivTotalTrafficIcon = findViewById(R.id.iv_total_traffic_icon)
         tvTotalTraffic = findViewById(R.id.tv_total_traffic)
-        ivAppStorageIcon = findViewById(R.id.iv_app_storage_icon)
-        tvAppStorage = findViewById(R.id.tv_app_storage)
 
         layoutWeatherChip.setOnClickListener {
             when {
@@ -160,11 +153,6 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
                 }
                 isTotalTrafficChipSelected() -> {
                     showTotalTrafficDetailDialog(this)
-                }
-                isAppStorageChipSelected() -> {
-                    showAppStorageDetailDialog(this) {
-                        if (isAppStorageChipSelected()) refreshAppStorageChip()
-                    }
                 }
             }
         }
@@ -175,9 +163,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         ivWeatherIcon = ivWeatherIcon,
         tvWeatherTemp = tvWeatherTemp,
         ivTotalTrafficIcon = ivTotalTrafficIcon,
-        tvTotalTraffic = tvTotalTraffic,
-        ivAppStorageIcon = ivAppStorageIcon,
-        tvAppStorage = tvAppStorage
+        tvTotalTraffic = tvTotalTraffic
     )
 
     private fun weatherLocationReady(): Boolean =
@@ -204,11 +190,11 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
                 val distanceY = lastEvent.y - firstEvent.y
                 if (abs(distanceY) <= abs(distanceX) || abs(distanceY) < swipeThreshold) return false
 
-                // Advance through all three chip contents with wrap-around.
-                dualSwipeChipSelection = when (dualSwipeChipSelection) {
-                    SearchBarChipMode.WEATHER -> SearchBarChipMode.TOTAL_TRAFFIC
-                    SearchBarChipMode.TOTAL_TRAFFIC -> SearchBarChipMode.APP_STORAGE
-                    else -> SearchBarChipMode.WEATHER
+                // With two items, both vertical directions advance the carousel with wrap-around.
+                dualSwipeChipSelection = if (dualSwipeChipSelection == SearchBarChipMode.WEATHER) {
+                    SearchBarChipMode.TOTAL_TRAFFIC
+                } else {
+                    SearchBarChipMode.WEATHER
                 }
                 SearchBarChipMode.saveDualSelection(dualSwipeChipSelection)
                 refreshSearchBarChip()
@@ -242,12 +228,6 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
             (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.TOTAL_TRAFFIC)
     }
 
-    private fun isAppStorageChipSelected(): Boolean {
-        val mode = SearchBarChipMode.current()
-        return mode == SearchBarChipMode.APP_STORAGE ||
-            (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.APP_STORAGE)
-    }
-
     private fun refreshSearchBarChip() {
         val mode = SearchBarChipMode.current()
         if (mode == SearchBarChipMode.DUAL_SWIPE) {
@@ -257,25 +237,17 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         }
         val weatherEnabled = isWeatherChipSelected()
         val totalTrafficEnabled = isTotalTrafficChipSelected()
-        val appStorageEnabled = isAppStorageChipSelected()
 
         SearchChipGradientController.applyState(this, chipViews())
 
         when {
             weatherEnabled -> {
                 hideTotalTrafficChip()
-                hideAppStorageChip()
                 refreshWeatherChip()
             }
             totalTrafficEnabled -> {
                 hideWeatherChipViews()
-                hideAppStorageChip()
                 refreshTotalTrafficChip()
-            }
-            appStorageEnabled -> {
-                hideWeatherChipViews()
-                hideTotalTrafficChip()
-                refreshAppStorageChip()
             }
             else -> {
                 layoutWeatherChip.isVisible = false
@@ -293,11 +265,6 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         tvTotalTraffic.isVisible = false
     }
 
-    private fun hideAppStorageChip() {
-        ivAppStorageIcon.isVisible = false
-        tvAppStorage.isVisible = false
-    }
-
     private fun refreshTotalTrafficChip() {
         val totalTraffic = MmkvManager.getTotalTrafficString()
         tvTotalTraffic.text = totalTraffic
@@ -306,19 +273,6 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
             tvTotalTraffic.isVisible = true
             layoutWeatherChip.isVisible = true
         }
-    }
-
-    private fun refreshAppStorageChip() {
-        if (!isAppStorageChipSelected()) return
-
-        val storage = getAppStorageInfo()
-        tvAppStorage.text = getString(
-            R.string.app_storage_chip_format,
-            formatStorageBytes(storage.totalBytes)
-        )
-        ivAppStorageIcon.isVisible = true
-        tvAppStorage.isVisible = true
-        layoutWeatherChip.isVisible = true
     }
 
     private fun refreshWeatherChip() {
