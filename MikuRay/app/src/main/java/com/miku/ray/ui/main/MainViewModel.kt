@@ -18,6 +18,9 @@ import com.miku.ray.dto.GroupMapItem
 import com.miku.ray.dto.entities.ServersCache
 import com.miku.ray.dto.entities.SubscriptionCache
 import com.miku.ray.dto.SubscriptionUpdateResult
+import com.miku.ray.dto.RealPingProgress
+import com.miku.ray.dto.RealPingResult
+import com.miku.ray.dto.RealPingSummary
 import com.miku.ray.dto.TestProgressInfo
 import com.miku.ray.ui.bottomsheet.SortSubBottomSheet
 import com.miku.ray.dto.TestServiceMessage
@@ -34,12 +37,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Collections
+import java.util.UUID
 import java.util.regex.PatternSyntaxException
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var serverList = mutableListOf<String>()
     var subscriptionId: String = MmkvManager.decodeSettingsString(AppConfig.CACHE_SUBSCRIPTION_ID, "").orEmpty()
     var keywordFilter = ""
+    private var activeTestId: String? = null
     val serversCache = mutableListOf<ServersCache>()
 
     val isRunning by lazy { MutableLiveData<Boolean>() }
@@ -201,21 +206,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun testAllRealPing(onlyTcp: Boolean = false) {
+        val testId = UUID.randomUUID().toString()
         MessageUtil.sendMsg2TestService(
             getApplication(),
-            TestServiceMessage(key = AppConfig.MSG_MEASURE_CONFIG_CANCEL)
+            TestServiceMessage(
+                key = AppConfig.MSG_MEASURE_CONFIG_CANCEL,
+                testId = activeTestId.orEmpty(),
+            )
         )
+        activeTestId = testId
         MmkvManager.clearAllTestDelayResults(serversCache.map { it.guid }.toList())
         updateListAction.value = -1
 
         viewModelScope.launch(Dispatchers.Default) {
             if (serversCache.isEmpty()) {
+                activeTestId = null
                 return@launch
             }
             MessageUtil.sendMsg2TestService(
                 getApplication(),
                 TestServiceMessage(
                     key = AppConfig.MSG_MEASURE_CONFIG_START,
+                    testId = testId,
                     subscriptionId = subscriptionId,
                     serverGuids = if (keywordFilter.isNotEmpty()) serversCache.map { it.guid } else emptyList(),
                     onlyTcp = onlyTcp
@@ -450,8 +462,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return config?.subscriptionId
     }
 
-    fun onTestsFinished() {
+    fun onTestsFinished(cancelled: Boolean = false) {
         viewModelScope.launch(Dispatchers.Default) {
+            if (cancelled) return@launch
             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_REMOVE_INVALID_AFTER_TEST)) {
                 removeInvalidServer()
             }
@@ -497,14 +510,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun cancelRealPingTest() {
         MessageUtil.sendMsg2TestService(
             getApplication(),
-            TestServiceMessage(key = AppConfig.MSG_MEASURE_CONFIG_CANCEL)
+            TestServiceMessage(
+                key = AppConfig.MSG_MEASURE_CONFIG_CANCEL,
+                testId = activeTestId.orEmpty(),
+            )
         )
     }
 
     fun clearTestResults() {
         MessageUtil.sendMsg2TestService(
             getApplication(),
-            TestServiceMessage(key = AppConfig.MSG_MEASURE_CONFIG_CANCEL)
+            TestServiceMessage(
+                key = AppConfig.MSG_MEASURE_CONFIG_CANCEL,
+                testId = activeTestId.orEmpty(),
+            )
         )
         MmkvManager.clearAllTestDelayResults(MmkvManager.decodeAllServerList())
         // Re-sort serversCache immediately so order=by-delay drops back to its
@@ -516,7 +535,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun clearTestResultsForGroup() {
         MessageUtil.sendMsg2TestService(
             getApplication(),
-            TestServiceMessage(key = AppConfig.MSG_MEASURE_CONFIG_CANCEL)
+            TestServiceMessage(
+                key = AppConfig.MSG_MEASURE_CONFIG_CANCEL,
+                testId = activeTestId.orEmpty(),
+            )
         )
         MmkvManager.clearAllTestDelayResults(MmkvManager.decodeServerList(subscriptionId))
         // Re-sort serversCache immediately so order=by-delay drops back to its
@@ -569,17 +591,45 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_SUCCESS -> {
-                    val content = intent.getStringExtra("content")
-                    updateListAction.value = getPosition(content ?: "")
+                    val result = intent.serializable<RealPingResult>("content")
+                    if (result != null) {
+                        if (acceptsTestEvent(result.testId)) {
+                            updateListAction.value = getPosition(result.guid)
+                        }
+                    } else {
+                        val content = intent.getStringExtra("content")
+                        updateListAction.value = getPosition(content ?: "")
+                    }
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_NOTIFY -> {
-                    testProgressAction.value = intent.serializable<TestProgressInfo>("content")
+                    val progress = intent.serializable<RealPingProgress>("content")
+                    if (progress != null) {
+                        if (acceptsTestEvent(progress.testId)) {
+                            testProgressAction.value = TestProgressInfo(
+                                guid = "",
+                                delayMillis = -1L,
+                                current = progress.completed,
+                                total = progress.total,
+                            )
+                        }
+                    } else {
+                        testProgressAction.value = intent.serializable<TestProgressInfo>("content")
+                    }
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_FINISH -> {
-                    testProgressAction.value = null
-                    onTestsFinished()
+                    val summary = intent.serializable<RealPingSummary>("content")
+                    if (summary != null) {
+                        if (!acceptsTestEvent(summary.testId)) return
+                        activeTestId = null
+                        testProgressAction.value = null
+                        onTestsFinished(summary.cancelled)
+                    } else {
+                        activeTestId = null
+                        testProgressAction.value = null
+                        onTestsFinished()
+                    }
                 }
 
                 AppConfig.MSG_COUNTRY_CODE_SUCCESS -> {
@@ -611,4 +661,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    private fun acceptsTestEvent(testId: String): Boolean =
+        testId.isEmpty() || testId == activeTestId
 }
