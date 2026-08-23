@@ -38,7 +38,7 @@ object SearchBarChipMode {
             AppConfig.PREF_SEARCH_BAR_CHIP_DUAL_SELECTION,
             WEATHER
         )
-        return if (stored in setOf(WEATHER, TOTAL_TRAFFIC, APP_STORAGE)) stored else WEATHER
+        return stored?.takeIf { it in setOf(WEATHER, TOTAL_TRAFFIC, APP_STORAGE) } ?: WEATHER
     }
 
     fun saveDualSelection(value: String): String {
