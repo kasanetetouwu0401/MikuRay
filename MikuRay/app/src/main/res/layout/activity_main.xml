@@ -249,6 +249,25 @@
                                 android:textSize="13sp"
                                 android:visibility="gone"
                                 tools:text="1.2 GB" />
+
+                            <ImageView
+                                android:id="@+id/iv_cache_icon"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:src="@drawable/rmx_device_database_line"
+                                android:tint="?colorOnSurfaceVariant"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:id="@+id/tv_cache_size"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:textAppearance="?textAppearanceBodySmall"
+                                android:textColor="?colorOnSurfaceVariant"
+                                android:textSize="13sp"
+                                android:visibility="gone"
+                                tools:text="50.5 MB" />
                         </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>

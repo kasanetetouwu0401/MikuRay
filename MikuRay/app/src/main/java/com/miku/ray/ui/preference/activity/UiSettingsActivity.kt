@@ -536,6 +536,7 @@ class UiSettingsActivity : BaseActivity() {
                     when (mode) {
                         SearchBarChipMode.WEATHER -> requireContext().snackbarDefault(R.string.pref_search_bar_chip_info_weather, title = getString(R.string.title_alerter_info))
                         SearchBarChipMode.TOTAL_TRAFFIC -> requireContext().snackbarDefault(R.string.pref_search_bar_chip_info_traffic, title = getString(R.string.title_alerter_info))
+                        SearchBarChipMode.CACHE -> requireContext().snackbarDefault(R.string.pref_search_bar_chip_info_cache, title = getString(R.string.title_alerter_info))
                         SearchBarChipMode.DUAL_SWIPE -> requireContext().snackbarDefault(R.string.pref_search_bar_chip_info_dual, title = getString(R.string.title_alerter_info))
                     }
                     true

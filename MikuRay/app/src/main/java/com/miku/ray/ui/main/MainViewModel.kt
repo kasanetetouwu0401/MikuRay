@@ -60,22 +60,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val updateGroupBadgeAction by lazy { MutableLiveData<Unit>() }
     val updateGroupOrderAction by lazy { MutableLiveData<Unit>() }
 
-    /**
-     * Fires for every individual test-result delay, independent of which
-     * subscription tab is currently active. serversCache/updateListAction only
-     * cover the active tab, so other already-open tabs would otherwise stay
-     * stale until the user re-visits them. Fragments observe this to refresh
-     * just their own matching row live, even while in the background.
-     */
-    val serverDelayUpdatedAction by lazy { MutableLiveData<String>() }
-
-    /**
-     * Fires with the guids whose test delay was just cleared/reset, so every
-     * open tab holding any of those guids can refresh those rows live instead
-     * of only the active tab.
-     */
-    val serverDelaysClearedAction by lazy { MutableLiveData<List<String>>() }
-
     fun startListenBroadcast() {
         isRunning.value = false
         val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
@@ -231,9 +215,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         activeTestId = testId
         activeTestCompleted = 0
         activeTestTotal = serversCache.size
-        val testedGuids = serversCache.map { it.guid }.toList()
-        MmkvManager.clearAllTestDelayResults(testedGuids)
-        serverDelaysClearedAction.value = testedGuids
+        MmkvManager.clearAllTestDelayResults(serversCache.map { it.guid }.toList())
         updateListAction.value = -1
 
         viewModelScope.launch(Dispatchers.Default) {
@@ -546,9 +528,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 testId = activeTestId.orEmpty(),
             )
         )
-        val allGuids = MmkvManager.decodeAllServerList()
-        MmkvManager.clearAllTestDelayResults(allGuids)
-        serverDelaysClearedAction.postValue(allGuids)
+        MmkvManager.clearAllTestDelayResults(MmkvManager.decodeAllServerList())
         // Re-sort serversCache immediately so order=by-delay drops back to its
         // tie-break order right away, instead of waiting for a reload/restart.
         updateCache()
@@ -563,9 +543,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 testId = activeTestId.orEmpty(),
             )
         )
-        val groupGuids = MmkvManager.decodeServerList(subscriptionId)
-        MmkvManager.clearAllTestDelayResults(groupGuids)
-        serverDelaysClearedAction.postValue(groupGuids)
+        MmkvManager.clearAllTestDelayResults(MmkvManager.decodeServerList(subscriptionId))
         // Re-sort serversCache immediately so order=by-delay drops back to its
         // tie-break order right away, instead of waiting for a reload/restart.
         updateCache()
@@ -618,10 +596,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 AppConfig.MSG_MEASURE_CONFIG_SUCCESS -> {
                     val result = intent.serializable<RealPingResult>("content")
                     if (result != null) {
-                        // Broadcast unconditionally so every currently-open tab
-                        // (not just the active one) can refresh this guid's row
-                        // live - covers plain servers and policy group members.
-                        serverDelayUpdatedAction.value = result.guid
                         if (acceptsTestEvent(result.testId)) {
                             updateListAction.value = getPosition(result.guid)
                             // Result events also drive the dialog's detail list.

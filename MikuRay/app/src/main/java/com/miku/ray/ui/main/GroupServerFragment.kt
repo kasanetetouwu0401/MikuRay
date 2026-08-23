@@ -94,16 +94,6 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
             updateEmptyState()
         }
 
-        // Not gated by subId: lets this tab live-update its own rows even
-        // while another tab is active, since adapter.data is this fragment's
-        // own copy and won't be touched by other tabs mutating the shared cache.
-        mainViewModel.serverDelayUpdatedAction.observe(viewLifecycleOwner) { guid ->
-            if (!guid.isNullOrEmpty()) adapter.refreshRow(guid)
-        }
-        mainViewModel.serverDelaysClearedAction.observe(viewLifecycleOwner) { guids ->
-            if (!guids.isNullOrEmpty()) adapter.refreshRows(guids)
-        }
-
         binding.btnScrollToSelected.setOnClickListener {
             ownerActivity.locateSelectedServer()
             scrollButtonHideHandler.removeCallbacks(hideScrollButtonRunnable)

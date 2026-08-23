@@ -710,9 +710,11 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="pref_search_bar_chip_disabled">Disabled</string>
     <string name="pref_search_bar_chip_weather">Weather</string>
     <string name="pref_search_bar_chip_total_traffic">Total traffic usage</string>
+    <string name="pref_search_bar_chip_cache">Storage usage</string>
     <string name="pref_search_bar_chip_dual_swipe">Dual (swipe)</string>
     <string name="pref_search_bar_chip_info_weather">Weather chip can be clicked to open forecast details</string>
     <string name="pref_search_bar_chip_info_traffic">Traffic chip can be clicked to open data usage details</string>
+    <string name="pref_search_bar_chip_info_cache">Storage chip can be clicked to open app data and cache details</string>
     <string name="pref_search_bar_chip_info_dual">Swipe vertically on the chip to switch content. Tap to open details</string>
     <string name="pref_search_chip_gradient_title">Gradient chip background</string>
     <string name="pref_search_chip_gradient_summary">Apply a primary-to-tertiary gradient background on the search bar chip while the weather or total traffic chip is active</string>
@@ -838,6 +840,24 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="label_total_traffic_month">This Month</string>
     <string name="title_total_traffic_history">Last 7 Days</string>
     <string name="label_total_traffic_no_history">No usage recorded yet</string>
+
+    <string name="title_storage_detail">Storage Usage</string>
+    <string name="label_storage_data_size">Data</string>
+    <string name="label_storage_cache_size">Cache</string>
+    <string name="label_storage_calculating">Calculating…</string>
+    <string name="action_clear_cache">Clear Cache</string>
+    <string name="clear_cache_confirm_title">Clear cache?</string>
+    <string name="clear_cache_confirm_summary">This removes temporary cached files (thumbnails, downloaded banners, etc). Your servers, settings, and profiles are not affected.</string>
+    <string name="clear_cache_success">Cache cleared</string>
+    <string name="clear_cache_failed">Failed to clear some cache files</string>
+    <string name="label_total_traffic_data_size">Data</string>
+    <string name="label_total_traffic_cache_size">Cache</string>
+    <string name="label_calculating">Calculating…</string>
+    <string name="action_clear_cache">Clear Cache</string>
+    <string name="clear_cache_confirm_title">Clear cache?</string>
+    <string name="clear_cache_confirm_summary">This removes temporary cached files (thumbnails, downloaded banners, etc). Your servers, settings, and profiles are not affected.</string>
+    <string name="clear_cache_success">Cache cleared</string>
+    <string name="clear_cache_failed">Failed to clear some cache files</string>
     <string name="pref_disable_sensor_text_title">Show Full Address</string>
     <string name="pref_disable_sensor_text_summary">Show full server IP/domain without *** masking</string>
     <string name="pref_network_security_enabled_title">Show Network and Security</string>

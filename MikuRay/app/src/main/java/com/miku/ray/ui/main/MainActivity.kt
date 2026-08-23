@@ -95,6 +95,8 @@ import com.miku.ray.util.showMikuRayExportPasswordDialog
 import com.miku.ray.util.showMikuRayImportPasswordDialog
 import com.miku.ray.util.showSubUpdateDiffDialog
 import com.miku.ray.util.showTotalTrafficDetailDialog
+import com.miku.ray.util.showCacheDetailDialog
+import com.miku.ray.util.AppStorageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -330,6 +332,10 @@ class MainActivity : HelperBaseActivity(),
             (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.TOTAL_TRAFFIC)
     }
 
+    private fun isCacheChipSelected(): Boolean {
+        return SearchBarChipMode.current() == SearchBarChipMode.CACHE
+    }
+
     private fun refreshSearchBarChip() {
         val mode = SearchBarChipMode.current()
         if (mode == SearchBarChipMode.DUAL_SWIPE) {
@@ -339,17 +345,25 @@ class MainActivity : HelperBaseActivity(),
         }
         val weatherEnabled = isWeatherChipSelected()
         val totalTrafficEnabled = isTotalTrafficChipSelected()
+        val cacheEnabled = isCacheChipSelected()
 
         SearchChipGradientController.applyState(this, binding)
 
         when {
             weatherEnabled -> {
                 hideTotalTrafficChip()
+                hideCacheChip()
                 refreshWeatherChip()
             }
             totalTrafficEnabled -> {
                 hideWeatherChipViews()
+                hideCacheChip()
                 refreshTotalTrafficChip()
+            }
+            cacheEnabled -> {
+                hideWeatherChipViews()
+                hideTotalTrafficChip()
+                refreshCacheChip()
             }
             else -> {
                 binding.layoutWeatherChip.isVisible = false
@@ -367,6 +381,11 @@ class MainActivity : HelperBaseActivity(),
         binding.tvTotalTraffic.isVisible = false
     }
 
+    private fun hideCacheChip() {
+        binding.ivCacheIcon.isVisible = false
+        binding.tvCacheSize.isVisible = false
+    }
+
     private fun refreshTotalTrafficChip() {
         val totalTraffic = MmkvManager.getTotalTrafficString()
         
@@ -375,6 +394,22 @@ class MainActivity : HelperBaseActivity(),
             binding.ivTotalTrafficIcon.isVisible = true
             binding.tvTotalTraffic.isVisible = true
             binding.layoutWeatherChip.isVisible = true
+        }
+    }
+
+    private fun refreshCacheChip() {
+        if (!isCacheChipSelected()) {
+            return
+        }
+        binding.ivCacheIcon.isVisible = true
+        binding.tvCacheSize.isVisible = true
+        binding.layoutWeatherChip.isVisible = true
+
+        lifecycleScope.launch {
+            val cacheSize = AppStorageUtils.getAppCacheSize(this@MainActivity)
+            if (isCacheChipSelected()) {
+                binding.tvCacheSize.text = MmkvManager.formatTrafficBytesPublic(cacheSize)
+            }
         }
     }
 
@@ -634,6 +669,9 @@ class MainActivity : HelperBaseActivity(),
                 }
                 isTotalTrafficChipSelected() -> {
                     showTotalTrafficDetailDialog(this)
+                }
+                isCacheChipSelected() -> {
+                    showCacheDetailDialog(this)
                 }
             }
         }

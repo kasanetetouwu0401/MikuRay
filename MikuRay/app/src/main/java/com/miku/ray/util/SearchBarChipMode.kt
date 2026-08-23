@@ -7,11 +7,12 @@ object SearchBarChipMode {
     const val DISABLED = "disabled"
     const val WEATHER = "weather"
     const val TOTAL_TRAFFIC = "total_traffic"
+    const val CACHE = "cache"
     const val DUAL_SWIPE = "dual_swipe"
 
     private const val LEGACY_WEATHER_KEY = "pref_show_weather_chip"
     private const val LEGACY_TOTAL_TRAFFIC_KEY = "pref_show_total_traffic_chip"
-    private val VALID_VALUES = setOf(DISABLED, WEATHER, TOTAL_TRAFFIC, DUAL_SWIPE)
+    private val VALID_VALUES = setOf(DISABLED, WEATHER, TOTAL_TRAFFIC, CACHE, DUAL_SWIPE)
 
     fun current(): String {
         val stored = MmkvManager.decodeSettingsString(AppConfig.PREF_SEARCH_BAR_CHIP)
