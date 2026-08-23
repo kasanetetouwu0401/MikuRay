@@ -19,6 +19,7 @@ import com.miku.ray.extension.isNotNullEmpty
 import com.miku.ray.fmt.CustomFmt
 import com.miku.ray.fmt.Hysteria2Fmt
 import com.miku.ray.fmt.ShadowsocksFmt
+import com.miku.ray.fmt.SshFmt
 import com.miku.ray.fmt.SocksFmt
 import com.miku.ray.fmt.TrojanFmt
 import com.miku.ray.fmt.V2rayNFmt
@@ -50,6 +51,7 @@ object AngConfigManager {
             EConfigType.VLESS.protocolScheme to VlessFmt::parse,
             EConfigType.WIREGUARD.protocolScheme to WireguardFmt::parse,
             EConfigType.HYSTERIA2.protocolScheme to Hysteria2Fmt::parse,
+            AppConfig.SSH to SshFmt::parse,
             AppConfig.HY2 to Hysteria2Fmt::parse,
             AppConfig.V2RAYNFMTS to V2rayNFmt::parse
         )
@@ -134,7 +136,9 @@ object AngConfigManager {
                 EConfigType.TROJAN -> TrojanFmt.toUri(config)
                 EConfigType.WIREGUARD -> WireguardFmt.toUri(config)
                 EConfigType.HYSTERIA2 -> Hysteria2Fmt.toUri(config)
+                EConfigType.SSH -> SshFmt.toUri(config)
                 else -> {}
+
             }
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to share config for GUID: $guid", e)

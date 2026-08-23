@@ -1331,6 +1331,38 @@
                             </LinearLayout>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/import_manually_ssh"
+                    android:clickable="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:foreground="?android:selectableItemBackground"
+                    app:cardBackgroundColor="?colorCard"
+                    app:cardCornerRadius="28dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp">
+                    <LinearLayout
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:padding="24dp"
+                        android:layout_width="250dp"
+                        android:layout_height="100dp">
+                        <TextView
+                            android:text="SSH"
+                            android:textAppearance="?textAppearanceTitleMedium"
+                            android:textColor="?colorOnSurface"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                        <TextView
+                            android:text="Neko-compatible SSH tunnel"
+                            android:textAppearance="?textAppearanceTitleSmall"
+                            android:textColor="?colorOnSurfaceVariant"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
             </HorizontalScrollView>
         </LinearLayout>

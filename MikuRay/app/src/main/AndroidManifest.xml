@@ -1360,6 +1360,10 @@
             android:exported="false"
             android:windowSoftInputMode="stateUnchanged|adjustResize" />
         <activity
+            android:name=".ui.server.ServerSshActivity"
+            android:exported="false"
+            android:windowSoftInputMode="stateUnchanged|adjustResize" />
+        <activity
             android:name=".ui.server.ServerHysteria2Activity"
             android:exported="false"
             android:windowSoftInputMode="stateUnchanged|adjustResize" />

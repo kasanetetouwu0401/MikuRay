@@ -79,6 +79,26 @@ data class ProfileItem(
     // itself is always CUSTOM for these configs.
     var customProtocol: String? = null,
 
+    // Neko-compatible SSH profile fields.
+    var sshServer: String? = null,
+    var sshPort: String? = null,
+    var sshUser: String? = null,
+    var sshPass: String? = null,
+    var sshPortaLocal: String? = null,
+    var sshTunnelType: String? = null,
+    var sshPayload: String? = null,
+    var sshWsPayload: String? = null,
+    var sshRemoteProxy: String? = null,
+    var sshRemoteProxyPort: String? = null,
+    var sshUseDefaultPayload: Boolean? = null,
+    var sshTlsServerName: String? = null,
+    var sshTlsForcing: String? = null,
+    var sshTrustAllCertificates: Boolean? = null,
+    var sshCompression: Boolean? = null,
+    var sshDnsResolver1: String? = null,
+    var sshDnsResolver2: String? = null,
+    var sshUdpResolver: String? = null,
+
     ) {
     companion object {
         fun create(configType: EConfigType): ProfileItem {
@@ -135,6 +155,24 @@ data class ProfileItem(
                 && this.portHoppingInterval == obj.portHoppingInterval
                 && this.pinnedCA256 == obj.pinnedCA256
                 && this.proxyChainProfiles == obj.proxyChainProfiles
+                && this.sshServer == obj.sshServer
+                && this.sshPort == obj.sshPort
+                && this.sshUser == obj.sshUser
+                && this.sshPass == obj.sshPass
+                && this.sshPortaLocal == obj.sshPortaLocal
+                && this.sshTunnelType == obj.sshTunnelType
+                && this.sshPayload == obj.sshPayload
+                && this.sshWsPayload == obj.sshWsPayload
+                && this.sshRemoteProxy == obj.sshRemoteProxy
+                && this.sshRemoteProxyPort == obj.sshRemoteProxyPort
+                && this.sshUseDefaultPayload == obj.sshUseDefaultPayload
+                && this.sshTlsServerName == obj.sshTlsServerName
+                && this.sshTlsForcing == obj.sshTlsForcing
+                && this.sshTrustAllCertificates == obj.sshTrustAllCertificates
+                && this.sshCompression == obj.sshCompression
+                && this.sshDnsResolver1 == obj.sshDnsResolver1
+                && this.sshDnsResolver2 == obj.sshDnsResolver2
+                && this.sshUdpResolver == obj.sshUdpResolver
                 )
     }
 }

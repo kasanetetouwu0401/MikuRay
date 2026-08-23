@@ -16,6 +16,7 @@ import com.miku.ray.R
 import com.miku.ray.contracts.ServiceControl
 import com.miku.ray.dto.OutboundTrafficStat
 import com.miku.ray.dto.entities.ProfileItem
+import com.miku.ray.enums.EConfigType
 import com.miku.ray.enums.BrowserDialerMode
 import com.miku.ray.extension.isNotNullEmpty
 import com.miku.ray.handler.MmkvManager
@@ -128,7 +129,22 @@ object CoreServiceManager {
         }
 
         LogUtil.i(AppConfig.TAG, "StartCore-Manager: Starting core loop for ${config.remarks}")
-        val result = CoreConfigManager.getV2rayConfig(service, guid)
+        val sshProfile = config.takeIf { it.configType == EConfigType.SSH }
+        if (sshProfile != null) {
+            try {
+                val localPort = SshTunnelManager.start(sshProfile)
+                LogUtil.i(AppConfig.TAG, "SSH transport ready on 127.0.0.1:$localPort")
+            } catch (e: Exception) {
+                SshTunnelManager.stop()
+                throw e
+            }
+        }
+        val result = try {
+            CoreConfigManager.getV2rayConfig(service, guid)
+        } catch (e: Exception) {
+            if (sshProfile != null) SshTunnelManager.stop()
+            throw e
+        }
         LogUtil.d(AppConfig.TAG, result.content)
         if (!result.status) {
             error(result.errorMessage.ifBlank { "Failed to get V2Ray config" })
@@ -187,6 +203,10 @@ object CoreServiceManager {
         networkMonitor?.unregister()
         networkMonitor = null
         currentVpnInterface = null
+
+        if (currentConfig?.configType == EConfigType.SSH) {
+            SshTunnelManager.stop()
+        }
 
         if (isRunning()) {
             backgroundScope.launch {

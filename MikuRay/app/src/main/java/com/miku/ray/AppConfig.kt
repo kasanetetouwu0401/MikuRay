@@ -417,6 +417,8 @@ object AppConfig {
     const val HYSTERIA2 = "hysteria2://"
     const val HY2 = "hy2://"
     const val V2RAYNFMTS = "v2rayn://"
+    const val SSH = "ssh://"
+    const val SSH_LOCAL_PORT = "10809"
 
     const val VPN = "VPN"
     const val VPN_MTU = 1500
