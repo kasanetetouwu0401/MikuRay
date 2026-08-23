@@ -810,11 +810,6 @@
     <string name="label_total_traffic_data_size">数据</string>
     <string name="label_total_traffic_cache_size">缓存</string>
     <string name="label_calculating">计算中…</string>
-    <string name="action_clear_cache">清除缓存</string>
-    <string name="clear_cache_confirm_title">清除缓存？</string>
-    <string name="clear_cache_confirm_summary">这将删除临时缓存文件（缩略图、已下载的横幅图片等），不会影响你的服务器、设置和配置文件。</string>
-    <string name="clear_cache_success">缓存已清除</string>
-    <string name="clear_cache_failed">部分缓存文件清除失败</string>
     <string name="pref_network_security_enabled_title">显示网络和安全</string>
     <string name="pref_network_security_enabled_summary">在每个服务器上显示传输和安全信息</string>
     <string name="pref_disable_sensor_text_title">显示完整地址</string>

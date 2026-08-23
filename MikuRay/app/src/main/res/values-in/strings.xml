@@ -821,11 +821,6 @@ Nama Paket — cuma bisa kalo kamu pake Xray TUN, routeOnly aktif, dan Android 1
     <string name="label_total_traffic_data_size">Data</string>
     <string name="label_total_traffic_cache_size">Cache</string>
     <string name="label_calculating">Menghitung…</string>
-    <string name="action_clear_cache">Hapus Cache</string>
-    <string name="clear_cache_confirm_title">Hapus cache?</string>
-    <string name="clear_cache_confirm_summary">Ini bakal hapus file cache sementara (thumbnail, banner yang kedownload, dll). Server, pengaturan, dan profil kamu gak kena efek</string>
-    <string name="clear_cache_success">Cache berhasil dihapus</string>
-    <string name="clear_cache_failed">Sebagian file cache gagal dihapus</string>
     <string name="pref_network_security_enabled_title">Tampilin Jaringan dan Keamanan</string>
     <string name="pref_network_security_enabled_summary">Tampilin info transport dan keamanan di tiap server</string>
     <string name="pref_disable_sensor_text_title">Tampilin Alamat Lengkap</string>

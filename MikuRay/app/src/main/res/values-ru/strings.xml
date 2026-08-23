@@ -831,11 +831,6 @@
     <string name="label_total_traffic_data_size">Данные</string>
     <string name="label_total_traffic_cache_size">Кэш</string>
     <string name="label_calculating">Подсчёт…</string>
-    <string name="action_clear_cache">Очистить кэш</string>
-    <string name="clear_cache_confirm_title">Очистить кэш?</string>
-    <string name="clear_cache_confirm_summary">Это удалит временные файлы кэша (миниатюры, загруженные баннеры и т.д.). Ваши серверы, настройки и профили не пострадают.</string>
-    <string name="clear_cache_success">Кэш очищен</string>
-    <string name="clear_cache_failed">Не удалось очистить часть файлов кэша</string>
     <string name="pref_network_security_enabled_title">Показывать сеть и безопасность</string>
     <string name="pref_network_security_enabled_summary">Показывать информацию о транспорте и безопасности на каждом сервере</string>
     <string name="pref_disable_sensor_text_title">Показывать полный адрес</string>
