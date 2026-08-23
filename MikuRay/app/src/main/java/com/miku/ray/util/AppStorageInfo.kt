@@ -1,18 +1,15 @@
 package com.miku.ray.util
 
-import android.app.usage.StorageStatsManager
 import android.content.Context
-import android.os.Build
-import android.os.Process
 import java.io.File
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 
 /**
- * Storage statistics for this application. On Android O and newer, the values
- * come from the same platform API used by the system app-info storage screen.
- * Older Android versions use a best-effort filesystem fallback.
+ * Calculates the app's private data and cache usage without relying on the
+ * platform Settings storage screen, which is not available consistently on
+ * every Android version.
  */
 data class AppStorageInfo(
     val appBytes: Long,
@@ -27,26 +24,25 @@ data class AppStorageInfo(
 }
 
 fun Context.getAppStorageInfo(): AppStorageInfo {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val systemStats = runCatching {
-            val manager = getSystemService(StorageStatsManager::class.java)
-            manager.queryStatsForPackage(
-                applicationInfo.storageUuid,
-                packageName,
-                Process.myUserHandle()
-            )
-        }.getOrNull()
+    val cacheRoots = cacheRoots()
+    val cacheRootPaths = cacheRoots.mapNotNull { it.canonicalPath }.toSet()
+    val codeCachePath = runCatching { codeCacheDir.canonicalPath }.getOrNull()
 
-        if (systemStats != null) {
-            return AppStorageInfo(
-                appBytes = systemStats.appBytes,
-                dataBytes = systemStats.dataBytes,
-                cacheBytes = systemStats.cacheBytes
-            )
-        }
+    val dataBytes = directorySize(File(applicationInfo.dataDir)) { file ->
+        val path = runCatching { file.canonicalPath }.getOrNull()
+        path != null && path !in cacheRootPaths && path != codeCachePath
     }
+    val cacheBytes = cacheRoots.sumOf(::directorySize)
+    val appBytes = listOfNotNull(
+        applicationInfo.sourceDir,
+        *applicationInfo.splitSourceDirs.orEmpty()
+    ).distinct().sumOf { path -> File(path).length() }
 
-    return getManualAppStorageInfo()
+    return AppStorageInfo(
+        appBytes = appBytes,
+        dataBytes = dataBytes,
+        cacheBytes = cacheBytes
+    )
 }
 
 fun Context.clearAppCache(): Boolean {
@@ -67,28 +63,6 @@ fun formatStorageBytes(bytes: Long): String {
 
     val formatter = DecimalFormat("0.##", DecimalFormatSymbols(Locale.getDefault()))
     return "${formatter.format(value)} ${units[unitIndex]}"
-}
-
-private fun Context.getManualAppStorageInfo(): AppStorageInfo {
-    val cacheRoots = cacheRoots()
-    val cacheRootPaths = cacheRoots.mapNotNull { it.canonicalPath }.toSet()
-    val codeCachePath = runCatching { codeCacheDir.canonicalPath }.getOrNull()
-
-    val dataBytes = directorySize(File(applicationInfo.dataDir)) { file ->
-        val path = runCatching { file.canonicalPath }.getOrNull()
-        path != null && path !in cacheRootPaths && path != codeCachePath
-    }
-    val cacheBytes = cacheRoots.sumOf(::directorySize)
-    val appBytes = listOfNotNull(
-        applicationInfo.sourceDir,
-        *applicationInfo.splitSourceDirs.orEmpty()
-    ).distinct().sumOf { path -> File(path).length() }
-
-    return AppStorageInfo(
-        appBytes = appBytes,
-        dataBytes = dataBytes,
-        cacheBytes = cacheBytes
-    )
 }
 
 private fun Context.cacheRoots(): List<File> {
