@@ -267,7 +267,7 @@
                                 android:textColor="?colorOnSurfaceVariant"
                                 android:textSize="13sp"
                                 android:visibility="gone"
-                                tools:text="D 96 MB · C 32 MB" />
+                                tools:text="96 MB" />
                         </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>

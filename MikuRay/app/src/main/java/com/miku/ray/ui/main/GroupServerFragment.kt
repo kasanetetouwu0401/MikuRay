@@ -94,6 +94,14 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
             updateEmptyState()
         }
 
+        // Keep the selected server's status dot in sync with the VPN
+        // connection state. Using viewLifecycleOwner here (rather than the
+        // adapter guessing a LifecycleOwner from the RecyclerView's context)
+        // guarantees this fires for exactly this fragment's own lifecycle.
+        mainViewModel.isRunning.observe(viewLifecycleOwner) {
+            adapter.refreshConnectionStatus()
+        }
+
         binding.btnScrollToSelected.setOnClickListener {
             ownerActivity.locateSelectedServer()
             scrollButtonHideHandler.removeCallbacks(hideScrollButtonRunnable)

@@ -65,7 +65,6 @@ class MainRecyclerAdapter(
         notifyDataSetChanged()
     }
 
-    private var isRunningObserver: androidx.lifecycle.Observer<Boolean>? = null
     private var selectedBannerController: SelectedProfileBannerController? = null
 
     @SuppressLint("NotifyDataSetChanged")
@@ -79,18 +78,29 @@ class MainRecyclerAdapter(
         }
     }
 
+    /**
+     * Re-binds the currently selected server's row so its status dot picks up
+     * the latest [MainViewModel.isRunning] value.
+     *
+     * This used to be driven by an observer the adapter registered on itself by
+     * casting `recyclerView.context` to a [androidx.lifecycle.LifecycleOwner].
+     * That cast is not guaranteed to succeed (or to reflect the right
+     * lifecycle) depending on how the hosting Fragment/RecyclerView context is
+     * set up, so the dot could silently stop refreshing even though the VPN
+     * was actually connected. The caller (the Fragment that owns this
+     * adapter's RecyclerView) now observes isRunning itself with its own
+     * viewLifecycleOwner and calls this method directly, which is reliable.
+     */
+    fun refreshConnectionStatus() {
+        val selectedGuid = MmkvManager.getSelectServer()
+        val position = data.indexOfFirst { it.guid == selectedGuid }
+        if (position >= 0) {
+            notifyItemChanged(position)
+        }
+    }
+
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
-        val lifecycleOwner = recyclerView.context as? androidx.lifecycle.LifecycleOwner
-        if (lifecycleOwner != null) {
-            isRunningObserver = androidx.lifecycle.Observer {
-                // Rebind every visible row. The selected profile can change
-                // while the service is starting, and RecyclerView may have
-                // recycled the old selected row by the time the state arrives.
-                notifyDataSetChanged()
-            }
-            mainViewModel.isRunning.observe(lifecycleOwner, isRunningObserver!!)
-        }
 
         val controller = SelectedProfileBannerController(recyclerView.context)
         selectedBannerController = controller
@@ -105,9 +115,6 @@ class MainRecyclerAdapter(
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        isRunningObserver?.let {
-            mainViewModel.isRunning.removeObserver(it)
-        }
         selectedBannerController?.unregisterChangeListener()
         selectedBannerController = null
     }
@@ -178,8 +185,28 @@ class MainRecyclerAdapter(
             holder.views.ivPinIndicator.visibility = if (isPinned) View.VISIBLE else View.GONE
 
             val isSelectedServer = (guid == MmkvManager.getSelectServer())
-            val isServiceRunning = mainViewModel.isRunning.value == true
-            bindStatusDot(holder.views.vStatusDot, isSelectedServer && isServiceRunning)
+            val isVpnConnected = mainViewModel.isRunning.value == true
+
+            if (isSelectedServer && isVpnConnected) {
+                holder.views.vStatusDot.setBackgroundResource(R.drawable.blink_color)
+                val blinkAnimDrawable = holder.views.vStatusDot.background
+
+                if (blinkAnimDrawable is android.graphics.drawable.AnimationDrawable) {
+                    holder.views.vStatusDot.visibility = View.VISIBLE
+                    holder.views.vStatusDot.post {
+                        if (!blinkAnimDrawable.isRunning) {
+                            blinkAnimDrawable.start()
+                        }
+                    }
+                }
+            } else {
+                val blinkAnimDrawable = holder.views.vStatusDot.background
+                if (blinkAnimDrawable is android.graphics.drawable.AnimationDrawable) {
+                    blinkAnimDrawable.stop()
+                }
+                holder.views.vStatusDot.visibility = View.GONE
+                holder.views.vStatusDot.background = null
+            }
 
             if (isGridMode) {
                 selectedBannerController?.clear(holder.views.layoutIndicator)
@@ -269,31 +296,6 @@ class MainRecyclerAdapter(
             holder.views.infoContainer.setOnTouchListener { _, event ->
                 gestureDetector.onTouchEvent(event)
                 true
-            }
-        }
-    }
-
-    private fun bindStatusDot(dot: View, shouldShow: Boolean) {
-        (dot.background as? android.graphics.drawable.AnimationDrawable)?.stop()
-        if (!shouldShow) {
-            dot.visibility = View.GONE
-            dot.background = null
-            return
-        }
-
-        dot.setBackgroundResource(R.drawable.blink_color)
-        dot.visibility = View.VISIBLE
-        val animation = dot.background as? android.graphics.drawable.AnimationDrawable
-        if (animation == null) {
-            // Keep the connected state visible even if a platform/resource
-            // inflater returns a non-animated drawable.
-            dot.setBackgroundResource(R.drawable.dot_primary)
-            return
-        }
-
-        dot.post {
-            if (dot.isAttachedToWindow && dot.visibility == View.VISIBLE && dot.background === animation && !animation.isRunning) {
-                animation.start()
             }
         }
     }
