@@ -27,7 +27,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -97,9 +99,12 @@ import com.miku.ray.util.showSubUpdateDiffDialog
 import com.miku.ray.util.showTotalTrafficDetailDialog
 import com.miku.ray.util.showAppStorageDetailDialog
 import com.miku.ray.util.formatStorageBytes
+import com.miku.ray.util.AppStorageInfo
 import com.miku.ray.util.getAppStorageInfo
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -124,6 +129,7 @@ class MainActivity : HelperBaseActivity(),
     private var lastIpStateText: String = ""
     private var lastTrafficSpeedText: String = ""
     private var lastTestResultText: String = ""
+    private var appStorageRefreshJob: Job? = null
 
     private val urlTestProgressDialog: TestProgressDialogController by lazy {
         TestProgressDialogController(this, TestProgressDialogController.Mode.URL_TEST) { mainViewModel.cancelRealPingTest() }
@@ -185,6 +191,7 @@ class MainActivity : HelperBaseActivity(),
         setupGroupTab()
         setupViewModel()
         setupBannerHome()
+        startAppStorageRefreshLoop()
         
         BlurBottomStatusController.applyState(this, binding)
         SubscriptionUpdater.sync()
@@ -400,10 +407,32 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
+    private fun startAppStorageRefreshLoop() {
+        appStorageRefreshJob?.cancel()
+        appStorageRefreshJob = lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                while (isActive) {
+                    refreshAppStorageChip()
+                    delay(APP_STORAGE_REFRESH_INTERVAL_MS)
+                }
+            }
+        }
+    }
+
     private fun refreshAppStorageChip() {
         if (!isAppStorageChipSelected()) return
 
-        val storage = getAppStorageInfo()
+        lifecycleScope.launch {
+            val storage = withContext(Dispatchers.IO) {
+                applicationContext.getAppStorageInfo()
+            }
+            if (!isFinishing && !isDestroyed && isAppStorageChipSelected()) {
+                applyAppStorageChip(storage)
+            }
+        }
+    }
+
+    private fun applyAppStorageChip(storage: AppStorageInfo) {
         binding.tvAppStorage.text = getString(
             R.string.app_storage_chip_format,
             formatStorageBytes(storage.totalBytes)
@@ -411,6 +440,10 @@ class MainActivity : HelperBaseActivity(),
         binding.ivAppStorageIcon.isVisible = true
         binding.tvAppStorage.isVisible = true
         binding.layoutWeatherChip.isVisible = true
+    }
+
+    private companion object {
+        const val APP_STORAGE_REFRESH_INTERVAL_MS = 1000L
     }
 
     private fun refreshWeatherChip() {
@@ -1709,6 +1742,7 @@ class MainActivity : HelperBaseActivity(),
     }
 
     override fun onDestroy() {
+        appStorageRefreshJob?.cancel()
         hideLoading()
         urlTestProgressDialog.dismiss()
         tabMediator?.detach()
