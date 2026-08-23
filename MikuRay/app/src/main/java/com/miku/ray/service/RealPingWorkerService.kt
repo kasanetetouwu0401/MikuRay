@@ -126,6 +126,7 @@ class RealPingWorkerService(
     private val onEvent: (RealPingEvent) -> Unit = {},
 ) {
     private val guids = guids.distinct()
+    private val requestedGuids = this.guids.toHashSet()
     private val job = SupervisorJob()
     private val dispatcher = Dispatchers.IO.limitedParallelism(SettingsManager.getRealPingConcurrency())
     private val scope = CoroutineScope(job + dispatcher + CoroutineName("RealPingBatchWorker"))
@@ -146,6 +147,7 @@ class RealPingWorkerService(
                     val delayMillis = safelyProbe(guid)
                     currentCoroutineContext().ensureActive()
                     synchronized(resultLock) { probeDelays[guid] = delayMillis }
+                    emitPolicyGroupMemberResult(guid, delayMillis)
                     emitCompletedSources(plan.sourcesByMemberGuid[guid].orEmpty())
                     progress.record()?.let(onEvent)
                 }
@@ -161,6 +163,18 @@ class RealPingWorkerService(
         finished.set(true)
         job.cancel()
         return summary()
+    }
+
+    /**
+     * A probe guid that was never directly requested only exists because it was
+     * resolved as a policy-group member (see [RealPingProbePlan.build]). Surface
+     * its own result too - not just the group's aggregated delay - so every
+     * server inside the policy group gets a visible result, and so the member's
+     * own subscription/server-list tab picks up the fresh delay immediately.
+     */
+    private fun emitPolicyGroupMemberResult(guid: String, delayMillis: Long) {
+        if (guid in requestedGuids) return
+        if (!finished.get()) onEvent(RealPingEvent.Result(guid, delayMillis))
     }
 
     private fun emitCompletedSources(sources: List<RealPingProbeSource>) {
