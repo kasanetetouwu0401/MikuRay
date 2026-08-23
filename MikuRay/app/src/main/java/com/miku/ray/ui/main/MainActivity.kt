@@ -397,11 +397,13 @@ class MainActivity : HelperBaseActivity(),
         binding.tvAppStorage.isVisible = false
     }
 
-    private fun refreshTotalTrafficChip() {
+    private fun refreshTotalTrafficChip(updateVisibility: Boolean = true) {
         val totalTraffic = MmkvManager.getTotalTrafficString()
         
-        binding.tvTotalTraffic.text = totalTraffic
-        if (isTotalTrafficChipSelected()) {
+        if (binding.tvTotalTraffic.text?.toString() != totalTraffic) {
+            binding.tvTotalTraffic.text = totalTraffic
+        }
+        if (updateVisibility && isTotalTrafficChipSelected()) {
             binding.ivTotalTrafficIcon.isVisible = true
             binding.tvTotalTraffic.isVisible = true
             binding.layoutWeatherChip.isVisible = true
@@ -413,16 +415,16 @@ class MainActivity : HelperBaseActivity(),
         realtimeChipRefreshJob = lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 while (isActive) {
-                    refreshTotalTrafficChip()
-                    refreshAppStorageChip()
-                    if (isWeatherChipSelected()) loadWeatherChip()
+                    refreshTotalTrafficChip(updateVisibility = false)
+                    refreshAppStorageChip(updateVisibility = false)
+                    if (isWeatherChipSelected()) loadWeatherChip(updateVisibility = false)
                     delay(REALTIME_CHIP_REFRESH_INTERVAL_MS)
                 }
             }
         }
     }
 
-    private fun refreshAppStorageChip() {
+    private fun refreshAppStorageChip(updateVisibility: Boolean = true) {
         if (!isAppStorageChipSelected()) return
 
         lifecycleScope.launch {
@@ -430,19 +432,24 @@ class MainActivity : HelperBaseActivity(),
                 applicationContext.getAppStorageInfo()
             }
             if (!isFinishing && !isDestroyed && isAppStorageChipSelected()) {
-                applyAppStorageChip(storage)
+                applyAppStorageChip(storage, updateVisibility)
             }
         }
     }
 
-    private fun applyAppStorageChip(storage: AppStorageInfo) {
-        binding.tvAppStorage.text = getString(
+    private fun applyAppStorageChip(storage: AppStorageInfo, updateVisibility: Boolean = true) {
+        val storageText = getString(
             R.string.app_storage_chip_format,
             formatStorageBytes(storage.totalBytes)
         )
-        binding.ivAppStorageIcon.isVisible = true
-        binding.tvAppStorage.isVisible = true
-        binding.layoutWeatherChip.isVisible = true
+        if (binding.tvAppStorage.text?.toString() != storageText) {
+            binding.tvAppStorage.text = storageText
+        }
+        if (updateVisibility) {
+            binding.ivAppStorageIcon.isVisible = true
+            binding.tvAppStorage.isVisible = true
+            binding.layoutWeatherChip.isVisible = true
+        }
     }
 
     private companion object {
@@ -499,20 +506,26 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
-    private fun loadWeatherChip() {
+    private fun loadWeatherChip(updateVisibility: Boolean = true) {
         if (!isWeatherChipSelected()) return
-        binding.layoutWeatherChip.isVisible = true
+        if (updateVisibility) binding.layoutWeatherChip.isVisible = true
 
         val fresh = WeatherHelper.getCachedWeather()
         val stale = fresh ?: WeatherHelper.getCachedWeatherStale()
 
         if (stale != null) {
-            applyWeatherToChip(stale)
+            applyWeatherToChip(stale, updateVisibility)
         } else {
-            binding.ivWeatherIcon.setImageResource(RemixR.drawable.rmx_cloud_line)
-            binding.ivWeatherIcon.isVisible = true
-            binding.tvWeatherTemp.text = getString(R.string.weather_loading)
-            binding.tvWeatherTemp.isVisible = true
+            if (binding.ivWeatherIcon.tag != RemixR.drawable.rmx_cloud_line) {
+                binding.ivWeatherIcon.setImageResource(RemixR.drawable.rmx_cloud_line)
+                binding.ivWeatherIcon.tag = RemixR.drawable.rmx_cloud_line
+            }
+            if (updateVisibility) binding.ivWeatherIcon.isVisible = true
+            val loadingText = getString(R.string.weather_loading)
+            if (binding.tvWeatherTemp.text?.toString() != loadingText) {
+                binding.tvWeatherTemp.text = loadingText
+            }
+            if (updateVisibility) binding.tvWeatherTemp.isVisible = true
         }
 
         if (fresh != null || weatherFetchJob?.isActive == true) return
@@ -527,11 +540,17 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
-    private fun applyWeatherToChip(weather: WeatherHelper.WeatherResult) {
-        binding.ivWeatherIcon.setImageResource(weather.iconRes)
-        binding.tvWeatherTemp.text = weather.getTemperatureString(WeatherHelper.isCelsius())
+    private fun applyWeatherToChip(weather: WeatherHelper.WeatherResult, updateVisibility: Boolean = true) {
+        if (binding.ivWeatherIcon.tag != weather.iconRes) {
+            binding.ivWeatherIcon.setImageResource(weather.iconRes)
+            binding.ivWeatherIcon.tag = weather.iconRes
+        }
+        val temperatureText = weather.getTemperatureString(WeatherHelper.isCelsius())
+        if (binding.tvWeatherTemp.text?.toString() != temperatureText) {
+            binding.tvWeatherTemp.text = temperatureText
+        }
 
-        if (isWeatherChipSelected()) {
+        if (updateVisibility && isWeatherChipSelected()) {
             binding.ivWeatherIcon.isVisible = true
             binding.tvWeatherTemp.isVisible = true
             binding.layoutWeatherChip.isVisible = true
