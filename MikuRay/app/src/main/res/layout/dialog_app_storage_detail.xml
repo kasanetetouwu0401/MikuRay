@@ -189,9 +189,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/action_clear_app_cache"
-                app:icon="@drawable/rmx_delete_bin_line"
-                app:iconGravity="textStart"
-                app:iconPadding="8dp" />
+                style="@style/Widget.Material3Expressive.Button" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
