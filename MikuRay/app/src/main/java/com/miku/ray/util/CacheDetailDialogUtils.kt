@@ -8,6 +8,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.miku.ray.R
 import com.miku.ray.databinding.DialogCacheDetailBinding
 import com.miku.ray.handler.MmkvManager
+import com.miku.ray.extension.snackbarError
+import com.miku.ray.extension.snackbarSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
