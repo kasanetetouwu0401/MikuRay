@@ -1,8 +1,8 @@
 -repackageclasses
 -allowaccessmodification
 -keep class com.miku.ray.** { *; }
--keep class com.trilead.ssh2.** { *; }
--dontwarn com.trilead.ssh2.**
+-keep class com.miku.ray.thirdparty.trilead.ssh2.** { *; }
+-dontwarn com.miku.ray.thirdparty.trilead.ssh2.**
 -keep class com.yalantis.ucrop.** { *; }
 
 # Removed Kotlin's built-in Null and Exception checks

@@ -3,9 +3,9 @@ package com.miku.ray.core
 import android.util.Log
 import com.miku.ray.AppConfig
 import com.miku.ray.dto.entities.ProfileItem
-import com.trilead.ssh2.Connection
-import com.trilead.ssh2.NekoProxyData
-import com.trilead.ssh2.LocalStreamForwarder
+import com.miku.ray.thirdparty.trilead.ssh2.Connection
+import com.miku.ray.thirdparty.trilead.ssh2.NekoProxyData
+import com.miku.ray.thirdparty.trilead.ssh2.LocalStreamForwarder
 import java.io.EOFException
 import java.io.IOException
 import java.io.InputStream
