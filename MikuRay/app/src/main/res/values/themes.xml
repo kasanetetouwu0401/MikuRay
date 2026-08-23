@@ -966,4 +966,41 @@
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.TrueBlack.AlertDialog</item>
     </style>
     
-    </resources>
+    <style name="ShapeAppearance.App.CardView.Top" parent="ShapeAppearance.Material3.Corner.Medium">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">28dp</item>
+        <item name="cornerSizeTopRight">28dp</item>
+        <item name="cornerSizeBottomLeft">4dp</item>
+        <item name="cornerSizeBottomRight">4dp</item>
+    </style>
+
+    <style name="ShapeAppearance.App.CardView.Middle" parent="ShapeAppearance.Material3.Corner.Medium">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">4dp</item>
+        <item name="cornerSizeTopRight">4dp</item>
+        <item name="cornerSizeBottomLeft">4dp</item>
+        <item name="cornerSizeBottomRight">4dp</item>
+    </style>
+
+    <style name="ShapeAppearance.App.CardView.Bottom" parent="ShapeAppearance.Material3.Corner.Medium">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">4dp</item>
+        <item name="cornerSizeTopRight">4dp</item>
+        <item name="cornerSizeBottomLeft">28dp</item>
+        <item name="cornerSizeBottomRight">28dp</item>
+    </style>
+
+    <style name="ShapeAppearance.App.CardView.Single" parent="ShapeAppearance.Material3.Corner.Medium">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">28dp</item>
+        <item name="cornerSizeTopRight">28dp</item>
+        <item name="cornerSizeBottomLeft">28dp</item>
+        <item name="cornerSizeBottomRight">28dp</item>
+    </style>
+
+    <style name="AppThemeToolbarCircleNavigationButton" parent="">
+        <item name="toolbarNavigationButtonCircleColor">?attr/colorCard</item>
+        <item name="toolbarNavigationButtonStyle">@style/Widget.Material3.Toolbar.Button.Navigation.Circle</item>
+    </style>
+
+</resources>
