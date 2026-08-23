@@ -79,6 +79,25 @@ class MainRecyclerAdapter(
         }
     }
 
+    /**
+     * Refreshes a single row by guid if it's present in this adapter's own
+     * (independent, copied) data list - used to live-update a server's test
+     * result even when this tab/fragment isn't the currently active one.
+     */
+    fun refreshRow(guid: String) {
+        val position = data.indexOfFirst { it.guid == guid }
+        if (position >= 0) notifyItemChanged(position)
+    }
+
+    /** Bulk variant of [refreshRow] for when many guids changed at once (e.g. clear results). */
+    fun refreshRows(guids: Collection<String>) {
+        if (guids.isEmpty()) return
+        val guidSet = guids.toHashSet()
+        data.forEachIndexed { index, item ->
+            if (item.guid in guidSet) notifyItemChanged(index)
+        }
+    }
+
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         val lifecycleOwner = recyclerView.context as? androidx.lifecycle.LifecycleOwner
