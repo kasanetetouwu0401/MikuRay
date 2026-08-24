@@ -469,7 +469,10 @@ class MainActivity : HelperBaseActivity(),
         val bannerHome = binding.bannerHome
         val headerImage = binding.headerImage
         val headerTopRow = binding.headerTopRow
-        val bannerMediaController = BannerMediaController(headerImage, R.drawable.uwu_banner_home)
+        val bannerMediaController = BannerMediaController(
+            headerImage,
+            R.drawable.uwu_banner_home
+        )
         homeBannerMediaController = bannerMediaController
 
         headerImage.setLayerType(View.LAYER_TYPE_NONE, null)

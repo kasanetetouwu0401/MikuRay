@@ -80,6 +80,7 @@ class BannerMediaController(
     fun release() {
         stopVideo()
         Glide.with(context.applicationContext).clear(imageView)
+        videoView?.stopPlayback()
         videoView?.let { (it.parent as? ViewGroup)?.removeView(it) }
         imageView.setImageDrawable(null)
         imageView.tag = null

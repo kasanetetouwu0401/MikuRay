@@ -29,12 +29,6 @@
             android:src="@drawable/uwu_banner_home"
             android:scaleType="centerCrop" />
 
-        <com.miku.ray.widget.CenterCropVideoView
-            android:id="@+id/header_video"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
-
         <View
             android:id="@+id/header_image_fade"
             android:background="@drawable/uwu_bg_fade_bottom"
