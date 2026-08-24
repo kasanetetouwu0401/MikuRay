@@ -32,8 +32,7 @@ class ThemeStateManager(private val activity: Activity) {
 
     private fun fetchCurrentState(): ThemeState {
         return ThemeState(
-            themeKey = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "1",
-
+            themeKey = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "8",
             dynamicColor = MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, false),
             dynamicBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false),
             trueBlack = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRUE_BLACK, false),
