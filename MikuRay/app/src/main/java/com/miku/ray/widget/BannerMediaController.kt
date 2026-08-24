@@ -135,11 +135,12 @@ class BannerMediaController(
         private const val DEFAULT_TAG = "DEFAULT_BANNER_MEDIA"
         private const val HIDDEN_TAG = "HIDDEN_BANNER_MEDIA"
         private val VIDEO_EXTENSIONS = listOf(".mp4", ".webm", ".mkv", ".3gp", ".mov")
+        private val CONTROLLER_TAG_KEY = "banner_media_controller".hashCode()
 
         fun forImageView(imageView: ImageView, defaultDrawableRes: Int): BannerMediaController {
-            return (imageView.getTag("banner_media_controller".hashCode()) as? BannerMediaController)
+            return (imageView.getTag(CONTROLLER_TAG_KEY) as? BannerMediaController)
                 ?: BannerMediaController(imageView, defaultDrawableRes).also {
-                    imageView.setTag("banner_media_controller".hashCode(), it)
+                    imageView.setTag(CONTROLLER_TAG_KEY, it)
                 }
         }
     }
