@@ -940,14 +940,6 @@ you need."</string>
     <string name="pref_header_top_row_padding_title">Header top padding</string>
     <string name="pref_header_top_row_padding_summary_value">%1$ddp</string>
 
-    <string name="app_background_category">Application Background</string>
-    <string name="app_background_custom_title">Change application background</string>
-    <string name="app_background_custom_summary">Set a custom image behind the application content (optional)</string>
-    <string name="app_background_delete_title">Remove custom application background</string>
-    <string name="app_background_delete_summary">Custom background removed. The default background will be used instead</string>
-    <string name="app_background_updated">Application background updated successfully.</string>
-    <string name="app_background_update_failed">Unable to save the selected background image.</string>
-
     <string name="sheet_banner_category">Bottomsheet Banner</string>
     <string name="sheet_banner_custom_title">Change sheet banner</string>
     <string name="sheet_banner_custom_summary">Set a custom image for the bottomsheet (optional)</string>

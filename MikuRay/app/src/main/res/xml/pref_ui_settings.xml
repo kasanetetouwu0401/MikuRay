@@ -434,27 +434,6 @@
     </com.miku.ray.widget.UwuPreferenceCategory>
 
     <com.miku.ray.widget.UwuPreferenceCategory
-        android:key="pref_category_app_background"
-        android:title="@string/app_background_category"
-        app:sectionIcon="@drawable/rmx_image_edit_line">
-
-        <Preference
-            android:icon="@drawable/rmx_image_edit_line"
-            app:layout="@layout/uwu_mid"
-            android:key="action_change_app_background"
-            android:title="@string/app_background_custom_title"
-            android:summary="@string/app_background_custom_summary" />
-
-        <Preference
-            android:icon="@drawable/rmx_delete_bin_line"
-            app:layout="@layout/uwu_bot"
-            android:key="action_delete_app_background"
-            android:title="@string/app_background_delete_title"
-            android:summary="@string/app_background_delete_summary" />
-
-    </com.miku.ray.widget.UwuPreferenceCategory>
-
-    <com.miku.ray.widget.UwuPreferenceCategory
         android:key="pref_category_sheet_banner"
         android:title="@string/sheet_banner_category"
         app:sectionIcon="@drawable/rmx_sparkling_line">

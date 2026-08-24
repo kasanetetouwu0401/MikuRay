@@ -894,14 +894,6 @@
     <string name="pref_home_banner_height_title">横幅高度</string>
     <string name="pref_header_top_row_padding_title">头部顶部内边距</string>
 
-    <string name="app_background_category">应用背景</string>
-    <string name="app_background_custom_title">更改应用背景</string>
-    <string name="app_background_custom_summary">在应用内容后设置自定义图片作为背景（可选）</string>
-    <string name="app_background_delete_title">移除自定义应用背景</string>
-    <string name="app_background_delete_summary">自定义背景已移除，将改用默认背景</string>
-    <string name="app_background_updated">应用背景更新成功。</string>
-    <string name="app_background_update_failed">无法保存所选背景图片。</string>
-
     <string name="sheet_banner_category">底部面板横幅</string>
     <string name="sheet_banner_custom_title">更改底部横幅</string>
     <string name="sheet_banner_custom_summary">为底部面板设置自定义图片（可选）</string>

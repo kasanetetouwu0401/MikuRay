@@ -205,9 +205,6 @@ object AppConfig {
     const val SHEET_BANNER_DIM_MIN = 0
     const val SHEET_BANNER_DIM_MAX = 90
     const val PREF_CUSTOM_THEME_BANNER_URI = "custom_theme_banner_uri"
-    const val PREF_CUSTOM_APP_BACKGROUND_URI = "custom_app_background_uri"
-    const val PREF_ACTION_CHANGE_APP_BACKGROUND = "action_change_app_background"
-    const val PREF_ACTION_DELETE_APP_BACKGROUND = "action_delete_app_background"
     const val PREF_BANNER_SETTINGS_CHARACTER = "pref_banner_settings_character"
     const val PREF_BANNER_SETTINGS_CHARACTER_DEFAULT = "uwu_banner_miku_v2"
 
@@ -311,7 +308,6 @@ object AppConfig {
     const val BROADCAST_ACTION_SELECTED_BANNER_CHANGED = "$ANG_PACKAGE.action.selected_banner_changed"
     const val BROADCAST_ACTION_PARTICLES_CHANGED = "$ANG_PACKAGE.action.particles_changed"
     const val BROADCAST_ACTION_CATEGORY_STYLE_CHANGED = "$ANG_PACKAGE.action.category_style_changed"
-    const val BROADCAST_ACTION_APP_BACKGROUND_CHANGED = "$ANG_PACKAGE.action.app_background_changed"
 
     const val TASKER_EXTRA_BUNDLE = "com.twofortyfouram.locale.intent.extra.BUNDLE"
     const val TASKER_EXTRA_STRING_BLURB = "com.twofortyfouram.locale.intent.extra.BLURB"

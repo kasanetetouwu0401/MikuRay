@@ -905,14 +905,6 @@ yang kamu butuhin."</string>
     <string name="pref_home_banner_height_title">Tinggi banner</string>
     <string name="pref_header_top_row_padding_title">Padding atas header</string>
 
-    <string name="app_background_category">Background Aplikasi</string>
-    <string name="app_background_custom_title">Ganti background aplikasi</string>
-    <string name="app_background_custom_summary">Pasang gambar kustom di belakang konten aplikasi (opsional)</string>
-    <string name="app_background_delete_title">Hapus background aplikasi kustom</string>
-    <string name="app_background_delete_summary">Background kustom dihapus. Aplikasi bakal pakai background bawaan lagi</string>
-    <string name="app_background_updated">Background aplikasi berhasil diupdate.</string>
-    <string name="app_background_update_failed">Gambar background yang dipilih gagal disimpan.</string>
-
     <string name="sheet_banner_category">Banner Bottomsheet</string>
     <string name="sheet_banner_custom_title">Ganti banner sheet</string>
     <string name="sheet_banner_custom_summary">Pasang gambar kustom buat bottomsheet (opsional)</string>

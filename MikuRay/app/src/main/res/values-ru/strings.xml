@@ -915,14 +915,6 @@
     <string name="pref_home_banner_height_title">Высота баннера</string>
     <string name="pref_header_top_row_padding_title">Верхний отступ заголовка</string>
 
-    <string name="app_background_category">Фон приложения</string>
-    <string name="app_background_custom_title">Изменить фон приложения</string>
-    <string name="app_background_custom_summary">Задайте своё изображение в качестве фона за содержимым приложения (необязательно)</string>
-    <string name="app_background_delete_title">Удалить свой фон приложения</string>
-    <string name="app_background_delete_summary">Свой фон удалён. Вместо него будет использоваться фон по умолчанию</string>
-    <string name="app_background_updated">Фон приложения успешно обновлён.</string>
-    <string name="app_background_update_failed">Не удалось сохранить выбранное изображение фона.</string>
-
     <string name="sheet_banner_category">Баннер нижней панели</string>
     <string name="sheet_banner_custom_title">Изменить баннер панели</string>
     <string name="sheet_banner_custom_summary">Задайте своё изображение для нижней панели (необязательно)</string>

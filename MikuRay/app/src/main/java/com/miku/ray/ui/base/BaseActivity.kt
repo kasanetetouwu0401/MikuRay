@@ -1,12 +1,8 @@
 package com.miku.ray.ui.base
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -27,7 +23,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AngApplication
@@ -38,9 +33,6 @@ import com.miku.ray.helper.CustomDividerItemDecoration
 import com.miku.ray.util.DPIController
 import com.miku.ray.util.FontSizeController
 import com.miku.ray.util.CustomFontManager
-import com.miku.ray.util.AppBackgroundController
-import com.bumptech.glide.request.target.Target
-import android.graphics.drawable.Drawable
 import com.miku.ray.util.WindowBlurUtils
 import com.qmdeve.blurview.widget.BlurView
 import com.miku.ray.util.ThemeStateManager
@@ -52,17 +44,6 @@ abstract class BaseActivity : AppCompatActivity() {
 
     private var toolbarSubtitle: CharSequence? = null
     private var collapsingToolbarRef: CollapsingToolbarLayout? = null
-    private var appBackgroundReceiver: BroadcastReceiver? = null
-    private var appBackgroundTarget: Target<Drawable>? = null
-    private var defaultStatusBarColor = Color.TRANSPARENT
-    private var defaultNavigationBarColor = Color.TRANSPARENT
-    private var defaultNavigationBarDividerColor = Color.TRANSPARENT
-    private var originalAppBarBackground: Drawable? = null
-    private var originalCollapsingBackground: Drawable? = null
-    private var originalContentScrim: Drawable? = null
-    private var originalContentRootBackground: Drawable? = null
-    private var toolbarDefaultsCaptured = false
-    private var contentRootDefaultsCaptured = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
@@ -70,11 +51,6 @@ abstract class BaseActivity : AppCompatActivity() {
         }
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        defaultStatusBarColor = window.statusBarColor
-        defaultNavigationBarColor = window.navigationBarColor
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-            defaultNavigationBarDividerColor = window.navigationBarDividerColor
-        }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         themeStateManager = ThemeStateManager(this)
@@ -121,8 +97,6 @@ abstract class BaseActivity : AppCompatActivity() {
             CustomFontManager.applyToViewTree(typeface, window.decorView)
         }
 
-        setupAppBackground()
-
         val root = findViewById<android.view.View>(R.id.main_content) ?: return
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -134,81 +108,6 @@ abstract class BaseActivity : AppCompatActivity() {
                 right  = maxOf(systemBars.right,  displayCutout.right)
             )
             insets
-        }
-    }
-
-    private fun setupAppBackground() {
-        appBackgroundTarget = AppBackgroundController.load(
-            activity = this,
-            previousTarget = appBackgroundTarget,
-            onCustomBackgroundStateChanged = ::applyBackgroundChrome
-        )
-
-        if (appBackgroundReceiver == null) {
-            appBackgroundReceiver = object : BroadcastReceiver() {
-                override fun onReceive(context: Context?, intent: Intent?) {
-                    if (intent?.action == AppConfig.BROADCAST_ACTION_APP_BACKGROUND_CHANGED) {
-                        appBackgroundTarget = AppBackgroundController.load(this@BaseActivity, appBackgroundTarget)
-                    }
-                }
-            }
-            val filter = IntentFilter(AppConfig.BROADCAST_ACTION_APP_BACKGROUND_CHANGED)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                registerReceiver(appBackgroundReceiver, filter, RECEIVER_NOT_EXPORTED)
-            } else {
-                @Suppress("UnspecifiedRegisterReceiverFlag")
-                registerReceiver(appBackgroundReceiver, filter)
-            }
-        }
-    }
-
-    private fun applyBackgroundChrome(customBackgroundActive: Boolean) {
-        val contentRoot = findViewById<View>(R.id.main_content)
-        if (!contentRootDefaultsCaptured) {
-            originalContentRootBackground = contentRoot?.background?.constantState?.newDrawable()?.mutate()
-            contentRootDefaultsCaptured = true
-        }
-        if (customBackgroundActive) {
-            contentRoot?.background = null
-        } else {
-            contentRoot?.background = originalContentRootBackground?.constantState?.newDrawable()?.mutate()
-        }
-
-        val appBar = findViewById<AppBarLayout>(R.id.app_bar)
-        val collapsingToolbar = findViewById<CollapsingToolbarLayout>(R.id.collapsing_toolbar)
-        if (!toolbarDefaultsCaptured) {
-            originalAppBarBackground = appBar?.background?.constantState?.newDrawable()?.mutate()
-            originalCollapsingBackground = collapsingToolbar?.background?.constantState?.newDrawable()?.mutate()
-            originalContentScrim = collapsingToolbar?.contentScrim?.constantState?.newDrawable()?.mutate()
-            toolbarDefaultsCaptured = true
-        }
-
-        if (customBackgroundActive) {
-            appBar?.setBackgroundColor(Color.TRANSPARENT)
-            collapsingToolbar?.apply {
-                setBackgroundColor(Color.TRANSPARENT)
-                contentScrim = ColorDrawable(Color.TRANSPARENT)
-            }
-        } else {
-            appBar?.background = originalAppBarBackground?.constantState?.newDrawable()?.mutate()
-            collapsingToolbar?.apply {
-                background = originalCollapsingBackground?.constantState?.newDrawable()?.mutate()
-                contentScrim = originalContentScrim?.constantState?.newDrawable()?.mutate()
-            }
-        }
-
-        if (customBackgroundActive) {
-            window.statusBarColor = Color.TRANSPARENT
-            window.navigationBarColor = Color.TRANSPARENT
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                window.navigationBarDividerColor = Color.TRANSPARENT
-            }
-        } else {
-            window.statusBarColor = defaultStatusBarColor
-            window.navigationBarColor = defaultNavigationBarColor
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                window.navigationBarDividerColor = defaultNavigationBarDividerColor
-            }
         }
     }
 
@@ -413,15 +312,6 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        appBackgroundReceiver?.let {
-            try {
-                unregisterReceiver(it)
-            } catch (_: IllegalArgumentException) {
-            }
-        }
-        appBackgroundReceiver = null
-        AppBackgroundController.clear(this, appBackgroundTarget)
-        appBackgroundTarget = null
         super.onDestroy()
         loadingOverlay?.let {
             (it.parent as? ViewGroup)?.removeView(it)

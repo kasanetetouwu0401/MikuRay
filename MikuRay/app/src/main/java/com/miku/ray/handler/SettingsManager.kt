@@ -57,7 +57,6 @@ object SettingsManager {
             AppConfig.PREF_PROFILE_BANNER_URI,
             AppConfig.PREF_SELECTED_BANNER_URI,
             AppConfig.PREF_CUSTOM_THEME_BANNER_URI,
-            AppConfig.PREF_CUSTOM_APP_BACKGROUND_URI,
         )
         bannerKeys.forEach { key ->
             preloadBanner(context, MmkvManager.decodeSettingsString(key))

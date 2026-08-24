@@ -123,8 +123,6 @@ class UiSettingsActivity : BaseActivity() {
         private val headerTopRowPaddingSlider by lazy { findPreference<HeaderTopRowPaddingDialog>(AppConfig.PREF_HEADER_TOP_ROW_PADDING) }
         private val changeHomeBannerImageAction by lazy { findPreference<Preference>(AppConfig.PREF_ACTION_CHANGE_HOME_BANNER) }
         private val deleteHomeBannerImageAction by lazy { findPreference<Preference>(AppConfig.PREF_ACTION_DELETE_HOME_BANNER) }
-        private val changeAppBackgroundAction by lazy { findPreference<Preference>(AppConfig.PREF_ACTION_CHANGE_APP_BACKGROUND) }
-        private val deleteAppBackgroundAction by lazy { findPreference<Preference>(AppConfig.PREF_ACTION_DELETE_APP_BACKGROUND) }
         private val groupAllTabIcon by lazy { findPreference<Preference>(AppConfig.PREF_GROUP_ALL_TAB_ICON) }
         private val searchBarChip by lazy { findPreference<ListPreference>(AppConfig.PREF_SEARCH_BAR_CHIP) }
         private val selectedBannerStyleEnabled by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED) }
@@ -181,11 +179,6 @@ class UiSettingsActivity : BaseActivity() {
         private val pickThemeBannerImage =
             registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
                 if (uri != null) startCropThemeBannerActivity(uri)
-            }
-
-        private val pickAppBackgroundImage =
-            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-                if (uri != null) saveAppBackgroundImage(uri)
             }
 
         private val pickCustomFontFile =
@@ -629,7 +622,6 @@ class UiSettingsActivity : BaseActivity() {
 
             setupProfilePreferences()
             setupHomeBannerPreferences()
-            setupAppBackgroundPreferences()
             setupSheetBannerPreferences()
             setupSelectedBannerPreferences()
             setupParticlesPreferences()
@@ -650,74 +642,6 @@ class UiSettingsActivity : BaseActivity() {
                     }
                 }
             }
-        }
-
-        private fun setupAppBackgroundPreferences() {
-            updateAppBackgroundDeleteState()
-
-            changeAppBackgroundAction?.setOnPreferenceClickListener {
-                pickAppBackgroundImage.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                )
-                true
-            }
-
-            deleteAppBackgroundAction?.setOnPreferenceClickListener {
-                val savedUri = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_APP_BACKGROUND_URI)
-                if (!savedUri.isNullOrEmpty()) {
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(R.string.app_background_delete_title)
-                        .setIcon(RemixR.drawable.rmx_delete_bin_line)
-                        .setMessage(R.string.app_background_delete_summary)
-                        .setPositiveButton(android.R.string.ok) { _, _ ->
-                            lifecycleScope.launch {
-                                deleteOldFile(savedUri)
-                                MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_APP_BACKGROUND_URI, "")
-                                updateAppBackgroundDeleteState()
-                                broadcastAppBackgroundChanged()
-                                requireContext().snackbarSuccess(
-                                    getString(R.string.app_background_delete_summary),
-                                    title = getString(R.string.title_alerter_success)
-                                )
-                            }
-                        }
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .showBlur()
-                }
-                true
-            }
-        }
-
-        private fun updateAppBackgroundDeleteState() {
-            val hasBackground = !MmkvManager
-                .decodeSettingsString(AppConfig.PREF_CUSTOM_APP_BACKGROUND_URI)
-                .isNullOrBlank()
-            deleteAppBackgroundAction?.isEnabled = hasBackground
-        }
-
-        private fun saveAppBackgroundImage(sourceUri: Uri) {
-            lifecycleScope.launch {
-                try {
-                    val oldUri = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_APP_BACKGROUND_URI)
-                    deleteOldFile(oldUri)
-                    val ext = if (isGif(sourceUri)) "gif" else "jpg"
-                    val savedUri = saveBannerFile(sourceUri, "app_background_", ext)
-                    MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_APP_BACKGROUND_URI, savedUri.toString())
-                    SettingsManager.preloadBanner(requireContext(), savedUri.toString())
-                    updateAppBackgroundDeleteState()
-                    broadcastAppBackgroundChanged()
-                    requireContext().toastSuccess(getString(R.string.app_background_updated))
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    requireContext().toastError(getString(R.string.app_background_update_failed))
-                }
-            }
-        }
-
-        private fun broadcastAppBackgroundChanged() {
-            requireContext().sendBroadcast(
-                android.content.Intent(AppConfig.BROADCAST_ACTION_APP_BACKGROUND_CHANGED)
-            )
         }
 
         private fun setupSheetBannerPreferences() {
