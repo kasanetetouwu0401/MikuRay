@@ -1,17 +1,17 @@
 package com.miku.ray.ui.preference
 
 import android.content.Context
-import android.net.Uri
+
 import android.util.AttributeSet
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
+
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
+import com.miku.ray.widget.BannerMediaController
 
 class CustomBannerPreference @JvmOverloads constructor(
     context: Context,
@@ -22,7 +22,6 @@ class CustomBannerPreference @JvmOverloads constructor(
 
     var onImageClick: (() -> Unit)? = null
     var onImageLongClick: (() -> Unit)? = null
-    private val defaultBannerTag = "DEFAULT_THEME_BANNER"
 
     init {
         layoutResource = R.layout.uwu_banner_theme
@@ -46,21 +45,12 @@ class CustomBannerPreference @JvmOverloads constructor(
 
         val imageView = holder.findViewById(R.id.img_banner_preference) as? ImageView
         if (imageView != null) {
+            val bannerMediaController = BannerMediaController.forImageView(
+                imageView,
+                R.drawable.uwu_banner_theme
+            )
             val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_THEME_BANNER_URI)
-            val targetTag = uriString?.takeUnless { it.isBlank() } ?: defaultBannerTag
-            if (imageView.tag != targetTag) {
-                Glide.with(context.applicationContext).clear(imageView)
-                if (targetTag == defaultBannerTag) {
-                    imageView.setImageResource(R.drawable.uwu_banner_theme)
-                } else {
-                    Glide.with(imageView)
-                        .load(Uri.parse(targetTag))
-                        .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .error(R.drawable.uwu_banner_theme)
-                        .into(imageView)
-                }
-                imageView.tag = targetTag
-            }
+            bannerMediaController.load(uriString)
         }
 
         val imageClickTarget = holder.findViewById(R.id.theme_banner_image_card)

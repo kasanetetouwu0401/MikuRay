@@ -8,9 +8,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.util.LruCache
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -21,6 +24,7 @@ import com.bumptech.glide.request.transition.Transition
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
+import com.miku.ray.widget.BannerMediaController
 
 class SelectedProfileBannerController(context: Context) {
 
@@ -40,6 +44,7 @@ class SelectedProfileBannerController(context: Context) {
         val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI)
         if (uriString.isNullOrEmpty()) {
             clearPendingRequest(target)
+            clearMediaController(target)
             applyDefaultBanner(target, cornerRadiusDp)
             return
         }
@@ -54,6 +59,14 @@ class SelectedProfileBannerController(context: Context) {
         val tagKey = "$bitmapKey::dim=$dimPercent::color=$dimColor::r=$cornerRadiusPx"
         if (target.getTag(TAG_KEY) == tagKey) return
         clearPendingRequest(target)
+
+        getMediaController(target, cornerRadiusPx, dimColor)?.let { mediaController ->
+            target.setLayerType(View.LAYER_TYPE_NONE, null)
+            target.background = null
+            target.setTag(TAG_KEY, tagKey)
+            mediaController.load(uriString)
+            return
+        }
 
         bitmapCache.get(bitmapKey)?.let { cached ->
             target.setLayerType(View.LAYER_TYPE_NONE, null)
@@ -112,6 +125,53 @@ class SelectedProfileBannerController(context: Context) {
         }
     }
 
+    private fun getMediaController(
+        target: View,
+        cornerRadiusPx: Float,
+        dimColor: Int
+    ): BannerMediaController? {
+        val parent = target as? ViewGroup ?: return null
+        val imageView = (target.getTag(MEDIA_IMAGE_TAG) as? ImageView) ?: ImageView(target.context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            setLayerType(View.LAYER_TYPE_NONE, null)
+            parent.addView(this, 0)
+            target.setTag(MEDIA_IMAGE_TAG, this)
+        }
+
+        val dimView = (target.getTag(MEDIA_DIM_TAG) as? View) ?: View(target.context).also {
+            it.layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            parent.addView(it, (parent.indexOfChild(imageView) + 2).coerceAtMost(parent.childCount))
+            target.setTag(MEDIA_DIM_TAG, it)
+        }
+        dimView.background = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = cornerRadiusPx
+            setColor(dimColor)
+        }
+
+        return BannerMediaController.forImageView(imageView, R.drawable.uwu_banner_selected)
+    }
+
+    private fun clearMediaController(target: View) {
+        val imageView = target.getTag(MEDIA_IMAGE_TAG) as? ImageView
+        if (imageView != null) {
+            BannerMediaController.forImageView(imageView, R.drawable.uwu_banner_selected).release()
+            (imageView.parent as? ViewGroup)?.removeView(imageView)
+        }
+        (target.getTag(MEDIA_DIM_TAG) as? View)?.let { dimView ->
+            (dimView.parent as? ViewGroup)?.removeView(dimView)
+        }
+        target.setTag(MEDIA_IMAGE_TAG, null)
+        target.setTag(MEDIA_DIM_TAG, null)
+    }
+
     private fun applyDefaultBanner(target: View, cornerRadiusDp: Float = 16f) {
         val dimPercent = MmkvManager.decodeSettingsInt(
             AppConfig.PREF_SELECTED_BANNER_DIM,
@@ -154,6 +214,7 @@ class SelectedProfileBannerController(context: Context) {
 
     fun clear(target: View) {
         clearPendingRequest(target)
+        clearMediaController(target)
         target.setTag(TAG_KEY, null)
         target.setLayerType(View.LAYER_TYPE_NONE, null)
         target.background = null
@@ -260,6 +321,8 @@ class SelectedProfileBannerController(context: Context) {
     companion object {
         private val TAG_KEY = "selected_profile_banner_tag".hashCode()
         private val REQUEST_TAG = "selected_profile_banner_request".hashCode()
+        private val MEDIA_IMAGE_TAG = "selected_profile_banner_media_image".hashCode()
+        private val MEDIA_DIM_TAG = "selected_profile_banner_media_dim".hashCode()
 
         private const val MAX_CACHE_KB = 12 * 1024
         private const val MAX_BANNER_DECODE_SIZE = 1600

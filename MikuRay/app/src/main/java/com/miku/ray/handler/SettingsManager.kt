@@ -68,6 +68,12 @@ object SettingsManager {
     fun preloadBanner(context: Context, uriString: String?) {
         if (uriString.isNullOrBlank()) return
         try {
+            val uri = Uri.parse(uriString)
+            val mimeType = context.contentResolver.getType(uri)
+            val isVideo = mimeType?.startsWith("video/") == true ||
+                listOf(".mp4", ".webm", ".mkv", ".3gp", ".mov").any(uriString.lowercase()::endsWith)
+            if (isVideo) return
+
             val appContext = context.applicationContext
             Glide.with(appContext)
                 .load(Uri.parse(uriString))

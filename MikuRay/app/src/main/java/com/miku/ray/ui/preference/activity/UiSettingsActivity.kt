@@ -147,8 +147,13 @@ class UiSettingsActivity : BaseActivity() {
             registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
                 if (uri != null) {
                     if (isGif(uri)) {
-                        saveGifBannerDirectly(uri, AppConfig.PREF_CUSTOM_HOME_BANNER_URI, "home_banner_") {
+                        saveMediaBannerDirectly(uri, AppConfig.PREF_CUSTOM_HOME_BANNER_URI, "home_banner_", "gif") {
                             extractAndSaveBannerColor(it)
+                            broadcastHomeBannerChanged()
+                            requireContext().toastSuccess(getString(R.string.home_banner_updated))
+                        }
+                    } else if (isVideo(uri)) {
+                        saveMediaBannerDirectly(uri, AppConfig.PREF_CUSTOM_HOME_BANNER_URI, "home_banner_", mediaExtension(uri)) {
                             broadcastHomeBannerChanged()
                             requireContext().toastSuccess(getString(R.string.home_banner_updated))
                         }
@@ -161,8 +166,8 @@ class UiSettingsActivity : BaseActivity() {
         private val pickSheetBannerImage =
             registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
                 if (uri != null) {
-                    if (isGif(uri)) {
-                        saveGifBannerDirectly(uri, AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, "sheet_banner_") {
+                    if (isGif(uri) || isVideo(uri)) {
+                        saveMediaBannerDirectly(uri, AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, "sheet_banner_", if (isGif(uri)) "gif" else mediaExtension(uri)) {
                             requireContext().toastSuccess(getString(R.string.sheet_banner_updated))
                         }
                     } else {
@@ -173,12 +178,31 @@ class UiSettingsActivity : BaseActivity() {
 
         private val pickSelectedBannerImage =
             registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-                if (uri != null) startCropSelectedBannerActivity(uri)
+                if (uri != null) {
+                    if (isGif(uri) || isVideo(uri)) {
+                        saveMediaBannerDirectly(uri, AppConfig.PREF_SELECTED_BANNER_URI, "selected_banner_", if (isGif(uri)) "gif" else mediaExtension(uri)) {
+                            updateIndicatorStyleEnabledState()
+                            broadcastSelectedBannerChanged()
+                            requireContext().toastSuccess(getString(R.string.selected_banner_updated))
+                        }
+                    } else {
+                        startCropSelectedBannerActivity(uri)
+                    }
+                }
             }
 
         private val pickThemeBannerImage =
             registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-                if (uri != null) startCropThemeBannerActivity(uri)
+                if (uri != null) {
+                    if (isGif(uri) || isVideo(uri)) {
+                        saveMediaBannerDirectly(uri, AppConfig.PREF_CUSTOM_THEME_BANNER_URI, "theme_banner_", if (isGif(uri)) "gif" else mediaExtension(uri)) {
+                            navigateCheckUpdate?.refresh()
+                            requireContext().toastSuccess(getString(R.string.theme_banner_updated))
+                        }
+                    } else {
+                        startCropThemeBannerActivity(uri)
+                    }
+                }
             }
 
         private val pickCustomFontFile =
@@ -327,7 +351,7 @@ class UiSettingsActivity : BaseActivity() {
 
             navigateCheckUpdate?.onImageClick = {
                 pickThemeBannerImage.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
                 )
             }
 
@@ -647,7 +671,7 @@ class UiSettingsActivity : BaseActivity() {
         private fun setupSheetBannerPreferences() {
             findPreference<Preference>(AppConfig.PREF_ACTION_CHANGE_SHEET_BANNER)?.setOnPreferenceClickListener {
                 pickSheetBannerImage.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
                 )
                 true
             }
@@ -793,7 +817,7 @@ class UiSettingsActivity : BaseActivity() {
 
             findPreference<Preference>(AppConfig.PREF_ACTION_CHANGE_SELECTED_BANNER)?.setOnPreferenceClickListener {
                 pickSelectedBannerImage.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
                 )
                 true
             }
@@ -930,7 +954,7 @@ class UiSettingsActivity : BaseActivity() {
 
             findPreference<Preference>(AppConfig.PREF_ACTION_CHANGE_HOME_BANNER)?.setOnPreferenceClickListener {
                 pickHomeBannerImage.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
                 )
                 true
             }
@@ -1128,21 +1152,45 @@ class UiSettingsActivity : BaseActivity() {
         private fun isGif(uri: Uri): Boolean {
             val mimeType = requireContext().contentResolver.getType(uri)
             if (mimeType == "image/gif") return true
-            val path = uri.path ?: return false
-            return path.lowercase().endsWith(".gif")
+            return uri.path?.lowercase()?.endsWith(".gif") == true
         }
 
-        private fun saveGifBannerDirectly(
+        private fun isVideo(uri: Uri): Boolean {
+            val mimeType = requireContext().contentResolver.getType(uri)
+            if (mimeType?.startsWith("video/") == true) return true
+            val path = uri.path?.lowercase() ?: return false
+            return listOf(".mp4", ".webm", ".mkv", ".3gp", ".mov").any(path::endsWith)
+        }
+
+        private fun mediaExtension(uri: Uri): String {
+            val mimeType = requireContext().contentResolver.getType(uri)
+            val fromMime = when (mimeType) {
+                "video/mp4" -> "mp4"
+                "video/webm" -> "webm"
+                "video/3gpp" -> "3gp"
+                "video/quicktime" -> "mov"
+                "video/x-matroska" -> "mkv"
+                else -> null
+            }
+            if (fromMime != null) return fromMime
+
+            return uri.path?.substringAfterLast('.', "mp4")?.lowercase()
+                ?.takeIf { it in setOf("mp4", "webm", "mkv", "3gp", "mov") }
+                ?: "mp4"
+        }
+
+        private fun saveMediaBannerDirectly(
             sourceUri: Uri,
             prefKey: String,
             fileNamePrefix: String,
+            ext: String,
             onSuccess: (Uri) -> Unit
         ) {
             lifecycleScope.launch {
                 try {
                     val oldUri = MmkvManager.decodeSettingsString(prefKey)
                     deleteOldFile(oldUri)
-                    val savedUri = saveBannerFile(sourceUri, fileNamePrefix, ext = "gif")
+                    val savedUri = saveBannerFile(sourceUri, fileNamePrefix, ext = ext)
                     MmkvManager.encodeSettings(prefKey, savedUri.toString())
                     SettingsManager.preloadBanner(requireContext(), savedUri.toString())
                     onSuccess(savedUri)

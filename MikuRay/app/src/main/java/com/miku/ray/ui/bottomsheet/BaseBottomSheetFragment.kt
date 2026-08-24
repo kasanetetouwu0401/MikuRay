@@ -1,6 +1,5 @@
 package com.miku.ray.ui.bottomsheet
 
-import android.net.Uri
 import android.view.View
 import androidx.core.view.ViewCompat
 import android.view.WindowManager
@@ -16,12 +15,13 @@ import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.particlesdrawable.ParticlesView
 import com.miku.ray.util.ParticlesController
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import android.widget.ImageView
 import com.miku.ray.util.getColorAttr
+import com.miku.ray.widget.BannerMediaController
 
 abstract class BaseBottomSheetFragment : BottomSheetDialogFragment() {
+
+    private var bannerMediaController: BannerMediaController? = null
 
     protected fun setupParticles(view: View) {
         val particlesView = view.findViewById<ParticlesView>(R.id.ParticlesView) ?: return
@@ -58,40 +58,30 @@ abstract class BaseBottomSheetFragment : BottomSheetDialogFragment() {
         view.findViewById<View>(R.id.view_banner_sheet_dim)?.let { dimView ->
             dimView.setBackgroundColor(dimColor)
         }
-        val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI)
-        val targetTag = if (uriString.isNullOrBlank()) TAG_SHEET_DEFAULT else uriString
-        if (bannerImageView.tag != targetTag) {
-            if (!uriString.isNullOrBlank()) {
-                val isGif = uriString.lowercase().endsWith(".gif")
-                if (isGif) {
-                    Glide.with(this)
-                        .asGif()
-                        .load(Uri.parse(uriString))
-                        .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .error(R.drawable.uwu_banner_sheet)
-                        .into(bannerImageView)
-                } else {
-                    Glide.with(this)
-                        .load(Uri.parse(uriString))
-                        .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .error(R.drawable.uwu_banner_sheet)
-                        .into(bannerImageView)
-                }
-            } else {
-                Glide.with(this).clear(bannerImageView)
-                bannerImageView.setImageResource(R.drawable.uwu_banner_sheet)
-            }
-            bannerImageView.tag = targetTag
+
+        if (bannerMediaController == null) {
+            bannerMediaController = BannerMediaController.forImageView(
+                bannerImageView,
+                R.drawable.uwu_banner_sheet
+            )
         }
+        val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI)
+        bannerMediaController?.load(uriString)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        bannerMediaController?.resume()
+    }
+
+    override fun onPause() {
+        bannerMediaController?.pause()
+        super.onPause()
     }
 
     override fun onDestroyView() {
-        view?.findViewById<ImageView>(R.id.img_banner_sheet)?.let { bannerImageView ->
-            val context = bannerImageView.context.applicationContext
-            Glide.with(context).clear(bannerImageView)
-            bannerImageView.setImageDrawable(null)
-            bannerImageView.tag = null
-        }
+        bannerMediaController?.release()
+        bannerMediaController = null
         super.onDestroyView()
     }
 

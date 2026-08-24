@@ -187,17 +187,18 @@ class BackupActivity : HelperBaseActivity() {
             if (uriString.isBlank()) continue
             try {
                 val uri = Uri.parse(uriString)
+                val extension = bannerExtension(uri)
                 val srcFile = if (uri.scheme == "file") {
                     java.io.File(uri.path!!)
                 } else {
-                    val tmp = java.io.File(cacheDir, "banner_backup_tmp_${key}.jpg")
+                    val tmp = java.io.File(cacheDir, "banner_backup_tmp_${key}.$extension")
                     contentResolver.openInputStream(uri)?.use { input ->
                         tmp.outputStream().use { input.copyTo(it) }
                     }
                     tmp
                 }
                 if (srcFile.exists()) {
-                    srcFile.copyTo(java.io.File(bannersDir, "$key.jpg"), overwrite = true)
+                    srcFile.copyTo(java.io.File(bannersDir, "$key.$extension"), overwrite = true)
                 }
             } catch (e: Exception) {
                 LogUtil.e(AppConfig.TAG, "Failed to backup banner for key $key", e)
@@ -232,7 +233,7 @@ class BackupActivity : HelperBaseActivity() {
         restoreCustomFont(backupDir)
 
         val restoredHomeBannerUri = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_HOME_BANNER_URI)
-        if (!restoredHomeBannerUri.isNullOrBlank()) {
+        if (!restoredHomeBannerUri.isNullOrBlank() && !isVideoBannerUri(restoredHomeBannerUri)) {
             lifecycleScope.launch {
                 BannerColorExtractor.extractAndSave(this@BackupActivity, Uri.parse(restoredHomeBannerUri))
             }
@@ -274,14 +275,16 @@ class BackupActivity : HelperBaseActivity() {
         if (!bannersDir.exists()) return
 
         for (key in bannerKeys) {
-            val srcFile = java.io.File(bannersDir, "$key.jpg")
-            if (!srcFile.exists()) {
+            val srcFile = bannersDir.listFiles()
+                ?.firstOrNull { it.isFile && it.nameWithoutExtension == key }
+            if (srcFile == null) {
                 MmkvManager.encodeSettings(key, "")
                 continue
             }
             try {
                 val bannersOutDir = java.io.File(filesDir, "banners").apply { mkdirs() }
-                val destFile = java.io.File(bannersOutDir, "${key}_${System.currentTimeMillis()}.jpg")
+                val extension = srcFile.extension.ifBlank { "jpg" }
+                val destFile = java.io.File(bannersOutDir, "${key}_${System.currentTimeMillis()}.$extension")
                 srcFile.copyTo(destFile, overwrite = true)
                 MmkvManager.encodeSettings(key, Uri.fromFile(destFile).toString())
             } catch (e: Exception) {
@@ -289,6 +292,33 @@ class BackupActivity : HelperBaseActivity() {
                 MmkvManager.encodeSettings(key, "")
             }
         }
+    }
+
+    private fun bannerExtension(uri: Uri): String {
+        val mimeType = contentResolver.getType(uri)
+        val fromMime = when (mimeType) {
+            "image/gif" -> "gif"
+            "image/png" -> "png"
+            "image/webp" -> "webp"
+            "video/mp4" -> "mp4"
+            "video/webm" -> "webm"
+            "video/3gpp" -> "3gp"
+            "video/quicktime" -> "mov"
+            "video/x-matroska" -> "mkv"
+            else -> null
+        }
+        if (fromMime != null) return fromMime
+
+        return uri.path?.substringAfterLast('.', "jpg")?.lowercase()
+            ?.takeIf { it in setOf("jpg", "jpeg", "png", "webp", "gif", "mp4", "webm", "mkv", "3gp", "mov") }
+            ?: "jpg"
+    }
+
+    private fun isVideoBannerUri(uriString: String): Boolean {
+        val uri = Uri.parse(uriString)
+        val mimeType = contentResolver.getType(uri)
+        return mimeType?.startsWith("video/") == true ||
+            listOf(".mp4", ".webm", ".mkv", ".3gp", ".mov").any(uriString.lowercase()::endsWith)
     }
 
     private fun showFileChooser() {

@@ -884,7 +884,7 @@
     <string name="home_banner_disable_title">禁用主页横幅</string>
     <string name="home_banner_disable_summary">隐藏主屏幕顶部的横幅图片</string>
     <string name="home_banner_custom_title">更改主页横幅</string>
-    <string name="home_banner_custom_summary">为主页头部设置自定义图片（可选）</string>
+    <string name="home_banner_custom_summary">为主页头部设置自定义图片、GIF 或视频（可选）</string>
     <string name="home_banner_delete_title">移除自定义主页横幅</string>
     <string name="home_banner_delete_summary">自定义横幅已移除，将改用默认主页横幅</string>
     <string name="home_banner_updated">主页横幅更新成功。</string>
@@ -896,7 +896,7 @@
 
     <string name="sheet_banner_category">底部面板横幅</string>
     <string name="sheet_banner_custom_title">更改底部横幅</string>
-    <string name="sheet_banner_custom_summary">为底部面板设置自定义图片（可选）</string>
+    <string name="sheet_banner_custom_summary">为底部面板设置自定义图片、GIF 或视频（可选）</string>
     <string name="sheet_banner_delete_title">移除自定义底部横幅</string>
     <string name="sheet_banner_delete_summary">自定义横幅已移除，将改用默认底部横幅</string>
     <string name="sheet_banner_updated">底部横幅更新成功。</string>
@@ -923,7 +923,7 @@
     <string name="selected_banner_dim_title">横幅遮罩强度</string>
     <string name="sheet_banner_dim_title">横幅遮罩强度</string>
     <string name="selected_banner_custom_title">更改选中配置的横幅</string>
-    <string name="selected_banner_custom_summary">为选中的服务器卡片设置自定义图片（可选）</string>
+    <string name="selected_banner_custom_summary">为选中的服务器卡片设置自定义图片、GIF 或视频（可选）</string>
     <string name="selected_banner_delete_title">删除选中配置的自定义横幅</string>
     <string name="selected_banner_delete_summary">自定义横幅已移除，将改用默认横幅</string>
     <string name="selected_banner_updated">已成功更新选中配置的横幅。</string>

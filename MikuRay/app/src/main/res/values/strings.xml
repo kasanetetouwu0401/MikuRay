@@ -928,7 +928,7 @@ you need."</string>
     <string name="home_banner_disable_title">Disable home banner</string>
     <string name="home_banner_disable_summary">Hide the banner image at the top of the home screen</string>
     <string name="home_banner_custom_title">Change home banner</string>
-    <string name="home_banner_custom_summary">Set a custom image for the home header (optional)</string>
+    <string name="home_banner_custom_summary">Set a custom image, GIF, or video for the home header (optional)</string>
     <string name="home_banner_delete_title">Remove custom home banner</string>
     <string name="home_banner_delete_summary">Custom banner removed. Default home banner will be used instead</string>
     <string name="home_banner_updated">Home banner updated successfully.</string>
@@ -971,7 +971,7 @@ you need."</string>
     <string name="sheet_banner_dim_title">Banner overlay strength</string>
     <string name="sheet_banner_dim_summary_value">%1$d%%</string>
     <string name="selected_banner_custom_title">Change selected profile banner</string>
-    <string name="selected_banner_custom_summary">Set a custom image for the selected server card (optional)</string>
+    <string name="selected_banner_custom_summary">Set a custom image, GIF, or video for the selected server card (optional)</string>
     <string name="selected_banner_delete_title">Remove custom selected profile banner</string>
     <string name="selected_banner_delete_summary">Custom banner removed. Default banner will be used instead</string>
     <string name="selected_banner_updated">Selected profile banner updated successfully.</string>

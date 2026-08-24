@@ -905,7 +905,7 @@
     <string name="home_banner_disable_title">Отключить баннер главного экрана</string>
     <string name="home_banner_disable_summary">Скрыть баннер вверху главного экрана</string>
     <string name="home_banner_custom_title">Изменить баннер главного экрана</string>
-    <string name="home_banner_custom_summary">Задайте своё изображение для заголовка главного экрана (необязательно)</string>
+    <string name="home_banner_custom_summary">Задайте своё изображение, GIF или видео для заголовка главного экрана (необязательно)</string>
     <string name="home_banner_delete_title">Удалить свой баннер главного экрана</string>
     <string name="home_banner_delete_summary">Свой баннер удалён. Вместо него будет использоваться баннер главного экрана по умолчанию</string>
     <string name="home_banner_updated">Баннер главного экрана успешно обновлён.</string>
@@ -917,7 +917,7 @@
 
     <string name="sheet_banner_category">Баннер нижней панели</string>
     <string name="sheet_banner_custom_title">Изменить баннер панели</string>
-    <string name="sheet_banner_custom_summary">Задайте своё изображение для нижней панели (необязательно)</string>
+    <string name="sheet_banner_custom_summary">Задайте своё изображение, GIF или видео для нижней панели (необязательно)</string>
     <string name="sheet_banner_delete_title">Удалить свой баннер нижней панели</string>
     <string name="sheet_banner_delete_summary">Свой баннер удалён. Вместо него будет использоваться баннер по умолчанию</string>
     <string name="sheet_banner_updated">Баннер панели успешно обновлен.</string>
@@ -944,7 +944,7 @@
     <string name="selected_banner_dim_title">Интенсивность затемнения баннера</string>
     <string name="sheet_banner_dim_title">Интенсивность затемнения баннера</string>
     <string name="selected_banner_custom_title">Изменить баннер выбранного профиля</string>
-    <string name="selected_banner_custom_summary">Задать свою картинку для карточки выбранного сервера (необязательно)</string>
+    <string name="selected_banner_custom_summary">Задать свою картинку, GIF или видео для карточки выбранного сервера (необязательно)</string>
     <string name="selected_banner_delete_title">Удалить свой баннер выбранного профиля</string>
     <string name="selected_banner_delete_summary">Свой баннер удалён. Вместо него будет использоваться баннер по умолчанию</string>
     <string name="selected_banner_updated">Баннер выбранного профиля успешно обновлен.</string>
