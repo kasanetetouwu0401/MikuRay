@@ -48,6 +48,8 @@
         <item name="seekBarPreferenceStyle">@style/AppThemePreferenceItem</item>
         <item name="editTextPreferenceStyle">@style/AppThemeEditTextPreference</item>
         <item name="preferenceCategoryStyle">@style/AppThemePreferenceCategory</item>
+        <item name="materialAlertDialogTheme">@style/AppThemeAlertDialog</item>
+        <item name="alertDialogTheme">@style/AppThemeAlertDialog</item>
     </style>
 
     <style name="AppThemePreferenceItem" parent="@style/Preference.Material">
