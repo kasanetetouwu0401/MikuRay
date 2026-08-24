@@ -73,7 +73,6 @@ import com.miku.ray.ui.server.ServerHysteria2Activity
 import com.miku.ray.ui.server.ServerProxyChainActivity
 import com.miku.ray.ui.server.ServerShadowsocksActivity
 import com.miku.ray.ui.server.ServerSocksActivity
-import com.miku.ray.ui.server.ServerSshActivity
 import com.miku.ray.ui.server.ServerTrojanActivity
 import com.miku.ray.ui.server.ServerVlessActivity
 import com.miku.ray.ui.server.ServerVmessActivity
@@ -682,7 +681,6 @@ class MainActivity : HelperBaseActivity(),
             R.id.import_manually_trojan -> importManually(EConfigType.TROJAN.value)
             R.id.import_manually_wireguard -> importManually(EConfigType.WIREGUARD.value)
             R.id.import_manually_hysteria2 -> importManually(EConfigType.HYSTERIA2.value)
-            R.id.import_manually_ssh -> importManually(EConfigType.SSH.value)
         }
     }
 
@@ -1138,7 +1136,6 @@ class MainActivity : HelperBaseActivity(),
                 EConfigType.SOCKS, EConfigType.HTTP -> ServerSocksActivity::class.java
                 EConfigType.WIREGUARD -> ServerWireguardActivity::class.java
                 EConfigType.HYSTERIA2 -> ServerHysteria2Activity::class.java
-                EConfigType.SSH -> ServerSshActivity::class.java
                 else -> ServerVmessActivity::class.java
             }
             

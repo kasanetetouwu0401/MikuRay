@@ -27,7 +27,6 @@ object CoreOutboundBuilder {
             EConfigType.WIREGUARD -> toOutboundWireguard(profileItem)
             EConfigType.HYSTERIA2 -> toOutboundHysteria2(profileItem)
             EConfigType.HTTP -> toOutboundHttp(profileItem)
-            EConfigType.SSH -> toOutboundSsh(profileItem)
             else -> null
         }
 
@@ -193,16 +192,6 @@ object CoreOutboundBuilder {
             populateTlsSettings(it, profileItem, sni)
         }
 
-        return outboundBean
-    }
-
-    private fun toOutboundSsh(profileItem: ProfileItem): OutboundBean? {
-        val outboundBean = createInitOutbound(EConfigType.SOCKS)
-        outboundBean?.settings?.let { settings ->
-            settings.address = AppConfig.LOOPBACK
-            settings.port = SshTunnelManager.getLocalPort(profileItem)
-            settings.level = AppConfig.DEFAULT_LEVEL
-        }
         return outboundBean
     }
 
