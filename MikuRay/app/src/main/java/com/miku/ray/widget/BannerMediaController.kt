@@ -23,6 +23,8 @@ class BannerMediaController(
 
     private fun createVideoView(): CenterCropVideoView? {
         val parent = imageView.parent as? ViewGroup ?: return null
+        parent.clipChildren = true
+        parent.clipToPadding = true
         val video = CenterCropVideoView(context).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,

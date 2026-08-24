@@ -3,6 +3,7 @@ package com.miku.ray.widget
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.VideoView
+import kotlin.math.roundToInt
 
 class CenterCropVideoView @JvmOverloads constructor(
     context: Context,
@@ -12,36 +13,54 @@ class CenterCropVideoView @JvmOverloads constructor(
 
     private var videoWidth = 0
     private var videoHeight = 0
-
     fun setVideoSize(width: Int, height: Int) {
         videoWidth = width
         videoHeight = height
-        updateCenterCropScale()
+        requestLayout()
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+
+        if (videoWidth <= 0 || videoHeight <= 0) {
+            translationX = 0f
+            translationY = 0f
+            return
+        }
+
+        val measuredViewportWidth = measuredWidth
+        val measuredViewportHeight = measuredHeight
+        if (measuredViewportWidth <= 0 || measuredViewportHeight <= 0) return
+
+        val videoAspect = videoWidth.toFloat() / videoHeight.toFloat()
+        val viewportAspect = measuredViewportWidth.toFloat() / measuredViewportHeight.toFloat()
+
+        val croppedWidth: Int
+        val croppedHeight: Int
+        if (videoAspect > viewportAspect) {
+            croppedWidth = (measuredViewportHeight * videoAspect).roundToInt()
+            croppedHeight = measuredViewportHeight
+        } else {
+            croppedWidth = measuredViewportWidth
+            croppedHeight = (measuredViewportWidth / videoAspect).roundToInt()
+        }
+
+        setMeasuredDimension(croppedWidth, croppedHeight)
+        translationX = (measuredViewportWidth - croppedWidth) / 2f
+        translationY = (measuredViewportHeight - croppedHeight) / 2f
     }
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
-        updateCenterCropScale()
+        if (videoWidth <= 0 || videoHeight <= 0) {
+            translationX = 0f
+            translationY = 0f
+        }
     }
 
     override fun onDetachedFromWindow() {
-        scaleX = 1f
-        scaleY = 1f
+        translationX = 0f
+        translationY = 0f
         super.onDetachedFromWindow()
     }
-
-    private fun updateCenterCropScale() {
-        if (width <= 0 || height <= 0 || videoWidth <= 0 || videoHeight <= 0) return
-
-        val videoAspect = videoWidth.toFloat() / videoHeight.toFloat()
-        val viewAspect = width.toFloat() / height.toFloat()
-        if (videoAspect > viewAspect) {
-            scaleX = 1f
-            scaleY = videoAspect / viewAspect
-        } else {
-            scaleX = viewAspect / videoAspect
-            scaleY = 1f
-        }
-    }
 }
-

@@ -22,7 +22,7 @@
         app:strokeColor="?colorOutlineVariant"
         app:strokeWidth="0.0dip"
         android:layerType="none">
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/layout_indicator"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
@@ -245,6 +245,6 @@
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
+        </FrameLayout>
     </com.google.android.material.card.MaterialCardView>
 </LinearLayout>

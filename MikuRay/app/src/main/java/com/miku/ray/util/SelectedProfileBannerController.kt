@@ -147,7 +147,7 @@ class SelectedProfileBannerController(context: Context) {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            parent.addView(it, (parent.indexOfChild(imageView) + 2).coerceAtMost(parent.childCount))
+            parent.addView(it, (parent.indexOfChild(imageView) + 1).coerceAtMost(parent.childCount))
             target.setTag(MEDIA_DIM_TAG, it)
         }
         dimView.background = GradientDrawable().apply {
