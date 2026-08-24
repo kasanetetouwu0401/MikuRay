@@ -198,7 +198,7 @@ class WidgetProvider : AppWidgetProvider() {
         }
 
         private fun buildThemedContext(context: Context): Context {
-            val key = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "8"
+            val key = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "1"
             var themed: Context = ContextThemeWrapper(context, ThemeManager.getThemeStyleRes(key))
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

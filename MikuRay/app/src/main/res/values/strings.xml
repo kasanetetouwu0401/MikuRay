@@ -676,6 +676,14 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="reset">Reset</string>
     <string name="pref_custom_color_title">Custom Theme Color</string>
     <string name="pref_custom_color_reset">Reset to Preset</string>
+    <string name="pref_custom_color_short_label">Custom HEX/HCT</string>
+    <string name="pref_custom_source_hex_label">Source color HEX</string>
+    <string name="pref_custom_source_hct_label">Material HCT values</string>
+    <string name="pref_custom_source_hue_hint">Hue (0–360)</string>
+    <string name="pref_custom_source_chroma_hint">Chroma (0–150)</string>
+    <string name="pref_custom_source_tone_hint">Tone (0–100)</string>
+    <string name="pref_custom_source_invalid_hex">Enter a valid HEX color, for example #6750A4</string>
+    <string name="pref_custom_source_invalid_range">Value must be between %1$.0f and %2$.0f</string>
     <string name="indicator_style_title">Select Indicator Style</string>
     <string name="pref_indicator_style_title">Server Indicator Style</string>
     <string name="pref_indicator_style_summary">Select the active server indicator display</string>

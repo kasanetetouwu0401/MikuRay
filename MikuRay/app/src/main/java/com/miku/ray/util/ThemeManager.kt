@@ -51,7 +51,7 @@ object ThemeManager {
                     applyCustomColorTheme(activity, customColor)
                 }
                 else -> {
-                    val key = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "8"
+                    val key = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "1"
                     activity.setTheme(getThemeStyleRes(key))
                 }
             }
@@ -63,27 +63,7 @@ object ThemeManager {
     }
 
     @StyleRes
-    fun getThemeStyleRes(key: String): Int {
-        return when (key) {
-            "1"  -> R.style.AppTheme_Red
-            "2"  -> R.style.AppTheme_Pink
-            "3"  -> R.style.AppTheme_Purple
-            "4"  -> R.style.AppTheme_DeepPurple
-            "5"  -> R.style.AppTheme_Indigo
-            "6"  -> R.style.AppTheme_Blue
-            "7"  -> R.style.AppTheme_Cyan
-            "8"  -> R.style.AppTheme_Teal
-            "9"  -> R.style.AppTheme_Green
-            "10" -> R.style.AppTheme_LightGreen
-            "11" -> R.style.AppTheme_Lime
-            "12" -> R.style.AppTheme_Yellow
-            "13" -> R.style.AppTheme_Amber
-            "14" -> R.style.AppTheme_Orange
-            "15" -> R.style.AppTheme_Brown
-            "16" -> R.style.AppTheme_BlueGrey
-            else -> R.style.AppTheme_Teal
-        }
-    }
+    fun getThemeStyleRes(key: String): Int = ThemePresetCatalog.styleForKey(key)
 
     fun applyCustomColorTheme(activity: Activity, @ColorInt seedColor: Int, isTrueBlack: Boolean = false) {
         val optionsBuilder = DynamicColorsOptions.Builder()
