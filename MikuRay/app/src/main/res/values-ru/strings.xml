@@ -1051,16 +1051,4 @@
     <string name="ui_theme_import_failed">Не удалось импортировать тему: %1$s</string>
     <string name="title_pref_use_system_blur">Использовать системное размытие</string>
     <string name="summary_pref_use_system_blur">Использовать нативное размытие окон Android, если оно доступно</string>
-    <string name="title_theme_palette">Палитра темы</string>
-    <string name="theme_palette_description">Выберите акцентный цвет для повторного использования. MikuRay создаст полную светлую и тёмную цветовую схему Material на его основе.</string>
-    <string name="theme_palette_suggested">Рекомендуемые палитры</string>
-    <string name="theme_palette_saved">Ваши палитры</string>
-    <string name="theme_palette_saved_empty">Сохранённых палитр пока нет. Создайте палитру из пользовательского цвета.</string>
-    <string name="theme_palette_create">Создать и сохранить палитру</string>
-    <string name="theme_palette_recent">Недавно использованные</string>
-    <string name="theme_palette_recent_empty">Применённые цвета появятся здесь.</string>
-    <string name="theme_palette_color_description">Применить %1$s</string>
-    <string name="theme_palette_remove_title">Удалить палитру?</string>
-    <string name="theme_palette_remove_message">Удалить %1$s из сохранённых палитр?</string>
-    <string name="theme_palette_remove_action">Удалить</string>
 </resources>

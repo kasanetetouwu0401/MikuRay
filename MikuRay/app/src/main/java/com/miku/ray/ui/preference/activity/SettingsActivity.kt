@@ -30,6 +30,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.util.SearchBarChipMode
 import com.miku.ray.R
+import com.miku.ray.databinding.ActivitySettingsSearchBinding
 import com.miku.ray.enums.PermissionType
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
 import com.miku.ray.extension.toastSuccess
@@ -48,6 +49,8 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
+    private val binding by lazy { ActivitySettingsSearchBinding.inflate(layoutInflater) }
+
 
     private lateinit var searchActionView: SearchPreferenceActionView
     private lateinit var btnClearHistory: com.google.android.material.button.MaterialButton
@@ -62,8 +65,8 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings_search)
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        setContentView(binding.root)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_settings), subtitle = getString(R.string.subtitle_settings))
 
         setupSearchActionView()
@@ -97,8 +100,8 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     }
 
     private fun setupSearchActionView() {
-        searchActionView = findViewById(R.id.search_action_view)
-        btnClearHistory = findViewById(R.id.btn_clear_history)
+        searchActionView = binding.searchActionView
+        btnClearHistory = binding.btnClearHistory
         searchActionView.setActivity(this)
         searchActionView.getSearchConfiguration().apply {
             setHistoryEnabled(true)
@@ -140,11 +143,11 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         supportFragmentManager.fragments.filterIsInstance<SearchPreferenceFragment>().firstOrNull()
 
     private fun setupWeatherTrafficChip() {
-        layoutWeatherChip = findViewById(R.id.layout_weather_chip)
-        ivWeatherIcon = findViewById(R.id.iv_weather_icon)
-        tvWeatherTemp = findViewById(R.id.tv_weather_temp)
-        ivTotalTrafficIcon = findViewById(R.id.iv_total_traffic_icon)
-        tvTotalTraffic = findViewById(R.id.tv_total_traffic)
+        layoutWeatherChip = binding.layoutWeatherChip
+        ivWeatherIcon = binding.ivWeatherIcon
+        tvWeatherTemp = binding.tvWeatherTemp
+        ivTotalTrafficIcon = binding.ivTotalTrafficIcon
+        tvTotalTraffic = binding.tvTotalTraffic
 
         layoutWeatherChip.setOnClickListener {
             when {

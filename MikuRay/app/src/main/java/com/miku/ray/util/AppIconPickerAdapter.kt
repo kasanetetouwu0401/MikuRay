@@ -1,15 +1,12 @@
 package com.miku.ray.util
 
 import android.content.Context
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.card.MaterialCardView
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.databinding.ItemAppIconPickerBinding
 
 class AppIconPickerAdapter(
     private val context: Context,
@@ -49,17 +46,10 @@ class AppIconPickerAdapter(
     private var selected: String = selectedValue
     private val items: List<Triple<String, String, String>> = icons(context)
 
-    inner class VH(view: View) : RecyclerView.ViewHolder(view) {
-        val card: MaterialCardView = view.findViewById(R.id.card_container)
-        val icon: ImageView = view.findViewById(R.id.icon_image)
-        val label: TextView = view.findViewById(R.id.icon_label)
-    }
+    inner class VH(val binding: ItemAppIconPickerBinding) : RecyclerView.ViewHolder(binding.root)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val v = LayoutInflater.from(context)
-            .inflate(R.layout.item_app_icon_picker, parent, false)
-        return VH(v)
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH =
+        VH(ItemAppIconPickerBinding.inflate(android.view.LayoutInflater.from(context), parent, false))
 
     override fun getItemCount() = items.size
 
@@ -69,13 +59,13 @@ class AppIconPickerAdapter(
         val isSelected = value == selected
 
         if (resId != 0) {
-            holder.icon.setImageResource(resId)
+            holder.binding.iconImage.setImageResource(resId)
         } else {
-            holder.icon.setImageDrawable(null)
+            holder.binding.iconImage.setImageDrawable(null)
         }
 
-        holder.label.text = label
-        holder.card.strokeColor = if (isSelected) {
+        holder.binding.iconLabel.text = label
+        holder.binding.cardContainer.strokeColor = if (isSelected) {
             context.getColorAttr("colorPrimary")
         } else {
             android.graphics.Color.TRANSPARENT

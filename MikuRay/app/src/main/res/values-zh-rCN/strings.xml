@@ -1030,16 +1030,4 @@
     <string name="ui_theme_import_failed">无法导入主题：%1$s</string>
     <string name="title_pref_use_system_blur">使用系统模糊</string>
     <string name="summary_pref_use_system_blur">可用时使用原生 Android 窗口模糊</string>
-    <string name="title_theme_palette">主题调色板</string>
-    <string name="theme_palette_description">选择可重复使用的强调色。MikuRay 将基于该颜色生成完整的 Material 浅色和深色配色方案。</string>
-    <string name="theme_palette_suggested">推荐调色板</string>
-    <string name="theme_palette_saved">你的调色板</string>
-    <string name="theme_palette_saved_empty">尚无已保存的调色板。请从自定义颜色创建一个。</string>
-    <string name="theme_palette_create">创建并保存调色板</string>
-    <string name="theme_palette_recent">最近使用</string>
-    <string name="theme_palette_recent_empty">你应用的颜色将显示在此处。</string>
-    <string name="theme_palette_color_description">应用 %1$s</string>
-    <string name="theme_palette_remove_title">移除调色板？</string>
-    <string name="theme_palette_remove_message">要从已保存的调色板中移除 %1$s 吗？</string>
-    <string name="theme_palette_remove_action">移除</string>
 </resources>

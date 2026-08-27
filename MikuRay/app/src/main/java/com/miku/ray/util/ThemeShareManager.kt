@@ -103,8 +103,6 @@ object ThemeShareManager {
     private val stringKeys = setOf(
         AppConfig.PREF_LANGUAGE,
         AppConfig.PREF_APP_THEME,
-        AppConfig.PREF_THEME_PALETTE_SAVED,
-        AppConfig.PREF_THEME_PALETTE_RECENT,
         AppConfig.PREF_UI_MODE_NIGHT,
         AppConfig.PREF_BANNER_SETTINGS_CHARACTER,
         AppConfig.PREF_WEATHER_CUSTOM_LOCATION_NAME,

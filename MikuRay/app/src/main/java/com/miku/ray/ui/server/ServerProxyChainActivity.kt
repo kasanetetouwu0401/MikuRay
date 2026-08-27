@@ -50,7 +50,7 @@ class ServerProxyChainActivity : BaseActivity() {
         binding.serverScrollContent.applyEdgeToEdgeListInsets()
 
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = EConfigType.PROXYCHAIN.toString(), subtitle = getString(R.string.subtitle_server_config))
 
         loadAvailableRemarks()

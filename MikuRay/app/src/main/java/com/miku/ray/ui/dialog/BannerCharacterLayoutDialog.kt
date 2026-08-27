@@ -13,6 +13,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.databinding.DialogBannerCharacterLayoutSliderBinding
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.ui.preference.BannerSettingsPreference
 import com.miku.ray.util.WindowBlurUtils
@@ -122,12 +123,26 @@ class BannerCharacterLayoutDialog @JvmOverloads constructor(
     override fun onClick() {
         context.findActivity() ?: return
 
-        val dialogView = LayoutInflater.from(context)
-            .inflate(R.layout.dialog_banner_character_layout_slider, null)
+        val dialogBinding = DialogBannerCharacterLayoutSliderBinding.inflate(LayoutInflater.from(context))
+        val dialogView = dialogBinding.root
+        val labels = mapOf(
+            R.id.text_label_banner_width to dialogBinding.textLabelBannerWidth,
+            R.id.text_label_banner_height to dialogBinding.textLabelBannerHeight,
+            R.id.text_label_banner_margin_top to dialogBinding.textLabelBannerMarginTop,
+            R.id.text_label_banner_margin_bottom to dialogBinding.textLabelBannerMarginBottom,
+            R.id.text_label_banner_margin_end to dialogBinding.textLabelBannerMarginEnd,
+        )
+        val slidersById = mapOf(
+            R.id.slider_banner_width to dialogBinding.sliderBannerWidth,
+            R.id.slider_banner_height to dialogBinding.sliderBannerHeight,
+            R.id.slider_banner_margin_top to dialogBinding.sliderBannerMarginTop,
+            R.id.slider_banner_margin_bottom to dialogBinding.sliderBannerMarginBottom,
+            R.id.slider_banner_margin_end to dialogBinding.sliderBannerMarginEnd,
+        )
 
         val sliders = params.map { param ->
-            val label = dialogView.findViewById<TextView>(param.labelViewId)
-            val slider = dialogView.findViewById<Slider>(param.sliderViewId)
+            val label = labels.getValue(param.labelViewId)
+            val slider = slidersById.getValue(param.sliderViewId)
             val current = currentValue(param)
 
             slider.valueFrom = param.min
@@ -162,8 +177,7 @@ class BannerCharacterLayoutDialog @JvmOverloads constructor(
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
             sliders.forEach { (param, slider) ->
                 slider.value = param.default
-                dialogView.findViewById<TextView>(param.labelViewId).text =
-                    labelText(param, param.default)
+                labels.getValue(param.labelViewId).text = labelText(param, param.default)
                 MmkvManager.encodeSettings(param.prefKey, param.default)
             }
             refreshBannerPreview()

@@ -7,9 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.databinding.UwuBottomSheetRoutingMenuBinding
 import com.miku.ray.handler.MmkvManager
 
 class RoutingMenuBottomSheet : BaseBottomSheetFragment() {
+
+    private var _binding: UwuBottomSheetRoutingMenuBinding? = null
+    private val binding get() = requireNotNull(_binding)
 
     interface OnRoutingMenuOptionClickListener {
         fun onRoutingMenuOptionClicked(viewId: Int)
@@ -30,32 +34,38 @@ class RoutingMenuBottomSheet : BaseBottomSheetFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.uwu_bottom_sheet_routing_menu, container, false)
+    ): View {
+        _binding = UwuBottomSheetRoutingMenuBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupParticles(view)
-        loadBannerSheet(view)
+        setupParticles(binding.root)
+        loadBannerSheet(binding.root)
 
         val clickListener = View.OnClickListener {
             mListener?.onRoutingMenuOptionClicked(it.id)
             dismiss()
         }
 
-        val actionIds = listOf(
-            R.id.import_predefined_rulesets,
-            R.id.import_rulesets_from_clipboard,
-            R.id.import_rulesets_from_qrcode,
-            R.id.export_rulesets_to_clipboard,
-            R.id.menu_user_asset_setting
+        val actionViews = listOf(
+            binding.importPredefinedRulesets,
+            binding.importRulesetsFromClipboard,
+            binding.importRulesetsFromQrcode,
+            binding.exportRulesetsToClipboard,
+            binding.menuUserAssetSetting
         )
 
-        actionIds.forEach { id ->
-            view.findViewById<View>(id)?.setOnClickListener(clickListener)
+        actionViews.forEach { actionView ->
+            actionView.setOnClickListener(clickListener)
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onDetach() {

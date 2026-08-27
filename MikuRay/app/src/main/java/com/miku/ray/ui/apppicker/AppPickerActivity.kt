@@ -55,7 +55,7 @@ class AppPickerActivity : BaseActivity() {
 
         binding.recyclerView.applyEdgeToEdgeListInsets()
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = resolveScreenTitle(), subtitle = getString(R.string.subtitle_app_picker))
 
         selectedPackages.addAll(initialSelectedPackages)

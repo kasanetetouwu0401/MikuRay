@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.miku.ray.R
+import com.miku.ray.databinding.DialogTabIconPickerBinding
 import com.miku.ray.util.TabIconPickerAdapter
 import com.miku.ray.util.WindowBlurUtils
 import com.miku.ray.util.getColorAttr
@@ -21,10 +22,11 @@ class TabIconPickerDialog(
     private val onSelected: (String?) -> Unit,
 ) {
     fun show(): androidx.appcompat.app.AlertDialog {
-        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_tab_icon_picker, null)
-        val rowNone   = dialogView.findViewById<View>(R.id.row_none)
-        val checkNone = dialogView.findViewById<ImageView>(R.id.check_none)
-        val rv        = dialogView.findViewById<RecyclerView>(R.id.rv_icons)
+        val dialogBinding = DialogTabIconPickerBinding.inflate(LayoutInflater.from(context))
+        val dialogView = dialogBinding.root
+        val rowNone = dialogBinding.rowNone
+        val checkNone = dialogBinding.checkNone
+        val rv = dialogBinding.rvIcons
 
         lateinit var dialog: androidx.appcompat.app.AlertDialog
 

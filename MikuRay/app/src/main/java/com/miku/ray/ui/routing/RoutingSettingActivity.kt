@@ -51,7 +51,7 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
         setContentView(binding.root)
 
         binding.routingScrollContent.applyEdgeToEdgeListInsets()
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.routing_settings_title), subtitle = getString(R.string.subtitle_routing_setting))
 
         adapter = RoutingSettingRecyclerAdapter(viewModel, ActivityAdapterListener())

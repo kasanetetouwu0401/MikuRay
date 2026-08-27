@@ -39,6 +39,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.miku.ray.AngApplication
 import com.miku.ray.R
+import com.miku.ray.databinding.LayoutSnackbarCustomBinding
 import com.miku.ray.enums.EConfigType
 import com.miku.ray.util.getColorAttr
 import com.miku.ray.toasty.Toasty
@@ -184,8 +185,12 @@ private fun showSnackbar(
         snackbarLayout.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
             ?.visibility = View.INVISIBLE
 
-        val contentView = LayoutInflater.from(activity)
-            .inflate(R.layout.layout_snackbar_custom, snackbarLayout, false)
+        val snackbarBinding = LayoutSnackbarCustomBinding.inflate(
+            LayoutInflater.from(activity),
+            snackbarLayout,
+            false
+        )
+        val contentView = snackbarBinding.root
 
         val resolvedTextColor = if (textColorAttr != null) {
             activity.getColorAttr(textColorAttr)
@@ -193,11 +198,11 @@ private fun showSnackbar(
             activity.getColorAttr("colorOnSurfaceInverse")
         }
 
-        contentView.findViewById<ImageView>(R.id.iv_snackbar_icon)?.apply {
+        snackbarBinding.ivSnackbarIcon.apply {
             setImageResource(iconRes)
             DrawableCompat.setTint(drawable.mutate(), resolvedTextColor)
         }
-        contentView.findViewById<TextView>(R.id.tv_snackbar_title)?.apply {
+        snackbarBinding.tvSnackbarTitle.apply {
             if (title.isNotNullEmpty()) {
                 text = title
                 visibility = View.VISIBLE
@@ -206,7 +211,7 @@ private fun showSnackbar(
                 visibility = View.GONE
             }
         }
-        contentView.findViewById<TextView>(R.id.tv_snackbar_message)?.apply {
+        snackbarBinding.tvSnackbarMessage.apply {
             text = message
             setTextColor(resolvedTextColor)
         }

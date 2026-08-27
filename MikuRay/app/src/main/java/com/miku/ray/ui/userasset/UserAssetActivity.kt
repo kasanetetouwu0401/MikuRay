@@ -49,7 +49,7 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
         setContentView(binding.root)
 
         binding.userAssetScrollContent.applyEdgeToEdgeListInsets()
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_user_asset_setting), subtitle = getString(R.string.subtitle_user_asset))
 
         binding.recyclerView.setHasFixedSize(true)

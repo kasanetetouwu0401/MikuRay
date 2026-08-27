@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.databinding.UwuBannerThemeBinding
 import com.miku.ray.handler.MmkvManager
 
 class CustomBannerPreference @JvmOverloads constructor(
@@ -38,14 +39,15 @@ class CustomBannerPreference @JvmOverloads constructor(
         holder.itemView.isClickable = false
         holder.itemView.isFocusable = false
 
-        (holder.findViewById(R.id.uwu_name_title_summary) as? TextView)?.text = com.miku.ray.util.AppNameHelper.getDisplayName(context)
-        (holder.findViewById(R.id.uwu_version_name_summary) as? TextView)?.text = context.getString(R.string.uwu_version_name)
-        (holder.findViewById(R.id.uwu_version_code_summary) as? TextView)?.text = context.getString(R.string.uwu_version_code)
-        (holder.findViewById(R.id.uwu_package_name_summary) as? TextView)?.text = context.getString(R.string.uwu_package_name)
-        (holder.findViewById(R.id.uwu_build_date_summary) as? TextView)?.text = context.getString(R.string.uwu_build_date)
+        val binding = UwuBannerThemeBinding.bind(holder.itemView)
+        binding.uwuNameTitleSummary.text = com.miku.ray.util.AppNameHelper.getDisplayName(context)
+        binding.uwuVersionNameSummary.text = context.getString(R.string.uwu_version_name)
+        binding.uwuVersionCodeSummary.text = context.getString(R.string.uwu_version_code)
+        binding.uwuPackageNameSummary.text = context.getString(R.string.uwu_package_name)
+        binding.uwuBuildDateSummary.text = context.getString(R.string.uwu_build_date)
 
-        val imageView = holder.findViewById(R.id.img_banner_preference) as? ImageView
-        if (imageView != null) {
+        val imageView = binding.imgBannerPreference
+        run {
             val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_THEME_BANNER_URI)
             val targetTag = uriString?.takeUnless { it.isBlank() } ?: defaultBannerTag
             if (imageView.tag != targetTag) {
@@ -63,17 +65,17 @@ class CustomBannerPreference @JvmOverloads constructor(
             }
         }
 
-        val imageClickTarget = holder.findViewById(R.id.theme_banner_image_card)
-        imageClickTarget?.setOnClickListener {
+        val imageClickTarget = binding.themeBannerImageCard
+        imageClickTarget.setOnClickListener {
             onImageClick?.invoke()
         }
-        imageClickTarget?.setOnLongClickListener {
+        imageClickTarget.setOnLongClickListener {
             onImageLongClick?.invoke()
             true
         }
 
-        val clickTarget = holder.findViewById(R.id.onClick)
-        clickTarget?.setOnClickListener {
+        val clickTarget = binding.onClick
+        clickTarget.setOnClickListener {
             this.performClick()
         }
     }

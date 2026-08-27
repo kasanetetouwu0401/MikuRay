@@ -10,8 +10,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.skydoves.colorpickerview.ColorPickerView
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import com.miku.ray.R
+import com.miku.ray.databinding.DialogCustomColorPickerBinding
 import com.miku.ray.util.ThemeManager
-import com.miku.ray.util.ThemePaletteStore
 import com.miku.ray.util.WindowBlurUtils
 
 class CustomColorPickerDialog : DialogFragment() {
@@ -22,14 +22,10 @@ class CustomColorPickerDialog : DialogFragment() {
         fun show(
             fragmentManager: androidx.fragment.app.FragmentManager,
             currentColor: Int = Color.parseColor("#6750A4"),
-            saveToPalette: Boolean = false,
             onApplied: () -> Unit = {},
         ) {
             CustomColorPickerDialog().apply {
-                arguments = Bundle().apply {
-                    putInt("current_color", currentColor)
-                    putBoolean("save_to_palette", saveToPalette)
-                }
+                arguments = Bundle().apply { putInt("current_color", currentColor) }
                 onAppliedCallback = onApplied
             }.show(fragmentManager, TAG)
         }
@@ -45,12 +41,12 @@ class CustomColorPickerDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val initialColor = arguments?.getInt("current_color") ?: selectedColor
-        val saveToPalette = arguments?.getBoolean("save_to_palette", false) ?: false
         selectedColor = initialColor
 
-        val view = layoutInflater.inflate(R.layout.dialog_custom_color_picker, null)
+        val dialogBinding = DialogCustomColorPickerBinding.inflate(layoutInflater)
+        val view = dialogBinding.root
 
-        val colorPickerView = view.findViewById<ColorPickerView>(R.id.color_picker_view)
+        val colorPickerView = dialogBinding.colorPickerView
 
         colorPickerView.post {
             colorPickerView.selectByHsvColor(initialColor)
@@ -65,7 +61,6 @@ class CustomColorPickerDialog : DialogFragment() {
             .setIcon(RemixR.drawable.rmx_palette_line)
             .setView(view)
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                if (saveToPalette) ThemePaletteStore.addSavedColor(selectedColor)
                 activity?.let { ThemeManager.saveCustomColor(it, selectedColor) }
                 onAppliedCallback()
             }

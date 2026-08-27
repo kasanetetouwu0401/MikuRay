@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.R
+import com.miku.ray.databinding.ActivityWeatherForecastBinding
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
 import com.miku.ray.ui.base.BaseActivity
 import kotlinx.coroutines.Job
@@ -47,6 +48,8 @@ data class DailyForecastItem(
 )
 
 class WeatherForecastActivity : BaseActivity() {
+    private val binding by lazy { ActivityWeatherForecastBinding.inflate(layoutInflater) }
+
     private var job: Job? = null
 
     private lateinit var ivIcon: ImageView
@@ -67,28 +70,28 @@ class WeatherForecastActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_weather_forecast)
+        setContentView(binding.root)
 
-        findViewById<androidx.core.widget.NestedScrollView>(R.id.weather_forecast_content).applyEdgeToEdgeListInsets()
+        binding.weatherForecastContent.applyEdgeToEdgeListInsets()
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.weather_forecast_title), subtitle = getString(R.string.subtitle_weather_forecast))
 
-        ivIcon = findViewById(R.id.ivForecastCurrentIcon)
-        tvCondition = findViewById(R.id.tvForecastCurrentCondition)
-        tvTemp = findViewById(R.id.tvForecastCurrentTemp)
-        tvFeelsLike = findViewById(R.id.tvForecastFeelsLike)
-        tvMaxMin = findViewById(R.id.tvForecastMaxMin)
-        tvError = findViewById(R.id.tvForecastError)
-        tvSummary = findViewById(R.id.tvForecastSummary)
-        cardCurrent = findViewById(R.id.cardForecastCurrent)
-        cardDetails = findViewById(R.id.cardForecastDetails)
-        recyclerDetails = findViewById(R.id.recyclerForecastDetails)
-        cardSummary = findViewById(R.id.cardForecastSummary)
-        cardHourly = findViewById(R.id.cardForecastHourly)
-        cardDaily = findViewById(R.id.cardForecastDaily)
-        recyclerHourly = findViewById(R.id.recyclerForecastHourly)
-        recyclerDaily = findViewById(R.id.recyclerForecastDaily)
+        ivIcon = binding.ivForecastCurrentIcon
+        tvCondition = binding.tvForecastCurrentCondition
+        tvTemp = binding.tvForecastCurrentTemp
+        tvFeelsLike = binding.tvForecastFeelsLike
+        tvMaxMin = binding.tvForecastMaxMin
+        tvError = binding.tvForecastError
+        tvSummary = binding.tvForecastSummary
+        cardCurrent = binding.cardForecastCurrent
+        cardDetails = binding.cardForecastDetails
+        recyclerDetails = binding.recyclerForecastDetails
+        cardSummary = binding.cardForecastSummary
+        cardHourly = binding.cardForecastHourly
+        cardDaily = binding.cardForecastDaily
+        recyclerHourly = binding.recyclerForecastHourly
+        recyclerDaily = binding.recyclerForecastDaily
 
         recyclerDetails.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         recyclerDetails.isNestedScrollingEnabled = false

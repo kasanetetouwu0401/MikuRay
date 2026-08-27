@@ -8,9 +8,13 @@ import android.view.ViewGroup
 import android.widget.CheckedTextView
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.databinding.UwuBottomSheetSortSubBinding
 import com.miku.ray.handler.MmkvManager
 
 class SortSubBottomSheet : BaseBottomSheetFragment() {
+
+    private var _binding: UwuBottomSheetSortSubBinding? = null
+    private val binding get() = requireNotNull(_binding)
 
     interface OnSortSubOptionClickListener {
         fun onSortSubOptionClicked(order: Int)
@@ -37,19 +41,20 @@ class SortSubBottomSheet : BaseBottomSheetFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.uwu_bottom_sheet_sort_sub, container, false)
+    ): View {
+        _binding = UwuBottomSheetSortSubBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupParticles(view)
-        loadBannerSheet(view)
+        setupParticles(binding.root)
+        loadBannerSheet(binding.root)
 
-        val checkOrigin  = view.findViewById<CheckedTextView>(R.id.action_sort_sub_origin)
-        val checkAdded   = view.findViewById<CheckedTextView>(R.id.action_sort_sub_added)
-        val checkUpdated = view.findViewById<CheckedTextView>(R.id.action_sort_sub_updated)
+        val checkOrigin  = binding.actionSortSubOrigin
+        val checkAdded   = binding.actionSortSubAdded
+        val checkUpdated = binding.actionSortSubUpdated
 
         fun updateChecks(order: Int) {
             checkOrigin?.isChecked  = order == ORDER_ORIGIN
@@ -58,14 +63,14 @@ class SortSubBottomSheet : BaseBottomSheetFragment() {
         }
         updateChecks(currentOrder)
 
-        view.findViewById<View>(R.id.card_sort_sub_origin)?.setOnClickListener {
-            view.findViewById<View>(R.id.action_sort_sub_origin)?.performClick()
+        binding.cardSortSubOrigin.setOnClickListener {
+            binding.actionSortSubOrigin.performClick()
         }
-        view.findViewById<View>(R.id.card_sort_sub_added)?.setOnClickListener {
-            view.findViewById<View>(R.id.action_sort_sub_added)?.performClick()
+        binding.cardSortSubAdded.setOnClickListener {
+            binding.actionSortSubAdded.performClick()
         }
-        view.findViewById<View>(R.id.card_sort_sub_updated)?.setOnClickListener {
-            view.findViewById<View>(R.id.action_sort_sub_updated)?.performClick()
+        binding.cardSortSubUpdated.setOnClickListener {
+            binding.actionSortSubUpdated.performClick()
         }
 
         val orderClickListener = View.OnClickListener { v ->
@@ -83,12 +88,17 @@ class SortSubBottomSheet : BaseBottomSheetFragment() {
         }
 
         listOf(
-            R.id.action_sort_sub_origin,
-            R.id.action_sort_sub_added,
-            R.id.action_sort_sub_updated
-        ).forEach { id ->
-            view.findViewById<View>(id)?.setOnClickListener(orderClickListener)
+            binding.actionSortSubOrigin,
+            binding.actionSortSubAdded,
+            binding.actionSortSubUpdated
+        ).forEach { actionView ->
+            actionView.setOnClickListener(orderClickListener)
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onDetach() {

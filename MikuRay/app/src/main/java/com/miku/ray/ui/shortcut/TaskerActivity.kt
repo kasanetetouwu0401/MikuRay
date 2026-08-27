@@ -39,7 +39,7 @@ class TaskerActivity : BaseActivity() {
             this,
             android.R.layout.simple_list_item_single_choice, lstData
         )
-        listview = findViewById<View>(R.id.listview) as ListView
+        listview = binding.listview
         listview?.adapter = adapter
         listview?.applyEdgeToEdgeListInsets()
 

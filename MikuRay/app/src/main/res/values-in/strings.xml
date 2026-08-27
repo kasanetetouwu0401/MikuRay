@@ -1041,16 +1041,4 @@ yang kamu butuhin."</string>
     <string name="ui_theme_import_failed">Tema tidak dapat diimpor: %1$s</string>
     <string name="title_pref_use_system_blur">Gunakan blur sistem</string>
     <string name="summary_pref_use_system_blur">Gunakan blur jendela Android bawaan jika tersedia</string>
-    <string name="title_theme_palette">Palet tema</string>
-    <string name="theme_palette_description">Pilih warna aksen yang bisa dipakai lagi. MikuRay akan membuat skema warna Material terang dan gelap lengkap dari warna ini.</string>
-    <string name="theme_palette_suggested">Palet rekomendasi</string>
-    <string name="theme_palette_saved">Palet kamu</string>
-    <string name="theme_palette_saved_empty">Belum ada palet yang disimpan. Buat satu dari warna kustom.</string>
-    <string name="theme_palette_create">Buat dan simpan palet</string>
-    <string name="theme_palette_recent">Baru dipakai</string>
-    <string name="theme_palette_recent_empty">Warna yang kamu pakai bakal muncul di sini.</string>
-    <string name="theme_palette_color_description">Terapkan %1$s</string>
-    <string name="theme_palette_remove_title">Hapus palet?</string>
-    <string name="theme_palette_remove_message">Hapus %1$s dari palet tersimpan kamu?</string>
-    <string name="theme_palette_remove_action">Hapus</string>
 </resources>

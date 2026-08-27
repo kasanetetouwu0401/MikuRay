@@ -1,6 +1,7 @@
 package com.miku.ray.ui.preference.preferencesearch;
 
 import com.miku.ray.R;
+import com.miku.ray.databinding.SearchpreferencePreferenceBinding;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -66,7 +67,8 @@ public class SearchPreference extends Preference implements View.OnClickListener
 
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
-        EditText searchText = (EditText) holder.findViewById(R.id.search);
+        SearchpreferencePreferenceBinding binding = SearchpreferencePreferenceBinding.bind(holder.itemView);
+        EditText searchText = binding.search;
         searchText.setFocusable(false);
         searchText.setInputType(InputType.TYPE_NULL);
         searchText.setOnClickListener(this);
@@ -75,7 +77,7 @@ public class SearchPreference extends Preference implements View.OnClickListener
             searchText.setHint(hint);
         }
 
-        holder.findViewById(R.id.search_card).setOnClickListener(this);
+        binding.searchCard.setOnClickListener(this);
         holder.itemView.setOnClickListener(this);
         holder.itemView.setBackgroundColor(0x0);
     }

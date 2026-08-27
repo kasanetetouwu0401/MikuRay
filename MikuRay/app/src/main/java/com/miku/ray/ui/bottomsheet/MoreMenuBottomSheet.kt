@@ -8,9 +8,13 @@ import android.view.ViewGroup
 import android.widget.CheckedTextView
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.databinding.UwuBottomSheetMoreMenuBinding
 import com.miku.ray.handler.MmkvManager
 
 class MoreMenuBottomSheet : BaseBottomSheetFragment() {
+
+    private var _binding: UwuBottomSheetMoreMenuBinding? = null
+    private val binding get() = requireNotNull(_binding)
 
     interface OnMoreOptionClickListener {
         fun onMoreOptionClicked(viewId: Int)
@@ -45,19 +49,20 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.uwu_bottom_sheet_more_menu, container, false)
+    ): View {
+        _binding = UwuBottomSheetMoreMenuBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupParticles(view)
-        loadBannerSheet(view)
+        setupParticles(binding.root)
+        loadBannerSheet(binding.root)
 
-        val checkOrigin = view.findViewById<CheckedTextView>(R.id.action_order_origin)
-        val checkName   = view.findViewById<CheckedTextView>(R.id.action_order_by_name)
-        val checkDelay  = view.findViewById<CheckedTextView>(R.id.action_order_by_delay)
+        val checkOrigin = binding.actionOrderOrigin
+        val checkName   = binding.actionOrderByName
+        val checkDelay  = binding.actionOrderByDelay
 
         fun updateChecks(order: Int) {
             checkOrigin?.isChecked = order == ORDER_ORIGIN
@@ -67,26 +72,26 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
         updateChecks(currentOrder)
 
         val isTrafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
-        view.findViewById<View>(R.id.reset_traffic)?.visibility = if (isTrafficEnabled) View.VISIBLE else View.GONE
+        binding.resetTraffic.visibility = if (isTrafficEnabled) View.VISIBLE else View.GONE
 
         val hasTestResults = MmkvManager.hasAnyTestDelayResults()
-        view.findViewById<View>(R.id.clear_test_results)?.visibility = if (hasTestResults) View.VISIBLE else View.GONE
+        binding.clearTestResults.visibility = if (hasTestResults) View.VISIBLE else View.GONE
         val hasCountryCodes = MmkvManager.hasAnyCountryCodeResults()
-        view.findViewById<View>(R.id.clear_country_codes)?.visibility = if (hasCountryCodes) View.VISIBLE else View.GONE
+        binding.clearCountryCodes.visibility = if (hasCountryCodes) View.VISIBLE else View.GONE
 
         val isScrollButtonsHidden = MmkvManager.decodeSettingsBool(AppConfig.PREF_HIDE_SCROLL_BUTTONS, false)
         val hasSelectedServer = !MmkvManager.getSelectServer().isNullOrEmpty()
-        view.findViewById<View>(R.id.action_scroll_to_selected)?.visibility =
+        binding.actionScrollToSelected.visibility =
             if (isScrollButtonsHidden && hasSelectedServer) View.VISIBLE else View.GONE
 
-        view.findViewById<View>(R.id.card_order_origin)?.setOnClickListener {
-            view.findViewById<View>(R.id.action_order_origin)?.performClick()
+        binding.cardOrderOrigin.setOnClickListener {
+            binding.actionOrderOrigin.performClick()
         }
-        view.findViewById<View>(R.id.card_order_by_name)?.setOnClickListener {
-            view.findViewById<View>(R.id.action_order_by_name)?.performClick()
+        binding.cardOrderByName.setOnClickListener {
+            binding.actionOrderByName.performClick()
         }
-        view.findViewById<View>(R.id.card_order_by_delay)?.setOnClickListener {
-            view.findViewById<View>(R.id.action_order_by_delay)?.performClick()
+        binding.cardOrderByDelay.setOnClickListener {
+            binding.actionOrderByDelay.performClick()
         }
 
         val clickListener = View.OnClickListener { v ->
@@ -109,31 +114,36 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
         }
 
         listOf(
-            R.id.action_order_origin,
-            R.id.action_order_by_name,
-            R.id.action_order_by_delay
-        ).forEach { id ->
-            view.findViewById<View>(id)?.setOnClickListener(orderClickListener)
+            binding.actionOrderOrigin,
+            binding.actionOrderByName,
+            binding.actionOrderByDelay
+        ).forEach { actionView ->
+            actionView.setOnClickListener(orderClickListener)
         }
 
         listOf(
-            R.id.service_restart,
-            R.id.del_all_config,
-            R.id.del_duplicate_config,
-            R.id.del_invalid_config,
-            R.id.export_all,
-            R.id.export_group_file,
-            R.id.real_ping_all,
-            R.id.country_code_all,
-            R.id.tcping_all,
-            R.id.clear_test_results,
-            R.id.clear_country_codes,
-            R.id.sub_update,
-            R.id.reset_traffic,
-            R.id.action_scroll_to_selected
-        ).forEach { id ->
-            view.findViewById<View>(id)?.setOnClickListener(clickListener)
+            binding.serviceRestart,
+            binding.delAllConfig,
+            binding.delDuplicateConfig,
+            binding.delInvalidConfig,
+            binding.exportAll,
+            binding.exportGroupFile,
+            binding.realPingAll,
+            binding.countryCodeAll,
+            binding.tcpingAll,
+            binding.clearTestResults,
+            binding.clearCountryCodes,
+            binding.subUpdate,
+            binding.resetTraffic,
+            binding.actionScrollToSelected
+        ).forEach { actionView ->
+            actionView.setOnClickListener(clickListener)
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onDetach() {

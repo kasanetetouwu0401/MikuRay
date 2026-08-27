@@ -20,6 +20,7 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.miku.ray.R
+import com.miku.ray.databinding.ToastLayoutBinding
 
 object Toasty {
 
@@ -228,11 +229,12 @@ object Toasty {
     fun custom(context: Context, message: CharSequence, icon: Drawable?, @ColorInt tintColor: Int, @ColorInt textColor: Int, duration: Int, withIcon: Boolean, shouldTint: Boolean): Toast {
         val currentToast = Toast.makeText(context, "", duration)
         val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val toastLayout = inflater.inflate(R.layout.toast_layout, null)
+        val toastBinding = ToastLayoutBinding.inflate(inflater)
+        val toastLayout = toastBinding.root
 
-        val toastRoot = toastLayout.findViewById<LinearLayout>(R.id.toast_root)
-        val toastIcon = toastLayout.findViewById<ImageView>(R.id.toast_icon)
-        val toastTextView = toastLayout.findViewById<TextView>(R.id.toast_text)
+        val toastRoot = toastBinding.toastRoot
+        val toastIcon = toastBinding.toastIcon
+        val toastTextView = toastBinding.toastText
 
         var drawableFrame: Drawable? = null
 

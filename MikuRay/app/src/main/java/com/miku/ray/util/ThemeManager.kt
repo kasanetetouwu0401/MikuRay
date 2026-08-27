@@ -125,7 +125,6 @@ object ThemeManager {
         MmkvManager.encodeSettings(AppConfig.PREF_DYNAMIC_COLOR, false)
         MmkvManager.encodeSettings(AppConfig.PREF_USE_CUSTOM_COLOR, true)
         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_COLOR, color)
-        ThemePaletteStore.recordRecentColor(color)
         activity.recreate()
     }
 

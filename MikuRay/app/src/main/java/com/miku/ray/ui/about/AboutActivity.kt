@@ -22,7 +22,7 @@ class AboutActivity : BaseActivity() {
 
         binding.aboutContent.applyEdgeToEdgeListInsets()
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_about), subtitle = getString(R.string.subtitle_about))
 
         binding.layoutSoureCcode.setOnClickListener {

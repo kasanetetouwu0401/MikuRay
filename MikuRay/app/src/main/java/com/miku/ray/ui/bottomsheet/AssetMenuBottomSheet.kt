@@ -7,9 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.databinding.UwuBottomSheetAssetMenuBinding
 import com.miku.ray.handler.MmkvManager
 
 class AssetMenuBottomSheet : BaseBottomSheetFragment() {
+
+    private var _binding: UwuBottomSheetAssetMenuBinding? = null
+    private val binding get() = requireNotNull(_binding)
 
     interface OnAssetMenuOptionClickListener {
         fun onAssetMenuOptionClicked(viewId: Int)
@@ -30,30 +34,36 @@ class AssetMenuBottomSheet : BaseBottomSheetFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.uwu_bottom_sheet_asset_menu, container, false)
+    ): View {
+        _binding = UwuBottomSheetAssetMenuBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupParticles(view)
-        loadBannerSheet(view)
+        setupParticles(binding.root)
+        loadBannerSheet(binding.root)
 
         val clickListener = View.OnClickListener {
             mListener?.onAssetMenuOptionClicked(it.id)
             dismiss()
         }
 
-        val actionIds = listOf(
-            R.id.add_file,
-            R.id.add_url,
-            R.id.add_qrcode
+        val actionViews = listOf(
+            binding.addFile,
+            binding.addUrl,
+            binding.addQrcode
         )
 
-        actionIds.forEach { id ->
-            view.findViewById<View>(id)?.setOnClickListener(clickListener)
+        actionViews.forEach { actionView ->
+            actionView.setOnClickListener(clickListener)
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onDetach() {

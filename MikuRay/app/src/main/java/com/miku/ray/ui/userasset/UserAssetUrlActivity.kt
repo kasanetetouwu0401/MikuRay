@@ -41,7 +41,7 @@ class UserAssetUrlActivity : BaseActivity() {
         binding.userAssetUrlScrollContent.applyEdgeToEdgeListInsets()
 
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_user_asset_add_url), subtitle = getString(R.string.subtitle_user_asset_url))
 
         val assetItem = MmkvManager.decodeAsset(editAssetId)

@@ -1081,16 +1081,4 @@ you need."</string>
     <string name="ui_theme_import_failed">Unable to import the theme: %1$s</string>
     <string name="title_pref_use_system_blur">Use system blur</string>
     <string name="summary_pref_use_system_blur">Use native Android window blur when available</string>
-    <string name="title_theme_palette">Theme palette</string>
-    <string name="theme_palette_description">Choose a reusable accent color. MikuRay will derive a complete light and dark Material color scheme from it.</string>
-    <string name="theme_palette_suggested">Suggested palettes</string>
-    <string name="theme_palette_saved">Your palettes</string>
-    <string name="theme_palette_saved_empty">No saved palettes yet. Create one from a custom color.</string>
-    <string name="theme_palette_create">Create and save palette</string>
-    <string name="theme_palette_recent">Recently used</string>
-    <string name="theme_palette_recent_empty">Colors you apply will appear here.</string>
-    <string name="theme_palette_color_description">Apply %1$s</string>
-    <string name="theme_palette_remove_title">Remove palette?</string>
-    <string name="theme_palette_remove_message">Remove %1$s from your saved palettes?</string>
-    <string name="theme_palette_remove_action">Remove</string>
 </resources>

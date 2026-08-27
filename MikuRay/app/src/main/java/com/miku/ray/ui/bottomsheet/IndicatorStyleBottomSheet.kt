@@ -11,6 +11,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.databinding.UwuLayoutBottomSheetIndicatorStyleBinding
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.IndicatorStyle
 import com.miku.ray.util.WindowBlurUtils
@@ -21,8 +22,9 @@ class IndicatorStyleBottomSheet(
 ) {
     fun show() {
         val dialog = BottomSheetDialog(context)
-        val view = LayoutInflater.from(context).inflate(R.layout.uwu_layout_bottom_sheet_indicator_style, null)
-        val recycler = view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerStyle)
+        val binding = UwuLayoutBottomSheetIndicatorStyleBinding.inflate(LayoutInflater.from(context))
+        val view = binding.root
+        val recycler = binding.recyclerStyle
 
         val currentStyleName = MmkvManager.decodeSettingsString(
             AppConfig.PREF_INDICATOR_STYLE,
@@ -62,7 +64,7 @@ class IndicatorStyleBottomSheet(
 
                 dialog.behavior.maxHeight = screenHeight - statusBarInset - baseSizePx
 
-                bottomSheetView.findViewById<android.view.View>(R.id.bottom_sheet)?.updatePadding(
+                binding.bottomSheet.updatePadding(
                     bottom = baseSizePx + navBarInset
                 )
 

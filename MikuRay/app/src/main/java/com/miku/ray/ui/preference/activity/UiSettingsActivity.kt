@@ -35,6 +35,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.miku.ray.AppConfig
 import com.miku.ray.util.SearchBarChipMode
 import com.miku.ray.R
+import com.miku.ray.databinding.ActivitySettingsBinding
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
 import com.miku.ray.extension.snackbarDefault
 import com.miku.ray.extension.snackbarSuccess
@@ -76,6 +77,8 @@ import java.io.File
 import java.io.IOException
 
 class UiSettingsActivity : BaseActivity() {
+    private val binding by lazy { ActivitySettingsBinding.inflate(layoutInflater) }
+
     private val exportUiTheme = registerForActivityResult(
         ActivityResultContracts.CreateDocument(ThemeShareManager.MIME_TYPE)
     ) { uri ->
@@ -100,8 +103,8 @@ class UiSettingsActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        setContentView(binding.root)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_ui_settings), subtitle = getString(R.string.subtitle_ui_settings))
 
         if (savedInstanceState == null) {
@@ -129,9 +132,10 @@ class UiSettingsActivity : BaseActivity() {
     }
 
     private fun showThemeExportNameDialog() {
-        val inputView = layoutInflater.inflate(R.layout.uwu_dialog_edittext, null)
-        val messageView = inputView.findViewById<TextView>(android.R.id.message)
-        val nameInput = inputView.findViewById<TextInputEditText>(android.R.id.edit)
+        val inputBinding = UwuDialogEdittextBinding.inflate(layoutInflater)
+        val inputView = inputBinding.root
+        val messageView = inputBinding.message
+        val nameInput = inputBinding.edit
 
         messageView.setText(R.string.ui_theme_export_name_message)
         nameInput.hint = getString(R.string.ui_theme_export_name_hint)

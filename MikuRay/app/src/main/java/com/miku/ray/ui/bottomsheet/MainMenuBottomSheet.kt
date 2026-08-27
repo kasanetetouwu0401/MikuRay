@@ -7,9 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.databinding.UwuLayoutBottomSheetMainMenuBinding
 import com.miku.ray.handler.MmkvManager
 
 class MainMenuBottomSheet : BaseBottomSheetFragment() {
+
+    private var _binding: UwuLayoutBottomSheetMainMenuBinding? = null
+    private val binding get() = requireNotNull(_binding)
 
     interface OnOptionClickListener {
         fun onOptionClicked(viewId: Int)
@@ -30,33 +34,39 @@ class MainMenuBottomSheet : BaseBottomSheetFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.uwu_layout_bottom_sheet_main_menu, container, false)
+    ): View {
+        _binding = UwuLayoutBottomSheetMainMenuBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupParticles(view)
-        loadBannerSheet(view)
+        setupParticles(binding.root)
+        loadBannerSheet(binding.root)
 
         val clickListener = View.OnClickListener {
             mListener?.onOptionClicked(it.id)
             dismiss()
         }
 
-        val actionIds = listOf(
-            R.id.menu_sub_setting,
-            R.id.menu_routing_setting,
-            R.id.menu_settings,
-            R.id.menu_logcat,
-            R.id.menu_backup_restore,
-            R.id.menu_about
+        val actionViews = listOf(
+            binding.menuSubSetting,
+            binding.menuRoutingSetting,
+            binding.menuSettings,
+            binding.menuLogcat,
+            binding.menuBackupRestore,
+            binding.menuAbout
         )
 
-        actionIds.forEach { id ->
-            view.findViewById<View>(id)?.setOnClickListener(clickListener)
+        actionViews.forEach { actionView ->
+            actionView.setOnClickListener(clickListener)
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onDetach() {

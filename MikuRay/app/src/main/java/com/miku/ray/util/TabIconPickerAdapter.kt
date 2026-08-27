@@ -2,13 +2,10 @@ package com.miku.ray.util
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.card.MaterialCardView
-import com.miku.ray.R
+import com.miku.ray.databinding.ItemTabIconPickerBinding
 
 class TabIconPickerAdapter(
     private val context: Context,
@@ -57,17 +54,10 @@ class TabIconPickerAdapter(
             .replaceFirstChar { it.uppercase() }
     }
 
-    inner class VH(view: View) : RecyclerView.ViewHolder(view) {
-        val card: MaterialCardView = view.findViewById(R.id.icon_card)
-        val icon: ImageView        = view.findViewById(R.id.icon_view)
-        val check: ImageView       = view.findViewById(R.id.check_view)
-    }
+    inner class VH(val binding: ItemTabIconPickerBinding) : RecyclerView.ViewHolder(binding.root)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val v = LayoutInflater.from(context)
-            .inflate(R.layout.item_tab_icon_picker, parent, false)
-        return VH(v)
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH =
+        VH(ItemTabIconPickerBinding.inflate(android.view.LayoutInflater.from(context), parent, false))
 
     override fun getItemCount() = icons.size
 
@@ -77,9 +67,9 @@ class TabIconPickerAdapter(
         val selected = name == selectedIcon
 
         if (resId != 0) {
-            holder.icon.setImageResource(resId)
+            holder.binding.iconView.setImageResource(resId)
         } else {
-            holder.icon.setImageDrawable(null)
+            holder.binding.iconView.setImageDrawable(null)
         }
 
         val (bgColor, iconTint, checkTint) = if (selected) {
@@ -96,10 +86,10 @@ class TabIconPickerAdapter(
             )
         }
 
-        holder.card.setCardBackgroundColor(bgColor)
-        holder.icon.imageTintList = ColorStateList.valueOf(iconTint)
-        holder.check.visibility   = if (selected) View.VISIBLE else View.GONE
-        if (selected) holder.check.imageTintList = ColorStateList.valueOf(checkTint)
+        holder.binding.iconCard.setCardBackgroundColor(bgColor)
+        holder.binding.iconView.imageTintList = ColorStateList.valueOf(iconTint)
+        holder.binding.checkView.visibility   = if (selected) View.VISIBLE else View.GONE
+        if (selected) holder.binding.checkView.imageTintList = ColorStateList.valueOf(checkTint)
 
         holder.itemView.setOnClickListener {
             val prev = selectedIcon

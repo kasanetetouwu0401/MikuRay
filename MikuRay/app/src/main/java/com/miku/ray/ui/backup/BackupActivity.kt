@@ -50,7 +50,7 @@ class BackupActivity : HelperBaseActivity() {
 
         binding.backupScrollContent.applyEdgeToEdgeListInsets()
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_configuration_backup_restore), subtitle = getString(R.string.subtitle_backup))
 
         binding.layoutBackup.setOnClickListener {

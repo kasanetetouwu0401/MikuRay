@@ -34,7 +34,7 @@ class CheckUpdateActivity : BaseActivity() {
 
         binding.checkUpdateScrollContent.applyEdgeToEdgeListInsets()
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbar = binding.toolbar
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.update_check_for_update), subtitle = getString(R.string.subtitle_check_update))
 
         binding.layoutCheckUpdate.setOnClickListener {

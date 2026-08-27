@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.miku.ray.R
+import com.miku.ray.databinding.UwuLayoutBottomSheetFontPickerBinding
 import com.miku.ray.util.FontPickerAdapter
 import com.miku.ray.util.WindowBlurUtils
 
@@ -20,8 +21,9 @@ class FontPickerBottomSheet(
 ) {
     fun show() {
         val dialog = BottomSheetDialog(context)
-        val view = LayoutInflater.from(context).inflate(R.layout.uwu_layout_bottom_sheet_font_picker, null)
-        val recycler = view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerFont)
+        val binding = UwuLayoutBottomSheetFontPickerBinding.inflate(LayoutInflater.from(context))
+        val view = binding.root
+        val recycler = binding.recyclerFont
 
         val values = context.resources.getStringArray(R.array.app_font_values)
         val labels = context.resources.getStringArray(R.array.app_font_entries)
@@ -54,7 +56,7 @@ class FontPickerBottomSheet(
 
                 dialog.behavior.maxHeight = screenHeight - statusBarInset - baseSizePx
 
-                bottomSheetView.findViewById<android.view.View>(R.id.bottom_sheet)?.updatePadding(
+                binding.bottomSheet.updatePadding(
                     bottom = baseSizePx + navBarInset
                 )
 
