@@ -33,6 +33,7 @@ import com.miku.ray.AppConfig
 import com.miku.ray.util.SearchBarChipMode
 import com.miku.ray.R
 import com.miku.ray.databinding.ActivitySettingsBinding
+import com.miku.ray.databinding.UwuDialogEdittextBinding
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
 import com.miku.ray.extension.snackbarDefault
 import com.miku.ray.extension.snackbarSuccess
