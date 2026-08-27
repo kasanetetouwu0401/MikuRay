@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckedTextView
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.databinding.UwuBottomSheetSortSubBinding

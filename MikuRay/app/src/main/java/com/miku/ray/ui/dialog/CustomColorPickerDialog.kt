@@ -7,7 +7,6 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.skydoves.colorpickerview.ColorPickerView
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import com.miku.ray.R
 import com.miku.ray.databinding.DialogCustomColorPickerBinding

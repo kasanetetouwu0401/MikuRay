@@ -27,7 +27,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.CollapsingToolbarLayout
-import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AngApplication
 import com.miku.ray.R
 import com.miku.ray.databinding.ActivityBaseBinding

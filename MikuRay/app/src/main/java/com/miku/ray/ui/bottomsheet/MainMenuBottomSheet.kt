@@ -5,10 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.miku.ray.AppConfig
-import com.miku.ray.R
 import com.miku.ray.databinding.UwuLayoutBottomSheetMainMenuBinding
-import com.miku.ray.handler.MmkvManager
 
 class MainMenuBottomSheet : BaseBottomSheetFragment() {
 

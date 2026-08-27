@@ -1,10 +1,8 @@
 package com.miku.ray.ui.preference.preferencesearch;
 
-import com.miku.ray.R;
 import com.miku.ray.databinding.SearchpreferenceListItemHistoryBinding;
 import com.miku.ray.databinding.SearchpreferenceListItemResultBinding;
 
-import android.graphics.Color;
 import android.text.SpannableString;
 import android.text.Spannable;
 import android.text.TextUtils;

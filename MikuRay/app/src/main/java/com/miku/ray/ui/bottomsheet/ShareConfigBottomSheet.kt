@@ -5,12 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.miku.ray.AppConfig
-import com.miku.ray.R
 import com.miku.ray.databinding.UwuBottomSheetShareConfigBinding
 import com.miku.ray.enums.EConfigType
 import com.miku.ray.extension.isComplexType
-import com.miku.ray.handler.MmkvManager
 
 class ShareConfigBottomSheet : BaseBottomSheetFragment() {
 

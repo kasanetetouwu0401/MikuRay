@@ -3,8 +3,6 @@ package com.miku.ray.ui.preference
 import android.content.Context
 import android.net.Uri
 import android.util.AttributeSet
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import com.bumptech.glide.Glide

@@ -3,8 +3,6 @@ package com.miku.ray.ui.splash
 import com.miku.ray.ui.main.MainActivity
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.TextView
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat

@@ -3,14 +3,11 @@ package com.miku.ray.ui.perappproxy
 import com.miku.ray.ui.base.BaseActivity
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.AppConfig.ANG_PACKAGE
 import com.miku.ray.R

@@ -6,7 +6,6 @@ import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import com.miku.ray.R
 import com.miku.ray.databinding.UwuActivityWelcomeBinding
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.ui.base.BaseActivity

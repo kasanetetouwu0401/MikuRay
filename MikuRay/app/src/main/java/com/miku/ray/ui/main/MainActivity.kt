@@ -53,7 +53,6 @@ import com.miku.ray.extension.snackbarDefault
 import com.miku.ray.extension.snackbarError
 import com.miku.ray.extension.snackbarSuccess
 import com.miku.ray.extension.toSpeedString
-import com.miku.ray.extension.toastError
 import com.miku.ray.extension.toastInfo
 import com.miku.ray.extension.toastSuccess
 import com.miku.ray.handler.AngConfigManager

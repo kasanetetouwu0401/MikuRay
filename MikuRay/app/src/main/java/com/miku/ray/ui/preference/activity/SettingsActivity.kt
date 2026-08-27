@@ -26,7 +26,6 @@ import com.miku.ray.ui.preference.preferencesearch.SearchPreferenceActionView
 import com.miku.ray.ui.preference.preferencesearch.SearchPreferenceFragment
 import com.miku.ray.ui.preference.preferencesearch.SearchPreferenceResult
 import com.miku.ray.ui.preference.preferencesearch.SearchPreferenceResultListener
-import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.util.SearchBarChipMode
 import com.miku.ray.R

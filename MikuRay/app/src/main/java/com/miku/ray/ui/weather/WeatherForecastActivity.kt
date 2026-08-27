@@ -12,7 +12,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.R
 import com.miku.ray.databinding.ActivityWeatherForecastBinding
 import com.miku.ray.extension.applyEdgeToEdgeListInsets

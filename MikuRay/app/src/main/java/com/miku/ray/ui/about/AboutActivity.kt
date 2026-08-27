@@ -3,7 +3,6 @@ package com.miku.ray.ui.about
 import com.miku.ray.ui.base.BaseActivity
 import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.BuildConfig
 import com.miku.ray.R
