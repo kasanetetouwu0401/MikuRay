@@ -364,12 +364,12 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
         private CardView cardView;
 
         SearchViewHolder(SearchpreferenceFragmentBinding binding) {
-            searchView = binding.search;
-            clearButton = binding.clear;
+            searchView = binding.searchpreferenceSearchbar.search;
+            clearButton = binding.searchpreferenceSearchbar.clear;
             recyclerView = binding.list;
-            moreButton = binding.more;
+            moreButton = binding.searchpreferenceSearchbar.more;
             noResults = binding.noResults;
-            cardView = binding.searchCard;
+            cardView = binding.searchpreferenceSearchbar.searchCard;
         }
     }
 

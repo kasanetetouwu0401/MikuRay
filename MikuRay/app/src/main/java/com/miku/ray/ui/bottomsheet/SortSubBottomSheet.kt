@@ -56,9 +56,9 @@ class SortSubBottomSheet : BaseBottomSheetFragment() {
         val checkUpdated = binding.actionSortSubUpdated
 
         fun updateChecks(order: Int) {
-            checkOrigin?.isChecked  = order == ORDER_ORIGIN
-            checkAdded?.isChecked   = order == ORDER_BY_ADDED
-            checkUpdated?.isChecked = order == ORDER_BY_UPDATED
+            checkOrigin.isChecked  = order == ORDER_ORIGIN
+            checkAdded.isChecked   = order == ORDER_BY_ADDED
+            checkUpdated.isChecked = order == ORDER_BY_UPDATED
         }
         updateChecks(currentOrder)
 

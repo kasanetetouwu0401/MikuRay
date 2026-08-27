@@ -64,9 +64,9 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
         val checkDelay  = binding.actionOrderByDelay
 
         fun updateChecks(order: Int) {
-            checkOrigin?.isChecked = order == ORDER_ORIGIN
-            checkName?.isChecked   = order == ORDER_BY_NAME
-            checkDelay?.isChecked  = order == ORDER_BY_DELAY
+            checkOrigin.isChecked = order == ORDER_ORIGIN
+            checkName.isChecked   = order == ORDER_BY_NAME
+            checkDelay.isChecked  = order == ORDER_BY_DELAY
         }
         updateChecks(currentOrder)
 

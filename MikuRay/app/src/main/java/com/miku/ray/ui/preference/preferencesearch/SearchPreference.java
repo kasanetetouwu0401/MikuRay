@@ -68,7 +68,7 @@ public class SearchPreference extends Preference implements View.OnClickListener
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         SearchpreferencePreferenceBinding binding = SearchpreferencePreferenceBinding.bind(holder.itemView);
-        EditText searchText = binding.search;
+        EditText searchText = binding.searchpreferenceSearchbar.search;
         searchText.setFocusable(false);
         searchText.setInputType(InputType.TYPE_NULL);
         searchText.setOnClickListener(this);
@@ -77,7 +77,7 @@ public class SearchPreference extends Preference implements View.OnClickListener
             searchText.setHint(hint);
         }
 
-        binding.searchCard.setOnClickListener(this);
+        binding.searchpreferenceSearchbar.searchCard.setOnClickListener(this);
         holder.itemView.setOnClickListener(this);
         holder.itemView.setBackgroundColor(0x0);
     }

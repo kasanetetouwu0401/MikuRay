@@ -60,7 +60,7 @@ class ShareConfigBottomSheet : BaseBottomSheetFragment() {
         binding.shareQrcode.setOnClickListener(clickListener)
 
         val shareClipboardView = binding.shareClipboard
-        shareClipboardView?.setOnClickListener(clickListener)
+        shareClipboardView.setOnClickListener(clickListener)
 
         binding.shareFullClipboard.setOnClickListener(clickListener)
 
@@ -70,7 +70,7 @@ class ShareConfigBottomSheet : BaseBottomSheetFragment() {
         val isCustomConfig = typeEnum?.isComplexType() == true
 
         if (isCustomConfig) {
-            shareClipboardView?.visibility = View.GONE
+            shareClipboardView.visibility = View.GONE
         }
     }
 

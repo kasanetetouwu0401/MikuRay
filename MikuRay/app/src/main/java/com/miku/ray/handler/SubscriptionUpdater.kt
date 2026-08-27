@@ -155,7 +155,7 @@ object SubscriptionUpdater {
                 title = applicationContext.getString(R.string.title_pref_auto_update_subscription),
                 content = applicationContext.getString(
                     R.string.subscription_update_background_start,
-                ) + if (subItem?.remarks.isNullOrBlank()) "" else ": ${subItem?.remarks}",
+                ) + if (subItem.remarks.isNullOrBlank()) "" else ": ${subItem.remarks}",
             )
 
             updateLastUpdatedAndReschedule(applicationContext, subId)
