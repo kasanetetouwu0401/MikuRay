@@ -2,7 +2,6 @@ package com.miku.ray.ui.preference.activity
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
@@ -45,6 +44,7 @@ class VpnSettingsActivity : BaseActivity() {
         private val localDns by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_LOCAL_DNS_ENABLED) }
         private val fakeDns by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_FAKE_DNS_ENABLED) }
         private val fakeDnsIpPool by lazy { findPreference<EditTextPreference>(AppConfig.PREF_FAKE_DNS_IP_POOL) }
+        private val blockAaaaQuery by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_BLOCK_AAAA_QUERY) }
         private val appendHttpProxy by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_APPEND_HTTP_PROXY) }
         private val vpnDns by lazy { findPreference<EditTextPreference>(AppConfig.PREF_VPN_DNS) }
         private val vpnBypassLan by lazy { findPreference<ListPreference>(AppConfig.PREF_VPN_BYPASS_LAN) }
@@ -194,6 +194,7 @@ class VpnSettingsActivity : BaseActivity() {
             localDns?.isEnabled = vpn
             fakeDns?.isEnabled = vpn
             fakeDnsIpPool?.isEnabled = vpn && localDns?.isChecked == true && fakeDns?.isChecked == true
+            blockAaaaQuery?.isEnabled = vpn
             appendHttpProxy?.isEnabled = vpn
             vpnDns?.isEnabled = vpn
             vpnBypassLan?.isEnabled = vpn

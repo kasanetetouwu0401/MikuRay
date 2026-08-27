@@ -674,6 +674,11 @@ object CoreConfigManager {
             servers = servers,
             hosts = hosts,
             tag = AppConfig.TAG_DNS,
+            queryStrategy = if (MmkvManager.decodeSettingsBool(AppConfig.PREF_BLOCK_AAAA_QUERY) == true) {
+                "UseIPv4"
+            } else {
+                null
+            },
             enableParallelQuery = if ((domesticDns.size + remoteDns.size) > 2) true else null
         )
 

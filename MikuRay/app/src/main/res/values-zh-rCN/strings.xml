@@ -228,6 +228,8 @@
     <string name="title_pref_fake_dns_ip_pool">FakeIP 地址范围</string>
     <string name="summary_pref_fake_dns_ip_pool">用于虚拟 DNS 地址的 IPv4 CIDR。请使用私有基准测试范围，例如 198.18.0.0/15。</string>
     <string name="error_invalid_fake_dns_ip_pool">请输入从 /1 到 /30 的有效 IPv4 CIDR，例如 198.18.0.0/15。</string>
+    <string name="title_pref_block_aaaa_query">阻止 DNS AAAA 查询</string>
+    <string name="summary_pref_block_aaaa_query">强制核心 DNS 仅使用 IPv4。适用于 IPv6 不稳定的情况，但仅 IPv6 服务将无法使用。</string>
 
     <string name="title_pref_ipv6_enabled">启用 IPv6</string>
     <string name="summary_pref_ipv6_enabled">为 VPN 接口添加 IPv6 地址和路由</string>

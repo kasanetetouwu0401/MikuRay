@@ -62,6 +62,15 @@
             android:icon="@drawable/rmx_global_line"
             app:layout="@layout/uwu_mid_switch"
             app:widgetLayout="@layout/uwu_widget_material_switch"
+            android:defaultValue="false"
+            android:key="pref_block_aaaa_query"
+            android:summary="@string/summary_pref_block_aaaa_query"
+            android:title="@string/title_pref_block_aaaa_query" />
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:icon="@drawable/rmx_global_line"
+            app:layout="@layout/uwu_mid_switch"
+            app:widgetLayout="@layout/uwu_widget_material_switch"
             android:key="pref_append_http_proxy"
             android:summary="@string/summary_pref_append_http_proxy"
             android:title="@string/title_pref_append_http_proxy" />

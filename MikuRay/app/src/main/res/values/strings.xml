@@ -246,6 +246,8 @@
     <string name="title_pref_fake_dns_ip_pool">FakeIP address range</string>
     <string name="summary_pref_fake_dns_ip_pool">IPv4 CIDR used for fake DNS addresses. Use a private benchmark range such as 198.18.0.0/15.</string>
     <string name="error_invalid_fake_dns_ip_pool">Enter a valid IPv4 CIDR range from /1 to /30, for example 198.18.0.0/15.</string>
+    <string name="title_pref_block_aaaa_query">Block DNS AAAA queries</string>
+    <string name="summary_pref_block_aaaa_query">Force the core DNS to use IPv4 only. Useful when IPv6 is unreliable, but IPv6-only services will not work.</string>
 
     <string name="title_pref_ipv6_enabled">Enable IPv6</string>
     <string name="summary_pref_ipv6_enabled">Add IPv6 address and routes to the VPN interface</string>
