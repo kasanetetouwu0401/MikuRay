@@ -16,12 +16,10 @@ import com.miku.ray.dto.entities.SubscriptionCache
 import com.miku.ray.dto.entities.SubscriptionItem
 import com.miku.ray.enums.EConfigType
 import com.miku.ray.extension.isNotNullEmpty
-import com.miku.ray.fmt.ClashYamlFmt
 import com.miku.ray.fmt.CustomFmt
 import com.miku.ray.fmt.Hysteria2Fmt
 import com.miku.ray.fmt.ShadowsocksFmt
 import com.miku.ray.fmt.SIP008Fmt
-import com.miku.ray.fmt.SingBoxFmt
 import com.miku.ray.fmt.SocksFmt
 import com.miku.ray.fmt.TrojanFmt
 import com.miku.ray.fmt.V2rayNFmt
@@ -147,36 +145,24 @@ object AngConfigManager {
     }
 
     fun importBatchConfig(server: String?, subid: String, append: Boolean): Pair<Int, Int> {
-        val importContent = server
-            ?.removePrefix("\uFEFF")
-            ?.trim()
-            ?.takeIf { it.isNotEmpty() }
-            ?: return 0 to 0
-
         return try {
-            var count = parseSIP008Config(Utils.decode(importContent), subid, append)
+            var count = parseSIP008Config(Utils.decode(server), subid, append)
             if (count <= 0) {
-                count = parseSIP008Config(importContent, subid, append)
+                count = parseSIP008Config(server, subid, append)
             }
             if (count <= 0) {
-                count = parseSingBoxConfig(importContent, subid, append)
+                count = parseBatchConfig(Utils.decode(server), subid, append)
             }
             if (count <= 0) {
-                count = parseClashYamlConfig(importContent, subid, append)
+                count = parseBatchConfig(server, subid, append)
             }
             if (count <= 0) {
-                count = parseBatchConfig(Utils.decode(importContent), subid, append)
-            }
-            if (count <= 0) {
-                count = parseBatchConfig(importContent, subid, append)
-            }
-            if (count <= 0) {
-                count = parseCustomConfigServer(importContent, subid, append)
+                count = parseCustomConfigServer(server, subid, append)
             }
 
-            var countSub = parseBatchSubscription(importContent)
+            var countSub = parseBatchSubscription(server)
             if (countSub <= 0) {
-                countSub = parseBatchSubscription(Utils.decode(importContent))
+                countSub = parseBatchSubscription(Utils.decode(server))
             }
             if (countSub > 0) {
                 updateConfigViaSubAll()
@@ -235,60 +221,6 @@ object AngConfigManager {
         }
         return 0
     }
-    /**
-     * Imports compatible outbounds from a sing-box JSON document. Router, DNS,
-     * inbound, and sing-box-only configuration sections are not stored because
-     * they cannot be executed by MikuRay's Xray/v2fly core.
-     */
-    private fun parseSingBoxConfig(content: String?, subid: String, append: Boolean): Int {
-        try {
-            val subItem = MmkvManager.decodeSubscription(subid)
-            val configs = SingBoxFmt.parse(content)
-                .filter { config -> matchesSubscriptionFilters(config, subItem) }
-                .onEach { config -> config.subscriptionId = subid }
-            if (configs.isNotEmpty()) {
-                commitProfiles(
-                    configs = configs.map { ParsedProfile(it) },
-                    subid = subid,
-                    append = append,
-                )
-            }
-            return configs.size
-        } catch (e: ProfileStorageException) {
-            throw e
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to parse sing-box JSON subscription", e)
-        }
-        return 0
-    }
-
-    /**
-     * Imports only the `proxies` list from Clash/Mihomo YAML subscriptions. The parser
-     * intentionally skips unsupported protocols and options so stored profiles remain
-     * executable by MikuRay's existing Xray/v2fly core.
-     */
-    private fun parseClashYamlConfig(content: String?, subid: String, append: Boolean): Int {
-        try {
-            val subItem = MmkvManager.decodeSubscription(subid)
-            val configs = ClashYamlFmt.parse(content)
-                .filter { config -> matchesSubscriptionFilters(config, subItem) }
-                .onEach { config -> config.subscriptionId = subid }
-            if (configs.isNotEmpty()) {
-                commitProfiles(
-                    configs = configs.map { ParsedProfile(it) },
-                    subid = subid,
-                    append = append,
-                )
-            }
-            return configs.size
-        } catch (e: ProfileStorageException) {
-            throw e
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to parse Clash/Mihomo YAML subscription", e)
-        }
-        return 0
-    }
-
     private fun parseBatchConfig(servers: String?, subid: String, append: Boolean): Int {
         try {
             if (servers == null) {
@@ -657,9 +589,6 @@ object AngConfigManager {
         var count = parseSIP008Config(Utils.decode(server), subid, append)
         if (count <= 0) {
             count = parseSIP008Config(server, subid, append)
-        }
-        if (count <= 0) {
-            count = parseClashYamlConfig(server, subid, append)
         }
         if (count <= 0) {
             count = parseBatchConfig(Utils.decode(server), subid, append)

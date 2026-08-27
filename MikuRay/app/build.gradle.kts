@@ -213,7 +213,6 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.gson)
     implementation(libs.okhttp)
-    implementation(libs.snakeyaml)
 
     // Reactive and Utility Libraries
     implementation(libs.kotlinx.coroutines.android)

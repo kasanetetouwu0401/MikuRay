@@ -110,10 +110,9 @@ class ThemeColorDialog : DialogFragment() {
 
             customItemView.setOnClickListener {
                 dismiss()
-                CustomColorPickerDialog.show(
+                ThemePaletteDialog.show(
                     parentFragmentManager,
-                    currentColor = rawCustomColor,
-                    onApplied   = onAppliedCallback,
+                    onApplied = onAppliedCallback,
                 )
             }
 

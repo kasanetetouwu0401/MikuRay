@@ -172,14 +172,12 @@ data class V2rayConfig(
                 var writeBufferSize: Int = 1
             )
 
-                            data class WsSettingsBean(
-                    var path: String? = null,
-                    var host: String? = null,
-                    var headers: Map<String, String>? = null,
-                    var maxEarlyData: Int? = null,
-                    var earlyDataHeaderName: String? = null,
-                    val useBrowserForwarding: Boolean? = null,
-
+            data class WsSettingsBean(
+                var path: String? = null,
+                var host: String? = null,
+                var headers: Map<String, String>? = null,
+                val maxEarlyData: Int? = null,
+                val useBrowserForwarding: Boolean? = null,
                 val acceptProxyProtocol: Boolean? = null,
                 var heartbeatPeriod: Int? = null
             )

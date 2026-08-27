@@ -39,7 +39,6 @@ ucrop = "2.2.11"
 palette = "1.0.0"
 playServicesLocation = "21.4.0"
 timber = "5.0.1"
-snakeyaml = "2.6"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -87,7 +86,6 @@ palette = { module = "androidx.palette:palette-ktx", version.ref = "palette" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 aboutlibraries-view = { module = "com.mikepenz:aboutlibraries", version.ref = "aboutLibraries" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
-snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

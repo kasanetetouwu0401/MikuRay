@@ -120,6 +120,8 @@ object AppConfig {
     const val PREF_ACTION_DELETE_CUSTOM_FONT = "action_delete_custom_font"
     const val PREF_CUSTOM_COLOR = "pref_custom_color"
     const val PREF_USE_CUSTOM_COLOR = "pref_use_custom_color"
+    const val PREF_THEME_PALETTE_SAVED = "pref_theme_palette_saved"
+    const val PREF_THEME_PALETTE_RECENT = "pref_theme_palette_recent"
     const val PREF_ENABLE_BLUR = "pref_enable_blur"
     const val PREF_USE_SYSTEM_BLUR = "pref_use_system_blur"
     const val PREF_BLUR_BOTTOM_STATUS = "pref_blur_bottom_status"
