@@ -389,6 +389,8 @@ object CoreOutboundBuilder {
                 wssetting.host = host.orEmpty()
                 sni = host
                 wssetting.path = path ?: "/"
+                wssetting.maxEarlyData = profileItem.wsEarlyData?.takeIf { it >= 0 }
+                wssetting.earlyDataHeaderName = profileItem.wsEarlyDataHeaderName?.trim()?.takeIf { it.isNotEmpty() }
                 val heartbeat = MmkvManager.decodeSettingsString(AppConfig.PREF_WS_HEARTBEAT_PERIOD, "60")
                     ?.toIntOrNull() ?: 60
                 if (heartbeat > 0) wssetting.heartbeatPeriod = heartbeat

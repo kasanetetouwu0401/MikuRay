@@ -1,5 +1,6 @@
 package com.miku.ray.fmt
 
+import com.google.gson.JsonParser
 import com.miku.ray.AppConfig
 import com.miku.ray.enums.EConfigType
 import com.miku.ray.enums.NetworkType
@@ -42,6 +43,10 @@ class ClashYamlFmtTest {
                 type: hysteria2
                 server: hy2.example.com
                 port: 443
+                ports: 1000,2000-3000
+                hop-interval: 15-30
+                up: 30 Mbps
+                down: 200 Mbps
                 password: hy2-secret
                 sni: hy2.example.com
                 alpn: [h3, h2]
@@ -57,7 +62,7 @@ class ClashYamlFmtTest {
                 ip: 10.0.0.2/32
                 ipv6: fd00::2/128
                 mtu: 1280
-                reserved: [1, 2, 3]
+                reserved: U4An
         """.trimIndent()
 
         val profiles = ClashYamlFmt.parse(content)
@@ -88,12 +93,99 @@ class ClashYamlFmtTest {
         assertEquals(NetworkType.HYSTERIA.type, hysteria2.network)
         assertEquals("h3,h2", hysteria2.alpn)
         assertEquals("obfs-secret", hysteria2.obfsPassword)
+        assertEquals("1000,2000-3000", hysteria2.portHopping)
+        assertEquals("15-30", hysteria2.portHoppingInterval)
+        assertEquals("30m", hysteria2.bandwidthUp)
+        assertEquals("200m", hysteria2.bandwidthDown)
 
         val wireguard = profiles[3]
         assertEquals(EConfigType.WIREGUARD, wireguard.configType)
-        assertEquals("10.0.0.2/32\nfd00::2/128", wireguard.localAddress)
-        assertEquals("1,2,3", wireguard.reserved)
+        assertEquals("10.0.0.2/32,fd00::2/128", wireguard.localAddress)
+        assertEquals("83,128,39", wireguard.reserved)
         assertEquals(1280, wireguard.mtu)
+    }
+
+    @Test
+    fun parse_mapsAdvancedMihomoOptionsThatMikuRaySupports() {
+        val fingerprint = "e8:e2:d3:87:fd:bf:fe:b3:8e:9c:90:65:cf:30:a9:7e:e2:3c:0e:3d:32:ee:6f:78:ff:ae:40:96:6b:ef:cc:c9"
+        val content = """
+            proxies:
+              - name: VMess mKCP
+                type: vmess
+                server: vmess.example.com
+                port: 443
+                uuid: 123e4567-e89b-12d3-a456-426614174001
+                alterId: 0
+                cipher: auto
+                tls: true
+                servername: tls.example.com
+                client-fingerprint: firefox
+                fingerprint: $fingerprint
+                skip-cert-verify: true
+                name-cert-verify: cert.example.com
+                ech-opts:
+                  enable: true
+                  config: AEnExampleConfig
+                network: mkcp
+                mkcp-opts:
+                  mtu: 1350
+                  tti: 50
+                  seed: seeded
+                  header: wechat
+              - name: VLESS xHTTP
+                type: vless
+                server: xhttp.example.com
+                port: 443
+                uuid: 123e4567-e89b-12d3-a456-426614174002
+                tls: true
+                network: xhttp
+                xhttp-opts:
+                  path: /xhttp
+                  host: edge.example.com
+                  mode: stream-one
+                  no-grpc-header: false
+                  x-padding-bytes: 100-1000
+                  uplink-http-method: POST
+                  session-placement: path
+                  session-key: sid
+                  reuse-settings:
+                    max-concurrency: 16-32
+                    h-max-request-times: 600-900
+        """.trimIndent()
+
+        val profiles = ClashYamlFmt.parse(content)
+
+        assertEquals(2, profiles.size)
+
+        val vmess = profiles[0]
+        assertEquals(EConfigType.VMESS, vmess.configType)
+        assertEquals(NetworkType.KCP.type, vmess.network)
+        assertEquals(1350, vmess.kcpMtu)
+        assertEquals(50, vmess.kcpTti)
+        assertEquals("seeded", vmess.seed)
+        assertEquals("wechat-video", vmess.headerType)
+        assertEquals(AppConfig.TLS, vmess.security)
+        assertEquals("tls.example.com", vmess.sni)
+        assertEquals("firefox", vmess.fingerPrint)
+        assertEquals(fingerprint, vmess.pinnedCA256)
+        assertEquals("AEnExampleConfig", vmess.echConfigList)
+        assertTrue(vmess.insecure == true)
+        assertEquals("cert.example.com", vmess.verifyPeerCertByName)
+
+        val vless = profiles[1]
+        assertEquals(EConfigType.VLESS, vless.configType)
+        assertEquals(NetworkType.XHTTP.type, vless.network)
+        assertEquals("/xhttp", vless.path)
+        assertEquals("edge.example.com", vless.host)
+        assertEquals("stream-one", vless.xhttpMode)
+        val xhttpExtra = JsonParser.parseString(vless.xhttpExtra).asJsonObject
+        assertEquals(false, xhttpExtra["noGRPCHeader"].asBoolean)
+        assertEquals("100-1000", xhttpExtra["xPaddingBytes"].asString)
+        assertEquals("POST", xhttpExtra["uplinkHTTPMethod"].asString)
+        assertEquals("path", xhttpExtra["sessionIDPlacement"].asString)
+        assertEquals("sid", xhttpExtra["sessionIDKey"].asString)
+        assertEquals("16-32", xhttpExtra["xmux"].asJsonObject["maxConcurrency"].asString)
+        assertEquals("600-900", xhttpExtra["xmux"].asJsonObject["hMaxRequestTimes"].asString)
     }
 
     @Test
@@ -113,6 +205,22 @@ class ClashYamlFmtTest {
                 cipher: aes-256-gcm
                 password: secret
                 plugin: v2ray-plugin
+              - name: Unsupported SS over TLS
+                type: ss
+                server: tls-plugin.example.com
+                port: 8388
+                cipher: aes-256-gcm
+                password: secret
+                plugin: obfs
+                plugin-opts:
+                  mode: tls
+              - name: Unsupported TLSMirror
+                type: vmess
+                server: vmess.example.com
+                port: 443
+                uuid: 123e4567-e89b-12d3-a456-426614174003
+                tlsmirror-opts:
+                  primary-key: test
               - name: Invalid port
                 type: trojan
                 server: invalid.example.com
@@ -125,6 +233,14 @@ class ClashYamlFmtTest {
                 uuid: 123e4567-e89b-12d3-a456-426614174000
                 reality-opts:
                   short-id: abcdef
+              - name: Multi-peer WireGuard
+                type: wireguard
+                private-key: private-key-value
+                ip: 10.0.0.2/32
+                peers:
+                  - server: wg.example.com
+                    port: 51820
+                    public-key: public-key-value
         """.trimIndent()
 
         assertTrue(ClashYamlFmt.parse(content).isEmpty())
