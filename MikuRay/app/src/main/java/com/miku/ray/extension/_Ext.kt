@@ -22,6 +22,7 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.DrawableRes
@@ -38,7 +39,6 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.miku.ray.AngApplication
 import com.miku.ray.R
-import com.miku.ray.databinding.LayoutSnackbarCustomBinding
 import com.miku.ray.enums.EConfigType
 import com.miku.ray.util.getColorAttr
 import com.miku.ray.toasty.Toasty
@@ -184,12 +184,8 @@ private fun showSnackbar(
         snackbarLayout.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
             ?.visibility = View.INVISIBLE
 
-        val snackbarBinding = LayoutSnackbarCustomBinding.inflate(
-            LayoutInflater.from(activity),
-            snackbarLayout,
-            false
-        )
-        val contentView = snackbarBinding.root
+        val contentView = LayoutInflater.from(activity)
+            .inflate(R.layout.layout_snackbar_custom, snackbarLayout, false)
 
         val resolvedTextColor = if (textColorAttr != null) {
             activity.getColorAttr(textColorAttr)
@@ -197,11 +193,11 @@ private fun showSnackbar(
             activity.getColorAttr("colorOnSurfaceInverse")
         }
 
-        snackbarBinding.ivSnackbarIcon.apply {
+        contentView.findViewById<ImageView>(R.id.iv_snackbar_icon)?.apply {
             setImageResource(iconRes)
             DrawableCompat.setTint(drawable.mutate(), resolvedTextColor)
         }
-        snackbarBinding.tvSnackbarTitle.apply {
+        contentView.findViewById<TextView>(R.id.tv_snackbar_title)?.apply {
             if (title.isNotNullEmpty()) {
                 text = title
                 visibility = View.VISIBLE
@@ -210,7 +206,7 @@ private fun showSnackbar(
                 visibility = View.GONE
             }
         }
-        snackbarBinding.tvSnackbarMessage.apply {
+        contentView.findViewById<TextView>(R.id.tv_snackbar_message)?.apply {
             text = message
             setTextColor(resolvedTextColor)
         }

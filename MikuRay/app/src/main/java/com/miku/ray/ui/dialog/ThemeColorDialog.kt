@@ -19,8 +19,6 @@ import com.google.android.material.color.DynamicColorsOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.databinding.ItemThemeColorBinding
-import com.miku.ray.databinding.DialogThemeColorBinding
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.ThemeManager
 import com.miku.ray.util.WindowBlurUtils
@@ -51,21 +49,21 @@ class ThemeColorDialog : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialogBinding = DialogThemeColorBinding.inflate(LayoutInflater.from(requireContext()))
-        val view = dialogBinding.root
+        val view = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_theme_color, null)
 
-        val grid = dialogBinding.gridThemeColors
+        val grid = view.findViewById<android.widget.GridLayout>(R.id.grid_theme_colors)
 
         val useCustom   = MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_CUSTOM_COLOR, false)
         val savedColor  = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_COLOR, 0)
         val currentKey  = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "8"
 
         THEME_KEYS.forEach { key ->
-            val itemBinding = ItemThemeColorBinding.inflate(LayoutInflater.from(requireContext()), grid, false)
-            val itemView = itemBinding.root
+            val itemView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.item_theme_color, grid, false)
 
-            val circle = itemBinding.ivColorCircle
-            val check = itemBinding.ivCheck
+            val circle = itemView.findViewById<ImageView>(R.id.iv_color_circle)
+            val check  = itemView.findViewById<ImageView>(R.id.iv_check)
 
             val isSelected = !useCustom && key == currentKey
 
@@ -87,11 +85,11 @@ class ThemeColorDialog : DialogFragment() {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val customItemBinding = ItemThemeColorBinding.inflate(LayoutInflater.from(requireContext()), grid, false)
-            val customItemView = customItemBinding.root
+            val customItemView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.item_theme_color, grid, false)
 
-            val customCircle = customItemBinding.ivColorCircle
-            val customIcon = customItemBinding.ivCheck
+            val customCircle = customItemView.findViewById<ImageView>(R.id.iv_color_circle)
+            val customIcon   = customItemView.findViewById<ImageView>(R.id.iv_check)
 
             val isCustomSelected = useCustom && savedColor != 0
             val rawCustomColor   = if (savedColor != 0) savedColor else ContextCompat.getColor(requireContext(), R.color.teal_primary)

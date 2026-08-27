@@ -8,9 +8,9 @@ import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.databinding.DialogBlurBottomIntensityBinding
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.BlurBottomStatusController
 import com.miku.ray.util.WindowBlurUtils
@@ -30,10 +30,9 @@ class BlurBottomIntensityDialog @JvmOverloads constructor(
             AppConfig.DEFAULT_BLUR_BOTTOM_ALPHA
         )
 
-        val dialogBinding = DialogBlurBottomIntensityBinding.inflate(LayoutInflater.from(context))
-        val dialogView = dialogBinding.root
-        val sliderRadius = dialogBinding.sliderBlurBottomRadius
-        val sliderAlpha = dialogBinding.sliderBlurBottomAlpha
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_blur_bottom_intensity, null)
+        val sliderRadius = dialogView.findViewById<Slider>(R.id.slider_blur_bottom_radius)
+        val sliderAlpha = dialogView.findViewById<Slider>(R.id.slider_blur_bottom_alpha)
 
         sliderRadius.value = originalRadius.toFloat().coerceIn(1f, 50f)
         sliderAlpha.value = originalAlpha.toFloat().coerceIn(0f, 100f)

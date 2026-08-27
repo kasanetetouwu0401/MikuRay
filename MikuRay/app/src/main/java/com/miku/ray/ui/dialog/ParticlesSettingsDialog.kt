@@ -8,12 +8,13 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.databinding.DialogParticlesSettingsBinding
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.WindowBlurUtils
 import java.util.Locale
@@ -152,30 +153,12 @@ class ParticlesSettingsDialog @JvmOverloads constructor(
     override fun onClick() {
         val activity = context.findActivity() ?: return
 
-        val dialogBinding = DialogParticlesSettingsBinding.inflate(LayoutInflater.from(context))
-        val dialogView = dialogBinding.root
-        val labels = mapOf(
-            R.id.text_label_frame_delay to dialogBinding.textLabelFrameDelay,
-            R.id.text_label_line_length to dialogBinding.textLabelLineLength,
-            R.id.text_label_line_thickness to dialogBinding.textLabelLineThickness,
-            R.id.text_label_radius_max to dialogBinding.textLabelRadiusMax,
-            R.id.text_label_radius_min to dialogBinding.textLabelRadiusMin,
-            R.id.text_label_density to dialogBinding.textLabelDensity,
-            R.id.text_label_speed_factor to dialogBinding.textLabelSpeedFactor,
-        )
-        val slidersById = mapOf(
-            R.id.slider_frame_delay to dialogBinding.sliderFrameDelay,
-            R.id.slider_line_length to dialogBinding.sliderLineLength,
-            R.id.slider_line_thickness to dialogBinding.sliderLineThickness,
-            R.id.slider_radius_max to dialogBinding.sliderRadiusMax,
-            R.id.slider_radius_min to dialogBinding.sliderRadiusMin,
-            R.id.slider_density to dialogBinding.sliderDensity,
-            R.id.slider_speed_factor to dialogBinding.sliderSpeedFactor,
-        )
+        val dialogView = LayoutInflater.from(context)
+            .inflate(R.layout.dialog_particles_settings, null)
 
         val sliders = params.map { param ->
-            val label = labels.getValue(param.labelViewId)
-            val slider = slidersById.getValue(param.sliderViewId)
+            val label = dialogView.findViewById<TextView>(param.labelViewId)
+            val slider = dialogView.findViewById<Slider>(param.sliderViewId)
             val current = currentValue(param)
 
             slider.valueFrom = param.min
@@ -210,7 +193,8 @@ class ParticlesSettingsDialog @JvmOverloads constructor(
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
             sliders.forEach { (param, slider) ->
                 slider.value = param.default
-                labels.getValue(param.labelViewId).text = labelText(param, param.default)
+                dialogView.findViewById<TextView>(param.labelViewId).text =
+                    labelText(param, param.default)
                 MmkvManager.encodeSettings(param.prefKey, param.default)
             }
             activity.sendBroadcast(Intent(AppConfig.BROADCAST_ACTION_PARTICLES_CHANGED))

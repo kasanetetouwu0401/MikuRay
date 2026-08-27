@@ -10,9 +10,9 @@ import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.databinding.DialogSelectedBannerDimSliderBinding
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.SelectedProfileBannerController
 import com.miku.ray.util.WindowBlurUtils
@@ -43,9 +43,9 @@ class SelectedBannerDimSliderDialog @JvmOverloads constructor(
             AppConfig.SELECTED_BANNER_DIM_MAX
         )
 
-        val dialogBinding = DialogSelectedBannerDimSliderBinding.inflate(LayoutInflater.from(context))
-        val dialogView = dialogBinding.root
-        val slider = dialogBinding.sliderSelectedBannerDim
+        val dialogView = LayoutInflater.from(context)
+            .inflate(R.layout.dialog_selected_banner_dim_slider, null)
+        val slider = dialogView.findViewById<Slider>(R.id.slider_selected_banner_dim)
         slider.value = current.toFloat()
 
         val dialog = MaterialAlertDialogBuilder(context)

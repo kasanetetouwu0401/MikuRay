@@ -7,9 +7,9 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.skydoves.colorpickerview.ColorPickerView
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import com.miku.ray.R
-import com.miku.ray.databinding.DialogCustomColorPickerBinding
 import com.miku.ray.util.ThemeManager
 import com.miku.ray.util.WindowBlurUtils
 
@@ -42,10 +42,9 @@ class CustomColorPickerDialog : DialogFragment() {
         val initialColor = arguments?.getInt("current_color") ?: selectedColor
         selectedColor = initialColor
 
-        val dialogBinding = DialogCustomColorPickerBinding.inflate(layoutInflater)
-        val view = dialogBinding.root
+        val view = layoutInflater.inflate(R.layout.dialog_custom_color_picker, null)
 
-        val colorPickerView = dialogBinding.colorPickerView
+        val colorPickerView = view.findViewById<ColorPickerView>(R.id.color_picker_view)
 
         colorPickerView.post {
             colorPickerView.selectByHsvColor(initialColor)

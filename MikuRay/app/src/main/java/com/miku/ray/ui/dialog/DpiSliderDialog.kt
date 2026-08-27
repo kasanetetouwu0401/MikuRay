@@ -11,9 +11,9 @@ import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.databinding.DialogDpiSliderBinding
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.WindowBlurUtils
 
@@ -39,9 +39,8 @@ class DpiSliderDialog @JvmOverloads constructor(
         val savedDpi = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_DPI, 0)
         val currentDpi = if (savedDpi > 0) savedDpi else systemDpi
 
-        val dialogBinding = DialogDpiSliderBinding.inflate(LayoutInflater.from(context))
-        val dialogView = dialogBinding.root
-        val slider = dialogBinding.sliderDpi
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_dpi_slider, null)
+        val slider = dialogView.findViewById<Slider>(R.id.slider_dpi)
 
         slider.value = currentDpi.toFloat().coerceIn(160f, 640f)
 

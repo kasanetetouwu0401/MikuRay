@@ -14,6 +14,7 @@ import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import com.google.android.material.sidesheet.SideSheetDialog
@@ -23,6 +24,7 @@ import com.miku.ray.util.showBlur
 import com.miku.ray.util.showDeleteConfirmDialog
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.contracts.BaseAdapterListener
@@ -63,7 +65,7 @@ class SubSettingActivity : BaseActivity(),
         setContentView(binding.root)
 
         binding.recyclerView.applyEdgeToEdgeListInsets()
-        val toolbar = binding.toolbar
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_sub_setting), subtitle = getString(R.string.subtitle_sub_setting))
 
         adapter = SubSettingRecyclerAdapter(viewModel, ActivityAdapterListener())

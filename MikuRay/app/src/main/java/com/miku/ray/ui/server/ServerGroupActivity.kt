@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import com.miku.ray.util.showDeleteConfirmDialog
+import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.databinding.ActivityServerGroupBinding
@@ -14,7 +15,9 @@ import com.miku.ray.enums.BalancerStrategyType
 import com.miku.ray.enums.EConfigType
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
 import com.miku.ray.extension.isNotNullEmpty
+import com.miku.ray.extension.snackbarDefault
 import com.miku.ray.extension.snackbarError
+import com.miku.ray.extension.snackbarSuccess
 import com.miku.ray.extension.toastSuccess
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsChangeManager
@@ -56,7 +59,7 @@ class ServerGroupActivity : BaseActivity() {
         binding.serverScrollContent.applyEdgeToEdgeListInsets()
 
 
-        val toolbar = binding.toolbar
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = EConfigType.POLICYGROUP.toString(), subtitle = getString(R.string.subtitle_server_config))
 
         val config = MmkvManager.decodeServerConfig(editGuid)

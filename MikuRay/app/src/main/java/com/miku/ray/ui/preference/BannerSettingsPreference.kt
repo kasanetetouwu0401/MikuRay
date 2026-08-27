@@ -9,7 +9,6 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.databinding.UwuBannerSettingsBinding
 import com.miku.ray.handler.MmkvManager
 
 /**
@@ -35,10 +34,9 @@ class BannerSettingsPreference @JvmOverloads constructor(
 
         holder.setIsRecyclable(false)
 
-        val binding = UwuBannerSettingsBinding.bind(holder.itemView)
-        val imageView = binding.ivBannerSettingsCharacter
-        imageView.setImageResource(resolveDrawableRes())
-        applyLayoutParams(imageView)
+        val imageView = holder.findViewById(R.id.iv_banner_settings_character) as? ImageView
+        imageView?.setImageResource(resolveDrawableRes())
+        imageView?.let { applyLayoutParams(it) }
     }
 
     /** Forces this preference to rebind so the banner picks up the latest character / size / margins. */

@@ -27,9 +27,9 @@ import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AngApplication
 import com.miku.ray.R
-import com.miku.ray.databinding.ActivityBaseBinding
 import com.miku.ray.AppConfig
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.helper.CustomDividerItemDecoration
@@ -237,24 +237,24 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     protected fun setContentViewWithToolbar(layoutResId: Int, showHomeAsUp: Boolean = true, title: CharSequence? = null, subtitle: CharSequence? = null) {
-        val baseBinding = ActivityBaseBinding.inflate(layoutInflater)
-        LayoutInflater.from(this).inflate(layoutResId, baseBinding.contentContainer, true)
-        super.setContentView(baseBinding.root)
-        setupBaseToolbar(baseBinding, showHomeAsUp, title, subtitle)
+        val base = LayoutInflater.from(this).inflate(R.layout.activity_base, null)
+        val container = base.findViewById<FrameLayout>(R.id.content_container)
+        LayoutInflater.from(this).inflate(layoutResId, container, true)
+        super.setContentView(base)
+        setupBaseToolbar(base, showHomeAsUp, title, subtitle)
     }
 
     protected fun setContentViewWithToolbar(childView: View, showHomeAsUp: Boolean = true, title: CharSequence? = null, subtitle: CharSequence? = null) {
-        val baseBinding = ActivityBaseBinding.inflate(layoutInflater)
-        baseBinding.contentContainer.addView(
-            childView,
-            ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        )
-        super.setContentView(baseBinding.root)
-        setupBaseToolbar(baseBinding, showHomeAsUp, title, subtitle)
+        val base = LayoutInflater.from(this).inflate(R.layout.activity_base, null)
+        val container = base.findViewById<FrameLayout>(R.id.content_container)
+        container.addView(childView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        super.setContentView(base)
+        setupBaseToolbar(base, showHomeAsUp, title, subtitle)
     }
 
-    private fun setupBaseToolbar(baseBinding: ActivityBaseBinding, showHomeAsUp: Boolean, title: CharSequence?, subtitle: CharSequence?) {
-        setupToolbar(baseBinding.toolbar, showHomeAsUp, title, subtitle)
+    private fun setupBaseToolbar(baseRoot: View, showHomeAsUp: Boolean, title: CharSequence?, subtitle: CharSequence?) {
+        val toolbar = baseRoot.findViewById<MaterialToolbar>(R.id.toolbar)
+        setupToolbar(toolbar, showHomeAsUp, title, subtitle)
     }
 
     private fun getOrCreateLoadingOverlay(): FrameLayout {

@@ -10,9 +10,9 @@ import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.databinding.DialogBannerHeightSliderBinding
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.WindowBlurUtils
 
@@ -42,9 +42,9 @@ class BannerHeightSliderDialog @JvmOverloads constructor(
             AppConfig.HOME_BANNER_HEIGHT_MAX
         )
 
-        val dialogBinding = DialogBannerHeightSliderBinding.inflate(LayoutInflater.from(context))
-        val dialogView = dialogBinding.root
-        val slider = dialogBinding.sliderBannerHeight
+        val dialogView = LayoutInflater.from(context)
+            .inflate(R.layout.dialog_banner_height_slider, null)
+        val slider = dialogView.findViewById<Slider>(R.id.slider_banner_height)
         slider.value = current.toFloat()
 
         val dialog = MaterialAlertDialogBuilder(context)

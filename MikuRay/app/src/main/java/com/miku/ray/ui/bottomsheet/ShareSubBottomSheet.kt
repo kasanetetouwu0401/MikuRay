@@ -5,12 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.miku.ray.databinding.UwuBottomSheetShareSubBinding
+import com.miku.ray.AppConfig
+import com.miku.ray.R
+import com.miku.ray.handler.MmkvManager
 
 class ShareSubBottomSheet : BaseBottomSheetFragment() {
-
-    private var _binding: UwuBottomSheetShareSubBinding? = null
-    private val binding get() = requireNotNull(_binding)
 
     interface OnShareSubOptionClickListener {
         fun onShareSubOptionClicked(optionId: Int, url: String)
@@ -37,29 +36,23 @@ class ShareSubBottomSheet : BaseBottomSheetFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = UwuBottomSheetShareSubBinding.inflate(inflater, container, false)
-        return binding.root
+    ): View? {
+        return inflater.inflate(R.layout.uwu_bottom_sheet_share_sub, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupParticles(binding.root)
-        loadBannerSheet(binding.root)
+        setupParticles(view)
+        loadBannerSheet(view)
 
         val clickListener = View.OnClickListener {
             mListener?.onShareSubOptionClicked(it.id, subUrl)
             dismiss()
         }
 
-        binding.shareQrcode.setOnClickListener(clickListener)
-        binding.shareClipboard.setOnClickListener(clickListener)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        view.findViewById<View>(R.id.share_qrcode)?.setOnClickListener(clickListener)
+        view.findViewById<View>(R.id.share_clipboard)?.setOnClickListener(clickListener)
     }
 
     override fun onDetach() {

@@ -7,12 +7,13 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.databinding.DialogFontSizeSliderBinding
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.WindowBlurUtils
 import kotlin.math.roundToInt
@@ -39,10 +40,9 @@ class FontSizeSliderDialog @JvmOverloads constructor(
         val savedScale = MmkvManager.decodeSettingsFloat(AppConfig.PREF_APP_FONT_SIZE, AppConfig.FONT_SIZE_DEFAULT)
         val currentScale = if (savedScale > 0f) savedScale else AppConfig.FONT_SIZE_DEFAULT
 
-        val dialogBinding = DialogFontSizeSliderBinding.inflate(LayoutInflater.from(context))
-        val dialogView = dialogBinding.root
-        val slider = dialogBinding.sliderFontSize
-        val preview = dialogBinding.textFontSizePreview
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_font_size_slider, null)
+        val slider = dialogView.findViewById<Slider>(R.id.slider_font_size)
+        val preview = dialogView.findViewById<TextView>(R.id.text_font_size_preview)
 
         slider.value = currentScale.coerceIn(AppConfig.FONT_SIZE_MIN, AppConfig.FONT_SIZE_MAX)
         preview.text = context.getString(R.string.pref_font_size_preview_format, formatPercent(slider.value))

@@ -3,6 +3,8 @@ package com.miku.ray.ui.splash
 import com.miku.ray.ui.main.MainActivity
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.widget.TextView
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -10,7 +12,6 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.miku.ray.AppConfig.PREF_SHOW_SPLASH
 import com.miku.ray.R
-import com.miku.ray.databinding.UwuActivitySplashBinding
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.ui.base.BaseActivity
 import com.miku.ray.util.AppNameHelper
@@ -18,8 +19,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SplashActivity : BaseActivity() {
-    private val binding by lazy { UwuActivitySplashBinding.inflate(layoutInflater) }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (!isTaskRoot) {
@@ -37,9 +36,9 @@ class SplashActivity : BaseActivity() {
             return
         }
 
-        setContentView(binding.root)
+        setContentView(R.layout.uwu_activity_splash)
 
-        val rootLayout = binding.mainContent
+        val rootLayout = findViewById<View>(R.id.main_content)
         ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.updatePadding(
@@ -51,9 +50,9 @@ class SplashActivity : BaseActivity() {
             insets
         }
 
-        binding.splashName.text = AppNameHelper.getDisplayName(this)
+        findViewById<TextView>(R.id.splash_name).text = AppNameHelper.getDisplayName(this)
 
-        val versionText = binding.splashVersion
+        val versionText = findViewById<TextView>(R.id.splash_version)
         versionText.text = getString(
             R.string.uwu_splash_summary,
             getString(R.string.uwu_version_name),

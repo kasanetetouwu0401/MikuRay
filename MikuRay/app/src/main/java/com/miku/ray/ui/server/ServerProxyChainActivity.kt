@@ -7,6 +7,7 @@ import android.view.MenuItem
 import com.miku.ray.util.showDeleteConfirmDialog
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.contracts.BaseAdapterListener
@@ -17,6 +18,7 @@ import com.miku.ray.extension.applyEdgeToEdgeListInsets
 import com.miku.ray.extension.isComplexType
 import com.miku.ray.extension.snackbarDefault
 import com.miku.ray.extension.snackbarError
+import com.miku.ray.extension.snackbarSuccess
 import com.miku.ray.extension.toastSuccess
 import com.miku.ray.helper.SimpleItemTouchHelperCallback
 import com.miku.ray.handler.MmkvManager
@@ -48,7 +50,7 @@ class ServerProxyChainActivity : BaseActivity() {
         binding.serverScrollContent.applyEdgeToEdgeListInsets()
 
 
-        val toolbar = binding.toolbar
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = EConfigType.PROXYCHAIN.toString(), subtitle = getString(R.string.subtitle_server_config))
 
         loadAvailableRemarks()

@@ -8,9 +8,9 @@ import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.databinding.DialogSheetBannerDimSliderBinding
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.WindowBlurUtils
 
@@ -29,9 +29,9 @@ class SheetBannerDimSliderDialog @JvmOverloads constructor(
             AppConfig.SHEET_BANNER_DIM_MAX
         )
 
-        val dialogBinding = DialogSheetBannerDimSliderBinding.inflate(LayoutInflater.from(context))
-        val dialogView = dialogBinding.root
-        val slider = dialogBinding.sliderSheetBannerDim
+        val dialogView = LayoutInflater.from(context)
+            .inflate(R.layout.dialog_sheet_banner_dim_slider, null)
+        val slider = dialogView.findViewById<Slider>(R.id.slider_sheet_banner_dim)
         slider.value = current.toFloat()
 
         val dialog = MaterialAlertDialogBuilder(context)

@@ -10,9 +10,9 @@ import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.databinding.DialogHeaderTopRowPaddingSliderBinding
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.WindowBlurUtils
 
@@ -42,9 +42,9 @@ class HeaderTopRowPaddingDialog @JvmOverloads constructor(
             AppConfig.HEADER_TOP_ROW_PADDING_MAX
         )
 
-        val dialogBinding = DialogHeaderTopRowPaddingSliderBinding.inflate(LayoutInflater.from(context))
-        val dialogView = dialogBinding.root
-        val slider = dialogBinding.sliderHeaderTopRowPadding
+        val dialogView = LayoutInflater.from(context)
+            .inflate(R.layout.dialog_header_top_row_padding_slider, null)
+        val slider = dialogView.findViewById<Slider>(R.id.slider_header_top_row_padding)
         slider.value = current.toFloat()
 
         val dialog = MaterialAlertDialogBuilder(context)

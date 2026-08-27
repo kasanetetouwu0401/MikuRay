@@ -5,14 +5,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.miku.ray.databinding.UwuBottomSheetShareConfigBinding
+import com.miku.ray.AppConfig
+import com.miku.ray.R
 import com.miku.ray.enums.EConfigType
 import com.miku.ray.extension.isComplexType
+import com.miku.ray.handler.MmkvManager
 
 class ShareConfigBottomSheet : BaseBottomSheetFragment() {
-
-    private var _binding: UwuBottomSheetShareConfigBinding? = null
-    private val binding get() = requireNotNull(_binding)
 
     interface OnShareOptionClickListener {
         fun onShareOptionClicked(optionId: Int, guid: String)
@@ -41,42 +40,36 @@ class ShareConfigBottomSheet : BaseBottomSheetFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = UwuBottomSheetShareConfigBinding.inflate(inflater, container, false)
-        return binding.root
+    ): View? {
+        return inflater.inflate(R.layout.uwu_bottom_sheet_share_config, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupParticles(binding.root)
-        loadBannerSheet(binding.root)
+        setupParticles(view)
+        loadBannerSheet(view)
 
         val clickListener = View.OnClickListener {
             mListener?.onShareOptionClicked(it.id, configGuid)
             dismiss()
         }
 
-        binding.shareQrcode.setOnClickListener(clickListener)
+        view.findViewById<View>(R.id.share_qrcode)?.setOnClickListener(clickListener)
 
-        val shareClipboardView = binding.shareClipboard
-        shareClipboardView.setOnClickListener(clickListener)
+        val shareClipboardView = view.findViewById<View>(R.id.share_clipboard)
+        shareClipboardView?.setOnClickListener(clickListener)
 
-        binding.shareFullClipboard.setOnClickListener(clickListener)
+        view.findViewById<View>(R.id.share_full_clipboard)?.setOnClickListener(clickListener)
 
-        binding.shareFile.setOnClickListener(clickListener)
+        view.findViewById<View>(R.id.share_file)?.setOnClickListener(clickListener)
 
         val typeEnum = EConfigType.fromInt(configType)
         val isCustomConfig = typeEnum?.isComplexType() == true
 
         if (isCustomConfig) {
-            shareClipboardView.visibility = View.GONE
+            shareClipboardView?.visibility = View.GONE
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     override fun onDetach() {

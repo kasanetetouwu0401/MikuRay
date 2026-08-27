@@ -6,14 +6,12 @@ import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import com.miku.ray.databinding.UwuActivityWelcomeBinding
+import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.ui.base.BaseActivity
 import com.miku.ray.ui.splash.SplashActivity
 
 class WelcomeActivity : BaseActivity() {
-    private val binding by lazy { UwuActivityWelcomeBinding.inflate(layoutInflater) }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,9 +21,9 @@ class WelcomeActivity : BaseActivity() {
             return
         }
 
-        setContentView(binding.root)
+        setContentView(R.layout.uwu_activity_welcome)
 
-        val rootLayout = binding.mainContent
+        val rootLayout = findViewById<View>(R.id.main_content)
         ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.updatePadding(
@@ -41,28 +39,28 @@ class WelcomeActivity : BaseActivity() {
     }
 
     private fun setupViewsAndListeners() {
-        val page1 = binding.page1
-        val page2 = binding.page2
-        val page3 = binding.page3
+        val page1 = findViewById<View>(R.id.page1)
+        val page2 = findViewById<View>(R.id.page2)
+        val page3 = findViewById<View>(R.id.page3)
 
         page2.visibility = View.GONE
         page3.visibility = View.GONE
 
-        binding.page1button.setOnClickListener {
+        findViewById<View>(R.id.page_1button).setOnClickListener {
             page1.visibility = View.GONE
             page2.visibility = View.VISIBLE
         }
 
-        binding.page2button.setOnClickListener {
+        findViewById<View>(R.id.page_2button).setOnClickListener {
             page2.visibility = View.GONE
             page3.visibility = View.VISIBLE
         }
 
         val navigateAction = View.OnClickListener { navigateToMain() }
 
-        binding.page3button.setOnClickListener(navigateAction)
-        binding.page1Skip.setOnClickListener(navigateAction)
-        binding.page2Skip.setOnClickListener(navigateAction)
+        findViewById<View>(R.id.page_3button).setOnClickListener(navigateAction)
+        findViewById<View>(R.id.page_1_skip).setOnClickListener(navigateAction)
+        findViewById<View>(R.id.page_2_skip).setOnClickListener(navigateAction)
     }
 
     private fun navigateToMain() {

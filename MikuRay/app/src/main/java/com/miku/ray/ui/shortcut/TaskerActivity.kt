@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import com.miku.ray.AppConfig
@@ -38,7 +39,7 @@ class TaskerActivity : BaseActivity() {
             this,
             android.R.layout.simple_list_item_single_choice, lstData
         )
-        listview = binding.listview
+        listview = findViewById<View>(R.id.listview) as ListView
         listview?.adapter = adapter
         listview?.applyEdgeToEdgeListInsets()
 

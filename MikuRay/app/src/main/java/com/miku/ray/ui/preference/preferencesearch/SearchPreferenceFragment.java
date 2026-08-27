@@ -1,7 +1,6 @@
 package com.miku.ray.ui.preference.preferencesearch;
 
 import com.miku.ray.R;
-import com.miku.ray.databinding.SearchpreferenceFragmentBinding;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -46,7 +45,6 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
     private SearchPreferenceAdapter adapter;
     private HistoryClickListener historyClickListener;
     private CharSequence searchTermPreset = null;
-    private SearchpreferenceFragmentBinding binding;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,9 +64,8 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        binding = SearchpreferenceFragmentBinding.inflate(inflater, container, false);
-        View rootView = binding.getRoot();
-        viewHolder = new SearchViewHolder(binding);
+        View rootView = inflater.inflate(R.layout.searchpreference_fragment, container, false);
+        viewHolder = new SearchViewHolder(rootView);
 
         viewHolder.clearButton.setOnClickListener(view -> viewHolder.searchView.setText(""));
         if (searchConfiguration.isHistoryEnabled()) {
@@ -222,13 +219,6 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
     }
 
     @Override
-    public void onDestroyView() {
-        viewHolder = null;
-        binding = null;
-        super.onDestroyView();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         updateSearchResults(viewHolder.searchView.getText().toString());
@@ -363,13 +353,13 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
         private TextView noResults;
         private CardView cardView;
 
-        SearchViewHolder(SearchpreferenceFragmentBinding binding) {
-            searchView = binding.searchpreferenceSearchbar.search;
-            clearButton = binding.searchpreferenceSearchbar.clear;
-            recyclerView = binding.list;
-            moreButton = binding.searchpreferenceSearchbar.more;
-            noResults = binding.noResults;
-            cardView = binding.searchpreferenceSearchbar.searchCard;
+        SearchViewHolder(View root) {
+            searchView = root.findViewById(R.id.search);
+            clearButton = root.findViewById(R.id.clear);
+            recyclerView = root.findViewById(R.id.list);
+            moreButton = root.findViewById(R.id.more);
+            noResults = root.findViewById(R.id.no_results);
+            cardView = root.findViewById(R.id.search_card);
         }
     }
 

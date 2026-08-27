@@ -7,6 +7,7 @@ import android.view.MenuItem
 import com.miku.ray.util.showDeleteConfirmDialog
 import com.blacksquircle.ui.editorkit.utils.EditorTheme
 import com.blacksquircle.ui.language.json.JsonLanguage
+import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.databinding.ActivityServerCustomConfigBinding
@@ -15,6 +16,7 @@ import com.miku.ray.enums.EConfigType
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
 import com.miku.ray.extension.snackbarDefault
 import com.miku.ray.extension.snackbarError
+import com.miku.ray.extension.snackbarSuccess
 import com.miku.ray.extension.toastSuccess
 import com.miku.ray.fmt.CustomFmt
 import com.miku.ray.handler.AngConfigManager
@@ -42,7 +44,7 @@ class ServerCustomConfigActivity : BaseActivity() {
         binding.serverScrollContent.applyEdgeToEdgeListInsets()
 
 
-        val toolbar = binding.toolbar
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = EConfigType.CUSTOM.toString(), subtitle = getString(R.string.subtitle_server_config))
 
         if (!Utils.getDarkModeStatus(this)) {

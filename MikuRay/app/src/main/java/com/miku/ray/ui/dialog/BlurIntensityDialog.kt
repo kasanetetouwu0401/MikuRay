@@ -11,9 +11,9 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.databinding.DialogBlurIntensityBinding
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.WindowBlurUtils
 
@@ -35,12 +35,11 @@ class BlurIntensityDialog @JvmOverloads constructor(
         val originalRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS)
         val originalRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
 
-        val dialogBinding = DialogBlurIntensityBinding.inflate(LayoutInflater.from(context))
-        val dialogView = dialogBinding.root
-        val sliderRadius = dialogBinding.sliderBlurRadius
-        val sliderRounds = dialogBinding.sliderBlurRounds
-        val roundsLabel = dialogBinding.labelBlurRounds
-        val roundsWarning = dialogBinding.blurRoundsWarning
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_blur_intensity, null)
+        val sliderRadius = dialogView.findViewById<Slider>(R.id.slider_blur_radius)
+        val sliderRounds = dialogView.findViewById<Slider>(R.id.slider_blur_rounds)
+        val roundsLabel = dialogView.findViewById<View>(R.id.label_blur_rounds)
+        val roundsWarning = dialogView.findViewById<View>(R.id.blur_rounds_warning)
         val isUsingSystemBlur = WindowBlurUtils.isSystemBlurAvailable(context)
         if (isUsingSystemBlur) {
             roundsLabel.visibility = View.GONE

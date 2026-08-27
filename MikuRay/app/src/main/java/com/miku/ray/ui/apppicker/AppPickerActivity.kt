@@ -9,6 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.databinding.ActivityAppPickerBinding
@@ -54,7 +55,7 @@ class AppPickerActivity : BaseActivity() {
 
         binding.recyclerView.applyEdgeToEdgeListInsets()
 
-        val toolbar = binding.toolbar
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = resolveScreenTitle(), subtitle = getString(R.string.subtitle_app_picker))
 
         selectedPackages.addAll(initialSelectedPackages)

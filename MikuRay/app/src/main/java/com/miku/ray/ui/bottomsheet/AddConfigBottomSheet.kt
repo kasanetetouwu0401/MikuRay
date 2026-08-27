@@ -5,12 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.miku.ray.databinding.UwuLayoutBottomSheetAddConfigBinding
+import com.miku.ray.AppConfig
+import com.miku.ray.R
+import com.miku.ray.handler.MmkvManager
 
 class AddConfigBottomSheet : BaseBottomSheetFragment() {
-
-    private var _binding: UwuLayoutBottomSheetAddConfigBinding? = null
-    private val binding get() = requireNotNull(_binding)
 
     interface OnAddConfigClickListener {
         fun onAddConfigOptionClicked(viewId: Int)
@@ -31,46 +30,40 @@ class AddConfigBottomSheet : BaseBottomSheetFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = UwuLayoutBottomSheetAddConfigBinding.inflate(inflater, container, false)
-        return binding.root
+    ): View? {
+        return inflater.inflate(R.layout.uwu_layout_bottom_sheet_add_config, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupParticles(binding.root)
-        loadBannerSheet(binding.root)
+        setupParticles(view)
+        loadBannerSheet(view)
 
         val clickListener = View.OnClickListener {
             mListener?.onAddConfigOptionClicked(it.id)
             dismiss()
         }
 
-        val actionViews = listOf(
-            binding.importQrcode,
-            binding.importClipboard,
-            binding.importLocal,
-            binding.importManuallyPolicyGroup,
-            binding.importManuallyProxyChain,
-            binding.importManuallyVmess,
-            binding.importManuallyVless,
-            binding.importManuallySs,
-            binding.importManuallySocks,
-            binding.importManuallyHttp,
-            binding.importManuallyTrojan,
-            binding.importManuallyWireguard,
-            binding.importManuallyHysteria2
+        val actionIds = listOf(
+            R.id.import_qrcode,
+            R.id.import_clipboard,
+            R.id.import_local,
+            R.id.import_manually_policy_group,
+            R.id.import_manually_proxy_chain,
+            R.id.import_manually_vmess,
+            R.id.import_manually_vless,
+            R.id.import_manually_ss,
+            R.id.import_manually_socks,
+            R.id.import_manually_http,
+            R.id.import_manually_trojan,
+            R.id.import_manually_wireguard,
+            R.id.import_manually_hysteria2
         )
 
-        actionViews.forEach { actionView ->
-            actionView.setOnClickListener(clickListener)
+        actionIds.forEach { id ->
+            view.findViewById<View>(id)?.setOnClickListener(clickListener)
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     override fun onDetach() {

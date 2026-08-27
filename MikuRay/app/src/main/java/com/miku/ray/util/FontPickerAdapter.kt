@@ -1,10 +1,13 @@
 package com.miku.ray.util
 
 import android.content.Context
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.miku.ray.databinding.ItemFontPickerBinding
+import com.miku.ray.R
 
 class FontPickerAdapter(
     private val context: Context,
@@ -14,10 +17,15 @@ class FontPickerAdapter(
     private val onSelect: (value: String, label: String) -> Unit
 ) : RecyclerView.Adapter<FontPickerAdapter.ViewHolder>() {
 
-    inner class ViewHolder(val binding: ItemFontPickerBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val label: TextView = view.findViewById(R.id.textFontLabel)
+        val check: ImageView = view.findViewById(R.id.imageFontCheck)
+    }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(ItemFontPickerBinding.inflate(android.view.LayoutInflater.from(context), parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(context).inflate(R.layout.item_font_picker, parent, false)
+        return ViewHolder(view)
+    }
 
     override fun getItemCount() = values.size
 
@@ -25,11 +33,11 @@ class FontPickerAdapter(
         val value = values[position]
         val label = labels.getOrElse(position) { value }
 
-        holder.binding.textFontLabel.text = label
-        holder.binding.textFontLabel.typeface = AppFontResolver.getTypeface(context, value)
+        holder.label.text = label
+        holder.label.typeface = AppFontResolver.getTypeface(context, value)
 
         val isSelected = value == selectedValue
-        holder.binding.imageFontCheck.visibility = if (isSelected) View.VISIBLE else View.GONE
+        holder.check.visibility = if (isSelected) View.VISIBLE else View.GONE
 
         holder.itemView.setOnClickListener {
             if (value != selectedValue) {

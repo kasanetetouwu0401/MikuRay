@@ -145,7 +145,6 @@ class StrokeDrawable : Drawable() {
         updatePaintColors()
     }
 
-    @Deprecated("Deprecated in Java")
     override fun setColorFilter(colorFilter: ColorFilter?) {
         topStrokePaint.colorFilter = colorFilter
         bottomStrokePaint.colorFilter = colorFilter

@@ -7,9 +7,9 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.preference.Preference
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.miku.ray.R
-import com.miku.ray.databinding.DialogAppIconPickerBinding
 import com.miku.ray.util.AppIconPickerAdapter
 import com.miku.ray.util.LauncherAliasSwitcher
 import com.miku.ray.util.WindowBlurUtils
@@ -27,9 +27,8 @@ class AppIconPickerDialog @JvmOverloads constructor(
 
     override fun onClick() {
         val current = LauncherAliasSwitcher.currentIconVariant()
-        val dialogBinding = DialogAppIconPickerBinding.inflate(LayoutInflater.from(context))
-        val dialogView = dialogBinding.root
-        val rv = dialogBinding.rvAppIcons
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_app_icon_picker, null)
+        val rv = dialogView.findViewById<RecyclerView>(R.id.rv_app_icons)
 
         lateinit var dialog: androidx.appcompat.app.AlertDialog
 

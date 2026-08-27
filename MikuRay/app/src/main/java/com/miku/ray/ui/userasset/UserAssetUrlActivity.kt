@@ -6,12 +6,14 @@ import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
 import com.miku.ray.util.showDeleteConfirmDialog
+import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.databinding.ActivityUserAssetUrlBinding
 import com.miku.ray.dto.entities.AssetUrlItem
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
 import com.miku.ray.extension.snackbarError
+import com.miku.ray.extension.snackbarSuccess
 import com.miku.ray.extension.toastSuccess
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.LogUtil
@@ -39,7 +41,7 @@ class UserAssetUrlActivity : BaseActivity() {
         binding.userAssetUrlScrollContent.applyEdgeToEdgeListInsets()
 
 
-        val toolbar = binding.toolbar
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = getString(R.string.title_user_asset_add_url), subtitle = getString(R.string.subtitle_user_asset_url))
 
         val assetItem = MmkvManager.decodeAsset(editAssetId)

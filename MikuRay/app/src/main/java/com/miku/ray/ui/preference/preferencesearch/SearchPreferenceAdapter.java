@@ -1,8 +1,8 @@
 package com.miku.ray.ui.preference.preferencesearch;
 
-import com.miku.ray.databinding.SearchpreferenceListItemHistoryBinding;
-import com.miku.ray.databinding.SearchpreferenceListItemResultBinding;
+import com.miku.ray.R;
 
+import android.graphics.Color;
 import android.text.SpannableString;
 import android.text.Spannable;
 import android.text.TextUtils;
@@ -38,10 +38,12 @@ class SearchPreferenceAdapter extends RecyclerView.Adapter<SearchPreferenceAdapt
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == PreferenceItem.TYPE) {
             return new PreferenceViewHolder(
-                    SearchpreferenceListItemResultBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+                    LayoutInflater.from(parent.getContext()).inflate(
+                            R.layout.searchpreference_list_item_result, parent, false));
         } else {
             return new HistoryViewHolder(
-                    SearchpreferenceListItemHistoryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+                    LayoutInflater.from(parent.getContext()).inflate(
+                            R.layout.searchpreference_list_item_history, parent, false));
         }
     }
 
@@ -141,9 +143,9 @@ class SearchPreferenceAdapter extends RecyclerView.Adapter<SearchPreferenceAdapt
 
     static class HistoryViewHolder extends ViewHolder {
         TextView term;
-        HistoryViewHolder(SearchpreferenceListItemHistoryBinding binding) {
-            super(binding.getRoot());
-            term = binding.term;
+        HistoryViewHolder(View v) {
+            super(v);
+            term = v.findViewById(R.id.term);
         }
     }
 
@@ -151,11 +153,11 @@ class SearchPreferenceAdapter extends RecyclerView.Adapter<SearchPreferenceAdapt
         TextView title;
         TextView summary;
         TextView breadcrumbs;
-        PreferenceViewHolder(SearchpreferenceListItemResultBinding binding) {
-            super(binding.getRoot());
-            title = binding.title;
-            summary = binding.summary;
-            breadcrumbs = binding.breadcrumbs;
+        PreferenceViewHolder(View v) {
+            super(v);
+            title = v.findViewById(R.id.title);
+            summary = v.findViewById(R.id.summary);
+            breadcrumbs = v.findViewById(R.id.breadcrumbs);
         }
     }
 }
