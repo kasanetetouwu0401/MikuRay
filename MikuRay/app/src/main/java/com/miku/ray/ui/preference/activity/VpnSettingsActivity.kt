@@ -153,11 +153,10 @@ class VpnSettingsActivity : BaseActivity() {
                             p.setOnPreferenceChangeListener { pref, newValue ->
                                 val value = (newValue as? String).orEmpty().trim()
                                 if (pref.key == AppConfig.PREF_FAKE_DNS_IP_POOL && !FakeDnsIpPool.isValid(value)) {
-                                    Toast.makeText(
-                                        requireContext(),
-                                        R.string.error_invalid_fake_dns_ip_pool,
-                                        Toast.LENGTH_LONG
-                                    ).show()
+                                    requireContext().snackbarError(
+                                        getString(R.string.error_invalid_fake_dns_ip_pool),
+                                        title = getString(R.string.title_alerter_error)
+                                    )
                                     false
                                 } else {
                                     pref.summary = value
