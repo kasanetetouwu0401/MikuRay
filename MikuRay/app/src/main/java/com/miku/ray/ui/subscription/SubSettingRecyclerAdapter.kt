@@ -39,9 +39,13 @@ class SubSettingRecyclerAdapter(
         )
         holder.itemSubSettingBinding.tvLastUpdated.text = Utils.formatTimestamp(subItem.lastUpdated)
         val usageText = formatSubscriptionUsage(holder.itemView.context, subItem)
+        val expiryText = formatSubscriptionExpiry(holder.itemView.context, subItem)
         holder.itemSubSettingBinding.tvSubscriptionUsage.text = usageText
+        holder.itemSubSettingBinding.tvSubscriptionExpire.text = expiryText
         holder.itemSubSettingBinding.tvSubscriptionUsage.visibility =
             if (usageText == null) View.GONE else View.VISIBLE
+        holder.itemSubSettingBinding.tvSubscriptionExpire.visibility =
+            if (expiryText == null) View.GONE else View.VISIBLE
         holder.itemView.setBackgroundColor(Color.TRANSPARENT)
 
         holder.itemSubSettingBinding.layoutEdit.setOnClickListener {
@@ -65,6 +69,7 @@ class SubSettingRecyclerAdapter(
             holder.itemSubSettingBinding.tvLastUpdated.visibility = View.GONE
             holder.itemSubSettingBinding.tvServerCount.visibility = View.GONE
             holder.itemSubSettingBinding.tvSubscriptionUsage.visibility = View.GONE
+            holder.itemSubSettingBinding.tvSubscriptionExpire.visibility = View.GONE
         } else {
             holder.itemSubSettingBinding.tvUrl.visibility = View.VISIBLE
             holder.itemSubSettingBinding.layoutShare.visibility = View.VISIBLE
@@ -73,6 +78,8 @@ class SubSettingRecyclerAdapter(
             holder.itemSubSettingBinding.tvServerCount.visibility = View.VISIBLE
             holder.itemSubSettingBinding.tvSubscriptionUsage.visibility =
                 if (usageText == null) View.GONE else View.VISIBLE
+            holder.itemSubSettingBinding.tvSubscriptionExpire.visibility =
+                if (expiryText == null) View.GONE else View.VISIBLE
             holder.itemSubSettingBinding.layoutShare.setOnClickListener {
                 adapterListener?.onShare(subItem.url)
             }
@@ -80,7 +87,7 @@ class SubSettingRecyclerAdapter(
     }
 
     private fun formatSubscriptionUsage(context: Context, subscription: SubscriptionItem): String? {
-        val trafficText = when {
+        return when {
             subscription.bytesUsed >= 0L && subscription.bytesRemaining >= 0L -> {
                 context.getString(
                     R.string.sub_setting_usage,
@@ -96,7 +103,10 @@ class SubSettingRecyclerAdapter(
             }
             else -> null
         }
-        val expiryText = subscription.expiresAt
+    }
+
+    private fun formatSubscriptionExpiry(context: Context, subscription: SubscriptionItem): String? {
+        return subscription.expiresAt
             .takeIf { it in 1L..(Long.MAX_VALUE / 1000L) }
             ?.let { seconds ->
                 context.getString(
@@ -104,7 +114,6 @@ class SubSettingRecyclerAdapter(
                     DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(seconds * 1000L)),
                 )
             }
-        return listOfNotNull(trafficText, expiryText).takeIf { it.isNotEmpty() }?.joinToString(" • ")
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainViewHolder {

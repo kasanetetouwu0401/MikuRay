@@ -103,10 +103,6 @@ object HttpUtil {
         return getUrlContentResponseWithUserAgent(request).content
     }
 
-    /**
-     * Mengambil konten dan header respons akhir setelah pengalihan manual.
-     * Dipakai pembaruan langganan untuk membaca Subscription-Userinfo.
-     */
     @Throws(IOException::class)
     fun getUrlContentResponseWithUserAgent(request: UrlContentRequest): UrlContentResponse {
         var currentUrl = request.url
