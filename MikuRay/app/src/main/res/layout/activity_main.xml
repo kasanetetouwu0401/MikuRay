@@ -446,14 +446,16 @@
             android:insetTop="0dp"
             android:insetBottom="0dp"
             android:contentDescription="@string/title_sub_update"
-            app:backgroundTint="?colorPrimaryContainer"
+            app:backgroundTint="?colorCard"
+            app:strokeColor="?colorOutline"
+            app:strokeWidth="1dp"
             app:cornerRadius="16dp"
             app:icon="@drawable/rmx_cloud_line"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="24dp"
-            app:iconTint="?colorOnPrimaryContainer"
-            style="@style/Widget.Material3.Button.IconButton.Filled" />
+            app:iconTint="?colorOnSurface"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_quick_country_code"
@@ -464,14 +466,16 @@
             android:insetTop="0dp"
             android:insetBottom="0dp"
             android:contentDescription="@string/title_country_code_all_server"
-            app:backgroundTint="?colorSecondaryContainer"
+            app:backgroundTint="?colorCard"
+            app:strokeColor="?colorOutline"
+            app:strokeWidth="1dp"
             app:cornerRadius="16dp"
             app:icon="@drawable/rmx_global_line"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="24dp"
-            app:iconTint="?colorOnSecondaryContainer"
-            style="@style/Widget.Material3.Button.IconButton.Filled" />
+            app:iconTint="?colorOnSurface"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_quick_tcping"
@@ -482,14 +486,16 @@
             android:insetTop="0dp"
             android:insetBottom="0dp"
             android:contentDescription="@string/title_ping_all_server"
-            app:backgroundTint="?colorTertiaryContainer"
+            app:backgroundTint="?colorCard"
+            app:strokeColor="?colorOutline"
+            app:strokeWidth="1dp"
             app:cornerRadius="16dp"
             app:icon="@drawable/rmx_wifi_line"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="24dp"
-            app:iconTint="?colorOnTertiaryContainer"
-            style="@style/Widget.Material3.Button.IconButton.Filled" />
+            app:iconTint="?colorOnSurface"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_quick_real_ping"
@@ -499,16 +505,16 @@
             android:insetTop="0dp"
             android:insetBottom="0dp"
             android:contentDescription="@string/title_real_ping_all_server"
-            app:backgroundTint="@color/uwu_tint_tertiary"
+            app:backgroundTint="?colorCard"
+            app:strokeColor="?colorOutline"
+            app:strokeWidth="1dp"
             app:cornerRadius="16dp"
             app:icon="@drawable/rmx_speed_line"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="24dp"
-            app:strokeColor="?colorTertiary"
-            app:strokeWidth="1dp"
-            app:iconTint="?colorOnTertiaryContainer"
-            style="@style/Widget.Material3.Button.IconButton.Filled" />
+            app:iconTint="?colorOnSurface"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
 
     </LinearLayout>
 
