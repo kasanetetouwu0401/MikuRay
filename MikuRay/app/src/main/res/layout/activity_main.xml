@@ -440,7 +440,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_quick_sub_update"
             android:layout_width="0dp"
-            android:layout_height="64dp"
+            android:layout_height="56dp"
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
             android:insetTop="0dp"
@@ -458,7 +458,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_quick_country_code"
             android:layout_width="0dp"
-            android:layout_height="64dp"
+            android:layout_height="56dp"
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
             android:insetTop="0dp"
@@ -476,7 +476,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_quick_tcping"
             android:layout_width="0dp"
-            android:layout_height="64dp"
+            android:layout_height="56dp"
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
             android:insetTop="0dp"
@@ -494,7 +494,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_quick_real_ping"
             android:layout_width="0dp"
-            android:layout_height="64dp"
+            android:layout_height="56dp"
             android:layout_weight="1"
             android:insetTop="0dp"
             android:insetBottom="0dp"

@@ -304,7 +304,7 @@ class MainActivity : HelperBaseActivity(),
             val bottomStatusParams = bottomStatus?.layoutParams as? ViewGroup.MarginLayoutParams
             bottomStatusParams?.let {
                 it.bottomMargin = if (quickActionsEnabled) {
-                    (116 * resources.displayMetrics.density).toInt()
+                    (100 * resources.displayMetrics.density).toInt()
                 } else {
                     (16 * resources.displayMetrics.density).toInt() + systemBars.bottom
                 }
