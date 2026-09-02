@@ -298,13 +298,13 @@ class MainActivity : HelperBaseActivity(),
                 bottom = 0
             )
 
-            val quickActionsEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_QUICK_ACTIONS, true)
+            val quickActionsEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_QUICK_ACTIONS, false)
 
             val bottomStatus = view.findViewById<View>(R.id.blur_bottom_status)
             val bottomStatusParams = bottomStatus?.layoutParams as? ViewGroup.MarginLayoutParams
             bottomStatusParams?.let {
                 it.bottomMargin = if (quickActionsEnabled) {
-                    (122 * resources.displayMetrics.density).toInt()
+                    (116 * resources.displayMetrics.density).toInt()
                 } else {
                     (16 * resources.displayMetrics.density).toInt() + systemBars.bottom
                 }
