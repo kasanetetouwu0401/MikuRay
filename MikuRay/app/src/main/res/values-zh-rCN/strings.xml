@@ -590,7 +590,6 @@
     <string name="add_server_manually">手动添加服务器</string>
     <string name="protocol_policy_group">策略组</string>
     <string name="protocol_proxy_chain">代理链</string>
-    <string name="quick_actions_and_testing">快捷操作与测试</string>
     <string name="management">管理</string>
     <string name="action_export">导出</string>
     <string name="action_duplicates">重复项</string>

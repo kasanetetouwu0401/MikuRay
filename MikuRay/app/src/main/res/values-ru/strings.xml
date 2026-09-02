@@ -618,7 +618,6 @@
     <string name="protocol_wireguard">Wireguard</string>
     <string name="protocol_policy_group">Группа политик</string>
     <string name="protocol_proxy_chain">Цепочка прокси</string>
-    <string name="quick_actions_and_testing">Быстрые действия и тестирование</string>
     <string name="management">Управление</string>
     <string name="action_export">Экспорт</string>
     <string name="action_duplicates">Дубликаты</string>
