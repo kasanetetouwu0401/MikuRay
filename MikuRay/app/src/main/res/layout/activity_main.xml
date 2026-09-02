@@ -426,4 +426,83 @@
         </RelativeLayout>
     </com.miku.ray.blurview.BlurView>
 
+    <LinearLayout
+        android:id="@+id/layout_quick_actions"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_quick_sub_update"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginEnd="12dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:contentDescription="@string/title_sub_update"
+            app:backgroundTint="?colorCard"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/rmx_cloud_line"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="24dp"
+            app:iconTint="?colorOnSurface"
+            style="@style/Widget.Material3.Button.IconButton.Filled" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_quick_country_code"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginEnd="12dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:contentDescription="@string/title_country_code_all_server"
+            app:backgroundTint="?colorCard"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/rmx_global_line"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="24dp"
+            app:iconTint="?colorOnSurface"
+            style="@style/Widget.Material3.Button.IconButton.Filled" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_quick_tcping"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginEnd="12dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:contentDescription="@string/title_ping_all_server"
+            app:backgroundTint="?colorCard"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/rmx_wifi_line"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="24dp"
+            app:iconTint="?colorOnSurface"
+            style="@style/Widget.Material3.Button.IconButton.Filled" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_quick_real_ping"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:contentDescription="@string/title_real_ping_all_server"
+            app:backgroundTint="?colorCard"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/rmx_speed_line"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="24dp"
+            app:iconTint="?colorOnSurface"
+            style="@style/Widget.Material3.Button.IconButton.Filled" />
+
+    </LinearLayout>
+
 </FrameLayout>

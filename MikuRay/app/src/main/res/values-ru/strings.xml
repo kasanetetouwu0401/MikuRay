@@ -940,6 +940,9 @@
     <string name="particles_enable_summary">Показать эффект частиц на нижней панели</string>
     <string name="snowflakes_enable_title">Включить анимацию снегопада</string>
     <string name="snowflakes_enable_summary">Показывать падающие снежинки на главном экране</string>
+    <string name="title_category_quick_actions">Быстрые действия</string>
+    <string name="title_pref_show_quick_actions">Показать панель быстрых действий</string>
+    <string name="summary_pref_show_quick_actions">Показывать строку кнопок-ярлыков над карточкой статуса соединения для обновления подписки, проверки кода страны, tcping и теста реальной задержки</string>
     <string name="snowflakes_speed_title">Скорость снегопада</string>
     <string name="snowflakes_speed_value">Скорость: %1$s</string>
     <string name="snowflakes_speed_summary_value">Скорость анимации: %1$s</string>

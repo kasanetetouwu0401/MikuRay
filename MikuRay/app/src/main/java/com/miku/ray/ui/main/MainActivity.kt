@@ -194,6 +194,7 @@ class MainActivity : HelperBaseActivity(),
         
         BlurBottomStatusController.applyState(this, binding) { handleLayoutTestClick() }
         updateSnowflakesVisibility()
+        updateQuickActionsVisibility()
         SubscriptionUpdater.sync()
         syncWeatherBackgroundUpdates()
         
@@ -268,6 +269,7 @@ class MainActivity : HelperBaseActivity(),
         refreshSearchBarChip()
         refreshIpStateText()
         updateSnowflakesVisibility()
+        updateQuickActionsVisibility()
         
         if (SettingsChangeManager.consumeRefreshDisplayPrefs()) {
             refreshAllGroupListDisplays()
@@ -296,11 +298,24 @@ class MainActivity : HelperBaseActivity(),
                 bottom = 0
             )
 
+            val quickActionsEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_QUICK_ACTIONS, true)
+
             val bottomStatus = view.findViewById<View>(R.id.blur_bottom_status)
             val bottomStatusParams = bottomStatus?.layoutParams as? ViewGroup.MarginLayoutParams
             bottomStatusParams?.let {
-                it.bottomMargin = (16 * resources.displayMetrics.density).toInt() + systemBars.bottom
+                it.bottomMargin = if (quickActionsEnabled) {
+                    (122 * resources.displayMetrics.density).toInt()
+                } else {
+                    (16 * resources.displayMetrics.density).toInt() + systemBars.bottom
+                }
                 bottomStatus.layoutParams = it
+            }
+
+            val quickActions = view.findViewById<View>(R.id.layout_quick_actions)
+            val quickActionsParams = quickActions?.layoutParams as? ViewGroup.MarginLayoutParams
+            quickActionsParams?.let {
+                it.bottomMargin = (16 * resources.displayMetrics.density).toInt() + systemBars.bottom
+                quickActions.layoutParams = it
             }
 
             val headerContent = view.findViewById<View>(R.id.header_content)
@@ -308,6 +323,14 @@ class MainActivity : HelperBaseActivity(),
 
             insets
         }
+    }
+
+    private fun updateQuickActionsVisibility() {
+        binding.layoutQuickActions.visibility = if (
+            MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_QUICK_ACTIONS, true)
+        ) View.VISIBLE else View.GONE
+
+        binding.mainContent.requestApplyInsets()
     }
 
     private fun updateSnowflakesVisibility() {
@@ -735,6 +758,25 @@ class MainActivity : HelperBaseActivity(),
 
         binding.btnAddSub.setOnClickListener {
             requestActivityLauncher.launch(Intent(this, SubEditActivity::class.java))
+        }
+
+        binding.btnQuickSubUpdate.setOnClickListener {
+            importConfigViaSub()
+        }
+
+        binding.btnQuickCountryCode.setOnClickListener {
+            countryCodeProgressDialog.show(mainViewModel.serversCache.count())
+            mainViewModel.testAllCountryCodes()
+        }
+
+        binding.btnQuickTcping.setOnClickListener {
+            urlTestProgressDialog.show(mainViewModel.serversCache.count(), R.string.title_ping_all_server)
+            mainViewModel.testAllRealPing(true)
+        }
+
+        binding.btnQuickRealPing.setOnClickListener {
+            urlTestProgressDialog.show(mainViewModel.serversCache.count(), R.string.title_real_ping_all_server)
+            mainViewModel.testAllRealPing()
         }
 
         binding.layoutWeatherChip.setOnClickListener {
