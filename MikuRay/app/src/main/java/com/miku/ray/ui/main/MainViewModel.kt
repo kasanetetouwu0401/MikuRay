@@ -65,6 +65,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val updateGroupBadgeAction by lazy { MutableLiveData<Unit>() }
     val updateGroupOrderAction by lazy { MutableLiveData<Unit>() }
 
+    init {
+        // Load the persisted snapshot before any fragment can read
+        // serversCache. Previously this only happened after MainActivity had
+        // finished its asynchronous UI setup, so every consumer could see a
+        // transient empty cache during a cold start.
+        reloadServerList(notify = false)
+    }
+
     fun startListenBroadcast() {
         isRunning.value = false
         val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
@@ -87,7 +95,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     @Synchronized
-    fun reloadServerList() {
+    fun reloadServerList(notify: Boolean = true) {
         val subId = subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
         val order = MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)
         if (order == 0) {
@@ -106,7 +114,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         updateCache()
         serverCacheLoaded = true
-        updateListAction.postValue(-1)
+        if (notify) updateListAction.postValue(-1)
     }
 
     /**
@@ -121,10 +129,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun removeServer(guid: String) {
         serverList.remove(guid)
         MmkvManager.removeServer(guid)
-        val index = getPosition(guid)
-        if (index >= 0) {
-            serversCache.removeAt(index)
-        }
+        // Rebuild from the persisted source of truth so filtering, ordering,
+        // pinning, and every fragment receive the same valid snapshot.
+        updateCache()
+        updateListAction.postValue(-1)
         updateGroupBadgeAction.postValue(Unit)
     }
 
