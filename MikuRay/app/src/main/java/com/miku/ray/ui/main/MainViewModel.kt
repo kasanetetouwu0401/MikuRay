@@ -49,6 +49,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var activeTestTotal = 0
     private var isRestarting = false
     private var pendingServerRestartGuid: String? = null
+    @Volatile
+    private var serverCacheLoaded = false
     val serversCache = mutableListOf<ServersCache>()
 
     val isRunning by lazy { MutableLiveData<Boolean>() }
@@ -103,7 +105,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         updateCache()
+        serverCacheLoaded = true
         updateListAction.postValue(-1)
+    }
+
+    /**
+     * Makes the persisted server snapshot available before a UI action reads
+     * [serversCache]. The UI must not interpret an uninitialized cache as an
+     * empty server set during a cold start.
+     */
+    fun ensureServerCacheReady() {
+        if (!serverCacheLoaded) reloadServerList()
     }
 
     fun removeServer(guid: String) {
@@ -222,8 +234,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         updateListAction.value = -1
 
         viewModelScope.launch(Dispatchers.Default) {
+            // MainActivity can receive a click while its asynchronous group
+            // setup is still populating the cache on a cold start. Reload the
+            // persisted list once before treating the request as empty.
+            if (serversCache.isEmpty()) {
+                withContext(Dispatchers.Main) {
+                    reloadServerList()
+                    activeTestTotal = serversCache.size
+                }
+            }
             if (serversCache.isEmpty()) {
                 activeTestId = null
+                // The activity shows the progress dialog before starting the
+                // service. During cold start the list can still be empty, so
+                // there may be no service-side FINISH event to close it.
+                // Always publish the terminal state for this local no-op.
+                withContext(Dispatchers.Main) {
+                    testProgressAction.value = null
+                }
                 return@launch
             }
             MessageUtil.sendMsg2TestService(
