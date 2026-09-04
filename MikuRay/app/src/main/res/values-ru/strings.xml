@@ -984,6 +984,8 @@
     <string name="title_category_toolbar_style">Стиль панели инструментов</string>
     <string name="title_pref_toolbar_center_subtitle_mode">Центрированный подзаголовок панели</string>
     <string name="summary_pref_toolbar_center_subtitle_mode">Показывать центрированный подзаголовок с анимацией затухания вместо обычного заголовка</string>
+    <string name="title_pref_toolbar_gradient_header">Градиент в развёрнутом состоянии</string>
+    <string name="summary_pref_toolbar_gradient_header">Показывать градиентный фон только пока панель развёрнута, при сворачивании он плавно исчезает и возвращается стандартный фон темы</string>
     <string name="selected_banner_dim_title">Интенсивность затемнения баннера</string>
     <string name="sheet_banner_dim_title">Интенсивность затемнения баннера</string>
     <string name="selected_banner_custom_title">Изменить баннер выбранного профиля</string>

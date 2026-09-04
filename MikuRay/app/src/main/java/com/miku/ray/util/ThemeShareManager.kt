@@ -71,7 +71,8 @@ object ThemeShareManager {
         AppConfig.PREF_ENABLE_SNOWFLAKES,
         AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED,
         AppConfig.PREF_SOUND_ON_CONNECT,
-        AppConfig.PREF_TOOLBAR_CENTER_SUBTITLE_MODE
+        AppConfig.PREF_TOOLBAR_CENTER_SUBTITLE_MODE,
+        AppConfig.PREF_TOOLBAR_GRADIENT_HEADER
     )
 
     private val intKeys = setOf(

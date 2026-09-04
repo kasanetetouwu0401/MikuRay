@@ -20,12 +20,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AngApplication
@@ -52,6 +54,11 @@ abstract class BaseActivity : AppCompatActivity() {
 
     private var toolbarSubtitle: CharSequence? = null
     private var collapsingToolbarRef: CollapsingToolbarLayout? = null
+
+    private var appBarRef: AppBarLayout? = null
+    private var gradientHeaderView: View? = null
+    private var gradientOffsetListener: AppBarLayout.OnOffsetChangedListener? = null
+    private var defaultContentScrim: android.graphics.drawable.Drawable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
@@ -119,12 +126,26 @@ abstract class BaseActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
+            val topInset = maxOf(systemBars.top, displayCutout.top)
+            val gradientEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TOOLBAR_GRADIENT_HEADER, false)
+
+            if (gradientEnabled) {
+                view.updatePadding(top = 0, bottom = 0)
+                findViewById<Toolbar>(R.id.toolbar)?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = topInset
+                }
+            } else {
+                view.updatePadding(top = topInset, bottom = 0)
+                findViewById<Toolbar>(R.id.toolbar)?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = 0
+                }
+            }
+
             view.updatePadding(
-                top    = maxOf(systemBars.top,    displayCutout.top),
-                bottom = 0,
-                left   = maxOf(systemBars.left,   displayCutout.left),
-                right  = maxOf(systemBars.right,  displayCutout.right)
+                left  = maxOf(systemBars.left,  displayCutout.left),
+                right = maxOf(systemBars.right, displayCutout.right)
             )
+
             insets
         }
     }
@@ -181,6 +202,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
             toolbarSubtitle = subtitle
             collapsingToolbarRef = findViewById(R.id.collapsing_toolbar)
+            appBarRef = findViewById(R.id.app_bar)
 
             applyToolbarStyle()
         }
@@ -234,6 +256,82 @@ abstract class BaseActivity : AppCompatActivity() {
 
         collapsingToolbar.requestLayout()
         collapsingToolbar.invalidate()
+
+        setupGradientHeaderEffect(collapsingToolbar)
+    }
+
+    private fun setupGradientHeaderEffect(collapsingToolbar: CollapsingToolbarLayout) {
+        val appBar = appBarRef ?: findViewById(R.id.app_bar)
+        appBarRef = appBar
+
+        val enabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TOOLBAR_GRADIENT_HEADER, false)
+
+        // Cache CTL's original contentScrim once, so it can be restored if the
+        // gradient header is turned off again without recreating the Activity.
+        if (defaultContentScrim == null) {
+            defaultContentScrim = collapsingToolbar.contentScrim
+        }
+
+        if (!enabled || appBar == null) {
+            gradientHeaderView?.visibility = View.GONE
+            gradientOffsetListener?.let { appBar.removeOnOffsetChangedListener(it) }
+            gradientOffsetListener = null
+            // Restore CTL's own scrim animation for the non-gradient look.
+            collapsingToolbar.contentScrim = defaultContentScrim
+            return
+        }
+
+        // CollapsingToolbarLayout's built-in contentScrim fades in on its OWN
+        // time-based ValueAnimator (scrimAnimationDuration), triggered once the
+        // toolbar height crosses scrimVisibleHeightTrigger — completely
+        // independent from the scroll-position-based alpha we drive below for
+        // gradientView. On a fast fling the two curves fall out of sync and the
+        // opaque scrim (drawn on top of gradientView by CTL) pops in/out
+        // abruptly, which is the flicker/seam you see. Null it out so there is
+        // only one source of truth (scroll fraction) driving both layers.
+        collapsingToolbar.contentScrim = null
+
+        val gradientView = gradientHeaderView ?: View(this).apply {
+            id = View.NO_ID
+            setBackgroundResource(R.drawable.bg_toolbar_gradient_header)
+            isClickable = false
+            isFocusable = false
+            setLayerType(View.LAYER_TYPE_HARDWARE, null)
+        }.also {
+            gradientHeaderView = it
+        }
+
+        if (gradientView.parent == null) {
+            val lp = CollapsingToolbarLayout.LayoutParams(
+                CollapsingToolbarLayout.LayoutParams.MATCH_PARENT,
+                CollapsingToolbarLayout.LayoutParams.MATCH_PARENT
+            ).apply {
+                collapseMode = CollapsingToolbarLayout.LayoutParams.COLLAPSE_MODE_PIN
+            }
+            collapsingToolbar.addView(gradientView, 0, lp)
+        }
+
+        gradientView.visibility = View.VISIBLE
+
+        val range = appBar.totalScrollRange
+        if (range > 0) {
+            val currentOffset = Math.abs(appBar.top)
+            gradientView.alpha = (1f - (currentOffset.toFloat() / range)).coerceIn(0f, 1f)
+        } else {
+            gradientView.alpha = 1f
+        }
+
+        if (gradientOffsetListener == null) {
+            val listener = AppBarLayout.OnOffsetChangedListener { layout, verticalOffset ->
+                val scrollRange = layout.totalScrollRange
+                if (scrollRange > 0) {
+                    val fraction = 1f - (-verticalOffset / scrollRange.toFloat())
+                    gradientView.alpha = fraction.coerceIn(0f, 1f)
+                }
+            }
+            appBar.addOnOffsetChangedListener(listener)
+            gradientOffsetListener = listener
+        }
     }
 
     protected fun setContentViewWithToolbar(layoutResId: Int, showHomeAsUp: Boolean = true, title: CharSequence? = null, subtitle: CharSequence? = null) {
@@ -409,6 +507,9 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        gradientOffsetListener?.let { appBarRef?.removeOnOffsetChangedListener(it) }
+        gradientOffsetListener = null
+        gradientHeaderView = null
         dismissSystemLoadingDialog()
         dismissFallbackLoadingOverlay()
         super.onDestroy()

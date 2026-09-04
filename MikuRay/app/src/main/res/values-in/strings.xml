@@ -974,6 +974,8 @@ yang kamu butuhin."</string>
     <string name="title_category_toolbar_style">Gaya toolbar</string>
     <string name="title_pref_toolbar_center_subtitle_mode">Subtitle toolbar center</string>
     <string name="summary_pref_toolbar_center_subtitle_mode">Nampilin subtitle center pake animasi fade, bukan title polos biasa</string>
+    <string name="title_pref_toolbar_gradient_header">Gradient header pas expanded</string>
+    <string name="summary_pref_toolbar_gradient_header">Nampilin background gradient cuma pas toolbar lagi dibentangkan, pas di-collapse balik lagi ke background tema bawaan</string>
     <string name="selected_banner_dim_title">Intensitas overlay banner</string>
     <string name="sheet_banner_dim_title">Intensitas overlay banner</string>
     <string name="selected_banner_custom_title">Ganti banner profil yang dipilih</string>

@@ -963,6 +963,8 @@
     <string name="title_category_toolbar_style">工具栏样式</string>
     <string name="title_pref_toolbar_center_subtitle_mode">居中工具栏副标题</string>
     <string name="summary_pref_toolbar_center_subtitle_mode">显示居中副标题和淡入淡出动画，而不是普通标准标题</string>
+    <string name="title_pref_toolbar_gradient_header">展开时显示渐变背景</string>
+    <string name="summary_pref_toolbar_gradient_header">仅在工具栏展开时显示渐变背景，折叠时会渐隐并恢复为主题默认背景</string>
     <string name="selected_banner_dim_title">横幅遮罩强度</string>
     <string name="sheet_banner_dim_title">横幅遮罩强度</string>
     <string name="selected_banner_custom_title">更改选中配置的横幅</string>
