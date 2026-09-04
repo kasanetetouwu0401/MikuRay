@@ -287,7 +287,6 @@ class UiSettingsActivity : BaseActivity() {
         private val weatherCustomLocation by lazy { findPreference<EditTextPreference>(AppConfig.PREF_WEATHER_CUSTOM_LOCATION) }
         private val searchChipGradient by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SEARCH_CHIP_GRADIENT) }
         private val toolbarCenterSubtitleMode by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_TOOLBAR_CENTER_SUBTITLE_MODE) }
-        private val toolbarGradientHeader by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_TOOLBAR_GRADIENT_HEADER) }
         private val showRealtimeTrafficIp by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_REALTIME_TRAFFIC_IP) }
         private val showIspInfo by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_ISP_INFO) }
 
@@ -570,19 +569,6 @@ class UiSettingsActivity : BaseActivity() {
 
             toolbarCenterSubtitleMode?.setOnPreferenceChangeListener { _, newValue ->
                 MmkvManager.encodeSettings(AppConfig.PREF_TOOLBAR_CENTER_SUBTITLE_MODE, newValue as Boolean)
-                activity?.recreate()
-                true
-            }
-
-            // The gradient header effect is wired up in BaseActivity when the
-            // Toolbar/CollapsingToolbarLayout is first set up (contentScrim,
-            // extra expanded height, offset listener, etc.) — toggling the
-            // MMKV value alone doesn't re-run any of that for an Activity
-            // that's already on screen (including this Settings screen
-            // itself), so recreate() is needed for it to actually take
-            // effect, same as toolbarCenterSubtitleMode above.
-            toolbarGradientHeader?.setOnPreferenceChangeListener { _, newValue ->
-                MmkvManager.encodeSettings(AppConfig.PREF_TOOLBAR_GRADIENT_HEADER, newValue as Boolean)
                 activity?.recreate()
                 true
             }

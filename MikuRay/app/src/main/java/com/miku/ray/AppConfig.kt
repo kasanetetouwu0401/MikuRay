@@ -295,7 +295,6 @@ object AppConfig {
     const val PREF_ACTION_DELETE_SELECTED_BANNER = "action_delete_selected_banner_image"
 
     const val PREF_TOOLBAR_CENTER_SUBTITLE_MODE = "pref_toolbar_center_subtitle_mode"
-    const val PREF_TOOLBAR_GRADIENT_HEADER = "pref_toolbar_gradient_header"
 
     const val PREF_PARTICLES_SETTINGS = "pref_particles_settings"
 

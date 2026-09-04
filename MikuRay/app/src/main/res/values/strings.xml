@@ -1010,8 +1010,6 @@ you need."</string>
     <string name="title_category_toolbar_style">Toolbar style</string>
     <string name="title_pref_toolbar_center_subtitle_mode">Center toolbar subtitle</string>
     <string name="summary_pref_toolbar_center_subtitle_mode">Show a centered subtitle with fade animation instead of the plain standard title</string>
-    <string name="title_pref_toolbar_gradient_header">Gradient header when expanded</string>
-    <string name="summary_pref_toolbar_gradient_header">Show a gradient background only while the toolbar is expanded, fading back to the default theme background as it collapses</string>
     <string name="selected_banner_dim_title">Banner overlay strength</string>
     <string name="selected_banner_dim_summary_value">%1$d%%</string>
     <string name="sheet_banner_dim_title">Banner overlay strength</string>
