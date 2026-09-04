@@ -59,6 +59,7 @@ abstract class BaseActivity : AppCompatActivity() {
     private var gradientHeaderView: View? = null
     private var gradientOffsetListener: AppBarLayout.OnOffsetChangedListener? = null
     private var defaultContentScrim: android.graphics.drawable.Drawable? = null
+    private var defaultCollapsingHeight: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
@@ -266,10 +267,35 @@ abstract class BaseActivity : AppCompatActivity() {
 
         val enabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TOOLBAR_GRADIENT_HEADER, false)
 
-        // Cache CTL's original contentScrim once, so it can be restored if the
-        // gradient header is turned off again without recreating the Activity.
+        // Cache CTL's original contentScrim + expanded height once, so both can
+        // be restored if the gradient header is turned off again without
+        // recreating the Activity. Height is resolved explicitly from
+        // ?attr/collapsingToolbarLayoutLargeSize (the attr every collapsing
+        // toolbar in this app is declared with) rather than trusted from the
+        // already-inflated layoutParams, since nonTransitiveRClass means we
+        // can't reference it via the app's own R.attr anyway.
         if (defaultContentScrim == null) {
             defaultContentScrim = collapsingToolbar.contentScrim
+        }
+        if (defaultCollapsingHeight == -1) {
+            val resolved = android.util.TypedValue().let { tv ->
+                if (theme.resolveAttribute(com.google.android.material.R.attr.collapsingToolbarLayoutLargeSize, tv, true)) {
+                    tv.getDimension(resources.displayMetrics).toInt()
+                } else {
+                    -1
+                }
+            }
+            defaultCollapsingHeight = if (resolved > 0) resolved else collapsingToolbar.layoutParams.height
+        }
+
+        // Give the expanded header extra height while the gradient is active,
+        // so there's more scroll range for the collapse to snap fully instead
+        // of settling a few px short of the true collapsed bounds (which is
+        // what makes the title look jammed up against the nav icon).
+        val extraHeightPx = (32 * resources.displayMetrics.density).toInt()
+        val targetHeight = if (enabled) defaultCollapsingHeight + extraHeightPx else defaultCollapsingHeight
+        if (collapsingToolbar.layoutParams.height != targetHeight) {
+            collapsingToolbar.layoutParams = collapsingToolbar.layoutParams.apply { height = targetHeight }
         }
 
         if (!enabled || appBar == null) {
