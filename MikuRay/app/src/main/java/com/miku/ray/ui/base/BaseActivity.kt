@@ -87,9 +87,8 @@ abstract class BaseActivity : AppCompatActivity() {
         super.onResume()
         com.miku.ray.handler.SettingsManager.refreshAutoNightModeIfNeeded()
         themeStateManager.checkThemeChangedAndRecreate()
-        collapsingToolbarRef?.let { ctl ->
+        if (collapsingToolbarRef != null) {
             applyToolbarStyle()
-            ctl.post { applyToolbarStyle() }
         }
     }
 

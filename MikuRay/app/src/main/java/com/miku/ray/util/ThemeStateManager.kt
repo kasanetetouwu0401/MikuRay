@@ -27,7 +27,8 @@ class ThemeStateManager(private val activity: Activity) {
         val customFontName: String,
         val headerTopRowPadding: Int,
         val fabExtended: Boolean,
-        val showQuickActions: Boolean
+        val showQuickActions: Boolean,
+        val toolbarGradientHeader: Boolean
     )
 
     private var currentState: ThemeState = fetchCurrentState()
@@ -54,7 +55,8 @@ class ThemeStateManager(private val activity: Activity) {
             customFontName = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT_CUSTOM_NAME) ?: "",
             headerTopRowPadding = MmkvManager.decodeSettingsInt(AppConfig.PREF_HEADER_TOP_ROW_PADDING, AppConfig.HEADER_TOP_ROW_PADDING_DEFAULT),
             fabExtended = MmkvManager.decodeSettingsBool(AppConfig.PREF_FAB_EXTENDED, false),
-            showQuickActions = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_QUICK_ACTIONS, false)
+            showQuickActions = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_QUICK_ACTIONS, false),
+            toolbarGradientHeader = MmkvManager.decodeSettingsBool(AppConfig.PREF_TOOLBAR_GRADIENT_HEADER, false)
         )
     }
 
