@@ -59,7 +59,7 @@ abstract class BaseActivity : AppCompatActivity() {
     private var gradientHeaderView: View? = null
     private var gradientOffsetListener: AppBarLayout.OnOffsetChangedListener? = null
     private var defaultContentScrim: android.graphics.drawable.Drawable? = null
-    private var defaultCollapsingHeight: Int = -1
+    private var defaultExpandedTitleMarginTop: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
@@ -267,54 +267,25 @@ abstract class BaseActivity : AppCompatActivity() {
 
         val enabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TOOLBAR_GRADIENT_HEADER, false)
 
-        // Cache CTL's original contentScrim + expanded height once, so both can
-        // be restored if the gradient header is turned off again without
-        // recreating the Activity. Height is resolved explicitly from
-        // ?attr/collapsingToolbarLayoutLargeSize (the attr every collapsing
-        // toolbar in this app is declared with) rather than trusted from the
-        // already-inflated layoutParams, since nonTransitiveRClass means we
-        // can't reference it via the app's own R.attr anyway.
         if (defaultContentScrim == null) {
             defaultContentScrim = collapsingToolbar.contentScrim
         }
-        if (defaultCollapsingHeight == -1) {
-            val resolved = android.util.TypedValue().let { tv ->
-                if (theme.resolveAttribute(com.google.android.material.R.attr.collapsingToolbarLayoutLargeSize, tv, true)) {
-                    tv.getDimension(resources.displayMetrics).toInt()
-                } else {
-                    -1
-                }
-            }
-            defaultCollapsingHeight = if (resolved > 0) resolved else collapsingToolbar.layoutParams.height
+        if (defaultExpandedTitleMarginTop == -1) {
+            defaultExpandedTitleMarginTop = collapsingToolbar.expandedTitleMarginTop
         }
 
-        // Give the expanded header extra height while the gradient is active,
-        // so there's more scroll range for the collapse to snap fully instead
-        // of settling a few px short of the true collapsed bounds (which is
-        // what makes the title look jammed up against the nav icon).
-        val extraHeightPx = (32 * resources.displayMetrics.density).toInt()
-        val targetHeight = if (enabled) defaultCollapsingHeight + extraHeightPx else defaultCollapsingHeight
-        if (collapsingToolbar.layoutParams.height != targetHeight) {
-            collapsingToolbar.layoutParams = collapsingToolbar.layoutParams.apply { height = targetHeight }
-        }
+        val extraMarginTopPx = (32 * resources.displayMetrics.density).toInt()
+        collapsingToolbar.expandedTitleMarginTop =
+            if (enabled) defaultExpandedTitleMarginTop + extraMarginTopPx else defaultExpandedTitleMarginTop
 
         if (!enabled || appBar == null) {
             gradientHeaderView?.visibility = View.GONE
             gradientOffsetListener?.let { appBar.removeOnOffsetChangedListener(it) }
             gradientOffsetListener = null
-            // Restore CTL's own scrim animation for the non-gradient look.
             collapsingToolbar.contentScrim = defaultContentScrim
             return
         }
 
-        // CollapsingToolbarLayout's built-in contentScrim fades in on its OWN
-        // time-based ValueAnimator (scrimAnimationDuration), triggered once the
-        // toolbar height crosses scrimVisibleHeightTrigger — completely
-        // independent from the scroll-position-based alpha we drive below for
-        // gradientView. On a fast fling the two curves fall out of sync and the
-        // opaque scrim (drawn on top of gradientView by CTL) pops in/out
-        // abruptly, which is the flicker/seam you see. Null it out so there is
-        // only one source of truth (scroll fraction) driving both layers.
         collapsingToolbar.contentScrim = null
 
         val gradientView = gradientHeaderView ?: View(this).apply {
