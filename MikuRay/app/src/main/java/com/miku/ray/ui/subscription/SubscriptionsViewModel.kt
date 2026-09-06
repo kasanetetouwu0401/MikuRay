@@ -1,6 +1,6 @@
 package com.miku.ray.ui.subscription
 
-import android.app.Application
+import androidx.lifecycle.ViewModel
 import com.miku.ray.AngApplication
 import com.miku.ray.AppConfig
 import com.miku.ray.dto.SubscriptionUpdateMessage
@@ -11,19 +11,12 @@ import com.miku.ray.handler.AngConfigManager
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.handler.SettingsManager
-import com.miku.ray.ui.base.BaseViewModel
 import com.miku.ray.ui.bottomsheet.SortSubBottomSheet
 import com.miku.ray.util.MessageUtil
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
-class SubscriptionsViewModel(application: Application) : BaseViewModel(application) {
+class SubscriptionsViewModel : ViewModel() {
     private val subscriptions: MutableList<SubscriptionCache> =
         MmkvManager.decodeSubscriptions().toMutableList()
-
-    private val _subsFlow = MutableStateFlow(subscriptions.toList())
-    val subsFlow: StateFlow<List<SubscriptionCache>> = _subsFlow.asStateFlow()
 
     init {
         applySortOrder()
@@ -48,7 +41,6 @@ class SubscriptionsViewModel(application: Application) : BaseViewModel(applicati
                 lastUpdated = { it.subscription.lastUpdated }
             )
         )
-        _subsFlow.value = subscriptions.toList()
     }
 
     fun remove(subId: String): Boolean {
@@ -56,7 +48,6 @@ class SubscriptionsViewModel(application: Application) : BaseViewModel(applicati
         if (changed) {
             SettingsManager.removeSubscriptionWithDefault(subId)
             SettingsChangeManager.makeSetupGroupTab()
-            _subsFlow.value = subscriptions.toList()
         }
         return changed
     }
@@ -66,7 +57,6 @@ class SubscriptionsViewModel(application: Application) : BaseViewModel(applicati
         if (idx >= 0) {
             subscriptions[idx] = SubscriptionCache(subId, item)
             MmkvManager.encodeSubscription(subId, item)
-            _subsFlow.value = subscriptions.toList()
         }
     }
 
@@ -74,7 +64,6 @@ class SubscriptionsViewModel(application: Application) : BaseViewModel(applicati
         if (fromPosition in subscriptions.indices && toPosition in subscriptions.indices) {
             val item = subscriptions.removeAt(fromPosition)
             subscriptions.add(toPosition, item)
-            _subsFlow.value = subscriptions.toList()
         }
     }
 

@@ -8,9 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.coroutines.launch
 import androidx.core.view.isVisible
 import com.miku.ray.util.showDeleteConfirmDialog
 import androidx.recyclerview.widget.GridLayoutManager
@@ -92,25 +89,13 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
         itemTouchHelper = ItemTouchHelper(SimpleItemTouchHelperCallback(adapter, allowSwipe = false))
         itemTouchHelper?.attachToRecyclerView(binding.recyclerView)
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
-                launch {
-                    mainViewModel.serversForGroup(subId).collect { list ->
-                        adapter.setData(list.toMutableList(), -1)
-                        hasLoadedData = true
-                        updateEmptyState()
-                    }
-                }
-                launch {
-                    mainViewModel.viewModelEvent.collect { event ->
-                        if (event !is MainViewModelEvent.ListChanged) return@collect
-                        if (mainViewModel.uiState.value.selectedGroupId != subId) return@collect
-                        val list = mainViewModel.serversForGroup(subId).value
-                        val position = event.guid?.let { guid -> list.indexOfFirst { it.guid == guid } } ?: -1
-                        adapter.setData(list.toMutableList(), position)
-                    }
-                }
+        mainViewModel.updateListAction.observe(viewLifecycleOwner) { index ->
+            if (mainViewModel.subscriptionId != subId) {
+                return@observe
             }
+            adapter.setData(mainViewModel.serversCache, index)
+            hasLoadedData = true
+            updateEmptyState()
         }
 
         binding.btnScrollToSelected.setOnClickListener {
@@ -209,7 +194,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
 
     override fun onResume() {
         super.onResume()
-        mainViewModel.onAction(MainAction.SelectGroup(subId))
+        mainViewModel.subscriptionIdChangedAsync(subId)
 
         applyGridModeState()
 
@@ -281,7 +266,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
 
     private fun editServer(guid: String, profile: ProfileItem) {
         val intent = Intent().putExtra("guid", guid)
-            .putExtra("isRunning", mainViewModel.uiState.value.isRunning)
+            .putExtra("isRunning", mainViewModel.isRunning.value)
             .putExtra("createConfigType", profile.configType.value)
             .putExtra("subscriptionId", subId)
         when (profile.configType) {
@@ -371,7 +356,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
             .setTitle(R.string.title_pin_server)
             .setIcon(RemixR.drawable.rmx_map_pushpin_line)
             .setItems(arrayOf(actionLabel)) { _, _ ->
-                val nowPinned = mainViewModel.togglePinServer(subId, guid)
+                val nowPinned = mainViewModel.togglePinServer(guid)
                 ownerActivity.snackbarSuccess(
                     getString(if (nowPinned) R.string.toast_server_pinned else R.string.toast_server_unpinned),
                     title = getString(R.string.title_alerter_success)
@@ -385,8 +370,8 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
         val selected = MmkvManager.getSelectServer()
         if (!mainViewModel.beginServerRestart(guid)) return
 
-        val fromPosition = mainViewModel.getPosition(subId, selected.orEmpty())
-        val toPosition = mainViewModel.getPosition(subId, guid)
+        val fromPosition = mainViewModel.getPosition(selected.orEmpty())
+        val toPosition = mainViewModel.getPosition(guid)
         adapter.setSelectServer(fromPosition, toPosition)
 
         LauncherManager.restartService(ownerActivity) { handled ->
@@ -438,7 +423,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
             return
         }
 
-        val serversCache = mainViewModel.serversForGroup(subId).value
+        val serversCache = mainViewModel.serversCache
         val position = serversCache.indexOfFirst { it.guid == selectedGuid }
         val recyclerView = binding.recyclerView
 
