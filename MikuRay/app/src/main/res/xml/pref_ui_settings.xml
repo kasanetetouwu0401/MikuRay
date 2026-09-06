@@ -241,7 +241,7 @@
             android:icon="@drawable/rmx_smartphone_line"
             app:key="pref_custom_dpi"
             app:layout="@layout/uwu_mid"
-            app:title="@string/pref_ui_scale_title" />
+            app:title="@string/pref_custom_dpi" />
 
         <ListPreference
             android:defaultValue="gradient"
