@@ -29,10 +29,10 @@ import com.miku.ray.particlesdrawable.renderer.DefaultSceneRenderer;
 
 @Keep
 public class ParticlesView extends View implements
-        Animatable,
-        SceneConfiguration,
-        SceneController,
-        SceneScheduler {
+Animatable,
+SceneConfiguration,
+SceneController,
+SceneScheduler {
 
     private final CanvasSceneRenderer canvasSceneRenderer = new CanvasSceneRenderer();
     private final Scene scene = new Scene();
@@ -56,18 +56,18 @@ public class ParticlesView extends View implements
     }
 
     public ParticlesView(
-            @NonNull final Context context,
-            @Nullable final AttributeSet attrs,
-            @AttrRes final int defStyleAttr) {
+        @NonNull final Context context,
+        @Nullable final AttributeSet attrs,
+        @AttrRes final int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
 
     public ParticlesView(
-            @NonNull final Context context,
-            @Nullable final AttributeSet attrs,
-            @AttrRes final int defStyleAttr,
-            @StyleRes final int defStyleRes) {
+        @NonNull final Context context,
+        @Nullable final AttributeSet attrs,
+        @AttrRes final int defStyleAttr,
+        @StyleRes final int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs);
     }
@@ -115,7 +115,7 @@ public class ParticlesView extends View implements
     }
 
     public void setParticleRadiusRange(@FloatRange(from = 0.5f) final float minRadius,
-                                       @FloatRange(from = 0.5f) final float maxRadius) {
+        @FloatRange(from = 0.5f) final float maxRadius) {
         scene.setParticleRadiusRange(minRadius, maxRadius);
     }
 

@@ -21,160 +21,160 @@
                 android:id="@+id/header_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/uwu_banner_home"
-                android:scaleType="centerCrop" />
+                android:scaleType="centerCrop"
+                android:src="@drawable/uwu_banner_home" />
 
             <View
                 android:id="@+id/header_image_fade"
-                android:background="@drawable/uwu_bg_fade_bottom"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:background="@drawable/uwu_bg_fade_bottom" />
         </FrameLayout>
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/app_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
             android:background="@android:color/transparent"
-            app:elevation="0dp"
-            android:layout_alignParentTop="true">
+            app:elevation="0dp">
 
             <LinearLayout
                 android:id="@+id/header_content"
-                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:id="@+id/header_top_row"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="3dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingBottom="3dp"
+                    android:paddingEnd="16dp"
                     android:paddingStart="12dp"
-                    android:paddingEnd="16dp">
+                    android:paddingTop="16dp">
 
                     <LinearLayout
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_home"
+                            style="@style/Widget.Material3Expressive.Button.IconButton.Filled"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:minWidth="55dp"
                             android:minHeight="55dp"
-                            app:backgroundTint="?colorCard"
+                            android:minWidth="55dp"
+                            app:backgroundTint="?attr/colorCard"
                             app:icon="@drawable/ic_btn_home_color"
                             app:iconGravity="textStart"
                             app:iconPadding="0dp"
-                            app:iconTint="@null"
-                            style="@style/Widget.Material3Expressive.Button.IconButton.Filled" />
+                            app:iconTint="@null" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_more_menu"
+                            style="@style/Widget.Material3Expressive.Button.IconButton.Filled"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:minWidth="55dp"
                             android:minHeight="55dp"
-                            app:backgroundTint="?colorCard"
+                            android:minWidth="55dp"
+                            app:backgroundTint="?attr/colorCard"
                             app:icon="@drawable/ic_btn_more_menu_color"
                             app:iconGravity="textStart"
                             app:iconPadding="0dp"
-                            app:iconTint="@null"
-                            style="@style/Widget.Material3Expressive.Button.IconButton.Filled" />
+                            app:iconTint="@null" />
                     </LinearLayout>
 
                     <LinearLayout
-                        android:gravity="end|center"
-                        android:orientation="vertical"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_marginEnd="10dp"
                         android:layout_marginStart="5dp"
-                        android:layout_marginEnd="10dp">
+                        android:layout_weight="1"
+                        android:gravity="end|center"
+                        android:orientation="vertical">
 
                         <com.miku.ray.marquee.text.Greetings
                             android:id="@+id/tv_greeting_sub"
-                            android:textAppearance="?textAppearanceBodySmall"
-                            android:textStyle="bold"
-                            android:textColor="?colorOnSurfaceVariant"
-                            android:ellipsize="marquee"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:ellipsize="marquee"
+                            android:marqueeRepeatLimit="marquee_forever"
                             android:singleLine="true"
-                            android:marqueeRepeatLimit="marquee_forever" />
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textStyle="bold" />
 
                         <com.miku.ray.marquee.text.UserNameTextView
                             android:id="@+id/tv_username"
-                            android:textAppearance="?textAppearanceTitleMedium"
-                            android:textStyle="bold"
-                            android:textColor="?colorOnSurface"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:ellipsize="marquee"
                             android:focusable="true"
                             android:focusableInTouchMode="true"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:marqueeRepeatLimit="marquee_forever"
                             android:singleLine="true"
-                            android:marqueeRepeatLimit="marquee_forever" />
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <com.miku.ray.widget.ProfileBannerImageView
                         android:id="@+id/iv_profile"
-                        android:background="@android:color/transparent"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
+                        android:background="@android:color/transparent"
                         android:elevation="0dp"
                         android:outlineProvider="none"
                         app:elevation="0dp"
-                        app:siBorderColor="?colorPrimary"
+                        app:siBorderColor="?attr/colorPrimary"
                         app:siBorderWidth="3dp" />
                 </LinearLayout>
 
                 <LinearLayout
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingTop="3dp"
-                    android:paddingBottom="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingBottom="8dp"
+                    android:paddingEnd="16dp"
                     android:paddingStart="12dp"
-                    android:paddingEnd="16dp">
+                    android:paddingTop="3dp">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_add_config"
+                        style="@style/Widget.Material3Expressive.Button.IconButton.Filled"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:minWidth="55dp"
-                        android:minHeight="55dp"
                         android:layout_marginEnd="4dp"
-                        app:backgroundTint="?colorCard"
+                        android:minHeight="55dp"
+                        android:minWidth="55dp"
+                        app:backgroundTint="?attr/colorCard"
                         app:icon="@drawable/ic_btn_add_config_color"
                         app:iconGravity="textStart"
                         app:iconPadding="0dp"
-                        app:iconTint="@null"
-                        style="@style/Widget.Material3Expressive.Button.IconButton.Filled" />
+                        app:iconTint="@null" />
 
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="0dp"
                         android:layout_height="50dp"
                         android:layout_weight="1"
-                        app:cardBackgroundColor="?colorCard"
+                        app:cardBackgroundColor="?attr/colorCard"
                         app:cardCornerRadius="28dp"
                         app:cardElevation="0dp"
                         app:strokeWidth="0dp">
 
                         <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
                             android:paddingLeft="14dp"
-                            android:paddingRight="10dp"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
+                            android:paddingRight="10dp">
 
                             <ImageView
                                 android:layout_width="25dp"
@@ -183,10 +183,10 @@
 
                             <androidx.appcompat.widget.SearchView
                                 android:id="@+id/search_view_inline"
-                                android:background="@android:color/transparent"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
+                                android:background="@android:color/transparent"
                                 app:closeIcon="@null"
                                 app:iconifiedByDefault="false"
                                 app:queryBackground="@android:color/transparent"
@@ -202,8 +202,8 @@
                                 android:focusable="true"
                                 android:gravity="center_vertical"
                                 android:orientation="horizontal"
-                                android:paddingStart="8dp"
                                 android:paddingEnd="10dp"
+                                android:paddingStart="8dp"
                                 android:visibility="gone">
 
                                 <ImageView
@@ -211,7 +211,7 @@
                                     android:layout_width="16dp"
                                     android:layout_height="16dp"
                                     android:src="@drawable/rmx_weather_sun_line"
-                                    android:tint="?colorOnSurfaceVariant"
+                                    android:tint="?attr/colorOnSurfaceVariant"
                                     android:visibility="gone" />
 
                                 <TextView
@@ -219,8 +219,8 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginStart="4dp"
-                                    android:textAppearance="?textAppearanceBodySmall"
-                                    android:textColor="?colorOnSurfaceVariant"
+                                    android:textAppearance="?attr/textAppearanceBodySmall"
+                                    android:textColor="?attr/colorOnSurfaceVariant"
                                     android:textSize="13sp"
                                     android:visibility="gone"
                                     tools:text="29°C" />
@@ -230,7 +230,7 @@
                                     android:layout_width="16dp"
                                     android:layout_height="16dp"
                                     android:src="@drawable/rmx_business_bar_chart_line"
-                                    android:tint="?colorOnSurfaceVariant"
+                                    android:tint="?attr/colorOnSurfaceVariant"
                                     android:visibility="gone" />
 
                                 <TextView
@@ -238,8 +238,8 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginStart="4dp"
-                                    android:textAppearance="?textAppearanceBodySmall"
-                                    android:textColor="?colorOnSurfaceVariant"
+                                    android:textAppearance="?attr/textAppearanceBodySmall"
+                                    android:textColor="?attr/colorOnSurfaceVariant"
                                     android:textSize="13sp"
                                     android:visibility="gone"
                                     tools:text="1.2 GB" />
@@ -257,10 +257,10 @@
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/view_pager"
-                android:scrollbars="vertical"
-                android:nextFocusRight="@+id/fab"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:nextFocusRight="@+id/fab"
+                android:scrollbars="vertical" />
 
             <View
                 android:layout_width="match_parent"
@@ -269,18 +269,18 @@
 
             <LinearLayout
                 android:id="@+id/layout_tab_wrapper"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginEnd="12dp">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="?colorCard"
+                    app:cardBackgroundColor="?attr/colorCard"
                     app:cardCornerRadius="28dp"
                     app:cardElevation="0dp"
                     app:contentPadding="5dp"
@@ -289,20 +289,20 @@
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:clipChildren="true"
+                        android:clipToOutline="true"
                         app:cardBackgroundColor="@android:color/transparent"
                         app:cardCornerRadius="23dp"
                         app:cardElevation="0dp"
-                        app:strokeWidth="0dp"
-                        android:clipToOutline="true"
-                        android:clipChildren="true">
+                        app:strokeWidth="0dp">
 
                         <com.google.android.material.tabs.TabLayout
                             android:id="@+id/tab_group"
-                            android:background="@android:color/transparent"
                             android:layout_width="match_parent"
                             android:layout_height="40dp"
+                            android:background="@android:color/transparent"
                             app:tabIndicator="@drawable/uwu_tabs_rounded_indicator"
-                            app:tabIndicatorColor="?colorPrimary"
+                            app:tabIndicatorColor="?attr/colorPrimary"
                             app:tabIndicatorFullWidth="true"
                             app:tabIndicatorHeight="40dp"
                             app:tabMinWidth="0dp"
@@ -316,17 +316,17 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_add_sub"
+                    style="@style/Widget.Material3Expressive.Button.IconButton.Filled"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:minWidth="55dp"
-                    android:minHeight="55dp"
                     android:layout_marginStart="4dp"
-                    app:backgroundTint="?colorPrimary"
+                    android:minHeight="55dp"
+                    android:minWidth="55dp"
+                    app:backgroundTint="?attr/colorPrimary"
                     app:icon="@drawable/rmx_add_circle_line"
                     app:iconGravity="textStart"
                     app:iconPadding="0dp"
-                    app:iconTint="?colorOnPrimary"
-                    style="@style/Widget.Material3Expressive.Button.IconButton.Filled" />
+                    app:iconTint="?attr/colorOnPrimary" />
             </LinearLayout>
 
         </RelativeLayout>
@@ -350,163 +350,163 @@
 
     <com.miku.ray.blurview.BlurView
         android:id="@+id/blur_bottom_status"
-        android:focusable="true"
-        android:clickable="true"
         android:layout_width="match_parent"
         android:layout_height="90dp"
         android:layout_gravity="bottom"
         android:layout_marginBottom="16dp"
-        android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:background="@android:color/transparent">
+        android:layout_marginStart="16dp"
+        android:background="@android:color/transparent"
+        android:clickable="true"
+        android:focusable="true">
 
         <RelativeLayout
-            android:gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp">
+            android:gravity="center_vertical"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp">
 
             <LinearLayout
                 android:id="@+id/status_text_container"
-                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="8dp"
                 android:layout_toStartOf="@+id/fab"
-                android:layout_alignParentStart="true">
+                android:orientation="vertical">
 
                 <com.miku.ray.marquee.text.AutoMarqueeTextView
                     android:id="@+id/tv_ip_state"
-                    android:textAppearance="?textAppearanceTitleSmall"
-                    android:textSize="12sp"
-                    android:textColor="?colorOnSurfaceVariant"
-                    android:ellipsize="marquee"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
                     android:singleLine="true"
-                    android:marqueeRepeatLimit="marquee_forever" />
+                    android:textAppearance="?attr/textAppearanceTitleSmall"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="12sp" />
 
                 <com.miku.ray.marquee.text.AutoMarqueeTextView
                     android:id="@+id/tv_test_state"
-                    android:textAppearance="?textAppearanceTitleMedium"
-                    android:textSize="17sp"
-                    android:textColor="?colorOnSurface"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:ellipsize="marquee"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/connection_test_pending"
+                    android:marqueeRepeatLimit="marquee_forever"
                     android:singleLine="true"
-                    android:marqueeRepeatLimit="marquee_forever" />
+                    android:text="@string/connection_test_pending"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="17sp" />
 
             </LinearLayout>
 
                 <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
                     android:id="@+id/fab"
+                    style="?attr/extendedFloatingActionButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
                     android:layout_alignParentEnd="true"
-                    app:icon="@drawable/rmx_media_play_line"
-                    android:fontFeatureSettings="tnum"
-                    android:textAppearance="?textAppearanceTitleMedium"
-                    android:textStyle="bold"
-                    android:textSize="17sp"
-                    app:cornerRadius="16dp"
-                    app:iconGravity="end"
+                    android:layout_centerVertical="true"
                     android:elevation="0dp"
+                    android:fontFeatureSettings="tnum"
                     android:outlineProvider="none"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="16dp"
                     app:elevation="0dp"
-                    style="?attr/extendedFloatingActionButtonStyle" />
-                    
+                    app:icon="@drawable/rmx_media_play_line"
+                    app:iconGravity="end" />
+
         </RelativeLayout>
     </com.miku.ray.blurview.BlurView>
 
     <LinearLayout
         android:id="@+id/layout_quick_actions"
-        android:orientation="horizontal"
-        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:gravity="center"
+        android:orientation="horizontal"
         android:visibility="gone">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_quick_sub_update"
+            style="@style/Widget.Material3.Button.IconButton.Filled"
             android:layout_width="0dp"
             android:layout_height="56dp"
-            android:layout_weight="1"
             android:layout_marginEnd="4dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
+            android:layout_weight="1"
             android:contentDescription="@string/title_sub_update"
-            app:backgroundTint="?colorPrimaryContainer"
+            android:insetBottom="0dp"
+            android:insetTop="0dp"
+            app:backgroundTint="?attr/colorPrimaryContainer"
             app:cornerRadius="16dp"
             app:icon="@drawable/rmx_cloud_line"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="24dp"
-            app:iconTint="?colorOnPrimaryContainer"
-            style="@style/Widget.Material3.Button.IconButton.Filled" />
+            app:iconTint="?attr/colorOnPrimaryContainer" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_quick_country_code"
+            style="@style/Widget.Material3.Button.IconButton.Filled"
             android:layout_width="0dp"
             android:layout_height="56dp"
-            android:layout_weight="1"
             android:layout_marginEnd="4dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
+            android:layout_weight="1"
             android:contentDescription="@string/title_country_code_all_server"
-            app:backgroundTint="?colorSecondaryContainer"
+            android:insetBottom="0dp"
+            android:insetTop="0dp"
+            app:backgroundTint="?attr/colorSecondaryContainer"
             app:cornerRadius="16dp"
             app:icon="@drawable/rmx_global_line"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="24dp"
-            app:iconTint="?colorOnSecondaryContainer"
-            style="@style/Widget.Material3.Button.IconButton.Filled" />
+            app:iconTint="?attr/colorOnSecondaryContainer" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_quick_tcping"
+            style="@style/Widget.Material3.Button.IconButton.Filled"
             android:layout_width="0dp"
             android:layout_height="56dp"
-            android:layout_weight="1"
             android:layout_marginEnd="4dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
+            android:layout_weight="1"
             android:contentDescription="@string/title_ping_all_server"
-            app:backgroundTint="?colorTertiaryContainer"
+            android:insetBottom="0dp"
+            android:insetTop="0dp"
+            app:backgroundTint="?attr/colorTertiaryContainer"
             app:cornerRadius="16dp"
             app:icon="@drawable/rmx_wifi_line"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="24dp"
-            app:iconTint="?colorOnTertiaryContainer"
-            style="@style/Widget.Material3.Button.IconButton.Filled" />
+            app:iconTint="?attr/colorOnTertiaryContainer" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_quick_real_ping"
+            style="@style/Widget.Material3.Button.IconButton.Filled"
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
             android:contentDescription="@string/title_real_ping_all_server"
-            app:backgroundTint="?colorErrorContainer"
+            android:insetBottom="0dp"
+            android:insetTop="0dp"
+            app:backgroundTint="?attr/colorErrorContainer"
             app:cornerRadius="16dp"
             app:icon="@drawable/rmx_speed_line"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="24dp"
-            app:iconTint="?colorOnErrorContainer"
-            style="@style/Widget.Material3.Button.IconButton.Filled" />
+            app:iconTint="?attr/colorOnErrorContainer" />
 
     </LinearLayout>
 

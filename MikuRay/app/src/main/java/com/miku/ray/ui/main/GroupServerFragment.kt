@@ -46,7 +46,7 @@ import com.miku.ray.remixicon.R as RemixR
 
 class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
     private val ownerActivity: MainActivity
-        get() = requireActivity() as MainActivity
+    get() = requireActivity() as MainActivity
     private val mainViewModel: MainViewModel by activityViewModels()
     private lateinit var adapter: MainRecyclerAdapter
     private var itemTouchHelper: ItemTouchHelper? = null
@@ -56,7 +56,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
     private val hideScrollButtonRunnable = Runnable { setScrollButtonsVisible(false) }
     private var bottomStatusCard: View? = null
     private val bottomStatusLayoutListener =
-        View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> syncButtonMarginWithBottomStatus() }
+    View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> syncButtonMarginWithBottomStatus() }
     private var hasLoadedData = false
 
     companion object {
@@ -70,14 +70,14 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
     }
 
     override fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?) =
-        FragmentGroupServerBinding.inflate(inflater, container, false)
+    FragmentGroupServerBinding.inflate(inflater, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         hasLoadedData = false
         adapter = MainRecyclerAdapter(mainViewModel, ActivityAdapterListener())
         adapter.setGridMode(isDoubleColumnEnabled())
-        // Tinggi item grid dapat berubah ketika metadata opsional disembunyikan.
+
         binding.recyclerView.setHasFixedSize(false)
 
         binding.recyclerView.layoutManager = createServerLayoutManager(isDoubleColumnEnabled())
@@ -134,14 +134,14 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
         }
 
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (dy == 0) return
-                if (isHideScrollButtonsEnabled()) return
-                binding.btnScrollToSelected.isVisible = !MmkvManager.getSelectServer().isNullOrEmpty()
-                setScrollButtonsVisible(true)
-                scrollButtonHideHandler.removeCallbacks(hideScrollButtonRunnable)
-                scrollButtonHideHandler.postDelayed(hideScrollButtonRunnable, SCROLL_BUTTON_AUTO_HIDE_DELAY_MS)
-            }
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    if (dy == 0) return
+                    if (isHideScrollButtonsEnabled()) return
+                    binding.btnScrollToSelected.isVisible = !MmkvManager.getSelectServer().isNullOrEmpty()
+                    setScrollButtonsVisible(true)
+                    scrollButtonHideHandler.removeCallbacks(hideScrollButtonRunnable)
+                    scrollButtonHideHandler.postDelayed(hideScrollButtonRunnable, SCROLL_BUTTON_AUTO_HIDE_DELAY_MS)
+                }
         })
 
         bottomStatusCard = ownerActivity.findViewById(R.id.blur_bottom_status)
@@ -194,7 +194,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
             container.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(150).start()
         } else {
             container.animate().alpha(0f).scaleX(0.6f).scaleY(0.6f).setDuration(150)
-                .withEndAction { container.visibility = View.GONE }.start()
+            .withEndAction { container.visibility = View.GONE }.start()
         }
     }
 
@@ -223,9 +223,9 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
         val currentLayoutManager = binding.recyclerView.layoutManager
         val needsLayoutManagerChange = when {
             doubleColumnEnabled -> currentLayoutManager !is StaggeredGridLayoutManager ||
-                currentLayoutManager.spanCount != GRID_SPAN_COUNT
+            currentLayoutManager.spanCount != GRID_SPAN_COUNT
             else -> currentLayoutManager !is GridLayoutManager ||
-                currentLayoutManager.spanCount != LIST_SPAN_COUNT
+            currentLayoutManager.spanCount != LIST_SPAN_COUNT
         }
 
         if (needsLayoutManagerChange) {
@@ -280,9 +280,9 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
 
     private fun editServer(guid: String, profile: ProfileItem) {
         val intent = Intent().putExtra("guid", guid)
-            .putExtra("isRunning", mainViewModel.isRunning.value)
-            .putExtra("createConfigType", profile.configType.value)
-            .putExtra("subscriptionId", subId)
+        .putExtra("isRunning", mainViewModel.isRunning.value)
+        .putExtra("createConfigType", profile.configType.value)
+        .putExtra("subscriptionId", subId)
         when (profile.configType) {
             EConfigType.CUSTOM -> {
                 ownerActivity.startActivity(intent.setClass(ownerActivity, ServerCustomConfigActivity::class.java))
@@ -367,17 +367,17 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
             if (currentlyPinned) R.string.action_unpin_server else R.string.action_pin_server
         )
         MaterialAlertDialogBuilder(ownerActivity)
-            .setTitle(R.string.title_pin_server)
-            .setIcon(RemixR.drawable.rmx_map_pushpin_line)
-            .setItems(arrayOf(actionLabel)) { _, _ ->
-                val nowPinned = mainViewModel.togglePinServer(guid)
-                ownerActivity.snackbarSuccess(
-                    getString(if (nowPinned) R.string.toast_server_pinned else R.string.toast_server_unpinned),
-                    title = getString(R.string.title_alerter_success)
-                )
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .showBlur()
+        .setTitle(R.string.title_pin_server)
+        .setIcon(RemixR.drawable.rmx_map_pushpin_line)
+        .setItems(arrayOf(actionLabel)) { _, _ ->
+            val nowPinned = mainViewModel.togglePinServer(guid)
+            ownerActivity.snackbarSuccess(
+                getString(if (nowPinned) R.string.toast_server_pinned else R.string.toast_server_unpinned),
+                title = getString(R.string.title_alerter_success)
+            )
+        }
+        .setNegativeButton(android.R.string.cancel, null)
+        .showBlur()
     }
 
     private fun setSelectServer(guid: String) {

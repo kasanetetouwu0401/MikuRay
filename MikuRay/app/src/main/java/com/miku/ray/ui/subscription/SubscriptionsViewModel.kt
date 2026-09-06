@@ -16,7 +16,7 @@ import com.miku.ray.util.MessageUtil
 
 class SubscriptionsViewModel : ViewModel() {
     private val subscriptions: MutableList<SubscriptionCache> =
-        MmkvManager.decodeSubscriptions().toMutableList()
+    MmkvManager.decodeSubscriptions().toMutableList()
 
     init {
         applySortOrder()
@@ -29,9 +29,7 @@ class SubscriptionsViewModel : ViewModel() {
     }
 
     fun applySortOrder() {
-        // Always start from the persisted (origin) order, since sortByDescending
-        // mutates the in-memory list in place and would otherwise permanently
-        // lose the original order once a non-origin sort has been applied.
+
         val origin = MmkvManager.decodeSubscriptions()
         subscriptions.clear()
         subscriptions.addAll(
@@ -74,8 +72,8 @@ class SubscriptionsViewModel : ViewModel() {
 
     fun updateSubscriptionsMore() {
         val subIds = MmkvManager.decodeSubscriptions()
-            .filter { it.subscription.enabled && it.subscription.url.isNotEmpty() }
-            .map { it.guid }
+        .filter { it.subscription.enabled && it.subscription.url.isNotEmpty() }
+        .map { it.guid }
         if (subIds.isEmpty()) return
 
         MessageUtil.sendMsg2SubscriptionService(
@@ -88,4 +86,3 @@ class SubscriptionsViewModel : ViewModel() {
         return AngConfigManager.updateConfigViaSubAll()
     }
 }
-

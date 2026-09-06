@@ -51,9 +51,9 @@ class PreferenceParser {
                     result.resId = item.getResId();
 
                     if (!BLACKLIST.contains(xpp.getName())
-                            && result.hasData()
-                            && !"true".equals(getAttribute(xpp, NS_SEARCH, "ignore"))
-                            && !bannedKeys.contains(result.key)) {
+                        && result.hasData()
+                        && !"true".equals(getAttribute(xpp, NS_SEARCH, "ignore"))
+                        && !bannedKeys.contains(result.key)) {
                         result.breadcrumbs = joinBreadcrumbs(breadcrumbs);
                         result.keyBreadcrumbs = cleanupKeyBreadcrumbs(keyBreadcrumbs);
                         results.add(result);
@@ -103,7 +103,7 @@ class PreferenceParser {
         for (int i = 0; i < xpp.getAttributeCount(); i++) {
             Log.d("ns", xpp.getAttributeNamespace(i));
             if (attribute.equals(xpp.getAttributeName(i)) &&
-                    (namespace == null || namespace.equals(xpp.getAttributeNamespace(i)))) {
+                (namespace == null || namespace.equals(xpp.getAttributeNamespace(i)))) {
                 return xpp.getAttributeValue(i);
             }
         }

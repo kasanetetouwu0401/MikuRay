@@ -54,10 +54,10 @@ class CustomBannerPreference @JvmOverloads constructor(
                     imageView.setImageResource(R.drawable.uwu_banner_theme)
                 } else {
                     Glide.with(imageView)
-                        .load(Uri.parse(targetTag))
-                        .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .error(R.drawable.uwu_banner_theme)
-                        .into(imageView)
+                    .load(Uri.parse(targetTag))
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
+                    .error(R.drawable.uwu_banner_theme)
+                    .into(imageView)
                 }
                 imageView.tag = targetTag
             }

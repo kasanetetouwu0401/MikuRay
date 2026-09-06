@@ -1,6 +1,5 @@
 package com.miku.ray.ui.dialog
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.app.Dialog
 import android.graphics.Color
@@ -50,7 +49,7 @@ class ThemeColorDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val view = LayoutInflater.from(requireContext())
-            .inflate(R.layout.dialog_theme_color, null)
+        .inflate(R.layout.dialog_theme_color, null)
 
         val grid = view.findViewById<android.widget.GridLayout>(R.id.grid_theme_colors)
 
@@ -60,7 +59,7 @@ class ThemeColorDialog : DialogFragment() {
 
         THEME_KEYS.forEach { key ->
             val itemView = LayoutInflater.from(requireContext())
-                .inflate(R.layout.item_theme_color, grid, false)
+            .inflate(R.layout.item_theme_color, grid, false)
 
             val circle = itemView.findViewById<ImageView>(R.id.iv_color_circle)
             val check  = itemView.findViewById<ImageView>(R.id.iv_check)
@@ -86,7 +85,7 @@ class ThemeColorDialog : DialogFragment() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val customItemView = LayoutInflater.from(requireContext())
-                .inflate(R.layout.item_theme_color, grid, false)
+            .inflate(R.layout.item_theme_color, grid, false)
 
             val customCircle = customItemView.findViewById<ImageView>(R.id.iv_color_circle)
             val customIcon   = customItemView.findViewById<ImageView>(R.id.iv_check)
@@ -95,8 +94,8 @@ class ThemeColorDialog : DialogFragment() {
             val rawCustomColor   = if (savedColor != 0) savedColor else ContextCompat.getColor(requireContext(), R.color.teal_primary)
 
             val customOptions = DynamicColorsOptions.Builder()
-                .setContentBasedSource(rawCustomColor)
-                .build()
+            .setContentBasedSource(rawCustomColor)
+            .build()
             val wrappedCustomContext = DynamicColors.wrapContextIfAvailable(requireContext(), customOptions)
             val m3CustomPrimary = wrappedCustomContext.getColorAttr("colorPrimary")
 
@@ -121,11 +120,11 @@ class ThemeColorDialog : DialogFragment() {
         }
 
         return MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.pref_theme_color_title)
-            .setIcon(RemixR.drawable.rmx_palette_line)
-            .setView(view)
-            .setNegativeButton(android.R.string.cancel) { _, _ -> dismiss() }
-            .create()
+        .setTitle(R.string.pref_theme_color_title)
+        .setIcon(RemixR.drawable.rmx_palette_line)
+        .setView(view)
+        .setNegativeButton(android.R.string.cancel) { _, _ -> dismiss() }
+        .create()
     }
 
     private fun applyCircleDrawable(view: ImageView, @ColorInt color: Int, selected: Boolean) {
@@ -145,5 +144,5 @@ class ThemeColorDialog : DialogFragment() {
     }
 
     private fun dpToPx(dp: Int): Int =
-        (dp * resources.displayMetrics.density).toInt()
+    (dp * resources.displayMetrics.density).toInt()
 }

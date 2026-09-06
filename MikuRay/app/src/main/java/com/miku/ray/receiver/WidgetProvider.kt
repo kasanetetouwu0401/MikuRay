@@ -1,6 +1,5 @@
 package com.miku.ray.receiver
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager

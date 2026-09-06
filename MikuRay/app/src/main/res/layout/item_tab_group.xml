@@ -1,50 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:paddingHorizontal="8dp"
-    android:paddingVertical="8dp"
-    android:orientation="horizontal"
+    android:duplicateParentState="true"
     android:gravity="center_vertical"
-    android:duplicateParentState="true">
+    android:orientation="horizontal"
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="8dp">
 
     <ImageView
         android:id="@+id/tab_icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginEnd="5dp"
-        android:visibility="gone"
-        android:duplicateParentState="true"
-        app:tint="@color/uwu_tab_content_tint"
         android:contentDescription="@null"
-        android:importantForAccessibility="no" />
+        android:duplicateParentState="true"
+        android:importantForAccessibility="no"
+        android:visibility="gone"
+        app:tint="@color/uwu_tab_content_tint" />
 
     <TextView
         android:id="@+id/tab_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?textAppearanceTitleSmall"
-        android:textColor="@color/uwu_tab_content_tint"
         android:duplicateParentState="true"
-        android:singleLine="true" />
+        android:singleLine="true"
+        android:textAppearance="?attr/textAppearanceTitleSmall"
+        android:textColor="@color/uwu_tab_content_tint" />
 
     <TextView
         android:id="@+id/tab_badge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="6dp"
-        android:paddingStart="7dp"
-        android:paddingEnd="7dp"
-        android:paddingTop="2dp"
-        android:paddingBottom="2dp"
         android:background="@drawable/uwu_tab_badge_bg"
         android:backgroundTint="@color/uwu_badge_bg_tint"
-        android:textAppearance="?textAppearanceLabelSmall"
+        android:duplicateParentState="true"
+        android:paddingBottom="2dp"
+        android:paddingEnd="7dp"
+        android:paddingStart="7dp"
+        android:paddingTop="2dp"
+        android:singleLine="true"
+        android:textAppearance="?attr/textAppearanceLabelSmall"
         android:textColor="@color/uwu_badge_text_color"
         android:textStyle="bold"
-        android:singleLine="true"
-        android:visibility="gone"
-        android:duplicateParentState="true" />
+        android:visibility="gone" />
 
 </LinearLayout>

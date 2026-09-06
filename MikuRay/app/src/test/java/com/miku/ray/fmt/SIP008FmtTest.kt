@@ -10,26 +10,26 @@ class SIP008FmtTest {
     @Test
     fun parse_acceptsStandardSIP008ShadowsocksProfiles() {
         val content = """
-            {
-              "version": 1,
-              "servers": [
-                {
-                  "id": "standard-aead",
-                  "remarks": "SIP008 AEAD",
-                  "server": "ss.example.com",
-                  "server_port": 8388,
-                  "method": "aes-256-gcm",
-                  "password": "super-secret"
-                },
-                {
-                  "id": "normalized-method",
-                  "server": "198.51.100.20",
-                  "server_port": 443,
-                  "method": "aead-chacha20-poly1305",
-                  "password": "another-secret"
-                }
-              ]
-            }
+        {
+        "version": 1,
+        "servers": [
+        {
+        "id": "standard-aead",
+        "remarks": "SIP008 AEAD",
+        "server": "ss.example.com",
+        "server_port": 8388,
+        "method": "aes-256-gcm",
+        "password": "super-secret"
+        },
+        {
+        "id": "normalized-method",
+        "server": "198.51.100.20",
+        "server_port": 443,
+        "method": "aead-chacha20-poly1305",
+        "password": "another-secret"
+        }
+        ]
+        }
         """.trimIndent()
 
         val profiles = SIP008Fmt.parse(content)
@@ -47,19 +47,19 @@ class SIP008FmtTest {
     @Test
     fun parse_mapsSupportedSimpleObfsHttpPlugin() {
         val content = """
-            {
-              "version": 1,
-              "servers": [
-                {
-                  "server": "obfs.example.com",
-                  "server_port": 443,
-                  "method": "aes-128-gcm",
-                  "password": "secret",
-                  "plugin": "simple-obfs",
-                  "plugin_opts": "obfs=http;obfs-host=cdn.example.com;path=/health"
-                }
-              ]
-            }
+        {
+        "version": 1,
+        "servers": [
+        {
+        "server": "obfs.example.com",
+        "server_port": 443,
+        "method": "aes-128-gcm",
+        "password": "secret",
+        "plugin": "simple-obfs",
+        "plugin_opts": "obfs=http;obfs-host=cdn.example.com;path=/health"
+        }
+        ]
+        }
         """.trimIndent()
 
         val profile = SIP008Fmt.parse(content).single()
@@ -73,30 +73,30 @@ class SIP008FmtTest {
     @Test
     fun parse_skipsUnsupportedRuntimeConfigurations() {
         val content = """
-            {
-              "version": 1,
-              "servers": [
-                {
-                  "server": "plugin.example.com",
-                  "server_port": 8388,
-                  "method": "aes-256-gcm",
-                  "password": "secret",
-                  "plugin": "v2ray-plugin"
-                },
-                {
-                  "server": "legacy.example.com",
-                  "server_port": 8388,
-                  "method": "rc4-md5",
-                  "password": "secret"
-                },
-                {
-                  "server": "invalid-port.example.com",
-                  "server_port": 0,
-                  "method": "aes-256-gcm",
-                  "password": "secret"
-                }
-              ]
-            }
+        {
+        "version": 1,
+        "servers": [
+        {
+        "server": "plugin.example.com",
+        "server_port": 8388,
+        "method": "aes-256-gcm",
+        "password": "secret",
+        "plugin": "v2ray-plugin"
+        },
+        {
+        "server": "legacy.example.com",
+        "server_port": 8388,
+        "method": "rc4-md5",
+        "password": "secret"
+        },
+        {
+        "server": "invalid-port.example.com",
+        "server_port": 0,
+        "method": "aes-256-gcm",
+        "password": "secret"
+        }
+        ]
+        }
         """.trimIndent()
 
         assertTrue(SIP008Fmt.parse(content).isEmpty())

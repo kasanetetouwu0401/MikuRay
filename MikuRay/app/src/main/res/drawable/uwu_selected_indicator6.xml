@@ -4,12 +4,12 @@
     <item>
         <shape>
             <solid
-                android:color="?colorCard" />
+                android:color="?attr/colorCard" />
             <corners
-                android:radius="16.0dip" />
+                android:radius="16dp" />
             <stroke
-                android:width="3.0dip"
-                android:color="?colorPrimary" />
+                android:color="?attr/colorPrimary"
+                android:width="3dp" />
         </shape>
     </item>
 </layer-list>

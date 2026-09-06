@@ -14,7 +14,6 @@ class CrashReporterConfiguration : Serializable {
 
     var emailIds: Array<String> = arrayOf()
 
-
     fun setCrashReportStoragePath(path : String) : CrashReporterConfiguration{
         this.crashReportStoragePath  = path
         return this

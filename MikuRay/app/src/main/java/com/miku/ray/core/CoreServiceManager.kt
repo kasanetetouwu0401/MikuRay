@@ -64,15 +64,15 @@ object CoreServiceManager {
     private var currentVpnInterface: ParcelFileDescriptor? = null
 
     var serviceControl: ServiceControl? = null
-        set(value) {
-            field = value
-            val service = value?.getService()
-            CoreNativeManager.initCoreEnv(service)
-            if (service != null && processFinder == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                processFinder = XrayProcessFinder(service)
-                coreController.registerProcessFinder(processFinder)
-            }
+    set(value) {
+        field = value
+        val service = value?.getService()
+        CoreNativeManager.initCoreEnv(service)
+        if (service != null && processFinder == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            processFinder = XrayProcessFinder(service)
+            coreController.registerProcessFinder(processFinder)
         }
+    }
 
     fun clearServiceControl(instance: ServiceControl) {
         if (serviceControl === instance) {
@@ -131,7 +131,7 @@ object CoreServiceManager {
         SettingsManager.initAssets(service, service.assets)
         val assetFolder = Utils.userAssetPath(service)
         val missingGeoFiles = listOf(AppConfig.GEOSITE_DAT, AppConfig.GEOIP_DAT)
-            .filterNot { File(assetFolder, it).exists() }
+        .filterNot { File(assetFolder, it).exists() }
         if (missingGeoFiles.isNotEmpty()) {
             error("Geo data file not found: ${missingGeoFiles.joinToString()}. Try clearing the app data and then reopening it.")
         }
@@ -324,8 +324,6 @@ object CoreServiceManager {
                 }
             }
 
-            // Resolve endpoint information once so both UI indicators describe the
-            // same successful test instead of issuing independent lookups.
             val ip = if (time >= 0) SpeedtestManager.getRemoteIPInfo() else null
             val result = if (time >= 0) {
                 service.getString(R.string.connection_test_available, time)
@@ -356,13 +354,11 @@ object CoreServiceManager {
         return serviceControl?.getService()
     }
 
-    /** Completes a pending restart and reports a terminal start failure to the UI. */
     internal fun reportStartFailure(service: Service, message: String) {
         serviceRestartLifecycle.completeCurrent()
         MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
     }
 
-    /** Reports a failure only when it belongs to the restart operation that is still active. */
     private fun reportRestartFailure(
         service: Service,
         token: ServiceRestartLifecycle.Token,
@@ -373,7 +369,6 @@ object CoreServiceManager {
         }
     }
 
-    /** Waits for the asynchronous native-core shutdown before starting its replacement. */
     private suspend fun waitForCoreToStop(): Boolean {
         var waitedMs = 0
         while (isRunning() && waitedMs < RESTART_STOP_TIMEOUT_MS) {
@@ -464,8 +459,7 @@ object CoreServiceManager {
 
                 AppConfig.MSG_STATE_RESTART -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Restart service")
-                    // The UI and daemon run in separate processes, so acknowledge the active
-                    // daemon before stopping it instead of relying on possibly stale UI state.
+
                     if (isOrderedBroadcast) resultCode = Activity.RESULT_OK
 
                     val pendingResult = goAsync()
@@ -499,7 +493,7 @@ object CoreServiceManager {
                                 throw e
                             } catch (e: Exception) {
                                 val message = e.message?.takeUnless { it.isBlank() }
-                                    ?: e.javaClass.simpleName
+                                ?: e.javaClass.simpleName
                                 LogUtil.e(AppConfig.TAG, "StartCore-Manager: Restart failed: $message", e)
                                 reportRestartFailure(serviceControl.getService(), token, message)
                             } finally {
@@ -508,7 +502,7 @@ object CoreServiceManager {
                         }
                     } catch (e: Exception) {
                         val message = e.message?.takeUnless { it.isBlank() }
-                            ?: e.javaClass.simpleName
+                        ?: e.javaClass.simpleName
                         LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to schedule restart: $message", e)
                         pendingResult.finish()
                         reportStartFailure(serviceControl.getService(), message)

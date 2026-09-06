@@ -45,15 +45,14 @@ object LauncherManager {
     }
 
     fun startServiceFromToggle(context: Context): Boolean =
-        requestServiceStart(context, guid = null, showLifecycleFeedback = true)
+    requestServiceStart(context, guid = null, showLifecycleFeedback = true)
 
     fun startService(context: Context, guid: String? = null) {
         requestServiceStart(context, guid, showLifecycleFeedback = true)
     }
 
-    /** Starts a replacement service after a daemon-managed restart. */
     internal fun startServiceAfterRestart(context: Context): Boolean =
-        requestServiceStart(context, guid = null, showLifecycleFeedback = false)
+    requestServiceStart(context, guid = null, showLifecycleFeedback = false)
 
     private fun requestServiceStart(
         context: Context,
@@ -84,12 +83,10 @@ object LauncherManager {
         MessageUtil.sendMsg2Service(context, AppConfig.MSG_STATE_STOP, "")
     }
 
-    /** Restarts the active daemon without starting a stopped service. */
     fun restartService(context: Context) {
         restartService(context) { }
     }
 
-    /** Restarts the active daemon and reports whether a daemon accepted the request. */
     fun restartService(context: Context, onResult: (handled: Boolean) -> Unit) {
         MessageUtil.sendMsg2ServiceForResult(
             context,
@@ -99,7 +96,6 @@ object LauncherManager {
         )
     }
 
-    /** Restarts the active daemon, or delegates to the caller's permission-aware start flow. */
     fun restartServiceOrStart(context: Context, startIfStopped: () -> Unit) {
         restartService(context) { handled ->
             if (!handled) startIfStopped()
@@ -109,16 +105,16 @@ object LauncherManager {
     @Throws(Exception::class)
     private fun startContextService(context: Context, showLifecycleFeedback: Boolean) {
         val guid = MmkvManager.getSelectServer()
-            ?: run {
-                LogUtil.e(AppConfig.TAG, "LauncherManager: No server selected")
-                error(context.getString(R.string.app_tile_first_use))
-            }
+        ?: run {
+            LogUtil.e(AppConfig.TAG, "LauncherManager: No server selected")
+            error(context.getString(R.string.app_tile_first_use))
+        }
 
         val config = MmkvManager.decodeServerConfig(guid)
-            ?: run {
-                LogUtil.e(AppConfig.TAG, "LauncherManager: Failed to decode server config")
-                error(context.getString(R.string.toast_config_file_invalid))
-            }
+        ?: run {
+            LogUtil.e(AppConfig.TAG, "LauncherManager: Failed to decode server config")
+            error(context.getString(R.string.toast_config_file_invalid))
+        }
 
         if (!config.configType.isComplexType()
             && !Utils.isValidUrl(config.server)

@@ -60,16 +60,16 @@ public class SearchPreferenceResult {
             if (position != RecyclerView.NO_POSITION) {
                 recyclerView.scrollToPosition(position);
                 recyclerView.postDelayed(() -> {
-                    RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(position);
-                    if (holder != null) {
-                        Drawable oldBackground = holder.itemView.getBackground();
-                        int color = getColorFromAttr(prefsFragment.getContext(), android.R.attr.textColorPrimary);
-                        holder.itemView.setBackgroundColor(color & 0xffffff | 0x33000000);
-                        new Handler().postDelayed(() -> holder.itemView.setBackgroundDrawable(oldBackground), 1000);
-                        return;
-                    }
-                    highlightFallback(prefsFragment, prefResult);
-                }, 200);
+                        RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(position);
+                        if (holder != null) {
+                            Drawable oldBackground = holder.itemView.getBackground();
+                            int color = getColorFromAttr(prefsFragment.getContext(), android.R.attr.textColorPrimary);
+                            holder.itemView.setBackgroundColor(color & 0xffffff | 0x33000000);
+                            new Handler().postDelayed(() -> holder.itemView.setBackgroundDrawable(oldBackground), 1000);
+                            return;
+                        }
+                        highlightFallback(prefsFragment, prefResult);
+                    }, 200);
                 return;
             }
         }
@@ -85,9 +85,9 @@ public class SearchPreferenceResult {
         prefResult.setIcon(arrow);
         prefsFragment.scrollToPreference(prefResult);
         new Handler().postDelayed(() -> {
-            prefResult.setIcon(oldIcon);
-            prefResult.setIconSpaceReserved(oldSpaceReserved);
-        }, 1000);
+                prefResult.setIcon(oldIcon);
+                prefResult.setIconSpaceReserved(oldSpaceReserved);
+            }, 1000);
     }
 
     private int getColorFromAttr(Context context, int attr) {

@@ -22,20 +22,20 @@ object BannerColorExtractor {
 
                 if (bitmap != null) {
                     val palette = Palette.from(bitmap)
-                        .maximumColorCount(32)
-                        .generate()
+                    .maximumColorCount(32)
+                    .generate()
                     bitmap.recycle()
 
                     val bestSwatch = palette.swatches
-                        .filter { swatch ->
-                            val hsl = swatch.hsl
-                            hsl[1] >= 0.2f && hsl[2] in 0.15f..0.85f
-                        }
-                        .maxByOrNull { it.population }
+                    .filter { swatch ->
+                        val hsl = swatch.hsl
+                        hsl[1] >= 0.2f && hsl[2] in 0.15f..0.85f
+                    }
+                    .maxByOrNull { it.population }
 
                     val rawColor = bestSwatch?.rgb
-                        ?: palette.getDominantColor(0).takeIf { it != 0 }
-                        ?: palette.getVibrantColor(0)
+                    ?: palette.getDominantColor(0).takeIf { it != 0 }
+                    ?: palette.getVibrantColor(0)
 
                     val color = if (rawColor != 0) {
                         val hct = Hct.fromInt(rawColor)

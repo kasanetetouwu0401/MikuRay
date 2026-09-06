@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
-    android:id="@+id/main_content"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorBg"
@@ -17,13 +17,14 @@
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
-            android:background="?attr/colorBg"
             style="?attr/collapsingToolbarLayoutLargeStyle"
             android:layout_width="match_parent"
             android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
-            app:contentScrim="?attr/colorBg"
+            android:background="?attr/colorBg"
             app:collapsedTitleTextAppearance="?attr/textAppearanceTitleLargeEmphasized"
             app:collapsedTitleTextColor="?attr/colorOnSurface"
+            app:contentScrim="?attr/colorBg"
+            app:expandedTitleGravity="center_horizontal|bottom"
             app:expandedTitleMarginBottom="24dp"
             app:expandedTitleMarginEnd="24dp"
             app:expandedTitleMarginStart="24dp"
@@ -31,9 +32,8 @@
             app:expandedTitleTextAppearance="?attr/textAppearanceDisplaySmallEmphasized"
             app:expandedTitleTextColor="?attr/colorOnSurface"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:titleMaxLines="3"
             app:titleCollapseMode="fade"
-            app:expandedTitleGravity="center_horizontal|bottom">
+            app:titleMaxLines="3">
 
             <TextView
                 android:id="@+id/custom_expanded_subtitle"
@@ -41,24 +41,24 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|center_horizontal"
                 android:layout_marginBottom="24dp"
-                android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
+                android:layout_marginStart="24dp"
+                android:ellipsize="end"
                 android:gravity="center"
                 android:maxLines="3"
-                android:ellipsize="end"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 app:layout_collapseMode="parallax"
                 app:layout_collapseParallaxMultiplier="0.7" />
 
             <com.google.android.material.appbar.MaterialToolbar
-                android:theme="@style/AppThemeToolbarCircleNavigationButton"
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
                 android:elevation="0dp"
+                android:theme="@style/AppThemeToolbarCircleNavigationButton"
                 app:layout_collapseMode="pin" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -83,11 +83,11 @@
                 android:id="@+id/cardForecastCurrent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="4dp"
-                android:layout_marginBottom="8dp"
                 android:visibility="gone"
-                app:cardBackgroundColor="?colorCard"
+                app:cardBackgroundColor="?attr/colorCard"
                 app:cardCornerRadius="28dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp"
@@ -98,9 +98,9 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:orientation="vertical"
+                    android:paddingBottom="16dp"
                     android:paddingHorizontal="24dp"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="16dp">
+                    android:paddingTop="16dp">
 
                     <ImageView
                         android:id="@+id/ivForecastCurrentIcon"
@@ -113,8 +113,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:textAppearance="?textAppearanceTitleLarge"
-                        android:textColor="?colorOnSurface"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
+                        android:textColor="?attr/colorOnSurface"
                         tools:text="Bright" />
 
                     <TextView
@@ -122,7 +122,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:includeFontPadding="false"
-                        android:textColor="?colorPrimary"
+                        android:textColor="?attr/colorPrimary"
                         android:textSize="76sp"
                         android:textStyle="bold"
                         tools:text="28°" />
@@ -131,8 +131,8 @@
                         android:id="@+id/tvForecastFeelsLike"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?textAppearanceTitleMedium"
-                        android:textColor="?colorOnSurfaceVariant"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant"
                         tools:text="Feels like 30°" />
 
                     <TextView
@@ -140,8 +140,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:textAppearance="?textAppearanceTitleMedium"
-                        android:textColor="?colorOnSurfaceVariant"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant"
                         tools:text="Max 30° Min 24°" />
 
                 </LinearLayout>
@@ -155,8 +155,8 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="24dp"
                 android:text="@string/weather_forecast_load_error"
-                android:textAppearance="?textAppearanceBodyMedium"
-                android:textColor="?colorOnSurfaceVariant"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:visibility="gone"
                 tools:visibility="visible" />
 
@@ -164,10 +164,10 @@
                 android:id="@+id/cardForecastSummary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
                 android:layout_marginBottom="8dp"
+                android:layout_marginHorizontal="16dp"
                 android:visibility="gone"
-                app:cardBackgroundColor="?colorCard"
+                app:cardBackgroundColor="?attr/colorCard"
                 app:cardCornerRadius="28dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp"
@@ -177,14 +177,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="16dp">
+                    android:paddingBottom="16dp"
+                    android:paddingTop="16dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="20dp"
                         android:layout_marginBottom="8dp"
+                        android:layout_marginHorizontal="20dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
@@ -193,14 +193,14 @@
                             android:layout_height="18dp"
                             android:layout_marginEnd="6dp"
                             android:src="@drawable/rmx_file_text_line"
-                            app:tint="?colorOnSurfaceVariant" />
+                            app:tint="?attr/colorOnSurfaceVariant" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/weather_summary_title"
-                            android:textAppearance="?textAppearanceTitleSmall"
-                            android:textColor="?colorOnSurface" />
+                            android:textAppearance="?attr/textAppearanceTitleSmall"
+                            android:textColor="?attr/colorOnSurface" />
 
                     </LinearLayout>
 
@@ -209,8 +209,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="20dp"
-                        android:textAppearance="?textAppearanceBodyMedium"
-                        android:textColor="?colorOnSurfaceVariant"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant"
                         tools:text="Expect clear skies throughout the day. High 30°, low 24°." />
 
                 </LinearLayout>
@@ -221,10 +221,10 @@
                 android:id="@+id/cardForecastHourly"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
                 android:layout_marginBottom="8dp"
+                android:layout_marginHorizontal="16dp"
                 android:visibility="gone"
-                app:cardBackgroundColor="?colorCard"
+                app:cardBackgroundColor="?attr/colorCard"
                 app:cardCornerRadius="28dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp"
@@ -234,14 +234,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="12dp">
+                    android:paddingBottom="12dp"
+                    android:paddingTop="16dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="20dp"
                         android:layout_marginBottom="8dp"
+                        android:layout_marginHorizontal="20dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
@@ -250,14 +250,14 @@
                             android:layout_height="18dp"
                             android:layout_marginEnd="6dp"
                             android:src="@drawable/rmx_time_line"
-                            app:tint="?colorOnSurfaceVariant" />
+                            app:tint="?attr/colorOnSurfaceVariant" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/weather_hourly_forecast_title"
-                            android:textAppearance="?textAppearanceTitleSmall"
-                            android:textColor="?colorOnSurface" />
+                            android:textAppearance="?attr/textAppearanceTitleSmall"
+                            android:textColor="?attr/colorOnSurface" />
 
                     </LinearLayout>
 
@@ -278,10 +278,10 @@
                 android:id="@+id/cardForecastDaily"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
                 android:layout_marginBottom="8dp"
+                android:layout_marginHorizontal="16dp"
                 android:visibility="gone"
-                app:cardBackgroundColor="?colorCard"
+                app:cardBackgroundColor="?attr/colorCard"
                 app:cardCornerRadius="28dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp"
@@ -291,14 +291,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="12dp">
+                    android:paddingBottom="12dp"
+                    android:paddingTop="16dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="20dp"
                         android:layout_marginBottom="8dp"
+                        android:layout_marginHorizontal="20dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
@@ -307,14 +307,14 @@
                             android:layout_height="18dp"
                             android:layout_marginEnd="6dp"
                             android:src="@drawable/rmx_business_calendar_line"
-                            app:tint="?colorOnSurfaceVariant" />
+                            app:tint="?attr/colorOnSurfaceVariant" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/weather_daily_forecast_title"
-                            android:textAppearance="?textAppearanceTitleSmall"
-                            android:textColor="?colorOnSurface" />
+                            android:textAppearance="?attr/textAppearanceTitleSmall"
+                            android:textColor="?attr/colorOnSurface" />
 
                     </LinearLayout>
 
@@ -337,7 +337,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
                 android:visibility="gone"
-                app:cardBackgroundColor="?colorCard"
+                app:cardBackgroundColor="?attr/colorCard"
                 app:cardCornerRadius="28dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp"
@@ -347,14 +347,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="12dp">
+                    android:paddingBottom="12dp"
+                    android:paddingTop="16dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="20dp"
                         android:layout_marginBottom="4dp"
+                        android:layout_marginHorizontal="20dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
@@ -363,14 +363,14 @@
                             android:layout_height="18dp"
                             android:layout_marginEnd="6dp"
                             android:src="@drawable/rmx_weather_water_percent_line"
-                            app:tint="?colorOnSurfaceVariant" />
+                            app:tint="?attr/colorOnSurfaceVariant" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/weather_details_title"
-                            android:textAppearance="?textAppearanceTitleSmall"
-                            android:textColor="?colorOnSurface" />
+                            android:textAppearance="?attr/textAppearanceTitleSmall"
+                            android:textColor="?attr/colorOnSurface" />
 
                     </LinearLayout>
 
@@ -378,8 +378,8 @@
                         android:id="@+id/recyclerForecastDetails"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingHorizontal="12dp"
                         android:clipToPadding="false"
+                        android:paddingHorizontal="12dp"
                         tools:itemCount="8"
                         tools:listitem="@layout/item_weather_detail"
                         tools:spanCount="2" />

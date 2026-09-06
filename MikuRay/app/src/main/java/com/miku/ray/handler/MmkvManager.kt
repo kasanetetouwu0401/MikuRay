@@ -27,7 +27,6 @@ internal class ProfileStorageException(message: String) : IllegalStateException(
 
 object MmkvManager {
 
-
     private const val ID_MAIN = "MAIN"
     private const val ID_PROFILE_FULL_CONFIG = "PROFILE_FULL_CONFIG"
     private const val ID_SERVER_RAW = "SERVER_RAW"
@@ -49,10 +48,10 @@ object MmkvManager {
 
     private val recoveryHandler = object : MMKVHandler {
         override fun onMMKVCRCCheckFail(mmapID: String) =
-            recoverFromStorageError(mmapID, "CRC check")
+        recoverFromStorageError(mmapID, "CRC check")
 
         override fun onMMKVFileLengthError(mmapID: String) =
-            recoverFromStorageError(mmapID, "file length check")
+        recoverFromStorageError(mmapID, "file length check")
 
         override fun wantLogRedirecting(): Boolean = false
 
@@ -74,9 +73,6 @@ object MmkvManager {
     private val settingsStorage by lazy { MMKV.mmkvWithID(ID_SETTING, MMKV.MULTI_PROCESS_MODE) }
     private val dailyTrafficStorage by lazy { MMKV.mmkvWithID(ID_DAILY_TRAFFIC, MMKV.MULTI_PROCESS_MODE) }
 
-    /**
-     * Initializes MMKV with best-effort recovery so a damaged store is not silently discarded.
-     */
     fun initialize(context: Context) {
         val logLevel = if (BuildConfig.DEBUG) {
             MMKVLogLevel.LevelDebug
@@ -124,7 +120,6 @@ object MmkvManager {
         return mainStorage.decodeString(KEY_ANG_CONFIGS)
     }
 
-
     fun getSelectServer(): String? {
         return mainStorage.decodeString(KEY_SELECTED_SERVER)
     }
@@ -157,10 +152,6 @@ object MmkvManager {
         return true
     }
 
-    /**
-     * Removes deleted profiles from the saved pre-test/origin snapshot as well.
-     * Otherwise the next default-order reload can restore a server the user deleted.
-     */
     fun removeFromOriginServerList(guids: Collection<String>, subscriptionId: String) {
         if (guids.isEmpty()) return
         val subId = getSubscriptionId(subscriptionId)
@@ -179,7 +170,6 @@ object MmkvManager {
         val subId = getSubscriptionId(subscriptionId)
         return mainStorage.containsKey("${KEY_SUB_SERVER_PREFIX}ORIGIN_$subId")
     }
-
 
     fun decodeServerList(subscriptionId: String): MutableList<String> {
         val subId = getSubscriptionId(subscriptionId)
@@ -207,7 +197,6 @@ object MmkvManager {
         return allServers
     }
 
-
     fun decodeServerConfig(guid: String): ProfileItem? {
         if (guid.isBlank()) {
             return null
@@ -218,7 +207,6 @@ object MmkvManager {
         }
         return JsonUtil.fromJsonSafe(json, ProfileItem::class.java)
     }
-
 
     fun encodeServerConfig(guid: String, config: ProfileItem): String {
         val key = guid.ifBlank { Utils.getUuid() }
@@ -242,16 +230,6 @@ object MmkvManager {
         profileFullStorage.encode(key, configJson)
     }
 
-    /**
-     * Saves a batch of parsed profiles before publishing the group index and removing the
-     * profiles they replace, so an import that gets interrupted midway never leaves the
-     * group with zero servers (previously the group was cleared first, then repopulated).
-     *
-     * @param profiles Generated GUIDs mapped to their parsed profile, in insertion order.
-     * @param rawConfigs Optional raw configuration payloads keyed by profile GUID.
-     * @param subscriptionId The destination subscription ID.
-     * @param append Whether to append to the existing group index instead of replacing it.
-     */
     internal fun saveServerProfiles(
         profiles: Map<String, ProfileItem>,
         rawConfigs: Map<String, String>,
@@ -282,7 +260,6 @@ object MmkvManager {
                 selectedProfile = selectedProfile,
             )
 
-            // Write every new payload first; nothing old is touched yet.
             profiles.forEach { (guid, profile) ->
                 requireStorageWrite(
                     profileFullStorage.encode(guid, JsonUtil.toJson(profile)),
@@ -296,9 +273,6 @@ object MmkvManager {
                 }
             }
 
-            // Pinned servers among the ones being replaced must survive the update, the
-            // same way the selected server does: neither their payload nor their spot in
-            // the group index should be dropped just because a subscription refresh happened.
             val pinnedServers = decodePinnedServers()
             val pinnedReplacedServers = if (append) {
                 emptyList()
@@ -306,7 +280,6 @@ object MmkvManager {
                 replacedServers.filter { pinnedServers.contains(it) }
             }
 
-            // Publish the new group index.
             val serverList = if (append) {
                 decodeServerList(subscriptionId)
             } else {
@@ -318,8 +291,7 @@ object MmkvManager {
                     serverList.add(0, guid)
                 }
             }
-            // Re-append pinned servers that were dropped by the replacement so they keep
-            // showing up in this group after the subscription update.
+
             pinnedReplacedServers.forEach { guid ->
                 if (indexedServers.add(guid)) {
                     serverList.add(guid)
@@ -336,7 +308,6 @@ object MmkvManager {
 
             if (replacedServers.isEmpty()) return@withProfileIndexLock
 
-            // Only now, after the replacement batch is safely published, drop the old payloads.
             val protectedServers = setOfNotNull(replacementSelection ?: previousSelection) + pinnedReplacedServers
             val removablePayloads = ProfileReplacement.findRemovablePayloads(
                 replacedServers = replacedServers,
@@ -478,13 +449,6 @@ object MmkvManager {
         return formatTrafficBytes(uplinkTotal + downlinkTotal)
     }
 
-    /**
-     * All-time total traffic, kept as its own running counter (in [dailyTrafficStorage]) so it
-     * survives server deletions/imports. This is no longer derived by summing the live server
-     * list's per-profile traffic - it only grows via [addTotalTrafficAllTime]. It is untouched by
-     * [resetAllTraffic] (the server list's "Reset traffic" menu); it only shrinks via the explicit
-     * [clearTotalTrafficDataAndHistory] call wired to the "Clear total traffic data" preference.
-     */
     fun getTotalTrafficDetail(): Pair<Long, Long>? {
         val uplinkTotal = dailyTrafficStorage.decodeLong(KEY_TOTAL_TRAFFIC_UPLINK, 0L)
         val downlinkTotal = dailyTrafficStorage.decodeLong(KEY_TOTAL_TRAFFIC_DOWNLINK, 0L)
@@ -492,11 +456,6 @@ object MmkvManager {
         return uplinkTotal to downlinkTotal
     }
 
-    /**
-     * Called from TrafficController on every traffic tick to accumulate the all-time total.
-     * Only invoked while the "Show total traffic usage chip" preference is enabled, so nothing
-     * is counted here when the chip is off.
-     */
     fun addTotalTrafficAllTime(uplink: Long, downlink: Long) {
         if (uplink == 0L && downlink == 0L) return
         val newUplinkTotal = dailyTrafficStorage.decodeLong(KEY_TOTAL_TRAFFIC_UPLINK, 0L) + uplink
@@ -510,18 +469,11 @@ object MmkvManager {
         dailyTrafficStorage.remove(KEY_TOTAL_TRAFFIC_DOWNLINK)
     }
 
-    /** Wipes just the recorded daily/monthly traffic history (today, this month, history list). */
     private fun clearDailyTrafficHistory() {
         decodeDailyTrafficDates().forEach { dailyTrafficStorage.removeValueForKey(it) }
         dailyTrafficStorage.remove(KEY_DAILY_TRAFFIC_DATES)
     }
 
-    /**
-     * Clears everything backing the total traffic chip: the all-time counter shown on the chip
-     * itself, plus the daily/monthly history shown in its detail dialog. Does not touch any
-     * individual server's own traffic counter - that's reset separately via the server list's
-     * "Reset traffic" menu (resetProfileTraffic / resetGroupTraffic / resetAllTraffic).
-     */
     fun clearTotalTrafficDataAndHistory() {
         clearTotalTrafficAllTime()
         clearDailyTrafficHistory()
@@ -547,11 +499,6 @@ object MmkvManager {
         dailyTrafficStorage.encode(KEY_DAILY_TRAFFIC_DATES, JsonUtil.toJson(dates))
     }
 
-    /**
-     * Called from TrafficController on every traffic tick to accumulate today's usage. Only
-     * invoked while the "Show total traffic usage chip" preference is enabled - this history
-     * backs that chip's detail dialog and is independent of any per-server traffic.
-     */
     fun addDailyTraffic(uplink: Long, downlink: Long) {
         if (uplink == 0L && downlink == 0L) return
         val todayKey = dailyTrafficDateKey(java.util.Calendar.getInstance())
@@ -576,7 +523,6 @@ object MmkvManager {
         encodeDailyTrafficDates(dates)
     }
 
-    /** Traffic for a single calendar day, N days back from today (0 = today). */
     fun getDailyTrafficDetail(daysAgo: Int): Pair<Long, Long> {
         val cal = java.util.Calendar.getInstance()
         cal.add(java.util.Calendar.DAY_OF_YEAR, -daysAgo)
@@ -584,7 +530,6 @@ object MmkvManager {
         return info.uplinkTotal to info.downlinkTotal
     }
 
-    /** Last [days] days of traffic, oldest first, each as Triple(dateKey, uplink, downlink). Missing days come back as zero. */
     fun getDailyTrafficHistory(days: Int): List<Triple<String, Long, Long>> {
         val cal = java.util.Calendar.getInstance()
         val result = mutableListOf<Triple<String, Long, Long>>()
@@ -600,7 +545,6 @@ object MmkvManager {
 
     fun getTodayTrafficDetail(): Pair<Long, Long> = getDailyTrafficDetail(0)
 
-    /** Sum of all recorded days that fall within the current calendar month. */
     fun getCurrentMonthTrafficDetail(): Pair<Long, Long> {
         val monthPrefix = java.text.SimpleDateFormat("yyyy-MM", java.util.Locale.US).format(java.util.Date())
         var uplinkTotal = 0L
@@ -657,10 +601,6 @@ object MmkvManager {
         }
     }
 
-    /**
-     * Removes every server, except pinned ones, which are always kept regardless of
-     * which group/subscription they belong to.
-     */
     fun removeAllServer(): Int {
         val pinnedServers = decodePinnedServers()
         val subsList = decodeSubsList().toMutableList()
@@ -687,10 +627,6 @@ object MmkvManager {
         return removedCount
     }
 
-    /**
-     * Removes servers with a failed (negative) test delay. Pinned servers are always
-     * kept, even if their last test result was invalid.
-     */
     fun removeInvalidServer(guid: String): Int {
         var count = 0
         if (guid.isNotEmpty()) {
@@ -728,31 +664,22 @@ object MmkvManager {
         return serverRawStorage.decodeString(guid)
     }
 
-    /**
-     * Removes profile payloads that are provably absent from their raw SUB_SERVERS_* index.
-     *
-     * SUB_IDS and SUB are intentionally ignored: either store can be missing after MMKV
-     * recovery while the group indexes still identify live profiles. If any group index or
-     * profile payload needed for a decision is unreadable, that data is preserved.
-     *
-     * @return The number of profile payloads removed, or null if cleanup could not run safely.
-     */
     internal fun removeOrphanedServerProfiles(): Int? = synchronized(mainStorage) {
         mainStorage.lock()
         try {
             val indexedServersBySubscription = mainStorage.allKeys().orEmpty()
-                .asSequence()
-                .filter { key -> key.startsWith(KEY_SUB_SERVER_PREFIX) }
-                .associate { key ->
-                    val subscriptionId = key.removePrefix(KEY_SUB_SERVER_PREFIX)
-                    val json = mainStorage.decodeString(key)
-                    val serverIds = if (json.isNullOrBlank()) {
-                        null
-                    } else {
-                        JsonUtil.fromJsonSafe(json, Array<String>::class.java)?.toSet()
-                    }
-                    subscriptionId to serverIds
+            .asSequence()
+            .filter { key -> key.startsWith(KEY_SUB_SERVER_PREFIX) }
+            .associate { key ->
+                val subscriptionId = key.removePrefix(KEY_SUB_SERVER_PREFIX)
+                val json = mainStorage.decodeString(key)
+                val serverIds = if (json.isNullOrBlank()) {
+                    null
+                } else {
+                    JsonUtil.fromJsonSafe(json, Array<String>::class.java)?.toSet()
                 }
+                subscriptionId to serverIds
+            }
 
             val profiles = profileFullStorage.allKeys().orEmpty().map { guid ->
                 StoredProfileReference(
@@ -845,8 +772,6 @@ object MmkvManager {
         }
     }
 
-
-
     fun decodeAssetUrls(): List<AssetUrlCache> {
         val assetUrlItems = mutableListOf<AssetUrlCache>()
         assetStorage.allKeys()?.forEach { key ->
@@ -873,24 +798,16 @@ object MmkvManager {
         return JsonUtil.fromJsonSafe(json, AssetUrlItem::class.java)
     }
 
-
-
-    /**
-     * Reads routing rules and repairs missing or duplicate IDs at the storage boundary.
-     * The first occurrence of a valid ID keeps its identity; only invalid/colliding items
-     * receive a new identity. This preserves contents and ordering while making ID-based
-     * edit/delete and RecyclerView keys deterministic.
-     */
     fun decodeRoutingRulesets(): MutableList<RulesetItem>? {
         val ruleset = settingsStorage.decodeString(PREF_ROUTING_RULESET)
         if (ruleset.isNullOrEmpty()) return null
 
         val rulesetList = JsonUtil.fromJsonSafe(ruleset, Array<RulesetItem>::class.java)
-            ?.toMutableList()
-            ?: return mutableListOf()
+        ?.toMutableList()
+        ?: return mutableListOf()
         val repaired = repairRoutingRulesetIds(rulesetList)
         if (repaired.second) {
-            // Never publish in-memory replacement IDs if persistence failed.
+
             if (!settingsStorage.encode(PREF_ROUTING_RULESET, JsonUtil.toJson(repaired.first))) {
                 return null
             }
@@ -928,7 +845,6 @@ object MmkvManager {
         }
         return rulesetList to changed
     }
-
 
     fun encodeSettings(key: String, value: String?): Boolean {
         return settingsStorage.encode(key, value)
@@ -986,10 +902,6 @@ object MmkvManager {
         return settingsStorage.decodeStringSet(key)
     }
 
-    /**
-     * Pinned servers always float to the top of the list regardless of the
-     * active PREF_SERVER_ORDER (origin/name/delay), across all subscriptions.
-     */
     fun decodePinnedServers(): MutableSet<String> {
         return settingsStorage.decodeStringSet(KEY_PINNED_SERVERS) ?: mutableSetOf()
     }
@@ -999,9 +911,6 @@ object MmkvManager {
         return decodePinnedServers().contains(guid)
     }
 
-    /**
-     * Toggles the pinned state of [guid] and returns the resulting state.
-     */
     fun togglePinnedServer(guid: String): Boolean {
         if (guid.isBlank()) return false
         val pinnedServers = decodePinnedServers()
@@ -1034,8 +943,6 @@ object MmkvManager {
     fun decodeStartOnBoot(): Boolean {
         return decodeSettingsBool(PREF_IS_BOOTED, false)
     }
-
-
 
     fun encodeWebDavConfig(config: WebDavConfig): Boolean {
         return mainStorage.encode(KEY_WEBDAV_CONFIG, JsonUtil.toJson(config))

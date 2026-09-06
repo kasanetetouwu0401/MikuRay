@@ -6,10 +6,10 @@ import com.miku.ray.particlesdrawable.KeepAsApi;
 public final class DistanceResolver {
 
     public static float distance(final float ax, final float ay,
-                                 final float bx, final float by) {
+        final float bx, final float by) {
         return (float) Math.sqrt(
-                (ax - bx) * (ax - bx) +
-                        (ay - by) * (ay - by)
+            (ax - bx) * (ax - bx) +
+            (ay - by) * (ay - by)
         );
     }
 }

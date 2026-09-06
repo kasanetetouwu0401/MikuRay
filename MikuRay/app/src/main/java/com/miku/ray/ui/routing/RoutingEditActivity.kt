@@ -42,7 +42,6 @@ class RoutingEditActivity : BaseActivity() {
 
         binding.editScrollContent.applyEdgeToEdgeListInsets()
 
-
         setupToolbar(binding.toolbar, showHomeAsUp = true, title = getString(R.string.routing_settings_rule_title), subtitle = getString(R.string.subtitle_routing_edit))
 
         setupOutboundTagInput()
@@ -75,11 +74,11 @@ class RoutingEditActivity : BaseActivity() {
 
     private fun getSelectedProcessPackages(): List<String> {
         return binding.etProcess.text
-            ?.toString()
-            ?.split(",")
-            ?.map { it.trim() }
-            ?.filter { it.isNotEmpty() }
-            ?.distinct() ?: emptyList()
+        ?.toString()
+        ?.split(",")
+        ?.map { it.trim() }
+        ?.filter { it.isNotEmpty() }
+        ?.distinct() ?: emptyList()
     }
 
     private fun setupOutboundTagInput() {
@@ -142,7 +141,6 @@ class RoutingEditActivity : BaseActivity() {
         finish()
         return true
     }
-
 
     private fun deleteServer(): Boolean {
         if (position >= 0) {

@@ -26,8 +26,8 @@ class CoreSettingsActivity : BaseActivity() {
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, CoreSettingsFragment())
-                .commit()
+            .replace(R.id.settings_container, CoreSettingsFragment())
+            .commit()
         }
     }
 

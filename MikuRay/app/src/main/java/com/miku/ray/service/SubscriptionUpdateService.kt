@@ -38,7 +38,6 @@ class SubscriptionUpdateService : Service() {
     @Volatile
     private var activeWorker: RealPingWorkerService? = null
 
-    // Downloads may overlap, but native probe batches in this process may not.
     private val updateSemaphore = Semaphore(2)
     private val probeSemaphore = Semaphore(1)
 
@@ -57,7 +56,7 @@ class SubscriptionUpdateService : Service() {
         NotificationHelper.stopForeground(this)
         NotificationHelper.cancel(NotificationChannelType.SUBSCRIPTION_UPDATE, this)
         super.onDestroy()
-        // Auto-test cores share process-wide Xray state, so discard it after the run.
+
         Handler(Looper.getMainLooper()).post { Process.killProcess(Process.myPid()) }
     }
 

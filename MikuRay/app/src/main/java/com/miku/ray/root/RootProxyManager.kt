@@ -31,7 +31,6 @@ object RootProxyManager {
         "::1/128", "fe80::/10", "fc00::/7", "ff00::/8"
     )
 
-
     fun start(context: Context): Boolean {
         LogUtil.i(TAG, "RootProxyManager: start")
         teardown(context)
@@ -50,7 +49,7 @@ object RootProxyManager {
         LogUtil.i(TAG, "RootProxyManager: startClientSharing")
         teardown(context)
         val script = buildTun2socksSetup(context, captureDeviceTraffic = false, forceLanShare = true)
-            ?: return false
+        ?: return false
         val result = RootShell.runScript(context, "setup_rules.sh", script)
         if (!result.success) {
             LogUtil.e(TAG, "RootProxyManager: client sharing setup failed:\n${result.output}")
@@ -74,7 +73,6 @@ object RootProxyManager {
     private fun teardown(context: Context) {
         RootShell.runScript(context, "teardown_rules.sh", buildTeardown(context))
     }
-
 
     private fun buildTun2socksSetup(
         context: Context,
@@ -121,7 +119,7 @@ object RootProxyManager {
             appendLine("nohup sh -c 'while true; do echo ${AppConfig.ROOT_OOM_SCORE} > /proc/$corePid/oom_score_adj 2>/dev/null; sleep 5; done' >/dev/null 2>&1 &")
             appendLine("echo \$! > '$oomGuardPid'")
             appendLine("if [ ! -e /dev/net/tun ]; then mkdir -p /dev/net; mknod /dev/net/tun c 10 200; chmod 666 /dev/net/tun; fi")
-            // HEV credentials are written by the app process, never embedded in this root script.
+
             appendLine("nohup \"\$BIN\" '$cfgPath' >'$logFile' 2>&1 &")
             appendLine("T2S_PID=\$!")
             appendLine("echo \$T2S_PID > '$pidFile'")
@@ -254,15 +252,14 @@ object RootProxyManager {
         }
     }
 
-
     private fun buildLanShareSetup(captureDeviceTraffic: Boolean, ipv6: Boolean): String {
         val fwd = AppConfig.ROOT_FWD_CHAIN
         val dnsChain = AppConfig.ROOT_DNS_CHAIN
         val v6fwd = AppConfig.ROOT_V6_FWD_CHAIN
         val v6pre = AppConfig.ROOT_V6_PRE_CHAIN
         val dns = SettingsManager.getRemoteDnsServers()
-            .firstOrNull { Utils.isPureIpAddress(it) && !it.contains(":") }
-            ?: AppConfig.ROOT_LAN_DNS
+        .firstOrNull { Utils.isPureIpAddress(it) && !it.contains(":") }
+        ?: AppConfig.ROOT_LAN_DNS
         val lanCidrs = listOf("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")
         return buildString {
             appendLine("set +e")
@@ -319,7 +316,6 @@ object RootProxyManager {
             }
         }
     }
-
 
     private fun writeHevConfig(file: File, config: String): Boolean {
         val atomicFile = AtomicFile(file)

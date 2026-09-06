@@ -15,9 +15,9 @@ import androidx.annotation.NonNull;
 public final class SceneConfigurator {
 
     public void configureSceneFromAttributes(
-            @NonNull final SceneConfiguration scene,
-            @NonNull final Context context,
-            @NonNull final AttributeSet attrs) {
+        @NonNull final SceneConfiguration scene,
+        @NonNull final Context context,
+        @NonNull final AttributeSet attrs) {
 
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ParticlesView);
 

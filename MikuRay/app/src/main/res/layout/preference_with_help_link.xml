@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Button xmlns:android="http://schemas.android.com/apk/res/android"
+<Button
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/Widget.AppCompat.Button.Borderless"
     android:layout_width="match_parent"
@@ -7,6 +8,6 @@
     android:onClick="onModeHelpClicked"
     android:text="@string/title_mode_help"
     android:textAlignment="textStart"
-    android:textStyle="italic"
     android:textColor="?attr/colorPrimary"
+    android:textStyle="italic"
     tools:ignore="UsingOnClickInXml" />

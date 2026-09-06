@@ -10,10 +10,6 @@ import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 
-/**
- * Reads and writes a shareable UI theme as one plain JSON document. Binary banner and font
- * contents are stored as Base64, therefore a .mikutheme file is not a ZIP/archive file.
- */
 object ThemeShareManager {
     const val MIME_TYPE = "application/vnd.mikuray.theme+json"
     const val FILE_EXTENSION = ".mikutheme"
@@ -236,8 +232,8 @@ object ThemeShareManager {
 
     private fun JSONObject.putTyped(key: String, type: String, value: Any) {
         put(key, JSONObject().apply {
-            put("type", type)
-            put("value", value)
+                put("type", type)
+                put("value", value)
         })
     }
 
@@ -249,10 +245,10 @@ object ThemeShareManager {
         CustomFontManager.getFontFile(context)?.takeIf { it.exists() }?.let { file ->
             if (file.length() <= MAX_ASSET_BYTES) {
                 put(JSONObject().apply {
-                    put("id", "customFont")
-                    put("displayName", CustomFontManager.getFontDisplayName() ?: file.name)
-                    put("fileName", file.name)
-                    put("base64", Base64.encodeToString(file.readBytes(), Base64.NO_WRAP))
+                        put("id", "customFont")
+                        put("displayName", CustomFontManager.getFontDisplayName() ?: file.name)
+                        put("fileName", file.name)
+                        put("base64", Base64.encodeToString(file.readBytes(), Base64.NO_WRAP))
                 })
             }
         }
@@ -339,8 +335,8 @@ object ThemeShareManager {
                     deleteLocalFile(oldUri)
                     val isSound = spec in soundAssets
                     val extension = asset.optString("fileName").substringAfterLast('.', if (isSound) "bin" else "jpg")
-                        .lowercase().takeIf { if (isSound) it.length in 1..8 else it in setOf("jpg", "jpeg", "png", "webp") }
-                        ?: if (isSound) "bin" else "jpg"
+                    .lowercase().takeIf { if (isSound) it.length in 1..8 else it in setOf("jpg", "jpeg", "png", "webp") }
+                    ?: if (isSound) "bin" else "jpg"
                     val destinationDirectory = if (isSound) soundDirectory else bannerDirectory
                     val destination = File(destinationDirectory, "${spec.filePrefix}${System.currentTimeMillis()}.$extension")
                     destination.writeBytes(bytes)

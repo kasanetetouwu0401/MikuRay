@@ -9,7 +9,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-
 object RootLanSharing {
 
     private var lanSharingStarted = false
@@ -27,7 +26,7 @@ object RootLanSharing {
         lanSharingStarted = true
         lanShareJob = scope.launch {
             runCatching { RootProxyManager.startClientSharing(appContext) }
-                .onFailure { lanSharingStarted = false }
+            .onFailure { lanSharingStarted = false }
         }
         return true
     }

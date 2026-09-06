@@ -64,8 +64,7 @@ class CrashLogActivity : BaseActivity() {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(AppConfig.TG_CRASH_REPORT_URL)))
             toastSuccess(getString(R.string.crash_log_share_telegram_hint))
         } catch (e: Exception) {
-            // No app can handle the link (e.g. no browser) - fall back to the generic
-            // share sheet instead of crashing.
+
             CrashReporter.shareCrash(this)
         }
     }

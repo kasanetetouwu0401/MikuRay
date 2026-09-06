@@ -32,8 +32,8 @@ class ServerCustomConfigActivity : BaseActivity() {
     private val editGuid by lazy { intent.getStringExtra("guid").orEmpty() }
     private val isRunning by lazy {
         intent.getBooleanExtra("isRunning", false)
-                && editGuid.isNotEmpty()
-                && editGuid == MmkvManager.getSelectServer()
+        && editGuid.isNotEmpty()
+        && editGuid == MmkvManager.getSelectServer()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +42,6 @@ class ServerCustomConfigActivity : BaseActivity() {
         setContentView(binding.root)
 
         binding.serverScrollContent.applyEdgeToEdgeListInsets()
-
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = EConfigType.CUSTOM.toString(), subtitle = getString(R.string.subtitle_server_config))

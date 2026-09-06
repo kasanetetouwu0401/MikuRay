@@ -32,8 +32,8 @@ class ServerProxyChainActivity : BaseActivity() {
     private val editGuid by lazy { intent.getStringExtra("guid").orEmpty() }
     private val isRunning by lazy {
         intent.getBooleanExtra("isRunning", false)
-                && editGuid.isNotEmpty()
-                && editGuid == MmkvManager.getSelectServer()
+        && editGuid.isNotEmpty()
+        && editGuid == MmkvManager.getSelectServer()
     }
     private val subscriptionId by lazy {
         intent.getStringExtra("subscriptionId")
@@ -48,7 +48,6 @@ class ServerProxyChainActivity : BaseActivity() {
         setContentView(binding.root)
 
         binding.serverScrollContent.applyEdgeToEdgeListInsets()
-
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = EConfigType.PROXYCHAIN.toString(), subtitle = getString(R.string.subtitle_server_config))
@@ -182,9 +181,9 @@ class ServerProxyChainActivity : BaseActivity() {
 
     private fun parseChainMembers(raw: String?): List<String> {
         return raw.orEmpty()
-            .split(",")
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
+        .split(",")
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
     }
 
     private inner class ActivityAdapterListener : BaseAdapterListener {

@@ -85,8 +85,8 @@ class ProfileBannerImageView @JvmOverloads constructor(
     }
 
     private fun resolveShapeKey(): String =
-        MmkvManager.decodeSettingsString(AppConfig.PREF_PROFILE_BANNER_SHAPE)
-            ?: AppConfig.PREF_PROFILE_BANNER_SHAPE_DEFAULT
+    MmkvManager.decodeSettingsString(AppConfig.PREF_PROFILE_BANNER_SHAPE)
+    ?: AppConfig.PREF_PROFILE_BANNER_SHAPE_DEFAULT
 
     private fun resolveShapeId(key: String): Int = when (key) {
         "uwu_shape_clover"         -> R.raw.uwu_shape_clover
@@ -123,12 +123,12 @@ class ProfileBannerImageView @JvmOverloads constructor(
                     val savedUri = Uri.parse(uriString)
                     Glide.with(this).clear(this)
                     Glide.with(this)
-                        .asBitmap()
-                        .load(savedUri)
-                        .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .dontAnimate()
-                        .error(R.drawable.uwu_banner_profile)
-                        .into(this)
+                    .asBitmap()
+                    .load(savedUri)
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
+                    .dontAnimate()
+                    .error(R.drawable.uwu_banner_profile)
+                    .into(this)
                 } else {
                     loadDefault()
                 }

@@ -38,12 +38,12 @@ class SearchPreferenceAdapter extends RecyclerView.Adapter<SearchPreferenceAdapt
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == PreferenceItem.TYPE) {
             return new PreferenceViewHolder(
-                    LayoutInflater.from(parent.getContext()).inflate(
-                            R.layout.searchpreference_list_item_result, parent, false));
+                LayoutInflater.from(parent.getContext()).inflate(
+                    R.layout.searchpreference_list_item_result, parent, false));
         } else {
             return new HistoryViewHolder(
-                    LayoutInflater.from(parent.getContext()).inflate(
-                            R.layout.searchpreference_list_item_history, parent, false));
+                LayoutInflater.from(parent.getContext()).inflate(
+                    R.layout.searchpreference_list_item_history, parent, false));
         }
     }
 
@@ -81,9 +81,9 @@ class SearchPreferenceAdapter extends RecyclerView.Adapter<SearchPreferenceAdapt
         }
 
         h.root.setOnClickListener(v -> {
-            if (onItemClickListener != null) {
-                onItemClickListener.onItemClicked(listItem, h.getAdapterPosition());
-            }
+                if (onItemClickListener != null) {
+                    onItemClickListener.onItemClicked(listItem, h.getAdapterPosition());
+                }
         });
     }
 
@@ -98,9 +98,9 @@ class SearchPreferenceAdapter extends RecyclerView.Adapter<SearchPreferenceAdapt
         while ((start = textLower.indexOf(keywordLower, start)) != -1) {
             int end = start + keywordLower.length();
             spannable.setSpan(
-                    new ForegroundColorSpan(highlightColor),
-                    start, end,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                new ForegroundColorSpan(highlightColor),
+                start, end,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             start = end;
         }
         return spannable;

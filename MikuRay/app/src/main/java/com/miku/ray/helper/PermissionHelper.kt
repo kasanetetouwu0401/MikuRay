@@ -13,11 +13,11 @@ class PermissionHelper(private val activity: AppCompatActivity) {
     private var permissionCallback: ((Boolean) -> Unit)? = null
 
     private val permissionLauncher: ActivityResultLauncher<Array<String>> =
-        activity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
-            val anyGranted = results.values.any { it }
-            permissionCallback?.invoke(anyGranted)
-            permissionCallback = null
-        }
+    activity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
+        val anyGranted = results.values.any { it }
+        permissionCallback?.invoke(anyGranted)
+        permissionCallback = null
+    }
 
     fun request(permissionType: PermissionType, onGranted: () -> Unit) {
         val permissions = permissionType.getPermissions()

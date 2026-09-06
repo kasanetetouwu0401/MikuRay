@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.miku.ray.ui.preference.BannerSettingsPreference
@@ -11,10 +12,10 @@
         android:entries="@array/banner_settings_character_entries"
         android:entryValues="@array/banner_settings_character_values"
         android:icon="@drawable/rmx_media_gallery_line"
-        app:dialogIcon="@drawable/rmx_media_gallery_line"
         android:key="pref_banner_settings_character"
         android:summary="@string/summary_banner_settings_character"
         android:title="@string/title_banner_settings_character"
+        app:dialogIcon="@drawable/rmx_media_gallery_line"
         app:isPreferenceVisible="false"
         app:layout="@layout/uwu_top" />
 
@@ -29,9 +30,9 @@
      <Preference
         android:icon="@drawable/rmx_business_verified_badge_line"
         android:layout="@layout/uwu_maintainer"
+        android:summary="@string/uwu_maintainer_summary"
         android:title="@string/uwu_maintainer_title"
-        app:selectable="false"
-        android:summary="@string/uwu_maintainer_summary" />
+        app:selectable="false" />
 
     <Preference
         android:icon="@drawable/rmx_palette_line"

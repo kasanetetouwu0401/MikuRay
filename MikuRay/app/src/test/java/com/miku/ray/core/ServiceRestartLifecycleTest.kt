@@ -30,8 +30,8 @@ class ServiceRestartLifecycleTest {
         var token: ServiceRestartLifecycle.Token? = null
 
         assertTrue(lifecycle.launch(onStarting = {}) {
-            token = it
-            finished.complete(Unit)
+                token = it
+                finished.complete(Unit)
         })
         withTimeout(1_000) { finished.await() }
 
@@ -49,13 +49,13 @@ class ServiceRestartLifecycleTest {
         var replacementStarted = false
 
         assertTrue(lifecycle.launch(onStarting = {}) { token ->
-            try {
-                entered.complete(Unit)
-                release.await()
-                replacementStarted = lifecycle.isCurrent(token)
-            } finally {
-                finished.complete(Unit)
-            }
+                try {
+                    entered.complete(Unit)
+                    release.await()
+                    replacementStarted = lifecycle.isCurrent(token)
+                } finally {
+                    finished.complete(Unit)
+                }
         })
         withTimeout(1_000) { entered.await() }
 

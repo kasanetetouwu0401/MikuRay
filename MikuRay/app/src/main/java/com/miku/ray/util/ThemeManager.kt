@@ -25,14 +25,14 @@ object ThemeManager {
         val customColor = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_COLOR, 0)
         val isTrueBlack = isDarkMode(activity) && MmkvManager.decodeSettingsBool(AppConfig.PREF_TRUE_BLACK, false)
         val isDynamicBanner = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)
         val bannerColor = MmkvManager.decodeSettingsInt(AppConfig.PREF_BANNER_COLOR, 0)
 
         var themeApplied = false
 
         if (isDynamicBanner && bannerColor != 0) {
             val builder = DynamicColorsOptions.Builder()
-                .setContentBasedSource(bannerColor)
+            .setContentBasedSource(bannerColor)
 
             if (isTrueBlack) {
                 builder.setThemeOverlay(R.style.ThemeOverlay_App_TrueBlack)
@@ -87,7 +87,7 @@ object ThemeManager {
 
     fun applyCustomColorTheme(activity: Activity, @ColorInt seedColor: Int, isTrueBlack: Boolean = false) {
         val optionsBuilder = DynamicColorsOptions.Builder()
-            .setContentBasedSource(seedColor)
+        .setContentBasedSource(seedColor)
 
         if (isTrueBlack) {
             optionsBuilder.setThemeOverlay(R.style.ThemeOverlay_App_TrueBlack)

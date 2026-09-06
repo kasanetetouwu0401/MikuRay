@@ -7,7 +7,7 @@ import com.miku.ray.handler.MmkvManager
 object SensorTextController {
 
     fun isEnabled(): Boolean =
-        MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_SENSOR_TEXT, false)
+    MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_SENSOR_TEXT, false)
 
     fun getAddress(profile: ProfileItem): String {
         return if (isEnabled()) {
@@ -26,9 +26,9 @@ object SensorTextController {
 
         val addrPart = server?.let {
             if (it.contains(":"))
-                it.split(":").take(2).joinToString(":", postfix = ":***")
+            it.split(":").take(2).joinToString(":", postfix = ":***")
             else
-                it.split('.').dropLast(1).joinToString(".", postfix = ".***")
+            it.split('.').dropLast(1).joinToString(".", postfix = ".***")
         } ?: ""
 
         return "$addrPart : ${port ?: ""}"

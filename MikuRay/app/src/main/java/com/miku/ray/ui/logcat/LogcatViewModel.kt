@@ -16,7 +16,7 @@ class LogcatViewModel : ViewModel() {
     private var currentFilter: String = ""
 
     var usedFallback: Boolean = false
-        private set
+    private set
 
     fun getAll(): List<String> = filteredLogs
 
@@ -26,11 +26,11 @@ class LogcatViewModel : ViewModel() {
         val bufferLines = InProcessLogBuffer.getAll()
 
         val systemLines = (tryLogcatProcessBuilder() ?: tryLogcatPidOnly())
-            ?.filter { line ->
-                val tag = LogEntry.parse(line).tag
-                tag.isEmpty() || tag !in ownTags
-            }
-            .orEmpty()
+        ?.filter { line ->
+            val tag = LogEntry.parse(line).tag
+            tag.isEmpty() || tag !in ownTags
+        }
+        .orEmpty()
 
         usedFallback = systemLines.isEmpty() && bufferLines.isNotEmpty()
 
@@ -51,8 +51,8 @@ class LogcatViewModel : ViewModel() {
                 "logcat", "-d", "-v", "time",
                 "-s", "GoLog,${LogUtil.TAG_CORE},$ANG_PACKAGE,AndroidRuntime,System.err,VpnService"
             )
-                .redirectErrorStream(true)
-                .start()
+            .redirectErrorStream(true)
+            .start()
 
             val exited = process.waitFor(5, TimeUnit.SECONDS)
             if (!exited) {
@@ -76,8 +76,8 @@ class LogcatViewModel : ViewModel() {
         return try {
             val pid = Process.myPid().toString()
             val process = ProcessBuilder("logcat", "-d", "-v", "time", "--pid=$pid")
-                .redirectErrorStream(true)
-                .start()
+            .redirectErrorStream(true)
+            .start()
 
             val exited = process.waitFor(5, TimeUnit.SECONDS)
             if (!exited) {
@@ -97,8 +97,8 @@ class LogcatViewModel : ViewModel() {
     fun clearLogcat() {
         try {
             val process = ProcessBuilder("logcat", "-c")
-                .redirectErrorStream(true)
-                .start()
+            .redirectErrorStream(true)
+            .start()
             process.waitFor(3, TimeUnit.SECONDS)
         } catch (e: Exception) {
             LogUtil.w(AppConfig.TAG, "logcat clear failed: ${e.message}")

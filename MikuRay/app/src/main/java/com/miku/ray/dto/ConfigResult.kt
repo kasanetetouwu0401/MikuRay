@@ -6,4 +6,3 @@ data class ConfigResult(
     var content: String = "",
     var errorMessage: String = "",
 )
-

@@ -80,35 +80,35 @@ object CoreConfigContextBuilder {
 
         try {
             rulesetItems
-                .filter { it.enabled }
-                .mapNotNull { it.outboundTag.takeIf { tag -> tag.isNotBlank() } }
-                .filter { tag -> tag !in AppConfig.BUILTIN_OUTBOUND_TAGS }
-                .distinct()
-                .forEach { tag ->
-                    if (tag in processedTags) {
+            .filter { it.enabled }
+            .mapNotNull { it.outboundTag.takeIf { tag -> tag.isNotBlank() } }
+            .filter { tag -> tag !in AppConfig.BUILTIN_OUTBOUND_TAGS }
+            .distinct()
+            .forEach { tag ->
+                if (tag in processedTags) {
+                    return@forEach
+                }
+                processedTags.add(tag)
+
+                try {
+                    val profile = SettingsManager.getServerViaRemarks(tag) ?: run {
+                        LogUtil.w(AppConfig.TAG, "Routing tag '$tag' has no matching profile — will fall back to proxy at routing time")
                         return@forEach
                     }
-                    processedTags.add(tag)
-
-                    try {
-                        val profile = SettingsManager.getServerViaRemarks(tag) ?: run {
-                            LogUtil.w(AppConfig.TAG, "Routing tag '$tag' has no matching profile — will fall back to proxy at routing time")
-                            return@forEach
-                        }
-                        val resolvedOutbound = resolveOutbound(tag, profile) ?: run {
-                            LogUtil.w(AppConfig.TAG, "Cannot use CUSTOM profile as routing outbound for tag '$tag', skipping")
-                            return@forEach
-                        }
-                        if (resolvedOutbound.resolvedProfiles.isEmpty()) {
-                            LogUtil.w(AppConfig.TAG, "Routing outbound '$tag' resolved to empty list, skipping")
-                            return@forEach
-                        }
-                        resolvedOutbounds.add(resolvedOutbound)
-                        LogUtil.d(AppConfig.TAG, "Resolved routing outbound: tag='$tag', type='${resolvedOutbound.resolvedType}', profiles=${resolvedOutbound.resolvedProfiles.size}")
-                    } catch (e: Exception) {
-                        LogUtil.e(AppConfig.TAG, "Failed to resolve routing outbound for tag '$tag', skipping", e)
+                    val resolvedOutbound = resolveOutbound(tag, profile) ?: run {
+                        LogUtil.w(AppConfig.TAG, "Cannot use CUSTOM profile as routing outbound for tag '$tag', skipping")
+                        return@forEach
                     }
+                    if (resolvedOutbound.resolvedProfiles.isEmpty()) {
+                        LogUtil.w(AppConfig.TAG, "Routing outbound '$tag' resolved to empty list, skipping")
+                        return@forEach
+                    }
+                    resolvedOutbounds.add(resolvedOutbound)
+                    LogUtil.d(AppConfig.TAG, "Resolved routing outbound: tag='$tag', type='${resolvedOutbound.resolvedType}', profiles=${resolvedOutbound.resolvedProfiles.size}")
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "Failed to resolve routing outbound for tag '$tag', skipping", e)
                 }
+            }
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to resolve routing outbounds from rulesets", e)
         }
@@ -117,45 +117,45 @@ object CoreConfigContextBuilder {
     }
 
     internal fun resolvePolicyGroupGuids(config: ProfileItem): List<String> =
-        resolvePolicyGroupMembers(config)?.map { it.first }?.distinct().orEmpty()
+    resolvePolicyGroupMembers(config)?.map { it.first }?.distinct().orEmpty()
 
     private fun resolvePolicyGroupProfiles(config: ProfileItem): List<ProfileItem> =
-        resolvePolicyGroupMembers(config)?.map { it.second } ?: listOf(config)
+    resolvePolicyGroupMembers(config)?.map { it.second } ?: listOf(config)
 
     private fun resolvePolicyGroupMembers(config: ProfileItem): List<Pair<String, ProfileItem>>? {
         try {
             val serverList = MmkvManager.decodeAllServerList()
             return serverList
-                .asSequence()
-                .mapNotNull { guid ->
-                    MmkvManager.decodeServerConfig(guid)?.let { profile -> guid to profile }
+            .asSequence()
+            .mapNotNull { guid ->
+                MmkvManager.decodeServerConfig(guid)?.let { profile -> guid to profile }
+            }
+            .filter { (_, profile) ->
+                val subscriptionId = config.policyGroupSubscriptionId
+                if (subscriptionId.isNullOrBlank()) {
+                    true
+                } else {
+                    profile.subscriptionId == subscriptionId
                 }
-                .filter { (_, profile) ->
-                    val subscriptionId = config.policyGroupSubscriptionId
-                    if (subscriptionId.isNullOrBlank()) {
-                        true
-                    } else {
-                        profile.subscriptionId == subscriptionId
+            }
+            .filter { (_, profile) ->
+                val filter = config.policyGroupFilter
+                if (filter.isNullOrBlank()) {
+                    true
+                } else {
+                    try {
+                        Regex(filter).containsMatchIn(profile.remarks)
+                    } catch (_: Exception) {
+                        profile.remarks.contains(filter)
                     }
                 }
-                .filter { (_, profile) ->
-                    val filter = config.policyGroupFilter
-                    if (filter.isNullOrBlank()) {
-                        true
-                    } else {
-                        try {
-                            Regex(filter).containsMatchIn(profile.remarks)
-                        } catch (_: Exception) {
-                            profile.remarks.contains(filter)
-                        }
-                    }
-                }
-                .filter { (_, profile) -> profile.server.isNotNullEmpty() }
-                .filter { (_, profile) ->
-                    Utils.isPureIpAddress(profile.server!!) || Utils.isValidUrl(profile.server!!)
-                }
-                .filter { (_, profile) -> !profile.configType.isComplexType() }
-                .toList()
+            }
+            .filter { (_, profile) -> profile.server.isNotNullEmpty() }
+            .filter { (_, profile) ->
+                Utils.isPureIpAddress(profile.server!!) || Utils.isValidUrl(profile.server!!)
+            }
+            .filter { (_, profile) -> !profile.configType.isComplexType() }
+            .toList()
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to resolve policy group profiles for '${config.remarks}'", e)
             return null
@@ -169,15 +169,15 @@ object CoreConfigContextBuilder {
 
         try {
             return config.proxyChainProfiles.orEmpty().split(",")
-                .asSequence()
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
-                .mapNotNull { remark -> SettingsManager.getServerViaRemarks(remark) }
-                .filter { it.server.isNotNullEmpty() }
-                .filter { Utils.isPureIpAddress(it.server!!) || Utils.isValidUrl(it.server!!) }
-                .filter { !it.configType.isComplexType() }
-                .toList()
-                .reversed()
+            .asSequence()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .mapNotNull { remark -> SettingsManager.getServerViaRemarks(remark) }
+            .filter { it.server.isNotNullEmpty() }
+            .filter { Utils.isPureIpAddress(it.server!!) || Utils.isValidUrl(it.server!!) }
+            .filter { !it.configType.isComplexType() }
+            .toList()
+            .reversed()
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to resolve proxy chain profiles for '${config.remarks}'", e)
             return listOf(config)
@@ -207,39 +207,39 @@ object CoreConfigContextBuilder {
         val result = mutableListOf<CoreConfigContext.RoutingDomainRule>()
 
         rulesetItems
-            .asSequence()
-            .filter { it.enabled }
-            .filter { !it.domain.isNullOrEmpty() }
-            .forEach { rule ->
-                val normalizedOutboundTag = when (rule.outboundTag) {
-                    AppConfig.TAG_DIRECT -> AppConfig.TAG_DIRECT
-                    AppConfig.TAG_BLOCKED -> AppConfig.TAG_BLOCKED
-                    else -> AppConfig.TAG_PROXY
-                }
-                result.add(
-                    CoreConfigContext.RoutingDomainRule(
-                        domain = rule.domain.orEmpty(),
-                        outboundTag = normalizedOutboundTag
-                    )
-                )
+        .asSequence()
+        .filter { it.enabled }
+        .filter { !it.domain.isNullOrEmpty() }
+        .forEach { rule ->
+            val normalizedOutboundTag = when (rule.outboundTag) {
+                AppConfig.TAG_DIRECT -> AppConfig.TAG_DIRECT
+                AppConfig.TAG_BLOCKED -> AppConfig.TAG_BLOCKED
+                else -> AppConfig.TAG_PROXY
             }
+            result.add(
+                CoreConfigContext.RoutingDomainRule(
+                    domain = rule.domain.orEmpty(),
+                    outboundTag = normalizedOutboundTag
+                )
+            )
+        }
 
         return result
     }
 
     private fun resolveFallbackOutbounds(resolvedOutbounds: List<CoreConfigContext.ResolvedOutbound>): List<CoreConfigContext.ResolvedOutbound> {
         return resolvedOutbounds
-            .asSequence()
-            .filter { it.resolvedType == CoreResolvedType.POLICYGROUP }
-            .filter { BalancerStrategyType.from(it.profile.policyGroupType).supportsObservatory && it.profile.policyGroupTestOutbounds != false }
-            .mapNotNull { it.profile.policyGroupFallbackTag }
-            .filter { it !in AppConfig.BUILTIN_OUTBOUND_TAGS && resolvedOutbounds.none { outbound -> outbound.tag == it } }
-            .distinct()
-            .mapNotNull { tag ->
-                SettingsManager.getServerViaRemarks(tag)
-                    ?.takeUnless { it.configType == EConfigType.CUSTOM || it.configType == EConfigType.POLICYGROUP }
-                    ?.let { resolveOutbound(tag, it) }
-            }
-            .toList()
+        .asSequence()
+        .filter { it.resolvedType == CoreResolvedType.POLICYGROUP }
+        .filter { BalancerStrategyType.from(it.profile.policyGroupType).supportsObservatory && it.profile.policyGroupTestOutbounds != false }
+        .mapNotNull { it.profile.policyGroupFallbackTag }
+        .filter { it !in AppConfig.BUILTIN_OUTBOUND_TAGS && resolvedOutbounds.none { outbound -> outbound.tag == it } }
+        .distinct()
+        .mapNotNull { tag ->
+            SettingsManager.getServerViaRemarks(tag)
+            ?.takeUnless { it.configType == EConfigType.CUSTOM || it.configType == EConfigType.POLICYGROUP }
+            ?.let { resolveOutbound(tag, it) }
+        }
+        .toList()
     }
 }

@@ -27,11 +27,10 @@ object CoreConfigManager {
     private var initConfigCache: String? = null
     private var initConfigCacheWithTun: String? = null
 
-
     fun getV2rayConfig(context: Context, guid: String): ConfigResult {
         try {
             val configContext = CoreConfigContextBuilder.build(context, guid)
-                ?: return ConfigResult(status = false, guid = guid, errorMessage = "Failed to build config context")
+            ?: return ConfigResult(status = false, guid = guid, errorMessage = "Failed to build config context")
             if (configContext.isCustom) {
                 return buildV2rayCustomConfig(configContext)
             }
@@ -49,7 +48,7 @@ object CoreConfigManager {
     fun getV2rayConfig4Speedtest(context: Context, guid: String): ConfigResult {
         try {
             val configContext = CoreConfigContextBuilder.build(context, guid)
-                ?: return ConfigResult(status = false, guid = guid, errorMessage = "Failed to build config context")
+            ?: return ConfigResult(status = false, guid = guid, errorMessage = "Failed to build config context")
             if (configContext.isCustom) {
                 return buildV2rayCustomConfig(configContext)
             }
@@ -73,7 +72,7 @@ object CoreConfigManager {
     private fun buildV2rayCustomConfig(configContext: CoreConfigContext): ConfigResult {
         val context = configContext.context
         val raw = MmkvManager.decodeServerRaw(configContext.guid)
-            ?: return ConfigResult(status = false, guid = configContext.guid, errorMessage = "Custom config is empty")
+        ?: return ConfigResult(status = false, guid = configContext.guid, errorMessage = "Custom config is empty")
         val result = ConfigResult(true, configContext.guid, raw)
 
         val json = JsonUtil.parseString(raw)?.takeIf { it.isJsonObject }?.asJsonObject ?: return result
@@ -86,9 +85,9 @@ object CoreConfigManager {
                 json.add("stats", JsonObject())
             }
             val policyObj = json.get("policy")?.takeIf { it.isJsonObject }?.asJsonObject
-                ?: JsonObject().also { json.add("policy", it) }
+            ?: JsonObject().also { json.add("policy", it) }
             val systemObj = policyObj.get("system")?.takeIf { it.isJsonObject }?.asJsonObject
-                ?: JsonObject().also { policyObj.add("system", it) }
+            ?: JsonObject().also { policyObj.add("system", it) }
             if (!systemObj.has("statsOutboundUplink")) {
                 systemObj.addProperty("statsOutboundUplink", true)
             }
@@ -97,7 +96,7 @@ object CoreConfigManager {
             }
         } else {
             json.remove("stats")
-            // Keep user-defined policy levels; only remove the traffic-statistics policy block.
+
             json.get("policy")?.takeIf { it.isJsonObject }?.asJsonObject?.let { policy ->
                 policy.remove("system")
                 if (policy.entrySet().isEmpty()) {
@@ -112,8 +111,8 @@ object CoreConfigManager {
 
         if (SettingsManager.canUseProcessRouting()) {
             val rulesJson = json.get("routing")?.takeIf { it.isJsonObject }?.asJsonObject
-                ?.get("rules")?.takeIf { it.isJsonArray }?.asJsonArray
-                ?: JsonArray()
+            ?.get("rules")?.takeIf { it.isJsonArray }?.asJsonArray
+            ?: JsonArray()
 
             for (elem in rulesJson) {
                 val rule = elem.takeIf { it.isJsonObject }?.asJsonObject ?: continue
@@ -128,11 +127,11 @@ object CoreConfigManager {
         }
 
         val inboundsJson = json.get("inbounds")?.takeIf { it.isJsonArray }?.asJsonArray
-            ?: JsonArray().also { json.add("inbounds", it) }
+        ?: JsonArray().also { json.add("inbounds", it) }
         val tunNotExists = inboundsJson.none { elem ->
             elem.isJsonObject && elem.asJsonObject.get("protocol")
-                ?.takeIf { it.isJsonPrimitive && it.asJsonPrimitive.isString }
-                ?.asString == "tun"
+            ?.takeIf { it.isJsonPrimitive && it.asJsonPrimitive.isString }
+            ?.asString == "tun"
         }
 
         if (tunNotExists) {
@@ -275,8 +274,8 @@ object CoreConfigManager {
         v2rayConfig: V2rayConfig,
     ) {
         val chainOutbounds = resolvedOutbound.resolvedProfiles
-            .mapNotNull { convertProfile2Outbound(it) }
-            .toMutableList()
+        .mapNotNull { convertProfile2Outbound(it) }
+        .toMutableList()
         if (chainOutbounds.isEmpty()) {
             LogUtil.w(AppConfig.TAG, "PROXYCHAIN resolved outbound '${resolvedOutbound.tag}' has no valid profiles, skipping")
             return
@@ -373,8 +372,8 @@ object CoreConfigManager {
         val strategyType = BalancerStrategyType.from(resolvedOutbound.profile.policyGroupType)
         val fallbackTag = if (strategyType.supportsObservatory && resolvedOutbound.profile.policyGroupTestOutbounds != false) {
             resolvedOutbound.profile.policyGroupFallbackTag
-                ?.takeIf { it.isNotEmpty() && it != AppConfig.TAG_PROXY }
-                ?: membersToAdd.first().tag
+            ?.takeIf { it.isNotEmpty() && it != AppConfig.TAG_PROXY }
+            ?: membersToAdd.first().tag
         } else null
         val strategy = buildBalancerStrategy(
             strategyType = strategyType,
@@ -394,12 +393,7 @@ object CoreConfigManager {
     private fun postProcessForSpeedtest(v2rayConfig: V2rayConfig, targetTag: String, isBalancer: Boolean) {
         v2rayConfig.log.loglevel = MmkvManager.decodeSettingsString(AppConfig.PREF_LOGLEVEL) ?: "warning"
         v2rayConfig.inbounds.clear()
-        // Clearing all routing rules also wipes the catch-all rule that routes into the
-        // balancer for POLICYGROUP profiles. Without it, the core falls back to the first
-        // outbound in the list (an arbitrary group member), so the tested country code can
-        // end up not matching the intended server/group. Re-add an explicit catch-all rule
-        // pointing at the correct target (plain proxy tag, or the balancer tag for groups)
-        // so the test always goes through the outbound that is actually being tested.
+
         v2rayConfig.routing.rules.clear()
         v2rayConfig.routing.rules.add(
             V2rayConfig.RoutingBean.RulesBean(
@@ -440,12 +434,8 @@ object CoreConfigManager {
             initConfigCache = assets
         }
         return JsonUtil.fromJson(assets, V2rayConfig::class.java)
-            ?: error("Failed to parse config template")
+        ?: error("Failed to parse config template")
     }
-
-
-
-
 
     private fun needTun(): Boolean {
         return SettingsManager.isVpnMode() && !SettingsManager.isUsingHevTun()
@@ -456,7 +446,7 @@ object CoreConfigManager {
         val useHev = SettingsManager.isUsingHevTun()
         val forcedByHev = vpn && useHev
         val forcedBySocksRoot = SettingsManager.isRootMode()
-                || MmkvManager.decodeSettingsBool(AppConfig.PREF_ROOT_LAN_SHARING)
+        || MmkvManager.decodeSettingsBool(AppConfig.PREF_ROOT_LAN_SHARING)
 
         val enableLocalProxy = forcedByHev || forcedBySocksRoot || MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_LOCAL_PROXY, true)
 
@@ -487,10 +477,10 @@ object CoreConfigManager {
         }
         val fakedns = MmkvManager.decodeSettingsBool(AppConfig.PREF_FAKE_DNS_ENABLED) == true
         val sniffAllTlsAndHttp =
-            MmkvManager.decodeSettingsBool(AppConfig.PREF_SNIFFING_ENABLED, true) != false
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_SNIFFING_ENABLED, true) != false
         inbound1.sniffing?.enabled = fakedns || sniffAllTlsAndHttp
         inbound1.sniffing?.routeOnly =
-            MmkvManager.decodeSettingsBool(AppConfig.PREF_ROUTE_ONLY_ENABLED, false)
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_ROUTE_ONLY_ENABLED, false)
         if (!sniffAllTlsAndHttp) {
             inbound1.sniffing?.destOverride?.clear()
         }
@@ -500,7 +490,7 @@ object CoreConfigManager {
 
         if (!Utils.isXray()) {
             val inbound2 = JsonUtil.fromJson(JsonUtil.toJson(inbound1), V2rayConfig.InboundBean::class.java)
-                ?: error("Failed to clone inbound template")
+            ?: error("Failed to clone inbound template")
             inbound2.tag = EConfigType.HTTP.name.lowercase()
             inbound2.port = SettingsManager.getHttpPort()
             inbound2.protocol = EConfigType.HTTP.name.lowercase()
@@ -576,11 +566,11 @@ object CoreConfigManager {
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_FAKE_DNS_ENABLED) == true) {
             val geositeCn = arrayListOf(AppConfig.GEOSITE_CN)
             val routingDomains = configContext.routingDomainRules
-                .asSequence()
-                .filter { it.outboundTag != AppConfig.TAG_BLOCKED }
-                .flatMap { it.domain.asSequence() }
-                .toList()
-                .distinct()
+            .asSequence()
+            .filter { it.outboundTag != AppConfig.TAG_BLOCKED }
+            .flatMap { it.domain.asSequence() }
+            .toList()
+            .distinct()
             val finalDomain = geositeCn + routingDomains
             v2rayConfig.dns?.servers?.add(
                 0,
@@ -656,7 +646,7 @@ object CoreConfigManager {
 
         if (!speedEnabled && !trafficEnabled) {
             v2rayConfig.stats = null
-            // Preserve policy.levels (handshake, connIdle, uplinkOnly, downlinkOnly).
+
             v2rayConfig.policy?.system = null
         }
     }
@@ -723,10 +713,10 @@ object CoreConfigManager {
         val hosts = mutableMapOf<String, Any>()
 
         val blockDomains = configContext.routingDomainRules
-            .asSequence()
-            .filter { it.outboundTag == AppConfig.TAG_BLOCKED }
-            .flatMap { it.domain.asSequence() }
-            .toList()
+        .asSequence()
+        .filter { it.outboundTag == AppConfig.TAG_BLOCKED }
+        .flatMap { it.domain.asSequence() }
+        .toList()
         if (blockDomains.isNotEmpty()) {
             hosts.putAll(blockDomains.map { it to AppConfig.LOOPBACK })
         }
@@ -750,11 +740,11 @@ object CoreConfigManager {
         val userHosts = MmkvManager.decodeSettingsString(AppConfig.PREF_DNS_HOSTS)
         if (userHosts.isNotNullEmpty()) {
             val userHostsMap = userHosts?.split(",").orEmpty()
-                .filter { it.isNotBlank() && it.contains(":") }
-                .associate {
-                    val parts = it.split(":", limit = 2)
-                    parts[0].trim() to parts[1].trim()
-                }
+            .filter { it.isNotBlank() && it.contains(":") }
+            .associate {
+                val parts = it.split(":", limit = 2)
+                parts[0].trim() to parts[1].trim()
+            }
             hosts.putAll(userHostsMap)
         }
 
@@ -764,13 +754,13 @@ object CoreConfigManager {
     private fun buildDnsCnModeFromRoutingRules(configContext: CoreConfigContext, servers: ArrayList<Any>, domesticDns: List<String>): List<String> {
         val cnRegionFilter = { domain: String ->
             domain.startsWith("geosite:") && (domain.endsWith("-cn") || domain.endsWith("@cn"))
-                    || domain == AppConfig.GEOSITE_CN
+            || domain == AppConfig.GEOSITE_CN
         }
         val isCnRoutingMode = configContext.routingDomainRules
-            .asSequence()
-            .filter { it.outboundTag == AppConfig.TAG_DIRECT }
-            .flatMap { it.domain.asSequence() }
-            .any { it == AppConfig.GEOSITE_CN }
+        .asSequence()
+        .filter { it.outboundTag == AppConfig.TAG_DIRECT }
+        .flatMap { it.domain.asSequence() }
+        .any { it == AppConfig.GEOSITE_CN }
 
         if (!isCnRoutingMode) {
             return emptyList()
@@ -778,11 +768,11 @@ object CoreConfigManager {
 
         val geoipCn = arrayListOf(AppConfig.GEOIP_CN)
         val cnDomains = configContext.routingDomainRules
-            .asSequence()
-            .filter { it.outboundTag == AppConfig.TAG_DIRECT }
-            .flatMap { it.domain.asSequence() }
-            .filter { cnRegionFilter(it) }
-            .toList()
+        .asSequence()
+        .filter { it.outboundTag == AppConfig.TAG_DIRECT }
+        .flatMap { it.domain.asSequence() }
+        .filter { cnRegionFilter(it) }
+        .toList()
         if (cnDomains.isEmpty()) {
             return emptyList()
         }
@@ -841,10 +831,6 @@ object CoreConfigManager {
         return domesticDnsTags
     }
 
-
-
-
-
     private fun resolveOutboundDomainsToHosts(v2rayConfig: V2rayConfig) {
         if (MmkvManager.decodeSettingsString(AppConfig.PREF_OUTBOUND_DOMAIN_RESOLVE_METHOD, AppConfig.DEFAULT_OUTBOUND_DOMAIN_RESOLVE_METHOD) != "1") {
             return
@@ -892,7 +878,7 @@ object CoreConfigManager {
 
     private fun applyTcpKeepAlive(v2rayConfig: V2rayConfig) {
         val idleSeconds = MmkvManager.decodeSettingsString(AppConfig.PREF_TCP_KEEPALIVE_IDLE, "30")
-            ?.toIntOrNull() ?: 60
+        ?.toIntOrNull() ?: 60
         if (idleSeconds <= 0) return
 
         v2rayConfig.getAllProxyOutbound().forEach { outbound ->
@@ -904,15 +890,11 @@ object CoreConfigManager {
         return CoreOutboundBuilder.convert(profileItem)
     }
 
-
-
-
-
     private fun applyObservability(v2rayConfig: V2rayConfig, strategies: List<BalancerStrategy>) {
         val allObsSelectors = strategies
-            .mapNotNull { it.observatory?.subjectSelector }
-            .flatten()
-            .distinct()
+        .mapNotNull { it.observatory?.subjectSelector }
+        .flatten()
+        .distinct()
         val obsTemplate = strategies.firstNotNullOfOrNull { it.observatory }
         if (obsTemplate != null && allObsSelectors.isNotEmpty()) {
             v2rayConfig.observatory = V2rayConfig.ObservatoryObject(
@@ -924,9 +906,9 @@ object CoreConfigManager {
         }
 
         val allBurstSelectors = strategies
-            .mapNotNull { it.burstObservatory?.subjectSelector }
-            .flatten()
-            .distinct()
+        .mapNotNull { it.burstObservatory?.subjectSelector }
+        .flatten()
+        .distinct()
         val burstTemplate = strategies.firstNotNullOfOrNull { it.burstObservatory }
         if (burstTemplate != null && allBurstSelectors.isNotEmpty()) {
             v2rayConfig.burstObservatory = V2rayConfig.BurstObservatoryObject(
@@ -943,8 +925,8 @@ object CoreConfigManager {
     ) {
 
         v2rayConfig.routing.domainStrategy =
-            MmkvManager.decodeSettingsString(AppConfig.PREF_ROUTING_DOMAIN_STRATEGY)
-                ?: "AsIs"
+        MmkvManager.decodeSettingsString(AppConfig.PREF_ROUTING_DOMAIN_STRATEGY)
+        ?: "AsIs"
 
         val rulesetItems = MmkvManager.decodeRoutingRulesets()
         rulesetItems?.forEach { key ->
@@ -1007,7 +989,6 @@ object CoreConfigManager {
         v2rayConfig.routing.rules.add(rule)
     }
 
-
     private fun buildBalancerStrategy(
         strategyType: BalancerStrategyType,
         selector: List<String>,
@@ -1060,10 +1041,10 @@ object CoreConfigManager {
 
     private fun decodeObservatorySampling(): Int {
         return MmkvManager.decodeSettingsString(AppConfig.PREF_OBSERVATORY_LEAST_LOAD_SAMPLING)
-            ?.trim()
-            ?.toIntOrNull()
-            ?.takeIf { it > 0 }
-            ?: AppConfig.OBSERVATORY_LEAST_LOAD_SAMPLING.toInt()
+        ?.trim()
+        ?.toIntOrNull()
+        ?.takeIf { it > 0 }
+        ?: AppConfig.OBSERVATORY_LEAST_LOAD_SAMPLING.toInt()
     }
 
     private data class BalancerStrategy(

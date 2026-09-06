@@ -22,7 +22,7 @@ class LibraryActivity : BaseActivity() {
         if (savedInstanceState == null) {
             val fragment = LibsBuilder().withEdgeToEdge(true).supportFragment()
             supportFragmentManager.beginTransaction()
-                .replace(binding.libraryFragmentContainer.id, fragment).commit()
+            .replace(binding.libraryFragmentContainer.id, fragment).commit()
         }
     }
 }

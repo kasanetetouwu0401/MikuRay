@@ -1,6 +1,5 @@
 package com.miku.ray.handler
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.app.Notification
 import android.app.NotificationChannel
@@ -104,8 +103,6 @@ object NotificationManager : TrafficController.Listener {
     fun showNotification(currentConfig: ProfileItem?) {
         val service = getService() ?: return
 
-        // The notification owns the connection lifecycle. Persist the exact same
-        // timestamp that drives its timer so the FAB cannot drift or reuse stale time.
         MmkvManager.encodeSettings(
             AppConfig.PREF_VPN_CONNECT_START_TIME,
             System.currentTimeMillis(),
@@ -133,30 +130,30 @@ object NotificationManager : TrafficController.Listener {
         val restartV2RayPendingIntent = PendingIntent.getBroadcast(service, NOTIFICATION_PENDING_INTENT_RESTART_V2RAY, restartV2RayIntent, flags)
 
         val channelId =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                createNotificationChannel()
-            } else {
-                ""
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel()
+        } else {
+            ""
+        }
 
         mBuilder = NotificationCompat.Builder(service, channelId)
-            .setSmallIcon(R.drawable.ic_stat_name)
-            .setContentTitle(currentConfig?.remarks ?: service.getString(R.string.app_name))
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setOngoing(true)
-            .setShowWhen(false)
-            .setOnlyAlertOnce(true)
-            .setContentIntent(contentPendingIntent)
-            .addAction(
-                RemixR.drawable.rmx_delete_bin_line,
-                service.getString(R.string.notification_action_stop_v2ray),
-                stopV2RayPendingIntent
-            )
-            .addAction(
-                RemixR.drawable.rmx_history_line,
-                service.getString(R.string.title_service_restart),
-                restartV2RayPendingIntent
-            )
+        .setSmallIcon(R.drawable.ic_stat_name)
+        .setContentTitle(currentConfig?.remarks ?: service.getString(R.string.app_name))
+        .setPriority(NotificationCompat.PRIORITY_LOW)
+        .setOngoing(true)
+        .setShowWhen(false)
+        .setOnlyAlertOnce(true)
+        .setContentIntent(contentPendingIntent)
+        .addAction(
+            RemixR.drawable.rmx_delete_bin_line,
+            service.getString(R.string.notification_action_stop_v2ray),
+            stopV2RayPendingIntent
+        )
+        .addAction(
+            RemixR.drawable.rmx_history_line,
+            service.getString(R.string.title_service_restart),
+            restartV2RayPendingIntent
+        )
 
         service.startForeground(NOTIFICATION_ID, mBuilder?.build())
     }

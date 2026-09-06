@@ -79,13 +79,13 @@ public final class Scene implements SceneConfiguration {
     }
 
     public void setParticleData(
-            final int position,
-            final float x,
-            final float y,
-            final float dCos,
-            final float dSin,
-            final float radius,
-            final float speedFactor) {
+        final int position,
+        final float x,
+        final float y,
+        final float dCos,
+        final float dSin,
+        final float radius,
+        final float speedFactor) {
         setParticleX(position, x);
         setParticleY(position, y);
 
@@ -245,7 +245,6 @@ public final class Scene implements SceneConfiguration {
         this.lineLength = lineLength;
     }
 
-
     @Override
     public int getParticleColor() {
         return particleColor;
@@ -268,13 +267,13 @@ public final class Scene implements SceneConfiguration {
 
     @Override
     public void setParticleRadiusRange(
-            @FloatRange(from = 0.5f) final float minRadius,
-            @FloatRange(from = 0.5f) final float maxRadius) {
+        @FloatRange(from = 0.5f) final float minRadius,
+        @FloatRange(from = 0.5f) final float maxRadius) {
         if (minRadius < 0.5f || maxRadius < 0.5f) {
             throw new IllegalArgumentException("Particle radius must not be less than 0.5");
         }
         if (Float.compare(minRadius, Float.NaN) == 0
-                || Float.compare(maxRadius, Float.NaN) == 0) {
+            || Float.compare(maxRadius, Float.NaN) == 0) {
             throw new IllegalArgumentException("Particle radius must be a valid float");
         }
         if (minRadius > maxRadius) {

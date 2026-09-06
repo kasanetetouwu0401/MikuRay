@@ -25,7 +25,7 @@ class UwuPreferenceCategory @JvmOverloads constructor(
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
         val iconView = holder.itemView.findViewById<ImageView>(R.id.uwu_category_icon)
-            ?: return
+        ?: return
         if (sectionIconRes != 0) {
             iconView.setImageResource(sectionIconRes)
         }

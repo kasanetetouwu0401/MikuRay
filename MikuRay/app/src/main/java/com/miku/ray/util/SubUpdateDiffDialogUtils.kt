@@ -1,6 +1,5 @@
 package com.miku.ray.util
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.content.Context
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -12,9 +11,9 @@ fun showSubUpdateDiffDialog(context: Context, result: SubscriptionUpdateResult) 
     if (result.addedProfiles.isEmpty() && result.deletedProfiles.isEmpty()) return
 
     val subNames = (result.addedProfiles.asSequence().map { it.subscriptionName } +
-            result.deletedProfiles.asSequence().map { it.subscriptionName })
-        .distinct()
-        .toList()
+        result.deletedProfiles.asSequence().map { it.subscriptionName })
+    .distinct()
+    .toList()
     val multipleSubs = subNames.size > 1
 
     fun format(entries: List<ProfileDiffEntry>): String = entries.joinToString("\n") { entry ->
@@ -35,9 +34,9 @@ fun showSubUpdateDiffDialog(context: Context, result: SubscriptionUpdateResult) 
     }
 
     MaterialAlertDialogBuilder(context)
-        .setTitle(title)
-        .setIcon(RemixR.drawable.rmx_rss_line)
-        .setMessage(message)
-        .setPositiveButton(android.R.string.ok, null)
-        .showBlur()
+    .setTitle(title)
+    .setIcon(RemixR.drawable.rmx_rss_line)
+    .setMessage(message)
+    .setPositiveButton(android.R.string.ok, null)
+    .showBlur()
 }

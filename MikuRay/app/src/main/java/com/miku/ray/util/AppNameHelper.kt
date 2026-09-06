@@ -25,7 +25,7 @@ object AppNameHelper {
 
     fun getDisplayName(context: Context): String {
         val variant = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_APP_NAME)
-            ?: AppConfig.APP_NAME_DEFAULT
+        ?: AppConfig.APP_NAME_DEFAULT
         return getDisplayName(context, variant)
     }
 

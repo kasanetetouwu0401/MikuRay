@@ -1,6 +1,5 @@
 package com.miku.ray.ui.dialog
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.app.Activity
 import android.content.Context
@@ -147,14 +146,14 @@ class ParticlesSettingsDialog @JvmOverloads constructor(
 
     private fun currentValue(param: SliderParam): Float {
         return MmkvManager.decodeSettingsFloat(param.prefKey, param.default)
-            .coerceIn(param.min, param.max)
+        .coerceIn(param.min, param.max)
     }
 
     override fun onClick() {
         val activity = context.findActivity() ?: return
 
         val dialogView = LayoutInflater.from(context)
-            .inflate(R.layout.dialog_particles_settings, null)
+        .inflate(R.layout.dialog_particles_settings, null)
 
         val sliders = params.map { param ->
             val label = dialogView.findViewById<TextView>(param.labelViewId)
@@ -174,18 +173,18 @@ class ParticlesSettingsDialog @JvmOverloads constructor(
         }
 
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(title)
-            .setIcon(RemixR.drawable.rmx_sparkling_line)
-            .setView(dialogView)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                sliders.forEach { (param, slider) ->
-                    MmkvManager.encodeSettings(param.prefKey, slider.value)
-                }
-                activity.sendBroadcast(Intent(AppConfig.BROADCAST_ACTION_PARTICLES_CHANGED))
+        .setTitle(title)
+        .setIcon(RemixR.drawable.rmx_sparkling_line)
+        .setView(dialogView)
+        .setPositiveButton(android.R.string.ok) { _, _ ->
+            sliders.forEach { (param, slider) ->
+                MmkvManager.encodeSettings(param.prefKey, slider.value)
             }
-            .setNeutralButton(R.string.reset, null)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
+            activity.sendBroadcast(Intent(AppConfig.BROADCAST_ACTION_PARTICLES_CHANGED))
+        }
+        .setNeutralButton(R.string.reset, null)
+        .setNegativeButton(android.R.string.cancel, null)
+        .create()
 
         WindowBlurUtils.applyWindowBlur(dialog.window)
         dialog.show()
@@ -194,7 +193,7 @@ class ParticlesSettingsDialog @JvmOverloads constructor(
             sliders.forEach { (param, slider) ->
                 slider.value = param.default
                 dialogView.findViewById<TextView>(param.labelViewId).text =
-                    labelText(param, param.default)
+                labelText(param, param.default)
                 MmkvManager.encodeSettings(param.prefKey, param.default)
             }
             activity.sendBroadcast(Intent(AppConfig.BROADCAST_ACTION_PARTICLES_CHANGED))

@@ -19,19 +19,19 @@ public final class Defaults {
     public static final int LINE_COLOR = Color.WHITE;
 
     public static final float LINE_LENGTH = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, 86, Resources.getSystem().getDisplayMetrics());
+        TypedValue.COMPLEX_UNIT_DIP, 86, Resources.getSystem().getDisplayMetrics());
 
     public static final float LINE_THICKNESS = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, 1, Resources.getSystem().getDisplayMetrics());
+        TypedValue.COMPLEX_UNIT_DIP, 1, Resources.getSystem().getDisplayMetrics());
 
     @ColorInt
     public static final int PARTICLE_COLOR = Color.WHITE;
 
     public static final float PARTICLE_RADIUS_MAX = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, 3f, Resources.getSystem().getDisplayMetrics());
+        TypedValue.COMPLEX_UNIT_DIP, 3f, Resources.getSystem().getDisplayMetrics());
 
     public static final float PARTICLE_RADIUS_MIN = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, 1f, Resources.getSystem().getDisplayMetrics());
+        TypedValue.COMPLEX_UNIT_DIP, 1f, Resources.getSystem().getDisplayMetrics());
 
     public static final float SPEED_FACTOR = 1f;
 }

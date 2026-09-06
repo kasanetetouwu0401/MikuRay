@@ -144,8 +144,7 @@ class SnowflakesView @JvmOverloads constructor(
         val handler = Handler(thread.looper)
         val runnable = object : Runnable {
             override fun run() {
-                // A runnable from a previous attach/detach cycle must never
-                // continue after a new animation worker has been created.
+
                 if (!running || generation != animationGeneration) return
 
                 val now = SystemClock.uptimeMillis()
@@ -199,8 +198,8 @@ class SnowflakesView @JvmOverloads constructor(
         windTimeMs += dtMs
         val globalGust = (
             sin(windTimeMs * 0.00075f) * 0.65f +
-                sin(windTimeMs * 0.00165f + 1.4f) * 0.35f
-            ) * windMultiplier
+            sin(windTimeMs * 0.00165f + 1.4f) * 0.35f
+        ) * windMultiplier
         val iterator = flakes.iterator()
         while (iterator.hasNext()) {
             val flake = iterator.next()

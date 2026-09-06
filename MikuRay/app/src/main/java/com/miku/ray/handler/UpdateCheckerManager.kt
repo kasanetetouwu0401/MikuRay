@@ -41,13 +41,13 @@ object UpdateCheckerManager {
                     proxyPassword = proxyPassword
                 )
             )
-                ?: throw IllegalStateException("Failed to get response")
+            ?: throw IllegalStateException("Failed to get response")
         }
 
         val latestRelease = if (includePreRelease) {
             JsonUtil.fromJsonSafe(response, Array<GitHubRelease>::class.java)
-                ?.firstOrNull()
-                ?: throw IllegalStateException("No pre-release found")
+            ?.firstOrNull()
+            ?: throw IllegalStateException("No pre-release found")
         } else {
             JsonUtil.fromJsonSafe(response, GitHubRelease::class.java)
         }
@@ -101,6 +101,6 @@ object UpdateCheckerManager {
         }
 
         return asset?.browserDownloadUrl
-            ?: throw IllegalStateException("No compatible APK found")
+        ?: throw IllegalStateException("No compatible APK found")
     }
 }

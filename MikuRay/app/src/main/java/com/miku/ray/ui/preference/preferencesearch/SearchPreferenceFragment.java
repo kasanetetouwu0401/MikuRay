@@ -84,18 +84,18 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
             viewHolder.moreButton.setContentDescription(searchConfiguration.getTextMore());
         }
         viewHolder.moreButton.setOnClickListener(v -> {
-            PopupMenu popup = new PopupMenu(getContext(), viewHolder.moreButton);
-            popup.getMenuInflater().inflate(R.menu.searchpreference_more, popup.getMenu());
-            popup.setOnMenuItemClickListener(item -> {
-                if (item.getItemId() == R.id.clear_history) {
-                    clearHistory();
+                PopupMenu popup = new PopupMenu(getContext(), viewHolder.moreButton);
+                popup.getMenuInflater().inflate(R.menu.searchpreference_more, popup.getMenu());
+                popup.setOnMenuItemClickListener(item -> {
+                        if (item.getItemId() == R.id.clear_history) {
+                            clearHistory();
+                        }
+                        return true;
+                });
+                if (searchConfiguration.getTextClearHistory() != null) {
+                    popup.getMenu().findItem(R.id.clear_history).setTitle(searchConfiguration.getTextClearHistory());
                 }
-                return true;
-            });
-            if (searchConfiguration.getTextClearHistory() != null) {
-                popup.getMenu().findItem(R.id.clear_history).setTitle(searchConfiguration.getTextClearHistory());
-            }
-            popup.show();
+                popup.show();
         });
 
         viewHolder.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -106,11 +106,11 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
 
         viewHolder.searchView.addTextChangedListener(textWatcher);
         viewHolder.searchView.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                hideKeyboard();
-                return true;
-            }
-            return false;
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    hideKeyboard();
+                    return true;
+                }
+                return false;
         });
 
         if (!searchConfiguration.isSearchBarEnabled()) {
@@ -133,27 +133,27 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
     public void onViewCreated(android.view.View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
-            androidx.core.graphics.Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            androidx.core.graphics.Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
-            int topInset = searchConfiguration.isSearchBarEnabled()
+                androidx.core.graphics.Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                androidx.core.graphics.Insets cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
+                int topInset = searchConfiguration.isSearchBarEnabled()
                 ? Math.max(systemBars.top, cutout.top)
                 : 0;
-            int bottomInset = Math.max(systemBars.bottom, cutout.bottom);
-            v.setPadding(
-                v.getPaddingLeft(),
-                topInset,
-                v.getPaddingRight(),
-                v.getPaddingBottom()
-            );
+                int bottomInset = Math.max(systemBars.bottom, cutout.bottom);
+                v.setPadding(
+                    v.getPaddingLeft(),
+                    topInset,
+                    v.getPaddingRight(),
+                    v.getPaddingBottom()
+                );
 
-            int baseBottomPadding = (int) (16 * v.getResources().getDisplayMetrics().density);
-            viewHolder.recyclerView.setPadding(
-                viewHolder.recyclerView.getPaddingLeft(),
-                viewHolder.recyclerView.getPaddingTop(),
-                viewHolder.recyclerView.getPaddingRight(),
-                baseBottomPadding + bottomInset
-            );
-            return insets;
+                int baseBottomPadding = (int) (16 * v.getResources().getDisplayMetrics().density);
+                viewHolder.recyclerView.setPadding(
+                    viewHolder.recyclerView.getPaddingLeft(),
+                    viewHolder.recyclerView.getPaddingTop(),
+                    viewHolder.recyclerView.getPaddingRight(),
+                    baseBottomPadding + bottomInset
+                );
+                return insets;
         });
     }
 
@@ -230,11 +230,11 @@ public class SearchPreferenceFragment extends Fragment implements SearchPreferen
 
     private void showKeyboard() {
         viewHolder.searchView.post(() -> {
-            viewHolder.searchView.requestFocus();
-            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm != null) {
-                imm.showSoftInput(viewHolder.searchView, InputMethodManager.SHOW_IMPLICIT);
-            }
+                viewHolder.searchView.requestFocus();
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.showSoftInput(viewHolder.searchView, InputMethodManager.SHOW_IMPLICIT);
+                }
         });
     }
 

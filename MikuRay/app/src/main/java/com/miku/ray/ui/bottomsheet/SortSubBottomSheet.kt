@@ -107,11 +107,6 @@ class SortSubBottomSheet : BaseBottomSheetFragment() {
             return SortSubBottomSheet()
         }
 
-        /**
-         * Applies the persisted PREF_SUB_SORT_ORDER to a list of subscriptions,
-         * without mutating the input list. Shared by SubSettingActivity and
-         * MainActivity so both stay in sync.
-         */
         fun <T> sorted(list: List<T>, addedTime: (T) -> Long, lastUpdated: (T) -> Long): List<T> {
             val order = MmkvManager.decodeSettingsInt(AppConfig.PREF_SUB_SORT_ORDER, ORDER_ORIGIN)
             return when (order) {

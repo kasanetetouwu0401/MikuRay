@@ -125,7 +125,7 @@ class ServerProxyChainMemberAdapter(
     }
 
     class MemberViewHolder(val binding: ItemRecyclerProxyChainMemberBinding) :
-        BaseViewHolder(binding.root), ItemTouchHelperViewHolder
+    BaseViewHolder(binding.root), ItemTouchHelperViewHolder
 
     open class BaseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun onItemSelected() {

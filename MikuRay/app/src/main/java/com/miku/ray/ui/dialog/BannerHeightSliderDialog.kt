@@ -1,6 +1,5 @@
 package com.miku.ray.ui.dialog
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.app.Activity
 import android.content.Context
@@ -43,28 +42,28 @@ class BannerHeightSliderDialog @JvmOverloads constructor(
         )
 
         val dialogView = LayoutInflater.from(context)
-            .inflate(R.layout.dialog_banner_height_slider, null)
+        .inflate(R.layout.dialog_banner_height_slider, null)
         val slider = dialogView.findViewById<Slider>(R.id.slider_banner_height)
         slider.value = current.toFloat()
 
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.pref_home_banner_height_title)
-            .setIcon(RemixR.drawable.rmx_design_ruler_2_line)
-            .setView(dialogView)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                val newHeight = slider.value.toInt()
-                MmkvManager.encodeSettings(AppConfig.PREF_HOME_BANNER_HEIGHT, newHeight)
-                summary = context.getString(
-                    R.string.pref_home_banner_height_summary_value, newHeight
-                )
-                val intent = android.content.Intent(
-                    AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED
-                )
-                activity.sendBroadcast(intent)
-            }
-            .setNeutralButton(R.string.reset, null)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
+        .setTitle(R.string.pref_home_banner_height_title)
+        .setIcon(RemixR.drawable.rmx_design_ruler_2_line)
+        .setView(dialogView)
+        .setPositiveButton(android.R.string.ok) { _, _ ->
+            val newHeight = slider.value.toInt()
+            MmkvManager.encodeSettings(AppConfig.PREF_HOME_BANNER_HEIGHT, newHeight)
+            summary = context.getString(
+                R.string.pref_home_banner_height_summary_value, newHeight
+            )
+            val intent = android.content.Intent(
+                AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED
+            )
+            activity.sendBroadcast(intent)
+        }
+        .setNeutralButton(R.string.reset, null)
+        .setNegativeButton(android.R.string.cancel, null)
+        .create()
 
         WindowBlurUtils.applyWindowBlur(dialog.window)
         dialog.show()

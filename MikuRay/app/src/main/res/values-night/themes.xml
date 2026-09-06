@@ -26,7 +26,7 @@
         <item name="preferenceTheme">@style/AppThemePreference</item>
         <item name="android:homeAsUpIndicator">@drawable/rmx_arrows_arrow_left_double_line</item>
         <item name="actionOverflowButtonStyle">@style/AppTheme.OverflowButton</item>
-        
+
     </style>
 
     <style name="ThemeOverlay.App.TrueBlack" parent="@style/ThemeOverlay.Material3Expressive">
@@ -48,7 +48,7 @@
         <item name="colorOutlineVariant">#ff49454f</item>
         <item name="colorSurfaceInverse">#ffe6e1e5</item>
         <item name="colorOnSurfaceInverse">#ff313033</item>
-        
+
         <item name="colorBg">#ff000000</item>
         <item name="colorCard">#ff131313</item>
 

@@ -36,10 +36,10 @@ object SocksFmt : FmtBase() {
 
     fun toUri(config: ProfileItem): String {
         val pw =
-            if (config.username.isNotNullEmpty())
-                "${config.username}:${config.password}"
-            else
-                ":"
+        if (config.username.isNotNullEmpty())
+        "${config.username}:${config.password}"
+        else
+        ":"
 
         return toUri(config, Utils.encode(pw, true), null)
     }

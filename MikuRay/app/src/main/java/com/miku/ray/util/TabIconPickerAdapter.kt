@@ -52,9 +52,9 @@ class TabIconPickerAdapter(
         )
 
         fun labelFor(iconName: String): String = iconName
-            .removePrefix("filter_")
-            .removeSuffix("_solar")
-            .replaceFirstChar { it.uppercase() }
+        .removePrefix("filter_")
+        .removeSuffix("_solar")
+        .replaceFirstChar { it.uppercase() }
     }
 
     inner class VH(view: View) : RecyclerView.ViewHolder(view) {
@@ -65,7 +65,7 @@ class TabIconPickerAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val v = LayoutInflater.from(context)
-            .inflate(R.layout.item_tab_icon_picker, parent, false)
+        .inflate(R.layout.item_tab_icon_picker, parent, false)
         return VH(v)
     }
 

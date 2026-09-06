@@ -7,104 +7,104 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_network"
-        app:shapeAppearance="?shapeAppearanceCornerMedium"
-        app:boxStrokeWidth="1.5dip"
-        app:boxStrokeWidthFocused="1.5dip"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        app:endIconMode="dropdown_menu"
-        app:endIconDrawable="@drawable/ic_dropdown_selector"
-        app:endIconTint="?attr/colorOnSurfaceVariant"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="@string/server_lab_network"
-        app:startIconDrawable="@drawable/rmx_device_network_line"
-        app:startIconTint="?attr/colorOnSurfaceVariant"
+        app:boxStrokeWidth="1.5dp"
+        app:boxStrokeWidthFocused="1.5dp"
+        app:endIconDrawable="@drawable/ic_dropdown_selector"
+        app:endIconMode="dropdown_menu"
+        app:endIconTint="?attr/colorOnSurfaceVariant"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
+        app:startIconDrawable="@drawable/rmx_device_network_line"
+        app:startIconTint="?attr/colorOnSurfaceVariant">
 
         <com.google.android.material.textfield.MaterialAutoCompleteTextView
             android:id="@+id/sp_network"
-            android:textColor="?attr/colorOnSurface"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="none"
+            android:textColor="?attr/colorOnSurface"
             app:simpleItems="@array/networks" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_header_type"
-        app:shapeAppearance="?shapeAppearanceCornerMedium"
-        app:boxStrokeWidth="1.5dip"
-        app:boxStrokeWidthFocused="1.5dip"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        app:endIconMode="dropdown_menu"
-        app:endIconDrawable="@drawable/ic_dropdown_selector"
-        app:endIconTint="?attr/colorOnSurfaceVariant"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
         android:hint="@string/server_lab_head_type"
-        app:startIconDrawable="@drawable/rmx_document_file_list_line"
-        app:startIconTint="?attr/colorOnSurfaceVariant"
+        app:boxStrokeWidth="1.5dp"
+        app:boxStrokeWidthFocused="1.5dp"
+        app:endIconDrawable="@drawable/ic_dropdown_selector"
+        app:endIconMode="dropdown_menu"
+        app:endIconTint="?attr/colorOnSurfaceVariant"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/til_network">
+        app:layout_constraintTop_toBottomOf="@id/til_network"
+        app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
+        app:startIconDrawable="@drawable/rmx_document_file_list_line"
+        app:startIconTint="?attr/colorOnSurfaceVariant">
 
         <com.google.android.material.textfield.MaterialAutoCompleteTextView
             android:id="@+id/sp_header_type"
-            android:textColor="?attr/colorOnSurface"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="none" />
+            android:inputType="none"
+            android:textColor="?attr/colorOnSurface" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_request_host"
-        app:shapeAppearance="?shapeAppearanceCornerMedium"
-        app:boxStrokeWidth="1.5dip"
-        app:boxStrokeWidthFocused="1.5dip"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
         android:hint="@string/server_lab_request_host"
-        app:startIconDrawable="@drawable/rmx_device_server_line"
-        app:startIconTint="?attr/colorOnSurfaceVariant"
+        app:boxStrokeWidth="1.5dp"
+        app:boxStrokeWidthFocused="1.5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/til_header_type">
+        app:layout_constraintTop_toBottomOf="@id/til_header_type"
+        app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
+        app:startIconDrawable="@drawable/rmx_device_server_line"
+        app:startIconTint="?attr/colorOnSurfaceVariant">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_request_host"
-            android:textColor="?attr/colorOnSurface"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:inputType="text"
+            android:textColor="?attr/colorOnSurface" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_path"
-        app:shapeAppearance="?shapeAppearanceCornerMedium"
-        app:boxStrokeWidth="1.5dip"
-        app:boxStrokeWidthFocused="1.5dip"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
         android:hint="@string/server_lab_path"
-        app:startIconDrawable="@drawable/rmx_route_line"
-        app:startIconTint="?attr/colorOnSurfaceVariant"
+        app:boxStrokeWidth="1.5dp"
+        app:boxStrokeWidthFocused="1.5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/til_request_host">
+        app:layout_constraintTop_toBottomOf="@id/til_request_host"
+        app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
+        app:startIconDrawable="@drawable/rmx_route_line"
+        app:startIconTint="?attr/colorOnSurfaceVariant">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_path"
-            android:textColor="?attr/colorOnSurface"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:inputType="text"
+            android:textColor="?attr/colorOnSurface" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <LinearLayout
@@ -118,132 +118,132 @@
         app:layout_constraintTop_toBottomOf="@id/til_path">
 
         <com.google.android.material.textfield.TextInputLayout
-            app:shapeAppearance="?shapeAppearanceCornerMedium"
-            app:boxStrokeWidth="1.5dip"
-            app:boxStrokeWidthFocused="1.5dip"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/server_lab_kcp_mtu"
+            app:boxStrokeWidth="1.5dp"
+            app:boxStrokeWidthFocused="1.5dp"
+            app:helperText="@string/server_lab_kcp_mtu_tip"
+            app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
             app:startIconDrawable="@drawable/rmx_arrows_expand_width_line"
-            app:startIconTint="?attr/colorOnSurfaceVariant"
-            app:helperText="@string/server_lab_kcp_mtu_tip">
+            app:startIconTint="?attr/colorOnSurfaceVariant">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_kcp_mtu"
-                android:textColor="?attr/colorOnSurface"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number" />
+                android:inputType="number"
+                android:textColor="?attr/colorOnSurface" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            app:shapeAppearance="?shapeAppearanceCornerMedium"
-            app:boxStrokeWidth="1.5dip"
-            app:boxStrokeWidthFocused="1.5dip"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/padding_spacing_dp16"
             android:hint="@string/server_lab_kcp_tti"
+            app:boxStrokeWidth="1.5dp"
+            app:boxStrokeWidthFocused="1.5dp"
+            app:helperText="@string/server_lab_kcp_tti_tip"
+            app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
             app:startIconDrawable="@drawable/rmx_system_timer_line"
-            app:startIconTint="?attr/colorOnSurfaceVariant"
-            app:helperText="@string/server_lab_kcp_tti_tip">
+            app:startIconTint="?attr/colorOnSurfaceVariant">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_kcp_tti"
-                android:textColor="?attr/colorOnSurface"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number" />
+                android:inputType="number"
+                android:textColor="?attr/colorOnSurface" />
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layout_extra"
-        app:shapeAppearance="?shapeAppearanceCornerMedium"
-        app:boxStrokeWidth="1.5dip"
-        app:boxStrokeWidthFocused="1.5dip"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
         android:hint="@string/server_lab_xhttp_extra"
-        app:startIconDrawable="@drawable/rmx_development_code_line"
-        app:startIconTint="?attr/colorOnSurfaceVariant"
+        app:boxStrokeWidth="1.5dp"
+        app:boxStrokeWidthFocused="1.5dp"
         app:helperText="@string/server_lab_xhttp_extra_tip"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layout_kcp">
+        app:layout_constraintTop_toBottomOf="@id/layout_kcp"
+        app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
+        app:startIconDrawable="@drawable/rmx_development_code_line"
+        app:startIconTint="?attr/colorOnSurfaceVariant">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_extra"
-            android:textColor="?attr/colorOnSurface"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="top"
             android:inputType="textMultiLine"
+            android:maxLines="10"
             android:minLines="4"
-            android:maxLines="10" />
+            android:textColor="?attr/colorOnSurface" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layout_fm"
-        app:shapeAppearance="?shapeAppearanceCornerMedium"
-        app:boxStrokeWidth="1.5dip"
-        app:boxStrokeWidthFocused="1.5dip"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
         android:hint="@string/server_lab_final_mask"
-        app:startIconDrawable="@drawable/rmx_development_code_line"
-        app:startIconTint="?attr/colorOnSurfaceVariant"
+        app:boxStrokeWidth="1.5dp"
+        app:boxStrokeWidthFocused="1.5dp"
         app:helperText="@string/server_lab_final_mask_tip"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layout_extra">
+        app:layout_constraintTop_toBottomOf="@id/layout_extra"
+        app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
+        app:startIconDrawable="@drawable/rmx_development_code_line"
+        app:startIconTint="?attr/colorOnSurfaceVariant">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_fm"
-            android:textColor="?attr/colorOnSurface"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="top"
             android:inputType="textMultiLine"
+            android:maxLines="10"
             android:minLines="1"
-            android:maxLines="10" />
+            android:textColor="?attr/colorOnSurface" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layout_browser_dialer"
-        app:shapeAppearance="?shapeAppearanceCornerMedium"
-        app:boxStrokeWidth="1.5dip"
-        app:boxStrokeWidthFocused="1.5dip"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        app:endIconMode="dropdown_menu"
-        app:endIconDrawable="@drawable/ic_dropdown_selector"
-        app:endIconTint="?attr/colorOnSurfaceVariant"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
         android:hint="@string/server_lab_browser_dialer"
-        app:startIconDrawable="@drawable/rmx_business_window_line"
-        app:startIconTint="?attr/colorOnSurfaceVariant"
         android:visibility="gone"
+        app:boxStrokeWidth="1.5dp"
+        app:boxStrokeWidthFocused="1.5dp"
+        app:endIconDrawable="@drawable/ic_dropdown_selector"
+        app:endIconMode="dropdown_menu"
+        app:endIconTint="?attr/colorOnSurfaceVariant"
+        app:helperText="@string/server_lab_browser_dialer_tip"
+        app:helperTextEnabled="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/layout_fm"
-        app:helperText="@string/server_lab_browser_dialer_tip"
-        app:helperTextEnabled="true">
+        app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
+        app:startIconDrawable="@drawable/rmx_business_window_line"
+        app:startIconTint="?attr/colorOnSurfaceVariant">
 
         <com.google.android.material.textfield.MaterialAutoCompleteTextView
             android:id="@+id/sp_browser_dialer_mode"
-            android:textColor="?attr/colorOnSurface"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="none"
+            android:textColor="?attr/colorOnSurface"
             app:simpleItems="@array/browser_dialer_mode" />
     </com.google.android.material.textfield.TextInputLayout>
 

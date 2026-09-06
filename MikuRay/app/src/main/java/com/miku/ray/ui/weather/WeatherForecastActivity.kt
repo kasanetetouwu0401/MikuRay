@@ -1,6 +1,5 @@
 package com.miku.ray.ui.weather
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.os.Bundle
 import android.view.Menu
@@ -294,11 +293,11 @@ class WeatherForecastActivity : BaseActivity() {
     }
 
     private fun formatVisibility(meters: Double): String =
-        if (meters >= 1000) {
-            getString(R.string.weather_visibility_km_format, meters / 1000.0)
-        } else {
-            getString(R.string.weather_visibility_m_format, Math.round(meters))
-        }
+    if (meters >= 1000) {
+        getString(R.string.weather_visibility_km_format, meters / 1000.0)
+    } else {
+        getString(R.string.weather_visibility_m_format, Math.round(meters))
+    }
 
     private fun formatTimeOfDay(iso: String?): String? {
         if (iso.isNullOrBlank()) return null

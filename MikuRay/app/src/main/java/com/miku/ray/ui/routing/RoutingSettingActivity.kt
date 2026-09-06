@@ -1,6 +1,5 @@
 package com.miku.ray.ui.routing
 
-
 import com.miku.ray.remixicon.R as RemixR
 import com.miku.ray.ui.base.HelperBaseActivity
 import android.annotation.SuppressLint
@@ -40,7 +39,7 @@ import kotlinx.coroutines.withContext
 class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRoutingMenuOptionClickListener {
     private val binding by lazy { ActivityRoutingSettingBinding.inflate(layoutInflater) }
     private val ownerActivity: RoutingSettingActivity
-        get() = this
+    get() = this
     private val viewModel: RoutingSettingsViewModel by viewModels()
     private lateinit var adapter: RoutingSettingRecyclerAdapter
     private var mItemTouchHelper: ItemTouchHelper? = null
@@ -98,72 +97,72 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
 
     private fun importPredefined() {
         AlertDialog.Builder(this)
-            .setTitle(R.string.routing_settings_import_predefined_rulesets_title)
-            .setIcon(RemixR.drawable.rmx_device_router_line)
-            .setItems(resources.getStringArray(R.array.preset_rulesets)) { _, i ->
+        .setTitle(R.string.routing_settings_import_predefined_rulesets_title)
+        .setIcon(RemixR.drawable.rmx_device_router_line)
+        .setItems(resources.getStringArray(R.array.preset_rulesets)) { _, i ->
             AlertDialog.Builder(this)
-                .setTitle(R.string.routing_settings_import_predefined_rulesets_title)
-                .setIcon(RemixR.drawable.rmx_error_warning_line)
-                .setMessage(R.string.routing_settings_import_rulesets_tip)
-                .setPositiveButton(android.R.string.ok) { _, _ ->
-                    try {
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            SettingsManager.resetRoutingRulesetsFromPresets(this@RoutingSettingActivity, i)
-                            launch(Dispatchers.Main) {
-                                refreshData()
-                                snackbarSuccess(
-                                    getString(R.string.routing_settings_import_predefined_rulesets),
-                                    title = getString(R.string.title_alerter_success)
-                                )
-                            }
-                        }
-                    } catch (e: Exception) {
-                        LogUtil.e(AppConfig.TAG, "Failed to import predefined ruleset", e)
-                    }
-                }
-                .setNegativeButton(android.R.string.cancel) { _, _ ->
-                }
-                .showBlur()
-        }.showBlur()
-    }
-
-    private fun importFromClipboard() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.routing_settings_import_rulesets_from_clipboard_title)
+            .setTitle(R.string.routing_settings_import_predefined_rulesets_title)
             .setIcon(RemixR.drawable.rmx_error_warning_line)
             .setMessage(R.string.routing_settings_import_rulesets_tip)
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                val clipboard = try {
-                    Utils.getClipboard(this)
-                } catch (e: Exception) {
-                    LogUtil.e(AppConfig.TAG, "Failed to get clipboard content", e)
-                    snackbarError(
-                        getString(R.string.routing_settings_import_rulesets_from_clipboard),
-                        title = getString(R.string.title_alerter_error)
-                    )
-                    return@setPositiveButton
-                }
-                lifecycleScope.launch(Dispatchers.IO) {
-                    val result = SettingsManager.resetRoutingRulesets(clipboard)
-                    withContext(Dispatchers.Main) {
-                        if (result) {
+                try {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        SettingsManager.resetRoutingRulesetsFromPresets(this@RoutingSettingActivity, i)
+                        launch(Dispatchers.Main) {
                             refreshData()
                             snackbarSuccess(
-                                getString(R.string.routing_settings_import_rulesets_from_clipboard),
+                                getString(R.string.routing_settings_import_predefined_rulesets),
                                 title = getString(R.string.title_alerter_success)
-                            )
-                        } else {
-                            snackbarError(
-                                getString(R.string.routing_settings_import_rulesets_from_clipboard),
-                                title = getString(R.string.title_alerter_error)
                             )
                         }
                     }
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "Failed to import predefined ruleset", e)
                 }
             }
             .setNegativeButton(android.R.string.cancel) { _, _ ->
             }
             .showBlur()
+        }.showBlur()
+    }
+
+    private fun importFromClipboard() {
+        AlertDialog.Builder(this)
+        .setTitle(R.string.routing_settings_import_rulesets_from_clipboard_title)
+        .setIcon(RemixR.drawable.rmx_error_warning_line)
+        .setMessage(R.string.routing_settings_import_rulesets_tip)
+        .setPositiveButton(android.R.string.ok) { _, _ ->
+            val clipboard = try {
+                Utils.getClipboard(this)
+            } catch (e: Exception) {
+                LogUtil.e(AppConfig.TAG, "Failed to get clipboard content", e)
+                snackbarError(
+                    getString(R.string.routing_settings_import_rulesets_from_clipboard),
+                    title = getString(R.string.title_alerter_error)
+                )
+                return@setPositiveButton
+            }
+            lifecycleScope.launch(Dispatchers.IO) {
+                val result = SettingsManager.resetRoutingRulesets(clipboard)
+                withContext(Dispatchers.Main) {
+                    if (result) {
+                        refreshData()
+                        snackbarSuccess(
+                            getString(R.string.routing_settings_import_rulesets_from_clipboard),
+                            title = getString(R.string.title_alerter_success)
+                        )
+                    } else {
+                        snackbarError(
+                            getString(R.string.routing_settings_import_rulesets_from_clipboard),
+                            title = getString(R.string.title_alerter_error)
+                        )
+                    }
+                }
+            }
+        }
+        .setNegativeButton(android.R.string.cancel) { _, _ ->
+        }
+        .showBlur()
     }
 
     private fun importQRcode(): Boolean {
@@ -191,34 +190,33 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
         }
     }
 
-
     private fun importRulesetsFromQRcode(qrcode: String?): Boolean {
         AlertDialog.Builder(this)
-            .setTitle(R.string.routing_settings_import_rulesets_from_qrcode_title)
-            .setIcon(RemixR.drawable.rmx_error_warning_line)
-            .setMessage(R.string.routing_settings_import_rulesets_tip)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                lifecycleScope.launch(Dispatchers.IO) {
-                    val result = SettingsManager.resetRoutingRulesets(qrcode)
-                    withContext(Dispatchers.Main) {
-                        if (result) {
-                            refreshData()
-                            snackbarSuccess(
-                                getString(R.string.routing_settings_import_rulesets_from_qrcode),
-                                title = getString(R.string.title_alerter_success)
-                            )
-                        } else {
-                            snackbarError(
-                                getString(R.string.routing_settings_import_rulesets_from_qrcode),
-                                title = getString(R.string.title_alerter_error)
-                            )
-                        }
+        .setTitle(R.string.routing_settings_import_rulesets_from_qrcode_title)
+        .setIcon(RemixR.drawable.rmx_error_warning_line)
+        .setMessage(R.string.routing_settings_import_rulesets_tip)
+        .setPositiveButton(android.R.string.ok) { _, _ ->
+            lifecycleScope.launch(Dispatchers.IO) {
+                val result = SettingsManager.resetRoutingRulesets(qrcode)
+                withContext(Dispatchers.Main) {
+                    if (result) {
+                        refreshData()
+                        snackbarSuccess(
+                            getString(R.string.routing_settings_import_rulesets_from_qrcode),
+                            title = getString(R.string.title_alerter_success)
+                        )
+                    } else {
+                        snackbarError(
+                            getString(R.string.routing_settings_import_rulesets_from_qrcode),
+                            title = getString(R.string.title_alerter_error)
+                        )
                     }
                 }
             }
-            .setNegativeButton(android.R.string.cancel) { _, _ ->
-            }
-            .showBlur()
+        }
+        .setNegativeButton(android.R.string.cancel) { _, _ ->
+        }
+        .showBlur()
         return true
     }
 
@@ -240,7 +238,7 @@ class RoutingSettingActivity : HelperBaseActivity(), RoutingMenuBottomSheet.OnRo
             if (position !in 0 until adapter.itemCount) return
             startActivity(
                 Intent(ownerActivity, RoutingEditActivity::class.java)
-                    .putExtra("position", position)
+                .putExtra("position", position)
             )
         }
 

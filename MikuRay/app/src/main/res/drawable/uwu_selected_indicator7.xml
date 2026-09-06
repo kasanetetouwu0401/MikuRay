@@ -3,40 +3,40 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:gravity="top"
-        android:height="26.0dip">
+        android:height="26dp">
         <shape>
             <gradient
-                android:startColor="?colorCard"
-                android:endColor="?colorPrimary"
                 android:angle="45.0"
+                android:endColor="?attr/colorPrimary"
+                android:startColor="?attr/colorCard"
                 android:type="linear" />
             <corners
-                android:radius="16.0dip" />
+                android:radius="16dp" />
         </shape>
     </item>
     <item
         android:gravity="bottom"
-        android:height="26.0dip">
+        android:height="26dp">
         <shape>
             <gradient
-                android:startColor="?colorPrimary"
-                android:endColor="?colorCard"
                 android:angle="45.0"
+                android:endColor="?attr/colorCard"
+                android:startColor="?attr/colorPrimary"
                 android:type="linear" />
             <corners
-                android:radius="16.0dip" />
+                android:radius="16dp" />
         </shape>
     </item>
     <item
-        android:top="4.0dip"
-        android:bottom="4.0dip">
+        android:bottom="4dp"
+        android:top="4dp">
         <inset>
             <shape
                 android:shape="rectangle">
                 <solid
-                    android:color="?colorCard" />
+                    android:color="?attr/colorCard" />
                 <corners
-                    android:radius="16.0dip" />
+                    android:radius="16dp" />
             </shape>
         </inset>
     </item>

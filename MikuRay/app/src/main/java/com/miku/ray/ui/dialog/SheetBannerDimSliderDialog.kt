@@ -1,6 +1,5 @@
 package com.miku.ray.ui.dialog
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.content.Context
 import android.util.AttributeSet
@@ -30,22 +29,22 @@ class SheetBannerDimSliderDialog @JvmOverloads constructor(
         )
 
         val dialogView = LayoutInflater.from(context)
-            .inflate(R.layout.dialog_sheet_banner_dim_slider, null)
+        .inflate(R.layout.dialog_sheet_banner_dim_slider, null)
         val slider = dialogView.findViewById<Slider>(R.id.slider_sheet_banner_dim)
         slider.value = current.toFloat()
 
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.sheet_banner_dim_title)
-            .setIcon(RemixR.drawable.rmx_design_contrast_2_line)
-            .setView(dialogView)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                val newDim = slider.value.toInt()
-                MmkvManager.encodeSettings(AppConfig.PREF_SHEET_BANNER_DIM, newDim)
-                summary = context.getString(R.string.sheet_banner_dim_summary_value, newDim)
-            }
-            .setNeutralButton(R.string.reset, null)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
+        .setTitle(R.string.sheet_banner_dim_title)
+        .setIcon(RemixR.drawable.rmx_design_contrast_2_line)
+        .setView(dialogView)
+        .setPositiveButton(android.R.string.ok) { _, _ ->
+            val newDim = slider.value.toInt()
+            MmkvManager.encodeSettings(AppConfig.PREF_SHEET_BANNER_DIM, newDim)
+            summary = context.getString(R.string.sheet_banner_dim_summary_value, newDim)
+        }
+        .setNeutralButton(R.string.reset, null)
+        .setNegativeButton(android.R.string.cancel, null)
+        .create()
 
         WindowBlurUtils.applyWindowBlur(dialog.window)
         dialog.show()

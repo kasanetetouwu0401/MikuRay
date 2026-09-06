@@ -33,25 +33,25 @@ object JsonUtil {
 
     fun toJsonPretty(src: Any?): String? {
         if (src == null)
-            return null
+        return null
         val gsonPre = GsonBuilder()
-            .setPrettyPrinting()
-            .disableHtmlEscaping()
-            .registerTypeAdapter(
-                object : TypeToken<Double>() {}.type,
-                JsonSerializer { src: Double?, _: Type?, _: JsonSerializationContext? ->
-                    JsonPrimitive(
-                        src?.toInt()
-                    )
-                }
-            )
-            .create()
+        .setPrettyPrinting()
+        .disableHtmlEscaping()
+        .registerTypeAdapter(
+            object : TypeToken<Double>() {}.type,
+            JsonSerializer { src: Double?, _: Type?, _: JsonSerializationContext? ->
+                JsonPrimitive(
+                    src?.toInt()
+                )
+            }
+        )
+        .create()
         return gsonPre.toJson(src)
     }
 
     fun parseString(src: String?): JsonObject? {
         if (src == null)
-            return null
+        return null
         try {
             return JsonParser.parseString(src).getAsJsonObject()
         } catch (e: Exception) {

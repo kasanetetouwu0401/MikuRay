@@ -1,6 +1,5 @@
 package com.miku.ray.ui.dialog
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.app.Activity
 import android.content.Context
@@ -45,21 +44,21 @@ class DpiSliderDialog @JvmOverloads constructor(
         slider.value = currentDpi.toFloat().coerceIn(160f, 640f)
 
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.pref_custom_dpi)
-            .setIcon(RemixR.drawable.rmx_smartphone_line)
-            .setView(dialogView)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                val clamped = slider.value.toInt()
-                val valueToSave = if (clamped == systemDpi) 0 else clamped
+        .setTitle(R.string.pref_custom_dpi)
+        .setIcon(RemixR.drawable.rmx_smartphone_line)
+        .setView(dialogView)
+        .setPositiveButton(android.R.string.ok) { _, _ ->
+            val clamped = slider.value.toInt()
+            val valueToSave = if (clamped == systemDpi) 0 else clamped
 
-                MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_DPI, valueToSave)
-                summary = if (valueToSave == 0) systemDpi.toString() else clamped.toString()
+            MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_DPI, valueToSave)
+            summary = if (valueToSave == 0) systemDpi.toString() else clamped.toString()
 
-                activity.recreate()
-            }
-            .setNeutralButton(R.string.reset, null)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
+            activity.recreate()
+        }
+        .setNeutralButton(R.string.reset, null)
+        .setNegativeButton(android.R.string.cancel, null)
+        .create()
 
         WindowBlurUtils.applyWindowBlur(dialog.window)
         dialog.show()

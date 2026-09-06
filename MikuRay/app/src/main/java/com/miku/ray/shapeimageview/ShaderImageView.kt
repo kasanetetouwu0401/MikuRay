@@ -21,12 +21,12 @@ abstract class ShaderImageView @JvmOverloads constructor(
     protected var _pathHelper: ShaderHelper? = null
 
     protected val pathHelper: ShaderHelper
-        get() {
-            if (_pathHelper == null) {
-                _pathHelper = createImageViewHelper()
-            }
-            return _pathHelper!!
+    get() {
+        if (_pathHelper == null) {
+            _pathHelper = createImageViewHelper()
         }
+        return _pathHelper!!
+    }
 
     init {
         pathHelper.init(context, attrs, defStyle)
@@ -102,23 +102,23 @@ abstract class ShaderImageView @JvmOverloads constructor(
     }
 
     var borderWidth: Int
-        get() = pathHelper.borderWidth
-        set(value) {
-            pathHelper.borderWidth = value
-            invalidate()
-        }
+    get() = pathHelper.borderWidth
+    set(value) {
+        pathHelper.borderWidth = value
+        invalidate()
+    }
 
     var borderAlpha: Float
-        get() = pathHelper.borderAlpha
-        set(value) {
-            pathHelper.borderAlpha = value
-            invalidate()
-        }
+    get() = pathHelper.borderAlpha
+    set(value) {
+        pathHelper.borderAlpha = value
+        invalidate()
+    }
 
     var isSquare: Boolean
-        get() = pathHelper.isSquare
-        set(value) {
-            pathHelper.isSquare = value
-            invalidate()
-        }
+    get() = pathHelper.isSquare
+    set(value) {
+        pathHelper.isSquare = value
+        invalidate()
+    }
 }

@@ -40,7 +40,6 @@ object CoreNativeManager {
         }
     }
 
-
     fun getLibVersion(): String {
         return try {
             Libv2ray.checkVersionX()

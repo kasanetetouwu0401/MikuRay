@@ -87,10 +87,10 @@ data class V2rayNShareItem(
             else -> error("Unknown ConfigType: $ConfigType")
         }
         val network = if (configType == EConfigType.HYSTERIA2) "hysteria" else
-            when (Network) {
-                "raw" -> "tcp"
-                else -> NetworkType.fromString(Network).type
-            }
+        when (Network) {
+            "raw" -> "tcp"
+            else -> NetworkType.fromString(Network).type
+        }
         val profile = ProfileItem(
             configType = configType,
             remarks = Remarks.orEmpty(),

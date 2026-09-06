@@ -187,14 +187,14 @@ class TransportFields(private val view: View) {
         val browserDialerMode = spBrowserDialerMode?.text?.toString().orEmpty()
         val defaultDialerMode = browserDialerModes.firstOrNull().orEmpty()
         profileItem.browserDialerMode =
-            if ((networks[networkPos] == NetworkType.WS.type || networks[networkPos] == NetworkType.XHTTP.type)
-                && browserDialerMode.isNotEmpty()
-                && browserDialerMode != defaultDialerMode
-            ) {
-                browserDialerMode
-            } else {
-                null
-            }
+        if ((networks[networkPos] == NetworkType.WS.type || networks[networkPos] == NetworkType.XHTTP.type)
+            && browserDialerMode.isNotEmpty()
+            && browserDialerMode != defaultDialerMode
+        ) {
+            browserDialerMode
+        } else {
+            null
+        }
 
         return true
     }

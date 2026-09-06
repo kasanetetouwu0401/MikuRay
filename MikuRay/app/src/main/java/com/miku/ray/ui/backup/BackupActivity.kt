@@ -55,15 +55,15 @@ class BackupActivity : HelperBaseActivity() {
 
         binding.layoutBackup.setOnClickListener {
             MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.title_configuration_backup)
-                .setIcon(RemixR.drawable.rmx_device_save_3_line)
-                .setItems(config_backup_options) { _, which ->
-                    when (which) {
-                        0 -> backupViaLocal()
-                        1 -> backupViaWebDav()
-                    }
+            .setTitle(R.string.title_configuration_backup)
+            .setIcon(RemixR.drawable.rmx_device_save_3_line)
+            .setItems(config_backup_options) { _, which ->
+                when (which) {
+                    0 -> backupViaLocal()
+                    1 -> backupViaWebDav()
                 }
-                .showBlur()
+            }
+            .showBlur()
         }
 
         binding.layoutShare.setOnClickListener {
@@ -72,13 +72,13 @@ class BackupActivity : HelperBaseActivity() {
                 startActivity(
                     Intent.createChooser(
                         Intent(Intent.ACTION_SEND).setType("application/zip")
-                            .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            .putExtra(
-                                Intent.EXTRA_STREAM,
-                                FileProvider.getUriForFile(
-                                    this, BuildConfig.APPLICATION_ID + ".cache", File(ret.second)
-                                )
-                            ), getString(R.string.title_configuration_share)
+                        .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        .putExtra(
+                            Intent.EXTRA_STREAM,
+                            FileProvider.getUriForFile(
+                                this, BuildConfig.APPLICATION_ID + ".cache", File(ret.second)
+                            )
+                        ), getString(R.string.title_configuration_share)
                     )
                 )
             } else {
@@ -91,15 +91,15 @@ class BackupActivity : HelperBaseActivity() {
 
         binding.layoutRestore.setOnClickListener {
             MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.title_configuration_restore)
-                .setIcon(RemixR.drawable.rmx_history_line)
-                .setItems(config_backup_options) { _, which ->
-                    when (which) {
-                        0 -> restoreViaLocal()
-                        1 -> restoreViaWebDav()
-                    }
+            .setTitle(R.string.title_configuration_restore)
+            .setIcon(RemixR.drawable.rmx_history_line)
+            .setItems(config_backup_options) { _, which ->
+                when (which) {
+                    0 -> restoreViaLocal()
+                    1 -> restoreViaWebDav()
                 }
-                .showBlur()
+            }
+            .showBlur()
         }
 
         binding.layoutProfileStorageCleanup.setOnClickListener {
@@ -579,23 +579,23 @@ class BackupActivity : HelperBaseActivity() {
         }
 
         MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.title_webdav_config_setting)
-            .setIcon(RemixR.drawable.rmx_cloud_line)
-            .setView(dialogBinding.root)
-            .setPositiveButton(R.string.menu_item_save_config) { _, _ ->
-                val url = dialogBinding.etWebdavUrl.text.toString().trim()
-                val user = dialogBinding.etWebdavUser.text.toString().trim().ifEmpty { null }
-                val pass = dialogBinding.etWebdavPass.text.toString()
-                val remotePath = dialogBinding.etWebdavRemotePath.text.toString().trim().ifEmpty { AppConfig.WEBDAV_BACKUP_DIR }
-                val cfg = WebDavConfig(baseUrl = url, username = user, password = pass, remoteBasePath = remotePath)
-                MmkvManager.encodeWebDavConfig(cfg)
+        .setTitle(R.string.title_webdav_config_setting)
+        .setIcon(RemixR.drawable.rmx_cloud_line)
+        .setView(dialogBinding.root)
+        .setPositiveButton(R.string.menu_item_save_config) { _, _ ->
+            val url = dialogBinding.etWebdavUrl.text.toString().trim()
+            val user = dialogBinding.etWebdavUser.text.toString().trim().ifEmpty { null }
+            val pass = dialogBinding.etWebdavPass.text.toString()
+            val remotePath = dialogBinding.etWebdavRemotePath.text.toString().trim().ifEmpty { AppConfig.WEBDAV_BACKUP_DIR }
+            val cfg = WebDavConfig(baseUrl = url, username = user, password = pass, remoteBasePath = remotePath)
+            MmkvManager.encodeWebDavConfig(cfg)
 
-                snackbarSuccess(
-                    getString(R.string.title_webdav_config_setting),
-                    title = getString(R.string.title_alerter_success)
-                )
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .showBlur()
+            snackbarSuccess(
+                getString(R.string.title_webdav_config_setting),
+                title = getString(R.string.title_alerter_success)
+            )
+        }
+        .setNegativeButton(android.R.string.cancel, null)
+        .showBlur()
     }
 }

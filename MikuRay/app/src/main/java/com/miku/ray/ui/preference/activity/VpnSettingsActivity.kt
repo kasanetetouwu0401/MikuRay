@@ -35,8 +35,8 @@ class VpnSettingsActivity : BaseActivity() {
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, VpnSettingsFragment())
-                .commit()
+            .replace(R.id.settings_container, VpnSettingsFragment())
+            .commit()
         }
     }
 
@@ -148,8 +148,8 @@ class VpnSettingsActivity : BaseActivity() {
                                 AppConfig.PREF_FAKE_DNS_IP_POOL to AppConfig.DEFAULT_FAKE_DNS_IP_POOL,
                             )
                             p.summary = p.text.takeUnless { it.isNullOrEmpty() }
-                                ?: defaults[p.key]
-                                ?: ""
+                            ?: defaults[p.key]
+                            ?: ""
                             p.setOnPreferenceChangeListener { pref, newValue ->
                                 val value = (newValue as? String).orEmpty().trim()
                                 if (pref.key == AppConfig.PREF_FAKE_DNS_IP_POOL && !FakeDnsIpPool.isValid(value)) {
@@ -214,11 +214,11 @@ class VpnSettingsActivity : BaseActivity() {
             fakeDnsEnabled: Boolean = fakeDns?.isChecked == true,
         ) {
             fakeDnsIpPool?.isEnabled =
-                isVpnMode() && localDnsEnabled && fakeDnsEnabled
+            isVpnMode() && localDnsEnabled && fakeDnsEnabled
         }
 
         private fun isVpnMode(): Boolean =
-            MmkvManager.decodeSettingsString(AppConfig.PREF_MODE, VPN) == VPN
+        MmkvManager.decodeSettingsString(AppConfig.PREF_MODE, VPN) == VPN
 
         private fun updateHevTunSettings(enabled: Boolean) {
             hevTunLogLevel?.isEnabled = enabled

@@ -26,8 +26,8 @@ class FragmentSettingsActivity : BaseActivity() {
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, FragmentSettingsFragment())
-                .commit()
+            .replace(R.id.settings_container, FragmentSettingsFragment())
+            .commit()
         }
     }
 

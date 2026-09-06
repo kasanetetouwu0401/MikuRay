@@ -43,9 +43,9 @@ class SubSettingRecyclerAdapter(
         holder.itemSubSettingBinding.tvSubscriptionUsage.text = usageText
         holder.itemSubSettingBinding.tvSubscriptionExpire.text = expiryText
         holder.itemSubSettingBinding.tvSubscriptionUsage.visibility =
-            if (usageText == null) View.GONE else View.VISIBLE
+        if (usageText == null) View.GONE else View.VISIBLE
         holder.itemSubSettingBinding.tvSubscriptionExpire.visibility =
-            if (expiryText == null) View.GONE else View.VISIBLE
+        if (expiryText == null) View.GONE else View.VISIBLE
         holder.itemView.setBackgroundColor(Color.TRANSPARENT)
 
         holder.itemSubSettingBinding.layoutEdit.setOnClickListener {
@@ -77,9 +77,9 @@ class SubSettingRecyclerAdapter(
             holder.itemSubSettingBinding.tvLastUpdated.visibility = View.VISIBLE
             holder.itemSubSettingBinding.tvServerCount.visibility = View.VISIBLE
             holder.itemSubSettingBinding.tvSubscriptionUsage.visibility =
-                if (usageText == null) View.GONE else View.VISIBLE
+            if (usageText == null) View.GONE else View.VISIBLE
             holder.itemSubSettingBinding.tvSubscriptionExpire.visibility =
-                if (expiryText == null) View.GONE else View.VISIBLE
+            if (expiryText == null) View.GONE else View.VISIBLE
             holder.itemSubSettingBinding.layoutShare.setOnClickListener {
                 adapterListener?.onShare(subItem.url)
             }
@@ -107,13 +107,13 @@ class SubSettingRecyclerAdapter(
 
     private fun formatSubscriptionExpiry(context: Context, subscription: SubscriptionItem): String? {
         return subscription.expiresAt
-            .takeIf { it in 1L..(Long.MAX_VALUE / 1000L) }
-            ?.let { seconds ->
-                context.getString(
-                    R.string.sub_setting_expire,
-                    DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(seconds * 1000L)),
-                )
-            }
+        .takeIf { it in 1L..(Long.MAX_VALUE / 1000L) }
+        ?.let { seconds ->
+            context.getString(
+                R.string.sub_setting_expire,
+                DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(seconds * 1000L)),
+            )
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainViewHolder {
@@ -127,7 +127,7 @@ class SubSettingRecyclerAdapter(
     }
 
     class MainViewHolder(val itemSubSettingBinding: ItemRecyclerSubSettingBinding) :
-        BaseViewHolder(itemSubSettingBinding.root), ItemTouchHelperViewHolder
+    BaseViewHolder(itemSubSettingBinding.root), ItemTouchHelperViewHolder
 
     open class BaseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun onItemSelected() {

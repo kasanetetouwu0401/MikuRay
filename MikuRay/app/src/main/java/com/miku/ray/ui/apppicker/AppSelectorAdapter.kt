@@ -34,7 +34,7 @@ class AppSelectorAdapter(
     }
 
     inner class AppViewHolder(private val binding: ItemRecyclerBypassListBinding) : RecyclerView.ViewHolder(binding.root),
-        View.OnClickListener {
+    View.OnClickListener {
         private lateinit var appInfo: AppInfo
 
         fun bind(item: AppInfo) {

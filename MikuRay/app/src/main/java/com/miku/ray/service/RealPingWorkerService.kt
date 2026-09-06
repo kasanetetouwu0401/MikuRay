@@ -31,9 +31,7 @@ internal object RealPingExecutionLimiter {
     private val customConfigMutex = Mutex()
 
     suspend fun <T> run(configType: EConfigType, block: () -> T): T {
-        // Custom profiles bypass speed-test trimming and start complete Xray configs.
-        // Parallel teardown can abort the native probe process, so serialize their
-        // JNI measurements globally across batches.
+
         return if (configType == EConfigType.CUSTOM) {
             customConfigMutex.withLock { block() }
         } else {
@@ -118,7 +116,6 @@ private data class RealPingProbePlan(
     }
 }
 
-/** Runs one bounded batch of individual delay tests in the disposable probe process. */
 class RealPingWorkerService(
     private val context: Context,
     guids: List<String>,
@@ -165,13 +162,6 @@ class RealPingWorkerService(
         return summary()
     }
 
-    /**
-     * A probe guid that was never directly requested only exists because it was
-     * resolved as a policy-group member (see [RealPingProbePlan.build]). Surface
-     * its own result too - not just the group's aggregated delay - so every
-     * server inside the policy group gets a visible result, and so the member's
-     * own subscription/server-list tab picks up the fresh delay immediately.
-     */
     private fun emitPolicyGroupMemberResult(guid: String, delayMillis: Long) {
         if (guid in requestedGuids) return
         if (!finished.get()) onEvent(RealPingEvent.Result(guid, delayMillis))

@@ -1,4 +1,5 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/traffic_widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -16,10 +17,10 @@
         android:layout_height="match_parent"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:paddingStart="14dp"
-        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
         android:paddingEnd="14dp"
-        android:paddingBottom="14dp">
+        android:paddingStart="14dp"
+        android:paddingTop="14dp">
 
         <ImageView
             android:id="@+id/traffic_widget_icon"
@@ -69,10 +70,10 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:orientation="vertical"
-                    android:paddingStart="8dp"
-                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
                     android:paddingEnd="8dp"
-                    android:paddingBottom="10dp">
+                    android:paddingStart="8dp"
+                    android:paddingTop="10dp">
 
                     <ImageView
                         android:id="@+id/traffic_widget_upload_icon"
@@ -117,10 +118,10 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:orientation="vertical"
-                    android:paddingStart="8dp"
-                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
                     android:paddingEnd="8dp"
-                    android:paddingBottom="10dp">
+                    android:paddingStart="8dp"
+                    android:paddingTop="10dp">
 
                     <ImageView
                         android:id="@+id/traffic_widget_download_icon"
@@ -173,10 +174,10 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:paddingStart="8dp"
-                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
                     android:paddingEnd="8dp"
-                    android:paddingBottom="10dp">
+                    android:paddingStart="8dp"
+                    android:paddingTop="10dp">
 
                     <TextView
                         android:id="@+id/traffic_widget_today_value"
@@ -217,10 +218,10 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:paddingStart="8dp"
-                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
                     android:paddingEnd="8dp"
-                    android:paddingBottom="10dp">
+                    android:paddingStart="8dp"
+                    android:paddingTop="10dp">
 
                     <TextView
                         android:id="@+id/traffic_widget_month_value"
@@ -268,8 +269,8 @@
                 android:id="@+id/traffic_widget_upload_legend"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="3dp"
                 android:layout_marginEnd="7dp"
+                android:layout_marginStart="3dp"
                 android:text="@string/label_total_traffic_up"
                 android:textSize="11sp" />
 

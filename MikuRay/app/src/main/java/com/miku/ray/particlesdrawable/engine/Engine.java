@@ -36,26 +36,26 @@ public final class Engine implements Animatable, Runnable, SceneController {
     private volatile boolean animating;
 
     public Engine(
-            @NonNull final Scene scene,
-            @NonNull final SceneScheduler scheduler,
-            @NonNull final SceneRenderer renderer) {
+        @NonNull final Scene scene,
+        @NonNull final SceneScheduler scheduler,
+        @NonNull final SceneRenderer renderer) {
         this(
-                new FrameAdvancer(new ParticleGenerator()),
-                new ParticleGenerator(),
-                scene,
-                scheduler,
-                renderer,
-                new TimeProvider());
+            new FrameAdvancer(new ParticleGenerator()),
+            new ParticleGenerator(),
+            scene,
+            scheduler,
+            renderer,
+            new TimeProvider());
     }
 
     @VisibleForTesting
     Engine(
-            @NonNull final FrameAdvancer frameAdvancer,
-            @NonNull final ParticleGenerator particleGenerator,
-            @NonNull final Scene scene,
-            @NonNull final SceneScheduler scheduler,
-            @NonNull final SceneRenderer renderer,
-            @NonNull final TimeProvider timeProvider) {
+        @NonNull final FrameAdvancer frameAdvancer,
+        @NonNull final ParticleGenerator particleGenerator,
+        @NonNull final Scene scene,
+        @NonNull final SceneScheduler scheduler,
+        @NonNull final SceneRenderer renderer,
+        @NonNull final TimeProvider timeProvider) {
         this.frameAdvancer = frameAdvancer;
         this.scene = scene;
         this.scheduler = scheduler;
@@ -156,24 +156,24 @@ public final class Engine implements Animatable, Runnable, SceneController {
     private void initParticles() {
         initParticles(new ParticleCreationStrategy() {
 
-            @Override
-            public void addNewParticle(final int position) {
-                if (position % 2 == 0) {
-                    particleGenerator.applyFreshParticleOnScreen(scene, position);
-                } else {
-                    particleGenerator.applyFreshParticleOffScreen(scene, position);
+                @Override
+                public void addNewParticle(final int position) {
+                    if (position % 2 == 0) {
+                        particleGenerator.applyFreshParticleOnScreen(scene, position);
+                    } else {
+                        particleGenerator.applyFreshParticleOffScreen(scene, position);
+                    }
                 }
-            }
         });
     }
 
     private void initParticlesOffScreen() {
         initParticles(new ParticleCreationStrategy() {
 
-            @Override
-            public void addNewParticle(final int position) {
-                particleGenerator.applyFreshParticleOffScreen(scene, position);
-            }
+                @Override
+                public void addNewParticle(final int position) {
+                    particleGenerator.applyFreshParticleOffScreen(scene, position);
+                }
         });
     }
 
@@ -190,7 +190,7 @@ public final class Engine implements Animatable, Runnable, SceneController {
     @Override
     public void nextFrame() {
         final float step = lastFrameTime == 0 ? 1f
-                : (timeProvider.uptimeMillis() - lastFrameTime) * STEP_PER_MS;
+        : (timeProvider.uptimeMillis() - lastFrameTime) * STEP_PER_MS;
         frameAdvancer.advanceToNextFrame(scene, step);
         lastFrameTime = timeProvider.uptimeMillis();
     }

@@ -32,7 +32,7 @@ import java.util.UUID
 object Utils {
 
     private val IPV4_REGEX =
-        Regex("^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$")
+    Regex("^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$")
     private val IPV6_REGEX = Regex("^((?:[0-9A-Fa-f]{1,4}))?((?::[0-9A-Fa-f]{1,4}))*::((?:[0-9A-Fa-f]{1,4}))?((?::[0-9A-Fa-f]{1,4}))*|((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4})){7}$")
 
     fun getEditable(text: String?): Editable {
@@ -69,7 +69,7 @@ object Utils {
 
     fun decode(text: String?): String {
         val value = text?.trim().orEmpty()
-        // A normal subscription URL is valid import input, not a Base64 payload.
+
         if (value.startsWith("http://", ignoreCase = true)
             || value.startsWith("https://", ignoreCase = true)
             || value.contains("://")
@@ -169,9 +169,9 @@ object Utils {
 
     fun isCoreDNSAddress(s: String): Boolean {
         return s.startsWith("https") ||
-                s.startsWith("tcp") ||
-                s.startsWith("quic") ||
-                s == "localhost"
+        s.startsWith("tcp") ||
+        s.startsWith("quic") ||
+        s == "localhost"
     }
 
     fun isValidUrl(value: String?): Boolean {
@@ -179,8 +179,8 @@ object Utils {
 
         return try {
             Patterns.WEB_URL.matcher(value).matches() ||
-                    Patterns.DOMAIN_NAME.matcher(value).matches() ||
-                    URLUtil.isValidUrl(value)
+            Patterns.DOMAIN_NAME.matcher(value).matches() ||
+            URLUtil.isValidUrl(value)
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to validate URL", e)
             false
@@ -307,7 +307,7 @@ object Utils {
 
     fun fixIllegalUrl(str: String): String {
         return str.replace(" ", "%20")
-            .replace("|", "%7C")
+        .replace("|", "%7C")
     }
 
     fun findFreePort(ports: List<Int>): Int {
@@ -357,13 +357,6 @@ object Utils {
 
     fun isGoogleFlavor(): Boolean = true
 
-    /**
-     * Check if an IPv4 address is within an IPv4 CIDR range
-     *
-     * @param ip The IPv4 address to check
-     * @param cidr The IPv4 CIDR range (e.g., "192.168.1.0/24")
-     * @return True if the IP is within the CIDR range, false otherwise
-     */
     fun isIpInCidr(ip: String, cidr: String): Boolean {
         val parts = cidr.split('/')
         if (parts.size != 2 || !isIpv4Address(ip) || !isIpv4Address(parts[0])) return false

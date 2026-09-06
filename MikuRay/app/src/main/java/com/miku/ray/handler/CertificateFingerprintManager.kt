@@ -23,9 +23,9 @@ object CertificateFingerprintManager {
         }
 
         return result
-            ?.takeIf { it.error.isBlank() }
-            ?.sha256
-            ?.takeIf { it.isNotBlank() }
+        ?.takeIf { it.error.isBlank() }
+        ?.sha256
+        ?.takeIf { it.isNotBlank() }
     }
 
     private fun buildRequest(profile: ProfileItem): CertSha256Request? {
@@ -67,9 +67,9 @@ object CertificateFingerprintManager {
 
         val preferIpv6 = MmkvManager.decodeSettingsBool(AppConfig.PREF_PREFER_IPV6, false)
         return HttpUtil.resolveHostToIP(server, preferIpv6)
-            ?.firstOrNull()
-            ?.takeIf { it.isNotBlank() }
-            ?: server
+        ?.firstOrNull()
+        ?.takeIf { it.isNotBlank() }
+        ?: server
     }
 
     private fun inferServerName(profile: ProfileItem): String? {

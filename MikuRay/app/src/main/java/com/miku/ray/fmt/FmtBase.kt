@@ -11,9 +11,9 @@ import java.net.URI
 open class FmtBase {
     fun toUri(config: ProfileItem, userInfo: String?, dicQuery: HashMap<String, String>?): String {
         val query = if (dicQuery != null)
-            "?" + dicQuery.toList().joinToString(
-                separator = "&",
-                transform = { it.first + "=" + Utils.encodeURIComponent(it.second) })
+        "?" + dicQuery.toList().joinToString(
+            separator = "&",
+            transform = { it.first + "=" + Utils.encodeURIComponent(it.second) })
         else ""
 
         val url = String.format(
@@ -28,7 +28,7 @@ open class FmtBase {
 
     fun getQueryParam(uri: URI): Map<String, String> {
         return uri.rawQuery.split("&")
-            .associate { it.split("=").let { (k, v) -> k to Utils.decodeURIComponent(v) } }
+        .associate { it.split("=").let { (k, v) -> k to Utils.decodeURIComponent(v) } }
     }
 
     fun getItemFormQuery(config: ProfileItem, queryParam: Map<String, String>) {
@@ -126,7 +126,6 @@ open class FmtBase {
                 config.host?.nullIfBlank()?.let { dicQuery["host"] = it }
                 config.path?.nullIfBlank()?.let { dicQuery["path"] = it }
             }
-
 
             NetworkType.GRPC -> {
                 config.mode?.nullIfBlank()?.let { dicQuery["mode"] = it }

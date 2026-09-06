@@ -35,8 +35,8 @@ public interface SceneConfiguration {
     int getParticleColor();
 
     void setParticleRadiusRange(
-            @FloatRange(from = 0.5f) float minRadius,
-            @FloatRange(from = 0.5f) float maxRadius);
+        @FloatRange(from = 0.5f) float minRadius,
+        @FloatRange(from = 0.5f) float maxRadius);
 
     float getParticleRadiusMax();
 

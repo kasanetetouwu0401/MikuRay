@@ -29,8 +29,8 @@ object RootManager {
     private fun probe(): Boolean {
         return try {
             val process = ProcessBuilder("su", "-c", "id -u")
-                .redirectErrorStream(true)
-                .start()
+            .redirectErrorStream(true)
+            .start()
             val output = process.inputStream.bufferedReader().use { it.readText() }.trim()
             val finished = process.waitFor(10, TimeUnit.SECONDS)
             if (!finished) {

@@ -57,7 +57,7 @@ class AppIconPickerAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val v = LayoutInflater.from(context)
-            .inflate(R.layout.item_app_icon_picker, parent, false)
+        .inflate(R.layout.item_app_icon_picker, parent, false)
         return VH(v)
     }
 

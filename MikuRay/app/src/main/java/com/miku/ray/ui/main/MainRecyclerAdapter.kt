@@ -34,7 +34,7 @@ class MainRecyclerAdapter(
     private val mainViewModel: MainViewModel,
     private val adapterListener: MainAdapterListener?
 ) : RecyclerView.Adapter<MainRecyclerAdapter.BaseViewHolder>(), ItemTouchHelperAdapter,
-    FastScrollRecyclerView.SectionedAdapter {
+FastScrollRecyclerView.SectionedAdapter {
     companion object {
         private const val VIEW_TYPE_ITEM_LIST = 1
         private const val VIEW_TYPE_FOOTER = 2
@@ -50,7 +50,7 @@ class MainRecyclerAdapter(
     private var isGridMode: Boolean = false
 
     val isServerListEmpty: Boolean
-        get() = data.isEmpty()
+    get() = data.isEmpty()
 
     @SuppressLint("NotifyDataSetChanged")
     fun setGridMode(gridMode: Boolean) {
@@ -93,14 +93,13 @@ class MainRecyclerAdapter(
         val lifecycleOwner = recyclerView.context as? androidx.lifecycle.LifecycleOwner
         if (lifecycleOwner != null) {
             isRunningObserver = androidx.lifecycle.Observer { _ ->
-                // Always rebind selected server so v_status_dot reflects VPN state
-                // (important on cold start when list may have been bound before state arrived)
+
                 val selectedGuid = MmkvManager.getSelectServer()
                 val position = data.indexOfFirst { it.guid == selectedGuid }
                 if (position >= 0) {
                     notifyServerItemChanged(position)
                 } else if (data.isNotEmpty()) {
-                    // Fallback: full refresh if selection not in current page yet
+
                     notifyDataSetChanged()
                 }
             }
@@ -170,13 +169,13 @@ class MainRecyclerAdapter(
             val countryCode = aff?.countryCode?.trim()?.uppercase()?.takeIf { it.length == 2 }
             val countryFlag = Utils.countryCodeToFlag(countryCode)
             holder.views.tvCountryCode.text = listOf(countryFlag, countryCode)
-                .filterNotNull()
-                .filter { it.isNotBlank() }
-                .joinToString(" ")
+            .filterNotNull()
+            .filter { it.isNotBlank() }
+            .joinToString(" ")
             holder.views.tvCountryCode.visibility =
-                if (countryCode != null) View.VISIBLE else View.GONE
+            if (countryCode != null) View.VISIBLE else View.GONE
             holder.views.layoutTestMetadata?.visibility =
-                if (testResult.isNotEmpty() || countryCode != null) View.VISIBLE else View.GONE
+            if (testResult.isNotEmpty() || countryCode != null) View.VISIBLE else View.GONE
             if ((aff?.testDelayMillis ?: 0L) < 0L) {
                 holder.views.tvTestResult.setTextColor(ContextCompat.getColor(context, R.color.colorPingRed))
             } else {
@@ -200,14 +199,13 @@ class MainRecyclerAdapter(
             val isVpnConnected = mainViewModel.isRunning.value == true
 
             if (isSelectedServer && isVpnConnected) {
-                // Ensure animation drawable is (re)applied so the status dot is not stuck
-                // after cold start or late isRunning update.
+
                 holder.views.vStatusDot.setBackgroundResource(R.drawable.blink_color)
                 val blinkAnimDrawable = holder.views.vStatusDot.background
 
                 if (blinkAnimDrawable is android.graphics.drawable.AnimationDrawable) {
                     holder.views.vStatusDot.visibility = View.VISIBLE
-                    // Stop any previous instance then start fresh on next frame
+
                     if (blinkAnimDrawable.isRunning) {
                         blinkAnimDrawable.stop()
                     }
@@ -233,7 +231,7 @@ class MainRecyclerAdapter(
                     indicator.setBackgroundResource(0)
                 }
                 holder.views.layoutCard.setCardBackgroundColor(context.getColorAttr("colorCard"))
-                
+
                 if (isSelectedServer) {
                     val strokeWidthPx = (3 * context.resources.displayMetrics.density).toInt()
                     holder.views.layoutCard.strokeWidth = strokeWidthPx
@@ -332,10 +330,10 @@ class MainRecyclerAdapter(
 
     private fun getSubscriptionRemarks(profile: ProfileItem): String {
         val subRemarks =
-            if (mainViewModel.subscriptionId.isEmpty())
-                MmkvManager.decodeSubscription(profile.subscriptionId)?.remarks
-            else
-                null
+        if (mainViewModel.subscriptionId.isEmpty())
+        MmkvManager.decodeSubscription(profile.subscriptionId)?.remarks
+        else
+        null
 
         return subRemarks?.take(5) ?: ""
     }
@@ -413,8 +411,8 @@ class MainRecyclerAdapter(
         val policyGroupTypeLabel = if (isPolicyGroup) {
             val typePos = profile.policyGroupType?.toIntOrNull() ?: 0
             context.resources.getStringArray(R.array.policy_group_type)
-                .getOrNull(typePos)
-                ?.lowercase()
+            .getOrNull(typePos)
+            ?.lowercase()
         } else {
             null
         }
@@ -429,7 +427,7 @@ class MainRecyclerAdapter(
 
         val showAny = enabled && (isPolicyGroup || !isComplex)
         holder.views.layoutNetworkSecurity.visibility =
-            if (showAny) View.VISIBLE else View.GONE
+        if (showAny) View.VISIBLE else View.GONE
 
         if (enabled && isPolicyGroup && policyGroupTypeLabel != null) {
             holder.views.tvNetwork.text = policyGroupTypeLabel
@@ -480,15 +478,15 @@ class MainRecyclerAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         return when (viewType) {
             VIEW_TYPE_ITEM_LIST ->
-                MainViewHolder(
-                    ListItemViews(ItemRecyclerMainBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-                )
+            MainViewHolder(
+                ListItemViews(ItemRecyclerMainBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+            )
             VIEW_TYPE_ITEM_GRID ->
-                MainViewHolder(
-                    GridItemViews(ItemRecyclerMainGridBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-                )
+            MainViewHolder(
+                GridItemViews(ItemRecyclerMainGridBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+            )
             else ->
-                FooterViewHolder(ItemRecyclerFooterBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+            FooterViewHolder(ItemRecyclerFooterBinding.inflate(LayoutInflater.from(parent.context), parent, false))
         }
     }
 
@@ -584,7 +582,7 @@ class MainRecyclerAdapter(
     }
 
     class MainViewHolder(val views: MainItemViews) :
-        BaseViewHolder(views.root) {
+    BaseViewHolder(views.root) {
         override fun onItemSelected() {
             val context = itemView.context
             views.layoutCard.setCardBackgroundColor(context.getColorAttr("colorSurfaceVariant"))
@@ -596,7 +594,7 @@ class MainRecyclerAdapter(
     }
 
     class FooterViewHolder(val itemFooterBinding: ItemRecyclerFooterBinding) :
-        BaseViewHolder(itemFooterBinding.root)
+    BaseViewHolder(itemFooterBinding.root)
 
     override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
         mainViewModel.swapServer(fromPosition, toPosition)

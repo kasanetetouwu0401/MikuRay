@@ -1,11 +1,5 @@
 package com.miku.ray.util
 
-/**
- * Log priority constants used throughout MikuRay's log pipeline (LogUtil, InProcessLogBuffer,
- * LogEntry, MikuRayLogTree). Values intentionally match Timber/android.util.Log's own priority
- * scheme (VERBOSE=2 .. ASSERT=7) so they interoperate directly with [Timber], without any of
- * our own code needing to import `android.util.Log` itself.
- */
 object LogPriority {
     const val VERBOSE = 2
     const val DEBUG = 3

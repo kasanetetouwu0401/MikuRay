@@ -10,10 +10,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-/**
- * Owns the single daemon restart operation that may outlive the service instance
- * being replaced. A token prevents stale work from completing a newer restart.
- */
 internal class ServiceRestartLifecycle(
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) {
@@ -38,7 +34,7 @@ internal class ServiceRestartLifecycle(
             token = Token(++nextTokenId)
             owner = SupervisorJob()
             work = CoroutineScope(owner + dispatcher + CoroutineName("MikuRayServiceRestart"))
-                .launch(start = CoroutineStart.LAZY) { block(token) }
+            .launch(start = CoroutineStart.LAZY) { block(token) }
             activeToken = token
             ownerJob = owner
             restartJob = work

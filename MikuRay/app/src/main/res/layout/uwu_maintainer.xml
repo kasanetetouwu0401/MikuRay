@@ -4,70 +4,70 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="8.0dip"
-    android:layout_marginBottom="6.0dip"
-    android:layout_marginHorizontal="16.0dip"
+    android:layout_marginBottom="6dp"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="8dp"
     android:clipToPadding="false"
     app:cardBackgroundColor="?attr/colorPrimary"
-    app:cardElevation="0.0dip"
-    app:strokeWidth="0.0dip"
-    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Single"
+    app:cardElevation="0dp"
     app:cardPreventCornerOverlap="false"
-    app:contentPadding="0dp">
+    app:contentPadding="0dp"
+    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Single"
+    app:strokeWidth="0dp">
 
     <LinearLayout
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:clipToPadding="false"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:baselineAligned="false"
-        android:minHeight="?android:listPreferredItemHeightSmall"
-        android:paddingHorizontal="20.0dip"
-        android:paddingVertical="25.0dip">
+        android:clipToPadding="false"
+        android:gravity="center_vertical"
+        android:minHeight="?android:attr/listPreferredItemHeightSmall"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="25dp">
 
         <LinearLayout
-            android:gravity="start|center"
-            android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:gravity="start|center"
+            android:orientation="vertical">
 
             <TextView
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textSize="17.0sp"
-                android:textColor="?attr/colorOnPrimary"
-                android:ellipsize="marquee"
-                android:gravity="start"
-                android:layout_gravity="start"
                 android:id="@android:id/title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxLines="2" />
+                android:layout_gravity="start"
+                android:ellipsize="marquee"
+                android:gravity="start"
+                android:maxLines="2"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorOnPrimary"
+                android:textSize="17sp" />
 
             <TextView
-                android:textAppearance="?attr/textAppearanceTitleSmall"
-                android:textSize="14.0sp"
-                android:textColor="?attr/colorOnPrimary"
-                android:alpha="0.8"
                 android:id="@android:id/summary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2.0dip"
-                android:maxLines="10"
+                android:layout_alignStart="@android:id/title"
                 android:layout_below="@android:id/title"
-                android:layout_alignStart="@android:id/title" />
+                android:layout_marginTop="2dp"
+                android:alpha="0.8"
+                android:maxLines="10"
+                android:textAppearance="?attr/textAppearanceTitleSmall"
+                android:textColor="?attr/colorOnPrimary"
+                android:textSize="14sp" />
 
         </LinearLayout>
 
         <ImageView
-            android:layout_gravity="end|center"
             android:id="@android:id/icon"
-            android:padding="6.0dip"
-            android:layout_width="35.0dip"
-            android:layout_height="35.0dip"
-            app:tint="?attr/colorOnPrimary"
-            android:layout_marginStart="8.0dip" />
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_gravity="end|center"
+            android:layout_marginStart="8dp"
+            android:padding="6dp"
+            app:tint="?attr/colorOnPrimary" />
 
     </LinearLayout>
 

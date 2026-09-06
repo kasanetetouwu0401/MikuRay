@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -94,8 +95,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:drawableStart="@drawable/rmx_business_pie_chart_line"
                 android:drawablePadding="10dp"
+                android:drawableStart="@drawable/rmx_business_pie_chart_line"
                 android:drawableTint="?attr/colorPrimary"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
@@ -111,8 +112,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:drawableStart="@drawable/rmx_business_calendar_line"
                 android:drawablePadding="10dp"
+                android:drawableStart="@drawable/rmx_business_calendar_line"
                 android:drawableTint="?attr/colorPrimary"
                 android:ellipsize="end"
                 android:gravity="center_vertical"

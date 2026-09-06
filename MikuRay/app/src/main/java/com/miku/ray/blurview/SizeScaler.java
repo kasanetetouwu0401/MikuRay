@@ -1,14 +1,7 @@
 package com.miku.ray.blurview;
 
-/**
- * Scales width and height by [scaleFactor],
- * and then rounds the size proportionally so the width is divisible by [ROUNDING_VALUE]
- */
 public class SizeScaler {
 
-    // Bitmap size should be divisible by ROUNDING_VALUE to meet stride requirement.
-    // This will help avoiding an extra bitmap allocation when passing the bitmap to RenderScript for blur.
-    // Usually it's 16, but on Samsung devices it's 64 for some reason.
     private static final int ROUNDING_VALUE = 64;
     private final float scaleFactor;
 
@@ -19,9 +12,9 @@ public class SizeScaler {
     Size scale(int width, int height) {
         int nonRoundedScaledWidth = downscaleSize(width);
         int scaledWidth = roundSize(nonRoundedScaledWidth);
-        //Only width has to be aligned to ROUNDING_VALUE
+
         float roundingScaleFactor = (float) width / scaledWidth;
-        //Ceiling because rounding or flooring might leave empty space on the View's bottom
+
         int scaledHeight = (int) Math.ceil(height / roundingScaleFactor);
 
         return new Size(scaledWidth, scaledHeight, roundingScaleFactor);
@@ -31,9 +24,6 @@ public class SizeScaler {
         return downscaleSize(measuredHeight) == 0 || downscaleSize(measuredWidth) == 0;
     }
 
-    /**
-     * Rounds a value to the nearest divisible by {@link #ROUNDING_VALUE} to meet stride requirement
-     */
     private int roundSize(int value) {
         if (value % ROUNDING_VALUE == 0) {
             return value;
@@ -49,7 +39,7 @@ public class SizeScaler {
 
         final int width;
         final int height;
-        // TODO this is probably not needed anymore
+
         final float scaleFactor;
 
         Size(int width, int height, float scaleFactor) {
@@ -81,10 +71,10 @@ public class SizeScaler {
         @Override
         public String toString() {
             return "Size{" +
-                    "width=" + width +
-                    ", height=" + height +
-                    ", scaleFactor=" + scaleFactor +
-                    '}';
+            "width=" + width +
+            ", height=" + height +
+            ", scaleFactor=" + scaleFactor +
+            '}';
         }
     }
 }

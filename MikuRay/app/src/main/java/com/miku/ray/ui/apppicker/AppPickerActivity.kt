@@ -70,12 +70,12 @@ class AppPickerActivity : BaseActivity() {
         if (searchItem != null) {
             val searchView = searchItem.actionView as SearchView
             searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?): Boolean = false
+                    override fun onQueryTextSubmit(query: String?): Boolean = false
 
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    filterApps(newText.orEmpty())
-                    return false
-                }
+                    override fun onQueryTextChange(newText: String?): Boolean {
+                        filterApps(newText.orEmpty())
+                        return false
+                    }
             })
         }
 
@@ -114,7 +114,7 @@ class AppPickerActivity : BaseActivity() {
     private fun createSpecialItemUnidentified(): AppInfo {
         val icon = requireNotNull(
             getDrawable(android.R.drawable.ic_menu_help)
-                ?: getDrawable(android.R.drawable.sym_def_app_icon)
+            ?: getDrawable(android.R.drawable.sym_def_app_icon)
         ) { "No fallback drawable available" }
         return AppInfo(
             appName = getString(R.string.app_picker_unknown_app),
@@ -201,4 +201,3 @@ class AppPickerActivity : BaseActivity() {
         return intent.getStringExtra(EXTRA_PICKER_TITLE) ?: getString(R.string.per_app_proxy_settings)
     }
 }
-

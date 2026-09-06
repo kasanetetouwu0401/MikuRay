@@ -1,6 +1,5 @@
 package com.miku.ray.widget
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -73,8 +72,8 @@ class UwuHeaderIconView @JvmOverloads constructor(
                 TypedValue.COMPLEX_UNIT_DIP, 24f, resources.displayMetrics
             ).toInt()
             val iconDrawable = androidx.core.content.ContextCompat.getDrawable(context, iconRes)
-                ?.mutate()
-                ?.also { it.setBounds(0, 0, iconSizePx, iconSizePx) }
+            ?.mutate()
+            ?.also { it.setBounds(0, 0, iconSizePx, iconSizePx) }
             scaleType = ScaleType.CENTER
             setImageDrawable(iconDrawable)
             imageTintList = android.content.res.ColorStateList.valueOf(
