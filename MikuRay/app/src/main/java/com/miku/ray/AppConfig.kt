@@ -449,7 +449,7 @@ object AppConfig {
 
     const val MSG_SUB_UPDATE_START = 8
     const val MSG_SUB_UPDATE_CANCEL = 81
-        const val MSG_TRAFFIC_UPDATED = 81
+    const val MSG_TRAFFIC_UPDATED = 84
     const val MSG_TRAFFIC_SPEED_UPDATED = 82
     const val MSG_SUB_UPDATE_FINISH = 83
 

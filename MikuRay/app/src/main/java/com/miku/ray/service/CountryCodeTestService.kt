@@ -111,10 +111,12 @@ class CountryCodeTestService : Service() {
                     val countryCode = lookupThroughProfile(guid)
                     MmkvManager.encodeServerCountryCode(guid, countryCode)
                     MessageUtil.sendMsg2UI(this, AppConfig.MSG_COUNTRY_CODE_SUCCESS, guid)
+                    // Send progress as JSON string — Serializable data classes are unreliable
+                    // across the :daemon process boundary and caused the progress dialog to stick.
                     MessageUtil.sendMsg2UI(
                         this,
                         AppConfig.MSG_COUNTRY_CODE_NOTIFY,
-                        TestProgressInfo(guid, 0L, index + 1, guids.size)
+                        JsonUtil.toJson(TestProgressInfo(guid, 0L, index + 1, guids.size))
                     )
                 }
             } catch (e: InterruptedException) {

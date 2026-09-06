@@ -66,7 +66,11 @@ class TestProgressDialogController(
             .setNegativeButton(android.R.string.cancel) { _, _ ->
                 onCancel()
             }
-            .setPositiveButton(R.string.action_minimize, null)
+            // Use empty listener so the button does NOT auto-dismiss (default null dismisses).
+            // Minimize just closes the dialog; the test continues in background.
+            .setPositiveButton(R.string.action_minimize) { dialogInterface, _ ->
+                dialogInterface.dismiss()
+            }
             .create()
 
         WindowBlurUtils.applyWindowBlur(d.window)
@@ -77,34 +81,52 @@ class TestProgressDialogController(
         }
         d.show()
         dialog = d
+
+        // Prevent positive button from dismissing until we attach the listener properly
+        // (already handled above). Keep cancel visible while running.
+        d.getButton(DialogInterface.BUTTON_POSITIVE)?.setOnClickListener {
+            d.dismiss()
+        }
     }
 
     fun update(info: TestProgressInfo) {
+        // If dialog was minimized/dismissed, binding is null — ignore silently
+        // (test still runs; results appear in the server list).
         val b = binding ?: return
+        val d = dialog ?: return
+        if (!d.isShowing) return
 
         if (info.guid.isNotEmpty()) {
             val profile = MmkvManager.decodeServerConfig(info.guid)
-            val content = rowContentFor(info)
+            val rowContent = rowContentFor(info)
             adapter.append(
                 ResultRow(
                     remarks = profile?.remarks.orEmpty(),
                     protocol = profile?.configType?.name.orEmpty(),
-                    resultText = content.text,
-                    resultColorRes = content.colorRes
+                    resultText = rowContent.text,
+                    resultColorRes = rowContent.colorRes
                 )
             )
             b.listView.post {
-                if (adapter.itemCount > 0) b.listView.smoothScrollToPosition(adapter.itemCount - 1)
+                if (adapter.itemCount > 0) {
+                    b.listView.smoothScrollToPosition(adapter.itemCount - 1)
+                }
             }
         }
 
-        if (b.progressIndicator.isIndeterminate) b.progressIndicator.isIndeterminate = false
+        // Switch off indeterminate and drive determinate progress on every tick
+        if (b.progressIndicator.isIndeterminate) {
+            b.progressIndicator.isIndeterminate = false
+        }
         if (info.total > 0) {
-            b.progressIndicator.setProgressCompat(
-                ((info.current.toFloat() / info.total.toFloat()) * 100).toInt(), true
-            )
+            val pct = ((info.current.toFloat() / info.total.toFloat()) * 100f)
+                .toInt()
+                .coerceIn(0, 100)
+            b.progressIndicator.setProgressCompat(pct, true)
         }
         b.tvCounter.text = context.getString(R.string.test_progress_counter, info.current, info.total)
+        // Force a layout pass so the counter/bar actually redraw while dialog is open
+        b.root.postInvalidate()
     }
 
     fun finish() {

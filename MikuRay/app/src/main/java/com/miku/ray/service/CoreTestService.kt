@@ -22,6 +22,7 @@ import com.miku.ray.extension.serializable
 import com.miku.ray.handler.AngConfigManager
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.LogUtil
+import com.miku.ray.util.JsonUtil
 import com.miku.ray.util.MessageUtil
 import com.miku.ray.helper.NotificationHelper
 import com.miku.ray.remixicon.R as RemixR
@@ -192,10 +193,11 @@ class CoreTestService : Service() {
                     title = getString(if (message.onlyTcp) R.string.title_ping_all_server else R.string.title_real_ping_all_server),
                     content = getString(progressTextRes, progressText),
                 )
+                // JSON string is reliable across the :tasks process boundary
                 MessageUtil.sendMsg2UI(
                     this,
                     AppConfig.MSG_MEASURE_CONFIG_NOTIFY,
-                    RealPingProgress(message.testId, event.completed, event.total),
+                    JsonUtil.toJson(RealPingProgress(message.testId, event.completed, event.total)),
                 )
             }
 
@@ -204,7 +206,7 @@ class CoreTestService : Service() {
                 MessageUtil.sendMsg2UI(
                     this,
                     AppConfig.MSG_MEASURE_CONFIG_SUCCESS,
-                    RealPingResult(message.testId, event.guid, event.delayMillis),
+                    JsonUtil.toJson(RealPingResult(message.testId, event.guid, event.delayMillis)),
                 )
             }
 
@@ -252,7 +254,7 @@ class CoreTestService : Service() {
     }
 
     private fun sendSummary(summary: RealPingSummary) {
-        MessageUtil.sendMsg2UI(this, AppConfig.MSG_MEASURE_CONFIG_FINISH, summary)
+        MessageUtil.sendMsg2UI(this, AppConfig.MSG_MEASURE_CONFIG_FINISH, JsonUtil.toJson(summary))
     }
 
     private fun disposeProcess() {

@@ -31,6 +31,7 @@ import com.miku.ray.handler.AngConfigManager
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsManager
 import com.miku.ray.util.LogUtil
+import com.miku.ray.util.JsonUtil
 import com.miku.ray.util.MessageUtil
 import com.miku.ray.util.Utils
 import kotlinx.coroutines.Dispatchers
@@ -86,7 +87,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun startListenBroadcast() {
-        isRunning.value = false
         if (!receiverRegistered) {
             val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
             ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
@@ -96,6 +96,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun resyncState() {
+        // Re-query service state on resume so status_dot / test UI recover after process death or late start.
         MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
@@ -668,6 +669,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 AppConfig.MSG_STATE_RUNNING -> {
                     if (!isRestarting) {
                         isRunning.value = true
+                        // Force list rebind so v_status_dot and test metadata update immediately
+                        updateListAction.postValue(-1)
                     }
                 }
 
@@ -675,6 +678,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     if (!isRestarting) {
                         markConnectionStopped()
                         isRunning.value = false
+                        updateListAction.postValue(-1)
                     }
                 }
 
@@ -697,6 +701,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         ),
                     )
                     isRunning.value = true
+                    updateListAction.postValue(-1)
                 }
 
                 AppConfig.MSG_STATE_START_FAILURE -> {
@@ -713,6 +718,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     alertAction.value = Pair(false, msg)
                     markConnectionStopped()
                     isRunning.value = false
+                    updateListAction.postValue(-1)
                 }
 
                 AppConfig.MSG_STATE_STOP_SUCCESS -> {
@@ -720,6 +726,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     isRestarting = false
                     markConnectionStopped()
                     isRunning.value = false
+                    updateListAction.postValue(-1)
                 }
 
                 AppConfig.MSG_MEASURE_DELAY_SUCCESS -> {
@@ -732,68 +739,85 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_SUCCESS -> {
-                    val result = intent.serializable<RealPingResult>("content")
+                    // Prefer JSON (cross-process safe); fall back to Serializable for older builds
+                    val result = parseExtra(intent, RealPingResult::class.java)
+                        ?: intent.serializable<RealPingResult>("content")
                     if (result != null) {
                         if (acceptsTestEvent(result.testId)) {
-                            updateListAction.value = getPosition(result.guid)
+                            updateListAction.postValue(getPosition(result.guid))
                             activeTestCompleted += 1
                             activeTestTotal = maxOf(activeTestTotal, activeTestCompleted)
-                            testProgressAction.value = TestProgressInfo(
-                                guid = result.guid,
-                                delayMillis = result.delayMillis,
-                                current = activeTestCompleted,
-                                total = activeTestTotal,
+                            testProgressAction.postValue(
+                                TestProgressInfo(
+                                    guid = result.guid,
+                                    delayMillis = result.delayMillis,
+                                    current = activeTestCompleted,
+                                    total = activeTestTotal,
+                                )
                             )
                         }
                     } else {
                         val content = intent.getStringExtra("content")
-                        updateListAction.value = getPosition(content ?: "")
+                        // content may be a JSON string we failed to parse, or a bare guid
+                        val guid = content?.takeIf { !it.trimStart().startsWith("{") }.orEmpty()
+                        updateListAction.postValue(getPosition(guid))
                     }
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_NOTIFY -> {
-                    val progress = intent.serializable<RealPingProgress>("content")
+                    val progress = parseExtra(intent, RealPingProgress::class.java)
+                        ?: intent.serializable<RealPingProgress>("content")
                     if (progress != null) {
                         if (acceptsTestEvent(progress.testId)) {
                             activeTestCompleted = maxOf(activeTestCompleted, progress.completed)
                             activeTestTotal = maxOf(activeTestTotal, progress.total)
-                            testProgressAction.value = TestProgressInfo(
-                                guid = "",
-                                delayMillis = -1L,
-                                current = activeTestCompleted,
-                                total = activeTestTotal,
+                            testProgressAction.postValue(
+                                TestProgressInfo(
+                                    guid = "",
+                                    delayMillis = -1L,
+                                    current = activeTestCompleted,
+                                    total = activeTestTotal,
+                                )
                             )
                         }
                     } else {
-                        testProgressAction.value = intent.serializable<TestProgressInfo>("content")
+                        val info = parseExtra(intent, TestProgressInfo::class.java)
+                            ?: intent.serializable<TestProgressInfo>("content")
+                        if (info != null) testProgressAction.postValue(info)
                     }
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_FINISH -> {
-                    val summary = intent.serializable<RealPingSummary>("content")
+                    val summary = parseExtra(intent, RealPingSummary::class.java)
+                        ?: intent.serializable<RealPingSummary>("content")
                     if (summary != null) {
                         if (!acceptsTestEvent(summary.testId)) return
                         activeTestId = null
-                        testProgressAction.value = null
+                        testProgressAction.postValue(null)
                         onTestsFinished(summary.cancelled)
                     } else {
                         activeTestId = null
-                        testProgressAction.value = null
+                        testProgressAction.postValue(null)
                         onTestsFinished()
                     }
                 }
 
                 AppConfig.MSG_COUNTRY_CODE_SUCCESS -> {
                     val content = intent.getStringExtra("content")
-                    updateListAction.value = getPosition(content ?: "")
+                    updateListAction.postValue(getPosition(content ?: ""))
                 }
 
                 AppConfig.MSG_COUNTRY_CODE_NOTIFY -> {
-                    countryCodeProgressAction.value = intent.serializable<TestProgressInfo>("content")
+                    // JSON first (sent from :daemon process), then Serializable fallback
+                    val info = parseExtra(intent, TestProgressInfo::class.java)
+                        ?: intent.serializable<TestProgressInfo>("content")
+                    if (info != null) {
+                        countryCodeProgressAction.postValue(info)
+                    }
                 }
 
                 AppConfig.MSG_COUNTRY_CODE_FINISH -> {
-                    countryCodeProgressAction.value = null
+                    countryCodeProgressAction.postValue(null)
                 }
 
                 AppConfig.MSG_TRAFFIC_UPDATED -> {
@@ -815,4 +839,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun acceptsTestEvent(testId: String): Boolean =
         testId.isEmpty() || testId == activeTestId
+
+    /**
+     * Parse a cross-process Intent extra that may be a JSON string (preferred)
+     * or a legacy Serializable object. Services in :tasks / :daemon send JSON
+     * because Kotlin data-class Serializable is unreliable across process boundaries
+     * and was leaving the URL/country-code progress dialog stuck.
+     */
+    private fun <T> parseExtra(intent: Intent, cls: Class<T>): T? {
+        val raw = intent.getStringExtra("content") ?: return null
+        val trimmed = raw.trim()
+        if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) return null
+        return JsonUtil.fromJsonSafe(trimmed, cls)
+    }
 }
