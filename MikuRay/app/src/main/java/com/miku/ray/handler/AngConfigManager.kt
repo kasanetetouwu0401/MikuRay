@@ -153,14 +153,15 @@ object AngConfigManager {
     ): Pair<Int, Int> {
         return try {
             val decodedServer = Utils.decode(server)
+
             var count = parseSIP008Config(decodedServer, subid, append)
-            if (count <= 0 && decodedServer != server) {
+            if (count <= 0) {
                 count = parseSIP008Config(server, subid, append)
             }
-            if (count <= 0 && decodedServer != server) {
+            if (count <= 0) {
                 count = parseBatchConfig(decodedServer, subid, append)
             }
-            if (count <= 0 && decodedServer != server) {
+            if (count <= 0) {
                 count = parseBatchConfig(server, subid, append)
             }
             if (count <= 0) {
@@ -168,7 +169,7 @@ object AngConfigManager {
             }
 
             var countSub = parseBatchSubscription(server, requestSubscriptionName)
-            if (countSub <= 0 && decodedServer != server) {
+            if (countSub <= 0) {
                 countSub = parseBatchSubscription(decodedServer, requestSubscriptionName)
             }
             if (countSub > 0) {
