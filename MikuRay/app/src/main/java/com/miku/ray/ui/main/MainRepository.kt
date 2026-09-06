@@ -132,6 +132,11 @@ class MainRepository(
     override fun close() {
         if (!closed.compareAndSet(false, true)) return
         runCatching {
+            MessageUtil.sendMsg2Service(app, AppConfig.MSG_UNREGISTER_CLIENT, "")
+        }.onFailure {
+            LogUtil.e(AppConfig.TAG, "Failed to unregister service client", it)
+        }
+        runCatching {
             app.unregisterReceiver(serviceReceiver)
         }.onFailure {
             LogUtil.e(AppConfig.TAG, "Failed to unregister main service receiver", it)

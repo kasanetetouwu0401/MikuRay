@@ -230,7 +230,6 @@ class MainViewModel(
         when (action) {
             MainAction.Initialize -> initialize()
             is MainAction.SelectGroup -> selectGroup(action.groupId)
-            is MainAction.RemoveServer -> removeServerAndRefresh(action.guid)
             MainAction.ReloadServerList -> reloadCurrentGroup()
             is MainAction.FilterConfig -> filterConfig(action.keyword)
 
@@ -404,19 +403,6 @@ class MainViewModel(
             cacheMutex.withLock { groupDataCache.clear() }
         }
         emitEvent(MainViewModelEvent.GroupBadgeChanged)
-    }
-
-    fun removeServerAndRefresh(guid: String) {
-        if (guid == uiState.value.selectedGuid) {
-            toast(com.miku.ray.R.string.toast_action_not_allowed)
-            return
-        }
-        viewModelScope.launch(ioDispatcher) {
-            dataSource.removeServer(guid)
-            cacheMutex.withLock { groupDataCache.clear() }
-            reloadCurrentGroup()
-            emitEvent(MainViewModelEvent.GroupBadgeChanged)
-        }
     }
 
     /** Toggles the pinned state, re-sorts the visible list immediately, and returns the new state. */

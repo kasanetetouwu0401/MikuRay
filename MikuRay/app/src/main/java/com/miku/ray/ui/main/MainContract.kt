@@ -45,7 +45,6 @@ sealed interface MainViewModelEvent : ViewModelEvent {
 sealed interface MainAction {
     data object Initialize : MainAction
     data class SelectGroup(val groupId: String) : MainAction
-    data class RemoveServer(val guid: String) : MainAction
     data object ReloadServerList : MainAction
     data class FilterConfig(val keyword: String) : MainAction
 

@@ -1,6 +1,6 @@
 package com.miku.ray.ui.userasset
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.miku.ray.AppConfig
 import com.miku.ray.dto.UrlContentRequest
@@ -8,6 +8,7 @@ import com.miku.ray.dto.entities.AssetUrlCache
 import com.miku.ray.dto.entities.AssetUrlItem
 import com.miku.ray.extension.concatUrl
 import com.miku.ray.handler.MmkvManager
+import com.miku.ray.ui.base.BaseViewModel
 import com.miku.ray.util.HttpUtil
 import com.miku.ray.util.LogUtil
 import com.miku.ray.util.Utils
@@ -27,7 +28,7 @@ internal data class UserAssetUiState(
     val fileMetadata: Map<String, AssetFileMetadata> = emptyMap()
 )
 
-class UserAssetViewModel : ViewModel() {
+class UserAssetViewModel(application: Application) : BaseViewModel(application) {
     private val builtInGeoFiles = listOf(
         AppConfig.GEOSITE_DAT,
         AppConfig.GEOIP_DAT,

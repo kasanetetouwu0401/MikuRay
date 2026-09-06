@@ -27,6 +27,7 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -56,7 +57,6 @@ import com.miku.ray.extension.snackbarDefault
 import com.miku.ray.extension.snackbarError
 import com.miku.ray.extension.snackbarSuccess
 import com.miku.ray.extension.toSpeedString
-import com.miku.ray.extension.toastError
 import com.miku.ray.extension.toastInfo
 import com.miku.ray.extension.toastSuccess
 import com.miku.ray.handler.AngConfigManager
@@ -739,12 +739,7 @@ class MainActivity : HelperBaseActivity(),
             addAction(AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED)
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(bannerReceiver, filter, RECEIVER_NOT_EXPORTED)
-        } else {
-            @Suppress("UnspecifiedRegisterReceiverFlag")
-            registerReceiver(bannerReceiver, filter)
-        }
+        ContextCompat.registerReceiver(this, bannerReceiver, filter, Utils.receiverFlags())
     }
 
     private fun setupViewPager() {

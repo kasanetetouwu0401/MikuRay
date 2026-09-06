@@ -4,6 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.miku.ray.AngApplication
+import com.miku.ray.extension.snackbarDefault
+import com.miku.ray.extension.snackbarError
+import com.miku.ray.extension.snackbarSuccess
 import com.miku.ray.extension.toast
 import com.miku.ray.extension.toastError
 import com.miku.ray.extension.toastSuccess
@@ -64,6 +67,36 @@ abstract class BaseViewModel(application: Application) : AndroidViewModel(applic
     /** Send error toast event (String). */
     fun toastError(message: String) {
         app.toastError(message)
+    }
+
+    /** Show neutral/info snackbar (Resource ID). */
+    fun snackbarDefault(message: Int, title: CharSequence = "") {
+        app.snackbarDefault(message, title)
+    }
+
+    /** Show neutral/info snackbar (String). */
+    fun snackbarDefault(message: CharSequence, title: CharSequence = "") {
+        app.snackbarDefault(message, title)
+    }
+
+    /** Show success snackbar (Resource ID). */
+    fun snackbarSuccess(message: Int, title: CharSequence = "") {
+        app.snackbarSuccess(message, title)
+    }
+
+    /** Show success snackbar (String). */
+    fun snackbarSuccess(message: CharSequence, title: CharSequence = "") {
+        app.snackbarSuccess(message, title)
+    }
+
+    /** Show error snackbar (Resource ID). */
+    fun snackbarError(message: Int, title: CharSequence = "") {
+        app.snackbarError(message, title)
+    }
+
+    /** Show error snackbar (String). */
+    fun snackbarError(message: CharSequence, title: CharSequence = "") {
+        app.snackbarError(message, title)
     }
 
     /** Get string from resource ID. */

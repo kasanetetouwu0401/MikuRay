@@ -1,27 +1,37 @@
 package com.miku.ray.ui.logcat
 
+import android.app.Application
 import android.os.Process
-import androidx.lifecycle.ViewModel
 import com.miku.ray.AppConfig
 import com.miku.ray.AppConfig.ANG_PACKAGE
+import com.miku.ray.ui.base.BaseViewModel
 import com.miku.ray.util.InProcessLogBuffer
 import com.miku.ray.util.LogEntry
 import com.miku.ray.util.LogUtil
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-class LogcatViewModel : ViewModel() {
+class LogcatViewModel(application: Application) : BaseViewModel(application) {
     private val logsetsAll: MutableList<String> = mutableListOf()
-    private var filteredLogs: List<String> = emptyList()
     private var currentFilter: String = ""
 
     var usedFallback: Boolean = false
         private set
 
-    fun getAll(): List<String> = filteredLogs
+    private val _filteredLogs = MutableStateFlow<List<String>>(emptyList())
+    val filteredLogs: StateFlow<List<String>> = _filteredLogs.asStateFlow()
+
+    fun getAll(): List<String> = filteredLogs.value
 
     private val ownTags = setOf(ANG_PACKAGE, LogUtil.TAG_CORE)
 
+    // Kept synchronous (not wrapped in launchLoading/viewModelScope): callers already
+    // invoke this from their own IO-dispatched coroutine (see LogcatActivity.onRefresh)
+    // and rely on it completing before continuing, so making it fire-and-forget here
+    // would desync the SwipeRefreshLayout state.
     fun loadLogcat() {
         val bufferLines = InProcessLogBuffer.getAll()
 
@@ -105,7 +115,7 @@ class LogcatViewModel : ViewModel() {
         }
         InProcessLogBuffer.clear()
         logsetsAll.clear()
-        filteredLogs = emptyList()
+        _filteredLogs.value = emptyList()
     }
 
     fun filter(content: String?) {
@@ -114,7 +124,7 @@ class LogcatViewModel : ViewModel() {
     }
 
     private fun applyFilter() {
-        filteredLogs = if (currentFilter.isEmpty()) {
+        _filteredLogs.value = if (currentFilter.isEmpty()) {
             logsetsAll.toList()
         } else {
             logsetsAll.filter { it.contains(currentFilter, ignoreCase = true) }
