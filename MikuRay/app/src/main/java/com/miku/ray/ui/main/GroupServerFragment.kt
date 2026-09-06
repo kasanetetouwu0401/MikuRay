@@ -87,23 +87,10 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    mainViewModel.serversForGroup(subId).collect { servers ->
-                        adapter.setData(servers.toMutableList(), -1)
-                        hasLoadedData = true
-                        updateEmptyState()
-                    }
-                }
-
-                launch {
-                    mainViewModel.updateListAction.collect { index ->
-                        if (mainViewModel.subscriptionId != subId) {
-                            return@collect
-                        }
-                        adapter.setData(mainViewModel.serversCache, index)
-                        hasLoadedData = true
-                        updateEmptyState()
-                    }
+                mainViewModel.serversForGroup(subId).collect { servers ->
+                    adapter.setData(servers.toMutableList(), -1)
+                    hasLoadedData = true
+                    updateEmptyState()
                 }
             }
         }
@@ -115,6 +102,15 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
 
         itemTouchHelper = ItemTouchHelper(SimpleItemTouchHelperCallback(adapter, allowSwipe = false))
         itemTouchHelper?.attachToRecyclerView(binding.recyclerView)
+
+        mainViewModel.updateListAction.observe(viewLifecycleOwner) { index ->
+            if (mainViewModel.subscriptionId != subId) {
+                return@observe
+            }
+            adapter.setData(mainViewModel.serversCache, index)
+            hasLoadedData = true
+            updateEmptyState()
+        }
 
         binding.btnScrollToSelected.setOnClickListener {
             ownerActivity.locateSelectedServer()

@@ -33,9 +33,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -1008,107 +1006,81 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun setupViewModel() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    mainViewModel.updateListAction.collect {
-                        refreshTabBadges()
-                        if (SearchBarChipMode.current() in setOf(
-                                SearchBarChipMode.TOTAL_TRAFFIC,
-                                SearchBarChipMode.DUAL_SWIPE
-                            )) {
-                            SearchChipGradientController.applyState(this@MainActivity, binding)
-                            if (isTotalTrafficChipSelected()) refreshTotalTrafficChip()
-                        }
-                    }
-                }
+        mainViewModel.updateListAction.observe(this) {
+            refreshTabBadges()
+            if (SearchBarChipMode.current() in setOf(
+                    SearchBarChipMode.TOTAL_TRAFFIC,
+                    SearchBarChipMode.DUAL_SWIPE
+                )) {
+                SearchChipGradientController.applyState(this, binding)
+                if (isTotalTrafficChipSelected()) refreshTotalTrafficChip()
+            }
+        }
 
-                launch {
-                    mainViewModel.updateGroupBadgeAction.collect { refreshTabBadges() }
-                }
+        mainViewModel.updateGroupBadgeAction.observe(this) { refreshTabBadges() }
 
-                launch {
-                    mainViewModel.updateGroupOrderAction.collect {
-                        mainViewModel.reloadServerList()
-                        refreshGroupTabTitles()
-                    }
-                }
+        mainViewModel.updateGroupOrderAction.observe(this) {
+            mainViewModel.reloadServerList()
+            refreshGroupTabTitles()
+        }
+        
+        mainViewModel.updateTestResultAction.observe(this) {
+            lastTestResultText = it.orEmpty()
+            setTestState(it)
+        }
 
-                launch {
-                    mainViewModel.updateTestResultAction.collect {
-                        lastTestResultText = it.orEmpty()
-                        setTestState(it)
-                    }
-                }
+        mainViewModel.testProgressAction.observe(this) { info ->
+            if (info == null) {
+                urlTestProgressDialog.finish()
+            } else {
+                urlTestProgressDialog.update(info)
+            }
+        }
 
-                launch {
-                    mainViewModel.testProgressAction.collect { info ->
-                        if (info == null) {
-                            urlTestProgressDialog.finish()
-                        } else {
-                            urlTestProgressDialog.update(info)
-                        }
-                    }
-                }
+        mainViewModel.countryCodeProgressAction.observe(this) { info ->
+            if (info == null) {
+                countryCodeProgressDialog.finish()
+            } else {
+                countryCodeProgressDialog.update(info)
+            }
+        }
 
-                launch {
-                    mainViewModel.countryCodeProgressAction.collect { info ->
-                        if (info == null) {
-                            countryCodeProgressDialog.finish()
-                        } else {
-                            countryCodeProgressDialog.update(info)
-                        }
-                    }
-                }
+        mainViewModel.updateIpResultAction.observe(this) { ip ->
+            lastIpStateText = if (ip.isNullOrEmpty()) {
+                getString(R.string.ip_unknown)
+            } else {
+                getString(R.string.ip_connected, ip)
+            }
+            refreshIpStateText()
+        }
 
-                launch {
-                    mainViewModel.updateIpResultAction.collect { ip ->
-                        lastIpStateText = if (ip.isNullOrEmpty()) {
-                            getString(R.string.ip_unknown)
-                        } else {
-                            getString(R.string.ip_connected, ip)
-                        }
-                        refreshIpStateText()
-                    }
-                }
+        mainViewModel.updateTrafficSpeedAction.observe(this) { speedText ->
+            lastTrafficSpeedText = speedText
+            refreshIpStateText()
+        }
 
-                launch {
-                    mainViewModel.updateTrafficSpeedAction.collect { speedText ->
-                        lastTrafficSpeedText = speedText
-                        refreshIpStateText()
-                    }
-                }
+        mainViewModel.isRunning.observe(this) { isRunning ->
+            applyRunningState(isLoading = false, isRunning = isRunning)
+            if (isRunning == true && pendingConnectionTest) {
+                pendingConnectionTest = false
+                setTestState(getString(R.string.connection_test_testing))
+                mainViewModel.testCurrentServerRealPing()
+            }
+        }
 
-                launch {
-                    mainViewModel.isRunning.collect { isRunning ->
-                        applyRunningState(isLoading = false, isRunning = isRunning)
-                        if (isRunning && pendingConnectionTest) {
-                            pendingConnectionTest = false
-                            setTestState(getString(R.string.connection_test_testing))
-                            mainViewModel.testCurrentServerRealPing()
-                        }
-                    }
-                }
+        mainViewModel.serviceRestartAction.observe(this) {
+            stopFabTimer()
+            pendingConnectionTest = true
+            lastTestResultText = ""
+            setTestState(getString(R.string.connection_test_testing))
+        }
 
-                launch {
-                    mainViewModel.serviceRestartAction.collect {
-                        stopFabTimer()
-                        pendingConnectionTest = true
-                        lastTestResultText = ""
-                        setTestState(getString(R.string.connection_test_testing))
-                    }
-                }
-
-                launch {
-                    mainViewModel.alertAction.collect { (isSuccess, message) ->
-                        if (isSuccess) {
-                            snackbarSuccess(message, title = getString(R.string.title_alerter_success))
-                            mainViewModel.fetchCurrentIp()
-                        } else {
-                            snackbarError(message, title = getString(R.string.title_alerter_error))
-                        }
-                    }
-                }
+        mainViewModel.alertAction.observe(this) { (isSuccess, message) ->
+            if (isSuccess) {
+                snackbarSuccess(message, title = getString(R.string.title_alerter_success))
+                mainViewModel.fetchCurrentIp()
+            } else {
+                snackbarError(message, title = getString(R.string.title_alerter_error))
             }
         }
 

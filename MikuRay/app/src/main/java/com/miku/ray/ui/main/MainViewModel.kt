@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.content.res.AssetManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.miku.ray.AngApplication
 import com.miku.ray.AppConfig
@@ -36,12 +37,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.Collections
 import java.util.UUID
@@ -72,51 +69,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val groupCache = ConcurrentHashMap<String, List<ServersCache>>()
     private val groupStates = ConcurrentHashMap<String, MutableStateFlow<List<ServersCache>>>()
 
-    private val _isRunning = MutableStateFlow(false)
-    val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
-
-    private fun <T> actionFlow(replay: Int = 1) = MutableSharedFlow<T>(
-        replay = replay,
-        extraBufferCapacity = 64,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
-
-    private val _updateListAction = actionFlow<Int>()
-    val updateListAction: SharedFlow<Int> = _updateListAction.asSharedFlow()
-
-    private val _updateTestResultAction = actionFlow<String>()
-    val updateTestResultAction: SharedFlow<String> = _updateTestResultAction.asSharedFlow()
-
-    private val _testProgressAction = actionFlow<TestProgressInfo?>()
-    val testProgressAction: SharedFlow<TestProgressInfo?> = _testProgressAction.asSharedFlow()
-
-    private val _countryCodeProgressAction = actionFlow<TestProgressInfo?>()
-    val countryCodeProgressAction: SharedFlow<TestProgressInfo?> = _countryCodeProgressAction.asSharedFlow()
-
-    private val _updateIpResultAction = actionFlow<String?>()
-    val updateIpResultAction: SharedFlow<String?> = _updateIpResultAction.asSharedFlow()
-
-    private val _updateTrafficSpeedAction = actionFlow<String>()
-    val updateTrafficSpeedAction: SharedFlow<String> = _updateTrafficSpeedAction.asSharedFlow()
-
-    private val _serviceRestartAction = actionFlow<Unit>(replay = 0)
-    val serviceRestartAction: SharedFlow<Unit> = _serviceRestartAction.asSharedFlow()
-
-    private val _alertAction = actionFlow<Pair<Boolean, String>>(replay = 0)
-    val alertAction: SharedFlow<Pair<Boolean, String>> = _alertAction.asSharedFlow()
-
-    private val _updateGroupBadgeAction = actionFlow<Unit>(replay = 0)
-    val updateGroupBadgeAction: SharedFlow<Unit> = _updateGroupBadgeAction.asSharedFlow()
-
-    private val _updateGroupOrderAction = actionFlow<Unit>(replay = 0)
-    val updateGroupOrderAction: SharedFlow<Unit> = _updateGroupOrderAction.asSharedFlow()
+    val isRunning by lazy { MutableLiveData<Boolean>() }
+    val updateListAction by lazy { MutableLiveData<Int>() }
+    val updateTestResultAction by lazy { MutableLiveData<String>() }
+    val testProgressAction by lazy { MutableLiveData<TestProgressInfo?>() }
+    val countryCodeProgressAction by lazy { MutableLiveData<TestProgressInfo?>() }
+    val updateIpResultAction by lazy { MutableLiveData<String>() }
+    val updateTrafficSpeedAction by lazy { MutableLiveData<String>() }
+    val serviceRestartAction by lazy { MutableLiveData<Unit>() }
+    val alertAction by lazy { MutableLiveData<Pair<Boolean, String>>() }
+    val updateGroupBadgeAction by lazy { MutableLiveData<Unit>() }
+    val updateGroupOrderAction by lazy { MutableLiveData<Unit>() }
 
     init {
         reloadServerList(notify = false)
     }
 
     fun startListenBroadcast() {
-        _isRunning.value = false
+        isRunning.value = false
         if (!receiverRegistered) {
             val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
             ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
@@ -131,18 +101,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         reloadJob?.cancel()
-        unregisterMsgReceiver()
-        super.onCleared()
-    }
-
-    private fun unregisterMsgReceiver() {
-        if (!receiverRegistered) return
-        receiverRegistered = false
-        runCatching {
-            getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
-        }.onFailure {
-            LogUtil.e(AppConfig.TAG, "Failed to unregister main receiver", it)
+        if (receiverRegistered) {
+            try {
+                getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
+            } catch (e: IllegalArgumentException) {
+                e.printStackTrace()
+            } finally {
+                receiverRegistered = false
+            }
         }
+        LogUtil.i(AppConfig.TAG, "Main ViewModel is cleared")
+        super.onCleared()
     }
 
     @Synchronized
@@ -165,7 +134,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         updateCache()
         serverCacheLoaded = true
-        if (notify) _updateListAction.tryEmit(-1)
+        if (notify) updateListAction.postValue(-1)
     }
 
     fun refreshServerList(updateSubscription: Boolean = false): Job {
@@ -179,8 +148,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 reloadServerList(notify = false)
                 withContext(Dispatchers.Main) {
-                    _updateListAction.tryEmit(-1)
-                    _updateGroupBadgeAction.tryEmit(Unit)
+                    updateListAction.value = -1
+                    updateGroupBadgeAction.value = Unit
                 }
             } finally {
                 _isRefreshing.value = false
@@ -214,8 +183,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         MmkvManager.removeServer(guid)
         updateCache()
         refreshAllGroupCaches()
-        _updateListAction.tryEmit(-1)
-        _updateGroupBadgeAction.tryEmit(Unit)
+        updateListAction.postValue(-1)
+        updateGroupBadgeAction.postValue(Unit)
     }
 
     fun swapServer(fromPosition: Int, toPosition: Int) {
@@ -300,7 +269,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val nowPinned = MmkvManager.togglePinnedServer(guid)
         updateCache()
         refreshAllGroupCaches()
-        _updateListAction.tryEmit(-1)
+        updateListAction.postValue(-1)
         return nowPinned
     }
 
@@ -334,7 +303,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         activeTestCompleted = 0
         activeTestTotal = serversCache.size
         MmkvManager.clearAllTestDelayResults(serversCache.map { it.guid }.toList())
-        _updateListAction.tryEmit(-1)
+        updateListAction.value = -1
 
         viewModelScope.launch(Dispatchers.Default) {
             if (serversCache.isEmpty()) {
@@ -346,7 +315,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             if (serversCache.isEmpty()) {
                 activeTestId = null
                 withContext(Dispatchers.Main) {
-                    _testProgressAction.tryEmit(null)
+                    testProgressAction.value = null
                 }
                 return@launch
             }
@@ -370,7 +339,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )
         val guids = serversCache.map { it.guid }.toList()
         MmkvManager.clearAllCountryCodes(guids)
-        _updateListAction.tryEmit(-1)
+        updateListAction.value = -1
 
         viewModelScope.launch(Dispatchers.Default) {
             if (guids.isEmpty()) return@launch
@@ -395,13 +364,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun clearCountryCodes() {
         cancelCountryCodeTest()
         MmkvManager.clearAllCountryCodes(MmkvManager.decodeAllServerList())
-        _updateListAction.tryEmit(-1)
+        updateListAction.postValue(-1)
     }
 
     fun clearCountryCodesForGroup() {
         cancelCountryCodeTest()
         MmkvManager.clearAllCountryCodes(MmkvManager.decodeServerList(subscriptionId))
-        _updateListAction.tryEmit(-1)
+        updateListAction.postValue(-1)
     }
 
     fun testCurrentServerRealPing() {
@@ -592,7 +561,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         pendingServerRestartGuid = null
         isRestarting = false
         markConnectionStopped()
-        _isRunning.value = false
+        isRunning.value = false
     }
 
     private fun markConnectionStopped() {
@@ -640,24 +609,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun resetCurrentProfileTraffic() {
         MmkvManager.getSelectServer()?.let { guid ->
             MmkvManager.resetProfileTraffic(guid)
-            _updateListAction.tryEmit(getPosition(guid))
+            updateListAction.postValue(getPosition(guid))
         }
     }
 
     fun resetGroupTraffic() {
         MmkvManager.resetGroupTraffic(subscriptionId)
-        _updateListAction.tryEmit(-1)
+        updateListAction.postValue(-1)
     }
 
     fun resetAllTraffic() {
         MmkvManager.resetAllTraffic()
-        _updateListAction.tryEmit(-1)
+        updateListAction.postValue(-1)
     }
 
     fun cancelRealPingTest() {
         val testId = activeTestId.orEmpty()
         activeTestId = null
-        _testProgressAction.tryEmit(null)
+        testProgressAction.value = null
         MessageUtil.sendMsg2TestService(
             getApplication(),
             TestServiceMessage(
@@ -677,7 +646,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )
         MmkvManager.clearAllTestDelayResults(MmkvManager.decodeAllServerList())
         updateCache()
-        _updateListAction.tryEmit(-1)
+        updateListAction.postValue(-1)
     }
 
     fun clearTestResultsForGroup() {
@@ -690,7 +659,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )
         MmkvManager.clearAllTestDelayResults(MmkvManager.decodeServerList(subscriptionId))
         updateCache()
-        _updateListAction.tryEmit(-1)
+        updateListAction.postValue(-1)
     }
 
     private val mMsgReceiver = object : BroadcastReceiver() {
@@ -698,21 +667,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             when (intent?.getIntExtra("key", 0)) {
                 AppConfig.MSG_STATE_RUNNING -> {
                     if (!isRestarting) {
-                        _isRunning.value = true
+                        isRunning.value = true
                     }
                 }
 
                 AppConfig.MSG_STATE_NOT_RUNNING -> {
                     if (!isRestarting) {
                         markConnectionStopped()
-                        _isRunning.value = false
+                        isRunning.value = false
                     }
                 }
 
                 AppConfig.MSG_STATE_RESTART -> {
                     markConnectionStopped()
                     isRestarting = true
-                    _serviceRestartAction.tryEmit(Unit)
+                    serviceRestartAction.value = Unit
                 }
 
                 AppConfig.MSG_STATE_START_SUCCESS -> {
@@ -720,16 +689,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val restarted = intent.serializable<Boolean>("content") == true
                     pendingServerRestartGuid = null
                     isRestarting = false
-                    _alertAction.tryEmit(
-                        Pair(
-                            true,
-                            app.getString(
-                                if (restarted) R.string.toast_services_restart_success
-                                else R.string.toast_services_success,
-                            ),
-                        )
+                    alertAction.value = Pair(
+                        true,
+                        app.getString(
+                            if (restarted) R.string.toast_services_restart_success
+                            else R.string.toast_services_success,
+                        ),
                     )
-                    _isRunning.value = true
+                    isRunning.value = true
                 }
 
                 AppConfig.MSG_STATE_START_FAILURE -> {
@@ -743,46 +710,44 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                     pendingServerRestartGuid = null
                     isRestarting = false
-                    _alertAction.tryEmit(Pair(false, msg))
+                    alertAction.value = Pair(false, msg)
                     markConnectionStopped()
-                    _isRunning.value = false
+                    isRunning.value = false
                 }
 
                 AppConfig.MSG_STATE_STOP_SUCCESS -> {
                     pendingServerRestartGuid = null
                     isRestarting = false
                     markConnectionStopped()
-                    _isRunning.value = false
+                    isRunning.value = false
                 }
 
                 AppConfig.MSG_MEASURE_DELAY_SUCCESS -> {
-                    _updateTestResultAction.tryEmit(intent.getStringExtra("content").orEmpty())
+                    updateTestResultAction.value = intent.getStringExtra("content").orEmpty()
                 }
 
                 AppConfig.MSG_MEASURE_IP_SUCCESS -> {
                     val ip = intent.getStringExtra("content")
-                    _updateIpResultAction.tryEmit(ip)
+                    updateIpResultAction.value = ip
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_SUCCESS -> {
                     val result = intent.serializable<RealPingResult>("content")
                     if (result != null) {
                         if (acceptsTestEvent(result.testId)) {
-                            _updateListAction.tryEmit(getPosition(result.guid))
+                            updateListAction.value = getPosition(result.guid)
                             activeTestCompleted += 1
                             activeTestTotal = maxOf(activeTestTotal, activeTestCompleted)
-                            _testProgressAction.tryEmit(
-                                TestProgressInfo(
-                                    guid = result.guid,
-                                    delayMillis = result.delayMillis,
-                                    current = activeTestCompleted,
-                                    total = activeTestTotal,
-                                )
+                            testProgressAction.value = TestProgressInfo(
+                                guid = result.guid,
+                                delayMillis = result.delayMillis,
+                                current = activeTestCompleted,
+                                total = activeTestTotal,
                             )
                         }
                     } else {
                         val content = intent.getStringExtra("content")
-                        _updateListAction.tryEmit(getPosition(content ?: ""))
+                        updateListAction.value = getPosition(content ?: "")
                     }
                 }
 
@@ -792,17 +757,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         if (acceptsTestEvent(progress.testId)) {
                             activeTestCompleted = maxOf(activeTestCompleted, progress.completed)
                             activeTestTotal = maxOf(activeTestTotal, progress.total)
-                            _testProgressAction.tryEmit(
-                                TestProgressInfo(
-                                    guid = "",
-                                    delayMillis = -1L,
-                                    current = activeTestCompleted,
-                                    total = activeTestTotal,
-                                )
+                            testProgressAction.value = TestProgressInfo(
+                                guid = "",
+                                delayMillis = -1L,
+                                current = activeTestCompleted,
+                                total = activeTestTotal,
                             )
                         }
                     } else {
-                        _testProgressAction.tryEmit(intent.serializable<TestProgressInfo>("content"))
+                        testProgressAction.value = intent.serializable<TestProgressInfo>("content")
                     }
                 }
 
@@ -811,40 +774,40 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     if (summary != null) {
                         if (!acceptsTestEvent(summary.testId)) return
                         activeTestId = null
-                        _testProgressAction.tryEmit(null)
+                        testProgressAction.value = null
                         onTestsFinished(summary.cancelled)
                     } else {
                         activeTestId = null
-                        _testProgressAction.tryEmit(null)
+                        testProgressAction.value = null
                         onTestsFinished()
                     }
                 }
 
                 AppConfig.MSG_COUNTRY_CODE_SUCCESS -> {
                     val content = intent.getStringExtra("content")
-                    _updateListAction.tryEmit(getPosition(content ?: ""))
+                    updateListAction.value = getPosition(content ?: "")
                 }
 
                 AppConfig.MSG_COUNTRY_CODE_NOTIFY -> {
-                    _countryCodeProgressAction.tryEmit(intent.serializable<TestProgressInfo>("content"))
+                    countryCodeProgressAction.value = intent.serializable<TestProgressInfo>("content")
                 }
 
                 AppConfig.MSG_COUNTRY_CODE_FINISH -> {
-                    _countryCodeProgressAction.tryEmit(null)
+                    countryCodeProgressAction.value = null
                 }
 
                 AppConfig.MSG_TRAFFIC_UPDATED -> {
                     val guid = intent.getStringExtra("content") ?: return
-                    _updateListAction.tryEmit(getPosition(guid))
+                    updateListAction.postValue(getPosition(guid))
                 }
 
                 AppConfig.MSG_TRAFFIC_SPEED_UPDATED -> {
                     val speedText = intent.getStringExtra("content") ?: return
-                    _updateTrafficSpeedAction.tryEmit(speedText)
+                    updateTrafficSpeedAction.postValue(speedText)
                 }
 
                 AppConfig.MSG_SUB_UPDATE_FINISH -> {
-                    _updateGroupOrderAction.tryEmit(Unit)
+                    updateGroupOrderAction.postValue(Unit)
                 }
             }
         }
