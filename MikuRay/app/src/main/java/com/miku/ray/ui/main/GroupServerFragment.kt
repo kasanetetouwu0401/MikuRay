@@ -387,6 +387,9 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
         }
 
         override fun onRefreshData() {
+            // Refresh the persisted group snapshot asynchronously, matching the
+            // refresh-group behavior used by v2rayNG's main screen.
+            mainViewModel.refreshServerList(updateSubscription = true)
         }
 
         override fun onRemove(guid: String, position: Int) {

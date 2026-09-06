@@ -34,8 +34,12 @@ import com.miku.ray.util.LogUtil
 import com.miku.ray.util.MessageUtil
 import com.miku.ray.util.Utils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.Collections
 import java.util.UUID
 import java.util.regex.PatternSyntaxException
@@ -49,9 +53,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var activeTestTotal = 0
     private var isRestarting = false
     private var pendingServerRestartGuid: String? = null
+    private var reloadJob: Job? = null
+    private var receiverRegistered = false
     @Volatile
     private var serverCacheLoaded = false
     val serversCache = mutableListOf<ServersCache>()
+
+    // Immutable snapshot for new observers. The legacy mutable list remains for
+    // existing fragments and adapters, while this flow prevents consumers from
+    // observing a half-rebuilt cache during refreshes.
+    private val _serversState = MutableStateFlow<List<ServersCache>>(emptyList())
+    val serversState: StateFlow<List<ServersCache>> = _serversState.asStateFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     val isRunning by lazy { MutableLiveData<Boolean>() }
     val updateListAction by lazy { MutableLiveData<Int>() }
@@ -75,8 +90,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun startListenBroadcast() {
         isRunning.value = false
-        val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
-        ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
+        if (!receiverRegistered) {
+            val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
+            ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
+            receiverRegistered = true
+        }
         MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
@@ -85,10 +103,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     override fun onCleared() {
-        try {
-            getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
-        } catch (e: IllegalArgumentException) {
-            e.printStackTrace()
+        reloadJob?.cancel()
+        if (receiverRegistered) {
+            try {
+                getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
+            } catch (e: IllegalArgumentException) {
+                e.printStackTrace()
+            } finally {
+                receiverRegistered = false
+            }
         }
         LogUtil.i(AppConfig.TAG, "Main ViewModel is cleared")
         super.onCleared()
@@ -118,6 +141,35 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
+     * Reloads the current group from MMKV without blocking the UI thread.
+     * This is the ViewModel equivalent of v2rayNG's group refresh action.
+     */
+    fun refreshServerList(updateSubscription: Boolean = false): Job {
+        reloadJob?.cancel()
+        reloadJob = viewModelScope.launch(Dispatchers.IO) {
+            _isRefreshing.value = true
+            try {
+                if (updateSubscription) {
+                    updateConfigViaSubAll()
+                }
+                reloadServerList(notify = false)
+                withContext(Dispatchers.Main) {
+                    updateListAction.value = -1
+                    updateGroupBadgeAction.value = Unit
+                }
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
+        return reloadJob!!
+    }
+
+    /** Refreshes the in-memory snapshot after external profile changes. */
+    fun refreshGroups() {
+        refreshServerList(updateSubscription = false)
+    }
+
+    /**
      * Makes the persisted server snapshot available before a UI action reads
      * [serversCache]. The UI must not interpret an uninitialized cache as an
      * empty server set during a cold start.
@@ -143,6 +195,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         Collections.swap(serverList, fromPosition, toPosition)
         Collections.swap(serversCache, fromPosition, toPosition)
+        _serversState.value = serversCache.toList()
 
         MmkvManager.encodeServerList(serverList, subscriptionId)
     }
@@ -193,6 +246,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (pinnedServers.isNotEmpty()) {
             serversCache.sortByDescending { pinnedServers.contains(it.guid) }
         }
+
+        _serversState.value = serversCache.toList()
     }
 
     /**
