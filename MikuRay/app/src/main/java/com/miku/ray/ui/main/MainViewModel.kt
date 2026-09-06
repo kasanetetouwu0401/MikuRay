@@ -86,7 +86,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun startListenBroadcast() {
-        isRunning.value = false
+        // Do not force isRunning=false here (align with v2rayNG). Let the service
+        // reply with the real state via MSG_REGISTER_CLIENT so the UI does not
+        // get stuck showing disconnected / frozen status_dot while the VPN is up.
         if (!receiverRegistered) {
             val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
             ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
@@ -96,6 +98,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun resyncState() {
+        // Re-query service state on resume so status_dot / test UI recover after process death or late start.
         MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
@@ -668,6 +671,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 AppConfig.MSG_STATE_RUNNING -> {
                     if (!isRestarting) {
                         isRunning.value = true
+                        // Force list rebind so v_status_dot and test metadata update immediately
+                        updateListAction.postValue(-1)
                     }
                 }
 
@@ -675,6 +680,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     if (!isRestarting) {
                         markConnectionStopped()
                         isRunning.value = false
+                        updateListAction.postValue(-1)
                     }
                 }
 
@@ -697,6 +703,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         ),
                     )
                     isRunning.value = true
+                    updateListAction.postValue(-1)
                 }
 
                 AppConfig.MSG_STATE_START_FAILURE -> {
@@ -713,6 +720,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     alertAction.value = Pair(false, msg)
                     markConnectionStopped()
                     isRunning.value = false
+                    updateListAction.postValue(-1)
                 }
 
                 AppConfig.MSG_STATE_STOP_SUCCESS -> {
@@ -720,6 +728,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     isRestarting = false
                     markConnectionStopped()
                     isRunning.value = false
+                    updateListAction.postValue(-1)
                 }
 
                 AppConfig.MSG_MEASURE_DELAY_SUCCESS -> {

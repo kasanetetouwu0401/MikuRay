@@ -93,10 +93,15 @@ class MainRecyclerAdapter(
         val lifecycleOwner = recyclerView.context as? androidx.lifecycle.LifecycleOwner
         if (lifecycleOwner != null) {
             isRunningObserver = androidx.lifecycle.Observer { _ ->
+                // Always rebind selected server so v_status_dot reflects VPN state
+                // (important on cold start when list may have been bound before state arrived)
                 val selectedGuid = MmkvManager.getSelectServer()
                 val position = data.indexOfFirst { it.guid == selectedGuid }
                 if (position >= 0) {
                     notifyServerItemChanged(position)
+                } else if (data.isNotEmpty()) {
+                    // Fallback: full refresh if selection not in current page yet
+                    notifyDataSetChanged()
                 }
             }
             mainViewModel.isRunning.observe(lifecycleOwner, isRunningObserver!!)
@@ -195,14 +200,21 @@ class MainRecyclerAdapter(
             val isVpnConnected = mainViewModel.isRunning.value == true
 
             if (isSelectedServer && isVpnConnected) {
+                // Ensure animation drawable is (re)applied so the status dot is not stuck
+                // after cold start or late isRunning update.
                 holder.views.vStatusDot.setBackgroundResource(R.drawable.blink_color)
                 val blinkAnimDrawable = holder.views.vStatusDot.background
 
                 if (blinkAnimDrawable is android.graphics.drawable.AnimationDrawable) {
                     holder.views.vStatusDot.visibility = View.VISIBLE
+                    // Stop any previous instance then start fresh on next frame
+                    if (blinkAnimDrawable.isRunning) {
+                        blinkAnimDrawable.stop()
+                    }
                     holder.views.vStatusDot.post {
-                        if (!blinkAnimDrawable.isRunning) {
-                            blinkAnimDrawable.start()
+                        val d = holder.views.vStatusDot.background
+                        if (d is android.graphics.drawable.AnimationDrawable && !d.isRunning) {
+                            d.start()
                         }
                     }
                 }
