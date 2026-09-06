@@ -8,7 +8,6 @@ import android.content.IntentFilter
 import android.content.res.AssetManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.miku.ray.AngApplication
 import com.miku.ray.AppConfig
@@ -37,8 +36,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.Collections
 import java.util.UUID
@@ -60,42 +63,62 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var serverCacheLoaded = false
     val serversCache = mutableListOf<ServersCache>()
 
-    // Immutable snapshot for new observers. The legacy mutable list remains for
-    // existing fragments and adapters, while this flow prevents consumers from
-    // observing a half-rebuilt cache during refreshes.
     private val _serversState = MutableStateFlow<List<ServersCache>>(emptyList())
     val serversState: StateFlow<List<ServersCache>> = _serversState.asStateFlow()
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
-    // v2rayNG-style per-group cache. Existing fragments can keep using
-    // serversCache, while new consumers can observe an isolated group flow.
     private val groupCache = ConcurrentHashMap<String, List<ServersCache>>()
     private val groupStates = ConcurrentHashMap<String, MutableStateFlow<List<ServersCache>>>()
 
-    val isRunning by lazy { MutableLiveData<Boolean>() }
-    val updateListAction by lazy { MutableLiveData<Int>() }
-    val updateTestResultAction by lazy { MutableLiveData<String>() }
-    val testProgressAction by lazy { MutableLiveData<TestProgressInfo?>() }
-    val countryCodeProgressAction by lazy { MutableLiveData<TestProgressInfo?>() }
-    val updateIpResultAction by lazy { MutableLiveData<String>() }
-    val updateTrafficSpeedAction by lazy { MutableLiveData<String>() }
-    val serviceRestartAction by lazy { MutableLiveData<Unit>() }
-    val alertAction by lazy { MutableLiveData<Pair<Boolean, String>>() }
-    val updateGroupBadgeAction by lazy { MutableLiveData<Unit>() }
-    val updateGroupOrderAction by lazy { MutableLiveData<Unit>() }
+    // ---------- Running state (StateFlow: selalu punya nilai terbaru, seperti v2rayNG) ----------
+    private val _isRunning = MutableStateFlow(false)
+    val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
+
+    // ---------- One-shot / signal events (SharedFlow, pengganti MutableLiveData action) ----------
+    private fun <T> actionFlow(replay: Int = 1) = MutableSharedFlow<T>(
+        replay = replay,
+        extraBufferCapacity = 64,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+
+    private val _updateListAction = actionFlow<Int>()
+    val updateListAction: SharedFlow<Int> = _updateListAction.asSharedFlow()
+
+    private val _updateTestResultAction = actionFlow<String>()
+    val updateTestResultAction: SharedFlow<String> = _updateTestResultAction.asSharedFlow()
+
+    private val _testProgressAction = actionFlow<TestProgressInfo?>()
+    val testProgressAction: SharedFlow<TestProgressInfo?> = _testProgressAction.asSharedFlow()
+
+    private val _countryCodeProgressAction = actionFlow<TestProgressInfo?>()
+    val countryCodeProgressAction: SharedFlow<TestProgressInfo?> = _countryCodeProgressAction.asSharedFlow()
+
+    private val _updateIpResultAction = actionFlow<String?>()
+    val updateIpResultAction: SharedFlow<String?> = _updateIpResultAction.asSharedFlow()
+
+    private val _updateTrafficSpeedAction = actionFlow<String>()
+    val updateTrafficSpeedAction: SharedFlow<String> = _updateTrafficSpeedAction.asSharedFlow()
+
+    private val _serviceRestartAction = actionFlow<Unit>(replay = 0)
+    val serviceRestartAction: SharedFlow<Unit> = _serviceRestartAction.asSharedFlow()
+
+    private val _alertAction = actionFlow<Pair<Boolean, String>>(replay = 0)
+    val alertAction: SharedFlow<Pair<Boolean, String>> = _alertAction.asSharedFlow()
+
+    private val _updateGroupBadgeAction = actionFlow<Unit>(replay = 0)
+    val updateGroupBadgeAction: SharedFlow<Unit> = _updateGroupBadgeAction.asSharedFlow()
+
+    private val _updateGroupOrderAction = actionFlow<Unit>(replay = 0)
+    val updateGroupOrderAction: SharedFlow<Unit> = _updateGroupOrderAction.asSharedFlow()
 
     init {
-        // Load the persisted snapshot before any fragment can read
-        // serversCache. Previously this only happened after MainActivity had
-        // finished its asynchronous UI setup, so every consumer could see a
-        // transient empty cache during a cold start.
         reloadServerList(notify = false)
     }
 
     fun startListenBroadcast() {
-        isRunning.value = false
+        _isRunning.value = false
         if (!receiverRegistered) {
             val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
             ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
@@ -143,13 +166,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         updateCache()
         serverCacheLoaded = true
-        if (notify) updateListAction.postValue(-1)
+        if (notify) _updateListAction.tryEmit(-1)
     }
 
-    /**
-     * Reloads the current group from MMKV without blocking the UI thread.
-     * This is the ViewModel equivalent of v2rayNG's group refresh action.
-     */
     fun refreshServerList(updateSubscription: Boolean = false): Job {
         reloadJob?.cancel()
         reloadJob = viewModelScope.launch(Dispatchers.IO) {
@@ -161,8 +180,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 reloadServerList(notify = false)
                 withContext(Dispatchers.Main) {
-                    updateListAction.value = -1
-                    updateGroupBadgeAction.value = Unit
+                    _updateListAction.tryEmit(-1)
+                    _updateGroupBadgeAction.tryEmit(Unit)
                 }
             } finally {
                 _isRefreshing.value = false
@@ -183,16 +202,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /** Refreshes the in-memory snapshot after external profile changes. */
     fun refreshGroups() {
         refreshServerList(updateSubscription = false)
     }
 
-    /**
-     * Makes the persisted server snapshot available before a UI action reads
-     * [serversCache]. The UI must not interpret an uninitialized cache as an
-     * empty server set during a cold start.
-     */
     fun ensureServerCacheReady() {
         if (!serverCacheLoaded) reloadServerList()
     }
@@ -200,12 +213,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun removeServer(guid: String) {
         serverList.remove(guid)
         MmkvManager.removeServer(guid)
-        // Rebuild from the persisted source of truth so filtering, ordering,
-        // pinning, and every fragment receive the same valid snapshot.
         updateCache()
         refreshAllGroupCaches()
-        updateListAction.postValue(-1)
-        updateGroupBadgeAction.postValue(Unit)
+        _updateListAction.tryEmit(-1)
+        _updateGroupBadgeAction.tryEmit(Unit)
     }
 
     fun swapServer(fromPosition: Int, toPosition: Int) {
@@ -239,7 +250,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _serversState.value = snapshot
     }
 
-    /** Returns the current group as an immutable reactive stream. */
     fun serversForGroup(groupId: String): StateFlow<List<ServersCache>> {
         val state = groupStates.computeIfAbsent(groupId) { MutableStateFlow(emptyList()) }
         if (state.value.isEmpty() && !groupCache.containsKey(groupId)) {
@@ -287,15 +297,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return result
     }
 
-    /**
-     * Toggles the pinned state of [guid], re-sorts the cache so pinned
-     * servers float to the top immediately, and returns the new state.
-     */
     fun togglePinServer(guid: String): Boolean {
         val nowPinned = MmkvManager.togglePinnedServer(guid)
         updateCache()
         refreshAllGroupCaches()
-        updateListAction.postValue(-1)
+        _updateListAction.tryEmit(-1)
         return nowPinned
     }
 
@@ -325,19 +331,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun testAllRealPing(onlyTcp: Boolean = false) {
         val testId = UUID.randomUUID().toString()
-        // CoreTestService replaces an active batch itself and redelivers the
-        // newest start intent from the fresh disposable probe process. Sending
-        // a separate cancel here races that replacement and can drop the URL test.
         activeTestId = testId
         activeTestCompleted = 0
         activeTestTotal = serversCache.size
         MmkvManager.clearAllTestDelayResults(serversCache.map { it.guid }.toList())
-        updateListAction.value = -1
+        _updateListAction.tryEmit(-1)
 
         viewModelScope.launch(Dispatchers.Default) {
-            // MainActivity can receive a click while its asynchronous group
-            // setup is still populating the cache on a cold start. Reload the
-            // persisted list once before treating the request as empty.
             if (serversCache.isEmpty()) {
                 withContext(Dispatchers.Main) {
                     reloadServerList()
@@ -346,12 +346,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             if (serversCache.isEmpty()) {
                 activeTestId = null
-                // The activity shows the progress dialog before starting the
-                // service. During cold start the list can still be empty, so
-                // there may be no service-side FINISH event to close it.
-                // Always publish the terminal state for this local no-op.
                 withContext(Dispatchers.Main) {
-                    testProgressAction.value = null
+                    _testProgressAction.tryEmit(null)
                 }
                 return@launch
             }
@@ -375,7 +371,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )
         val guids = serversCache.map { it.guid }.toList()
         MmkvManager.clearAllCountryCodes(guids)
-        updateListAction.value = -1
+        _updateListAction.tryEmit(-1)
 
         viewModelScope.launch(Dispatchers.Default) {
             if (guids.isEmpty()) return@launch
@@ -400,13 +396,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun clearCountryCodes() {
         cancelCountryCodeTest()
         MmkvManager.clearAllCountryCodes(MmkvManager.decodeAllServerList())
-        updateListAction.postValue(-1)
+        _updateListAction.tryEmit(-1)
     }
 
     fun clearCountryCodesForGroup() {
         cancelCountryCodeTest()
         MmkvManager.clearAllCountryCodes(MmkvManager.decodeServerList(subscriptionId))
-        updateListAction.postValue(-1)
+        _updateListAction.tryEmit(-1)
     }
 
     fun testCurrentServerRealPing() {
@@ -497,9 +493,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         return@forEachIndexed
                     }
 
-                    // Pinned servers are never treated as the removable duplicate, so
-                    // pinning a server is enough to keep it even if an identical
-                    // config exists elsewhere in the list.
                     if (profile == profile2 && !deleteServer.contains(sc2.guid) && !pinnedServers.contains(sc2.guid)) {
                         deleteServer.add(sc2.guid)
                     }
@@ -535,7 +528,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             val serversCopy = serversCache.toList()
             for (item in serversCopy) {
-                // MmkvManager.removeInvalidServer already skips pinned servers.
                 count += MmkvManager.removeInvalidServer(item.guid)
             }
         }
@@ -585,8 +577,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         refreshAllGroupCaches()
         reloadServerList()
     }
-
-    /** Persists a new selection while waiting for the active daemon to accept restart. */
+    
     fun beginServerRestart(guid: String): Boolean {
         if (guid == MmkvManager.getSelectServer() || pendingServerRestartGuid != null) return false
 
@@ -596,14 +587,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return true
     }
 
-    /** Clears the optimistic restart state when no active daemon accepted the request. */
     fun onServerRestartRequestResult(guid: String, handled: Boolean) {
         if (handled || pendingServerRestartGuid != guid) return
 
         pendingServerRestartGuid = null
         isRestarting = false
         markConnectionStopped()
-        isRunning.value = false
+        _isRunning.value = false
     }
 
     private fun markConnectionStopped() {
@@ -651,24 +641,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun resetCurrentProfileTraffic() {
         MmkvManager.getSelectServer()?.let { guid ->
             MmkvManager.resetProfileTraffic(guid)
-            updateListAction.postValue(getPosition(guid))
+            _updateListAction.tryEmit(getPosition(guid))
         }
     }
 
     fun resetGroupTraffic() {
         MmkvManager.resetGroupTraffic(subscriptionId)
-        updateListAction.postValue(-1)
+        _updateListAction.tryEmit(-1)
     }
 
     fun resetAllTraffic() {
         MmkvManager.resetAllTraffic()
-        updateListAction.postValue(-1)
+        _updateListAction.tryEmit(-1)
     }
 
     fun cancelRealPingTest() {
         val testId = activeTestId.orEmpty()
         activeTestId = null
-        testProgressAction.value = null
+        _testProgressAction.tryEmit(null)
         MessageUtil.sendMsg2TestService(
             getApplication(),
             TestServiceMessage(
@@ -687,10 +677,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             )
         )
         MmkvManager.clearAllTestDelayResults(MmkvManager.decodeAllServerList())
-        // Re-sort serversCache immediately so order=by-delay drops back to its
-        // tie-break order right away, instead of waiting for a reload/restart.
         updateCache()
-        updateListAction.postValue(-1)
+        _updateListAction.tryEmit(-1)
     }
 
     fun clearTestResultsForGroup() {
@@ -702,10 +690,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             )
         )
         MmkvManager.clearAllTestDelayResults(MmkvManager.decodeServerList(subscriptionId))
-        // Re-sort serversCache immediately so order=by-delay drops back to its
-        // tie-break order right away, instead of waiting for a reload/restart.
         updateCache()
-        updateListAction.postValue(-1)
+        _updateListAction.tryEmit(-1)
     }
 
     private val mMsgReceiver = object : BroadcastReceiver() {
@@ -713,23 +699,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             when (intent?.getIntExtra("key", 0)) {
                 AppConfig.MSG_STATE_RUNNING -> {
                     if (!isRestarting) {
-                        isRunning.value = true
+                        _isRunning.value = true
                     }
                 }
 
                 AppConfig.MSG_STATE_NOT_RUNNING -> {
                     if (!isRestarting) {
                         markConnectionStopped()
-                        isRunning.value = false
+                        _isRunning.value = false
                     }
                 }
 
                 AppConfig.MSG_STATE_RESTART -> {
-                    // A service restart is a new connection lifecycle. Clear the
-                    // previous start time before the replacement service starts.
                     markConnectionStopped()
                     isRestarting = true
-                    serviceRestartAction.value = Unit
+                    _serviceRestartAction.tryEmit(Unit)
                 }
 
                 AppConfig.MSG_STATE_START_SUCCESS -> {
@@ -737,14 +721,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val restarted = intent.serializable<Boolean>("content") == true
                     pendingServerRestartGuid = null
                     isRestarting = false
-                    alertAction.value = Pair(
-                        true,
-                        app.getString(
-                            if (restarted) R.string.toast_services_restart_success
-                            else R.string.toast_services_success,
-                        ),
+                    _alertAction.tryEmit(
+                        Pair(
+                            true,
+                            app.getString(
+                                if (restarted) R.string.toast_services_restart_success
+                                else R.string.toast_services_success,
+                            ),
+                        )
                     )
-                    isRunning.value = true
+                    _isRunning.value = true
                 }
 
                 AppConfig.MSG_STATE_START_FAILURE -> {
@@ -758,47 +744,46 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                     pendingServerRestartGuid = null
                     isRestarting = false
-                    alertAction.value = Pair(false, msg)
+                    _alertAction.tryEmit(Pair(false, msg))
                     markConnectionStopped()
-                    isRunning.value = false
+                    _isRunning.value = false
                 }
 
                 AppConfig.MSG_STATE_STOP_SUCCESS -> {
                     pendingServerRestartGuid = null
                     isRestarting = false
                     markConnectionStopped()
-                    isRunning.value = false
+                    _isRunning.value = false
                 }
 
                 AppConfig.MSG_MEASURE_DELAY_SUCCESS -> {
-                    updateTestResultAction.value = intent.getStringExtra("content").orEmpty()
+                    _updateTestResultAction.tryEmit(intent.getStringExtra("content").orEmpty())
                 }
 
                 AppConfig.MSG_MEASURE_IP_SUCCESS -> {
                     val ip = intent.getStringExtra("content")
-                    updateIpResultAction.value = ip
+                    _updateIpResultAction.tryEmit(ip)
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_SUCCESS -> {
                     val result = intent.serializable<RealPingResult>("content")
                     if (result != null) {
                         if (acceptsTestEvent(result.testId)) {
-                            updateListAction.value = getPosition(result.guid)
-                            // Result events also drive the dialog's detail list.
-                            // The old adapter only receives TestProgressInfo rows,
-                            // so forwarding only updateListAction leaves it empty.
+                            _updateListAction.tryEmit(getPosition(result.guid))
                             activeTestCompleted += 1
                             activeTestTotal = maxOf(activeTestTotal, activeTestCompleted)
-                            testProgressAction.value = TestProgressInfo(
-                                guid = result.guid,
-                                delayMillis = result.delayMillis,
-                                current = activeTestCompleted,
-                                total = activeTestTotal,
+                            _testProgressAction.tryEmit(
+                                TestProgressInfo(
+                                    guid = result.guid,
+                                    delayMillis = result.delayMillis,
+                                    current = activeTestCompleted,
+                                    total = activeTestTotal,
+                                )
                             )
                         }
                     } else {
                         val content = intent.getStringExtra("content")
-                        updateListAction.value = getPosition(content ?: "")
+                        _updateListAction.tryEmit(getPosition(content ?: ""))
                     }
                 }
 
@@ -808,15 +793,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         if (acceptsTestEvent(progress.testId)) {
                             activeTestCompleted = maxOf(activeTestCompleted, progress.completed)
                             activeTestTotal = maxOf(activeTestTotal, progress.total)
-                            testProgressAction.value = TestProgressInfo(
-                                guid = "",
-                                delayMillis = -1L,
-                                current = activeTestCompleted,
-                                total = activeTestTotal,
+                            _testProgressAction.tryEmit(
+                                TestProgressInfo(
+                                    guid = "",
+                                    delayMillis = -1L,
+                                    current = activeTestCompleted,
+                                    total = activeTestTotal,
+                                )
                             )
                         }
                     } else {
-                        testProgressAction.value = intent.serializable<TestProgressInfo>("content")
+                        _testProgressAction.tryEmit(intent.serializable<TestProgressInfo>("content"))
                     }
                 }
 
@@ -825,40 +812,40 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     if (summary != null) {
                         if (!acceptsTestEvent(summary.testId)) return
                         activeTestId = null
-                        testProgressAction.value = null
+                        _testProgressAction.tryEmit(null)
                         onTestsFinished(summary.cancelled)
                     } else {
                         activeTestId = null
-                        testProgressAction.value = null
+                        _testProgressAction.tryEmit(null)
                         onTestsFinished()
                     }
                 }
 
                 AppConfig.MSG_COUNTRY_CODE_SUCCESS -> {
                     val content = intent.getStringExtra("content")
-                    updateListAction.value = getPosition(content ?: "")
+                    _updateListAction.tryEmit(getPosition(content ?: ""))
                 }
 
                 AppConfig.MSG_COUNTRY_CODE_NOTIFY -> {
-                    countryCodeProgressAction.value = intent.serializable<TestProgressInfo>("content")
+                    _countryCodeProgressAction.tryEmit(intent.serializable<TestProgressInfo>("content"))
                 }
 
                 AppConfig.MSG_COUNTRY_CODE_FINISH -> {
-                    countryCodeProgressAction.value = null
+                    _countryCodeProgressAction.tryEmit(null)
                 }
 
                 AppConfig.MSG_TRAFFIC_UPDATED -> {
                     val guid = intent.getStringExtra("content") ?: return
-                    updateListAction.postValue(getPosition(guid))
+                    _updateListAction.tryEmit(getPosition(guid))
                 }
 
                 AppConfig.MSG_TRAFFIC_SPEED_UPDATED -> {
                     val speedText = intent.getStringExtra("content") ?: return
-                    updateTrafficSpeedAction.postValue(speedText)
+                    _updateTrafficSpeedAction.tryEmit(speedText)
                 }
 
                 AppConfig.MSG_SUB_UPDATE_FINISH -> {
-                    updateGroupOrderAction.postValue(Unit)
+                    _updateGroupOrderAction.tryEmit(Unit)
                 }
             }
         }

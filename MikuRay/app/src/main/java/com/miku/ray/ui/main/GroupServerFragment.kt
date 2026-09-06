@@ -87,10 +87,23 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainViewModel.serversForGroup(subId).collect { servers ->
-                    adapter.setData(servers.toMutableList(), -1)
-                    hasLoadedData = true
-                    updateEmptyState()
+                launch {
+                    mainViewModel.serversForGroup(subId).collect { servers ->
+                        adapter.setData(servers.toMutableList(), -1)
+                        hasLoadedData = true
+                        updateEmptyState()
+                    }
+                }
+
+                launch {
+                    mainViewModel.updateListAction.collect { index ->
+                        if (mainViewModel.subscriptionId != subId) {
+                            return@collect
+                        }
+                        adapter.setData(mainViewModel.serversCache, index)
+                        hasLoadedData = true
+                        updateEmptyState()
+                    }
                 }
             }
         }
@@ -102,15 +115,6 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
 
         itemTouchHelper = ItemTouchHelper(SimpleItemTouchHelperCallback(adapter, allowSwipe = false))
         itemTouchHelper?.attachToRecyclerView(binding.recyclerView)
-
-        mainViewModel.updateListAction.observe(viewLifecycleOwner) { index ->
-            if (mainViewModel.subscriptionId != subId) {
-                return@observe
-            }
-            adapter.setData(mainViewModel.serversCache, index)
-            hasLoadedData = true
-            updateEmptyState()
-        }
 
         binding.btnScrollToSelected.setOnClickListener {
             ownerActivity.locateSelectedServer()
@@ -401,8 +405,6 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
         }
 
         override fun onRefreshData() {
-            // Refresh the persisted group snapshot asynchronously, matching the
-            // refresh-group behavior used by v2rayNG's main screen.
             mainViewModel.refreshServerList(updateSubscription = true)
         }
 
