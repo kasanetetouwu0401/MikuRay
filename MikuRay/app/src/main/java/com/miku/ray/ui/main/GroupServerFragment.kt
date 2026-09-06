@@ -8,6 +8,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import kotlinx.coroutines.launch
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.core.view.isVisible
 import com.miku.ray.util.showDeleteConfirmDialog
 import androidx.recyclerview.widget.GridLayoutManager
@@ -80,6 +84,16 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
         applyGridEdgePadding(isDoubleColumnEnabled())
 
         binding.recyclerView.adapter = adapter
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.serversForGroup(subId).collect { servers ->
+                    adapter.setData(servers.toMutableList(), -1)
+                    hasLoadedData = true
+                    updateEmptyState()
+                }
+            }
+        }
 
         val animator = binding.recyclerView.itemAnimator
         if (animator is SimpleItemAnimator) {
@@ -387,6 +401,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
         }
 
         override fun onRefreshData() {
+            mainViewModel.refreshServerList(updateSubscription = true)
         }
 
         override fun onRemove(guid: String, position: Int) {

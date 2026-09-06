@@ -157,6 +157,24 @@ object MmkvManager {
         return true
     }
 
+    /**
+     * Removes deleted profiles from the saved pre-test/origin snapshot as well.
+     * Otherwise the next default-order reload can restore a server the user deleted.
+     */
+    fun removeFromOriginServerList(guids: Collection<String>, subscriptionId: String) {
+        if (guids.isEmpty()) return
+        val subId = getSubscriptionId(subscriptionId)
+        val key = "${KEY_SUB_SERVER_PREFIX}ORIGIN_$subId"
+        val json = mainStorage.decodeString(key) ?: return
+        val origin = JsonUtil.fromJsonSafe(json, Array<String>::class.java)?.toMutableList() ?: return
+        origin.removeAll(guids.toSet())
+        if (origin.isEmpty()) {
+            mainStorage.remove(key)
+        } else {
+            mainStorage.encode(key, JsonUtil.toJson(origin))
+        }
+    }
+
     fun hasOriginServerList(subscriptionId: String): Boolean {
         val subId = getSubscriptionId(subscriptionId)
         return mainStorage.containsKey("${KEY_SUB_SERVER_PREFIX}ORIGIN_$subId")
@@ -344,8 +362,10 @@ object MmkvManager {
         if (getSelectServer() == guid) {
             mainStorage.remove(KEY_SELECTED_SERVER)
         }
+        removeFromOriginServerList(listOf(guid), subId)
         profileFullStorage.remove(guid)
         serverAffStorage.remove(guid)
+        serverRawStorage.remove(guid)
         unpinServer(guid)
     }
 
@@ -368,7 +388,9 @@ object MmkvManager {
             }
             profileFullStorage.remove(guid)
             serverAffStorage.remove(guid)
+            serverRawStorage.remove(guid)
         }
+        removeFromOriginServerList(guids, subId)
     }
 
     fun removeServerViaSubid(subscriptionId: String?) {
@@ -381,7 +403,9 @@ object MmkvManager {
             }
             profileFullStorage.remove(guid)
             serverAffStorage.remove(guid)
+            serverRawStorage.remove(guid)
         }
+        removeFromOriginServerList(serverList, subId)
 
         serverList.clear()
         encodeServerList(serverList, subId)
@@ -655,6 +679,7 @@ object MmkvManager {
                     }
                 }
                 removeProfilePayloads(removed)
+                removeFromOriginServerList(removed, subId)
                 removedCount += removed.size
                 encodeServerList(kept.toMutableList(), subId)
             }

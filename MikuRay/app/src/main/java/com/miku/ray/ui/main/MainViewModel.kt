@@ -34,10 +34,15 @@ import com.miku.ray.util.LogUtil
 import com.miku.ray.util.MessageUtil
 import com.miku.ray.util.Utils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.Collections
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.PatternSyntaxException
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -49,9 +54,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var activeTestTotal = 0
     private var isRestarting = false
     private var pendingServerRestartGuid: String? = null
+    private var reloadJob: Job? = null
+    private var receiverRegistered = false
     @Volatile
     private var serverCacheLoaded = false
     val serversCache = mutableListOf<ServersCache>()
+
+    private val _serversState = MutableStateFlow<List<ServersCache>>(emptyList())
+    val serversState: StateFlow<List<ServersCache>> = _serversState.asStateFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    private val groupCache = ConcurrentHashMap<String, List<ServersCache>>()
+    private val groupStates = ConcurrentHashMap<String, MutableStateFlow<List<ServersCache>>>()
 
     val isRunning by lazy { MutableLiveData<Boolean>() }
     val updateListAction by lazy { MutableLiveData<Int>() }
@@ -66,17 +82,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val updateGroupOrderAction by lazy { MutableLiveData<Unit>() }
 
     init {
-        // Load the persisted snapshot before any fragment can read
-        // serversCache. Previously this only happened after MainActivity had
-        // finished its asynchronous UI setup, so every consumer could see a
-        // transient empty cache during a cold start.
         reloadServerList(notify = false)
     }
 
     fun startListenBroadcast() {
         isRunning.value = false
-        val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
-        ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
+        if (!receiverRegistered) {
+            val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
+            ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
+            receiverRegistered = true
+        }
         MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
@@ -85,10 +100,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     override fun onCleared() {
-        try {
-            getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
-        } catch (e: IllegalArgumentException) {
-            e.printStackTrace()
+        reloadJob?.cancel()
+        if (receiverRegistered) {
+            try {
+                getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
+            } catch (e: IllegalArgumentException) {
+                e.printStackTrace()
+            } finally {
+                receiverRegistered = false
+            }
         }
         LogUtil.i(AppConfig.TAG, "Main ViewModel is cleared")
         super.onCleared()
@@ -117,11 +137,43 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (notify) updateListAction.postValue(-1)
     }
 
-    /**
-     * Makes the persisted server snapshot available before a UI action reads
-     * [serversCache]. The UI must not interpret an uninitialized cache as an
-     * empty server set during a cold start.
-     */
+    fun refreshServerList(updateSubscription: Boolean = false): Job {
+        reloadJob?.cancel()
+        reloadJob = viewModelScope.launch(Dispatchers.IO) {
+            _isRefreshing.value = true
+            try {
+                if (updateSubscription) {
+                    updateConfigViaSubAll()
+                    refreshAllGroupCaches()
+                }
+                reloadServerList(notify = false)
+                withContext(Dispatchers.Main) {
+                    updateListAction.value = -1
+                    updateGroupBadgeAction.value = Unit
+                }
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
+        return reloadJob!!
+    }
+
+    private fun refreshAllGroupCaches() {
+        val groupIds = buildList {
+            add("")
+            addAll(MmkvManager.decodeSubsList())
+        }.distinct()
+        groupIds.forEach { groupId ->
+            val snapshot = buildServerCache(groupId)
+            groupCache[groupId] = snapshot
+            groupStates.computeIfAbsent(groupId) { MutableStateFlow(emptyList()) }.value = snapshot
+        }
+    }
+
+    fun refreshGroups() {
+        refreshServerList(updateSubscription = false)
+    }
+
     fun ensureServerCacheReady() {
         if (!serverCacheLoaded) reloadServerList()
     }
@@ -129,9 +181,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun removeServer(guid: String) {
         serverList.remove(guid)
         MmkvManager.removeServer(guid)
-        // Rebuild from the persisted source of truth so filtering, ordering,
-        // pinning, and every fragment receive the same valid snapshot.
         updateCache()
+        refreshAllGroupCaches()
         updateListAction.postValue(-1)
         updateGroupBadgeAction.postValue(Unit)
     }
@@ -143,65 +194,81 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         Collections.swap(serverList, fromPosition, toPosition)
         Collections.swap(serversCache, fromPosition, toPosition)
+        val reordered = serversCache.toList()
+        groupCache[subscriptionId] = reordered
+        groupStates.computeIfAbsent(subscriptionId) { MutableStateFlow(emptyList()) }.value = reordered
+        _serversState.value = reordered
 
         MmkvManager.encodeServerList(serverList, subscriptionId)
     }
 
     @Synchronized
     fun updateCache() {
+        val groupId = subscriptionId
+        val snapshot = buildServerCache(groupId)
+        serverList = if (groupId.isEmpty()) {
+            MmkvManager.decodeAllServerList()
+        } else {
+            MmkvManager.decodeServerList(groupId)
+        }
         serversCache.clear()
+        serversCache.addAll(snapshot)
+        groupCache[groupId] = snapshot
+        groupStates.computeIfAbsent(groupId) { MutableStateFlow(emptyList()) }.value = snapshot
+        _serversState.value = snapshot
+    }
+
+    fun serversForGroup(groupId: String): StateFlow<List<ServersCache>> {
+        val state = groupStates.computeIfAbsent(groupId) { MutableStateFlow(emptyList()) }
+        if (state.value.isEmpty() && !groupCache.containsKey(groupId)) {
+            val snapshot = buildServerCache(groupId)
+            groupCache[groupId] = snapshot
+            state.value = snapshot
+        }
+        return state.asStateFlow()
+    }
+
+    private fun buildServerCache(groupId: String): List<ServersCache> {
+        val guids = if (groupId.isEmpty()) {
+            MmkvManager.decodeAllServerList()
+        } else {
+            MmkvManager.decodeServerList(groupId)
+        }
         val kw = keywordFilter.trim()
         val searchRegex = try {
             if (kw.isNotEmpty()) Regex(kw, setOf(RegexOption.IGNORE_CASE)) else null
-        } catch (e: PatternSyntaxException) {
+        } catch (_: PatternSyntaxException) {
             null
         }
-        for (guid in serverList) {
-            val profile = MmkvManager.decodeServerConfig(guid) ?: continue
-            if (kw.isEmpty()) {
-                serversCache.add(ServersCache(guid, profile))
-                continue
-            }
+        val result = guids.mapNotNull { guid ->
+            val profile = MmkvManager.decodeServerConfig(guid) ?: return@mapNotNull null
+            if (kw.isEmpty()) return@mapNotNull ServersCache(guid, profile)
+            val matches = profile.remarks.matchesPattern(searchRegex, kw)
+                || profile.description.orEmpty().matchesPattern(searchRegex, kw)
+                || profile.server.orEmpty().matchesPattern(searchRegex, kw)
+                || profile.configType.name.matchesPattern(searchRegex, kw)
+            if (matches) ServersCache(guid, profile) else null
+        }.toMutableList()
 
-            val remarks = profile.remarks
-            val description = profile.description.orEmpty()
-            val server = profile.server.orEmpty()
-            val protocol = profile.configType.name
-            if (remarks.matchesPattern(searchRegex, kw)
-                || description.matchesPattern(searchRegex, kw)
-                || server.matchesPattern(searchRegex, kw)
-                || protocol.matchesPattern(searchRegex, kw)
-            ) {
-                serversCache.add(ServersCache(guid, profile))
-            }
-        }
-
-        val subId = subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
-        val order = MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)
-        when (order) {
-            1 -> serversCache.sortWith(compareBy { it.profile.remarks.lowercase() })
-            2 -> serversCache.sortWith(compareBy {
+        val subId = groupId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
+        when (MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)) {
+            1 -> result.sortWith(compareBy { it.profile.remarks.lowercase() })
+            2 -> result.sortWith(compareBy {
                 val delay = MmkvManager.decodeServerAffiliationInfo(it.guid)?.testDelayMillis ?: 0L
                 if (delay <= 0L) Long.MAX_VALUE else delay
             })
         }
-
-        // Pinned servers float to the top regardless of the active order above.
-        // sortByDescending is stable, so it only reshuffles the pinned/unpinned
-        // partitions without disturbing the relative order within each.
         val pinnedServers = MmkvManager.decodePinnedServers()
         if (pinnedServers.isNotEmpty()) {
-            serversCache.sortByDescending { pinnedServers.contains(it.guid) }
+            result.sortByDescending { pinnedServers.contains(it.guid) }
         }
+        return result
     }
 
-    /**
-     * Toggles the pinned state of [guid], re-sorts the cache so pinned
-     * servers float to the top immediately, and returns the new state.
-     */
     fun togglePinServer(guid: String): Boolean {
         val nowPinned = MmkvManager.togglePinnedServer(guid)
         updateCache()
+        refreshAllGroupCaches()
         updateListAction.postValue(-1)
         return nowPinned
     }
@@ -232,9 +299,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun testAllRealPing(onlyTcp: Boolean = false) {
         val testId = UUID.randomUUID().toString()
-        // CoreTestService replaces an active batch itself and redelivers the
-        // newest start intent from the fresh disposable probe process. Sending
-        // a separate cancel here races that replacement and can drop the URL test.
         activeTestId = testId
         activeTestCompleted = 0
         activeTestTotal = serversCache.size
@@ -242,9 +306,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         updateListAction.value = -1
 
         viewModelScope.launch(Dispatchers.Default) {
-            // MainActivity can receive a click while its asynchronous group
-            // setup is still populating the cache on a cold start. Reload the
-            // persisted list once before treating the request as empty.
             if (serversCache.isEmpty()) {
                 withContext(Dispatchers.Main) {
                     reloadServerList()
@@ -253,10 +314,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             if (serversCache.isEmpty()) {
                 activeTestId = null
-                // The activity shows the progress dialog before starting the
-                // service. During cold start the list can still be empty, so
-                // there may be no service-side FINISH event to close it.
-                // Always publish the terminal state for this local no-op.
                 withContext(Dispatchers.Main) {
                     testProgressAction.value = null
                 }
@@ -404,9 +461,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         return@forEachIndexed
                     }
 
-                    // Pinned servers are never treated as the removable duplicate, so
-                    // pinning a server is enough to keep it even if an identical
-                    // config exists elsewhere in the list.
                     if (profile == profile2 && !deleteServer.contains(sc2.guid) && !pinnedServers.contains(sc2.guid)) {
                         deleteServer.add(sc2.guid)
                     }
@@ -442,7 +496,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             val serversCopy = serversCache.toList()
             for (item in serversCopy) {
-                // MmkvManager.removeInvalidServer already skips pinned servers.
                 count += MmkvManager.removeInvalidServer(item.guid)
             }
         }
@@ -488,10 +541,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         keywordFilter = keyword
+        groupCache.clear()
+        refreshAllGroupCaches()
         reloadServerList()
     }
-
-    /** Persists a new selection while waiting for the active daemon to accept restart. */
+    
     fun beginServerRestart(guid: String): Boolean {
         if (guid == MmkvManager.getSelectServer() || pendingServerRestartGuid != null) return false
 
@@ -501,7 +555,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return true
     }
 
-    /** Clears the optimistic restart state when no active daemon accepted the request. */
     fun onServerRestartRequestResult(guid: String, handled: Boolean) {
         if (handled || pendingServerRestartGuid != guid) return
 
@@ -592,8 +645,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             )
         )
         MmkvManager.clearAllTestDelayResults(MmkvManager.decodeAllServerList())
-        // Re-sort serversCache immediately so order=by-delay drops back to its
-        // tie-break order right away, instead of waiting for a reload/restart.
         updateCache()
         updateListAction.postValue(-1)
     }
@@ -607,8 +658,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             )
         )
         MmkvManager.clearAllTestDelayResults(MmkvManager.decodeServerList(subscriptionId))
-        // Re-sort serversCache immediately so order=by-delay drops back to its
-        // tie-break order right away, instead of waiting for a reload/restart.
         updateCache()
         updateListAction.postValue(-1)
     }
@@ -630,8 +679,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 AppConfig.MSG_STATE_RESTART -> {
-                    // A service restart is a new connection lifecycle. Clear the
-                    // previous start time before the replacement service starts.
                     markConnectionStopped()
                     isRestarting = true
                     serviceRestartAction.value = Unit
@@ -689,9 +736,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     if (result != null) {
                         if (acceptsTestEvent(result.testId)) {
                             updateListAction.value = getPosition(result.guid)
-                            // Result events also drive the dialog's detail list.
-                            // The old adapter only receives TestProgressInfo rows,
-                            // so forwarding only updateListAction leaves it empty.
                             activeTestCompleted += 1
                             activeTestTotal = maxOf(activeTestTotal, activeTestCompleted)
                             testProgressAction.value = TestProgressInfo(
