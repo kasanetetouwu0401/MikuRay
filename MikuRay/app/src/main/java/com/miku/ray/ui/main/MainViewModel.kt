@@ -465,12 +465,14 @@ class MainViewModel(
     }
 
     fun testAllRealPing(onlyTcp: Boolean = false) {
-        // Cancel any in-flight test first, mirroring testAllCountryCodes() and
-        // v2rayNG's cancelAllPing()-before-start pattern, so a leftover test
-        // doesn't keep running server-side after a new one is kicked off.
-        activeTestId?.let { previousTestId ->
-            dataSource.sendMsg2TestService(TestServiceMessage(key = AppConfig.MSG_MEASURE_CONFIG_CANCEL, testId = previousTestId))
-        }
+        // Always cancel whatever the test service might still be running first,
+        // exactly like v2rayNG's dataSource.cancelAllPing() at the top of its own
+        // testAllRealPing() - unconditional, no need to gate on activeTestId.
+        // CoreTestService now cancels its own active batch synchronously on this
+        // message instead of the old process-kill/redeliver dance, so this never
+        // wakes a dead service and never leaves a batch's FINISH summary stranded
+        // (which was leaving isTesting stuck true forever).
+        dataSource.sendMsg2TestService(TestServiceMessage(key = AppConfig.MSG_MEASURE_CONFIG_CANCEL))
         val groupId = uiState.value.selectedGroupId
         val testId = UUID.randomUUID().toString()
         activeTestId = testId

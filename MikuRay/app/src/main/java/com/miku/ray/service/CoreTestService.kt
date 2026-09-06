@@ -4,10 +4,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
-import android.os.Process
 import androidx.core.app.NotificationCompat
 import com.miku.ray.AppConfig
 import com.miku.ray.R
@@ -26,18 +23,32 @@ import com.miku.ray.util.MessageUtil
 import com.miku.ray.helper.NotificationHelper
 import com.miku.ray.remixicon.R as RemixR
 
+/**
+ * Mirrors v2rayNG's CoreTestService lifecycle: a batch is cancelled and
+ * replaced in place, inside the same process/instance.
+ *
+ * The previous design here (`batchStarted` flag + `Process.killProcess` +
+ * `START_REDELIVER_INTENT`) killed the whole process whenever a second START
+ * arrived before the first batch's teardown had fully finished, and asked
+ * Android to redeliver the intent to a "fresh" instance. That redelivery
+ * could silently drop the new batch (or its FINISH summary) depending on how
+ * fast the OS respawned the process, leaving MainViewModel's `isTesting`
+ * stuck true forever with no event to clear it. There is no upside to a
+ * disposable *service* process here (unlike the native probe work itself, or
+ * the CoreTestService->cancel flow used to kill+redeliver on purpose), so
+ * this now just tracks the one active worker and cancels it synchronously
+ * before starting a new one - exactly what v2rayNG's MainViewModel already
+ * does at the call site via `dataSource.cancelAllPing()`.
+ */
 class CoreTestService : Service() {
-    @Volatile
-    private var activeWorker: RealPingWorkerService? = null
+
+    private val lock = Any()
 
     @Volatile
     private var activeMessage: TestServiceMessage? = null
 
     @Volatile
-    private var suppressWorkerEvents = false
-
-    private val terminalLock = Any()
-    private var batchStarted = false
+    private var activeWorker: RealPingWorkerService? = null
 
     private val cancelAction by lazy {
         val intent = Intent(this, CoreTestService::class.java).putExtra(
@@ -66,18 +77,9 @@ class CoreTestService : Service() {
 
     override fun onDestroy() {
         LogUtil.i(AppConfig.TAG, "CoreTestService is being destroyed")
-        suppressWorkerEvents = true
-        activeWorker?.cancel()
-        activeWorker = null
-        activeMessage = null
+        cancelActiveWorker(sendSummary = false)
         NotificationHelper.stopForeground(this)
         super.onDestroy()
-        // Xray owns process-wide dialer state. Do not reuse this disposable process.
-        // Keep the process alive briefly so the terminal FINISH broadcast can be
-        // delivered to MainViewModel before the disposable process is killed.
-        Handler(Looper.getMainLooper()).postDelayed({
-            disposeProcess()
-        }, FINISH_BROADCAST_GRACE_MS)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -95,31 +97,21 @@ class CoreTestService : Service() {
             return START_NOT_STICKY
         }
 
-        return when (message.key) {
+        when (message.key) {
             AppConfig.MSG_MEASURE_CONFIG_START -> handleMeasureStart(message, startId)
             AppConfig.MSG_MEASURE_CONFIG_CANCEL -> handleMeasureCancel(startId)
             else -> {
                 NotificationHelper.stopForeground(this)
                 stopSelf(startId)
-                START_NOT_STICKY
             }
         }
+        return START_NOT_STICKY
     }
 
-    private fun handleMeasureStart(message: TestServiceMessage, startId: Int): Int {
-        if (batchStarted) {
-            // Never let two worker pools multiply the configured concurrency.
-            // The newest request is redelivered after this disposable process exits.
-            synchronized(terminalLock) {
-                suppressWorkerEvents = true
-                activeWorker?.cancel()
-            }
-            LogUtil.i(AppConfig.TAG, "CoreTestService handing replacement batch to a fresh process")
-            disposeProcess()
-            return START_REDELIVER_INTENT
-        }
-        batchStarted = true
-        activeMessage = message
+    private fun handleMeasureStart(message: TestServiceMessage, startId: Int) {
+        // A new batch always supersedes whatever is currently running - same
+        // rule v2rayNG's ViewModel enforces by cancelling before starting.
+        cancelActiveWorker(sendSummary = true)
 
         val guids = when {
             message.serverGuids.isNotEmpty() -> message.serverGuids
@@ -128,56 +120,24 @@ class CoreTestService : Service() {
         }.distinct()
 
         if (guids.isEmpty()) {
-            sendSummary(
-                RealPingSummary(
-                    testId = message.testId,
-                    live = 0,
-                    total = 0,
-                    cancelled = false,
-                ),
-            )
+            sendSummary(RealPingSummary(testId = message.testId, live = 0, total = 0, cancelled = false))
             NotificationHelper.stopForeground(this)
             stopSelf(startId)
-            return START_NOT_STICKY
+            return
         }
 
         LogUtil.i(AppConfig.TAG, "CoreTestService starting ${guids.size} probes")
+        activeMessage = message
         activeWorker = RealPingWorkerService(
             context = this,
             guids = guids,
             onlyTcp = message.onlyTcp,
-            onEvent = ::handleWorkerEvent,
+            onEvent = { event -> handleWorkerEvent(event, message) },
         ).also { it.start() }
-        return START_NOT_STICKY
     }
 
-    private fun handleMeasureCancel(startId: Int): Int {
-        LogUtil.i(AppConfig.TAG, "CoreTestService cancelling the active batch")
-        synchronized(terminalLock) {
-            suppressWorkerEvents = true
-            val message = activeMessage
-            val summary = activeWorker?.cancel()
-            activeWorker = null
-            activeMessage = null
-            if (message != null && summary != null) {
-                sendSummary(
-                    RealPingSummary(
-                        testId = message.testId,
-                        live = summary.live,
-                        total = summary.total,
-                        cancelled = true,
-                    ),
-                )
-            }
-        }
-        NotificationHelper.stopForeground(this)
-        stopSelf(startId)
-        return START_NOT_STICKY
-    }
-
-    private fun handleWorkerEvent(event: RealPingEvent) {
-        if (suppressWorkerEvents) return
-        val message = activeMessage ?: return
+    private fun handleWorkerEvent(event: RealPingEvent, message: TestServiceMessage) {
+        if (activeMessage !== message) return
         when (event) {
             is RealPingEvent.Progress -> {
                 val progressText = "${event.completed} / ${event.total}"
@@ -208,9 +168,17 @@ class CoreTestService : Service() {
                 )
             }
 
-            is RealPingEvent.Finish -> synchronized(terminalLock) {
-                if (!suppressWorkerEvents && activeMessage == message) {
+            is RealPingEvent.Finish -> {
+                val shouldFinish = synchronized(lock) {
+                    if (activeMessage !== message) return@synchronized false
+                    activeWorker = null
+                    activeMessage = null
+                    true
+                }
+                if (shouldFinish) {
                     finishBatch(message, event)
+                    NotificationHelper.stopForeground(this)
+                    stopSelf()
                 }
             }
         }
@@ -244,22 +212,33 @@ class CoreTestService : Service() {
                 listChanged = listChanged,
             ),
         )
-        suppressWorkerEvents = true
+    }
+
+    private fun handleMeasureCancel(startId: Int) {
+        LogUtil.i(AppConfig.TAG, "CoreTestService cancelling the active batch")
+        cancelActiveWorker(sendSummary = true)
+        NotificationHelper.stopForeground(this)
+        stopSelf(startId)
+    }
+
+    private fun cancelActiveWorker(sendSummary: Boolean) = synchronized(lock) {
+        val message = activeMessage ?: return
+        val summary = activeWorker?.cancel()
         activeWorker = null
         activeMessage = null
-        NotificationHelper.stopForeground(this)
-        stopSelf()
+        if (sendSummary && summary != null) {
+            sendSummary(
+                RealPingSummary(
+                    testId = message.testId,
+                    live = summary.live,
+                    total = summary.total,
+                    cancelled = true,
+                ),
+            )
+        }
     }
 
     private fun sendSummary(summary: RealPingSummary) {
         MessageUtil.sendMsg2UI(this, AppConfig.MSG_MEASURE_CONFIG_FINISH, summary)
-    }
-
-    private fun disposeProcess() {
-        Handler(Looper.getMainLooper()).post { Process.killProcess(Process.myPid()) }
-    }
-
-    private companion object {
-        const val FINISH_BROADCAST_GRACE_MS = 500L
     }
 }

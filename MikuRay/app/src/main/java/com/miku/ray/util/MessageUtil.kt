@@ -72,11 +72,8 @@ object MessageUtil {
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_CANCEL -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        ContextCompat.startForegroundService(ctx, intent)
-                    } else {
-                        ctx.startService(intent)
-                    }
+                    // Do not wake up service just to cancel; stop only if it is already running.
+                    ctx.stopService(intent)
                 }
 
                 else -> {
