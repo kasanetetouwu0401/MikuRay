@@ -72,11 +72,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val groupCache = ConcurrentHashMap<String, List<ServersCache>>()
     private val groupStates = ConcurrentHashMap<String, MutableStateFlow<List<ServersCache>>>()
 
-    // ---------- Running state (StateFlow: selalu punya nilai terbaru, seperti v2rayNG) ----------
     private val _isRunning = MutableStateFlow(false)
     val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
 
-    // ---------- One-shot / signal events (SharedFlow, pengganti MutableLiveData action) ----------
     private fun <T> actionFlow(replay: Int = 1) = MutableSharedFlow<T>(
         replay = replay,
         extraBufferCapacity = 64,
@@ -133,17 +131,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         reloadJob?.cancel()
-        if (receiverRegistered) {
-            try {
-                getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
-            } catch (e: IllegalArgumentException) {
-                e.printStackTrace()
-            } finally {
-                receiverRegistered = false
-            }
-        }
-        LogUtil.i(AppConfig.TAG, "Main ViewModel is cleared")
+        unregisterMsgReceiver()
         super.onCleared()
+    }
+
+    private fun unregisterMsgReceiver() {
+        if (!receiverRegistered) return
+        receiverRegistered = false
+        runCatching {
+            getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
+        }.onFailure {
+            LogUtil.e(AppConfig.TAG, "Failed to unregister main receiver", it)
+        }
     }
 
     @Synchronized
