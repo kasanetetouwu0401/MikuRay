@@ -47,12 +47,6 @@ abstract class BaseActivity : AppCompatActivity() {
     companion object {
         private val activeActivities = mutableListOf<WeakReference<BaseActivity>>()
 
-        /**
-         * Recreates every other tracked BaseActivity that has pending settings
-         * changes (theme, dpi, font, etc.), even while paused/stopped in the
-         * back stack. This way, when the user navigates back to one of them,
-         * it's already rebuilt instead of visibly recreating on resume.
-         */
         fun recreateOthersInBackground(except: android.app.Activity? = null) {
             val iterator = activeActivities.iterator()
             while (iterator.hasNext()) {
@@ -216,11 +210,6 @@ abstract class BaseActivity : AppCompatActivity() {
         applyToolbarStyle()
     }
 
-    /**
-     * Public entry point so dialogs/managers can force this activity to check
-     * for pending settings changes (dpi, theme, font, etc.) and recreate if
-     * needed — used to refresh back-stack activities in the background.
-     */
     fun refreshIfSettingsChanged() {
         themeStateManager.checkThemeChangedAndRecreate()
     }
