@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.Collections
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.PatternSyntaxException
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -67,6 +68,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    // v2rayNG-style per-group cache. Existing fragments can keep using
+    // serversCache, while new consumers can observe an isolated group flow.
+    private val groupCache = ConcurrentHashMap<String, List<ServersCache>>()
+    private val groupStates = ConcurrentHashMap<String, MutableStateFlow<List<ServersCache>>>()
 
     val isRunning by lazy { MutableLiveData<Boolean>() }
     val updateListAction by lazy { MutableLiveData<Int>() }
@@ -151,6 +157,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 if (updateSubscription) {
                     updateConfigViaSubAll()
+                    refreshAllGroupCaches()
                 }
                 reloadServerList(notify = false)
                 withContext(Dispatchers.Main) {
@@ -162,6 +169,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         return reloadJob!!
+    }
+
+    private fun refreshAllGroupCaches() {
+        val groupIds = buildList {
+            add("")
+            addAll(MmkvManager.decodeSubsList())
+        }.distinct()
+        groupIds.forEach { groupId ->
+            val snapshot = buildServerCache(groupId)
+            groupCache[groupId] = snapshot
+            groupStates.computeIfAbsent(groupId) { MutableStateFlow(emptyList()) }.value = snapshot
+        }
     }
 
     /** Refreshes the in-memory snapshot after external profile changes. */
@@ -184,6 +203,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         // Rebuild from the persisted source of truth so filtering, ordering,
         // pinning, and every fragment receive the same valid snapshot.
         updateCache()
+        refreshAllGroupCaches()
         updateListAction.postValue(-1)
         updateGroupBadgeAction.postValue(Unit)
     }
@@ -195,59 +215,76 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         Collections.swap(serverList, fromPosition, toPosition)
         Collections.swap(serversCache, fromPosition, toPosition)
-        _serversState.value = serversCache.toList()
+        val reordered = serversCache.toList()
+        groupCache[subscriptionId] = reordered
+        groupStates.computeIfAbsent(subscriptionId) { MutableStateFlow(emptyList()) }.value = reordered
+        _serversState.value = reordered
 
         MmkvManager.encodeServerList(serverList, subscriptionId)
     }
 
     @Synchronized
     fun updateCache() {
+        val groupId = subscriptionId
+        val snapshot = buildServerCache(groupId)
+        serverList = if (groupId.isEmpty()) {
+            MmkvManager.decodeAllServerList()
+        } else {
+            MmkvManager.decodeServerList(groupId)
+        }
         serversCache.clear()
+        serversCache.addAll(snapshot)
+        groupCache[groupId] = snapshot
+        groupStates.computeIfAbsent(groupId) { MutableStateFlow(emptyList()) }.value = snapshot
+        _serversState.value = snapshot
+    }
+
+    /** Returns the current group as an immutable reactive stream. */
+    fun serversForGroup(groupId: String): StateFlow<List<ServersCache>> {
+        val state = groupStates.computeIfAbsent(groupId) { MutableStateFlow(emptyList()) }
+        if (state.value.isEmpty() && !groupCache.containsKey(groupId)) {
+            val snapshot = buildServerCache(groupId)
+            groupCache[groupId] = snapshot
+            state.value = snapshot
+        }
+        return state.asStateFlow()
+    }
+
+    private fun buildServerCache(groupId: String): List<ServersCache> {
+        val guids = if (groupId.isEmpty()) {
+            MmkvManager.decodeAllServerList()
+        } else {
+            MmkvManager.decodeServerList(groupId)
+        }
         val kw = keywordFilter.trim()
         val searchRegex = try {
             if (kw.isNotEmpty()) Regex(kw, setOf(RegexOption.IGNORE_CASE)) else null
-        } catch (e: PatternSyntaxException) {
+        } catch (_: PatternSyntaxException) {
             null
         }
-        for (guid in serverList) {
-            val profile = MmkvManager.decodeServerConfig(guid) ?: continue
-            if (kw.isEmpty()) {
-                serversCache.add(ServersCache(guid, profile))
-                continue
-            }
+        val result = guids.mapNotNull { guid ->
+            val profile = MmkvManager.decodeServerConfig(guid) ?: return@mapNotNull null
+            if (kw.isEmpty()) return@mapNotNull ServersCache(guid, profile)
+            val matches = profile.remarks.matchesPattern(searchRegex, kw)
+                || profile.description.orEmpty().matchesPattern(searchRegex, kw)
+                || profile.server.orEmpty().matchesPattern(searchRegex, kw)
+                || profile.configType.name.matchesPattern(searchRegex, kw)
+            if (matches) ServersCache(guid, profile) else null
+        }.toMutableList()
 
-            val remarks = profile.remarks
-            val description = profile.description.orEmpty()
-            val server = profile.server.orEmpty()
-            val protocol = profile.configType.name
-            if (remarks.matchesPattern(searchRegex, kw)
-                || description.matchesPattern(searchRegex, kw)
-                || server.matchesPattern(searchRegex, kw)
-                || protocol.matchesPattern(searchRegex, kw)
-            ) {
-                serversCache.add(ServersCache(guid, profile))
-            }
-        }
-
-        val subId = subscriptionId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
-        val order = MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)
-        when (order) {
-            1 -> serversCache.sortWith(compareBy { it.profile.remarks.lowercase() })
-            2 -> serversCache.sortWith(compareBy {
+        val subId = groupId.ifEmpty { AppConfig.DEFAULT_SUBSCRIPTION_ID }
+        when (MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)) {
+            1 -> result.sortWith(compareBy { it.profile.remarks.lowercase() })
+            2 -> result.sortWith(compareBy {
                 val delay = MmkvManager.decodeServerAffiliationInfo(it.guid)?.testDelayMillis ?: 0L
                 if (delay <= 0L) Long.MAX_VALUE else delay
             })
         }
-
-        // Pinned servers float to the top regardless of the active order above.
-        // sortByDescending is stable, so it only reshuffles the pinned/unpinned
-        // partitions without disturbing the relative order within each.
         val pinnedServers = MmkvManager.decodePinnedServers()
         if (pinnedServers.isNotEmpty()) {
-            serversCache.sortByDescending { pinnedServers.contains(it.guid) }
+            result.sortByDescending { pinnedServers.contains(it.guid) }
         }
-
-        _serversState.value = serversCache.toList()
+        return result
     }
 
     /**
@@ -257,6 +294,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun togglePinServer(guid: String): Boolean {
         val nowPinned = MmkvManager.togglePinnedServer(guid)
         updateCache()
+        refreshAllGroupCaches()
         updateListAction.postValue(-1)
         return nowPinned
     }
@@ -543,6 +581,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         keywordFilter = keyword
+        groupCache.clear()
+        refreshAllGroupCaches()
         reloadServerList()
     }
 
