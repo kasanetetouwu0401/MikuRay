@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <attr format="color" name="colorBg" />
-    <attr format="color" name="colorCard" />
+    <attr name="colorBg" format="color" />
+    <attr name="colorCard" format="color" />
 
     <attr name="siArrowPosition">
         <enum name="left" value="0" />
@@ -22,89 +22,89 @@
         <enum name="round" value="2" />
     </attr>
     <declare-styleable name="ShaderImageView">
-        <attr format="boolean" name="siSquare" />
-        <attr format="color" name="siBorderColor" />
-        <attr format="dimension" name="siBorderWidth" />
-        <attr format="float" name="siBorderAlpha" />
-        <attr format="integer|reference" name="siForeground" />
-        <attr format="dimension" name="siRadius" />
-        <attr name="siArrowPosition" />
-        <attr format="dimension" name="siTriangleHeight" />
-        <attr format="integer|reference" name="siShape" />
-        <attr name="siBorderType" />
-        <attr name="siStrokeCap" />
-        <attr name="siStrokeJoin" />
-        <attr format="dimension" name="siStrokeMiter" />
+        <attr name="siSquare" format="boolean" />
+        <attr name="siBorderColor" format="color" />
+        <attr name="siBorderWidth" format="dimension" />
+        <attr name="siBorderAlpha" format="float" />
+        <attr name="siForeground" format="integer|reference" />
+        <attr name="siRadius" format="dimension" />
+        <attr name="siArrowPosition"/>
+        <attr name="siTriangleHeight" format="dimension"/>
+        <attr name="siShape" format="integer|reference" />
+        <attr name="siBorderType"/>
+        <attr name="siStrokeCap"/>
+        <attr name="siStrokeJoin"/>
+        <attr name="siStrokeMiter" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="ExpandableView">
-        <attr format="integer" name="el_duration" />
-        <attr format="boolean" name="el_expanded" />
-        <attr format="float" name="el_parallax" />
-        <attr format="enum" name="el_orientation">
+        <attr name="el_duration" format="integer" />
+        <attr name="el_expanded" format="boolean" />
+        <attr name="el_parallax" format="float" />
+        <attr name="el_orientation" format="enum">
             <enum name="horizontal" value="0" />
             <enum name="vertical" value="1" />
         </attr>
     </declare-styleable>
 
     <declare-styleable name="ExpandableLayout">
-        <attr format="reference" name="el_headerViewId" />
-        <attr format="reference" name="el_arrowViewId" />
-        <attr format="reference" name="el_contentViewId" />
+        <attr name="el_headerViewId" format="reference" />
+        <attr name="el_arrowViewId" format="reference" />
+        <attr name="el_contentViewId" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="DynamicShapeImageView">
-        <attr format="color|reference" name="shapeBackgroundColor" />
-        <attr format="enum" name="shapeTarget">
+        <attr name="shapeBackgroundColor" format="color|reference" />
+        <attr name="shapeTarget" format="enum">
             <enum name="icon" value="0" />
             <enum name="arrow" value="1" />
         </attr>
     </declare-styleable>
 
     <declare-styleable name="UwuHeaderIconView">
-        <attr format="reference" name="sectionIcon" />
+        <attr name="sectionIcon" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="ParticlesView">
         <attr
-            format="dimension"
-            name="particleRadiusMin" />
+            name="particleRadiusMin"
+            format="dimension" />
         <attr
-            format="dimension"
-            name="particleRadiusMax" />
+            name="particleRadiusMax"
+            format="dimension" />
         <attr
-            format="dimension"
-            name="lineThickness" />
+            name="lineThickness"
+            format="dimension" />
         <attr
-            format="dimension"
-            name="lineLength" />
+            name="lineLength"
+            format="dimension" />
         <attr
-            format="integer"
-            name="density" />
+            name="density"
+            format="integer" />
         <attr
-            format="color"
-            name="particleColor" />
+            name="particleColor"
+            format="color" />
         <attr
-            format="color"
-            name="lineColor" />
+            name="lineColor"
+            format="color" />
         <attr
-            format="integer"
-            name="frameDelayMillis" />
+            name="frameDelayMillis"
+            format="integer" />
         <attr
-            format="float"
-            name="speedFactor" />
+            name="speedFactor"
+            format="float" />
     </declare-styleable>
 
     <declare-styleable name="SearchPreference">
-        <attr format="string" name="textHint" />
-        <attr format="string" name="textNoResults" />
-        <attr format="string" name="textClearHistory" />
-        <attr format="string" name="textClearInput" />
-        <attr format="string" name="textMore" />
+        <attr name="textHint" format="string" />
+        <attr name="textNoResults" format="string" />
+        <attr name="textClearHistory" format="string" />
+        <attr name="textClearInput" format="string" />
+        <attr name="textMore" format="string" />
     </declare-styleable>
 
     <declare-styleable name="BlurView">
-        <attr format="color" name="blurOverlayColor" />
+        <attr name="blurOverlayColor" format="color" />
     </declare-styleable>
 
 </resources>

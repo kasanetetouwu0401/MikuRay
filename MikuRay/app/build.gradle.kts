@@ -29,7 +29,7 @@ base {
 android {
     namespace = "com.miku.ray"
     compileSdk = 37
-
+    
     ndkVersion = "29.0.14206865"
 
     defaultConfig {
@@ -38,7 +38,7 @@ android {
         targetSdk = 37
         versionCode = appVersionCode
         versionName = appVersionName
-
+        
         resValue("string", "uwu_version_name", appVersionName)
         resValue("string", "uwu_version_code", appVersionCode.toString())
         resValue("string", "uwu_package_name", applicationId.toString())
@@ -96,7 +96,7 @@ android {
                 "proguard-rules.pro"
             )
         }
-
+        
         debug {
             if (project.hasProperty("KS_PATH")) {
                 signingConfig = signingConfigs.getByName("appSigning")
@@ -152,10 +152,10 @@ android {
 androidComponents {
     onVariants { variant ->
         val versionCodes = mapOf(
-            "armeabi-v7a" to 4,
-            "arm64-v8a" to 4,
-            "x86" to 4,
-            "x86_64" to 4,
+            "armeabi-v7a" to 4, 
+            "arm64-v8a" to 4, 
+            "x86" to 4, 
+            "x86_64" to 4, 
             "universal" to 4
         )
 
@@ -178,11 +178,13 @@ androidComponents {
 }
 
 dependencies {
-
+    // Core Libraries
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar", "*.jar"))))
 
+    // Icons (RemixIcon vector drawables, kept as a separate module instead of app/res/drawable)
     implementation(project(":remixicon"))
 
+    // AndroidX Core Libraries
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)
@@ -196,6 +198,7 @@ dependencies {
     implementation(libs.palette)
     implementation(libs.play.services.location)
 
+    // UI Libraries
     implementation(libs.material)
     implementation(libs.editorkit)
     implementation(libs.flexbox)
@@ -204,31 +207,39 @@ dependencies {
     implementation(libs.com.airbnb.android.lottie)
     implementation(libs.aboutlibraries.view)
 
+    // Data and Storage Libraries
     implementation(libs.mmkv.static)
     implementation(libs.timber)
     implementation(libs.gson)
     implementation(libs.okhttp)
 
+    // Reactive and Utility Libraries
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.play.services)
 
+    // Language and Processing Libraries
     implementation(libs.language.base)
     implementation(libs.language.json)
 
+    // Intent and Utility Libraries
     implementation(libs.zxing.lite)
     implementation(libs.core)
 
+    // Image loading & cropping
     implementation(libs.glide)
     implementation(libs.ucrop)
 
+    // AndroidX Lifecycle and Architecture Components
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.runtime.ktx)
 
+    // Background Task Libraries
     implementation(libs.work.runtime.ktx)
     implementation(libs.work.multiprocess)
 
+    // Testing Libraries
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
