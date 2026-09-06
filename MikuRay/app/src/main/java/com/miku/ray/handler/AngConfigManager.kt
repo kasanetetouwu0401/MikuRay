@@ -153,14 +153,15 @@ object AngConfigManager {
     ): Pair<Int, Int> {
         return try {
             val decodedServer = Utils.decode(server)
+
             var count = parseSIP008Config(decodedServer, subid, append)
-            if (count <= 0 && decodedServer != server) {
+            if (count <= 0) {
                 count = parseSIP008Config(server, subid, append)
             }
-            if (count <= 0 && decodedServer != server) {
+            if (count <= 0) {
                 count = parseBatchConfig(decodedServer, subid, append)
             }
-            if (count <= 0 && decodedServer != server) {
+            if (count <= 0) {
                 count = parseBatchConfig(server, subid, append)
             }
             if (count <= 0) {
@@ -168,7 +169,7 @@ object AngConfigManager {
             }
 
             var countSub = parseBatchSubscription(server, requestSubscriptionName)
-            if (countSub <= 0 && decodedServer != server) {
+            if (countSub <= 0) {
                 countSub = parseBatchSubscription(decodedServer, requestSubscriptionName)
             }
             if (countSub > 0) {
@@ -192,9 +193,7 @@ object AngConfigManager {
             }
 
             var count = 0
-            servers.lineSequence()
-                .map { it.trim().removePrefix("\uFEFF") }
-                .filter { it.isNotEmpty() }
+            servers.lines()
                 .distinct()
                 .forEach { str ->
                     if (Utils.isValidSubUrl(str)) {
@@ -246,12 +245,9 @@ object AngConfigManager {
             val configs = mutableListOf<ProfileItem>()
             val v2raynLines = mutableListOf<String>()
 
-            servers.lineSequence()
-                .map { it.trim().removePrefix("\uFEFF") }
-                .filter { it.isNotEmpty() }
+            servers.lines()
                 .distinct()
-                .toList()
-                .asReversed()
+                .reversed()
                 .forEach { line ->
                     if (line.startsWith(AppConfig.V2RAYNFMTS, ignoreCase = true)) {
                         v2raynLines.add(line)
@@ -423,20 +419,12 @@ object AngConfigManager {
         subItem: SubscriptionItem?
     ): ProfileItem? {
         try {
-            val normalized = str?.trim()?.removePrefix("\uFEFF").orEmpty()
-            if (TextUtils.isEmpty(normalized)) {
+            if (str == null || TextUtils.isEmpty(str)) {
                 return null
             }
 
             val config = configFmtParsers.firstNotNullOfOrNull { (scheme, parser) ->
-                if (normalized.startsWith(scheme, ignoreCase = true)) {
-                    // Keep the payload untouched but canonicalize only the scheme;
-                    // several format parsers remove a lowercase prefix literally.
-                    val parserInput = scheme + normalized.substring(scheme.length)
-                    parser(parserInput)
-                } else {
-                    null
-                }
+                if (str.startsWith(scheme)) parser(str) else null
             }
 
             if (config == null) {
