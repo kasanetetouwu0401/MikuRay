@@ -80,6 +80,7 @@ object AppConfig {
     const val PREF_ROOT_MODE_ENABLE = "pref_root_mode_enabled"
     const val PREF_ROOT_LAN_SHARING = "pref_root_lan_sharing"
     const val PREF_IS_BOOTED = "pref_is_booted"
+    const val PREF_SYSTEM_VPN_SETTINGS = "pref_system_vpn_settings"
     const val PREF_CHECK_UPDATE_PRE_RELEASE = "pref_check_update_pre_release"
     const val PREF_GEO_FILES_SOURCES = "pref_geo_files_sources"
     const val PREF_USE_HEV_TUNNEL = "pref_use_hev_tunnel_v2"
@@ -96,6 +97,13 @@ object AppConfig {
     const val PREF_AUTO_SORT_AFTER_TEST = "pref_auto_sort_after_test"
     const val PREF_REAL_PING_CONCURRENCY = "pref_real_ping_concurrency"
     const val PREF_COUNTRY_CODE_TIMEOUT = "pref_country_code_timeout"
+
+    /** Shared defaults for settings shown in the UI and consumed by config generation. */
+    const val DEFAULT_SOCKS_ENABLE_UDP = true
+    const val DEFAULT_OUTBOUND_DOMAIN_RESOLVE_METHOD = "1"
+    const val DEFAULT_VPN_BYPASS_LAN = "1"
+    const val DEFAULT_HEV_TUNNEL_LOGLEVEL = "warn"
+    const val DEFAULT_MUX_XUDP_CONCURRENCY = "8"
 
     const val PREF_NAVIGATE_UI_SETTINGS = "pref_navigate_ui_settings"
     const val PREF_NAVIGATE_CHECK_UPDATE = "pref_navigate_check_update"
