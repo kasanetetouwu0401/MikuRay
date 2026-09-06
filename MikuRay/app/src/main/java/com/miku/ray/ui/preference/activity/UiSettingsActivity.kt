@@ -4,6 +4,7 @@ import com.miku.ray.remixicon.R as RemixR
 import android.app.Activity
 import android.Manifest
 import android.content.Intent
+import android.content.res.Resources
 import android.media.MediaPlayer
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -348,6 +349,7 @@ class UiSettingsActivity : BaseActivity() {
                     appFont?.isEnabled = false
                     updateCustomFontSummary()
                     activity?.recreate()
+                    activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                 } else {
                     requireContext().toastError(getString(R.string.custom_font_invalid))
                 }
@@ -539,6 +541,7 @@ class UiSettingsActivity : BaseActivity() {
                 appTheme?.isEnabled = !enabled
 
                 activity?.recreate()
+                activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                 true
             }
 
@@ -555,6 +558,7 @@ class UiSettingsActivity : BaseActivity() {
                 appTheme?.isEnabled = !enabled
 
                 activity?.recreate()
+                activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                 true
             }
 
@@ -563,12 +567,17 @@ class UiSettingsActivity : BaseActivity() {
                 isEnabled = isNightModeActive
                 summary = if (!isNightModeActive) getString(R.string.pref_true_black_only_in_night_mode)
                 else getString(R.string.summary_pref_true_black)
-                setOnPreferenceChangeListener { _, _ -> activity?.recreate(); true }
+                setOnPreferenceChangeListener { _, _ ->
+                    activity?.recreate()
+                    activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
+                    true
+                }
             }
 
             toolbarCenterSubtitleMode?.setOnPreferenceChangeListener { _, newValue ->
                 MmkvManager.encodeSettings(AppConfig.PREF_TOOLBAR_CENTER_SUBTITLE_MODE, newValue as Boolean)
                 activity?.recreate()
+                activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                 true
             }
 
@@ -652,6 +661,7 @@ class UiSettingsActivity : BaseActivity() {
                     MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT, value)
                     appFont?.summary = label
                     activity?.recreate()
+                    activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                 }.show()
                 true
             }
@@ -790,6 +800,7 @@ class UiSettingsActivity : BaseActivity() {
                 BannerColorExtractor.extractAndSave(requireContext(), uri) { colorChanged ->
                     if (colorChanged && MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)) {
                         activity?.recreate()
+                        activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                     }
                 }
             }
@@ -840,6 +851,7 @@ class UiSettingsActivity : BaseActivity() {
                     MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT_USE_CUSTOM, checked)
                     appFont?.isEnabled = !checked
                     activity?.recreate()
+                    activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                     true
                 }
             }
@@ -865,6 +877,7 @@ class UiSettingsActivity : BaseActivity() {
                     appFont?.isEnabled = true
                     updateCustomFontSummary()
                     activity?.recreate()
+                    activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .showBlur()
@@ -1147,6 +1160,7 @@ class UiSettingsActivity : BaseActivity() {
                             dynamicColorBanner?.isChecked = false
                             appTheme?.isEnabled = !isDynamicColor
                             activity?.recreate()
+                            activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                         }
                     }
 
@@ -1177,6 +1191,7 @@ class UiSettingsActivity : BaseActivity() {
 
                             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)) {
                                 activity?.recreate()
+                                activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                             }
                             broadcastHomeBannerChanged()
                             requireContext().snackbarSuccess(getString(R.string.home_banner_delete_summary), title = getString(R.string.title_alerter_success))
@@ -1488,8 +1503,10 @@ class UiSettingsActivity : BaseActivity() {
             deleteHomeBannerImageAction?.isEnabled = !isDisableHomeBanner
 
             val savedDpi = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_DPI, 0)
-            val systemDpi = resources.displayMetrics.densityDpi
-            customDpi?.summary = if (savedDpi > 0) savedDpi.toString() else systemDpi.toString()
+            val systemDpi = Resources.getSystem().displayMetrics.densityDpi
+            val currentDpi = if (savedDpi > 0) savedDpi else systemDpi
+            val currentPercent = (currentDpi * 100f / systemDpi / 5f).roundToInt() * 5
+            customDpi?.summary = "$currentPercent%"
 
             val savedFontSize = MmkvManager.decodeSettingsFloat(AppConfig.PREF_APP_FONT_SIZE, AppConfig.FONT_SIZE_DEFAULT)
             fontSizeSlider?.summary = "${(savedFontSize * 100f).roundToInt()}%"

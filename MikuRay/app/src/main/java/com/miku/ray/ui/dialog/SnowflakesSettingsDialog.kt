@@ -14,6 +14,7 @@ import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.remixicon.R as RemixR
+import com.miku.ray.ui.base.BaseActivity
 import com.miku.ray.util.WindowBlurUtils
 import java.util.Locale
 
@@ -108,6 +109,7 @@ class SnowflakesSettingsDialog @JvmOverloads constructor(
             MmkvManager.encodeSettings(AppConfig.PREF_SNOWFLAKES_LIFE, lifeSlider.value)
             updateSummary()
             activity.recreate()
+            BaseActivity.recreateOthersInBackground(except = activity)
         }
         .setNeutralButton(R.string.reset, null)
         .setNegativeButton(android.R.string.cancel, null)
@@ -124,6 +126,7 @@ class SnowflakesSettingsDialog @JvmOverloads constructor(
             updateSummary()
             dialog.dismiss()
             activity.recreate()
+            BaseActivity.recreateOthersInBackground(except = activity)
         }
     }
 

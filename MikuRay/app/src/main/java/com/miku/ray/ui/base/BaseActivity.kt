@@ -40,8 +40,33 @@ import com.miku.ray.util.GoogleSansFlexManager
 import com.miku.ray.util.WindowBlurUtils
 import com.qmdeve.blurview.widget.BlurView
 import com.miku.ray.util.ThemeStateManager
+import java.lang.ref.WeakReference
 
 abstract class BaseActivity : AppCompatActivity() {
+
+    companion object {
+        private val activeActivities = mutableListOf<WeakReference<BaseActivity>>()
+
+        /**
+         * Recreates every other tracked BaseActivity that has pending settings
+         * changes (theme, dpi, font, etc.), even while paused/stopped in the
+         * back stack. This way, when the user navigates back to one of them,
+         * it's already rebuilt instead of visibly recreating on resume.
+         */
+        fun recreateOthersInBackground(except: android.app.Activity? = null) {
+            val iterator = activeActivities.iterator()
+            while (iterator.hasNext()) {
+                val activity = iterator.next().get()
+                if (activity == null) {
+                    iterator.remove()
+                    continue
+                }
+                if (activity === except || activity.isFinishing || activity.isDestroyed) continue
+                activity.refreshIfSettingsChanged()
+            }
+        }
+    }
+
     private var loadingOverlay: FrameLayout? = null
     private var loadingBlurMode: LoadingBlurMode? = null
     private var systemLoadingDialog: Dialog? = null
@@ -62,6 +87,7 @@ abstract class BaseActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         themeStateManager = ThemeStateManager(this)
+        activeActivities.add(WeakReference(this))
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
@@ -188,6 +214,15 @@ abstract class BaseActivity : AppCompatActivity() {
 
     fun refreshToolbarStyle() {
         applyToolbarStyle()
+    }
+
+    /**
+     * Public entry point so dialogs/managers can force this activity to check
+     * for pending settings changes (dpi, theme, font, etc.) and recreate if
+     * needed — used to refresh back-stack activities in the background.
+     */
+    fun refreshIfSettingsChanged() {
+        themeStateManager.checkThemeChangedAndRecreate()
     }
 
     private fun applyToolbarStyle() {
@@ -409,6 +444,7 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        activeActivities.removeAll { it.get() == null || it.get() === this }
         dismissSystemLoadingDialog()
         dismissFallbackLoadingOverlay()
         super.onDestroy()
