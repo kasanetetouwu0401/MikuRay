@@ -8,7 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
 import com.miku.ray.R
 import com.miku.ray.contracts.MainAdapterListener
@@ -65,7 +70,7 @@ class MainRecyclerAdapter(
         notifyDataSetChanged()
     }
 
-    private var isRunningObserver: androidx.lifecycle.Observer<Boolean>? = null
+    private var isRunningCollectJob: kotlinx.coroutines.Job? = null
     private var selectedBannerController: SelectedProfileBannerController? = null
 
     @SuppressLint("NotifyDataSetChanged")
@@ -92,14 +97,20 @@ class MainRecyclerAdapter(
         super.onAttachedToRecyclerView(recyclerView)
         val lifecycleOwner = recyclerView.context as? androidx.lifecycle.LifecycleOwner
         if (lifecycleOwner != null) {
-            isRunningObserver = androidx.lifecycle.Observer { _ ->
-                val selectedGuid = MmkvManager.getSelectServer()
-                val position = data.indexOfFirst { it.guid == selectedGuid }
-                if (position >= 0) {
-                    notifyServerItemChanged(position)
+            isRunningCollectJob = lifecycleOwner.lifecycleScope.launch {
+                lifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                    mainViewModel.uiState
+                        .map { it.isRunning }
+                        .distinctUntilChanged()
+                        .collect {
+                            val selectedGuid = MmkvManager.getSelectServer()
+                            val position = data.indexOfFirst { it.guid == selectedGuid }
+                            if (position >= 0) {
+                                notifyServerItemChanged(position)
+                            }
+                        }
                 }
             }
-            mainViewModel.isRunning.observe(lifecycleOwner, isRunningObserver!!)
         }
 
         val controller = SelectedProfileBannerController(recyclerView.context)
@@ -115,9 +126,8 @@ class MainRecyclerAdapter(
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        isRunningObserver?.let {
-            mainViewModel.isRunning.removeObserver(it)
-        }
+        isRunningCollectJob?.cancel()
+        isRunningCollectJob = null
         selectedBannerController?.unregisterChangeListener()
         selectedBannerController = null
     }
@@ -192,7 +202,7 @@ class MainRecyclerAdapter(
             holder.views.ivPinIndicator.visibility = if (isPinned) View.VISIBLE else View.GONE
 
             val isSelectedServer = (guid == MmkvManager.getSelectServer())
-            val isVpnConnected = mainViewModel.isRunning.value == true
+            val isVpnConnected = mainViewModel.uiState.value.isRunning
 
             if (isSelectedServer && isVpnConnected) {
                 holder.views.vStatusDot.setBackgroundResource(R.drawable.blink_color)
@@ -320,7 +330,7 @@ class MainRecyclerAdapter(
 
     private fun getSubscriptionRemarks(profile: ProfileItem): String {
         val subRemarks =
-            if (mainViewModel.subscriptionId.isEmpty())
+            if (mainViewModel.uiState.value.selectedGroupId.isEmpty())
                 MmkvManager.decodeSubscription(profile.subscriptionId)?.remarks
             else
                 null
@@ -587,7 +597,7 @@ class MainRecyclerAdapter(
         BaseViewHolder(itemFooterBinding.root)
 
     override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
-        mainViewModel.swapServer(fromPosition, toPosition)
+        mainViewModel.swapServer(mainViewModel.uiState.value.selectedGroupId, fromPosition, toPosition)
         if (fromPosition < data.size && toPosition < data.size) {
             Collections.swap(data, fromPosition, toPosition)
         }

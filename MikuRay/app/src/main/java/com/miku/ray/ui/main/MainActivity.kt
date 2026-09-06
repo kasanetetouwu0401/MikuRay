@@ -33,7 +33,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -105,6 +107,8 @@ import com.miku.ray.util.showTotalTrafficDetailDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -118,7 +122,9 @@ class MainActivity : HelperBaseActivity(),
     ShareConfigBottomSheet.OnShareOptionClickListener {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
-    val mainViewModel: MainViewModel by viewModels()
+    val mainViewModel: MainViewModel by viewModels {
+        MainViewModel.Factory(application, MainRepository(application as com.miku.ray.AngApplication))
+    }
 
     private lateinit var groupPagerAdapter: GroupPagerAdapter
     private var tabMediator: TabLayoutMediator? = null
@@ -200,7 +206,7 @@ class MainActivity : HelperBaseActivity(),
         SubscriptionUpdater.sync()
         syncWeatherBackgroundUpdates()
         
-        mainViewModel.reloadServerList()
+        mainViewModel.onAction(MainAction.ReloadServerList)
         refreshGroupTabTitles(true)
 
         checkAndRequestPermission(PermissionType.POST_NOTIFICATIONS) {}
@@ -281,7 +287,7 @@ class MainActivity : HelperBaseActivity(),
             refreshGroupTabTitles()
         }
         
-        mainViewModel.resyncState()
+        mainViewModel.onAction(MainAction.ResyncState)
     }
 
     override fun onContentChanged() {
@@ -399,7 +405,7 @@ class MainActivity : HelperBaseActivity(),
         val showRealtimeTraffic = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_REALTIME_TRAFFIC_IP, false)
         
         binding.tvIpState.text = if (showRealtimeTraffic) {
-            if (mainViewModel.isRunning.value == true && lastTrafficSpeedText.isNotEmpty()) {
+            if (mainViewModel.uiState.value.isRunning && lastTrafficSpeedText.isNotEmpty()) {
                 lastTrafficSpeedText
             } else {
                 "↑ ${0L.toSpeedString()}  ↓ ${0L.toSpeedString()}"
@@ -765,7 +771,7 @@ class MainActivity : HelperBaseActivity(),
         }
 
         binding.btnMoreMenu.setOnClickListener {
-            MoreMenuBottomSheet.newInstance(mainViewModel.subscriptionId)
+            MoreMenuBottomSheet.newInstance(mainViewModel.uiState.value.selectedGroupId)
                 .show(supportFragmentManager, MoreMenuBottomSheet.TAG)
         }
 
@@ -778,21 +784,18 @@ class MainActivity : HelperBaseActivity(),
         }
 
         binding.btnQuickCountryCode.setOnClickListener {
-            mainViewModel.ensureServerCacheReady()
-            countryCodeProgressDialog.show(mainViewModel.serversCache.count())
-            mainViewModel.testAllCountryCodes()
+            countryCodeProgressDialog.show(mainViewModel.serversForGroup(mainViewModel.uiState.value.selectedGroupId).value.count())
+            mainViewModel.onAction(MainAction.TestAllCountryCodes)
         }
 
         binding.btnQuickTcping.setOnClickListener {
-            mainViewModel.ensureServerCacheReady()
-            urlTestProgressDialog.show(mainViewModel.serversCache.count(), R.string.title_ping_all_server)
-            mainViewModel.testAllRealPing(true)
+            urlTestProgressDialog.show(mainViewModel.serversForGroup(mainViewModel.uiState.value.selectedGroupId).value.count(), R.string.title_ping_all_server)
+            mainViewModel.onAction(MainAction.TestAllRealPing(true))
         }
 
         binding.btnQuickRealPing.setOnClickListener {
-            mainViewModel.ensureServerCacheReady()
-            urlTestProgressDialog.show(mainViewModel.serversCache.count(), R.string.title_real_ping_all_server)
-            mainViewModel.testAllRealPing()
+            urlTestProgressDialog.show(mainViewModel.serversForGroup(mainViewModel.uiState.value.selectedGroupId).value.count(), R.string.title_real_ping_all_server)
+            mainViewModel.onAction(MainAction.TestAllRealPing())
         }
 
         binding.layoutWeatherChip.setOnClickListener {
@@ -812,13 +815,13 @@ class MainActivity : HelperBaseActivity(),
             override fun onQueryTextSubmit(query: String?): Boolean = false
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                mainViewModel.filterConfig(newText.orEmpty())
+                mainViewModel.onAction(MainAction.FilterConfig(newText.orEmpty()))
                 return false
             }
         })
 
         binding.searchViewInline.setOnCloseListener {
-            mainViewModel.filterConfig("")
+            mainViewModel.onAction(MainAction.FilterConfig(""))
             false
         }
     }
@@ -857,19 +860,16 @@ class MainActivity : HelperBaseActivity(),
             R.id.export_all -> exportAll()
             R.id.export_group_file -> exportGroupAsFile()
             R.id.real_ping_all -> {
-                mainViewModel.ensureServerCacheReady()
-                urlTestProgressDialog.show(mainViewModel.serversCache.count(), R.string.title_real_ping_all_server)
-                mainViewModel.testAllRealPing()
+                urlTestProgressDialog.show(mainViewModel.serversForGroup(mainViewModel.uiState.value.selectedGroupId).value.count(), R.string.title_real_ping_all_server)
+                mainViewModel.onAction(MainAction.TestAllRealPing())
             }
             R.id.country_code_all -> {
-                mainViewModel.ensureServerCacheReady()
-                countryCodeProgressDialog.show(mainViewModel.serversCache.count())
-                mainViewModel.testAllCountryCodes()
+                countryCodeProgressDialog.show(mainViewModel.serversForGroup(mainViewModel.uiState.value.selectedGroupId).value.count())
+                mainViewModel.onAction(MainAction.TestAllCountryCodes)
             }
             R.id.tcping_all -> {
-                mainViewModel.ensureServerCacheReady()
-                urlTestProgressDialog.show(mainViewModel.serversCache.count(), R.string.title_ping_all_server)
-                mainViewModel.testAllRealPing(true)
+                urlTestProgressDialog.show(mainViewModel.serversForGroup(mainViewModel.uiState.value.selectedGroupId).value.count(), R.string.title_ping_all_server)
+                mainViewModel.onAction(MainAction.TestAllRealPing(true))
             }
             R.id.service_restart -> LauncherManager.restartServiceOrStart(this, ::startV2Ray)
             R.id.activity_restart -> restartApplication()
@@ -895,14 +895,14 @@ class MainActivity : HelperBaseActivity(),
                             0 -> {
                                 msgRes = R.string.confirm_clear_test_results_group
                                 action = {
-                                    mainViewModel.clearTestResultsForGroup()
+                                    mainViewModel.onAction(MainAction.ClearTestResultsForGroup)
                                     refreshAllGroupListDisplays()
                                 }
                             }
                             else -> {
                                 msgRes = R.string.confirm_clear_test_results_all
                                 action = {
-                                    mainViewModel.clearTestResults()
+                                    mainViewModel.onAction(MainAction.ClearTestResults)
                                     refreshAllGroupListDisplays()
                                 }
                             }
@@ -934,14 +934,14 @@ class MainActivity : HelperBaseActivity(),
                             0 -> {
                                 msgRes = R.string.confirm_clear_country_codes_group
                                 action = {
-                                    mainViewModel.clearCountryCodesForGroup()
+                                    mainViewModel.onAction(MainAction.ClearCountryCodesForGroup)
                                     refreshAllGroupListDisplays()
                                 }
                             }
                             else -> {
                                 msgRes = R.string.confirm_clear_country_codes_all
                                 action = {
-                                    mainViewModel.clearCountryCodes()
+                                    mainViewModel.onAction(MainAction.ClearCountryCodes)
                                     refreshAllGroupListDisplays()
                                 }
                             }
@@ -973,16 +973,16 @@ class MainActivity : HelperBaseActivity(),
                         when (which) {
                             0 -> {
                                 msgRes = R.string.confirm_reset_traffic_profile
-                                action = { mainViewModel.resetCurrentProfileTraffic() }
+                                action = { mainViewModel.onAction(MainAction.ResetCurrentProfileTraffic) }
                             }
                             1 -> {
                                 msgRes = R.string.confirm_reset_traffic_group
-                                action = { mainViewModel.resetGroupTraffic() }
+                                action = { mainViewModel.onAction(MainAction.ResetGroupTraffic) }
                             }
                             else -> {
                                 msgRes = R.string.confirm_reset_traffic_all
                                 action = {
-                                    mainViewModel.resetAllTraffic()
+                                    mainViewModel.onAction(MainAction.ResetAllTraffic)
                                     refreshAllGroupListDisplays()
                                 }
                             }
@@ -1000,92 +1000,104 @@ class MainActivity : HelperBaseActivity(),
             R.id.action_order_origin,
             R.id.action_order_by_name,
             R.id.action_order_by_delay -> {
-                mainViewModel.reloadServerList()
+                mainViewModel.onAction(MainAction.ReloadServerList)
             }
         }
     }
 
     private fun setupViewModel() {
-        mainViewModel.updateListAction.observe(this) {
-            refreshTabBadges()
-            if (SearchBarChipMode.current() in setOf(
-                    SearchBarChipMode.TOTAL_TRAFFIC,
-                    SearchBarChipMode.DUAL_SWIPE
-                )) {
-                SearchChipGradientController.applyState(this, binding)
-                if (isTotalTrafficChipSelected()) refreshTotalTrafficChip()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    mainViewModel.uiState.map { it.isRunning }.distinctUntilChanged().collect { isRunning ->
+                        applyRunningState(isLoading = false, isRunning = isRunning)
+                        if (isRunning && pendingConnectionTest) {
+                            pendingConnectionTest = false
+                            setTestState(getString(R.string.connection_test_testing))
+                            mainViewModel.testCurrentServerRealPing()
+                        }
+                    }
+                }
+
+                launch {
+                    mainViewModel.uiState.map { it.testProgress }.distinctUntilChanged().collect { info ->
+                        if (info == null) urlTestProgressDialog.finish() else urlTestProgressDialog.update(info)
+                    }
+                }
+
+                launch {
+                    mainViewModel.uiState.map { it.countryCodeProgress }.distinctUntilChanged().collect { info ->
+                        if (info == null) countryCodeProgressDialog.finish() else countryCodeProgressDialog.update(info)
+                    }
+                }
+
+                launch {
+                    mainViewModel.uiState.map { it.ipResult }.distinctUntilChanged().collect { ip ->
+                        lastIpStateText = if (ip.isNullOrEmpty()) {
+                            getString(R.string.ip_unknown)
+                        } else {
+                            getString(R.string.ip_connected, ip)
+                        }
+                        refreshIpStateText()
+                    }
+                }
+
+                launch {
+                    mainViewModel.uiState.map { it.trafficSpeedText }.distinctUntilChanged().collect { speedText ->
+                        lastTrafficSpeedText = speedText
+                        refreshIpStateText()
+                    }
+                }
+
+                launch {
+                    mainViewModel.viewModelEvent.collect { event ->
+                        when (event) {
+                            is MainViewModelEvent.ListChanged -> {
+                                refreshTabBadges()
+                                if (SearchBarChipMode.current() in setOf(
+                                        SearchBarChipMode.TOTAL_TRAFFIC,
+                                        SearchBarChipMode.DUAL_SWIPE
+                                    )) {
+                                    SearchChipGradientController.applyState(this@MainActivity, binding)
+                                    if (isTotalTrafficChipSelected()) refreshTotalTrafficChip()
+                                }
+                            }
+
+                            MainViewModelEvent.GroupBadgeChanged -> refreshTabBadges()
+
+                            MainViewModelEvent.GroupOrderChanged -> {
+                                mainViewModel.onAction(MainAction.ReloadServerList)
+                                refreshGroupTabTitles()
+                            }
+
+                            is MainViewModelEvent.TestResultText -> {
+                                lastTestResultText = event.text
+                                setTestState(event.text)
+                            }
+
+                            MainViewModelEvent.ServiceRestart -> {
+                                stopFabTimer()
+                                pendingConnectionTest = true
+                                lastTestResultText = ""
+                                setTestState(getString(R.string.connection_test_testing))
+                            }
+
+                            is MainViewModelEvent.Alert -> {
+                                if (event.isSuccess) {
+                                    snackbarSuccess(event.message, title = getString(R.string.title_alerter_success))
+                                } else {
+                                    snackbarError(event.message, title = getString(R.string.title_alerter_error))
+                                }
+                            }
+
+                            else -> Unit
+                        }
+                    }
+                }
             }
         }
 
-        mainViewModel.updateGroupBadgeAction.observe(this) { refreshTabBadges() }
-
-        mainViewModel.updateGroupOrderAction.observe(this) {
-            mainViewModel.reloadServerList()
-            refreshGroupTabTitles()
-        }
-        
-        mainViewModel.updateTestResultAction.observe(this) {
-            lastTestResultText = it.orEmpty()
-            setTestState(it)
-        }
-
-        mainViewModel.testProgressAction.observe(this) { info ->
-            if (info == null) {
-                urlTestProgressDialog.finish()
-            } else {
-                urlTestProgressDialog.update(info)
-            }
-        }
-
-        mainViewModel.countryCodeProgressAction.observe(this) { info ->
-            if (info == null) {
-                countryCodeProgressDialog.finish()
-            } else {
-                countryCodeProgressDialog.update(info)
-            }
-        }
-
-        mainViewModel.updateIpResultAction.observe(this) { ip ->
-            lastIpStateText = if (ip.isNullOrEmpty()) {
-                getString(R.string.ip_unknown)
-            } else {
-                getString(R.string.ip_connected, ip)
-            }
-            refreshIpStateText()
-        }
-
-        mainViewModel.updateTrafficSpeedAction.observe(this) { speedText ->
-            lastTrafficSpeedText = speedText
-            refreshIpStateText()
-        }
-
-        mainViewModel.isRunning.observe(this) { isRunning ->
-            applyRunningState(isLoading = false, isRunning = isRunning)
-            if (isRunning == true && pendingConnectionTest) {
-                pendingConnectionTest = false
-                setTestState(getString(R.string.connection_test_testing))
-                mainViewModel.testCurrentServerRealPing()
-            }
-        }
-
-        mainViewModel.serviceRestartAction.observe(this) {
-            stopFabTimer()
-            pendingConnectionTest = true
-            lastTestResultText = ""
-            setTestState(getString(R.string.connection_test_testing))
-        }
-
-        mainViewModel.alertAction.observe(this) { (isSuccess, message) ->
-            if (isSuccess) {
-                snackbarSuccess(message, title = getString(R.string.title_alerter_success))
-                mainViewModel.fetchCurrentIp()
-            } else {
-                snackbarError(message, title = getString(R.string.title_alerter_error))
-            }
-        }
-
-        mainViewModel.startListenBroadcast()
-        mainViewModel.initAssets(assets)
+        mainViewModel.onAction(MainAction.Initialize)
     }
 
     private fun setBadgeVisibility(badge: TextView, label: TextView, count: Int) {
@@ -1124,7 +1136,7 @@ class MainActivity : HelperBaseActivity(),
 
     private fun setupGroupTab() {
         lifecycleScope.launch(Dispatchers.IO) {
-            val groups = mainViewModel.getSubscriptions(this@MainActivity)
+            val groups = mainViewModel.getSubscriptions()
             withContext(Dispatchers.Main) {
                 if (isFinishing || isDestroyed) return@withContext
 
@@ -1140,7 +1152,7 @@ class MainActivity : HelperBaseActivity(),
                     return@withContext
                 }
 
-                val targetIndex = groups.indexOfFirst { it.id == mainViewModel.subscriptionId }
+                val targetIndex = groups.indexOfFirst { it.id == mainViewModel.uiState.value.selectedGroupId }
                     .takeIf { it >= 0 } ?: (groups.size - 1)
 
                 tabMediator?.detach()
@@ -1199,7 +1211,7 @@ class MainActivity : HelperBaseActivity(),
 
     private fun refreshTabBadges() {
         lifecycleScope.launch(Dispatchers.IO) {
-            val groups = mainViewModel.getSubscriptions(this@MainActivity)
+            val groups = mainViewModel.getSubscriptions()
             withContext(Dispatchers.Main) {
                 if (isFinishing || isDestroyed) return@withContext
                 
@@ -1216,10 +1228,10 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun handleFabAction() {
-        mainViewModel.resyncState()
+        mainViewModel.onAction(MainAction.ResyncState)
         applyRunningState(isLoading = true, isRunning = false)
 
-        if (mainViewModel.isRunning.value == true) {
+        if (mainViewModel.uiState.value.isRunning) {
             LauncherManager.stopService(this)
         } else if (SettingsManager.isVpnMode()) {
             val intent = VpnService.prepare(this)
@@ -1234,12 +1246,12 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun handleLayoutTestClick() {
-        if (mainViewModel.isRunning.value == true) {
+        if (mainViewModel.uiState.value.isRunning) {
             setTestState(getString(R.string.connection_test_testing))
             mainViewModel.testCurrentServerRealPing()
         } else {
             pendingConnectionTest = true
-            mainViewModel.resyncState()
+            mainViewModel.onAction(MainAction.ResyncState)
         }
     }
 
@@ -1352,13 +1364,13 @@ class MainActivity : HelperBaseActivity(),
         if (createConfigType == EConfigType.POLICYGROUP.value) {
             startActivity(
                 Intent()
-                    .putExtra("subscriptionId", mainViewModel.subscriptionId)
+                    .putExtra("subscriptionId", mainViewModel.uiState.value.selectedGroupId)
                     .setClass(this, ServerGroupActivity::class.java)
             )
         } else if (createConfigType == EConfigType.PROXYCHAIN.value) {
             startActivity(
                 Intent()
-                    .putExtra("subscriptionId", mainViewModel.subscriptionId)
+                    .putExtra("subscriptionId", mainViewModel.uiState.value.selectedGroupId)
                     .setClass(this, ServerProxyChainActivity::class.java)
             )
         } else {
@@ -1375,7 +1387,7 @@ class MainActivity : HelperBaseActivity(),
             startActivity(
                 Intent()
                     .putExtra("createConfigType", createConfigType)
-                    .putExtra("subscriptionId", mainViewModel.subscriptionId)
+                    .putExtra("subscriptionId", mainViewModel.uiState.value.selectedGroupId)
                     .setClass(this, targetActivity)
             )
         }
@@ -1452,7 +1464,7 @@ class MainActivity : HelperBaseActivity(),
             try {
                 val (count, countSub) = AngConfigManager.importBatchConfig(
                     server,
-                    mainViewModel.subscriptionId,
+                    mainViewModel.uiState.value.selectedGroupId,
                     true,
                 ) { suggested, existing ->
                     requestSubscriptionImportName(suggested, existing)
@@ -1466,7 +1478,7 @@ class MainActivity : HelperBaseActivity(),
                                 getString(R.string.title_import_config_count, count),
                                 title = getString(R.string.title_alerter_success)
                             )
-                            mainViewModel.reloadServerList()
+                            mainViewModel.onAction(MainAction.ReloadServerList)
                             refreshGroupTabTitles()
                         }
                         countSub > 0 -> setupGroupTab()
@@ -1526,7 +1538,7 @@ class MainActivity : HelperBaseActivity(),
                     }
                     
                     if (result.configCount > 0) {
-                        mainViewModel.reloadServerList()
+                        mainViewModel.onAction(MainAction.ReloadServerList)
                         refreshGroupTabTitles()
                     }
                     if (result.addedProfiles.isNotEmpty() || result.deletedProfiles.isNotEmpty()) {
@@ -1578,15 +1590,15 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun currentGroupDisplayName(): String =
-        mainViewModel.getSubscriptions(this)
-            .firstOrNull { it.id == mainViewModel.subscriptionId }
+        mainViewModel.getSubscriptions()
+            .firstOrNull { it.id == mainViewModel.uiState.value.selectedGroupId }
             ?.remarks
             ?: getString(R.string.filter_config_all)
 
     private fun exportGroupAsFile() {
         val currentGroupName = currentGroupDisplayName()
 
-        val payload = MikuRayGroupFileManager.buildGroupExportPayload(mainViewModel.subscriptionId, currentGroupName)
+        val payload = MikuRayGroupFileManager.buildGroupExportPayload(mainViewModel.uiState.value.selectedGroupId, currentGroupName)
         if (payload == null) {
             snackbarError(getString(R.string.title_export_group_file), title = getString(R.string.title_alerter_error))
             return
@@ -1658,7 +1670,7 @@ class MainActivity : HelperBaseActivity(),
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
                     val payload = MikuRayGroupFileManager.decryptPayloadFromFile(bytes, password)
-                    val count = MikuRayGroupFileManager.importPayload(payload, mainViewModel.subscriptionId)
+                    val count = MikuRayGroupFileManager.importPayload(payload, mainViewModel.uiState.value.selectedGroupId)
                     
                     withContext(Dispatchers.Main) {
                         hideLoading()
@@ -1670,7 +1682,7 @@ class MainActivity : HelperBaseActivity(),
                             if (payload.type == MikuRayExportPayload.TYPE_GROUP) {
                                 setupGroupTab()
                             } else {
-                                mainViewModel.reloadServerList()
+                                mainViewModel.onAction(MainAction.ReloadServerList)
                                 refreshGroupTabTitles()
                             }
                         } else {
@@ -1722,7 +1734,7 @@ class MainActivity : HelperBaseActivity(),
                 try {
                     val ret = mainViewModel.removeAllServer()
                     withContext(Dispatchers.Main) {
-                        mainViewModel.reloadServerList()
+                        mainViewModel.onAction(MainAction.ReloadServerList)
                         refreshGroupTabTitles()
                         snackbarSuccess(
                             getString(R.string.title_del_config_count, ret),
@@ -1751,7 +1763,7 @@ class MainActivity : HelperBaseActivity(),
                 try {
                     val ret = mainViewModel.removeDuplicateServer()
                     withContext(Dispatchers.Main) {
-                        mainViewModel.reloadServerList()
+                        mainViewModel.onAction(MainAction.ReloadServerList)
                         refreshGroupTabTitles()
                         snackbarSuccess(
                             getString(R.string.title_del_duplicate_config_count, ret),
@@ -1780,7 +1792,7 @@ class MainActivity : HelperBaseActivity(),
                 try {
                     val ret = mainViewModel.removeInvalidServer()
                     withContext(Dispatchers.Main) {
-                        mainViewModel.reloadServerList()
+                        mainViewModel.onAction(MainAction.ReloadServerList)
                         refreshGroupTabTitles()
                         snackbarSuccess(
                             getString(R.string.title_del_config_count, ret),
