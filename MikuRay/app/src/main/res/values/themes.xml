@@ -25,7 +25,7 @@
         <item name="preferenceTheme">@style/AppThemePreference</item>
         <item name="android:homeAsUpIndicator">@drawable/rmx_arrows_arrow_left_double_line</item>
         <item name="actionOverflowButtonStyle">@style/AppTheme.OverflowButton</item>
-        
+
     </style>
 
     <style name="AppTheme.OverflowButton" parent="Widget.AppCompat.ActionButton.Overflow">
@@ -891,7 +891,7 @@
         <item name="android:windowMinWidthMinor">91%</item>
         <item name="materialAlertDialogTitleIconStyle">@style/AppThemeAlertDialogTitleIcon</item>
     </style>
-    
+
     <style name="AppThemeAlertDialogTitleIcon" parent="@style/MaterialAlertDialog.Material3.Title.Icon.CenterStacked">
         <item name="android:layout_width">24dp</item>
         <item name="android:layout_height">24dp</item>
@@ -930,7 +930,7 @@
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
     </style>
-    
+
     <style name="BrandedSwitch" parent="AppThemeBase">
         <item name="colorPrimary">@color/color_fab_active</item>
     </style>
@@ -958,7 +958,7 @@
         <item name="alertDialogTheme">@style/ThemeOverlay.App.TrueBlack.AlertDialog</item>
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.TrueBlack.AlertDialog</item>
     </style>
-    
+
     <style name="ShapeAppearance.App.CardView.Top" parent="ShapeAppearance.Material3.Corner.Medium">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopLeft">28dp</item>

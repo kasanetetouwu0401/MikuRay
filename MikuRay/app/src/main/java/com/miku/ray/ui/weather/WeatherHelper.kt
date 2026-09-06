@@ -1,6 +1,5 @@
 package com.miku.ray.ui.weather
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.Manifest
 import android.content.Context
@@ -52,8 +51,8 @@ object WeatherHelper {
         val tempCelsius: Int
     ) {
         fun getTemperatureString(celsius: Boolean = isDefaultCelsius()): String =
-            if (celsius) "${tempCelsius}°C"
-            else "${Math.round(tempCelsius * 9.0 / 5.0 + 32)}°F"
+        if (celsius) "${tempCelsius}°C"
+        else "${Math.round(tempCelsius * 9.0 / 5.0 + 32)}°F"
     }
 
     data class WeatherCacheEntry(
@@ -180,13 +179,13 @@ object WeatherHelper {
     }
 
     fun getCustomLocationRaw(): String =
-        MmkvManager.decodeSettingsString(AppConfig.PREF_WEATHER_CUSTOM_LOCATION, "") ?: ""
+    MmkvManager.decodeSettingsString(AppConfig.PREF_WEATHER_CUSTOM_LOCATION, "") ?: ""
 
     fun hasCustomLocation(): Boolean = getCustomLocationRaw().isNotBlank()
 
     fun getCustomLocationResolvedName(): String? =
-        MmkvManager.decodeSettingsString(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_NAME, "")
-            ?.takeIf { it.isNotBlank() }
+    MmkvManager.decodeSettingsString(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_NAME, "")
+    ?.takeIf { it.isNotBlank() }
 
     fun clearCustomLocationCache() {
         MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CUSTOM_LOCATION_RAW_CACHED, "")
@@ -283,14 +282,14 @@ object WeatherHelper {
     }
 
     fun hasLocationPermission(context: Context): Boolean =
-        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
-            PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
-            PackageManager.PERMISSION_GRANTED
+    ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+    PackageManager.PERMISSION_GRANTED ||
+    ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+    PackageManager.PERMISSION_GRANTED
 
     private fun hasFineLocationPermission(context: Context): Boolean =
-        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
-            PackageManager.PERMISSION_GRANTED
+    ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+    PackageManager.PERMISSION_GRANTED
 
     fun hasBackgroundLocationPermission(context: Context): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return hasLocationPermission(context)
@@ -350,16 +349,16 @@ object WeatherHelper {
 
     private val client by lazy {
         OkHttpClient.Builder()
-            .connectTimeout(8, TimeUnit.SECONDS)
-            .readTimeout(8, TimeUnit.SECONDS)
-            .connectionSpecs(
-                listOf(
-                    ConnectionSpec.CLEARTEXT,
-                    ConnectionSpec.MODERN_TLS,
-                    ConnectionSpec.COMPATIBLE_TLS
-                )
+        .connectTimeout(8, TimeUnit.SECONDS)
+        .readTimeout(8, TimeUnit.SECONDS)
+        .connectionSpecs(
+            listOf(
+                ConnectionSpec.CLEARTEXT,
+                ConnectionSpec.MODERN_TLS,
+                ConnectionSpec.COMPATIBLE_TLS
             )
-            .proxySelector(object : ProxySelector() {
+        )
+        .proxySelector(object : ProxySelector() {
                 override fun select(uri: URI?): List<Proxy> {
                     return listOf(
                         Proxy(Proxy.Type.HTTP, InetSocketAddress("127.0.0.1", 10809)),
@@ -370,8 +369,8 @@ object WeatherHelper {
 
                 override fun connectFailed(uri: URI?, sa: SocketAddress?, ioe: IOException?) {
                 }
-            })
-            .build()
+        })
+        .build()
     }
 
     private suspend fun getCurrentLocation(
@@ -395,16 +394,16 @@ object WeatherHelper {
         }
 
         val priority = if (hasFineLocationPermission(context))
-            Priority.PRIORITY_HIGH_ACCURACY
+        Priority.PRIORITY_HIGH_ACCURACY
         else
-            Priority.PRIORITY_BALANCED_POWER_ACCURACY
+        Priority.PRIORITY_BALANCED_POWER_ACCURACY
 
         val locationRequest = CurrentLocationRequest.Builder()
-            .setPriority(priority)
-            .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
-            .setDurationMillis(AppConfig.WEATHER_LOCATION_TIMEOUT_MS)
-            .setMaxUpdateAgeMillis(if (force) 0L else 60_000L)
-            .build()
+        .setPriority(priority)
+        .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
+        .setDurationMillis(AppConfig.WEATHER_LOCATION_TIMEOUT_MS)
+        .setMaxUpdateAgeMillis(if (force) 0L else 60_000L)
+        .build()
 
         return try {
             withTimeoutOrNull(AppConfig.WEATHER_LOCATION_TIMEOUT_MS + 1000L) {
@@ -418,41 +417,41 @@ object WeatherHelper {
     }
 
     suspend fun fetchCurrentWeather(context: Context, force: Boolean = false): WeatherResult? =
-        fetchWeatherEntry(context, force)?.toWeatherResult()
+    fetchWeatherEntry(context, force)?.toWeatherResult()
 
     suspend fun fetchForecast(context: Context, force: Boolean = false): WeatherCacheEntry? =
-        fetchWeatherEntry(context, force)
+    fetchWeatherEntry(context, force)
 
     private suspend fun fetchWeatherEntry(context: Context, force: Boolean): WeatherCacheEntry? =
-        withContext(Dispatchers.IO) {
-            val forceRefresh = force || isFirstSessionLaunch
-            if (isFirstSessionLaunch) {
-                isFirstSessionLaunch = false
+    withContext(Dispatchers.IO) {
+        val forceRefresh = force || isFirstSessionLaunch
+        if (isFirstSessionLaunch) {
+            isFirstSessionLaunch = false
+        }
+
+        val location = getEffectiveLocation(context, forceRefresh) ?: return@withContext null
+
+        if (!forceRefresh) {
+            val cachedEntry = readCacheEntry()
+            val cachedFresh = cachedEntry != null &&
+            System.currentTimeMillis() - cachedEntry.fetchedAtEpochMs <= AppConfig.WEATHER_CACHE_TTL_MS
+            if (cachedFresh && isCacheValidForLocation(location)) {
+                return@withContext cachedEntry
             }
+        }
 
-            val location = getEffectiveLocation(context, forceRefresh) ?: return@withContext null
-
-            if (!forceRefresh) {
-                val cachedEntry = readCacheEntry()
-                val cachedFresh = cachedEntry != null &&
-                    System.currentTimeMillis() - cachedEntry.fetchedAtEpochMs <= AppConfig.WEATHER_CACHE_TTL_MS
-                if (cachedFresh && isCacheValidForLocation(location)) {
-                    return@withContext cachedEntry
-                }
-            }
-
-            try {
-                val forecastEntry = fetchOpenMeteo(location) ?: return@withContext null
-                val aqi = try {
-                    fetchAirQuality(location)
-                } catch (e: Exception) {
-                    null
-                }
-                forecastEntry.copy(airQualityIndex = aqi).also { saveCache(it) }
+        try {
+            val forecastEntry = fetchOpenMeteo(location) ?: return@withContext null
+            val aqi = try {
+                fetchAirQuality(location)
             } catch (e: Exception) {
                 null
             }
+            forecastEntry.copy(airQualityIndex = aqi).also { saveCache(it) }
+        } catch (e: Exception) {
+            null
         }
+    }
 
     private fun fetchOpenMeteo(location: android.location.Location): WeatherCacheEntry? {
         val url = buildString {
@@ -560,10 +559,10 @@ object WeatherHelper {
 
     private fun getBody(url: String): String? {
         val req = Request.Builder()
-            .url(url)
-            .header("User-Agent", "MikuRay/${BuildConfig.VERSION_NAME} (Android)")
-            .header("Accept", "application/json")
-            .build()
+        .url(url)
+        .header("User-Agent", "MikuRay/${BuildConfig.VERSION_NAME} (Android)")
+        .header("Accept", "application/json")
+        .build()
         return client.newCall(req).execute().use { resp ->
             if (!resp.isSuccessful) null else resp.body.string()
         }
@@ -574,15 +573,15 @@ object WeatherHelper {
         val request = PeriodicWorkRequestBuilder<UpdateWorker>(
             AppConfig.WEATHER_UPDATE_INTERVAL_MINUTES, TimeUnit.MINUTES
         )
-            .setConstraints(
-                Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-            )
-            .addTag(AppConfig.WEATHER_UPDATE_TASK_NAME)
-            .build()
+        .setConstraints(
+            Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+        )
+        .addTag(AppConfig.WEATHER_UPDATE_TASK_NAME)
+        .build()
         val policy = if (forceReschedule) ExistingPeriodicWorkPolicy.REPLACE
         else ExistingPeriodicWorkPolicy.KEEP
         RemoteWorkManager.getInstance(context)
-            .enqueueUniquePeriodicWork(AppConfig.WEATHER_UPDATE_TASK_NAME, policy, request)
+        .enqueueUniquePeriodicWork(AppConfig.WEATHER_UPDATE_TASK_NAME, policy, request)
     }
 
     fun cancelBackgroundUpdates(context: Context) {
@@ -590,17 +589,17 @@ object WeatherHelper {
     }
 
     class UpdateWorker(context: Context, params: WorkerParameters) :
-        CoroutineWorker(context, params) {
+    CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
             if (SearchBarChipMode.current() !in setOf(
                     SearchBarChipMode.WEATHER,
                     SearchBarChipMode.DUAL_SWIPE
-                )) {
+            )) {
                 return Result.success()
             }
 
             if (!hasCustomLocation() && !hasBackgroundLocationPermission(applicationContext))
-                return Result.success()
+            return Result.success()
 
             val result = fetchCurrentWeather(applicationContext)
             return if (result != null) Result.success() else Result.retry()

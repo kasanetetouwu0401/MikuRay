@@ -107,7 +107,6 @@ class CoreRootService : Service(), ServiceControl {
         super.attachBaseContext(context)
     }
 
-
     private fun stopAllService(isForced: Boolean = true) {
         isRunning = false
 

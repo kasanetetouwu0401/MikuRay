@@ -313,8 +313,8 @@ data class V2rayConfig(
                 settings?.peers?.firstOrNull()?.endpoint?.substringBeforeLast(":")
             } else {
                 (settings?.address as? String)
-                    ?: settings?.vnext?.firstOrNull()?.address
-                    ?: settings?.servers?.firstOrNull()?.address
+                ?: settings?.vnext?.firstOrNull()?.address
+                ?: settings?.servers?.firstOrNull()?.address
             }
         }
 
@@ -323,8 +323,8 @@ data class V2rayConfig(
                 settings?.peers?.firstOrNull()?.endpoint?.substringAfterLast(":")?.toIntOrNull()
             } else {
                 settings?.port
-                    ?: settings?.vnext?.firstOrNull()?.port
-                    ?: settings?.servers?.firstOrNull()?.port
+                ?: settings?.vnext?.firstOrNull()?.port
+                ?: settings?.servers?.firstOrNull()?.port
             }
         }
 

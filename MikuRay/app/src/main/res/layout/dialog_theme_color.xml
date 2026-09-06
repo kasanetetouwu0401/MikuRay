@@ -4,15 +4,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingHorizontal="4dp"
-    android:paddingBottom="8dp">
+    android:paddingBottom="8dp"
+    android:paddingHorizontal="4dp">
 
     <android.widget.GridLayout
         android:id="@+id/grid_theme_colors"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:columnCount="4"
-        android:rowOrderPreserved="true"
-        android:padding="8dp" />
+        android:padding="8dp"
+        android:rowOrderPreserved="true" />
 
 </ScrollView>

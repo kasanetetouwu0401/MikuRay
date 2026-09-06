@@ -16,15 +16,6 @@ import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.getColorAttr
 
-/**
- * Shape-aware ImageView used both for the app's icon-shape background badges
- * and, via [R.styleable.DynamicShapeImageView_shapeTarget], for the small
- * "arrow" background badges shown at the end of preference/menu cards.
- *
- * Both targets share the exact same set of SVG shapes (see [resolveShapeId]),
- * but each target has its own MMKV pref key / broadcast action so the icon
- * shape and arrow shape can be customized independently from UI Settings.
- */
 class DynamicShapeImageView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -36,13 +27,13 @@ class DynamicShapeImageView @JvmOverloads constructor(
     private var shapeTarget: ShapeTarget = ShapeTarget.ICON
 
     private val prefKey: String
-        get() = if (shapeTarget == ShapeTarget.ARROW) AppConfig.PREF_ARROW_SHAPE else AppConfig.PREF_ICON_SHAPE
+    get() = if (shapeTarget == ShapeTarget.ARROW) AppConfig.PREF_ARROW_SHAPE else AppConfig.PREF_ICON_SHAPE
 
     private val defaultShapeKey: String
-        get() = if (shapeTarget == ShapeTarget.ARROW) AppConfig.PREF_ARROW_SHAPE_DEFAULT else AppConfig.PREF_ICON_SHAPE_DEFAULT
+    get() = if (shapeTarget == ShapeTarget.ARROW) AppConfig.PREF_ARROW_SHAPE_DEFAULT else AppConfig.PREF_ICON_SHAPE_DEFAULT
 
     private val broadcastAction: String
-        get() = if (shapeTarget == ShapeTarget.ARROW) AppConfig.BROADCAST_ACTION_ARROW_SHAPE_CHANGED else AppConfig.BROADCAST_ACTION_ICON_SHAPE_CHANGED
+    get() = if (shapeTarget == ShapeTarget.ARROW) AppConfig.BROADCAST_ACTION_ARROW_SHAPE_CHANGED else AppConfig.BROADCAST_ACTION_ICON_SHAPE_CHANGED
 
     private var currentShapeKey: String? = null
 
@@ -90,13 +81,6 @@ class DynamicShapeImageView @JvmOverloads constructor(
 
         scaleType = ScaleType.CENTER_CROP
 
-        // ShaderImageView's own init block already called createImageViewHelper()
-        // during the super() constructor call above, i.e. before shapeTarget and
-        // customBgColor (parsed just above) even existed yet — so that first
-        // helper was always built with the ICON defaults. Force a rebuild now
-        // that this view's real target/color are known, so arrow badges (and any
-        // non-default color) render correctly from the very first frame instead
-        // of only after the user actively changes the shape preference.
         reloadShape()
 
         loadColorBitmap()

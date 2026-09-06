@@ -68,7 +68,6 @@ object NotificationHelper {
         builderCache.remove(channelType.notificationId)
     }
 
-
     private fun getNotificationManager(context: Context): NotificationManager {
         if (cachedNotificationManager == null) {
             cachedNotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -107,14 +106,13 @@ object NotificationHelper {
 
         val displayTitle = title.ifEmpty { com.miku.ray.util.AppNameHelper.getDisplayName(context) }
         return NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_stat_name)
-            .setContentTitle(displayTitle)
-            .setContentText(content)
-            .setOngoing(false)
-            .setOnlyAlertOnce(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .apply { action?.let(::addAction) }
+        .setSmallIcon(R.drawable.ic_stat_name)
+        .setContentTitle(displayTitle)
+        .setContentText(content)
+        .setOngoing(false)
+        .setOnlyAlertOnce(true)
+        .setPriority(NotificationCompat.PRIORITY_LOW)
+        .setCategory(NotificationCompat.CATEGORY_SERVICE)
+        .apply { action?.let(::addAction) }
     }
 }
-

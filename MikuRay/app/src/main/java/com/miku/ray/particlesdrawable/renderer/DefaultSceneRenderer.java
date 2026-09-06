@@ -26,8 +26,8 @@ public class DefaultSceneRenderer implements SceneRenderer {
         if (scene.getDensity() > 0) {
 
             final int particleColor = ParticleColorResolver.resolveParticleColorWithSceneAlpha(
-                    scene.getParticleColor(),
-                    scene.getAlpha()
+                scene.getParticleColor(),
+                scene.getAlpha()
             );
 
             final FloatBuffer radiuses = scene.getRadiuses();
@@ -46,18 +46,18 @@ public class DefaultSceneRenderer implements SceneRenderer {
                     if (distance < scene.getLineLength()) {
 
                         final int lineColor = LineColorResolver.resolveLineColorWithAlpha(
-                                scene.getAlpha(),
-                                scene.getLineColor(),
-                                scene.getLineLength(),
-                                distance);
+                            scene.getAlpha(),
+                            scene.getLineColor(),
+                            scene.getLineLength(),
+                            distance);
 
                         renderer.drawLine(
-                                x1,
-                                y1,
-                                x2,
-                                y2,
-                                scene.getLineThickness(),
-                                lineColor);
+                            x1,
+                            y1,
+                            x2,
+                            y2,
+                            scene.getLineThickness(),
+                            lineColor);
                     }
                 }
 

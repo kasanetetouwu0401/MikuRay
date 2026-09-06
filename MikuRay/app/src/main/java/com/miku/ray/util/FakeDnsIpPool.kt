@@ -2,10 +2,6 @@ package com.miku.ray.util
 
 import com.miku.ray.AppConfig
 
-/**
- * Validates the IPv4 CIDR used by Xray FakeDNS and derives a pool size that
- * does not exceed the usable addresses in the subnet.
- */
 object FakeDnsIpPool {
 
     data class Config(
@@ -35,7 +31,7 @@ object FakeDnsIpPool {
         val prefixLength = cidr.substringAfter('/').toInt()
         val addressCount = 1L shl (32 - prefixLength)
         return (addressCount - 1)
-            .coerceAtMost(AppConfig.FAKE_DNS_MAX_POOL_SIZE.toLong())
-            .toInt()
+        .coerceAtMost(AppConfig.FAKE_DNS_MAX_POOL_SIZE.toLong())
+        .toInt()
     }
 }

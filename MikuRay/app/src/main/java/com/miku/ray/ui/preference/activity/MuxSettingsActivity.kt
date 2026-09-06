@@ -26,8 +26,8 @@ class MuxSettingsActivity : BaseActivity() {
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, MuxSettingsFragment())
-                .commit()
+            .replace(R.id.settings_container, MuxSettingsFragment())
+            .commit()
         }
     }
 

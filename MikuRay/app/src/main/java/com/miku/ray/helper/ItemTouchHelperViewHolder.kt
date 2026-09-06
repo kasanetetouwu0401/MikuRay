@@ -5,6 +5,5 @@ import androidx.recyclerview.widget.ItemTouchHelper
 interface ItemTouchHelperViewHolder {
     fun onItemSelected()
 
-
     fun onItemClear()
 }

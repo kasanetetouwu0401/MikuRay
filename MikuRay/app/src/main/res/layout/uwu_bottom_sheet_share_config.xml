@@ -1,133 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    android:id="@+id/bottom_sheet"
-    android:orientation="vertical"
-    android:background="?colorBg"
-    android:paddingBottom="8.0dip"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottom_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorBg"
+    android:orientation="vertical"
+    android:paddingBottom="8dp">
     <androidx.core.widget.NestedScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_marginStart="0.0dip"
-        android:layout_marginEnd="0.0dip">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="0dp"
+        android:layout_marginStart="0dp">
         <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
             <com.google.android.material.card.MaterialCardView
-                android:clipToPadding="false"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16.0dip"
-                android:layout_marginBottom="5.0dip"
-                android:layout_marginStart="16.0dip"
-                android:layout_marginEnd="16.0dip"
-                app:cardBackgroundColor="?colorCard"
-                app:cardCornerRadius="28.0dip"
-                app:cardElevation="0.0dip"
-                app:strokeWidth="0.0dip">
+                android:layout_marginBottom="5dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:clipToPadding="false"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
                 <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
                     <com.google.android.material.card.MaterialCardView
-                        android:layout_width="fill_parent"
-                        android:layout_height="150.0dip"
-                        android:layout_marginTop="12.0dip"
-                        android:layout_marginBottom="12.0dip"
-                        android:layout_marginStart="12.0dip"
-                        android:layout_marginEnd="12.0dip"
+                        android:layout_width="match_parent"
+                        android:layout_height="150dp"
+                        android:layout_marginBottom="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginTop="12dp"
                         app:cardBackgroundColor="#00000000"
-                        app:cardCornerRadius="19.0dip"
-                        app:cardElevation="0.0dip"
-                        app:strokeWidth="0.0dip">
+                        app:cardCornerRadius="19dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp">
                         <ImageView
                             android:id="@+id/img_banner_sheet"
-                            android:layout_width="fill_parent"
-                            android:layout_height="150.0dip"
-                            android:src="@drawable/uwu_banner_sheet"
+                            android:layout_width="match_parent"
+                            android:layout_height="150dp"
+                            android:elevation="0dp"
                             android:scaleType="centerCrop"
-                            android:elevation="0.0dip" />
+                            android:src="@drawable/uwu_banner_sheet" />
                         <View
                             android:id="@+id/view_banner_sheet_dim"
-                            android:layout_width="fill_parent"
-                            android:layout_height="fill_parent" />
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
                         <com.miku.ray.particlesdrawable.ParticlesView
                             android:id="@+id/ParticlesView"
-                            android:background="#00000000"
-                            android:layout_width="fill_parent"
-                            android:layout_height="fill_parent"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
                             android:layout_centerInParent="true"
-                            app:particleColor="?colorPrimary"
-                            app:frameDelayMillis="10"
-                            app:lineColor="?colorPrimary"
-                            app:lineLength="86.0dip"
-                            app:lineThickness="1.0dip"
-                            app:particleRadiusMax="4.0dip"
-                            app:particleRadiusMin="1.0dip"
+                            android:background="#00000000"
                             app:density="60"
+                            app:frameDelayMillis="10"
+                            app:lineColor="?attr/colorPrimary"
+                            app:lineLength="86dp"
+                            app:lineThickness="1dp"
+                            app:particleColor="?attr/colorPrimary"
+                            app:particleRadiusMax="4dp"
+                            app:particleRadiusMin="1dp"
                             app:speedFactor="1.0" />
                         <LinearLayout
-                            android:gravity="bottom"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content">
+                            android:gravity="bottom">
                             <LinearLayout
-                                android:gravity="center_vertical"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
                                 android:clipToPadding="false"
-                                android:layout_width="fill_parent"
-                                android:layout_height="wrap_content">
+                                android:gravity="center_vertical">
                                 <LinearLayout
-                                    android:gravity="center"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="16.0dip"
-                                    android:layout_marginBottom="16.0dip"
-                                    android:layout_marginStart="16.0dip"
-                                    android:layout_marginEnd="5.0dip">
+                                    android:layout_marginBottom="16dp"
+                                    android:layout_marginEnd="5dp"
+                                    android:layout_marginStart="16dp"
+                                    android:layout_marginTop="16dp"
+                                    android:gravity="center">
                                     <com.miku.ray.widget.ProfileBannerImageView
-                                        android:layout_width="60.0dip"
-                                        android:layout_height="60.0dip"
+                                        android:layout_width="60dp"
+                                        android:layout_height="60dp"
                                         android:src="@drawable/uwu_banner_profile"
-                                        app:siBorderColor="?colorPrimary"
-                                        app:siBorderWidth="3.0dip" />
+                                        app:siBorderColor="?attr/colorPrimary"
+                                        app:siBorderWidth="3dp" />
                                 </LinearLayout>
                                 <RelativeLayout
-                                    android:paddingTop="16.0dip"
-                                    android:paddingBottom="16.0dip"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_marginEnd="5dp"
+                                    android:layout_marginStart="5dp"
                                     android:layout_weight="1.0"
-                                    android:layout_marginStart="5.0dip"
-                                    android:layout_marginEnd="5.0dip">
+                                    android:paddingBottom="16dp"
+                                    android:paddingTop="16dp">
                                     <LinearLayout
-                                        android:orientation="vertical"
-                                        android:layout_width="fill_parent"
-                                        android:layout_height="wrap_content">
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="vertical">
                                         <com.miku.ray.marquee.text.UserNameTextView
-                                            android:textAppearance="?textAppearanceTitleMedium"
-                                            android:textStyle="bold"
-                                            android:textSize="17.0sp"
-                                            android:textColor="?colorOnSurface"
-                                            android:ellipsize="marquee"
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:singleLine="true"
-                                            android:marqueeRepeatLimit="marquee_forever" />
-                                        <com.miku.ray.marquee.text.RandomText
-                                            android:textAppearance="?textAppearanceTitleSmall"
-                                            android:textStyle="bold"
-                                            android:textSize="14.0sp"
-                                            android:textColor="?colorOnSurfaceVariant"
                                             android:ellipsize="marquee"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:singleLine="true"
                                             android:marqueeRepeatLimit="marquee_forever"
+                                            android:singleLine="true"
+                                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                                            android:textColor="?attr/colorOnSurface"
+                                            android:textSize="17sp"
+                                            android:textStyle="bold" />
+                                        <com.miku.ray.marquee.text.RandomText
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:ellipsize="marquee"
+                                            android:marqueeRepeatLimit="marquee_forever"
+                                            android:singleLine="true"
+                                            android:textAppearance="?attr/textAppearanceTitleSmall"
+                                            android:textColor="?attr/colorOnSurfaceVariant"
+                                            android:textSize="14sp"
+                                            android:textStyle="bold"
                                             uwu_runnable="false" />
                                     </LinearLayout>
                                 </RelativeLayout>
@@ -138,128 +138,128 @@
             </com.google.android.material.card.MaterialCardView>
 
             <LinearLayout
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingLeft="24.0dip"
-                android:paddingTop="5.0dip"
-                android:paddingRight="24.0dip"
-                android:paddingBottom="5.0dip"
-                android:paddingHorizontal="24.0dip"
-                android:gravity="center_vertical">
+                android:paddingBottom="5dp"
+                android:paddingHorizontal="24dp"
+                android:paddingLeft="24dp"
+                android:paddingRight="24dp"
+                android:paddingTop="5dp">
 
                 <com.miku.ray.widget.UwuHeaderIconView
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    app:sectionIcon="@drawable/rmx_share_line"
-                    android:layout_marginEnd="12dp" />
+                    android:layout_marginEnd="12dp"
+                    app:sectionIcon="@drawable/rmx_share_line" />
 
                 <TextView
-                    android:textAppearance="?textAppearanceTitleMedium"
-                    android:textStyle="bold"
-                    android:textColor="?colorPrimary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/share_configuration" />
+                    android:text="@string/share_configuration"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorPrimary"
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/share_qrcode"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5.0dip"
-                android:layout_marginBottom="4.0dip"
-                android:layout_marginStart="16.0dip"
-                android:layout_marginEnd="16.0dip"
-                android:focusable="true"
+                android:layout_marginBottom="4dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="5dp"
                 android:clickable="true"
-                app:cardBackgroundColor="?colorCard"
-                app:cardElevation="0.0dip"
-                app:strokeWidth="0.0dip"
-                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Top"
+                android:focusable="true"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
                 app:cardPreventCornerOverlap="false"
-                app:contentPadding="0dp">
+                app:contentPadding="0dp"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Top"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:clipToPadding="false"
                     android:baselineAligned="false"
-                    android:minHeight="?android:listPreferredItemHeightSmall">
+                    android:clipToPadding="false"
+                    android:gravity="center_vertical"
+                    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+                    android:orientation="horizontal">
 
                     <LinearLayout
-                        android:gravity="center"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16.0dip"
-                        android:layout_marginBottom="16.0dip"
-                        android:layout_marginStart="8.0dip"
-                        android:layout_marginEnd="8.0dip">
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center">
                         <FrameLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="8.0dip">
+                                android:layout_marginStart="8dp">
                                 <com.miku.ray.widget.DynamicShapeImageView
-                                    app:shapeTarget="icon"
-                                    app:shapeBackgroundColor="?colorPrimary"
-                                    android:layout_width="45.0dip"
-                                    android:layout_height="45.0dip"
-                                    android:scaleType="centerCrop" />
+                                    android:layout_width="45dp"
+                                    android:layout_height="45dp"
+                                    android:scaleType="centerCrop"
+                                    app:shapeBackgroundColor="?attr/colorPrimary"
+                                    app:shapeTarget="icon" />
                                 <ImageView
+                                    android:layout_width="25dp"
+                                    android:layout_height="25dp"
                                     android:layout_gravity="center"
-                                    android:layout_width="25.0dip"
-                                    android:layout_height="25.0dip"
                                     android:src="@drawable/rmx_qr_code_line"
-                                    android:tint="?colorOnPrimary" />
+                                    android:tint="?attr/colorOnPrimary" />
                             </FrameLayout>
                     </LinearLayout>
                     <LinearLayout
-                        android:layout_gravity="center_vertical"
-                        android:orientation="vertical"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20.0dip"
-                        android:layout_marginBottom="20.0dip"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="20dp"
                         android:layout_weight="1.0"
-                        android:layout_marginStart="8.0dip"
-                        android:layout_marginEnd="16.0dip">
+                        android:orientation="vertical">
                         <TextView
-                            android:textAppearance="?textAppearanceTitleMedium"
-                            android:textSize="17.0sp"
-                            android:textColor="?colorOnSurface"
-                            android:ellipsize="marquee"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:ellipsize="marquee"
+                            android:singleLine="false"
                             android:text="@string/share_qrcode"
-                            android:singleLine="false" />
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="17sp" />
                     </LinearLayout>
                     <LinearLayout
-                        android:gravity="center"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16.0dip"
-                        android:layout_marginBottom="16.0dip"
-                        android:layout_marginStart="8.0dip"
-                        android:layout_marginEnd="16.0dip">
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center">
                         <FrameLayout
-                            android:layout_width="28.0dip"
-                            android:layout_height="28.0dip">
+                            android:layout_width="28dp"
+                            android:layout_height="28dp">
 
                             <com.miku.ray.widget.DynamicShapeImageView
-                                app:shapeTarget="arrow"
-                                app:shapeBackgroundColor="?colorSurfaceContainerHighest"
-                                android:layout_width="28.0dip"
-                                android:layout_height="28.0dip"
-                                android:scaleType="centerCrop" />
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:scaleType="centerCrop"
+                                app:shapeBackgroundColor="?attr/colorSurfaceContainerHighest"
+                                app:shapeTarget="arrow" />
 
                             <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
                                 android:layout_gravity="center"
-                                android:layout_width="24.0dip"
-                                android:layout_height="24.0dip"
                                 android:src="@drawable/rmx_arrows_arrow_right_double_line"
-                                android:tint="?colorOnSurfaceVariant" />
+                                android:tint="?attr/colorOnSurfaceVariant" />
                         </FrameLayout>
                     </LinearLayout>
                 </LinearLayout>
@@ -267,101 +267,101 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/share_clipboard"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="0.0dip"
-                android:layout_marginBottom="4.0dip"
-                android:layout_marginStart="16.0dip"
-                android:layout_marginEnd="16.0dip"
-                android:focusable="true"
+                android:layout_marginBottom="4dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="0dp"
                 android:clickable="true"
-                app:cardBackgroundColor="?colorCard"
-                app:cardElevation="0.0dip"
-                app:strokeWidth="0.0dip"
-                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Middle"
+                android:focusable="true"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
                 app:cardPreventCornerOverlap="false"
-                app:contentPadding="0dp">
+                app:contentPadding="0dp"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Middle"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:clipToPadding="false"
                     android:baselineAligned="false"
-                    android:minHeight="?android:listPreferredItemHeightSmall">
+                    android:clipToPadding="false"
+                    android:gravity="center_vertical"
+                    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+                    android:orientation="horizontal">
 
                     <LinearLayout
-                        android:gravity="center"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16.0dip"
-                        android:layout_marginBottom="16.0dip"
-                        android:layout_marginStart="8.0dip"
-                        android:layout_marginEnd="8.0dip">
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center">
                         <FrameLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="8.0dip">
+                                android:layout_marginStart="8dp">
                                 <com.miku.ray.widget.DynamicShapeImageView
-                                    app:shapeTarget="icon"
-                                    app:shapeBackgroundColor="?colorPrimary"
-                                    android:layout_width="45.0dip"
-                                    android:layout_height="45.0dip"
-                                    android:scaleType="centerCrop" />
+                                    android:layout_width="45dp"
+                                    android:layout_height="45dp"
+                                    android:scaleType="centerCrop"
+                                    app:shapeBackgroundColor="?attr/colorPrimary"
+                                    app:shapeTarget="icon" />
                                 <ImageView
+                                    android:layout_width="25dp"
+                                    android:layout_height="25dp"
                                     android:layout_gravity="center"
-                                    android:layout_width="25.0dip"
-                                    android:layout_height="25.0dip"
                                     android:src="@drawable/rmx_clipboard_line"
-                                    android:tint="?colorOnPrimary" />
+                                    android:tint="?attr/colorOnPrimary" />
                             </FrameLayout>
                     </LinearLayout>
                     <LinearLayout
-                        android:layout_gravity="center_vertical"
-                        android:orientation="vertical"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20.0dip"
-                        android:layout_marginBottom="20.0dip"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="20dp"
                         android:layout_weight="1.0"
-                        android:layout_marginStart="8.0dip"
-                        android:layout_marginEnd="16.0dip">
+                        android:orientation="vertical">
                         <TextView
-                            android:textAppearance="?textAppearanceTitleMedium"
-                            android:textSize="17.0sp"
-                            android:textColor="?colorOnSurface"
-                            android:ellipsize="marquee"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:ellipsize="marquee"
+                            android:singleLine="false"
                             android:text="@string/export_to_clipboard"
-                            android:singleLine="false" />
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="17sp" />
                     </LinearLayout>
                     <LinearLayout
-                        android:gravity="center"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16.0dip"
-                        android:layout_marginBottom="16.0dip"
-                        android:layout_marginStart="8.0dip"
-                        android:layout_marginEnd="16.0dip">
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center">
                         <FrameLayout
-                            android:layout_width="28.0dip"
-                            android:layout_height="28.0dip">
+                            android:layout_width="28dp"
+                            android:layout_height="28dp">
 
                             <com.miku.ray.widget.DynamicShapeImageView
-                                app:shapeTarget="arrow"
-                                app:shapeBackgroundColor="?colorSurfaceContainerHighest"
-                                android:layout_width="28.0dip"
-                                android:layout_height="28.0dip"
-                                android:scaleType="centerCrop" />
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:scaleType="centerCrop"
+                                app:shapeBackgroundColor="?attr/colorSurfaceContainerHighest"
+                                app:shapeTarget="arrow" />
 
                             <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
                                 android:layout_gravity="center"
-                                android:layout_width="24.0dip"
-                                android:layout_height="24.0dip"
                                 android:src="@drawable/rmx_arrows_arrow_right_double_line"
-                                android:tint="?colorOnSurfaceVariant" />
+                                android:tint="?attr/colorOnSurfaceVariant" />
                         </FrameLayout>
                     </LinearLayout>
                 </LinearLayout>
@@ -369,101 +369,101 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/share_full_clipboard"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="0.0dip"
-                android:layout_marginBottom="4.0dip"
-                android:layout_marginStart="16.0dip"
-                android:layout_marginEnd="16.0dip"
-                android:focusable="true"
+                android:layout_marginBottom="4dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="0dp"
                 android:clickable="true"
-                app:cardBackgroundColor="?colorCard"
-                app:cardElevation="0.0dip"
-                app:strokeWidth="0.0dip"
-                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Middle"
+                android:focusable="true"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
                 app:cardPreventCornerOverlap="false"
-                app:contentPadding="0dp">
+                app:contentPadding="0dp"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Middle"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:clipToPadding="false"
                     android:baselineAligned="false"
-                    android:minHeight="?android:listPreferredItemHeightSmall">
+                    android:clipToPadding="false"
+                    android:gravity="center_vertical"
+                    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+                    android:orientation="horizontal">
 
                     <LinearLayout
-                        android:gravity="center"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16.0dip"
-                        android:layout_marginBottom="16.0dip"
-                        android:layout_marginStart="8.0dip"
-                        android:layout_marginEnd="8.0dip">
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center">
                         <FrameLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="8.0dip">
+                                android:layout_marginStart="8dp">
                                 <com.miku.ray.widget.DynamicShapeImageView
-                                    app:shapeTarget="icon"
-                                    app:shapeBackgroundColor="?colorPrimary"
-                                    android:layout_width="45.0dip"
-                                    android:layout_height="45.0dip"
-                                    android:scaleType="centerCrop" />
+                                    android:layout_width="45dp"
+                                    android:layout_height="45dp"
+                                    android:scaleType="centerCrop"
+                                    app:shapeBackgroundColor="?attr/colorPrimary"
+                                    app:shapeTarget="icon" />
                                 <ImageView
+                                    android:layout_width="25dp"
+                                    android:layout_height="25dp"
                                     android:layout_gravity="center"
-                                    android:layout_width="25.0dip"
-                                    android:layout_height="25.0dip"
                                     android:src="@drawable/rmx_clipboard_line"
-                                    android:tint="?colorOnPrimary" />
+                                    android:tint="?attr/colorOnPrimary" />
                             </FrameLayout>
                     </LinearLayout>
                     <LinearLayout
-                        android:layout_gravity="center_vertical"
-                        android:orientation="vertical"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20.0dip"
-                        android:layout_marginBottom="20.0dip"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="20dp"
                         android:layout_weight="1.0"
-                        android:layout_marginStart="8.0dip"
-                        android:layout_marginEnd="16.0dip">
+                        android:orientation="vertical">
                         <TextView
-                            android:textAppearance="?textAppearanceTitleMedium"
-                            android:textSize="17.0sp"
-                            android:textColor="?colorOnSurface"
-                            android:ellipsize="marquee"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:ellipsize="marquee"
+                            android:singleLine="false"
                             android:text="@string/export_full_config_to_clipboard"
-                            android:singleLine="false" />
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="17sp" />
                     </LinearLayout>
                     <LinearLayout
-                        android:gravity="center"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16.0dip"
-                        android:layout_marginBottom="16.0dip"
-                        android:layout_marginStart="8.0dip"
-                        android:layout_marginEnd="16.0dip">
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center">
                         <FrameLayout
-                            android:layout_width="28.0dip"
-                            android:layout_height="28.0dip">
+                            android:layout_width="28dp"
+                            android:layout_height="28dp">
 
                             <com.miku.ray.widget.DynamicShapeImageView
-                                app:shapeTarget="arrow"
-                                app:shapeBackgroundColor="?colorSurfaceContainerHighest"
-                                android:layout_width="28.0dip"
-                                android:layout_height="28.0dip"
-                                android:scaleType="centerCrop" />
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:scaleType="centerCrop"
+                                app:shapeBackgroundColor="?attr/colorSurfaceContainerHighest"
+                                app:shapeTarget="arrow" />
 
                             <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
                                 android:layout_gravity="center"
-                                android:layout_width="24.0dip"
-                                android:layout_height="24.0dip"
                                 android:src="@drawable/rmx_arrows_arrow_right_double_line"
-                                android:tint="?colorOnSurfaceVariant" />
+                                android:tint="?attr/colorOnSurfaceVariant" />
                         </FrameLayout>
                     </LinearLayout>
                 </LinearLayout>
@@ -471,101 +471,101 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/share_file"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="0.0dip"
-                android:layout_marginBottom="8.0dip"
-                android:layout_marginStart="16.0dip"
-                android:layout_marginEnd="16.0dip"
-                android:focusable="true"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="0dp"
                 android:clickable="true"
-                app:cardBackgroundColor="?colorCard"
-                app:cardElevation="0.0dip"
-                app:strokeWidth="0.0dip"
-                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Bottom"
+                android:focusable="true"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
                 app:cardPreventCornerOverlap="false"
-                app:contentPadding="0dp">
+                app:contentPadding="0dp"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CardView.Bottom"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:clipToPadding="false"
                     android:baselineAligned="false"
-                    android:minHeight="?android:listPreferredItemHeightSmall">
+                    android:clipToPadding="false"
+                    android:gravity="center_vertical"
+                    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+                    android:orientation="horizontal">
 
                     <LinearLayout
-                        android:gravity="center"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16.0dip"
-                        android:layout_marginBottom="16.0dip"
-                        android:layout_marginStart="8.0dip"
-                        android:layout_marginEnd="8.0dip">
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center">
                         <FrameLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="8.0dip">
+                                android:layout_marginStart="8dp">
                                 <com.miku.ray.widget.DynamicShapeImageView
-                                    app:shapeTarget="icon"
-                                    app:shapeBackgroundColor="?colorPrimary"
-                                    android:layout_width="45.0dip"
-                                    android:layout_height="45.0dip"
-                                    android:scaleType="centerCrop" />
+                                    android:layout_width="45dp"
+                                    android:layout_height="45dp"
+                                    android:scaleType="centerCrop"
+                                    app:shapeBackgroundColor="?attr/colorPrimary"
+                                    app:shapeTarget="icon" />
                                 <ImageView
+                                    android:layout_width="25dp"
+                                    android:layout_height="25dp"
                                     android:layout_gravity="center"
-                                    android:layout_width="25.0dip"
-                                    android:layout_height="25.0dip"
                                     android:src="@drawable/rmx_file_line"
-                                    android:tint="?colorOnPrimary" />
+                                    android:tint="?attr/colorOnPrimary" />
                             </FrameLayout>
                     </LinearLayout>
                     <LinearLayout
-                        android:layout_gravity="center_vertical"
-                        android:orientation="vertical"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20.0dip"
-                        android:layout_marginBottom="20.0dip"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="20dp"
                         android:layout_weight="1.0"
-                        android:layout_marginStart="8.0dip"
-                        android:layout_marginEnd="16.0dip">
+                        android:orientation="vertical">
                         <TextView
-                            android:textAppearance="?textAppearanceTitleMedium"
-                            android:textSize="17.0sp"
-                            android:textColor="?colorOnSurface"
-                            android:ellipsize="marquee"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:ellipsize="marquee"
+                            android:singleLine="false"
                             android:text="@string/share_as_file"
-                            android:singleLine="false" />
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="17sp" />
                     </LinearLayout>
                     <LinearLayout
-                        android:gravity="center"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16.0dip"
-                        android:layout_marginBottom="16.0dip"
-                        android:layout_marginStart="8.0dip"
-                        android:layout_marginEnd="16.0dip">
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center">
                         <FrameLayout
-                            android:layout_width="28.0dip"
-                            android:layout_height="28.0dip">
+                            android:layout_width="28dp"
+                            android:layout_height="28dp">
 
                             <com.miku.ray.widget.DynamicShapeImageView
-                                app:shapeTarget="arrow"
-                                app:shapeBackgroundColor="?colorSurfaceContainerHighest"
-                                android:layout_width="28.0dip"
-                                android:layout_height="28.0dip"
-                                android:scaleType="centerCrop" />
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:scaleType="centerCrop"
+                                app:shapeBackgroundColor="?attr/colorSurfaceContainerHighest"
+                                app:shapeTarget="arrow" />
 
                             <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
                                 android:layout_gravity="center"
-                                android:layout_width="24.0dip"
-                                android:layout_height="24.0dip"
                                 android:src="@drawable/rmx_arrows_arrow_right_double_line"
-                                android:tint="?colorOnSurfaceVariant" />
+                                android:tint="?attr/colorOnSurfaceVariant" />
                         </FrameLayout>
                     </LinearLayout>
                 </LinearLayout>

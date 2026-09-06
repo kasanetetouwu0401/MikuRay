@@ -16,21 +16,21 @@ class FileChooserHelper(private val activity: AppCompatActivity) {
     private var documentCreateCallback: ((Uri?) -> Unit)? = null
 
     private val fileChooserLauncher: ActivityResultLauncher<Intent> =
-        activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            val uri = result.data?.data
-            if (result.resultCode == AppCompatActivity.RESULT_OK && uri != null) {
-                fileChooserCallback?.invoke(uri)
-            } else {
-                fileChooserCallback?.invoke(null)
-            }
-            fileChooserCallback = null
+    activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val uri = result.data?.data
+        if (result.resultCode == AppCompatActivity.RESULT_OK && uri != null) {
+            fileChooserCallback?.invoke(uri)
+        } else {
+            fileChooserCallback?.invoke(null)
         }
+        fileChooserCallback = null
+    }
 
     private val documentCreateLauncher: ActivityResultLauncher<String> =
-        activity.registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
-            documentCreateCallback?.invoke(uri)
-            documentCreateCallback = null
-        }
+    activity.registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
+        documentCreateCallback?.invoke(uri)
+        documentCreateCallback = null
+    }
 
     fun launch(
         mimeType: String = "*/*",

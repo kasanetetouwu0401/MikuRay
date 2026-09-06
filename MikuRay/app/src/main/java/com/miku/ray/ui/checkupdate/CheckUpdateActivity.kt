@@ -1,6 +1,5 @@
 package com.miku.ray.ui.checkupdate
 
-
 import com.miku.ray.remixicon.R as RemixR
 import com.miku.ray.ui.base.BaseActivity
 import android.os.Bundle
@@ -81,15 +80,15 @@ class CheckUpdateActivity : BaseActivity() {
 
     private fun showUpdateDialog(result: CheckUpdateResult) {
         AlertDialog.Builder(this)
-            .setTitle(getString(R.string.update_new_version_found, result.latestVersion))
-            .setIcon(RemixR.drawable.rmx_device_restart_line)
-            .setMessage(result.releaseNotes)
-            .setPositiveButton(R.string.update_now) { _, _ ->
-                result.downloadUrl?.let {
-                    Utils.openUri(this, it)
-                }
+        .setTitle(getString(R.string.update_new_version_found, result.latestVersion))
+        .setIcon(RemixR.drawable.rmx_device_restart_line)
+        .setMessage(result.releaseNotes)
+        .setPositiveButton(R.string.update_now) { _, _ ->
+            result.downloadUrl?.let {
+                Utils.openUri(this, it)
             }
-            .setNegativeButton(android.R.string.cancel, null)
-            .showBlur()
+        }
+        .setNegativeButton(android.R.string.cancel, null)
+        .showBlur()
     }
 }

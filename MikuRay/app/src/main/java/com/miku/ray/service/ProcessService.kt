@@ -23,8 +23,8 @@ class ProcessService {
             proBuilder.redirectErrorStream(true)
             watcherJob?.cancel()
             val startedProcess = proBuilder
-                .directory(context.filesDir)
-                .start()
+            .directory(context.filesDir)
+            .start()
             process = startedProcess
 
             watcherJob = scope.launch {

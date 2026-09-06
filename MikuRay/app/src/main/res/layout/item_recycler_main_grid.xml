@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/item_bg"
     android:layout_width="match_parent"
@@ -14,10 +15,10 @@
         android:clickable="true"
         android:focusable="true"
         android:layerType="none"
-        app:cardBackgroundColor="?colorCard"
+        app:cardBackgroundColor="?attr/colorCard"
         app:cardCornerRadius="16dp"
         app:cardElevation="0dp"
-        app:strokeColor="?colorOutlineVariant"
+        app:strokeColor="?attr/colorOutlineVariant"
         app:strokeWidth="0dp">
 
         <FrameLayout
@@ -28,10 +29,10 @@
                 android:id="@+id/info_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="14dp"
-                android:paddingTop="14dp"
+                android:paddingBottom="14dp"
                 android:paddingEnd="14dp"
-                android:paddingBottom="14dp">
+                android:paddingStart="14dp"
+                android:paddingTop="14dp">
 
                 <androidx.constraintlayout.widget.Guideline
                     android:id="@+id/guideline_overflow_start"
@@ -47,11 +48,11 @@
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:textAppearance="?attr/textAppearanceTitleSmall"
-                    android:textColor="?colorOnSurface"
+                    android:textColor="?attr/colorOnSurface"
                     app:layout_constrainedWidth="true"
+                    app:layout_constraintEnd_toStartOf="@id/iv_pin_indicator"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintHorizontal_chainStyle="packed"
-                    app:layout_constraintEnd_toStartOf="@id/iv_pin_indicator"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -67,7 +68,7 @@
                     app:layout_constraintStart_toEndOf="@id/tv_name"
                     app:layout_constraintTop_toTopOf="@id/tv_name"
                     app:srcCompat="@drawable/rmx_map_pushpin_line"
-                    app:tint="?colorPrimary" />
+                    app:tint="?attr/colorPrimary" />
 
                 <androidx.constraintlayout.widget.Barrier
                     android:id="@+id/barrier_header"
@@ -85,7 +86,7 @@
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:textColor="?colorOnSurfaceVariant"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/barrier_header" />
@@ -101,9 +102,9 @@
                     android:focusable="false"
                     android:maxLines="1"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?colorOnSecondaryContainer"
+                    android:textColor="?attr/colorOnSecondaryContainer"
                     android:textSize="10sp"
-                    app:chipBackgroundColor="?colorSecondaryContainer"
+                    app:chipBackgroundColor="?attr/colorSecondaryContainer"
                     app:chipEndPadding="6dp"
                     app:chipMinHeight="22dp"
                     app:chipMinTouchTargetSize="0dp"
@@ -127,9 +128,9 @@
                     android:focusable="false"
                     android:maxLines="1"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?colorOnTertiaryContainer"
+                    android:textColor="?attr/colorOnTertiaryContainer"
                     android:textSize="10sp"
-                    app:chipBackgroundColor="?colorTertiaryContainer"
+                    app:chipBackgroundColor="?attr/colorTertiaryContainer"
                     app:chipEndPadding="6dp"
                     app:chipMinHeight="22dp"
                     app:chipMinTouchTargetSize="0dp"
@@ -174,7 +175,7 @@
                         android:layout_marginStart="6dp"
                         android:maxLines="1"
                         android:textAppearance="?attr/textAppearanceLabelSmall"
-                        android:textColor="?colorOnSurfaceVariant"
+                        android:textColor="?attr/colorOnSurfaceVariant"
                         android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -196,7 +197,7 @@
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?colorOnSurfaceVariant"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -230,7 +231,7 @@
                         android:gravity="center_vertical"
                         android:maxLines="1"
                         android:textAppearance="?attr/textAppearanceLabelSmall"
-                        android:textColor="?colorOnSurfaceVariant"
+                        android:textColor="?attr/colorOnSurfaceVariant"
                         android:visibility="gone" />
 
                     <TextView
@@ -241,7 +242,7 @@
                         android:gravity="center_vertical"
                         android:maxLines="1"
                         android:textAppearance="?attr/textAppearanceLabelSmall"
-                        android:textColor="?colorOnSurfaceVariant"
+                        android:textColor="?attr/colorOnSurfaceVariant"
                         android:visibility="gone" />
                 </LinearLayout>
 
@@ -260,13 +261,13 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_gravity="top|end"
-                android:layout_marginTop="4dp"
                 android:layout_marginEnd="4dp"
+                android:layout_marginTop="4dp"
                 android:background="@drawable/bg_icon_button"
                 android:contentDescription="@string/searchpreference_more"
                 android:focusable="true"
                 app:srcCompat="@drawable/rmx_system_more_2_line"
-                app:tint="?colorOnSurfaceVariant" />
+                app:tint="?attr/colorOnSurfaceVariant" />
         </FrameLayout>
     </com.google.android.material.card.MaterialCardView>
 </LinearLayout>

@@ -116,13 +116,13 @@ class LogcatActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
         if (searchItem != null) {
             val searchView = searchItem.actionView as SearchView
             searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?): Boolean = false
+                    override fun onQueryTextSubmit(query: String?): Boolean = false
 
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    viewModel.filter(newText)
-                    refreshData()
-                    return false
-                }
+                    override fun onQueryTextChange(newText: String?): Boolean {
+                        viewModel.filter(newText)
+                        refreshData()
+                        return false
+                    }
             })
             searchView.setOnCloseListener {
                 viewModel.filter("")

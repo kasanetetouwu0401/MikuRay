@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.miku.ray.widget.UwuPreferenceCategory
@@ -9,11 +10,11 @@
 
         <androidx.preference.SwitchPreferenceCompat
             android:icon="@drawable/rmx_device_restart_line"
-            app:layout="@layout/uwu_top_switch"
-            app:widgetLayout="@layout/uwu_widget_material_switch"
             android:key="pref_is_booted"
             android:summary="@string/summary_pref_is_booted"
-            android:title="@string/title_pref_is_booted" />
+            android:title="@string/title_pref_is_booted"
+            app:layout="@layout/uwu_top_switch"
+            app:widgetLayout="@layout/uwu_widget_material_switch" />
 
         <Preference
             android:icon="@drawable/rmx_flashlight_line"
@@ -24,68 +25,68 @@
 
         <EditTextPreference
             android:icon="@drawable/rmx_external_link_line"
-            app:dialogIcon="@drawable/rmx_external_link_line"
-            app:layout="@layout/uwu_mid"
             android:key="pref_delay_test_url"
             android:summary="@string/summary_pref_delay_test_url"
-            android:title="@string/title_pref_delay_test_url" />
+            android:title="@string/title_pref_delay_test_url"
+            app:dialogIcon="@drawable/rmx_external_link_line"
+            app:layout="@layout/uwu_mid" />
 
         <EditTextPreference
             android:icon="@drawable/rmx_hashtag"
-            app:dialogIcon="@drawable/rmx_hashtag"
-            app:layout="@layout/uwu_mid"
             android:inputType="number"
             android:key="pref_real_ping_concurrency"
             android:summary="16"
-            android:title="@string/title_pref_real_ping_concurrency" />
+            android:title="@string/title_pref_real_ping_concurrency"
+            app:dialogIcon="@drawable/rmx_hashtag"
+            app:layout="@layout/uwu_mid" />
 
         <EditTextPreference
             android:icon="@drawable/rmx_hashtag"
-            app:dialogIcon="@drawable/rmx_hashtag"
-            app:layout="@layout/uwu_mid"
             android:inputType="numberDecimal"
             android:key="pref_country_code_timeout"
             android:summary="3.5"
-            android:title="@string/title_pref_country_code_timeout" />
+            android:title="@string/title_pref_country_code_timeout"
+            app:dialogIcon="@drawable/rmx_hashtag"
+            app:layout="@layout/uwu_mid" />
 
         <EditTextPreference
             android:icon="@drawable/rmx_external_link_line"
-            app:dialogIcon="@drawable/rmx_external_link_line"
-            app:layout="@layout/uwu_mid"
             android:key="pref_ip_api_url"
             android:summary="@string/summary_pref_ip_api_url"
-            android:title="@string/title_pref_ip_api_url" />
+            android:title="@string/title_pref_ip_api_url"
+            app:dialogIcon="@drawable/rmx_external_link_line"
+            app:layout="@layout/uwu_mid" />
 
         <ListPreference
-            android:icon="@drawable/rmx_git_branch_line"
-            app:dialogIcon="@drawable/rmx_git_branch_line"
-            app:layout="@layout/uwu_mid"
             android:defaultValue="AsIs"
             android:entries="@array/routing_domain_strategy"
             android:entryValues="@array/routing_domain_strategy"
+            android:icon="@drawable/rmx_git_branch_line"
             android:key="pref_routing_domain_strategy"
             android:summary="%s"
-            android:title="@string/routing_settings_domain_strategy" />
+            android:title="@string/routing_settings_domain_strategy"
+            app:dialogIcon="@drawable/rmx_git_branch_line"
+            app:layout="@layout/uwu_mid" />
 
         <ListPreference
-            android:icon="@drawable/rmx_settings_line"
-            app:dialogIcon="@drawable/rmx_settings_line"
-            app:layout="@layout/uwu_mid"
             android:defaultValue="VPN"
             android:entries="@array/mode_entries"
             android:entryValues="@array/mode_value"
+            android:icon="@drawable/rmx_settings_line"
             android:key="pref_mode"
             android:summary="%s"
-            android:title="@string/title_mode" />
+            android:title="@string/title_mode"
+            app:dialogIcon="@drawable/rmx_settings_line"
+            app:layout="@layout/uwu_mid" />
 
         <androidx.preference.SwitchPreferenceCompat
-            android:icon="@drawable/rmx_eye_off_line"
-            app:layout="@layout/uwu_bot_switch"
-            app:widgetLayout="@layout/uwu_widget_material_switch"
             android:defaultValue="false"
+            android:icon="@drawable/rmx_eye_off_line"
             android:key="hide_from_recent_apps"
             android:summary="@string/summary_pref_hide_from_recent_apps"
-            android:title="@string/title_pref_hide_from_recent_apps" />
+            android:title="@string/title_pref_hide_from_recent_apps"
+            app:layout="@layout/uwu_bot_switch"
+            app:widgetLayout="@layout/uwu_widget_material_switch" />
 
     </com.miku.ray.widget.UwuPreferenceCategory>
 

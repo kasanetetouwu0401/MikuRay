@@ -20,22 +20,22 @@ abstract class ShaderHelper {
     protected var viewHeight: Int = 0
 
     var borderColor: Int = Color.BLACK
-        set(value) {
-            field = value
-            borderPaint.color = value
-        }
+    set(value) {
+        field = value
+        borderPaint.color = value
+    }
 
     var borderWidth: Int = 0
-        set(value) {
-            field = value
-            borderPaint.strokeWidth = value.toFloat()
-        }
+    set(value) {
+        field = value
+        borderPaint.strokeWidth = value.toFloat()
+    }
 
     var borderAlpha: Float = 1f
-        set(value) {
-            field = value
-            borderPaint.alpha = (value * ALPHA_MAX).toInt()
-        }
+    set(value) {
+        field = value
+        borderPaint.alpha = (value * ALPHA_MAX).toInt()
+    }
 
     var isSquare: Boolean = false
 

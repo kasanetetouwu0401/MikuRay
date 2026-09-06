@@ -96,7 +96,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun resyncState() {
-        // Re-query service state on resume so status_dot / test UI recover after process death or late start.
+
         MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
@@ -245,9 +245,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val profile = MmkvManager.decodeServerConfig(guid) ?: return@mapNotNull null
             if (kw.isEmpty()) return@mapNotNull ServersCache(guid, profile)
             val matches = profile.remarks.matchesPattern(searchRegex, kw)
-                || profile.description.orEmpty().matchesPattern(searchRegex, kw)
-                || profile.server.orEmpty().matchesPattern(searchRegex, kw)
-                || profile.configType.name.matchesPattern(searchRegex, kw)
+            || profile.description.orEmpty().matchesPattern(searchRegex, kw)
+            || profile.server.orEmpty().matchesPattern(searchRegex, kw)
+            || profile.configType.name.matchesPattern(searchRegex, kw)
             if (matches) ServersCache(guid, profile) else null
         }.toMutableList()
 
@@ -255,8 +255,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         when (MmkvManager.decodeSettingsInt("${AppConfig.PREF_SERVER_ORDER}_$subId", 0)) {
             1 -> result.sortWith(compareBy { it.profile.remarks.lowercase() })
             2 -> result.sortWith(compareBy {
-                val delay = MmkvManager.decodeServerAffiliationInfo(it.guid)?.testDelayMillis ?: 0L
-                if (delay <= 0L) Long.MAX_VALUE else delay
+                    val delay = MmkvManager.decodeServerAffiliationInfo(it.guid)?.testDelayMillis ?: 0L
+                    if (delay <= 0L) Long.MAX_VALUE else delay
             })
         }
         val pinnedServers = MmkvManager.decodePinnedServers()
@@ -285,11 +285,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun exportAllServer(): Int {
         val serverListCopy =
-            if (subscriptionId.isEmpty() && keywordFilter.isEmpty()) {
-                serverList
-            } else {
-                serversCache.map { it.guid }.toList()
-            }
+        if (subscriptionId.isEmpty() && keywordFilter.isEmpty()) {
+            serverList
+        } else {
+            serversCache.map { it.guid }.toList()
+        }
 
         val ret = AngConfigManager.shareNonCustomConfigsToClipboard(
             getApplication<AngApplication>(),
@@ -439,7 +439,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun getPosition(guid: String): Int {
         serversCache.forEachIndexed { index, it ->
             if (it.guid == guid)
-                return index
+            return index
         }
         return -1
     }
@@ -477,16 +477,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun removeAllServer(): Int {
         val count =
-            if (subscriptionId.isEmpty() && keywordFilter.isEmpty()) {
-                MmkvManager.removeAllServer()
-            } else {
-                val pinnedServers = MmkvManager.decodePinnedServers()
-                val serversCopy = serversCache.toList().filterNot { pinnedServers.contains(it.guid) }
-                for (item in serversCopy) {
-                    MmkvManager.removeServer(item.guid)
-                }
-                serversCopy.count()
+        if (subscriptionId.isEmpty() && keywordFilter.isEmpty()) {
+            MmkvManager.removeAllServer()
+        } else {
+            val pinnedServers = MmkvManager.decodePinnedServers()
+            val serversCopy = serversCache.toList().filterNot { pinnedServers.contains(it.guid) }
+            for (item in serversCopy) {
+                MmkvManager.removeServer(item.guid)
             }
+            serversCopy.count()
+        }
         return count
     }
 
@@ -530,7 +530,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         MmkvManager.encodeServerList(sortedServerList, subId)
     }
 
-
     fun initAssets(assets: AssetManager) {
         viewModelScope.launch(Dispatchers.Default) {
             SettingsManager.initAssets(getApplication<AngApplication>(), assets)
@@ -546,7 +545,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         refreshAllGroupCaches()
         reloadServerList()
     }
-    
+
     fun beginServerRestart(guid: String): Boolean {
         if (guid == MmkvManager.getSelectServer() || pendingServerRestartGuid != null) return false
 
@@ -669,7 +668,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 AppConfig.MSG_STATE_RUNNING -> {
                     if (!isRestarting) {
                         isRunning.value = true
-                        // Force list rebind so v_status_dot and test metadata update immediately
+
                         updateListAction.postValue(-1)
                     }
                 }
@@ -739,9 +738,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_SUCCESS -> {
-                    // Prefer JSON (cross-process safe); fall back to Serializable for older builds
+
                     val result = parseExtra(intent, RealPingResult::class.java)
-                        ?: intent.serializable<RealPingResult>("content")
+                    ?: intent.serializable<RealPingResult>("content")
                     if (result != null) {
                         if (acceptsTestEvent(result.testId)) {
                             updateListAction.postValue(getPosition(result.guid))
@@ -758,7 +757,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         }
                     } else {
                         val content = intent.getStringExtra("content")
-                        // content may be a JSON string we failed to parse, or a bare guid
+
                         val guid = content?.takeIf { !it.trimStart().startsWith("{") }.orEmpty()
                         updateListAction.postValue(getPosition(guid))
                     }
@@ -766,7 +765,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 AppConfig.MSG_MEASURE_CONFIG_NOTIFY -> {
                     val progress = parseExtra(intent, RealPingProgress::class.java)
-                        ?: intent.serializable<RealPingProgress>("content")
+                    ?: intent.serializable<RealPingProgress>("content")
                     if (progress != null) {
                         if (acceptsTestEvent(progress.testId)) {
                             activeTestCompleted = maxOf(activeTestCompleted, progress.completed)
@@ -782,14 +781,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         }
                     } else {
                         val info = parseExtra(intent, TestProgressInfo::class.java)
-                            ?: intent.serializable<TestProgressInfo>("content")
+                        ?: intent.serializable<TestProgressInfo>("content")
                         if (info != null) testProgressAction.postValue(info)
                     }
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_FINISH -> {
                     val summary = parseExtra(intent, RealPingSummary::class.java)
-                        ?: intent.serializable<RealPingSummary>("content")
+                    ?: intent.serializable<RealPingSummary>("content")
                     if (summary != null) {
                         if (!acceptsTestEvent(summary.testId)) return
                         activeTestId = null
@@ -808,9 +807,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 AppConfig.MSG_COUNTRY_CODE_NOTIFY -> {
-                    // JSON first (sent from :daemon process), then Serializable fallback
+
                     val info = parseExtra(intent, TestProgressInfo::class.java)
-                        ?: intent.serializable<TestProgressInfo>("content")
+                    ?: intent.serializable<TestProgressInfo>("content")
                     if (info != null) {
                         countryCodeProgressAction.postValue(info)
                     }
@@ -838,14 +837,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun acceptsTestEvent(testId: String): Boolean =
-        testId.isEmpty() || testId == activeTestId
+    testId.isEmpty() || testId == activeTestId
 
-    /**
-     * Parse a cross-process Intent extra that may be a JSON string (preferred)
-     * or a legacy Serializable object. Services in :tasks / :daemon send JSON
-     * because Kotlin data-class Serializable is unreliable across process boundaries
-     * and was leaving the URL/country-code progress dialog stuck.
-     */
     private fun <T> parseExtra(intent: Intent, cls: Class<T>): T? {
         val raw = intent.getStringExtra("content") ?: return null
         val trimmed = raw.trim()

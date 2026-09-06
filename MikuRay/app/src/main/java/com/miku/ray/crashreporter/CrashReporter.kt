@@ -11,7 +11,6 @@ import com.miku.ray.crashreporter.utils.CrashReporterExceptionHandler
 import com.miku.ray.crashreporter.utils.CrashUtil
 import java.io.File
 
-
 object CrashReporter {
     lateinit var context: Context
     var config: CrashReporterConfiguration = CrashReporterConfiguration()
@@ -22,30 +21,27 @@ object CrashReporter {
         setUpExceptionHandler()
     }
 
-
     private fun setUpExceptionHandler() {
         Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler(CrashReporterExceptionHandler())
     }
 
-    //LOG Exception APIs
     fun logException(exception: Exception) {
         CrashUtil.logException(exception)
     }
 
     val crashLogFilesPath: String
-        get() {
-            return if (TextUtils.isEmpty(config.crashReportStoragePath)) {
-                val defaultPath =
-                    (context.getExternalFilesDir(null)!!.absolutePath + File.separator + Constants.CRASH_REPORT_DIR)
-                val file = File(defaultPath)
-                file.mkdirs()
-                defaultPath
-            } else
-                config.crashReportStoragePath
+    get() {
+        return if (TextUtils.isEmpty(config.crashReportStoragePath)) {
+            val defaultPath =
+            (context.getExternalFilesDir(null)!!.absolutePath + File.separator + Constants.CRASH_REPORT_DIR)
+            val file = File(defaultPath)
+            file.mkdirs()
+            defaultPath
+        } else
+        config.crashReportStoragePath
 
-        }
-
+    }
 
     private fun getBodyContent(): String {
         val sb = StringBuilder()
@@ -87,8 +83,7 @@ object CrashReporter {
             emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             activity.startActivity(emailIntent)
         } catch (e: Exception) {
-            // No email client available (or another failure) - fall back to a generic
-            // share sheet instead of letting an unhandled exception crash the app.
+
             e.printStackTrace()
             try {
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
@@ -98,7 +93,7 @@ object CrashReporter {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 activity.startActivity(Intent.createChooser(shareIntent, subject).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 })
             } catch (e2: Exception) {
                 e2.printStackTrace()

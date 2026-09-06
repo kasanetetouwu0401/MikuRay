@@ -1,6 +1,5 @@
 package com.miku.ray.ui.dialog
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.app.Dialog
 import android.graphics.Color
@@ -51,22 +50,22 @@ class CustomColorPickerDialog : DialogFragment() {
         }
 
         colorPickerView.setColorListener(ColorEnvelopeListener { envelope, _ ->
-            selectedColor = envelope.color
+                selectedColor = envelope.color
         })
 
         return MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.pref_custom_color_title)
-            .setIcon(RemixR.drawable.rmx_palette_line)
-            .setView(view)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                activity?.let { ThemeManager.saveCustomColor(it, selectedColor) }
-                onAppliedCallback()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .setNeutralButton(R.string.pref_custom_color_reset) { _, _ ->
-                activity?.let { ThemeManager.clearCustomColor(it) }
-                onAppliedCallback()
-            }
-            .create()
+        .setTitle(R.string.pref_custom_color_title)
+        .setIcon(RemixR.drawable.rmx_palette_line)
+        .setView(view)
+        .setPositiveButton(android.R.string.ok) { _, _ ->
+            activity?.let { ThemeManager.saveCustomColor(it, selectedColor) }
+            onAppliedCallback()
+        }
+        .setNegativeButton(android.R.string.cancel, null)
+        .setNeutralButton(R.string.pref_custom_color_reset) { _, _ ->
+            activity?.let { ThemeManager.clearCustomColor(it) }
+            onAppliedCallback()
+        }
+        .create()
     }
 }

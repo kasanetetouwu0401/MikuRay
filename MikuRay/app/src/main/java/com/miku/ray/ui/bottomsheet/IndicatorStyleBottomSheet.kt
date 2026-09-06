@@ -30,7 +30,7 @@ class IndicatorStyleBottomSheet(
         ) ?: IndicatorStyle.STYLE_0.name
 
         val selectedStyle = runCatching { IndicatorStyle.valueOf(currentStyleName) }
-            .getOrDefault(IndicatorStyle.STYLE_0)
+        .getOrDefault(IndicatorStyle.STYLE_0)
 
         recycler.layoutManager = LinearLayoutManager(context)
 

@@ -16,10 +16,6 @@ import com.miku.ray.widget.TrafficBarChartView
 
 private const val HISTORY_DAYS = 7
 
-/**
- * Shows the total traffic detail dialog. [onCleared] is invoked after the user confirms
- * clearing the data, so callers can refresh whatever traffic chip UI they own.
- */
 fun showTotalTrafficDetailDialog(context: Context, onCleared: () -> Unit = {}) {
     val hasData = MmkvManager.getTotalTrafficDetail() != null
     val (uploadBytes, downloadBytes) = MmkvManager.getTotalTrafficDetail() ?: (0L to 0L)
@@ -44,12 +40,12 @@ fun showTotalTrafficDetailDialog(context: Context, onCleared: () -> Unit = {}) {
     )
 
     val dialog = MaterialAlertDialogBuilder(context)
-        .setView(binding.root)
-        .setPositiveButton(android.R.string.ok, null)
-        .setNegativeButton(R.string.action_clear_total_traffic_button) { _, _ ->
-            showClearTotalTrafficConfirmDialog(context, onCleared)
-        }
-        .create()
+    .setView(binding.root)
+    .setPositiveButton(android.R.string.ok, null)
+    .setNegativeButton(R.string.action_clear_total_traffic_button) { _, _ ->
+        showClearTotalTrafficConfirmDialog(context, onCleared)
+    }
+    .create()
     WindowBlurUtils.applyWindowBlur(dialog.window)
 
     dialog.setOnShowListener {
@@ -60,20 +56,20 @@ fun showTotalTrafficDetailDialog(context: Context, onCleared: () -> Unit = {}) {
 
 private fun showClearTotalTrafficConfirmDialog(context: Context, onCleared: () -> Unit) {
     MaterialAlertDialogBuilder(context)
-        .setTitle(R.string.pref_action_clear_total_traffic_title)
-        .setIcon(RemixR.drawable.rmx_delete_bin_line)
-        .setMessage(R.string.confirm_clear_total_traffic)
-        .setPositiveButton(android.R.string.ok) { _, _ ->
-            MmkvManager.clearTotalTrafficDataAndHistory()
-            context.sendBroadcast(
-                Intent(AppConfig.BROADCAST_ACTION_TRAFFIC_WIDGET_REFRESH).setPackage(context.packageName)
-            )
-            onCleared()
-            context.snackbarSuccess(
-                context.getString(R.string.toast_total_traffic_cleared),
-                title = context.getString(R.string.title_alerter_success)
-            )
-        }
-        .setNegativeButton(android.R.string.cancel, null)
-        .showBlur()
+    .setTitle(R.string.pref_action_clear_total_traffic_title)
+    .setIcon(RemixR.drawable.rmx_delete_bin_line)
+    .setMessage(R.string.confirm_clear_total_traffic)
+    .setPositiveButton(android.R.string.ok) { _, _ ->
+        MmkvManager.clearTotalTrafficDataAndHistory()
+        context.sendBroadcast(
+            Intent(AppConfig.BROADCAST_ACTION_TRAFFIC_WIDGET_REFRESH).setPackage(context.packageName)
+        )
+        onCleared()
+        context.snackbarSuccess(
+            context.getString(R.string.toast_total_traffic_cleared),
+            title = context.getString(R.string.title_alerter_success)
+        )
+    }
+    .setNegativeButton(android.R.string.cancel, null)
+    .showBlur()
 }

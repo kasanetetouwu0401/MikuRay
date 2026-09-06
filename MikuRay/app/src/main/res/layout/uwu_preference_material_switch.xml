@@ -1,94 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    android:gravity="center_vertical"
-    android:clipToPadding="false"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:baselineAligned="false"
-    android:minHeight="?android:listPreferredItemHeightSmall"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:aapt="http://schemas.android.com/aapt">
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:baselineAligned="false"
+    android:clipToPadding="false"
+    android:gravity="center_vertical"
+    android:minHeight="?android:attr/listPreferredItemHeightSmall">
     <LinearLayout
-        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16.0dip"
-        android:layout_marginBottom="16.0dip"
-        android:layout_marginStart="8.0dip"
-        android:layout_marginEnd="8.0dip">
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center">
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8.0dip">
+            android:layout_marginStart="8dp">
             <com.miku.ray.widget.DynamicShapeImageView
-                app:shapeBackgroundColor="?colorPrimary"
-                android:layout_width="45.0dip"
-                android:layout_height="45.0dip"
-                android:scaleType="centerCrop" />
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:scaleType="centerCrop"
+                app:shapeBackgroundColor="?attr/colorPrimary" />
             <androidx.preference.internal.PreferenceImageView
-                android:layout_gravity="center"
                 android:id="@android:id/icon"
-                android:layout_width="25.0dip"
-                android:layout_height="25.0dip"
-                android:tint="?colorOnPrimary" />
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:tint="?attr/colorOnPrimary" />
       </FrameLayout>
     </LinearLayout>
     <RelativeLayout
-        android:paddingTop="16.0dip"
-        android:paddingBottom="16.0dip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_weight="1.0"
-        android:layout_marginStart="8.0dip"
-        android:layout_marginEnd="8.0dip">
+        android:paddingBottom="16dp"
+        android:paddingTop="16dp">
         <TextView
-            android:textAppearance="?textAppearanceTitleMedium"
-            android:textSize="17.0sp"
-            android:ellipsize="marquee"
             android:id="@android:id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:singleLine="false">
+            android:ellipsize="marquee"
+            android:singleLine="false"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textSize="17sp">
             <aapt:attr name="android:textColor">
                 <selector>
-                    <item android:state_enabled="false" android:color="?attr/colorOnSurface" android:alpha="0.38" />
+                    <item android:alpha="0.38" android:color="?attr/colorOnSurface" android:state_enabled="false" />
                     <item android:color="?attr/colorOnSurface" />
                 </selector>
             </aapt:attr>
         </TextView>
         <TextView
-            android:textAppearance="?textAppearanceTitleSmall"
-            android:textSize="14.0sp"
-            android:ellipsize="marquee"
             android:id="@android:id/summary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:singleLine="false"
+            android:layout_alignStart="@android:id/title"
             android:layout_below="@android:id/title"
-            android:layout_alignStart="@android:id/title">
+            android:ellipsize="marquee"
+            android:singleLine="false"
+            android:textAppearance="?attr/textAppearanceTitleSmall"
+            android:textSize="14sp">
             <aapt:attr name="android:textColor">
                 <selector>
-                    <item android:state_enabled="false" android:color="?attr/colorOnSurfaceVariant" android:alpha="0.38" />
+                    <item android:alpha="0.38" android:color="?attr/colorOnSurfaceVariant" android:state_enabled="false" />
                     <item android:color="?attr/colorOnSurfaceVariant" />
                 </selector>
             </aapt:attr>
         </TextView>
     </RelativeLayout>
     <LinearLayout
-        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16.0dip"
-        android:layout_marginBottom="16.0dip"
-        android:layout_marginStart="8.0dip"
-        android:layout_marginEnd="8.0dip">
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center">
         <LinearLayout
-            android:gravity="center"
-            android:orientation="vertical"
             android:id="@android:id/widget_frame"
             android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:paddingEnd="8.0dip" />
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingEnd="8dp" />
     </LinearLayout>
 </LinearLayout>

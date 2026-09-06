@@ -31,8 +31,8 @@ class ServerGroupActivity : BaseActivity() {
     private val editGuid by lazy { intent.getStringExtra("guid").orEmpty() }
     private val isRunning by lazy {
         intent.getBooleanExtra("isRunning", false)
-                && editGuid.isNotEmpty()
-                && editGuid == MmkvManager.getSelectServer()
+        && editGuid.isNotEmpty()
+        && editGuid == MmkvManager.getSelectServer()
     }
     private val subscriptionId by lazy {
         intent.getStringExtra("subscriptionId")
@@ -47,7 +47,7 @@ class ServerGroupActivity : BaseActivity() {
 
     private val fallbackSuggestions: List<String> by lazy {
         (AppConfig.BUILTIN_OUTBOUND_TAGS + SettingsManager.getProfileRemarks(
-            excludeConfigTypes = setOf(EConfigType.CUSTOM, EConfigType.POLICYGROUP)
+                excludeConfigTypes = setOf(EConfigType.CUSTOM, EConfigType.POLICYGROUP)
         )).filter { it != AppConfig.TAG_PROXY }
     }
 
@@ -57,7 +57,6 @@ class ServerGroupActivity : BaseActivity() {
         setContentView(binding.root)
 
         binding.serverScrollContent.applyEdgeToEdgeListInsets()
-
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setupToolbar(toolbar, showHomeAsUp = true, title = EConfigType.POLICYGROUP.toString(), subtitle = getString(R.string.subtitle_server_config))
@@ -88,7 +87,7 @@ class ServerGroupActivity : BaseActivity() {
         val supportsObservatory = BalancerStrategyType.from(typePos.toString()).supportsObservatory
         binding.layoutPolicyGroupTestOutbounds.visibility = if (supportsObservatory) android.view.View.VISIBLE else android.view.View.GONE
         binding.layoutPolicyGroupFallback.visibility =
-            if (supportsObservatory && binding.chkPolicyGroupTestOutbounds.isChecked) android.view.View.VISIBLE else android.view.View.GONE
+        if (supportsObservatory && binding.chkPolicyGroupTestOutbounds.isChecked) android.view.View.VISIBLE else android.view.View.GONE
     }
 
     private fun bindingServer(config: ProfileItem): Boolean {
@@ -107,7 +106,7 @@ class ServerGroupActivity : BaseActivity() {
 
         val supportsObservatory = BalancerStrategyType.from(config.policyGroupType).supportsObservatory
         binding.chkPolicyGroupTestOutbounds.isChecked =
-            config.policyGroupTestOutbounds != false || !supportsObservatory
+        config.policyGroupTestOutbounds != false || !supportsObservatory
         binding.spPolicyGroupFallback.setText(config.policyGroupFallbackTag.orEmpty(), false)
         updateFallbackVisibility()
 

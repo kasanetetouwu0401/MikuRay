@@ -31,7 +31,7 @@ abstract class BaseBottomSheetFragment : BottomSheetDialogFragment() {
             ParticlesController.applyTo(particlesView)
         }
     }
-    
+
     private fun computeDimColor(context: android.content.Context): Int {
         val dimPercent = MmkvManager.decodeSettingsInt(
             AppConfig.PREF_SHEET_BANNER_DIM,
@@ -65,17 +65,17 @@ abstract class BaseBottomSheetFragment : BottomSheetDialogFragment() {
                 val isGif = uriString.lowercase().endsWith(".gif")
                 if (isGif) {
                     Glide.with(this)
-                        .asGif()
-                        .load(Uri.parse(uriString))
-                        .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .error(R.drawable.uwu_banner_sheet)
-                        .into(bannerImageView)
+                    .asGif()
+                    .load(Uri.parse(uriString))
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
+                    .error(R.drawable.uwu_banner_sheet)
+                    .into(bannerImageView)
                 } else {
                     Glide.with(this)
-                        .load(Uri.parse(uriString))
-                        .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .error(R.drawable.uwu_banner_sheet)
-                        .into(bannerImageView)
+                    .load(Uri.parse(uriString))
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
+                    .error(R.drawable.uwu_banner_sheet)
+                    .into(bannerImageView)
                 }
             } else {
                 Glide.with(this).clear(bannerImageView)

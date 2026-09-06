@@ -49,7 +49,7 @@ object CustomFontManager {
     fun saveFontFile(context: Context, uri: Uri, displayName: String?): File? {
         return try {
             val ext = displayName?.substringAfterLast('.', "")?.lowercase()
-                ?.takeIf { it in SUPPORTED_EXTENSIONS } ?: "ttf"
+            ?.takeIf { it in SUPPORTED_EXTENSIONS } ?: "ttf"
 
             val dir = File(context.filesDir, FONT_DIR).apply { mkdirs() }
             dir.listFiles()?.forEach { it.delete() }
@@ -124,7 +124,7 @@ object CustomFontManager {
     }
 
     fun getFontDisplayName(): String? =
-        MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT_CUSTOM_NAME)?.takeIf { it.isNotEmpty() }
+    MmkvManager.decodeSettingsString(AppConfig.PREF_APP_FONT_CUSTOM_NAME)?.takeIf { it.isNotEmpty() }
 
     fun getTypeface(context: Context): Typeface? {
         val file = getFontFile(context) ?: return null
@@ -156,10 +156,6 @@ object CustomFontManager {
         replaceSystemFontMapEntries(typeface)
     }
 
-    /**
-     * Applies the selected file font after inflation as a safety net for views that
-     * specify a concrete TextAppearance or are inflated by a third-party widget.
-     */
     fun applyToViewTree(context: Context, root: View) {
         getTypeface(context)?.let { applyToViewTree(it, root) }
     }

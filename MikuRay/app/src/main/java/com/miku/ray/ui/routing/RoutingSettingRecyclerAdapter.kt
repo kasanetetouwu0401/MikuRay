@@ -17,7 +17,7 @@ class RoutingSettingRecyclerAdapter(
     private val viewModel: RoutingSettingsViewModel,
     private val adapterListener: BaseAdapterListener?
 ) : RecyclerView.Adapter<RoutingSettingRecyclerAdapter.MainViewHolder>(),
-    ItemTouchHelperAdapter {
+ItemTouchHelperAdapter {
 
     override fun getItemCount() = viewModel.getAll().size
 
@@ -60,7 +60,7 @@ class RoutingSettingRecyclerAdapter(
     }
 
     class MainViewHolder(val itemRoutingSettingBinding: ItemRecyclerRoutingSettingBinding) :
-        BaseViewHolder(itemRoutingSettingBinding.root), ItemTouchHelperViewHolder {
+    BaseViewHolder(itemRoutingSettingBinding.root), ItemTouchHelperViewHolder {
 
         override fun onItemSelected() {
             val context = itemView.context

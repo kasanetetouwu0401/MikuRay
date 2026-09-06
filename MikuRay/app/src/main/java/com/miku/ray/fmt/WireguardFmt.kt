@@ -85,7 +85,6 @@ object WireguardFmt : FmtBase() {
         return config
     }
 
-
     fun toUri(config: ProfileItem): String {
         val dicQuery = HashMap<String, String>()
 

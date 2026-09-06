@@ -66,37 +66,37 @@ class ExpandableView @JvmOverloads constructor(
     var duration: Int = DEFAULT_DURATION
 
     var parallax: Float = 1f
-        set(value) {
-            field = min(1f, max(0f, value))
-        }
+    set(value) {
+        field = min(1f, max(0f, value))
+    }
 
     var expansion: Float = 0f
-        set(value) {
-            if (field == value) return
+    set(value) {
+        if (field == value) return
 
-            val delta = value - field
-            when {
-                value == 0f -> state = State.COLLAPSED
-                value == 1f -> state = State.EXPANDED
-                delta < 0 -> state = State.COLLAPSING
-                delta > 0 -> state = State.EXPANDING
-            }
-
-            visibility = if (state == State.COLLAPSED) View.GONE else View.VISIBLE
-            field = value
-            requestLayout()
-
-            listener?.onExpansionUpdate(value, state)
+        val delta = value - field
+        when {
+            value == 0f -> state = State.COLLAPSED
+            value == 1f -> state = State.EXPANDED
+            delta < 0 -> state = State.COLLAPSING
+            delta > 0 -> state = State.EXPANDING
         }
+
+        visibility = if (state == State.COLLAPSED) View.GONE else View.VISIBLE
+        field = value
+        requestLayout()
+
+        listener?.onExpansionUpdate(value, state)
+    }
 
     var orientation: Int = VERTICAL
-        set(value) {
-            require(value in 0..1) { "Orientation must be either 0 (horizontal) or 1 (vertical)" }
-            field = value
-        }
+    set(value) {
+        require(value in 0..1) { "Orientation must be either 0 (horizontal) or 1 (vertical)" }
+        field = value
+    }
 
     var state: Int = State.COLLAPSED
-        private set
+    private set
 
     var interpolator: Interpolator = FastOutSlowInInterpolator(ff)
 
@@ -169,7 +169,7 @@ class ExpandableView @JvmOverloads constructor(
     }
 
     val isExpanded: Boolean
-        get() = state == State.EXPANDING || state == State.EXPANDED
+    get() = state == State.EXPANDING || state == State.EXPANDED
 
     fun toggle(animate: Boolean = true) {
         if (isExpanded) {

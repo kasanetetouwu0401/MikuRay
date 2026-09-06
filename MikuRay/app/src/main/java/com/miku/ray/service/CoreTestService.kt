@@ -73,12 +73,10 @@ class CoreTestService : Service() {
         activeMessage = null
         NotificationHelper.stopForeground(this)
         super.onDestroy()
-        // Xray owns process-wide dialer state. Do not reuse this disposable process.
-        // Keep the process alive briefly so the terminal FINISH broadcast can be
-        // delivered to MainViewModel before the disposable process is killed.
+
         Handler(Looper.getMainLooper()).postDelayed({
-            disposeProcess()
-        }, FINISH_BROADCAST_GRACE_MS)
+                disposeProcess()
+            }, FINISH_BROADCAST_GRACE_MS)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -109,8 +107,7 @@ class CoreTestService : Service() {
 
     private fun handleMeasureStart(message: TestServiceMessage, startId: Int): Int {
         if (batchStarted) {
-            // Never let two worker pools multiply the configured concurrency.
-            // The newest request is redelivered after this disposable process exits.
+
             synchronized(terminalLock) {
                 suppressWorkerEvents = true
                 activeWorker?.cancel()
@@ -193,7 +190,7 @@ class CoreTestService : Service() {
                     title = getString(if (message.onlyTcp) R.string.title_ping_all_server else R.string.title_real_ping_all_server),
                     content = getString(progressTextRes, progressText),
                 )
-                // JSON string is reliable across the :tasks process boundary
+
                 MessageUtil.sendMsg2UI(
                     this,
                     AppConfig.MSG_MEASURE_CONFIG_NOTIFY,
@@ -220,9 +217,9 @@ class CoreTestService : Service() {
 
     private fun finishBatch(message: TestServiceMessage, event: RealPingEvent.Finish) {
         val autoRemove = message.subscriptionId.isNotEmpty() &&
-                MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_REMOVE_INVALID_AFTER_TEST, false)
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_REMOVE_INVALID_AFTER_TEST, false)
         val autoSort = message.subscriptionId.isNotEmpty() &&
-                MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_SORT_AFTER_TEST, false)
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_SORT_AFTER_TEST, false)
         val listBefore = if (autoRemove || autoSort) {
             MmkvManager.decodeServerList(message.subscriptionId)
         } else {
@@ -235,7 +232,7 @@ class CoreTestService : Service() {
             AngConfigManager.sortByTestResultsForSub(message.subscriptionId)
         }
         val listChanged = (autoRemove || autoSort) &&
-                listBefore != MmkvManager.decodeServerList(message.subscriptionId)
+        listBefore != MmkvManager.decodeServerList(message.subscriptionId)
 
         sendSummary(
             RealPingSummary(

@@ -9,15 +9,6 @@ internal data class StoredProfileReference(
 
 internal object OrphanProfileCleaner {
 
-    /**
-     * Finds profile payloads that are provably unreachable from the raw group indexes.
-     *
-     * A null subscription ID means that the profile payload could not be decoded and is
-     * preserved. A null server set means that a group index could not be decoded, in which
-     * case the entire classification returns null and no cleanup should run.
-     * Subscription metadata is deliberately not an input because SUB and SUB_IDS can be
-     * missing while the raw SUB_SERVERS_* indexes remain intact.
-     */
     fun findOrphans(
         profiles: Collection<StoredProfileReference>,
         indexedServersBySubscription: Map<String, Set<String>?>,
@@ -32,9 +23,9 @@ internal object OrphanProfileCleaner {
         }
 
         val indexedServers = indexedServersBySubscription.values
-            .filterNotNull()
-            .flatten()
-            .toSet()
+        .filterNotNull()
+        .flatten()
+        .toSet()
 
         return profiles.mapNotNullTo(linkedSetOf()) { profile ->
             if (profile.guid == selectedServer || profile.guid in indexedServers) {

@@ -147,7 +147,7 @@ class CoreVpnService : VpnService(), ServiceControl {
                 withContext(Dispatchers.Main) {
                     unlockStart()
                     CoreServiceManager.reportStartFailure(this@CoreVpnService, setupFailure)
-                    // Avoid an infinite START_STICKY retry loop after VPN setup failure.
+
                     stopSelf()
                 }
             } else {
@@ -322,9 +322,7 @@ class CoreVpnService : VpnService(), ServiceControl {
     }
 
     private fun runTun2socks() {
-        // A watchdog restart can call this while the previous wrapper still owns
-        // the native singleton. Stop it first so two watchdogs cannot race and
-        // the new start cannot inherit stale native state.
+
         tun2SocksService?.stopTun2Socks()
         if (SettingsManager.isUsingHevTun()) {
             tun2SocksService = TProxyService(

@@ -73,13 +73,9 @@ data class ProfileItem(
 
     var browserDialerMode: String? = null,
 
-    // Only populated for EConfigType.CUSTOM: the underlying outbound protocol
-    // (vmess/vless/trojan/shadowsocks/socks/...) extracted from the raw JSON,
-    // used for protocol filtering on subscription import since configType
-    // itself is always CUSTOM for these configs.
     var customProtocol: String? = null,
 
-    ) {
+) {
     companion object {
         fun create(configType: EConfigType): ProfileItem {
             return ProfileItem(configType = configType)
@@ -98,43 +94,43 @@ data class ProfileItem(
         val obj = other as ProfileItem
 
         return (this.server == obj.server
-                && this.serverPort == obj.serverPort
-                && this.password == obj.password
-                && this.method == obj.method
-                && this.flow == obj.flow
-                && this.username == obj.username
+            && this.serverPort == obj.serverPort
+            && this.password == obj.password
+            && this.method == obj.method
+            && this.flow == obj.flow
+            && this.username == obj.username
 
-                && this.network == obj.network
-                && this.headerType == obj.headerType
-                && this.host == obj.host
-                && this.path == obj.path
-                && this.seed == obj.seed
-                && this.kcpMtu == obj.kcpMtu
-                && this.kcpTti == obj.kcpTti
-                && this.quicSecurity == obj.quicSecurity
-                && this.quicKey == obj.quicKey
-                && this.mode == obj.mode
-                && this.serviceName == obj.serviceName
-                && this.authority == obj.authority
-                && this.xhttpMode == obj.xhttpMode
+            && this.network == obj.network
+            && this.headerType == obj.headerType
+            && this.host == obj.host
+            && this.path == obj.path
+            && this.seed == obj.seed
+            && this.kcpMtu == obj.kcpMtu
+            && this.kcpTti == obj.kcpTti
+            && this.quicSecurity == obj.quicSecurity
+            && this.quicKey == obj.quicKey
+            && this.mode == obj.mode
+            && this.serviceName == obj.serviceName
+            && this.authority == obj.authority
+            && this.xhttpMode == obj.xhttpMode
 
-                && this.security == obj.security
-                && this.sni == obj.sni
-                && this.alpn == obj.alpn
-                && this.fingerPrint == obj.fingerPrint
-                && this.publicKey == obj.publicKey
-                && this.shortId == obj.shortId
+            && this.security == obj.security
+            && this.sni == obj.sni
+            && this.alpn == obj.alpn
+            && this.fingerPrint == obj.fingerPrint
+            && this.publicKey == obj.publicKey
+            && this.shortId == obj.shortId
 
-                && this.secretKey == obj.secretKey
-                && this.localAddress == obj.localAddress
-                && this.reserved == obj.reserved
-                && this.mtu == obj.mtu
+            && this.secretKey == obj.secretKey
+            && this.localAddress == obj.localAddress
+            && this.reserved == obj.reserved
+            && this.mtu == obj.mtu
 
-                && this.obfsPassword == obj.obfsPassword
-                && this.portHopping == obj.portHopping
-                && this.portHoppingInterval == obj.portHoppingInterval
-                && this.pinnedCA256 == obj.pinnedCA256
-                && this.proxyChainProfiles == obj.proxyChainProfiles
-                )
+            && this.obfsPassword == obj.obfsPassword
+            && this.portHopping == obj.portHopping
+            && this.portHoppingInterval == obj.portHoppingInterval
+            && this.pinnedCA256 == obj.pinnedCA256
+            && this.proxyChainProfiles == obj.proxyChainProfiles
+        )
     }
 }

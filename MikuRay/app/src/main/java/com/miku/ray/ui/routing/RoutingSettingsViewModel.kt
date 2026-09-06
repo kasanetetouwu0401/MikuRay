@@ -12,7 +12,7 @@ class RoutingSettingsViewModel : ViewModel() {
 
     fun reload() {
         val loaded = MmkvManager.decodeRoutingRulesets() ?: mutableListOf()
-        // Repair legacy/imported IDs in one write before exposing them as RecyclerView keys.
+
         if (SettingsManager.ensureRoutingRulesetIds(loaded)) {
             MmkvManager.encodeRoutingRulesets(loaded)
         }

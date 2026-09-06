@@ -9,21 +9,6 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 
-/**
- * Encrypts/decrypts the payload embedded in a .mikuray file.
- *
- * File layout (all integers big-endian):
- *   4 bytes  magic       "MKRY"
- *   1 byte   version     currently 1
- *   1 byte   saltLength
- *   N bytes  salt
- *   1 byte   ivLength
- *   M bytes  iv
- *   rest     AES-256-GCM ciphertext (tag appended by the cipher itself)
- *
- * The key is derived from a user-supplied password via PBKDF2WithHmacSHA256, so the same
- * password will always reproduce the key as long as the salt is known (it's stored in the file).
- */
 object MikuRayFileCrypto {
 
     private val MAGIC = byteArrayOf('M'.code.toByte(), 'K'.code.toByte(), 'R'.code.toByte(), 'Y'.code.toByte())
@@ -37,10 +22,6 @@ object MikuRayFileCrypto {
 
     class MikuRayCryptoException(message: String, cause: Throwable? = null) : Exception(message, cause)
 
-    /**
-     * Returns true if [bytes] starts with the .mikuray magic header. Used to distinguish
-     * a .mikuray file from a plain-text batch config / subscription link when importing.
-     */
     fun isMikuRayFile(bytes: ByteArray): Boolean {
         if (bytes.size < MAGIC.size) return false
         for (i in MAGIC.indices) {
@@ -60,7 +41,7 @@ object MikuRayFileCrypto {
             val cipherText = cipher.doFinal(plainText.toByteArray(Charsets.UTF_8))
 
             val buffer = ByteBuffer.allocate(MAGIC.size + 1 + 1 + salt.size + 1 + iv.size + cipherText.size)
-                .order(ByteOrder.BIG_ENDIAN)
+            .order(ByteOrder.BIG_ENDIAN)
             buffer.put(MAGIC)
             buffer.put(VERSION)
             buffer.put(salt.size.toByte())
@@ -103,7 +84,7 @@ object MikuRayFileCrypto {
         } catch (e: MikuRayCryptoException) {
             throw e
         } catch (e: Exception) {
-            // Wrong password, corrupted file, or GCM tag mismatch all land here.
+
             throw MikuRayCryptoException("Failed to decrypt .mikuray file (wrong password or corrupted file)", e)
         }
     }

@@ -83,9 +83,9 @@ object SearchPreferenceHighlighter {
         val animatorSet = AnimatorSet().apply {
             playSequentially(fadeIn, fadeOut)
             addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    card.foreground = null
-                }
+                    override fun onAnimationEnd(animation: Animator) {
+                        card.foreground = null
+                    }
             })
         }
 

@@ -73,14 +73,13 @@ object HttpUtil {
         }
     }
 
-
     fun getUrlContent(request: UrlContentRequest): String? {
         val url = request.url ?: return null
         val client = buildOkHttpClient(request.timeout, request.httpPort, request.proxyUsername, request.proxyPassword, followRedirects = true)
         val requestBuilder = Request.Builder()
-            .url(url)
-            .get()
-            .header("Connection", "close")
+        .url(url)
+        .get()
+        .header("Connection", "close")
         if (request.httpPort != 0 && !request.proxyUsername.isNullOrBlank() && !request.proxyPassword.isNullOrBlank()) {
             requestBuilder.header("Proxy-Authorization", Credentials.basic(request.proxyUsername, request.proxyPassword))
         }
@@ -118,10 +117,10 @@ object HttpUtil {
                 request.userAgent
             }
             val requestBuilder = Request.Builder()
-                .url(currentUrl)
-                .get()
-                .header("User-agent", finalUserAgent)
-                .header("Connection", "close")
+            .url(currentUrl)
+            .get()
+            .header("User-agent", finalUserAgent)
+            .header("Connection", "close")
 
             if (!request.hwid.isNullOrBlank()) {
                 requestBuilder.header("X-HWID", request.hwid)
@@ -196,10 +195,10 @@ object HttpUtil {
         followRedirects: Boolean
     ): OkHttpClient {
         val builder = OkHttpClient.Builder()
-            .connectTimeout(timeout.toLong(), TimeUnit.MILLISECONDS)
-            .readTimeout(timeout.toLong(), TimeUnit.MILLISECONDS)
-            .followRedirects(followRedirects)
-            .followSslRedirects(followRedirects)
+        .connectTimeout(timeout.toLong(), TimeUnit.MILLISECONDS)
+        .readTimeout(timeout.toLong(), TimeUnit.MILLISECONDS)
+        .followRedirects(followRedirects)
+        .followSslRedirects(followRedirects)
 
         if (httpPort != 0) {
             builder.proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(LOOPBACK, httpPort)))
@@ -209,8 +208,8 @@ object HttpUtil {
                         null
                     } else {
                         response.request.newBuilder()
-                            .header("Proxy-Authorization", Credentials.basic(proxyUsername, proxyPassword))
-                            .build()
+                        .header("Proxy-Authorization", Credentials.basic(proxyUsername, proxyPassword))
+                        .build()
                     }
                 }
             }
@@ -245,9 +244,9 @@ object HttpUtil {
         val url = request.url ?: return false
         val client = buildOkHttpClient(request.timeout, request.httpPort, request.proxyUsername, request.proxyPassword, followRedirects = true)
         val requestBuilder = Request.Builder()
-            .url(url)
-            .get()
-            .header("Connection", "close")
+        .url(url)
+        .get()
+        .header("Connection", "close")
         if (request.httpPort != 0 && !request.proxyUsername.isNullOrBlank() && !request.proxyPassword.isNullOrBlank()) {
             requestBuilder.header("Proxy-Authorization", Credentials.basic(request.proxyUsername, request.proxyPassword))
         }

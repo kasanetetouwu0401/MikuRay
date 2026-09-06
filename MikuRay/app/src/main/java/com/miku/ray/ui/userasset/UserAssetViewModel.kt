@@ -60,19 +60,18 @@ class UserAssetViewModel : ViewModel() {
     ): List<AssetUrlCache> {
         val savedAssets = decodedAssets ?: emptyList()
         val builtInItems = builtInGeoFiles
-            .filter { geoFile -> savedAssets.none { it.assetUrl.remarks == geoFile } }
-            .map {
-                AssetUrlCache(
-                    Utils.getUuid(),
-                    AssetUrlItem(
-                        it,
-                        String.format(AppConfig.GITHUB_DOWNLOAD_URL, geoFilesSource).concatUrl(it),
-                        locked = true
-                    )
+        .filter { geoFile -> savedAssets.none { it.assetUrl.remarks == geoFile } }
+        .map {
+            AssetUrlCache(
+                Utils.getUuid(),
+                AssetUrlItem(
+                    it,
+                    String.format(AppConfig.GITHUB_DOWNLOAD_URL, geoFilesSource).concatUrl(it),
+                    locked = true
                 )
-            }
+            )
+        }
 
-        // Force update URL for geoip-only-cn-private.dat.
         return (builtInItems + savedAssets).map { cache ->
             if (cache.assetUrl.remarks == AppConfig.GEOIP_ONLY_CN_PRIVATE_DAT) {
                 cache.copy(

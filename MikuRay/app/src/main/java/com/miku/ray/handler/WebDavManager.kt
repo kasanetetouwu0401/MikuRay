@@ -22,11 +22,11 @@ object WebDavManager {
     fun init(config: WebDavConfig) {
         cfg = config
         client = OkHttpClient.Builder()
-            .connectTimeout(config.timeoutSeconds, TimeUnit.SECONDS)
-            .readTimeout(config.timeoutSeconds, TimeUnit.SECONDS)
-            .writeTimeout(config.timeoutSeconds, TimeUnit.SECONDS)
-            .callTimeout(config.timeoutSeconds, TimeUnit.SECONDS)
-            .build()
+        .connectTimeout(config.timeoutSeconds, TimeUnit.SECONDS)
+        .readTimeout(config.timeoutSeconds, TimeUnit.SECONDS)
+        .writeTimeout(config.timeoutSeconds, TimeUnit.SECONDS)
+        .callTimeout(config.timeoutSeconds, TimeUnit.SECONDS)
+        .build()
     }
 
     suspend fun uploadFile(localFile: File, remoteFileName: String): Boolean = withContext(Dispatchers.IO) {

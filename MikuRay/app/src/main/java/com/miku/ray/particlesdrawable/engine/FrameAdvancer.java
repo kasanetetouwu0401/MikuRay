@@ -15,8 +15,8 @@ final class FrameAdvancer {
     }
 
     void advanceToNextFrame(
-            @NonNull final Scene scene,
-            final float step
+        @NonNull final Scene scene,
+        final float step
     ) {
         final int particlesCount = scene.getDensity();
         for (int i = 0; i < particlesCount; i++) {
@@ -41,11 +41,11 @@ final class FrameAdvancer {
 
     @VisibleForTesting
     boolean particleOutOfBounds(
-            @NonNull final Scene scene,
-            final float x,
-            final float y) {
+        @NonNull final Scene scene,
+        final float x,
+        final float y) {
         final float offset = scene.getParticleRadiusMin() + scene.getLineLength();
         return x + offset < 0 || x - offset > scene.getWidth()
-                || y + offset < 0 || y - offset > scene.getHeight();
+        || y + offset < 0 || y - offset > scene.getHeight();
     }
 }

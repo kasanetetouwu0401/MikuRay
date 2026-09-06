@@ -98,7 +98,6 @@ object AppConfig {
     const val PREF_REAL_PING_CONCURRENCY = "pref_real_ping_concurrency"
     const val PREF_COUNTRY_CODE_TIMEOUT = "pref_country_code_timeout"
 
-    /** Shared defaults for settings shown in the UI and consumed by config generation. */
     const val DEFAULT_SOCKS_ENABLE_UDP = true
     const val DEFAULT_OUTBOUND_DOMAIN_RESOLVE_METHOD = "1"
     const val DEFAULT_VPN_BYPASS_LAN = "1"

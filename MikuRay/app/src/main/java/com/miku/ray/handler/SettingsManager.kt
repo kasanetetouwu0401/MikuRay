@@ -70,12 +70,12 @@ object SettingsManager {
         try {
             val appContext = context.applicationContext
             Glide.with(appContext)
-                .load(Uri.parse(uriString))
-                .downsample(DownsampleStrategy.CENTER_INSIDE)
-                .override(MAX_BANNER_PRELOAD_SIZE, MAX_BANNER_PRELOAD_SIZE)
-                .diskCacheStrategy(DiskCacheStrategy.DATA)
-                .skipMemoryCache(true)
-                .preload()
+            .load(Uri.parse(uriString))
+            .downsample(DownsampleStrategy.CENTER_INSIDE)
+            .override(MAX_BANNER_PRELOAD_SIZE, MAX_BANNER_PRELOAD_SIZE)
+            .diskCacheStrategy(DiskCacheStrategy.DATA)
+            .skipMemoryCache(true)
+            .preload()
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to preload banner $uriString", e)
         }
@@ -97,8 +97,8 @@ object SettingsManager {
         }
 
         return JsonUtil.fromJsonSafe(assets, Array<RulesetItem>::class.java)
-            ?.toMutableList()
-            ?.also { ensureRoutingRulesetIds(it) }
+        ?.toMutableList()
+        ?.also { ensureRoutingRulesetIds(it) }
     }
 
     fun resetRoutingRulesetsFromPresets(context: Context, index: Int) {
@@ -127,11 +127,10 @@ object SettingsManager {
 
     private fun resetRoutingRulesetsCommon(rulesetList: MutableList<RulesetItem>) {
         val lockedRulesets = MmkvManager.decodeRoutingRulesets()
-            ?.filter { it.locked == true }
-            .orEmpty()
+        ?.filter { it.locked == true }
+        .orEmpty()
         val importedRulesets = rulesetList.filterNot { imported ->
-            // A locked built-in rule already present locally must not be appended again
-            // when its exported copy is imported. Different rules remain untouched.
+
             lockedRulesets.any { locked -> locked.id == imported.id && locked == imported }
         }
         val mergedRulesets = (lockedRulesets + importedRulesets).toMutableList()
@@ -139,7 +138,6 @@ object SettingsManager {
         MmkvManager.encodeRoutingRulesets(mergedRulesets)
     }
 
-    /** Ensures every ruleset has a non-blank, unique ID before entering an ID-keyed flow. */
     fun ensureRoutingRulesetIds(rulesetList: MutableList<RulesetItem>): Boolean {
         val usedIds = HashSet<String>(rulesetList.size)
         var changed = false
@@ -249,19 +247,19 @@ object SettingsManager {
         }
         val serverList = decodeAllServerList()
         return serverList
-            .mapNotNull { guid -> decodeServerConfig(guid) }
-            .firstOrNull { it.remarks == remarks }
+        .mapNotNull { guid -> decodeServerConfig(guid) }
+        .firstOrNull { it.remarks == remarks }
     }
 
     fun getProfileRemarks(excludeConfigTypes: Set<EConfigType> = setOf(EConfigType.CUSTOM)): List<String> {
         return decodeAllServerList()
-            .asSequence()
-            .mapNotNull { guid -> decodeServerConfig(guid) }
-            .filter { profile -> profile.configType !in excludeConfigTypes }
-            .map { it.remarks.trim() }
-            .filter { it.isNotEmpty() }
-            .distinct()
-            .toList()
+        .asSequence()
+        .mapNotNull { guid -> decodeServerConfig(guid) }
+        .filter { profile -> profile.configType !in excludeConfigTypes }
+        .map { it.remarks.trim() }
+        .filter { it.isNotEmpty() }
+        .distinct()
+        .toList()
     }
 
     fun removeSubscriptionWithDefault(subid: String) {
@@ -281,11 +279,11 @@ object SettingsManager {
 
     fun getSocksPort(): Int {
         val port =
-            if (IsDynamicSocksPort()) {
-                runtimeSocksPort ?: refreshRuntimeSocksPort()
-            } else {
-                Utils.parseInt(MmkvManager.decodeSettingsString(AppConfig.PREF_SOCKS_PORT), AppConfig.PORT_SOCKS.toInt())
-            }
+        if (IsDynamicSocksPort()) {
+            runtimeSocksPort ?: refreshRuntimeSocksPort()
+        } else {
+            Utils.parseInt(MmkvManager.decodeSettingsString(AppConfig.PREF_SOCKS_PORT), AppConfig.PORT_SOCKS.toInt())
+        }
         return port ?: AppConfig.PORT_SOCKS.toInt()
     }
 
@@ -334,17 +332,17 @@ object SettingsManager {
             try {
                 val folder = File(folderPath).apply { mkdirs() }
                 assets.list("")
-                    ?.filter { geo.contains(it) }
-                    ?.filter { !File(folder, it).exists() }
-                    ?.forEach {
-                        val target = File(folder, it)
-                        assets.open(it).use { input ->
-                            FileOutputStream(target).use { output ->
-                                input.copyTo(output)
-                            }
+                ?.filter { geo.contains(it) }
+                ?.filter { !File(folder, it).exists() }
+                ?.forEach {
+                    val target = File(folder, it)
+                    assets.open(it).use { input ->
+                        FileOutputStream(target).use { output ->
+                            input.copyTo(output)
                         }
-                        LogUtil.i(AppConfig.TAG, "Copied from apk assets folder to ${target.absolutePath}")
                     }
+                    LogUtil.i(AppConfig.TAG, "Copied from apk assets folder to ${target.absolutePath}")
+                }
             } catch (e: Exception) {
                 LogUtil.e(ANG_PACKAGE, "asset copy failed for $folderPath", e)
             }
@@ -353,7 +351,7 @@ object SettingsManager {
 
     fun getDomesticDnsServers(): List<String> {
         val domesticDns =
-            MmkvManager.decodeSettingsString(AppConfig.PREF_DOMESTIC_DNS) ?: AppConfig.DNS_DIRECT
+        MmkvManager.decodeSettingsString(AppConfig.PREF_DOMESTIC_DNS) ?: AppConfig.DNS_DIRECT
         val ret = domesticDns.split(",").filter { Utils.isPureIpAddress(it) || Utils.isCoreDNSAddress(it) }
         if (ret.isEmpty()) {
             return listOf(AppConfig.DNS_DIRECT)
@@ -363,7 +361,7 @@ object SettingsManager {
 
     fun getRemoteDnsServers(): List<String> {
         val remoteDns =
-            MmkvManager.decodeSettingsString(AppConfig.PREF_REMOTE_DNS) ?: AppConfig.DNS_PROXY
+        MmkvManager.decodeSettingsString(AppConfig.PREF_REMOTE_DNS) ?: AppConfig.DNS_PROXY
         val ret = remoteDns.split(",").filter { Utils.isPureIpAddress(it) || Utils.isCoreDNSAddress(it) }
         if (ret.isEmpty()) {
             return listOf(AppConfig.DNS_PROXY)
@@ -380,9 +378,9 @@ object SettingsManager {
         if (second) return AppConfig.DELAY_TEST_URL2
 
         return MmkvManager.decodeSettingsString(AppConfig.PREF_DELAY_TEST_URL)
-            ?.trim()
-            ?.takeIf { it.isNotEmpty() }
-            ?: AppConfig.DELAY_TEST_URL
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
+        ?: AppConfig.DELAY_TEST_URL
     }
 
     fun getRealPingConcurrency(): Int {
@@ -392,7 +390,7 @@ object SettingsManager {
 
     fun getCountryCodeTestTimeout(): Int {
         val seconds = MmkvManager.decodeSettingsString(AppConfig.PREF_COUNTRY_CODE_TIMEOUT)?.toIntOrNull() ?: 5
-        return seconds.coerceIn(1, 15) * 1000        
+        return seconds.coerceIn(1, 15) * 1000
     }
 
     fun getLocale(): Locale {
@@ -555,7 +553,6 @@ object SettingsManager {
         subscriptionServerMap.forEach { (subId, serverGuids) ->
             MmkvManager.encodeServerList(serverGuids, subId)
         }
-
 
         MmkvManager.encodeSettings(migrationKey, true)
     }

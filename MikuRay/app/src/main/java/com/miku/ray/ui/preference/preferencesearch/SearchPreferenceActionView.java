@@ -29,24 +29,24 @@ public class SearchPreferenceActionView extends SearchView {
     private void initView() {
         searchConfiguration.setSearchBarEnabled(false);
         setOnQueryTextListener(new OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if (searchFragment != null) {
-                    searchFragment.setSearchTerm(newText);
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    return false;
                 }
-                return true;
-            }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    if (searchFragment != null) {
+                        searchFragment.setSearchTerm(newText);
+                    }
+                    return true;
+                }
         });
         setOnQueryTextFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus && (searchFragment == null || !searchFragment.isVisible())) {
-                searchFragment = searchConfiguration.showSearchFragment();
-                searchFragment.setHistoryClickListener(entry -> setQuery(entry, false));
-            }
+                if (hasFocus && (searchFragment == null || !searchFragment.isVisible())) {
+                    searchFragment = searchConfiguration.showSearchFragment();
+                    searchFragment.setHistoryClickListener(entry -> setQuery(entry, false));
+                }
         });
     }
 
@@ -64,7 +64,6 @@ public class SearchPreferenceActionView extends SearchView {
         }
         if (searchFragment != null && searchFragment.isVisible()) {
             removeFragment();
-
 
             didSomething = true;
         }

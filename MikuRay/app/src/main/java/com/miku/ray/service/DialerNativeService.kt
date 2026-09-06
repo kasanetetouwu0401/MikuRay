@@ -104,12 +104,12 @@ class DialerNativeService : IDialerService {
         if (dialerAddr.isEmpty()) return
 
         val nativeClient = OkHttpClient.Builder()
-            .retryOnConnectionFailure(true)
-            .pingInterval(25, TimeUnit.SECONDS)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(60, TimeUnit.SECONDS)
-            .readTimeout(0, TimeUnit.SECONDS)
-            .build()
+        .retryOnConnectionFailure(true)
+        .pingInterval(25, TimeUnit.SECONDS)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(0, TimeUnit.SECONDS)
+        .build()
 
         client = nativeClient
         running.set(true)
@@ -326,7 +326,6 @@ class DialerNativeService : IDialerService {
             return "canceled" in message || "cancelled" in message
         }
 
-
         private fun tryOpenNextControlSocket() {
             scope.launch {
                 if (running.get()) maintainControlSocketPool()
@@ -342,7 +341,7 @@ class DialerNativeService : IDialerService {
             }
             val started = taskStartedAtMs.get()
             val duration =
-                if (started > 0L) (System.currentTimeMillis() - started).coerceAtLeast(0L) else -1L
+            if (started > 0L) (System.currentTimeMillis() - started).coerceAtLeast(0L) else -1L
             debug(
                 "BrowserDialer: cleanup socketId=$socketId url=$controlUrl task=$taskKind taskAccepted=${taskAccepted.get()} removed=$removed durationMs=$duration ${poolState()}"
             )
@@ -402,7 +401,7 @@ class DialerNativeService : IDialerService {
 
             val opened = AtomicBoolean(false)
             upstreamSocket =
-                localClient.newWebSocket(requestBuilder.build(), object : WebSocketListener() {
+            localClient.newWebSocket(requestBuilder.build(), object : WebSocketListener() {
                     override fun onOpen(webSocket: WebSocket, response: Response) {
                         opened.set(true)
                         try {
@@ -471,7 +470,7 @@ class DialerNativeService : IDialerService {
                             )
                         }
                     }
-                })
+            })
 
             textHandler = { message ->
                 try {
@@ -642,7 +641,7 @@ class DialerNativeService : IDialerService {
             val requestBuilder = Request.Builder().url(task.url)
             requestBuilder.header("Cache-Control", "no-cache, no-store, must-revalidate")
             task.extra.referrer?.takeIf { it.isNotBlank() }
-                ?.let { requestBuilder.header("Referer", it) }
+            ?.let { requestBuilder.header("Referer", it) }
             val taskHeaders = task.extra.headers.filterKeys { key ->
                 val lowerKey = key.lowercase()
                 !HEADERS_BLACKLIST.any { blackKey -> blackKey.equals(lowerKey, ignoreCase = true) }

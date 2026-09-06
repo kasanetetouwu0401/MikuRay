@@ -30,9 +30,9 @@ class NetworkMonitor(
 
     private val request by lazy {
         NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
-            .build()
+        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+        .build()
     }
 
     private val callback = object : ConnectivityManager.NetworkCallback() {

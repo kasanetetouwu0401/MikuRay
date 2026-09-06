@@ -41,7 +41,7 @@ class UserAssetAdapter(
             if (fileMetadata != null) {
                 val dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM)
                 assetProperties.text =
-                    "${fileMetadata.length.toTrafficString()}  •  ${dateFormat.format(Date(fileMetadata.lastModified))}"
+                "${fileMetadata.length.toTrafficString()}  •  ${dateFormat.format(Date(fileMetadata.lastModified))}"
             } else {
                 assetProperties.text = root.context.getString(R.string.msg_file_not_found)
             }
@@ -62,5 +62,5 @@ class UserAssetAdapter(
     }
 
     class UserAssetViewHolder(val binding: ItemRecyclerUserAssetBinding) :
-        RecyclerView.ViewHolder(binding.root)
+    RecyclerView.ViewHolder(binding.root)
 }

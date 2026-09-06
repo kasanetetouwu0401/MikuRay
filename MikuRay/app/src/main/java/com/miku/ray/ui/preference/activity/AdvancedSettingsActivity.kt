@@ -32,8 +32,8 @@ class AdvancedSettingsActivity : BaseActivity() {
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, AdvancedSettingsFragment())
-                .commit()
+            .replace(R.id.settings_container, AdvancedSettingsFragment())
+            .commit()
         }
     }
 
@@ -56,7 +56,7 @@ class AdvancedSettingsActivity : BaseActivity() {
             CategoryStyleHelper.applyToFragment(this)
 
             realPingConcurrency?.summary =
-                MmkvManager.decodeSettingsString(AppConfig.PREF_REAL_PING_CONCURRENCY, "16")
+            MmkvManager.decodeSettingsString(AppConfig.PREF_REAL_PING_CONCURRENCY, "16")
             realPingConcurrency?.setOnPreferenceChangeListener { pref, newValue ->
                 val concurrency = (newValue as? String)?.toIntOrNull() ?: 16
                 pref.summary = concurrency.toString()
@@ -64,7 +64,7 @@ class AdvancedSettingsActivity : BaseActivity() {
             }
 
             countryCodeTimeout?.summary =
-                MmkvManager.decodeSettingsString(AppConfig.PREF_COUNTRY_CODE_TIMEOUT, "5")
+            MmkvManager.decodeSettingsString(AppConfig.PREF_COUNTRY_CODE_TIMEOUT, "5")
             countryCodeTimeout?.setOnPreferenceChangeListener { pref, newValue ->
                 val timeoutSeconds = (newValue as? String)?.toIntOrNull() ?: 5
                 pref.summary = timeoutSeconds.toString()
@@ -93,7 +93,7 @@ class AdvancedSettingsActivity : BaseActivity() {
         override fun onResume() {
             super.onResume()
             systemVpnSettings?.isVisible = Intent(Settings.ACTION_VPN_SETTINGS)
-                .resolveActivity(requireContext().packageManager) != null
+            .resolveActivity(requireContext().packageManager) != null
         }
 
         private fun openSystemVpnSettings() {

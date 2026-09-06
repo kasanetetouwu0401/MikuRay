@@ -10,7 +10,7 @@ object PackageUidResolver {
     private val packageUidCache = ConcurrentHashMap<String, String>()
 
     val packageUidMap: Map<String, String>
-        get() = packageUidCache
+    get() = packageUidCache
 
     fun packageNamesToUids(context: Context, packageNames: List<String>): List<String> {
         return packageNames.mapNotNull { pkg ->

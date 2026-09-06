@@ -1,6 +1,5 @@
 package com.miku.ray.ui.dialog
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.content.Context
 import android.util.AttributeSet
@@ -46,11 +45,11 @@ class AppIconPickerDialog @JvmOverloads constructor(
         rv.adapter = adapter
 
         dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.title_pref_app_icon)
-            .setIcon(RemixR.drawable.rmx_apps_line)
-            .setView(dialogView)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
+        .setTitle(R.string.title_pref_app_icon)
+        .setIcon(RemixR.drawable.rmx_apps_line)
+        .setView(dialogView)
+        .setNegativeButton(android.R.string.cancel, null)
+        .create()
 
         WindowBlurUtils.applyWindowBlur(dialog.window)
         dialog.show()

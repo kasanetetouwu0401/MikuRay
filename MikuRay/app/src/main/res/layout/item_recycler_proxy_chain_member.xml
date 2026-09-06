@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/item_bg"
@@ -13,10 +14,10 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
-        app:cardBackgroundColor="?colorCard"
+        app:cardBackgroundColor="?attr/colorCard"
         app:cardCornerRadius="28dp"
         app:cardElevation="0dp"
-        app:strokeColor="?colorOutlineVariant"
+        app:strokeColor="?attr/colorOutlineVariant"
         app:strokeWidth="0dp">
 
         <LinearLayout
@@ -37,34 +38,34 @@
                     android:id="@+id/tv_member_index"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
                     android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="?colorOnSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:textSize="17sp"
                     tools:text="1" />
 
                 <com.google.android.material.textfield.TextInputLayout
-                    app:shapeAppearance="?shapeAppearanceCornerMedium"
-                    app:boxStrokeWidth="1.5dip"
-                    app:boxStrokeWidthFocused="1.5dip"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="@string/server_proxy_chain_member_unselected"
+                    app:boxStrokeWidth="1.5dp"
+                    app:boxStrokeWidthFocused="1.5dp"
+                    app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
                     app:startIconDrawable="@drawable/rmx_route_line"
                     app:startIconTint="?attr/colorOnSurfaceVariant">
 
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         android:id="@+id/sp_member_remark"
-                        android:textColor="?attr/colorOnSurface"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ellipsize="end"
                         android:imeOptions="actionDone"
                         android:inputType="text"
-                        android:maxLines="1" />
+                        android:maxLines="1"
+                        android:textColor="?attr/colorOnSurface" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -72,13 +73,13 @@
                     android:id="@+id/layout_remove"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:layout_marginStart="4dp"
                     android:layout_marginEnd="4dp"
+                    android:layout_marginStart="4dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/menu_item_del_config"
-                    android:background="?selectableItemBackgroundBorderless"
                     android:focusable="true"
                     app:srcCompat="@drawable/rmx_delete_bin_line"
-                    app:tint="?colorError" />
+                    app:tint="?attr/colorError" />
 
             </LinearLayout>
         </LinearLayout>

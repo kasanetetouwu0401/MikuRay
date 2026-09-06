@@ -22,10 +22,6 @@ object MessageUtil {
         sendMsg(ctx, AppConfig.BROADCAST_ACTION_SERVICE, what, content)
     }
 
-    /**
-     * Sends an ordered service message and reports whether a daemon receiver handled it.
-     * With no running daemon, the initial canceled result reaches [onResult] unchanged.
-     */
     fun sendMsg2ServiceForResult(
         ctx: Context,
         what: Int,
@@ -91,7 +87,7 @@ object MessageUtil {
     fun sendMsg2CountryCodeTestService(ctx: Context, message: CountryCodeTestMessage) {
         try {
             val intent = Intent(ctx, CountryCodeTestService::class.java)
-                .putExtra("content", message)
+            .putExtra("content", message)
             when (message.key) {
                 AppConfig.MSG_COUNTRY_CODE_START -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -144,9 +140,9 @@ object MessageUtil {
     }
 
     private fun messageIntent(action: String, what: Int, content: Serializable): Intent =
-        Intent(action).apply {
-            `package` = AppConfig.ANG_PACKAGE
-            putExtra("key", what)
-            putExtra("content", content)
-        }
+    Intent(action).apply {
+        `package` = AppConfig.ANG_PACKAGE
+        putExtra("key", what)
+        putExtra("content", content)
+    }
 }

@@ -109,11 +109,11 @@ class PerAppProxyActivity : BaseActivity() {
         val searchItem = menu.findItem(R.id.search_view)
         val searchView = searchItem?.actionView as? SearchView
         searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean = false
-            override fun onQueryTextChange(newText: String?): Boolean {
-                filterProxyApp(newText.orEmpty())
-                return false
-            }
+                override fun onQueryTextSubmit(query: String?): Boolean = false
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    filterProxyApp(newText.orEmpty())
+                    return false
+                }
         })
         return super.onCreateOptionsMenu(menu)
     }

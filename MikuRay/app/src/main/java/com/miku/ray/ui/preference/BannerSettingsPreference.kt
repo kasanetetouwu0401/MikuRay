@@ -11,13 +11,6 @@ import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
 
-/**
- * Banner shown at the top of the main Settings screen.
- * The character artwork (Miku V2 / V2 Chinese / V2 Append / V3 / V3 English / V4 / V6 / Super Pack)
- * is controlled by the [AppConfig.PREF_BANNER_SETTINGS_CHARACTER] ListPreference and defaults to Miku V6.
- * Its size and offset (width / height / margin top / margin bottom / margin end) are controlled by
- * [com.miku.ray.ui.dialog.BannerCharacterLayoutDialog].
- */
 class BannerSettingsPreference @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -39,7 +32,6 @@ class BannerSettingsPreference @JvmOverloads constructor(
         imageView?.let { applyLayoutParams(it) }
     }
 
-    /** Forces this preference to rebind so the banner picks up the latest character / size / margins. */
     fun refreshBanner() {
         notifyChanged()
     }
@@ -72,7 +64,7 @@ class BannerSettingsPreference @JvmOverloads constructor(
         )
 
         val params = (imageView.layoutParams as? FrameLayout.LayoutParams)
-            ?: FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.MATCH_PARENT)
+        ?: FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.MATCH_PARENT)
 
         params.width = (widthDp * density).toInt()
         params.height = (heightDp * density).toInt()

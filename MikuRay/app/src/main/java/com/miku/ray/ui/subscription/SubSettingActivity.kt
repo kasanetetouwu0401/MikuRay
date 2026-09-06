@@ -1,6 +1,5 @@
 package com.miku.ray.ui.subscription
 
-
 import com.miku.ray.remixicon.R as RemixR
 import com.miku.ray.ui.base.BaseActivity
 import android.annotation.SuppressLint
@@ -50,11 +49,11 @@ import com.miku.ray.ui.bottomsheet.ShareSubBottomSheet
 import com.miku.ray.ui.bottomsheet.SortSubBottomSheet
 
 class SubSettingActivity : BaseActivity(),
-    ShareSubBottomSheet.OnShareSubOptionClickListener,
-    SortSubBottomSheet.OnSortSubOptionClickListener {
+ShareSubBottomSheet.OnShareSubOptionClickListener,
+SortSubBottomSheet.OnSortSubOptionClickListener {
     private val binding by lazy { ActivitySubSettingBinding.inflate(layoutInflater) }
     private val ownerActivity: SubSettingActivity
-        get() = this
+    get() = this
     private val viewModel: SubscriptionsViewModel by viewModels()
     private lateinit var adapter: SubSettingRecyclerAdapter
     private var mItemTouchHelper: ItemTouchHelper? = null
@@ -123,15 +122,15 @@ class SubSettingActivity : BaseActivity(),
         val dialogBinding = DialogSubUpdateOptionsBinding.inflate(layoutInflater)
 
         dialogBinding.switchUpdateSubscription.isChecked =
-            MmkvManager.decodeSettingsBool(AppConfig.PREF_UPDATE_SUBSCRIPTION, false)
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_UPDATE_SUBSCRIPTION, false)
         dialogBinding.switchAutoTest.isChecked =
-            MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_TEST_AFTER_UPDATE_SUBSCRIPTION, false)
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_TEST_AFTER_UPDATE_SUBSCRIPTION, false)
         dialogBinding.switchAutoRemoveInvalid.isChecked =
-            MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_REMOVE_INVALID_AFTER_TEST, false)
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_REMOVE_INVALID_AFTER_TEST, false)
         dialogBinding.switchAutoSort.isChecked =
-            MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_SORT_AFTER_TEST, false)
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_SORT_AFTER_TEST, false)
         dialogBinding.switchSendHwid.isChecked =
-            MmkvManager.decodeSettingsBool(AppConfig.PREF_SEND_HWID, false)
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_SEND_HWID, false)
 
         dialogBinding.rowUpdateSubscription.setOnClickListener {
             dialogBinding.switchUpdateSubscription.toggle()
@@ -243,9 +242,9 @@ class SubSettingActivity : BaseActivity(),
                         QRCodeDecoder.createQRCode(url)
                     )
                     AlertDialog.Builder(this)
-                        .setTitle(R.string.title_qr_code)
-                        .setIcon(RemixR.drawable.rmx_qr_code_line)
-                        .setView(ivBinding.root).showBlur()
+                    .setTitle(R.string.title_qr_code)
+                    .setIcon(RemixR.drawable.rmx_qr_code_line)
+                    .setView(ivBinding.root).showBlur()
                 }
                 R.id.share_clipboard -> {
                     Utils.setClipboard(this, url)
@@ -268,7 +267,7 @@ class SubSettingActivity : BaseActivity(),
         override fun onEdit(guid: String, position: Int) {
             startActivity(
                 Intent(ownerActivity, SubEditActivity::class.java)
-                    .putExtra("subId", guid)
+                .putExtra("subId", guid)
             )
         }
 

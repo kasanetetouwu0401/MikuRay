@@ -12,8 +12,8 @@ public final class ParticleColorResolver {
 
     @ColorInt
     public static int resolveParticleColorWithSceneAlpha(
-            @ColorInt final int particleColor,
-            @IntRange(from = 0, to = 255) final int sceneAlpha
+        @ColorInt final int particleColor,
+        @IntRange(from = 0, to = 255) final int sceneAlpha
     ) {
         final int alpha = Color.alpha(particleColor) * sceneAlpha / 255;
         return (particleColor & 0x00FFFFFF) | (alpha << 24);

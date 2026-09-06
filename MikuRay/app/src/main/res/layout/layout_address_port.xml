@@ -7,74 +7,74 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_remarks"
-        app:shapeAppearance="?shapeAppearanceCornerMedium"
-        app:boxStrokeWidth="1.5dip"
-        app:boxStrokeWidthFocused="1.5dip"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="@string/server_lab_remarks"
-        app:startIconDrawable="@drawable/rmx_finance_price_tag_line"
-        app:startIconTint="?attr/colorOnSurfaceVariant"
+        app:boxStrokeWidth="1.5dp"
+        app:boxStrokeWidthFocused="1.5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
+        app:startIconDrawable="@drawable/rmx_finance_price_tag_line"
+        app:startIconTint="?attr/colorOnSurfaceVariant">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_remarks"
-            android:textColor="?attr/colorOnSurface"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:inputType="text"
+            android:textColor="?attr/colorOnSurface" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_address"
-        app:shapeAppearance="?shapeAppearanceCornerMedium"
-        app:boxStrokeWidth="1.5dip"
-        app:boxStrokeWidthFocused="1.5dip"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
         android:hint="@string/server_lab_address3"
-        app:startIconDrawable="@drawable/rmx_device_router_line"
-        app:startIconTint="?attr/colorOnSurfaceVariant"
+        app:boxStrokeWidth="1.5dp"
+        app:boxStrokeWidthFocused="1.5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/til_remarks">
+        app:layout_constraintTop_toBottomOf="@id/til_remarks"
+        app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
+        app:startIconDrawable="@drawable/rmx_device_router_line"
+        app:startIconTint="?attr/colorOnSurfaceVariant">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_address"
-            android:textColor="?attr/colorOnSurface"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:inputType="text"
+            android:textColor="?attr/colorOnSurface" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_port"
-        app:shapeAppearance="?shapeAppearanceCornerMedium"
-        app:boxStrokeWidth="1.5dip"
-        app:boxStrokeWidthFocused="1.5dip"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
         android:hint="@string/server_lab_port3"
-        app:startIconDrawable="@drawable/rmx_others_plug_line"
-        app:startIconTint="?attr/colorOnSurfaceVariant"
+        app:boxStrokeWidth="1.5dp"
+        app:boxStrokeWidthFocused="1.5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/til_address"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
+        app:startIconDrawable="@drawable/rmx_others_plug_line"
+        app:startIconTint="?attr/colorOnSurfaceVariant">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_port"
-            android:textColor="?attr/colorOnSurface"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number" />
+            android:inputType="number"
+            android:textColor="?attr/colorOnSurface" />
     </com.google.android.material.textfield.TextInputLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

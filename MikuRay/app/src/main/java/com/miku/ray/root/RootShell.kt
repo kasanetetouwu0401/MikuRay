@@ -25,8 +25,8 @@ object RootShell {
     private fun exec(command: String, timeoutSeconds: Long = 30): Result {
         return try {
             val process = ProcessBuilder("su", "-c", command)
-                .redirectErrorStream(true)
-                .start()
+            .redirectErrorStream(true)
+            .start()
             val output = process.inputStream.bufferedReader().use { it.readText() }
             val finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS)
             if (!finished) {

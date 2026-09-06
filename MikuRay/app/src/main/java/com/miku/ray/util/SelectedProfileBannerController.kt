@@ -29,10 +29,10 @@ class SelectedProfileBannerController(context: Context) {
     private var changeReceiver: BroadcastReceiver? = null
 
     fun isEnabled(): Boolean =
-        MmkvManager.decodeSettingsBool(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED, false)
+    MmkvManager.decodeSettingsBool(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED, false)
 
     fun hasCustomBanner(): Boolean =
-        !MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI).isNullOrEmpty()
+    !MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI).isNullOrEmpty()
 
     fun hasBanner(): Boolean = true
 
@@ -99,12 +99,12 @@ class SelectedProfileBannerController(context: Context) {
             target.setTag(TAG_KEY, tagKey)
             target.setTag(REQUEST_TAG, requestTarget)
             Glide.with(target)
-                .asBitmap()
-                .load(uri)
-                .downsample(DownsampleStrategy.CENTER_INSIDE)
-                .override(MAX_BANNER_DECODE_SIZE, MAX_BANNER_DECODE_SIZE)
-                .diskCacheStrategy(DiskCacheStrategy.DATA)
-                .into(requestTarget)
+            .asBitmap()
+            .load(uri)
+            .downsample(DownsampleStrategy.CENTER_INSIDE)
+            .override(MAX_BANNER_DECODE_SIZE, MAX_BANNER_DECODE_SIZE)
+            .diskCacheStrategy(DiskCacheStrategy.DATA)
+            .into(requestTarget)
         } catch (e: Exception) {
             e.printStackTrace()
             target.setTag(REQUEST_TAG, null)
@@ -265,7 +265,7 @@ class SelectedProfileBannerController(context: Context) {
         private const val MAX_BANNER_DECODE_SIZE = 1600
         private val bitmapCache = object : LruCache<String, Bitmap>(MAX_CACHE_KB) {
             override fun sizeOf(key: String, value: Bitmap): Int =
-                (value.byteCount / 1024).coerceAtLeast(1)
+            (value.byteCount / 1024).coerceAtLeast(1)
         }
 
         fun broadcastChanged(context: Context) {

@@ -22,27 +22,26 @@ import java.util.concurrent.TimeUnit
 
 object SubscriptionUpdater {
 
-
     fun sync(
         context: Context = AngApplication.application,
         forceReschedule: Boolean = false
     ) {
         val existingWorkPolicy =
-            if (forceReschedule) {
-                ExistingPeriodicWorkPolicy.REPLACE
-            } else {
-                ExistingPeriodicWorkPolicy.KEEP
-            }
+        if (forceReschedule) {
+            ExistingPeriodicWorkPolicy.REPLACE
+        } else {
+            ExistingPeriodicWorkPolicy.KEEP
+        }
 
         MmkvManager.decodeSubscriptions()
-            .filter { it.subscription.autoUpdate && it.subscription.url.isNotEmpty() }
-            .forEach { sub ->
-                scheduleOne(
-                    context = context,
-                    subId = sub.guid,
-                    existingWorkPolicy = existingWorkPolicy
-                )
-            }
+        .filter { it.subscription.autoUpdate && it.subscription.url.isNotEmpty() }
+        .forEach { sub ->
+            scheduleOne(
+                context = context,
+                subId = sub.guid,
+                existingWorkPolicy = existingWorkPolicy
+            )
+        }
         LogUtil.i(
             AppConfig.TAG,
             "SubscriptionUpdater: sync complete forceReschedule=$forceReschedule"
@@ -59,7 +58,7 @@ object SubscriptionUpdater {
 
     fun cancelOne(context: Context = AngApplication.application, subId: String) {
         RemoteWorkManager.getInstance(context)
-            .cancelUniqueWork(taskName(subId))
+        .cancelUniqueWork(taskName(subId))
     }
 
     fun updateLastUpdatedAndReschedule(context: Context = AngApplication.application, subId: String) {
@@ -68,7 +67,6 @@ object SubscriptionUpdater {
         MmkvManager.encodeSubscription(subId, subItem)
         syncOne(context, subId)
     }
-
 
     private fun taskName(subId: String) = "${AppConfig.SUBSCRIPTION_UPDATE_TASK_NAME}_$subId"
 
@@ -109,15 +107,15 @@ object SubscriptionUpdater {
         }
 
         val request = PeriodicWorkRequestBuilder<UpdateTask>(intervalMinutes, TimeUnit.MINUTES)
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()
-            )
-            .setInputData(workDataOf(KEY_SUB_ID to subId))
-            .setInitialDelay(initialDelayMillis, TimeUnit.MILLISECONDS)
-            .addTag(AppConfig.SUBSCRIPTION_UPDATE_TASK_NAME)
+        .setConstraints(
+            Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
+        )
+        .setInputData(workDataOf(KEY_SUB_ID to subId))
+        .setInitialDelay(initialDelayMillis, TimeUnit.MILLISECONDS)
+        .addTag(AppConfig.SUBSCRIPTION_UPDATE_TASK_NAME)
+        .build()
 
         rw.enqueueUniquePeriodicWork(
             taskName(subId),
@@ -128,15 +126,14 @@ object SubscriptionUpdater {
         LogUtil.i(
             AppConfig.TAG,
             "SubscriptionUpdater: scheduled [${subItem.remarks}] interval=${intervalMinutes}min " +
-                    "initialDelay=${initialDelayMillis / 1000}s policy=$existingWorkPolicy"
+            "initialDelay=${initialDelayMillis / 1000}s policy=$existingWorkPolicy"
         )
     }
-
 
     private const val KEY_SUB_ID = "subId"
 
     class UpdateTask(context: Context, params: WorkerParameters) :
-        CoroutineWorker(context, params) {
+    CoroutineWorker(context, params) {
 
         @SuppressLint("MissingPermission")
         override suspend fun doWork(): Result {

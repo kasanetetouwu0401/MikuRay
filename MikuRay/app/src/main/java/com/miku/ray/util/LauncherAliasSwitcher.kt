@@ -46,13 +46,13 @@ object LauncherAliasSwitcher {
     private fun segment(key: String): String = key.replaceFirstChar { it.uppercase() }
 
     private fun aliasName(iconKey: String, nameKey: String): String =
-        "$ALIAS_PACKAGE_PREFIX${segment(iconKey)}${segment(nameKey)}"
+    "$ALIAS_PACKAGE_PREFIX${segment(iconKey)}${segment(nameKey)}"
 
     fun currentIconVariant(): String =
-        MmkvManager.decodeSettingsString(AppConfig.PREF_APP_ICON) ?: AppConfig.APP_ICON_DEFAULT
+    MmkvManager.decodeSettingsString(AppConfig.PREF_APP_ICON) ?: AppConfig.APP_ICON_DEFAULT
 
     fun currentNameVariant(): String =
-        MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_APP_NAME) ?: AppConfig.APP_NAME_DEFAULT
+    MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_APP_NAME) ?: AppConfig.APP_NAME_DEFAULT
 
     fun applyIconVariant(context: Context, iconVariant: String) {
         MmkvManager.encodeSettings(AppConfig.PREF_APP_ICON, iconVariant)

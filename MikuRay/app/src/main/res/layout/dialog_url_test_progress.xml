@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="?attr/dialogPreferredPadding"
-    android:paddingHorizontal="?attr/dialogPreferredPadding">
+    android:paddingHorizontal="?attr/dialogPreferredPadding"
+    android:paddingTop="?attr/dialogPreferredPadding">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,8 +21,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
-            android:textColor="?attr/colorOnSurface"
-            android:text="@string/title_real_ping_all_server" />
+            android:text="@string/title_real_ping_all_server"
+            android:textColor="?attr/colorOnSurface" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tv_counter"

@@ -112,10 +112,10 @@ import java.io.File
 import kotlin.math.abs
 
 class MainActivity : HelperBaseActivity(),
-    MainMenuBottomSheet.OnOptionClickListener,
-    AddConfigBottomSheet.OnAddConfigClickListener,
-    MoreMenuBottomSheet.OnMoreOptionClickListener,
-    ShareConfigBottomSheet.OnShareOptionClickListener {
+MainMenuBottomSheet.OnOptionClickListener,
+AddConfigBottomSheet.OnAddConfigClickListener,
+MoreMenuBottomSheet.OnMoreOptionClickListener,
+ShareConfigBottomSheet.OnShareOptionClickListener {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     val mainViewModel: MainViewModel by viewModels()
@@ -123,7 +123,7 @@ class MainActivity : HelperBaseActivity(),
     private lateinit var groupPagerAdapter: GroupPagerAdapter
     private var tabMediator: TabLayoutMediator? = null
     private var bannerReceiver: BroadcastReceiver? = null
-    
+
     private var isColdStart = true
     private var dualSwipeChipSelection = SearchBarChipMode.WEATHER
     private var pendingConnectionTest = false
@@ -165,7 +165,7 @@ class MainActivity : HelperBaseActivity(),
         if (SettingsChangeManager.consumeRestartService()) {
             LauncherManager.restartService(this)
         }
-        
+
         if (SettingsChangeManager.consumeSetupGroupTab()) {
             setupGroupTab()
         }
@@ -193,13 +193,13 @@ class MainActivity : HelperBaseActivity(),
         setupGroupTab()
         setupViewModel()
         setupBannerHome()
-        
+
         BlurBottomStatusController.applyState(this, binding) { handleLayoutTestClick() }
         updateSnowflakesVisibility()
         updateQuickActionsVisibility()
         SubscriptionUpdater.sync()
         syncWeatherBackgroundUpdates()
-        
+
         mainViewModel.reloadServerList()
         refreshGroupTabTitles(true)
 
@@ -253,34 +253,34 @@ class MainActivity : HelperBaseActivity(),
         }
 
         val dialog = MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.test_build_info_title)
-            .setIcon(RemixR.drawable.rmx_system_alarm_warning_line)
-            .setMessage(styledMessage)
-            .setPositiveButton(android.R.string.ok, null)
-            .setNegativeButton(R.string.test_build_info_dont_show_again) { _, _ ->
-                MmkvManager.encodeSettings(AppConfig.PREF_DISMISS_TEST_BUILD_INFO, true)
-            }
-            .showBlur()
+        .setTitle(R.string.test_build_info_title)
+        .setIcon(RemixR.drawable.rmx_system_alarm_warning_line)
+        .setMessage(styledMessage)
+        .setPositiveButton(android.R.string.ok, null)
+        .setNegativeButton(R.string.test_build_info_dont_show_again) { _, _ ->
+            MmkvManager.encodeSettings(AppConfig.PREF_DISMISS_TEST_BUILD_INFO, true)
+        }
+        .showBlur()
 
         dialog.findViewById<TextView>(android.R.id.message)?.movementMethod = LinkMovementMethod.getInstance()
     }
 
     override fun onResume() {
         super.onResume()
-        
+
         refreshSearchBarChip()
         refreshIpStateText()
         updateSnowflakesVisibility()
         updateQuickActionsVisibility()
-        
+
         if (SettingsChangeManager.consumeRefreshDisplayPrefs()) {
             refreshAllGroupListDisplays()
         }
-        
+
         if (SettingsChangeManager.consumeSetupGroupTab()) {
             refreshGroupTabTitles()
         }
-        
+
         mainViewModel.resyncState()
     }
 
@@ -379,7 +379,7 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun weatherLocationReady(): Boolean =
-        WeatherHelper.hasCustomLocation() || WeatherHelper.hasLocationPermission(this)
+    WeatherHelper.hasCustomLocation() || WeatherHelper.hasLocationPermission(this)
 
     private fun syncWeatherBackgroundUpdates() {
         val weatherEnabled = SearchBarChipMode.current() in setOf(
@@ -397,7 +397,7 @@ class MainActivity : HelperBaseActivity(),
 
     private fun refreshIpStateText() {
         val showRealtimeTraffic = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_REALTIME_TRAFFIC_IP, false)
-        
+
         binding.tvIpState.text = if (showRealtimeTraffic) {
             if (mainViewModel.isRunning.value == true && lastTrafficSpeedText.isNotEmpty()) {
                 lastTrafficSpeedText
@@ -420,34 +420,33 @@ class MainActivity : HelperBaseActivity(),
     private fun setupSearchBarChipSwipe() {
         val swipeThreshold = 64 * resources.displayMetrics.density
         val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onDown(event: MotionEvent): Boolean = true
+                override fun onDown(event: MotionEvent): Boolean = true
 
-            override fun onSingleTapUp(event: MotionEvent): Boolean {
-                binding.layoutWeatherChip.performClick()
-                return true
-            }
-
-            override fun onFling(
-                firstEvent: MotionEvent?,
-                lastEvent: MotionEvent,
-                velocityX: Float,
-                velocityY: Float
-            ): Boolean {
-                if (firstEvent == null) return false
-                val distanceX = lastEvent.x - firstEvent.x
-                val distanceY = lastEvent.y - firstEvent.y
-                if (abs(distanceY) <= abs(distanceX) || abs(distanceY) < swipeThreshold) return false
-
-                // With two items, both vertical directions advance the carousel with wrap-around.
-                dualSwipeChipSelection = if (dualSwipeChipSelection == SearchBarChipMode.WEATHER) {
-                    SearchBarChipMode.TOTAL_TRAFFIC
-                } else {
-                    SearchBarChipMode.WEATHER
+                override fun onSingleTapUp(event: MotionEvent): Boolean {
+                    binding.layoutWeatherChip.performClick()
+                    return true
                 }
-                SearchBarChipMode.saveDualSelection(dualSwipeChipSelection)
-                refreshSearchBarChip()
-                return true
-            }
+
+                override fun onFling(
+                    firstEvent: MotionEvent?,
+                    lastEvent: MotionEvent,
+                    velocityX: Float,
+                    velocityY: Float
+                ): Boolean {
+                    if (firstEvent == null) return false
+                    val distanceX = lastEvent.x - firstEvent.x
+                    val distanceY = lastEvent.y - firstEvent.y
+                    if (abs(distanceY) <= abs(distanceX) || abs(distanceY) < swipeThreshold) return false
+
+                    dualSwipeChipSelection = if (dualSwipeChipSelection == SearchBarChipMode.WEATHER) {
+                        SearchBarChipMode.TOTAL_TRAFFIC
+                    } else {
+                        SearchBarChipMode.WEATHER
+                    }
+                    SearchBarChipMode.saveDualSelection(dualSwipeChipSelection)
+                    refreshSearchBarChip()
+                    return true
+                }
         })
 
         binding.layoutWeatherChip.setOnTouchListener { view, event ->
@@ -467,13 +466,13 @@ class MainActivity : HelperBaseActivity(),
     private fun isWeatherChipSelected(): Boolean {
         val mode = SearchBarChipMode.current()
         return mode == SearchBarChipMode.WEATHER ||
-            (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.WEATHER)
+        (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.WEATHER)
     }
 
     private fun isTotalTrafficChipSelected(): Boolean {
         val mode = SearchBarChipMode.current()
         return mode == SearchBarChipMode.TOTAL_TRAFFIC ||
-            (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.TOTAL_TRAFFIC)
+        (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.TOTAL_TRAFFIC)
     }
 
     private fun refreshSearchBarChip() {
@@ -515,7 +514,7 @@ class MainActivity : HelperBaseActivity(),
 
     private fun refreshTotalTrafficChip() {
         val totalTraffic = MmkvManager.getTotalTrafficString()
-        
+
         binding.tvTotalTraffic.text = totalTraffic
         if (isTotalTrafficChipSelected()) {
             binding.ivTotalTrafficIcon.isVisible = true
@@ -529,9 +528,9 @@ class MainActivity : HelperBaseActivity(),
             binding.layoutWeatherChip.isVisible = false
             return
         }
-        
+
         val coldStart = isColdStart.also { isColdStart = false }
-        
+
         if (weatherLocationReady()) {
             if (coldStart) forceRefreshWeatherChip() else loadWeatherChip()
         } else {
@@ -553,7 +552,7 @@ class MainActivity : HelperBaseActivity(),
 
         val cached = WeatherHelper.getCachedWeatherStale()
         binding.layoutWeatherChip.isVisible = true
-        
+
         if (cached != null) {
             applyWeatherToChip(cached)
         } else {
@@ -628,7 +627,7 @@ class MainActivity : HelperBaseActivity(),
                 AppConfig.HOME_BANNER_HEIGHT_DEFAULT
             )
             val heightPx = (heightDp * resources.displayMetrics.density).toInt()
-            
+
             val lp = bannerHome.layoutParams
             lp.height = heightPx
             bannerHome.layoutParams = lp
@@ -638,7 +637,7 @@ class MainActivity : HelperBaseActivity(),
         fun applyBannerVisibility(show: Boolean) {
             bannerHome.visibility = if (show) View.VISIBLE else View.GONE
             val topPad = if (show) paddingTopWithBanner else paddingTopNoBanner
-            
+
             headerTopRow.setPadding(
                 headerTopRow.paddingLeft,
                 topPad,
@@ -655,9 +654,9 @@ class MainActivity : HelperBaseActivity(),
                     AppConfig.HEADER_TOP_ROW_PADDING_DEFAULT
                 )
             } else 0
-            
+
             val paddingPx = (paddingDp * resources.displayMetrics.density).toInt()
-            
+
             headerTopRow.setPadding(
                 headerTopRow.paddingLeft,
                 paddingPx,
@@ -679,30 +678,30 @@ class MainActivity : HelperBaseActivity(),
 
             val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_HOME_BANNER_URI)
             val targetTag = if (uriString.isNullOrBlank()) TAG_HOME_BANNER_DEFAULT else uriString
-            
+
             if (headerImage.tag == targetTag) return
-            
+
             if (!uriString.isNullOrBlank()) {
                 val isGif = uriString.lowercase().endsWith(".gif")
                 if (isGif) {
                     Glide.with(this@MainActivity)
-                        .asGif()
-                        .load(Uri.parse(uriString))
-                        .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .error(R.drawable.uwu_banner_home)
-                        .into(headerImage)
+                    .asGif()
+                    .load(Uri.parse(uriString))
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
+                    .error(R.drawable.uwu_banner_home)
+                    .into(headerImage)
                 } else {
                     Glide.with(this@MainActivity)
-                        .load(Uri.parse(uriString))
-                        .diskCacheStrategy(DiskCacheStrategy.DATA)
-                        .error(R.drawable.uwu_banner_home)
-                        .into(headerImage)
+                    .load(Uri.parse(uriString))
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
+                    .error(R.drawable.uwu_banner_home)
+                    .into(headerImage)
                 }
             } else {
                 Glide.with(this@MainActivity).clear(headerImage)
                 headerImage.setImageResource(R.drawable.uwu_banner_home)
             }
-            
+
             headerImage.tag = targetTag
         }
 
@@ -755,7 +754,7 @@ class MainActivity : HelperBaseActivity(),
         binding.fab.shrink()
 
         binding.blurBottomStatus.setOnClickListener { handleLayoutTestClick() }
-        
+
         binding.btnHome.setOnClickListener {
             MainMenuBottomSheet().show(supportFragmentManager, MainMenuBottomSheet.TAG)
         }
@@ -766,7 +765,7 @@ class MainActivity : HelperBaseActivity(),
 
         binding.btnMoreMenu.setOnClickListener {
             MoreMenuBottomSheet.newInstance(mainViewModel.subscriptionId)
-                .show(supportFragmentManager, MoreMenuBottomSheet.TAG)
+            .show(supportFragmentManager, MoreMenuBottomSheet.TAG)
         }
 
         binding.btnAddSub.setOnClickListener {
@@ -809,12 +808,12 @@ class MainActivity : HelperBaseActivity(),
 
     private fun setupInlineSearchView() {
         binding.searchViewInline.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean = false
+                override fun onQueryTextSubmit(query: String?): Boolean = false
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                mainViewModel.filterConfig(newText.orEmpty())
-                return false
-            }
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    mainViewModel.filterConfig(newText.orEmpty())
+                    return false
+                }
         })
 
         binding.searchViewInline.setOnCloseListener {
@@ -885,37 +884,37 @@ class MainActivity : HelperBaseActivity(),
                 )
 
                 MaterialAlertDialogBuilder(this)
-                    .setTitle(R.string.title_clear_test_results)
-                    .setIcon(RemixR.drawable.rmx_refresh_line)
-                    .setItems(options) { _, which ->
-                        val msgRes: Int
-                        val action: () -> Unit
+                .setTitle(R.string.title_clear_test_results)
+                .setIcon(RemixR.drawable.rmx_refresh_line)
+                .setItems(options) { _, which ->
+                    val msgRes: Int
+                    val action: () -> Unit
 
-                        when (which) {
-                            0 -> {
-                                msgRes = R.string.confirm_clear_test_results_group
-                                action = {
-                                    mainViewModel.clearTestResultsForGroup()
-                                    refreshAllGroupListDisplays()
-                                }
-                            }
-                            else -> {
-                                msgRes = R.string.confirm_clear_test_results_all
-                                action = {
-                                    mainViewModel.clearTestResults()
-                                    refreshAllGroupListDisplays()
-                                }
+                    when (which) {
+                        0 -> {
+                            msgRes = R.string.confirm_clear_test_results_group
+                            action = {
+                                mainViewModel.clearTestResultsForGroup()
+                                refreshAllGroupListDisplays()
                             }
                         }
-
-                        showDeleteConfirmDialog(
-                            context = this,
-                            titleRes = R.string.title_clear_test_results,
-                            messageRes = msgRes
-                        ) { action() }
+                        else -> {
+                            msgRes = R.string.confirm_clear_test_results_all
+                            action = {
+                                mainViewModel.clearTestResults()
+                                refreshAllGroupListDisplays()
+                            }
+                        }
                     }
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .showBlur()
+
+                    showDeleteConfirmDialog(
+                        context = this,
+                        titleRes = R.string.title_clear_test_results,
+                        messageRes = msgRes
+                    ) { action() }
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .showBlur()
             }
             R.id.clear_country_codes -> {
                 val options = arrayOf(
@@ -924,37 +923,37 @@ class MainActivity : HelperBaseActivity(),
                 )
 
                 MaterialAlertDialogBuilder(this)
-                    .setTitle(R.string.title_clear_country_codes)
-                    .setIcon(RemixR.drawable.rmx_refresh_line)
-                    .setItems(options) { _, which ->
-                        val msgRes: Int
-                        val action: () -> Unit
+                .setTitle(R.string.title_clear_country_codes)
+                .setIcon(RemixR.drawable.rmx_refresh_line)
+                .setItems(options) { _, which ->
+                    val msgRes: Int
+                    val action: () -> Unit
 
-                        when (which) {
-                            0 -> {
-                                msgRes = R.string.confirm_clear_country_codes_group
-                                action = {
-                                    mainViewModel.clearCountryCodesForGroup()
-                                    refreshAllGroupListDisplays()
-                                }
-                            }
-                            else -> {
-                                msgRes = R.string.confirm_clear_country_codes_all
-                                action = {
-                                    mainViewModel.clearCountryCodes()
-                                    refreshAllGroupListDisplays()
-                                }
+                    when (which) {
+                        0 -> {
+                            msgRes = R.string.confirm_clear_country_codes_group
+                            action = {
+                                mainViewModel.clearCountryCodesForGroup()
+                                refreshAllGroupListDisplays()
                             }
                         }
-
-                        showDeleteConfirmDialog(
-                            context = this,
-                            titleRes = R.string.title_clear_country_codes,
-                            messageRes = msgRes
-                        ) { action() }
+                        else -> {
+                            msgRes = R.string.confirm_clear_country_codes_all
+                            action = {
+                                mainViewModel.clearCountryCodes()
+                                refreshAllGroupListDisplays()
+                            }
+                        }
                     }
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .showBlur()
+
+                    showDeleteConfirmDialog(
+                        context = this,
+                        titleRes = R.string.title_clear_country_codes,
+                        messageRes = msgRes
+                    ) { action() }
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .showBlur()
             }
             R.id.reset_traffic -> {
                 val options = arrayOf(
@@ -964,38 +963,38 @@ class MainActivity : HelperBaseActivity(),
                 )
 
                 MaterialAlertDialogBuilder(this)
-                    .setTitle(R.string.title_reset_traffic)
-                    .setIcon(RemixR.drawable.rmx_refresh_line)
-                    .setItems(options) { _, which ->
-                        val msgRes: Int
-                        val action: () -> Unit
+                .setTitle(R.string.title_reset_traffic)
+                .setIcon(RemixR.drawable.rmx_refresh_line)
+                .setItems(options) { _, which ->
+                    val msgRes: Int
+                    val action: () -> Unit
 
-                        when (which) {
-                            0 -> {
-                                msgRes = R.string.confirm_reset_traffic_profile
-                                action = { mainViewModel.resetCurrentProfileTraffic() }
-                            }
-                            1 -> {
-                                msgRes = R.string.confirm_reset_traffic_group
-                                action = { mainViewModel.resetGroupTraffic() }
-                            }
-                            else -> {
-                                msgRes = R.string.confirm_reset_traffic_all
-                                action = {
-                                    mainViewModel.resetAllTraffic()
-                                    refreshAllGroupListDisplays()
-                                }
+                    when (which) {
+                        0 -> {
+                            msgRes = R.string.confirm_reset_traffic_profile
+                            action = { mainViewModel.resetCurrentProfileTraffic() }
+                        }
+                        1 -> {
+                            msgRes = R.string.confirm_reset_traffic_group
+                            action = { mainViewModel.resetGroupTraffic() }
+                        }
+                        else -> {
+                            msgRes = R.string.confirm_reset_traffic_all
+                            action = {
+                                mainViewModel.resetAllTraffic()
+                                refreshAllGroupListDisplays()
                             }
                         }
-
-                        showDeleteConfirmDialog(
-                            context = this,
-                            titleRes = R.string.title_reset_traffic,
-                            messageRes = msgRes
-                        ) { action() }
                     }
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .showBlur()
+
+                    showDeleteConfirmDialog(
+                        context = this,
+                        titleRes = R.string.title_reset_traffic,
+                        messageRes = msgRes
+                    ) { action() }
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .showBlur()
             }
             R.id.action_order_origin,
             R.id.action_order_by_name,
@@ -1011,7 +1010,7 @@ class MainActivity : HelperBaseActivity(),
             if (SearchBarChipMode.current() in setOf(
                     SearchBarChipMode.TOTAL_TRAFFIC,
                     SearchBarChipMode.DUAL_SWIPE
-                )) {
+            )) {
                 SearchChipGradientController.applyState(this, binding)
                 if (isTotalTrafficChipSelected()) refreshTotalTrafficChip()
             }
@@ -1023,7 +1022,7 @@ class MainActivity : HelperBaseActivity(),
             mainViewModel.reloadServerList()
             refreshGroupTabTitles()
         }
-        
+
         mainViewModel.updateTestResultAction.observe(this) {
             lastTestResultText = it.orEmpty()
             setTestState(it)
@@ -1103,13 +1102,13 @@ class MainActivity : HelperBaseActivity(),
             iconView.visibility = View.GONE
             return
         }
-        
+
         val resId = resources.getIdentifier(iconName, "drawable", packageName)
         if (resId == 0) {
             iconView.visibility = View.GONE
             return
         }
-        
+
         iconView.setImageResource(resId)
         iconView.visibility = View.VISIBLE
     }
@@ -1130,8 +1129,8 @@ class MainActivity : HelperBaseActivity(),
 
                 val currentIds = (0 until binding.tabGroup.tabCount).map { binding.tabGroup.getTabAt(it)?.tag }
                 val structureUnchanged = currentIds == groups.map { it.id } &&
-                    groupPagerAdapter.groups.map { it.icon } == groups.map { it.icon } &&
-                    groupPagerAdapter.groups.map { it.remarks } == groups.map { it.remarks }
+                groupPagerAdapter.groups.map { it.icon } == groups.map { it.icon } &&
+                groupPagerAdapter.groups.map { it.remarks } == groups.map { it.remarks }
 
                 groupPagerAdapter.update(groups)
 
@@ -1141,23 +1140,23 @@ class MainActivity : HelperBaseActivity(),
                 }
 
                 val targetIndex = groups.indexOfFirst { it.id == mainViewModel.subscriptionId }
-                    .takeIf { it >= 0 } ?: (groups.size - 1)
+                .takeIf { it >= 0 } ?: (groups.size - 1)
 
                 tabMediator?.detach()
-                
+
                 tabMediator = TabLayoutMediator(binding.tabGroup, binding.viewPager) { tab, position ->
                     groupPagerAdapter.groups.getOrNull(position)?.let { group ->
                         tab.tag = group.id
                         val tabView = LayoutInflater.from(this@MainActivity).inflate(R.layout.item_tab_group, null)
-                        
+
                         val tabIcon = tabView.findViewById<ImageView>(R.id.tab_icon)
                         val tabLabel = tabView.findViewById<TextView>(R.id.tab_label)
                         val tabBadge = tabView.findViewById<TextView>(R.id.tab_badge)
-                        
+
                         tabLabel.text = group.remarks
                         setTabIcon(tabIcon, group.icon)
                         setBadgeVisibility(tabBadge, tabLabel, group.serverCount)
-                        
+
                         tab.customView = tabView
                     }
                 }.also { it.attach() }
@@ -1174,7 +1173,7 @@ class MainActivity : HelperBaseActivity(),
 
                 if (targetIndex >= 0) {
                     binding.viewPager.setCurrentItem(targetIndex, false)
-                    // Reveal the selected group after rebuilding the scrollable tabs.
+
                     binding.tabGroup.post {
                         binding.tabGroup.setScrollPosition(targetIndex, 0f, true)
                     }
@@ -1189,11 +1188,7 @@ class MainActivity : HelperBaseActivity(),
     }
 
     fun refreshGroupTabTitles(refreshAll: Boolean = false) {
-        // setupGroupTab() already diffs tab ids/icons/remarks against the current
-        // TabLayout state and only rebuilds when the structure actually changed
-        // (e.g. sort-by-updated order shifting after a subscription update),
-        // otherwise it just falls back to a badge refresh. This keeps tab order
-        // in sync live without needing to restart the activity.
+
         setupGroupTab()
     }
 
@@ -1202,12 +1197,12 @@ class MainActivity : HelperBaseActivity(),
             val groups = mainViewModel.getSubscriptions(this@MainActivity)
             withContext(Dispatchers.Main) {
                 if (isFinishing || isDestroyed) return@withContext
-                
+
                 for (i in groups.indices) {
                     val tab = binding.tabGroup.getTabAt(i) ?: continue
                     val tabBadge = tab.customView?.findViewById<TextView>(R.id.tab_badge) ?: continue
                     val tabLabel = tab.customView?.findViewById<TextView>(R.id.tab_label) ?: continue
-                    
+
                     val count = groups.getOrNull(i)?.serverCount ?: 0
                     setBadgeVisibility(tabBadge, tabLabel, count)
                 }
@@ -1262,12 +1257,12 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun isFabExtended(): Boolean =
-        MmkvManager.decodeSettingsBool(AppConfig.PREF_FAB_EXTENDED, false)
+    MmkvManager.decodeSettingsBool(AppConfig.PREF_FAB_EXTENDED, false)
 
     private fun startFabTimer() {
         if (!isFabExtended()) return
         updateFabTimerText()
-        
+
         val density = resources.displayMetrics.density
         val paddingStartPx = (16 * density).toInt()
         val paddingTopPx = (12 * density).toInt()
@@ -1275,18 +1270,18 @@ class MainActivity : HelperBaseActivity(),
         val paddingBottomPx = (12 * density).toInt()
         val iconPaddingPx = (4 * density).toInt()
         val minimumWidthPx = (132 * density).toInt()
-        
+
         binding.fab.setPaddingRelative(
-                 paddingStartPx,
-                 paddingTopPx,
-                 paddingEndPx,
-                 paddingBottomPx
+            paddingStartPx,
+            paddingTopPx,
+            paddingEndPx,
+            paddingBottomPx
         )
-        
+
         binding.fab.minimumWidth = minimumWidthPx
         binding.fab.iconPadding = iconPaddingPx
         binding.fab.extend()
-        
+
         if (fabTimerJob?.isActive == true) return
         fabTimerJob = lifecycleScope.launch {
             while (isActive) {
@@ -1313,7 +1308,7 @@ class MainActivity : HelperBaseActivity(),
         val h = elapsed / 3600
         val m = (elapsed % 3600) / 60
         val s = elapsed % 60
-        
+
         binding.fab.text = "%02d:%02d:%02d".format(h, m, s)
     }
 
@@ -1352,14 +1347,14 @@ class MainActivity : HelperBaseActivity(),
         if (createConfigType == EConfigType.POLICYGROUP.value) {
             startActivity(
                 Intent()
-                    .putExtra("subscriptionId", mainViewModel.subscriptionId)
-                    .setClass(this, ServerGroupActivity::class.java)
+                .putExtra("subscriptionId", mainViewModel.subscriptionId)
+                .setClass(this, ServerGroupActivity::class.java)
             )
         } else if (createConfigType == EConfigType.PROXYCHAIN.value) {
             startActivity(
                 Intent()
-                    .putExtra("subscriptionId", mainViewModel.subscriptionId)
-                    .setClass(this, ServerProxyChainActivity::class.java)
+                .putExtra("subscriptionId", mainViewModel.subscriptionId)
+                .setClass(this, ServerProxyChainActivity::class.java)
             )
         } else {
             val targetActivity = when (EConfigType.fromInt(createConfigType)) {
@@ -1371,12 +1366,12 @@ class MainActivity : HelperBaseActivity(),
                 EConfigType.HYSTERIA2 -> ServerHysteria2Activity::class.java
                 else -> ServerVmessActivity::class.java
             }
-            
+
             startActivity(
                 Intent()
-                    .putExtra("createConfigType", createConfigType)
-                    .putExtra("subscriptionId", mainViewModel.subscriptionId)
-                    .setClass(this, targetActivity)
+                .putExtra("createConfigType", createConfigType)
+                .putExtra("subscriptionId", mainViewModel.subscriptionId)
+                .setClass(this, targetActivity)
             )
         }
     }
@@ -1397,15 +1392,15 @@ class MainActivity : HelperBaseActivity(),
         )
 
         MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.menu_item_import_config_qrcode)
-            .setIcon(RemixR.drawable.rmx_qr_code_line)
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> launchScan()
-                    1 -> showQRFileChooser()
-                }
+        .setTitle(R.string.menu_item_import_config_qrcode)
+        .setIcon(RemixR.drawable.rmx_qr_code_line)
+        .setItems(options) { _, which ->
+            when (which) {
+                0 -> launchScan()
+                1 -> showQRFileChooser()
             }
-            .showBlur()
+        }
+        .showBlur()
     }
 
     private fun launchScan() {
@@ -1415,7 +1410,7 @@ class MainActivity : HelperBaseActivity(),
     private fun showQRFileChooser() {
         launchFileChooser("image/*") { uri ->
             if (uri == null) return@launchFileChooser
-            
+
             try {
                 val inputStream = contentResolver.openInputStream(uri)
                 val bitmap = BitmapFactory.decodeStream(inputStream)
@@ -1458,7 +1453,7 @@ class MainActivity : HelperBaseActivity(),
                     requestSubscriptionImportName(suggested, existing)
                 }
                 delay(500L)
-                
+
                 withContext(Dispatchers.Main) {
                     when {
                         count > 0 -> {
@@ -1506,7 +1501,7 @@ class MainActivity : HelperBaseActivity(),
             try {
                 val result = mainViewModel.updateConfigViaSubAll()
                 delay(500L)
-                
+
                 withContext(Dispatchers.Main) {
                     when {
                         result.successCount + result.failureCount + result.skipCount == 0 -> {
@@ -1524,7 +1519,7 @@ class MainActivity : HelperBaseActivity(),
                             )
                         }
                     }
-                    
+
                     if (result.configCount > 0) {
                         mainViewModel.reloadServerList()
                         refreshGroupTabTitles()
@@ -1578,10 +1573,10 @@ class MainActivity : HelperBaseActivity(),
     }
 
     private fun currentGroupDisplayName(): String =
-        mainViewModel.getSubscriptions(this)
-            .firstOrNull { it.id == mainViewModel.subscriptionId }
-            ?.remarks
-            ?: getString(R.string.filter_config_all)
+    mainViewModel.getSubscriptions(this)
+    .firstOrNull { it.id == mainViewModel.subscriptionId }
+    ?.remarks
+    ?: getString(R.string.filter_config_all)
 
     private fun exportGroupAsFile() {
         val currentGroupName = currentGroupDisplayName()
@@ -1591,7 +1586,7 @@ class MainActivity : HelperBaseActivity(),
             snackbarError(getString(R.string.title_export_group_file), title = getString(R.string.title_alerter_error))
             return
         }
-        
+
         exportPayloadAndShare(payload, currentGroupName)
     }
 
@@ -1601,7 +1596,7 @@ class MainActivity : HelperBaseActivity(),
             snackbarError(getString(R.string.title_export_group_file), title = getString(R.string.title_alerter_error))
             return
         }
-        
+
         exportPayloadAndShare(payload, payload.name)
     }
 
@@ -1640,9 +1635,9 @@ class MainActivity : HelperBaseActivity(),
             startActivity(
                 Intent.createChooser(
                     Intent(Intent.ACTION_SEND)
-                        .setType("application/octet-stream")
-                        .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        .putExtra(Intent.EXTRA_STREAM, uri),
+                    .setType("application/octet-stream")
+                    .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    .putExtra(Intent.EXTRA_STREAM, uri),
                     getString(R.string.title_configuration_share)
                 )
             )
@@ -1659,7 +1654,7 @@ class MainActivity : HelperBaseActivity(),
                 try {
                     val payload = MikuRayGroupFileManager.decryptPayloadFromFile(bytes, password)
                     val count = MikuRayGroupFileManager.importPayload(payload, mainViewModel.subscriptionId)
-                    
+
                     withContext(Dispatchers.Main) {
                         hideLoading()
                         if (count > 0) {
@@ -1703,7 +1698,6 @@ class MainActivity : HelperBaseActivity(),
         }
     }
 
-    /** Fully restarts the app's activity/task, as opposed to [LauncherManager.restartServiceOrStart] which only restarts the core service. */
     private fun restartApplication() {
         val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
         if (launchIntent == null) {
@@ -1865,9 +1859,9 @@ class MainActivity : HelperBaseActivity(),
                     ivBinding.ivQcode.setImageBitmap(AngConfigManager.share2QRCode(guid))
                     ivBinding.ivQcode.contentDescription = "QR Code"
                     MaterialAlertDialogBuilder(this)
-                        .setTitle(R.string.title_qr_code)
-                        .setIcon(RemixR.drawable.rmx_qr_code_line)
-                        .setView(ivBinding.root).showBlur()
+                    .setTitle(R.string.title_qr_code)
+                    .setIcon(RemixR.drawable.rmx_qr_code_line)
+                    .setView(ivBinding.root).showBlur()
                 } catch (e: Exception) {
                     LogUtil.e(AppConfig.TAG, "Error when sharing QR code", e)
                 }

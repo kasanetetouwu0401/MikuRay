@@ -105,7 +105,6 @@ object CoreOutboundBuilder {
         }
     }
 
-
     private fun toOutboundVmess(profileItem: ProfileItem): OutboundBean? {
         val outboundBean = createInitOutbound(EConfigType.VMESS)
 
@@ -231,11 +230,11 @@ object CoreOutboundBuilder {
         val outboundBean = createInitOutbound(EConfigType.WIREGUARD)
 
         val rawAddresses = profileItem.localAddress
-            ?.split(",")
-            ?.map { it.trim() }
-            ?.filter { it.isNotEmpty() }
-            ?.ifEmpty { null }
-            ?: listOf(AppConfig.WIREGUARD_LOCAL_ADDRESS_V4)
+        ?.split(",")
+        ?.map { it.trim() }
+        ?.filter { it.isNotEmpty() }
+        ?.ifEmpty { null }
+        ?: listOf(AppConfig.WIREGUARD_LOCAL_ADDRESS_V4)
 
         val addresses = if (MmkvManager.decodeSettingsBool(AppConfig.PREF_IPV6_ENABLED) == true) {
             rawAddresses
@@ -294,7 +293,7 @@ object CoreOutboundBuilder {
         path: String?
     ): OutboundBean.StreamSettingsBean.TcpSettingsBean.HeaderBean.RequestBean {
         val requestString =
-            """{"version":"1.1","method":"GET","headers":{"User-Agent":["Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36"],"Accept-Encoding":["gzip, deflate"],"Connection":["keep-alive"],"Pragma":"no-cache"}}"""
+        """{"version":"1.1","method":"GET","headers":{"User-Agent":["Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36"],"Accept-Encoding":["gzip, deflate"],"Connection":["keep-alive"],"Pragma":"no-cache"}}"""
         val request = JsonUtil.fromJson(
             requestString,
             OutboundBean.StreamSettingsBean.TcpSettingsBean.HeaderBean.RequestBean::class.java
@@ -341,7 +340,7 @@ object CoreOutboundBuilder {
                 profileItem.kcpTti?.let { kcpSetting.tti = it }
                 streamSettings.kcpSettings = kcpSetting
                 val udpMaskList =
-                    mutableListOf<OutboundBean.StreamSettingsBean.FinalMaskBean.MaskBean>()
+                mutableListOf<OutboundBean.StreamSettingsBean.FinalMaskBean.MaskBean>()
                 if (!headerType.isNullOrEmpty() && headerType != "none") {
                     val kcpHeaderType = when {
                         headerType == "wechat-video" -> "wechat"
@@ -351,14 +350,14 @@ object CoreOutboundBuilder {
                         OutboundBean.StreamSettingsBean.FinalMaskBean.MaskBean(
                             type = "mkcp-legacy",
                             settings =
-                                OutboundBean.StreamSettingsBean.FinalMaskBean.MaskBean.MaskSettingsBean(
-                                    header = kcpHeaderType,
-                                    value = if (headerType == "dns" && !host.isNullOrEmpty()) {
-                                        host
-                                    } else {
-                                        null
-                                    }
-                                )
+                            OutboundBean.StreamSettingsBean.FinalMaskBean.MaskBean.MaskSettingsBean(
+                                header = kcpHeaderType,
+                                value = if (headerType == "dns" && !host.isNullOrEmpty()) {
+                                    host
+                                } else {
+                                    null
+                                }
+                            )
                         )
                     )
                 }
@@ -390,7 +389,7 @@ object CoreOutboundBuilder {
                 sni = host
                 wssetting.path = path ?: "/"
                 val heartbeat = MmkvManager.decodeSettingsString(AppConfig.PREF_WS_HEARTBEAT_PERIOD, "60")
-                    ?.toIntOrNull() ?: 60
+                ?.toIntOrNull() ?: 60
                 if (heartbeat > 0) wssetting.heartbeatPeriod = heartbeat
                 streamSettings.wsSettings = wssetting
             }
@@ -421,7 +420,6 @@ object CoreOutboundBuilder {
                 h2Setting.path = path ?: "/"
                 streamSettings.httpSettings = h2Setting
             }
-
 
             NetworkType.GRPC.type -> {
                 val grpcSetting = OutboundBean.StreamSettingsBean.GrpcSettingsBean()
@@ -562,7 +560,7 @@ object CoreOutboundBuilder {
             }
 
             var packets =
-                MmkvManager.decodeSettingsString(AppConfig.PREF_FRAGMENT_PACKETS) ?: "tlshello"
+            MmkvManager.decodeSettingsString(AppConfig.PREF_FRAGMENT_PACKETS) ?: "tlshello"
             if (streamSettings.security == AppConfig.REALITY
                 && packets == "tlshello"
             ) {
@@ -574,11 +572,11 @@ object CoreOutboundBuilder {
                 settings = OutboundBean.StreamSettingsBean.FinalMaskBean.MaskBean.MaskSettingsBean(
                     packets = packets,
                     length = MmkvManager.decodeSettingsString(AppConfig.PREF_FRAGMENT_LENGTH)
-                        ?: "50-100",
+                    ?: "50-100",
                     delay = MmkvManager.decodeSettingsString(AppConfig.PREF_FRAGMENT_INTERVAL)
-                        ?: "10-20",
+                    ?: "10-20",
                     maxSplit = MmkvManager.decodeSettingsString(AppConfig.PREF_FRAGMENT_MAXSPLIT)
-                        ?: "10"
+                    ?: "10"
                 )
             )
             val noiseMask = OutboundBean.StreamSettingsBean.FinalMaskBean.MaskBean(

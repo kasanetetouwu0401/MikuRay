@@ -194,12 +194,12 @@ object AngConfigManager {
 
             var count = 0
             servers.lines()
-                .distinct()
-                .forEach { str ->
-                    if (Utils.isValidSubUrl(str)) {
-                        count += importUrlAsSubscription(str, requestSubscriptionName)
-                    }
+            .distinct()
+            .forEach { str ->
+                if (Utils.isValidSubUrl(str)) {
+                    count += importUrlAsSubscription(str, requestSubscriptionName)
                 }
+            }
             return count
         } catch (e: CancellationException) {
             throw e
@@ -209,16 +209,12 @@ object AngConfigManager {
         return 0
     }
 
-    /**
-     * Imports SIP008 JSON subscriptions. The parser emits only Shadowsocks
-     * profiles that MikuRay can represent and run with its current core.
-     */
     private fun parseSIP008Config(content: String?, subid: String, append: Boolean): Int {
         try {
             val subItem = MmkvManager.decodeSubscription(subid)
             val configs = SIP008Fmt.parse(content)
-                .filter { config -> matchesSubscriptionFilters(config, subItem) }
-                .onEach { config -> config.subscriptionId = subid }
+            .filter { config -> matchesSubscriptionFilters(config, subItem) }
+            .onEach { config -> config.subscriptionId = subid }
             if (configs.isNotEmpty()) {
                 commitProfiles(
                     configs = configs.map { ParsedProfile(it) },
@@ -246,19 +242,19 @@ object AngConfigManager {
             val v2raynLines = mutableListOf<String>()
 
             servers.lines()
-                .distinct()
-                .reversed()
-                .forEach { line ->
-                    if (line.startsWith(AppConfig.V2RAYNFMTS, ignoreCase = true)) {
-                        v2raynLines.add(line)
-                    } else {
-                        parseConfig(line, subid, subItem)?.let { configs.add(it) }
-                    }
+            .distinct()
+            .reversed()
+            .forEach { line ->
+                if (line.startsWith(AppConfig.V2RAYNFMTS, ignoreCase = true)) {
+                    v2raynLines.add(line)
+                } else {
+                    parseConfig(line, subid, subItem)?.let { configs.add(it) }
                 }
+            }
 
             val v2raynConfigs = V2rayNFmt.parse(v2raynLines, subid)
-                .filter { matchesSubscriptionFilters(it, subItem) }
-                .onEach { it.subscriptionId = subid }
+            .filter { matchesSubscriptionFilters(it, subItem) }
+            .onEach { it.subscriptionId = subid }
             val allConfigs = v2raynConfigs + configs
 
             if (allConfigs.isNotEmpty()) {
@@ -278,11 +274,6 @@ object AngConfigManager {
         return 0
     }
 
-    /**
-     * Commits a batch of parsed profiles: generates their GUIDs, then hands the batch to
-     * MmkvManager, which publishes the new profiles and their index before removing the
-     * profiles being replaced (see MmkvManager.saveServerProfiles for the ordering).
-     */
     private fun commitProfiles(configs: List<ParsedProfile>, subid: String, append: Boolean) {
         val keyToProfile = linkedMapOf<String, ProfileItem>()
         val rawConfigs = mutableMapOf<String, String>()
@@ -312,7 +303,7 @@ object AngConfigManager {
         ) {
             try {
                 val serverList: Array<Any> =
-                    JsonUtil.fromJson(server, Array<Any>::class.java) ?: arrayOf()
+                JsonUtil.fromJson(server, Array<Any>::class.java) ?: arrayOf()
 
                 if (serverList.isNotEmpty()) {
                     val configs = mutableListOf<ParsedProfile>()
@@ -355,9 +346,7 @@ object AngConfigManager {
                 if (!matchesSubscriptionFilters(config, subItem)) {
                     return 0
                 }
-                // Previously missing: without this, imported WireGuard custom configs
-                // never got tagged with their subscription, so they couldn't be matched
-                // or removed together with the rest of the group on re-import.
+
                 config.subscriptionId = subid
                 commitProfiles(listOf(ParsedProfile(config, server)), subid, append)
                 return 1
@@ -375,16 +364,16 @@ object AngConfigManager {
     private fun matchesSubscriptionFilters(config: ProfileItem, subItem: SubscriptionItem?): Boolean {
         if (subItem?.filter.isNotNullEmpty() && config.remarks.isNotNullEmpty()) {
             val matched = Regex(pattern = subItem?.filter.orEmpty())
-                .containsMatchIn(input = config.remarks)
+            .containsMatchIn(input = config.remarks)
             if (!matched) return false
         }
 
         if (subItem?.networkFilter.isNotNullEmpty()) {
             val allowedNetworks = subItem?.networkFilter.orEmpty()
-                .split(',', '，', ' ')
-                .map { it.trim().lowercase() }
-                .filter { it.isNotEmpty() }
-                .toSet()
+            .split(',', '，', ' ')
+            .map { it.trim().lowercase() }
+            .filter { it.isNotEmpty() }
+            .toSet()
             if (allowedNetworks.isNotEmpty()) {
                 val configNetwork = config.network.orEmpty().lowercase().ifEmpty { "tcp" }
                 if (configNetwork !in allowedNetworks) return false
@@ -393,14 +382,12 @@ object AngConfigManager {
 
         if (subItem?.protocolFilter.isNotNullEmpty()) {
             val allowedProtocols = subItem?.protocolFilter.orEmpty()
-                .split(',', '，', ' ')
-                .map { it.trim().lowercase() }
-                .filter { it.isNotEmpty() }
-                .toSet()
+            .split(',', '，', ' ')
+            .map { it.trim().lowercase() }
+            .filter { it.isNotEmpty() }
+            .toSet()
             if (allowedProtocols.isNotEmpty()) {
-                // For CUSTOM configs (raw JSON), fall back to the underlying
-                // outbound protocol extracted by CustomFmt, since configType
-                // itself is always CUSTOM for those.
+
                 val configProtocol = if (config.configType == EConfigType.CUSTOM) {
                     config.customProtocol.orEmpty().lowercase()
                 } else {
@@ -472,14 +459,14 @@ object AngConfigManager {
         if (serverList.isEmpty()) return
 
         val sorted = serverList
-            .map { guid ->
-                val delay =
-                    MmkvManager.decodeServerAffiliationInfo(guid)?.testDelayMillis ?: 0L
-                guid to if (delay <= 0L) Long.MAX_VALUE else delay
-            }
-            .sortedBy { it.second }
-            .map { it.first }
-            .toMutableList()
+        .map { guid ->
+            val delay =
+            MmkvManager.decodeServerAffiliationInfo(guid)?.testDelayMillis ?: 0L
+            guid to if (delay <= 0L) Long.MAX_VALUE else delay
+        }
+        .sortedBy { it.second }
+        .map { it.first }
+        .toMutableList()
         MmkvManager.encodeServerList(sorted, subId)
     }
 
@@ -571,9 +558,9 @@ object AngConfigManager {
                 val subName = it.subscription.remarks
 
                 var added = (newProfileNames - oldProfileNames)
-                    .map { name -> ProfileDiffEntry(subName, name) }
+                .map { name -> ProfileDiffEntry(subName, name) }
                 val deleted = (oldProfileNames - newProfileNames)
-                    .map { name -> ProfileDiffEntry(subName, name) }
+                .map { name -> ProfileDiffEntry(subName, name) }
 
                 if (added.isEmpty() && deleted.isEmpty()) {
                     added = newProfileNames.map { name -> ProfileDiffEntry(subName, name) }
@@ -596,9 +583,9 @@ object AngConfigManager {
 
     private fun snapshotProfileNames(subId: String): Set<String> {
         return MmkvManager.decodeServerList(subId)
-            .mapNotNull { guid -> MmkvManager.decodeServerConfig(guid)?.remarks }
-            .filter { it.isNotBlank() }
-            .toSet()
+        .mapNotNull { guid -> MmkvManager.decodeServerConfig(guid)?.remarks }
+        .filter { it.isNotBlank() }
+        .toSet()
     }
 
     private fun parseConfigViaSub(server: String?, subid: String, append: Boolean): Int {
@@ -633,7 +620,7 @@ object AngConfigManager {
             (uri.fragment ?: "import sub") to null
         } else {
             val choice = requestSubscriptionName(uri.fragment, subscriptions.map { it.subscription.remarks }.toSet())
-                ?: return 0
+            ?: return 0
             val trimmedName = choice.name.trim().takeIf { it.isNotEmpty() } ?: return 0
             trimmedName to choice.tabIcon
         }

@@ -29,55 +29,55 @@ class StrokeDrawable : Drawable() {
     private var drawableAlpha: Int = 255
 
     var backgroundColor: Int = Color.TRANSPARENT
-        set(value) {
-            field = value
-            fillPaint.color = value
-            invalidateSelf()
-        }
+    set(value) {
+        field = value
+        fillPaint.color = value
+        invalidateSelf()
+    }
 
     var strokeColorTop: Int = Color.TRANSPARENT
-        set(value) {
-            field = value
-            updatePaintColors()
-        }
+    set(value) {
+        field = value
+        updatePaintColors()
+    }
 
     var strokeColorBottom: Int = Color.TRANSPARENT
-        set(value) {
-            field = value
-            updatePaintColors()
-        }
+    set(value) {
+        field = value
+        updatePaintColors()
+    }
 
     var strokeWidthTop: Float = 1f
-        set(value) {
-            field = value.coerceAtLeast(0f)
-            topStrokePaint.strokeWidth = field
-            invalidateSelf()
-        }
+    set(value) {
+        field = value.coerceAtLeast(0f)
+        topStrokePaint.strokeWidth = field
+        invalidateSelf()
+    }
 
     var strokeWidthBottom: Float = 1f
-        set(value) {
-            field = value.coerceAtLeast(0f)
-            bottomStrokePaint.strokeWidth = field
-            invalidateSelf()
-        }
+    set(value) {
+        field = value.coerceAtLeast(0f)
+        bottomStrokePaint.strokeWidth = field
+        invalidateSelf()
+    }
 
     var cornerRadius: Float = 0f
-        set(value) {
-            field = value.coerceAtLeast(0f)
-            invalidateSelf()
-        }
+    set(value) {
+        field = value.coerceAtLeast(0f)
+        invalidateSelf()
+    }
 
     var padding: Int = 0
-        set(value) {
-            field = value.coerceAtLeast(0)
-            invalidateSelf()
-        }
+    set(value) {
+        field = value.coerceAtLeast(0)
+        invalidateSelf()
+    }
 
     var nonRound: Boolean = true
-        set(value) {
-            field = value
-            invalidateSelf()
-        }
+    set(value) {
+        field = value
+        invalidateSelf()
+    }
 
     override fun draw(canvas: Canvas) {
         if (bounds.isEmpty) return

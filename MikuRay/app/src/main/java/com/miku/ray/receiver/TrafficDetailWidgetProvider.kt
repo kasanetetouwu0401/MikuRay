@@ -273,7 +273,7 @@ class TrafficDetailWidgetProvider : AppWidgetProvider() {
             val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, DEFAULT_WIDTH_DP)
             val heightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, DEFAULT_HEIGHT_DP)
             return max((widthDp * density).roundToInt(), dp(DEFAULT_WIDTH_DP.toFloat(), density)) to
-                max((heightDp * density).roundToInt(), dp(DEFAULT_HEIGHT_DP.toFloat(), density))
+            max((heightDp * density).roundToInt(), dp(DEFAULT_HEIGHT_DP.toFloat(), density))
         }
 
         private fun buildThemedContext(context: Context): Context {
@@ -299,14 +299,14 @@ class TrafficDetailWidgetProvider : AppWidgetProvider() {
                 }
             }
             val isTrueBlack = isDarkMode(context) &&
-                MmkvManager.decodeSettingsBool(AppConfig.PREF_TRUE_BLACK, false)
+            MmkvManager.decodeSettingsBool(AppConfig.PREF_TRUE_BLACK, false)
             if (isTrueBlack) themed.theme.applyStyle(R.style.ThemeOverlay_App_TrueBlack, true)
             return themed
         }
 
         private fun isDarkMode(context: Context): Boolean =
-            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
-                Configuration.UI_MODE_NIGHT_YES
+        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+        Configuration.UI_MODE_NIGHT_YES
 
         private fun dp(value: Float, density: Float): Int = (value * density).roundToInt().coerceAtLeast(1)
 
@@ -436,4 +436,3 @@ class TrafficDetailWidgetProvider : AppWidgetProvider() {
         private const val DEFAULT_HEIGHT_DP = 360
     }
 }
-

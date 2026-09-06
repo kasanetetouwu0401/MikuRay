@@ -35,12 +35,12 @@ public final class CanvasSceneRenderer implements LowLevelRenderer {
 
     @Override
     public void drawLine(
-            final float startX,
-            final float startY,
-            final float stopX,
-            final float stopY,
-            final float strokeWidth,
-            @ColorInt final int color) {
+        final float startX,
+        final float startY,
+        final float stopX,
+        final float stopY,
+        final float strokeWidth,
+        @ColorInt final int color) {
         if (canvas == null) {
             throw new IllegalStateException("Called in wrong state");
         }
@@ -51,10 +51,10 @@ public final class CanvasSceneRenderer implements LowLevelRenderer {
 
     @Override
     public void fillCircle(
-            final float cx,
-            final float cy,
-            final float radius,
-            @ColorInt final int color) {
+        final float cx,
+        final float cy,
+        final float radius,
+        @ColorInt final int color) {
         if (canvas == null) {
             throw new IllegalStateException("Called in wrong state");
         }

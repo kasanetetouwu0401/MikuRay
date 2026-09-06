@@ -6,7 +6,6 @@ import android.text.format.DateFormat
 import java.util.*
 import timber.log.Timber
 
-
 object AppUtils {
 
     @JvmStatic

@@ -24,7 +24,7 @@ class TProxyService(
 ) : Tun2SocksControl {
     companion object {
         private const val WATCHDOG_INTERVAL_MS = 5_000L
-        private const val STATS_LOG_INTERVAL_TICKS = 3 // ~15s at 5s interval
+        private const val STATS_LOG_INTERVAL_TICKS = 3
 
         @JvmStatic
         @Suppress("FunctionName")
@@ -47,8 +47,6 @@ class TProxyService(
         }
     }
 
-    // Keep the scope reusable: Android may invoke start/stop on the same service
-    // instance more than once during a VPN handover or an always-on restart.
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var watchdogJob: Job? = null
     private var started = false
@@ -73,11 +71,6 @@ class TProxyService(
         startWatchdog()
     }
 
-    /**
-     * Periodically polls TProxyIsRunning()/TProxyGetStats(). If the tunnel is
-     * supposed to be up (isRunningProvider() == true) but the native engine
-     * has died, triggers restartCallback() to bring it back.
-     */
     private fun startWatchdog() {
         watchdogJob?.cancel()
         watchdogJob = serviceScope.launch {
@@ -90,9 +83,7 @@ class TProxyService(
                 val running = isTunnelRunning()
                 if (!running) {
                     LogUtil.w(AppConfig.TAG, "HevSocks5Tunnel: engine not running, requesting restart")
-                    // restartCallback() builds a brand new TProxyService instance
-                    // (with its own watchdog), so this instance must stop watching now
-                    // to avoid two loops racing on the same native singleton.
+
                     restartCallback()
                     break
                 }
@@ -105,7 +96,7 @@ class TProxyService(
                             LogUtil.d(
                                 AppConfig.TAG,
                                 "HevSocks5Tunnel stats: txPackets=${stats[0]} txBytes=${stats[1]} " +
-                                    "rxPackets=${stats[2]} rxBytes=${stats[3]}"
+                                "rxPackets=${stats[2]} rxBytes=${stats[3]}"
                             )
                         }
                     }
@@ -154,8 +145,8 @@ class TProxyService(
 
             val timeoutSetting = MmkvManager.decodeSettingsString(AppConfig.PREF_HEV_TUNNEL_RW_TIMEOUT) ?: AppConfig.HEVTUN_RW_TIMEOUT
             val parts = timeoutSetting.split(",")
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
             val tcpTimeout = parts.getOrNull(0)?.toIntOrNull() ?: 300
             val udpTimeout = parts.getOrNull(1)?.toIntOrNull() ?: 60
 

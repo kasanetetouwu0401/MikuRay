@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
-    android:theme="@style/AppThemeAlertDialog"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:layout_marginTop="48.0dip"
-    android:layout_marginBottom="48.0dip"
-    android:overScrollMode="ifContentScrolls"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginBottom="48dp"
+    android:layout_marginTop="48dp"
+    android:overScrollMode="ifContentScrolls"
+    android:theme="@style/AppThemeAlertDialog">
     <LinearLayout
-        android:orientation="vertical"
-        android:paddingLeft="?dialogPreferredPadding"
-        android:paddingTop="?dialogPreferredPadding"
-        android:paddingRight="?dialogPreferredPadding"
-        android:paddingBottom="0.0dip"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="?dialogPreferredPadding"
-        android:paddingEnd="?dialogPreferredPadding">
+        android:orientation="vertical"
+        android:paddingBottom="0dp"
+        android:paddingEnd="?attr/dialogPreferredPadding"
+        android:paddingLeft="?attr/dialogPreferredPadding"
+        android:paddingRight="?attr/dialogPreferredPadding"
+        android:paddingStart="?attr/dialogPreferredPadding"
+        android:paddingTop="?attr/dialogPreferredPadding">
         <TextView
-            android:textColor="?colorOnSurfaceVariant"
             android:id="@android:id/message"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16.0dip"
-            android:textAppearance="?textAppearanceBodyMedium" />
+            android:layout_marginBottom="16dp"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant" />
         <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="fill_parent"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:shapeAppearance="?shapeAppearanceCornerMedium"
-            app:boxStrokeWidth="1.5dip"
-            app:boxStrokeWidthFocused="1.5dip"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+            app:boxStrokeWidth="1.5dp"
+            app:boxStrokeWidthFocused="1.5dp"
+            app:shapeAppearance="?attr/shapeAppearanceCornerMedium">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@android:id/edit"
-                android:textColor="?attr/colorOnSurface"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/colorOnSurface">
                 <requestFocus />
             </com.google.android.material.textfield.TextInputEditText>
         </com.google.android.material.textfield.TextInputLayout>

@@ -18,4 +18,3 @@ class ScStartActivity : BaseActivity() {
         finish()
     }
 }
-

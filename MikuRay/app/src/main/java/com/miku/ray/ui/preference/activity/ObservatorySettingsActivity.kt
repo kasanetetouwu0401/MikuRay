@@ -25,8 +25,8 @@ class ObservatorySettingsActivity : BaseActivity() {
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, ObservatorySettingsFragment())
-                .commit()
+            .replace(R.id.settings_container, ObservatorySettingsFragment())
+            .commit()
         }
     }
 

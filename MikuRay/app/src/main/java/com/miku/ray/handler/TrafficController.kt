@@ -111,18 +111,14 @@ object TrafficController {
 
         if (proxyUplink + proxyDownlink <= 0L) return
 
-        // Total traffic/history are owned by the search-bar chip feature and do not depend on
-        // which profile is selected.
         if (SearchBarChipMode.current() in setOf(
                 SearchBarChipMode.TOTAL_TRAFFIC,
                 SearchBarChipMode.DUAL_SWIPE
-            )) {
+        )) {
             MmkvManager.addDailyTraffic(proxyUplink, proxyDownlink)
             MmkvManager.addTotalTrafficAllTime(proxyUplink, proxyDownlink)
         }
 
-        // Per-profile traffic is owned by the per-server traffic setting. Do not accumulate it
-        // while that controller is off, even if another traffic feature is still active.
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) != true) return
         val guid = MmkvManager.getSelectServer() ?: return
         MmkvManager.addProfileTraffic(guid, proxyUplink, proxyDownlink)
@@ -133,5 +129,5 @@ object TrafficController {
     }
 
     private fun getService(): Service? =
-        CoreServiceManager.serviceControl?.getService()
+    CoreServiceManager.serviceControl?.getService()
 }

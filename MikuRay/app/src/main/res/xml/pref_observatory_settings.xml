@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.miku.ray.widget.UwuPreferenceCategory
@@ -8,48 +9,48 @@
         app:sectionIcon="@drawable/rmx_device_radar_line">
 
         <EditTextPreference
-            android:icon="@drawable/rmx_time_line"
-            app:dialogIcon="@drawable/rmx_time_line"
-            app:layout="@layout/uwu_top"
-            android:key="pref_observatory_least_ping_interval"
             android:defaultValue="3m"
-            android:title="@string/title_pref_observatory_least_ping_interval" />
+            android:icon="@drawable/rmx_time_line"
+            android:key="pref_observatory_least_ping_interval"
+            android:title="@string/title_pref_observatory_least_ping_interval"
+            app:dialogIcon="@drawable/rmx_time_line"
+            app:layout="@layout/uwu_top" />
 
         <EditTextPreference
-            android:icon="@drawable/rmx_time_line"
-            app:dialogIcon="@drawable/rmx_time_line"
-            app:layout="@layout/uwu_mid"
-            android:key="pref_observatory_least_load_interval"
             android:defaultValue="5m"
-            android:title="@string/title_pref_observatory_least_load_interval" />
+            android:icon="@drawable/rmx_time_line"
+            android:key="pref_observatory_least_load_interval"
+            android:title="@string/title_pref_observatory_least_load_interval"
+            app:dialogIcon="@drawable/rmx_time_line"
+            app:layout="@layout/uwu_mid" />
 
         <ListPreference
-            android:icon="@drawable/rmx_git_branch_line"
-            app:dialogIcon="@drawable/rmx_git_branch_line"
-            app:layout="@layout/uwu_mid"
             android:defaultValue="HEAD"
             android:entries="@array/observatory_least_load_method"
             android:entryValues="@array/observatory_least_load_method"
+            android:icon="@drawable/rmx_git_branch_line"
             android:key="pref_observatory_least_load_method"
             android:summary="%s"
-            android:title="@string/title_pref_observatory_least_load_method" />
+            android:title="@string/title_pref_observatory_least_load_method"
+            app:dialogIcon="@drawable/rmx_git_branch_line"
+            app:layout="@layout/uwu_mid" />
 
         <EditTextPreference
+            android:defaultValue="2"
             android:icon="@drawable/rmx_hashtag"
-            app:dialogIcon="@drawable/rmx_hashtag"
-            app:layout="@layout/uwu_mid"
             android:inputType="number"
             android:key="pref_observatory_least_load_sampling"
-            android:defaultValue="2"
-            android:title="@string/title_pref_observatory_least_load_sampling" />
+            android:title="@string/title_pref_observatory_least_load_sampling"
+            app:dialogIcon="@drawable/rmx_hashtag"
+            app:layout="@layout/uwu_mid" />
 
         <EditTextPreference
-            android:icon="@drawable/rmx_time_line"
-            app:dialogIcon="@drawable/rmx_time_line"
-            app:layout="@layout/uwu_bot"
-            android:key="pref_observatory_least_load_timeout"
             android:defaultValue="30s"
-            android:title="@string/title_pref_observatory_least_load_timeout" />
+            android:icon="@drawable/rmx_time_line"
+            android:key="pref_observatory_least_load_timeout"
+            android:title="@string/title_pref_observatory_least_load_timeout"
+            app:dialogIcon="@drawable/rmx_time_line"
+            app:layout="@layout/uwu_bot" />
 
     </com.miku.ray.widget.UwuPreferenceCategory>
 

@@ -24,12 +24,12 @@ fun showDeleteConfirmDialog(
     binding.dialogMessage.setText(messageRes)
 
     val dialog = MaterialAlertDialogBuilder(context)
-        .setView(binding.root)
-        .setPositiveButton(positiveTextRes) { _, _ ->
-            onConfirm()
-        }
-        .setNegativeButton(negativeTextRes, null)
-        .create()
+    .setView(binding.root)
+    .setPositiveButton(positiveTextRes) { _, _ ->
+        onConfirm()
+    }
+    .setNegativeButton(negativeTextRes, null)
+    .create()
 
     WindowBlurUtils.applyWindowBlur(dialog.window)
     dialog.show()

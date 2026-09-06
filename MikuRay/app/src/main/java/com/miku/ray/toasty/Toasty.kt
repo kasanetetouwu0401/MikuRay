@@ -1,6 +1,5 @@
 package com.miku.ray.toasty
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.annotation.SuppressLint
 import android.content.Context
@@ -37,190 +36,190 @@ object Toasty {
 
     @JvmStatic @CheckResult
     fun normal(context: Context, @StringRes message: Int): Toast =
-        normal(context, context.getString(message), Toast.LENGTH_SHORT, null, false)
+    normal(context, context.getString(message), Toast.LENGTH_SHORT, null, false)
 
     @JvmStatic @CheckResult
     fun normal(context: Context, message: CharSequence): Toast =
-        normal(context, message, Toast.LENGTH_SHORT, null, false)
+    normal(context, message, Toast.LENGTH_SHORT, null, false)
 
     @JvmStatic @CheckResult
     fun normal(context: Context, @StringRes message: Int, icon: Drawable?): Toast =
-        normal(context, context.getString(message), Toast.LENGTH_SHORT, icon, true)
+    normal(context, context.getString(message), Toast.LENGTH_SHORT, icon, true)
 
     @JvmStatic @CheckResult
     fun normal(context: Context, message: CharSequence, icon: Drawable?): Toast =
-        normal(context, message, Toast.LENGTH_SHORT, icon, true)
+    normal(context, message, Toast.LENGTH_SHORT, icon, true)
 
     @JvmStatic @CheckResult
     fun normal(context: Context, @StringRes message: Int, duration: Int): Toast =
-        normal(context, context.getString(message), duration, null, false)
+    normal(context, context.getString(message), duration, null, false)
 
     @JvmStatic @CheckResult
     fun normal(context: Context, message: CharSequence, duration: Int): Toast =
-        normal(context, message, duration, null, false)
+    normal(context, message, duration, null, false)
 
     @JvmStatic @CheckResult
     fun normal(context: Context, @StringRes message: Int, duration: Int, icon: Drawable?): Toast =
-        normal(context, context.getString(message), duration, icon, true)
+    normal(context, context.getString(message), duration, icon, true)
 
     @JvmStatic @CheckResult
     fun normal(context: Context, message: CharSequence, duration: Int, icon: Drawable?): Toast =
-        normal(context, message, duration, icon, true)
+    normal(context, message, duration, icon, true)
 
     @JvmStatic @CheckResult
     fun normal(context: Context, @StringRes message: Int, duration: Int, icon: Drawable?, withIcon: Boolean): Toast =
-        normal(context, context.getString(message), duration, icon, withIcon)
+    normal(context, context.getString(message), duration, icon, withIcon)
 
     @JvmStatic @CheckResult
     fun normal(context: Context, message: CharSequence, duration: Int, icon: Drawable?, withIcon: Boolean): Toast =
-        custom(context, message, icon,
-            ToastyUtils.getColorAttr(context, "colorTertiary", 0),
-            ToastyUtils.getColorAttr(context, "colorOnTertiary", 0),
-            duration, withIcon, true)
+    custom(context, message, icon,
+        ToastyUtils.getColorAttr(context, "colorTertiary", 0),
+        ToastyUtils.getColorAttr(context, "colorOnTertiary", 0),
+        duration, withIcon, true)
 
     @JvmStatic @CheckResult
     fun warning(context: Context, @StringRes message: Int): Toast =
-        warning(context, context.getString(message), Toast.LENGTH_SHORT, true)
+    warning(context, context.getString(message), Toast.LENGTH_SHORT, true)
 
     @JvmStatic @CheckResult
     fun warning(context: Context, message: CharSequence): Toast =
-        warning(context, message, Toast.LENGTH_SHORT, true)
+    warning(context, message, Toast.LENGTH_SHORT, true)
 
     @JvmStatic @CheckResult
     fun warning(context: Context, @StringRes message: Int, duration: Int): Toast =
-        warning(context, context.getString(message), duration, true)
+    warning(context, context.getString(message), duration, true)
 
     @JvmStatic @CheckResult
     fun warning(context: Context, message: CharSequence, duration: Int): Toast =
-        warning(context, message, duration, true)
+    warning(context, message, duration, true)
 
     @JvmStatic @CheckResult
     fun warning(context: Context, @StringRes message: Int, duration: Int, withIcon: Boolean): Toast =
-        warning(context, context.getString(message), duration, withIcon)
+    warning(context, context.getString(message), duration, withIcon)
 
     @JvmStatic @CheckResult
     fun warning(context: Context, message: CharSequence, duration: Int, withIcon: Boolean): Toast =
-        custom(context, message, ToastyUtils.getDrawable(context, RemixR.drawable.rmx_error_warning_line),
-            ToastyUtils.getColorAttr(context, "colorTertiary", 0),
-            ToastyUtils.getColorAttr(context, "colorOnTertiary", 0),
-            duration, withIcon, true)
+    custom(context, message, ToastyUtils.getDrawable(context, RemixR.drawable.rmx_error_warning_line),
+        ToastyUtils.getColorAttr(context, "colorTertiary", 0),
+        ToastyUtils.getColorAttr(context, "colorOnTertiary", 0),
+        duration, withIcon, true)
 
     @JvmStatic @CheckResult
     fun info(context: Context, @StringRes message: Int): Toast =
-        info(context, context.getString(message), Toast.LENGTH_SHORT, true)
+    info(context, context.getString(message), Toast.LENGTH_SHORT, true)
 
     @JvmStatic @CheckResult
     fun info(context: Context, message: CharSequence): Toast =
-        info(context, message, Toast.LENGTH_SHORT, true)
+    info(context, message, Toast.LENGTH_SHORT, true)
 
     @JvmStatic @CheckResult
     fun info(context: Context, @StringRes message: Int, duration: Int): Toast =
-        info(context, context.getString(message), duration, true)
+    info(context, context.getString(message), duration, true)
 
     @JvmStatic @CheckResult
     fun info(context: Context, message: CharSequence, duration: Int): Toast =
-        info(context, message, duration, true)
+    info(context, message, duration, true)
 
     @JvmStatic @CheckResult
     fun info(context: Context, @StringRes message: Int, duration: Int, withIcon: Boolean): Toast =
-        info(context, context.getString(message), duration, withIcon)
+    info(context, context.getString(message), duration, withIcon)
 
     @JvmStatic @CheckResult
     fun info(context: Context, message: CharSequence, duration: Int, withIcon: Boolean): Toast =
-        custom(context, message, ToastyUtils.getDrawable(context, RemixR.drawable.rmx_information_line),
-            ToastyUtils.getColorAttr(context, "colorSurfaceInverse", 0),
-            ToastyUtils.getColorAttr(context, "colorOnSurfaceInverse", 0),
-            duration, withIcon, true)
+    custom(context, message, ToastyUtils.getDrawable(context, RemixR.drawable.rmx_information_line),
+        ToastyUtils.getColorAttr(context, "colorSurfaceInverse", 0),
+        ToastyUtils.getColorAttr(context, "colorOnSurfaceInverse", 0),
+        duration, withIcon, true)
 
     @JvmStatic @CheckResult
     fun success(context: Context, @StringRes message: Int): Toast =
-        success(context, context.getString(message), Toast.LENGTH_SHORT, true)
+    success(context, context.getString(message), Toast.LENGTH_SHORT, true)
 
     @JvmStatic @CheckResult
     fun success(context: Context, message: CharSequence): Toast =
-        success(context, message, Toast.LENGTH_SHORT, true)
+    success(context, message, Toast.LENGTH_SHORT, true)
 
     @JvmStatic @CheckResult
     fun success(context: Context, @StringRes message: Int, duration: Int): Toast =
-        success(context, context.getString(message), duration, true)
+    success(context, context.getString(message), duration, true)
 
     @JvmStatic @CheckResult
     fun success(context: Context, message: CharSequence, duration: Int): Toast =
-        success(context, message, duration, true)
+    success(context, message, duration, true)
 
     @JvmStatic @CheckResult
     fun success(context: Context, @StringRes message: Int, duration: Int, withIcon: Boolean): Toast =
-        success(context, context.getString(message), duration, withIcon)
+    success(context, context.getString(message), duration, withIcon)
 
     @JvmStatic @CheckResult
     fun success(context: Context, message: CharSequence, duration: Int, withIcon: Boolean): Toast =
-        custom(context, message, ToastyUtils.getDrawable(context, RemixR.drawable.rmx_checkbox_circle_line),
-            ToastyUtils.getColorAttr(context, "colorPrimary", 0),
-            ToastyUtils.getColorAttr(context, "colorOnPrimary", 0),
-            duration, withIcon, true)
+    custom(context, message, ToastyUtils.getDrawable(context, RemixR.drawable.rmx_checkbox_circle_line),
+        ToastyUtils.getColorAttr(context, "colorPrimary", 0),
+        ToastyUtils.getColorAttr(context, "colorOnPrimary", 0),
+        duration, withIcon, true)
 
     @JvmStatic @CheckResult
     fun error(context: Context, @StringRes message: Int): Toast =
-        error(context, context.getString(message), Toast.LENGTH_SHORT, true)
+    error(context, context.getString(message), Toast.LENGTH_SHORT, true)
 
     @JvmStatic @CheckResult
     fun error(context: Context, message: CharSequence): Toast =
-        error(context, message, Toast.LENGTH_SHORT, true)
+    error(context, message, Toast.LENGTH_SHORT, true)
 
     @JvmStatic @CheckResult
     fun error(context: Context, @StringRes message: Int, duration: Int): Toast =
-        error(context, context.getString(message), duration, true)
+    error(context, context.getString(message), duration, true)
 
     @JvmStatic @CheckResult
     fun error(context: Context, message: CharSequence, duration: Int): Toast =
-        error(context, message, duration, true)
+    error(context, message, duration, true)
 
     @JvmStatic @CheckResult
     fun error(context: Context, @StringRes message: Int, duration: Int, withIcon: Boolean): Toast =
-        error(context, context.getString(message), duration, withIcon)
+    error(context, context.getString(message), duration, withIcon)
 
     @JvmStatic @CheckResult
     fun error(context: Context, message: CharSequence, duration: Int, withIcon: Boolean): Toast =
-        custom(context, message, ToastyUtils.getDrawable(context, RemixR.drawable.rmx_error_warning_line),
-            ToastyUtils.getColorAttr(context, "colorError", 0),
-            ToastyUtils.getColorAttr(context, "colorOnError", 0),
-            duration, withIcon, true)
+    custom(context, message, ToastyUtils.getDrawable(context, RemixR.drawable.rmx_error_warning_line),
+        ToastyUtils.getColorAttr(context, "colorError", 0),
+        ToastyUtils.getColorAttr(context, "colorOnError", 0),
+        duration, withIcon, true)
 
     @JvmStatic @CheckResult
     fun custom(context: Context, @StringRes message: Int, icon: Drawable?, duration: Int, withIcon: Boolean): Toast =
-        custom(context, context.getString(message), icon, -1,
-            ToastyUtils.getColorAttr(context, "colorOnSurfaceInverse", 0),
-            duration, withIcon, false)
+    custom(context, context.getString(message), icon, -1,
+        ToastyUtils.getColorAttr(context, "colorOnSurfaceInverse", 0),
+        duration, withIcon, false)
 
     @JvmStatic @CheckResult
     fun custom(context: Context, message: CharSequence, icon: Drawable?, duration: Int, withIcon: Boolean): Toast =
-        custom(context, message, icon, -1,
-            ToastyUtils.getColorAttr(context, "colorOnSurfaceInverse", 0),
-            duration, withIcon, false)
+    custom(context, message, icon, -1,
+        ToastyUtils.getColorAttr(context, "colorOnSurfaceInverse", 0),
+        duration, withIcon, false)
 
     @JvmStatic @CheckResult
     fun custom(context: Context, @StringRes message: Int, @DrawableRes iconRes: Int, @ColorRes tintColorRes: Int, duration: Int, withIcon: Boolean, shouldTint: Boolean): Toast =
-        custom(context, context.getString(message), ToastyUtils.getDrawable(context, iconRes),
-            ToastyUtils.getColor(context, tintColorRes),
-            ToastyUtils.getColorAttr(context, "colorOnSurfaceInverse", 0),
-            duration, withIcon, shouldTint)
+    custom(context, context.getString(message), ToastyUtils.getDrawable(context, iconRes),
+        ToastyUtils.getColor(context, tintColorRes),
+        ToastyUtils.getColorAttr(context, "colorOnSurfaceInverse", 0),
+        duration, withIcon, shouldTint)
 
     @JvmStatic @CheckResult
     fun custom(context: Context, message: CharSequence, @DrawableRes iconRes: Int, @ColorRes tintColorRes: Int, duration: Int, withIcon: Boolean, shouldTint: Boolean): Toast =
-        custom(context, message, ToastyUtils.getDrawable(context, iconRes),
-            ToastyUtils.getColor(context, tintColorRes),
-            ToastyUtils.getColorAttr(context, "colorOnSurfaceInverse", 0),
-            duration, withIcon, shouldTint)
+    custom(context, message, ToastyUtils.getDrawable(context, iconRes),
+        ToastyUtils.getColor(context, tintColorRes),
+        ToastyUtils.getColorAttr(context, "colorOnSurfaceInverse", 0),
+        duration, withIcon, shouldTint)
 
     @JvmStatic @CheckResult
     fun custom(context: Context, @StringRes message: Int, icon: Drawable?, @ColorRes tintColorRes: Int, duration: Int, withIcon: Boolean, shouldTint: Boolean): Toast =
-        custom(context, context.getString(message), icon, ToastyUtils.getColor(context, tintColorRes),
-            ToastyUtils.getColorAttr(context, "colorOnSurfaceInverse", 0), duration, withIcon, shouldTint)
+    custom(context, context.getString(message), icon, ToastyUtils.getColor(context, tintColorRes),
+        ToastyUtils.getColorAttr(context, "colorOnSurfaceInverse", 0), duration, withIcon, shouldTint)
 
     @JvmStatic @CheckResult
     fun custom(context: Context, @StringRes message: Int, icon: Drawable?, @ColorRes tintColorRes: Int, @ColorRes textColorRes: Int, duration: Int, withIcon: Boolean, shouldTint: Boolean): Toast =
-        custom(context, context.getString(message), icon, ToastyUtils.getColor(context, tintColorRes),
-            ToastyUtils.getColor(context, textColorRes), duration, withIcon, shouldTint)
+    custom(context, context.getString(message), icon, ToastyUtils.getColor(context, tintColorRes),
+        ToastyUtils.getColor(context, textColorRes), duration, withIcon, shouldTint)
 
     @SuppressLint("ShowToast", "InflateParams", "DiscouragedApi")
     @Suppress("DEPRECATION")

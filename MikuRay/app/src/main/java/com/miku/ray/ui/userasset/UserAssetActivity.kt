@@ -37,7 +37,7 @@ import java.io.File
 class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenuOptionClickListener {
     private val binding by lazy { ActivityUserAssetBinding.inflate(layoutInflater) }
     private val ownerActivity: UserAssetActivity
-        get() = this
+    get() = this
     private val viewModel: UserAssetViewModel by viewModels()
     private lateinit var adapter: UserAssetAdapter
 
@@ -160,7 +160,7 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
             }
             startActivity(
                 Intent(this, UserAssetUrlActivity::class.java)
-                    .putExtra(UserAssetUrlActivity.ASSET_URL_QRCODE, url)
+                .putExtra(UserAssetUrlActivity.ASSET_URL_QRCODE, url)
             )
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to import asset from URL", e)
@@ -218,7 +218,7 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
     @SuppressLint("NotifyDataSetChanged")
     private suspend fun reloadDataAndAwait() {
         val geoFilesSource = MmkvManager.decodeSettingsString(AppConfig.PREF_GEO_FILES_SOURCES)
-            ?: AppConfig.GEO_FILES_SOURCES.first()
+        ?: AppConfig.GEO_FILES_SOURCES.first()
         viewModel.reload(geoFilesSource, extDir).join()
         adapter.notifyDataSetChanged()
     }
@@ -227,14 +227,14 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
         override fun onEdit(guid: String, position: Int) {
             startActivity(
                 Intent(ownerActivity, UserAssetUrlActivity::class.java)
-                    .putExtra("assetId", guid)
+                .putExtra("assetId", guid)
             )
         }
 
         override fun onRemove(guid: String, position: Int) {
             val asset = viewModel.uiState.value.assets.getOrNull(position)?.takeIf { it.guid == guid }
-                ?: viewModel.uiState.value.assets.find { it.guid == guid }
-                ?: return
+            ?: viewModel.uiState.value.assets.find { it.guid == guid }
+            ?: return
             val file = File(extDir, asset.assetUrl.remarks)
 
             showDeleteConfirmDialog(context = ownerActivity, messageRes = R.string.del_file_asset_dialog_comfirm_message) {

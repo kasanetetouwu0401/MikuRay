@@ -18,10 +18,6 @@ import com.miku.ray.ui.preference.BannerSettingsPreference
 import com.miku.ray.util.WindowBlurUtils
 import java.util.Locale
 
-/**
- * Lets the user fully control the size and offset of the settings banner character artwork:
- * layout_width, layout_height, layout_marginTop, layout_marginBottom, layout_marginEnd.
- */
 class BannerCharacterLayoutDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
@@ -110,20 +106,20 @@ class BannerCharacterLayoutDialog @JvmOverloads constructor(
 
     private fun currentValue(param: SliderParam): Float {
         return MmkvManager.decodeSettingsFloat(param.prefKey, param.default)
-            .coerceIn(param.min, param.max)
+        .coerceIn(param.min, param.max)
     }
 
     private fun refreshBannerPreview() {
         preferenceManager
-            ?.findPreference<BannerSettingsPreference>("pref_banner_settings_card")
-            ?.refreshBanner()
+        ?.findPreference<BannerSettingsPreference>("pref_banner_settings_card")
+        ?.refreshBanner()
     }
 
     override fun onClick() {
         context.findActivity() ?: return
 
         val dialogView = LayoutInflater.from(context)
-            .inflate(R.layout.dialog_banner_character_layout_slider, null)
+        .inflate(R.layout.dialog_banner_character_layout_slider, null)
 
         val sliders = params.map { param ->
             val label = dialogView.findViewById<TextView>(param.labelViewId)
@@ -143,18 +139,18 @@ class BannerCharacterLayoutDialog @JvmOverloads constructor(
         }
 
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(title)
-            .setIcon(RemixR.drawable.rmx_arrows_expand_diagonal_line)
-            .setView(dialogView)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                sliders.forEach { (param, slider) ->
-                    MmkvManager.encodeSettings(param.prefKey, slider.value)
-                }
-                refreshBannerPreview()
+        .setTitle(title)
+        .setIcon(RemixR.drawable.rmx_arrows_expand_diagonal_line)
+        .setView(dialogView)
+        .setPositiveButton(android.R.string.ok) { _, _ ->
+            sliders.forEach { (param, slider) ->
+                MmkvManager.encodeSettings(param.prefKey, slider.value)
             }
-            .setNeutralButton(R.string.reset, null)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
+            refreshBannerPreview()
+        }
+        .setNeutralButton(R.string.reset, null)
+        .setNegativeButton(android.R.string.cancel, null)
+        .create()
 
         WindowBlurUtils.applyWindowBlur(dialog.window)
         dialog.show()
@@ -163,7 +159,7 @@ class BannerCharacterLayoutDialog @JvmOverloads constructor(
             sliders.forEach { (param, slider) ->
                 slider.value = param.default
                 dialogView.findViewById<TextView>(param.labelViewId).text =
-                    labelText(param, param.default)
+                labelText(param, param.default)
                 MmkvManager.encodeSettings(param.prefKey, param.default)
             }
             refreshBannerPreview()

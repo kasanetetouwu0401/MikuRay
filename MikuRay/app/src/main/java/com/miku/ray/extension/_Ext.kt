@@ -1,6 +1,5 @@
 package com.miku.ray.extension
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.app.Activity
 import android.app.Application
@@ -50,14 +49,14 @@ import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
 
 val Context.v2RayApplication: AngApplication?
-    get() = applicationContext as? AngApplication
+get() = applicationContext as? AngApplication
 
 object ForegroundActivityTracker : Application.ActivityLifecycleCallbacks {
 
     private var resumedActivity: WeakReference<Activity>? = null
 
     val currentActivity: Activity?
-        get() = resumedActivity?.get()?.takeIf { !it.isFinishing && !it.isDestroyed }
+    get() = resumedActivity?.get()?.takeIf { !it.isFinishing && !it.isDestroyed }
 
     fun register(application: Application) {
         application.registerActivityLifecycleCallbacks(this)
@@ -158,18 +157,18 @@ private fun showSnackbar(
 
     val fallbackMessage = if (title.isNotNullEmpty()) "$title: $message" else message
 
-        fun showToastyFallback() {
-            val toastDuration = Toast.LENGTH_LONG
-            when (iconRes) {
-                RemixR.drawable.rmx_checkbox_circle_line -> Toasty.success(context, fallbackMessage, toastDuration, true).show()
-                RemixR.drawable.rmx_error_warning_line -> Toasty.error(context, fallbackMessage, toastDuration, true).show()
-                RemixR.drawable.rmx_information_line -> Toasty.custom(context, fallbackMessage, ToastyUtils.getDrawable(context, iconRes),
-                    ToastyUtils.getColorAttr(context, "colorTertiary", 0),
-                    ToastyUtils.getColorAttr(context, "colorOnTertiary", 0),
-                    toastDuration, true, true).show()
-                else -> Toasty.normal(context, fallbackMessage, toastDuration).show()
-            }
+    fun showToastyFallback() {
+        val toastDuration = Toast.LENGTH_LONG
+        when (iconRes) {
+            RemixR.drawable.rmx_checkbox_circle_line -> Toasty.success(context, fallbackMessage, toastDuration, true).show()
+            RemixR.drawable.rmx_error_warning_line -> Toasty.error(context, fallbackMessage, toastDuration, true).show()
+            RemixR.drawable.rmx_information_line -> Toasty.custom(context, fallbackMessage, ToastyUtils.getDrawable(context, iconRes),
+                ToastyUtils.getColorAttr(context, "colorTertiary", 0),
+                ToastyUtils.getColorAttr(context, "colorOnTertiary", 0),
+                toastDuration, true, true).show()
+            else -> Toasty.normal(context, fallbackMessage, toastDuration).show()
         }
+    }
 
     if (activity == null || parent == null) {
         showToastyFallback()
@@ -182,10 +181,10 @@ private fun showSnackbar(
         snackbarLayout.contentDescription = fallbackMessage
 
         snackbarLayout.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
-            ?.visibility = View.INVISIBLE
+        ?.visibility = View.INVISIBLE
 
         val contentView = LayoutInflater.from(activity)
-            .inflate(R.layout.layout_snackbar_custom, snackbarLayout, false)
+        .inflate(R.layout.layout_snackbar_custom, snackbarLayout, false)
 
         val resolvedTextColor = if (textColorAttr != null) {
             activity.getColorAttr(textColorAttr)
@@ -242,10 +241,10 @@ private fun showSnackbar(
         snackbarLayout.doOnPreDraw { view ->
             view.translationY = -view.height.toFloat()
             view.animate()
-                .translationY(0f)
-                .setDuration(300L)
-                .setInterpolator(DecelerateInterpolator())
-                .start()
+            .translationY(0f)
+            .setDuration(300L)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
         }
 
         fun slideRightThenDismiss() {
@@ -254,11 +253,11 @@ private fun showSnackbar(
                 return
             }
             snackbarLayout.animate()
-                .translationX(snackbarLayout.width.toFloat())
-                .setDuration(300L)
-                .setInterpolator(AccelerateInterpolator())
-                .withEndAction { snackbar.dismiss() }
-                .start()
+            .translationX(snackbarLayout.width.toFloat())
+            .setDuration(300L)
+            .setInterpolator(AccelerateInterpolator())
+            .withEndAction { snackbar.dismiss() }
+            .start()
         }
 
         val autoDismissDelayMs = when (duration) {
@@ -369,7 +368,7 @@ fun Long.toTrafficString(): String {
 }
 
 val URI.idnHost: String
-    get() = host?.replace("[", "")?.replace("]", "").orEmpty()
+get() = host?.replace("[", "")?.replace("]", "").orEmpty()
 
 fun String?.removeWhiteSpace(): String? = this?.replace(" ", "")
 
@@ -378,26 +377,26 @@ fun String?.nullIfBlank(): String? = this?.takeIf { it.isNotBlank() }
 fun String.toLongEx(): Long = toLongOrNull() ?: 0
 
 fun Context.listenForPackageChanges(onetime: Boolean = true, callback: () -> Unit) =
-    object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            callback()
-            if (onetime) context.unregisterReceiver(this)
-        }
-    }.apply {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(this, IntentFilter().apply {
+object : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        callback()
+        if (onetime) context.unregisterReceiver(this)
+    }
+}.apply {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        registerReceiver(this, IntentFilter().apply {
                 addAction(Intent.ACTION_PACKAGE_ADDED)
                 addAction(Intent.ACTION_PACKAGE_REMOVED)
                 addDataScheme("package")
             }, Context.RECEIVER_EXPORTED)
-        } else {
-            registerReceiver(this, IntentFilter().apply {
+    } else {
+        registerReceiver(this, IntentFilter().apply {
                 addAction(Intent.ACTION_PACKAGE_ADDED)
                 addAction(Intent.ACTION_PACKAGE_REMOVED)
                 addDataScheme("package")
-            })
-        }
+        })
     }
+}
 
 inline fun <reified T : Serializable> Bundle.serializable(key: String): T? {
     classLoader = T::class.java.classLoader
@@ -439,7 +438,7 @@ fun String.matchesPattern(regex: Regex?, keyword: String?, ignoreCase: Boolean =
         return true
     }
     return regex?.containsMatchIn(this)
-        ?: this.contains(keyword, ignoreCase = ignoreCase)
+    ?: this.contains(keyword, ignoreCase = ignoreCase)
 }
 
 fun EConfigType.isGroupType(): Boolean {
@@ -450,20 +449,13 @@ fun EConfigType.isComplexType(): Boolean {
     return this == EConfigType.CUSTOM || this == EConfigType.POLICYGROUP || this == EConfigType.PROXYCHAIN
 }
 
-/**
- * Shorthand for delay with Int milliseconds using Duration to avoid legacy Long overload warning.
- */
 suspend fun delay(millis: Int) {
     kotlinx.coroutines.delay(millis.toLong().milliseconds)
 }
 
-/**
- * Shorthand for delay with Long milliseconds using Duration to avoid legacy Long overload warning.
- */
 suspend fun delay(millis: Long) {
     kotlinx.coroutines.delay(millis.milliseconds)
 }
-
 
 fun View.applyEdgeToEdgeListInsets() {
     if (this is ViewGroup) clipToPadding = false

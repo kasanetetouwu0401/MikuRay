@@ -412,9 +412,9 @@ private class NumberParse(val numbers: FloatArray) {
 
         private fun parseNumberList(src: String): List<Float> {
             return src.trim()
-                .replace(",", " ")
-                .split("\\s+".toRegex())
-                .mapNotNull { it.trim().toFloatOrNull() }
+            .replace(",", " ")
+            .split("\\s+".toRegex())
+            .mapNotNull { it.trim().toFloatOrNull() }
         }
     }
 }
@@ -426,8 +426,8 @@ private object TransformParser {
         if (cleaned.isEmpty()) return mat
 
         val tokens = cleaned.split(")")
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
 
         for (tok in tokens) {
             when {
@@ -484,7 +484,7 @@ private object TransformParser {
         val inside = token.substringAfter("(").trim()
         if (inside.isEmpty()) return emptyList()
         return inside.replace(",", " ").split("\\s+".toRegex())
-            .mapNotNull { it.toFloatOrNull() }
+        .mapNotNull { it.toFloatOrNull() }
     }
 }
 
@@ -509,10 +509,10 @@ private object ParseUtil {
 
     fun escape(src: String): String {
         return src.replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-            .replace("'", "&apos;")
-            .replace("\"", "&quot;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("'", "&apos;")
+        .replace("\"", "&quot;")
     }
 
     fun convertUnits(name: String, attributes: XmlPullParser, dpi: Float, width: Float, height: Float): Float? {

@@ -195,11 +195,11 @@ class TlsFields(view: View) {
         val pinnedCA256 = etPinnedCa256?.text?.toString()
 
         val allowInsecure =
-            if (allowInsecurePos < 0 || allowinsecures[allowInsecurePos].isBlank()) {
-                false
-            } else {
-                allowinsecures[allowInsecurePos].toBoolean()
-            }
+        if (allowInsecurePos < 0 || allowinsecures[allowInsecurePos].isBlank()) {
+            false
+        } else {
+            allowinsecures[allowInsecurePos].toBoolean()
+        }
 
         config.security = streamSecuritys[streamSecPos]
         config.insecure = allowInsecure

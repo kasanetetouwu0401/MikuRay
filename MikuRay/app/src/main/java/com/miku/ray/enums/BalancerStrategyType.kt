@@ -14,6 +14,6 @@ enum class BalancerStrategyType(
 
     companion object {
         fun from(policyGroupType: String?): BalancerStrategyType =
-            entries.firstOrNull { it.policyGroupTypeValue == policyGroupType } ?: LEAST_PING
+        entries.firstOrNull { it.policyGroupTypeValue == policyGroupType } ?: LEAST_PING
     }
 }

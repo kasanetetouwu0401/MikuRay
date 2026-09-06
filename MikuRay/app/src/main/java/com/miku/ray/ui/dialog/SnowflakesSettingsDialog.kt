@@ -36,17 +36,17 @@ class SnowflakesSettingsDialog @JvmOverloads constructor(
 
     private fun values(): FloatArray = floatArrayOf(
         MmkvManager.decodeSettingsFloat(AppConfig.PREF_SNOWFLAKES_SPEED, AppConfig.SNOWFLAKES_SPEED_DEFAULT)
-            .coerceIn(AppConfig.SNOWFLAKES_SPEED_MIN, AppConfig.SNOWFLAKES_SPEED_MAX),
+        .coerceIn(AppConfig.SNOWFLAKES_SPEED_MIN, AppConfig.SNOWFLAKES_SPEED_MAX),
         MmkvManager.decodeSettingsInt(AppConfig.PREF_SNOWFLAKES_COUNT, AppConfig.SNOWFLAKES_COUNT_DEFAULT)
-            .coerceIn(AppConfig.SNOWFLAKES_COUNT_MIN, AppConfig.SNOWFLAKES_COUNT_MAX).toFloat(),
+        .coerceIn(AppConfig.SNOWFLAKES_COUNT_MIN, AppConfig.SNOWFLAKES_COUNT_MAX).toFloat(),
         MmkvManager.decodeSettingsFloat(AppConfig.PREF_SNOWFLAKES_SIZE, AppConfig.SNOWFLAKES_SIZE_DEFAULT)
-            .coerceIn(AppConfig.SNOWFLAKES_SIZE_MIN, AppConfig.SNOWFLAKES_SIZE_MAX),
+        .coerceIn(AppConfig.SNOWFLAKES_SIZE_MIN, AppConfig.SNOWFLAKES_SIZE_MAX),
         MmkvManager.decodeSettingsFloat(AppConfig.PREF_SNOWFLAKES_OPACITY, AppConfig.SNOWFLAKES_OPACITY_DEFAULT)
-            .coerceIn(AppConfig.SNOWFLAKES_OPACITY_MIN, AppConfig.SNOWFLAKES_OPACITY_MAX),
+        .coerceIn(AppConfig.SNOWFLAKES_OPACITY_MIN, AppConfig.SNOWFLAKES_OPACITY_MAX),
         MmkvManager.decodeSettingsFloat(AppConfig.PREF_SNOWFLAKES_WIND, AppConfig.SNOWFLAKES_WIND_DEFAULT)
-            .coerceIn(AppConfig.SNOWFLAKES_WIND_MIN, AppConfig.SNOWFLAKES_WIND_MAX),
+        .coerceIn(AppConfig.SNOWFLAKES_WIND_MIN, AppConfig.SNOWFLAKES_WIND_MAX),
         MmkvManager.decodeSettingsFloat(AppConfig.PREF_SNOWFLAKES_LIFE, AppConfig.SNOWFLAKES_LIFE_DEFAULT)
-            .coerceIn(AppConfig.SNOWFLAKES_LIFE_MIN, AppConfig.SNOWFLAKES_LIFE_MAX)
+        .coerceIn(AppConfig.SNOWFLAKES_LIFE_MIN, AppConfig.SNOWFLAKES_LIFE_MAX)
     )
 
     private fun updateSummary() {
@@ -61,7 +61,7 @@ class SnowflakesSettingsDialog @JvmOverloads constructor(
         val activity = context.findActivity() ?: return
         val current = values()
         val dialogView = LayoutInflater.from(context)
-            .inflate(R.layout.dialog_snowflakes_settings, null)
+        .inflate(R.layout.dialog_snowflakes_settings, null)
         val speedSlider = dialogView.findViewById<Slider>(R.id.slider_snowflakes_speed)
         val countSlider = dialogView.findViewById<Slider>(R.id.slider_snowflakes_count)
         val sizeSlider = dialogView.findViewById<Slider>(R.id.slider_snowflakes_size)
@@ -96,22 +96,22 @@ class SnowflakesSettingsDialog @JvmOverloads constructor(
         }
 
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.snowflakes_settings_title)
-            .setIcon(RemixR.drawable.rmx_sparkling_line)
-            .setView(dialogView)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                MmkvManager.encodeSettings(AppConfig.PREF_SNOWFLAKES_SPEED, speedSlider.value)
-                MmkvManager.encodeSettings(AppConfig.PREF_SNOWFLAKES_COUNT, countSlider.value.toInt())
-                MmkvManager.encodeSettings(AppConfig.PREF_SNOWFLAKES_SIZE, sizeSlider.value)
-                MmkvManager.encodeSettings(AppConfig.PREF_SNOWFLAKES_OPACITY, opacitySlider.value)
-                MmkvManager.encodeSettings(AppConfig.PREF_SNOWFLAKES_WIND, windSlider.value)
-                MmkvManager.encodeSettings(AppConfig.PREF_SNOWFLAKES_LIFE, lifeSlider.value)
-                updateSummary()
-                activity.recreate()
-            }
-            .setNeutralButton(R.string.reset, null)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
+        .setTitle(R.string.snowflakes_settings_title)
+        .setIcon(RemixR.drawable.rmx_sparkling_line)
+        .setView(dialogView)
+        .setPositiveButton(android.R.string.ok) { _, _ ->
+            MmkvManager.encodeSettings(AppConfig.PREF_SNOWFLAKES_SPEED, speedSlider.value)
+            MmkvManager.encodeSettings(AppConfig.PREF_SNOWFLAKES_COUNT, countSlider.value.toInt())
+            MmkvManager.encodeSettings(AppConfig.PREF_SNOWFLAKES_SIZE, sizeSlider.value)
+            MmkvManager.encodeSettings(AppConfig.PREF_SNOWFLAKES_OPACITY, opacitySlider.value)
+            MmkvManager.encodeSettings(AppConfig.PREF_SNOWFLAKES_WIND, windSlider.value)
+            MmkvManager.encodeSettings(AppConfig.PREF_SNOWFLAKES_LIFE, lifeSlider.value)
+            updateSummary()
+            activity.recreate()
+        }
+        .setNeutralButton(R.string.reset, null)
+        .setNegativeButton(android.R.string.cancel, null)
+        .create()
         WindowBlurUtils.applyWindowBlur(dialog.window)
         dialog.show()
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {

@@ -7,4 +7,3 @@ data class CountryCodeTestMessage(
     val subscriptionId: String = "",
     val serverGuids: List<String> = emptyList()
 ) : Serializable
-

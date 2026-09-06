@@ -68,11 +68,11 @@ class LogcatRecyclerAdapter(
         }
 
         private fun colorForLevel(level: Char): Int = when (level) {
-            'E', 'F' -> Color.parseColor("#F44336") // red
-            'W' -> Color.parseColor("#FFA000")      // amber
-            'I' -> Color.parseColor("#4CAF50")      // green
-            'D' -> Color.parseColor("#29B6F6")      // light blue
-            'V' -> Color.parseColor("#9E9E9E")      // grey
+            'E', 'F' -> Color.parseColor("#F44336")
+            'W' -> Color.parseColor("#FFA000")
+            'I' -> Color.parseColor("#4CAF50")
+            'D' -> Color.parseColor("#29B6F6")
+            'V' -> Color.parseColor("#9E9E9E")
             else -> Color.parseColor("#9E9E9E")
         }
     }

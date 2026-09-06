@@ -15,13 +15,6 @@ import android.renderscript.ScriptIntrinsicBlur;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
-/**
- * Blur using RenderScript, processed on GPU when device drivers support it.
- * Requires API 17+
- *
- * @deprecated because RenderScript is deprecated and its hardware acceleration is not guaranteed.
- * RenderEffectBlur is the best alternative at the moment.
- */
 @Deprecated
 public class RenderScriptBlur implements BlurAlgorithm {
     private final Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
@@ -32,9 +25,6 @@ public class RenderScriptBlur implements BlurAlgorithm {
     private int lastBitmapWidth = -1;
     private int lastBitmapHeight = -1;
 
-    /**
-     * @param context Context to create the {@link RenderScript}
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public RenderScriptBlur(@NonNull Context context) {
         renderScript = RenderScript.create(context);
@@ -45,15 +35,10 @@ public class RenderScriptBlur implements BlurAlgorithm {
         return bitmap.getHeight() == lastBitmapHeight && bitmap.getWidth() == lastBitmapWidth;
     }
 
-    /**
-     * @param bitmap     bitmap to blur
-     * @param blurRadius blur radius (1..25)
-     * @return blurred bitmap
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public Bitmap blur(@NonNull Bitmap bitmap, float blurRadius) {
-        //Allocation will use the same backing array of pixels as bitmap if created with USAGE_SHARED flag
+
         Allocation inAllocation = Allocation.createFromBitmap(renderScript, bitmap);
 
         if (!canReuseAllocation(bitmap)) {
@@ -67,7 +52,7 @@ public class RenderScriptBlur implements BlurAlgorithm {
 
         blurScript.setRadius(blurRadius);
         blurScript.setInput(inAllocation);
-        //do not use inAllocation in forEach. it will cause visual artifacts on blurred Bitmap
+
         blurScript.forEach(outAllocation);
         outAllocation.copyTo(bitmap);
 

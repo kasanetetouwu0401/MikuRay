@@ -18,12 +18,6 @@ import com.miku.ray.dto.TestProgressInfo
 import com.miku.ray.extension.vibrateOnError
 import com.miku.ray.handler.MmkvManager
 
-/**
- * Progress dialog controller shared by the URL/TCP ping test and the country
- * code lookup test. Both tests use the same dialog + result list layout and
- * only differ in how a single result row is rendered, so [Mode] picks the
- * per-row formatting instead of keeping two near-identical classes/layouts.
- */
 class TestProgressDialogController(
     private val context: Context,
     private val mode: Mode,
@@ -36,7 +30,7 @@ class TestProgressDialogController(
     private val adapter = ResultAdapter()
 
     val isShowing: Boolean
-        get() = dialog?.isShowing == true
+    get() = dialog?.isShowing == true
 
     fun show(total: Int, @StringRes titleResId: Int = defaultTitleResId()) {
         if (isShowing) {
@@ -61,17 +55,16 @@ class TestProgressDialogController(
         adapter.clear()
 
         val d = MaterialAlertDialogBuilder(context)
-            .setView(b.root)
-            .setCancelable(false)
-            .setNegativeButton(android.R.string.cancel) { _, _ ->
-                onCancel()
-            }
-            // Use empty listener so the button does NOT auto-dismiss (default null dismisses).
-            // Minimize just closes the dialog; the test continues in background.
-            .setPositiveButton(R.string.action_minimize) { dialogInterface, _ ->
-                dialogInterface.dismiss()
-            }
-            .create()
+        .setView(b.root)
+        .setCancelable(false)
+        .setNegativeButton(android.R.string.cancel) { _, _ ->
+            onCancel()
+        }
+
+        .setPositiveButton(R.string.action_minimize) { dialogInterface, _ ->
+            dialogInterface.dismiss()
+        }
+        .create()
 
         WindowBlurUtils.applyWindowBlur(d.window)
 
@@ -82,16 +75,13 @@ class TestProgressDialogController(
         d.show()
         dialog = d
 
-        // Prevent positive button from dismissing until we attach the listener properly
-        // (already handled above). Keep cancel visible while running.
         d.getButton(DialogInterface.BUTTON_POSITIVE)?.setOnClickListener {
             d.dismiss()
         }
     }
 
     fun update(info: TestProgressInfo) {
-        // If dialog was minimized/dismissed, binding is null — ignore silently
-        // (test still runs; results appear in the server list).
+
         val b = binding ?: return
         val d = dialog ?: return
         if (!d.isShowing) return
@@ -114,18 +104,17 @@ class TestProgressDialogController(
             }
         }
 
-        // Switch off indeterminate and drive determinate progress on every tick
         if (b.progressIndicator.isIndeterminate) {
             b.progressIndicator.isIndeterminate = false
         }
         if (info.total > 0) {
             val pct = ((info.current.toFloat() / info.total.toFloat()) * 100f)
-                .toInt()
-                .coerceIn(0, 100)
+            .toInt()
+            .coerceIn(0, 100)
             b.progressIndicator.setProgressCompat(pct, true)
         }
         b.tvCounter.text = context.getString(R.string.test_progress_counter, info.current, info.total)
-        // Force a layout pass so the counter/bar actually redraw while dialog is open
+
         b.root.postInvalidate()
     }
 
@@ -134,7 +123,7 @@ class TestProgressDialogController(
         b.progressIndicator.isIndeterminate = false
         b.progressIndicator.setProgressCompat(100, true)
         b.progressIndicator.visibility = View.GONE
-        
+
         dialog?.getButton(DialogInterface.BUTTON_NEGATIVE)?.visibility = View.GONE
         dialog?.getButton(DialogInterface.BUTTON_POSITIVE)?.setText(android.R.string.ok)
     }
@@ -151,7 +140,6 @@ class TestProgressDialogController(
         Mode.COUNTRY_CODE -> R.string.title_country_code_all_server
     }
 
-    /** Text + color for a single result row, resolved once per [mode]. */
     private data class RowContent(val text: String, @androidx.annotation.ColorRes val colorRes: Int)
 
     private fun rowContentFor(info: TestProgressInfo): RowContent = when (mode) {
@@ -165,16 +153,16 @@ class TestProgressDialogController(
         }
         Mode.COUNTRY_CODE -> {
             val code = MmkvManager.decodeServerAffiliationInfo(info.guid)?.countryCode
-                ?.trim()?.uppercase()?.takeIf { it.length == 2 }
+            ?.trim()?.uppercase()?.takeIf { it.length == 2 }
             if (code == null) {
                 context.vibrateOnError()
                 RowContent(context.getString(R.string.toast_failure), R.color.colorPingRed)
             } else {
                 val text = listOf(Utils.countryCodeToFlag(code), code)
-                    .filterNotNull()
-                    .filter { it.isNotBlank() }
-                    .joinToString(" ")
-                    .ifBlank { context.getString(R.string.toast_failure) }
+                .filterNotNull()
+                .filter { it.isNotBlank() }
+                .joinToString(" ")
+                .ifBlank { context.getString(R.string.toast_failure) }
                 RowContent(text, R.color.colorPing)
             }
         }

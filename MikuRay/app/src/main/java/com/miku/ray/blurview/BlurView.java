@@ -17,10 +17,6 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
-/**
- * FrameLayout that blurs its underlying content.
- * Can have children and draw them over blurred background.
- */
 public class BlurView extends FrameLayout {
 
     private static final String TAG = BlurView.class.getSimpleName();
@@ -81,13 +77,6 @@ public class BlurView extends FrameLayout {
         }
     }
 
-    /**
-     * @param rootView  root to start blur from.
-     *                  Can be Activity's root content layout (android.R.id.content)
-     *                  or (preferably) some of your layouts. The lower amount of Views are in the root, the better for performance.
-     * @param algorithm sets the blur algorithm
-     * @return {@link BlurView} to setup needed params.
-     */
     public BlurViewFacade setupWith(@NonNull ViewGroup rootView, BlurAlgorithm algorithm) {
         this.blurController.destroy();
         BlurController blurController = new PreDrawBlurController(this, rootView, overlayColor, algorithm);
@@ -96,47 +85,24 @@ public class BlurView extends FrameLayout {
         return blurController;
     }
 
-    /**
-     * @param rootView root to start blur from.
-     *                 Can be Activity's root content layout (android.R.id.content)
-     *                 or (preferably) some of your layouts. The lower amount of Views are in the root, the better for performance.
-     *                 <p>
-     *                 BlurAlgorithm is automatically picked based on the API version.
-     *                 It uses RenderEffectBlur on API 31+, and RenderScriptBlur on older versions.
-     * @return {@link BlurView} to setup needed params.
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public BlurViewFacade setupWith(@NonNull ViewGroup rootView) {
         return setupWith(rootView, getBlurAlgorithm());
     }
 
-    // Setters duplicated to be able to conveniently change these settings outside of setupWith chain
-
-    /**
-     * @see BlurViewFacade#setBlurRadius(float)
-     */
     public BlurViewFacade setBlurRadius(float radius) {
         return blurController.setBlurRadius(radius);
     }
 
-    /**
-     * @see BlurViewFacade#setOverlayColor(int)
-     */
     public BlurViewFacade setOverlayColor(@ColorInt int overlayColor) {
         this.overlayColor = overlayColor;
         return blurController.setOverlayColor(overlayColor);
     }
 
-    /**
-     * @see BlurViewFacade#setBlurAutoUpdate(boolean)
-     */
     public BlurViewFacade setBlurAutoUpdate(boolean enabled) {
         return blurController.setBlurAutoUpdate(enabled);
     }
 
-    /**
-     * @see BlurViewFacade#setBlurEnabled(boolean)
-     */
     public BlurViewFacade setBlurEnabled(boolean enabled) {
         return blurController.setBlurEnabled(enabled);
     }

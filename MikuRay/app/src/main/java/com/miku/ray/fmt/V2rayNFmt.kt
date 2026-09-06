@@ -28,8 +28,8 @@ object V2rayNFmt : FmtBase() {
                 val childIds = item.ProtoExtraObj?.ChildItems?.takeIf { it.isNotNullEmpty() }
                 if (childIds != null) {
                     val childRemarks = childIds.split(",")
-                        .mapNotNull { childId -> itemsById[childId.trim()]?.Remarks }
-                        .filter { it.isNotNullEmpty() }
+                    .mapNotNull { childId -> itemsById[childId.trim()]?.Remarks }
+                    .filter { it.isNotNullEmpty() }
 
                     if (childRemarks.isNotEmpty()) {
                         when (configType) {

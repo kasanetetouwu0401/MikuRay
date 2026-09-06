@@ -1,6 +1,5 @@
 package com.miku.ray.ui.dialog
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.content.Context
 import android.util.AttributeSet
@@ -38,13 +37,13 @@ class BlurBottomIntensityDialog @JvmOverloads constructor(
         sliderAlpha.value = originalAlpha.toFloat().coerceIn(0f, 100f)
 
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.pref_blur_bottom_intensity)
-            .setIcon(RemixR.drawable.rmx_blur_line)
-            .setView(dialogView)
-            .setPositiveButton(android.R.string.ok, null)
-            .setNeutralButton(R.string.reset, null)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
+        .setTitle(R.string.pref_blur_bottom_intensity)
+        .setIcon(RemixR.drawable.rmx_blur_line)
+        .setView(dialogView)
+        .setPositiveButton(android.R.string.ok, null)
+        .setNeutralButton(R.string.reset, null)
+        .setNegativeButton(android.R.string.cancel, null)
+        .create()
 
         WindowBlurUtils.applyWindowBlur(dialog.window)
         dialog.show()

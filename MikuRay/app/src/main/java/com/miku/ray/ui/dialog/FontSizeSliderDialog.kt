@@ -1,6 +1,5 @@
 package com.miku.ray.ui.dialog
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.app.Activity
 import android.content.Context
@@ -54,21 +53,21 @@ class FontSizeSliderDialog @JvmOverloads constructor(
         }
 
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.pref_font_size)
-            .setIcon(RemixR.drawable.rmx_font_size)
-            .setView(dialogView)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                val clamped = slider.value.coerceIn(AppConfig.FONT_SIZE_MIN, AppConfig.FONT_SIZE_MAX)
-                val valueToSave = if (clamped == AppConfig.FONT_SIZE_DEFAULT) AppConfig.FONT_SIZE_DEFAULT else clamped
+        .setTitle(R.string.pref_font_size)
+        .setIcon(RemixR.drawable.rmx_font_size)
+        .setView(dialogView)
+        .setPositiveButton(android.R.string.ok) { _, _ ->
+            val clamped = slider.value.coerceIn(AppConfig.FONT_SIZE_MIN, AppConfig.FONT_SIZE_MAX)
+            val valueToSave = if (clamped == AppConfig.FONT_SIZE_DEFAULT) AppConfig.FONT_SIZE_DEFAULT else clamped
 
-                MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT_SIZE, valueToSave)
-                summary = formatPercent(valueToSave)
+            MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT_SIZE, valueToSave)
+            summary = formatPercent(valueToSave)
 
-                activity.recreate()
-            }
-            .setNeutralButton(R.string.reset, null)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
+            activity.recreate()
+        }
+        .setNeutralButton(R.string.reset, null)
+        .setNegativeButton(android.R.string.cancel, null)
+        .create()
 
         WindowBlurUtils.applyWindowBlur(dialog.window)
         dialog.show()

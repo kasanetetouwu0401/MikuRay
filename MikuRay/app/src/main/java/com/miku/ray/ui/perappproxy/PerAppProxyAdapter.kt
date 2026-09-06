@@ -48,7 +48,7 @@ class PerAppProxyAdapter(
     open class BaseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     inner class AppViewHolder(private val itemBypassBinding: ItemRecyclerBypassListBinding) : BaseViewHolder(itemBypassBinding.root),
-        View.OnClickListener {
+    View.OnClickListener {
         private lateinit var appInfo: AppInfo
 
         fun bind(appInfo: AppInfo) {

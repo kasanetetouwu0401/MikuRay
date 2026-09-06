@@ -1,6 +1,5 @@
 package com.miku.ray.ui.dialog
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.app.Activity
 import android.content.Context
@@ -43,28 +42,28 @@ class HeaderTopRowPaddingDialog @JvmOverloads constructor(
         )
 
         val dialogView = LayoutInflater.from(context)
-            .inflate(R.layout.dialog_header_top_row_padding_slider, null)
+        .inflate(R.layout.dialog_header_top_row_padding_slider, null)
         val slider = dialogView.findViewById<Slider>(R.id.slider_header_top_row_padding)
         slider.value = current.toFloat()
 
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.pref_header_top_row_padding_title)
-            .setIcon(RemixR.drawable.rmx_design_pencil_ruler_line)
-            .setView(dialogView)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                val newPadding = slider.value.toInt()
-                MmkvManager.encodeSettings(AppConfig.PREF_HEADER_TOP_ROW_PADDING, newPadding)
-                summary = context.getString(
-                    R.string.pref_header_top_row_padding_summary_value, newPadding
-                )
-                val intent = android.content.Intent(
-                    AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED
-                )
-                activity.sendBroadcast(intent)
-            }
-            .setNeutralButton(R.string.reset, null)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
+        .setTitle(R.string.pref_header_top_row_padding_title)
+        .setIcon(RemixR.drawable.rmx_design_pencil_ruler_line)
+        .setView(dialogView)
+        .setPositiveButton(android.R.string.ok) { _, _ ->
+            val newPadding = slider.value.toInt()
+            MmkvManager.encodeSettings(AppConfig.PREF_HEADER_TOP_ROW_PADDING, newPadding)
+            summary = context.getString(
+                R.string.pref_header_top_row_padding_summary_value, newPadding
+            )
+            val intent = android.content.Intent(
+                AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED
+            )
+            activity.sendBroadcast(intent)
+        }
+        .setNeutralButton(R.string.reset, null)
+        .setNegativeButton(android.R.string.cancel, null)
+        .create()
 
         WindowBlurUtils.applyWindowBlur(dialog.window)
         dialog.show()

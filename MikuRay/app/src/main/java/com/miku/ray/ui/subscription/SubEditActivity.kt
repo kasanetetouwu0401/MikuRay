@@ -103,11 +103,11 @@ class SubEditActivity : BaseActivity() {
         }
 
         dialog = MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.sub_setting_tab_icon)
-            .setIcon(RemixR.drawable.rmx_apps_line)
-            .setView(dialogBinding.root)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
+        .setTitle(R.string.sub_setting_tab_icon)
+        .setIcon(RemixR.drawable.rmx_apps_line)
+        .setView(dialogBinding.root)
+        .setNegativeButton(android.R.string.cancel, null)
+        .create()
 
         WindowBlurUtils.applyWindowBlur(dialog!!.window)
         dialog!!.show()
@@ -172,7 +172,6 @@ class SubEditActivity : BaseActivity() {
         return true
     }
 
-
     private fun setupProfileRemarkInputs() {
         val suggestions = SettingsManager.getProfileRemarks(
             excludeConfigTypes = setOf(
@@ -199,7 +198,6 @@ class SubEditActivity : BaseActivity() {
             }
         }
     }
-
 
     private fun saveServer(): Boolean {
         val subItem = MmkvManager.decodeSubscription(editSubId) ?: SubscriptionItem()
@@ -271,7 +269,6 @@ class SubEditActivity : BaseActivity() {
         return true
     }
 
-
     private fun deleteServer(): Boolean {
         if (editSubId.isNotEmpty()) {
             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_CONFIRM_REMOVE)) {
@@ -297,7 +294,6 @@ class SubEditActivity : BaseActivity() {
         return true
     }
 
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.action_server, menu)
         del_config = menu.findItem(R.id.del_config)
@@ -310,7 +306,6 @@ class SubEditActivity : BaseActivity() {
         R.id.save_config -> { saveServer(); true }
         else -> super.onOptionsItemSelected(item)
     }
-
 
     override fun onDestroy() {
         dialog?.dismiss()

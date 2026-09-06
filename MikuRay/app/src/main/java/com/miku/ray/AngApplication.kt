@@ -40,17 +40,17 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
     }
 
     private val workManagerConfiguration: Configuration = Configuration.Builder()
-        .setDefaultProcessName("${ANG_PACKAGE}:bg")
-        .build()
+    .setDefaultProcessName("${ANG_PACKAGE}:bg")
+    .build()
 
     override fun onCreate() {
         super.onCreate()
         CrashReporter.initialize(
             this,
             CrashReporterConfiguration()
-                .setMaxNumberOfCrashToBeReport(5)
-                .setCrashReportSubjectForEmail("MikuRay Crash Report")
-                .setExtraInformation("MikuRay ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
+            .setMaxNumberOfCrashToBeReport(5)
+            .setCrashReportSubjectForEmail("MikuRay Crash Report")
+            .setExtraInformation("MikuRay ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
         )
 
         Timber.plant(MikuRayLogTree())
@@ -63,10 +63,6 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
         SettingsManager.setNightMode()
     }
 
-    /**
-     * Applies all activity-level themes before AppCompat/material widgets inflate.
-     * Applying a textAppearance after setContentView is too late for many widgets.
-     */
     fun applyActivityTheme(activity: Activity) {
         ThemeManager.applyTheme(activity)
 
@@ -92,7 +88,7 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-        // Fallback for pre-Q devices, where onActivityPreCreated is not dispatched.
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             applyActivityTheme(activity)
         }
@@ -109,8 +105,6 @@ class AngApplication : Application(), Application.ActivityLifecycleCallbacks {
         } catch (e: Exception) {
         }
     }
-
-    
 
     override fun onActivityStarted(activity: Activity) {}
     override fun onActivityPaused(activity: Activity) {}

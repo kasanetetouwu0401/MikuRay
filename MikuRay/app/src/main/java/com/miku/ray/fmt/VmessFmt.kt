@@ -43,7 +43,7 @@ object VmessFmt : FmtBase() {
         config.serverPort = vmessQRCode.port
         config.password = vmessQRCode.id
         config.method =
-            if (TextUtils.isEmpty(vmessQRCode.scy)) AppConfig.DEFAULT_SECURITY else vmessQRCode.scy
+        if (TextUtils.isEmpty(vmessQRCode.scy)) AppConfig.DEFAULT_SECURITY else vmessQRCode.scy
 
         config.network = vmessQRCode.net
         if (config.network.isNullOrEmpty()) {
@@ -57,7 +57,6 @@ object VmessFmt : FmtBase() {
             NetworkType.KCP -> {
                 config.seed = vmessQRCode.path
             }
-
 
             NetworkType.GRPC -> {
                 config.mode = vmessQRCode.type
@@ -100,7 +99,6 @@ object VmessFmt : FmtBase() {
             NetworkType.KCP -> {
                 vmessQRCode.path = config.seed.orEmpty()
             }
-
 
             NetworkType.GRPC -> {
                 vmessQRCode.type = config.mode.orEmpty()
@@ -147,6 +145,5 @@ object VmessFmt : FmtBase() {
 
         return config
     }
-
 
 }

@@ -14,7 +14,7 @@ import com.miku.ray.helper.CustomDividerItemDecoration
 abstract class BaseFragment<VB : ViewBinding> : Fragment() {
     private var _binding: VB? = null
     protected val binding: VB
-        get() = _binding!!
+    get() = _binding!!
 
     protected abstract fun inflateBinding(inflater: LayoutInflater, container: ViewGroup?): VB
 

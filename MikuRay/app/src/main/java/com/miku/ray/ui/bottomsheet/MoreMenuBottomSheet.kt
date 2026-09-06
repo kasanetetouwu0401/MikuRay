@@ -77,7 +77,7 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
         val isScrollButtonsHidden = MmkvManager.decodeSettingsBool(AppConfig.PREF_HIDE_SCROLL_BUTTONS, false)
         val hasSelectedServer = !MmkvManager.getSelectServer().isNullOrEmpty()
         view.findViewById<View>(R.id.action_scroll_to_selected)?.visibility =
-            if (isScrollButtonsHidden && hasSelectedServer) View.VISIBLE else View.GONE
+        if (isScrollButtonsHidden && hasSelectedServer) View.VISIBLE else View.GONE
 
         val isQuickActionsEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_QUICK_ACTIONS, false)
         listOf(

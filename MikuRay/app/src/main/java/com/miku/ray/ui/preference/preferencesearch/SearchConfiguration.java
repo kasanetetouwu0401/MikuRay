@@ -65,9 +65,9 @@ public class SearchConfiguration {
         SearchPreferenceFragment fragment = new SearchPreferenceFragment();
         fragment.setArguments(arguments);
         activity.getSupportFragmentManager().beginTransaction()
-                .add(containerResId, fragment, SearchPreferenceFragment.TAG)
-                .addToBackStack(SearchPreferenceFragment.TAG)
-                .commit();
+        .add(containerResId, fragment, SearchPreferenceFragment.TAG)
+        .addToBackStack(SearchPreferenceFragment.TAG)
+        .commit();
         return fragment;
     }
 

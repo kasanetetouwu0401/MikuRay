@@ -70,11 +70,11 @@ object WindowBlurUtils {
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
             window.decorView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-                override fun onViewAttachedToWindow(v: View) {}
-                override fun onViewDetachedFromWindow(v: View) {
-                    decorView.removeView(blurView)
-                    window.decorView.removeOnAttachStateChangeListener(this)
-                }
+                    override fun onViewAttachedToWindow(v: View) {}
+                    override fun onViewDetachedFromWindow(v: View) {
+                        decorView.removeView(blurView)
+                        window.decorView.removeOnAttachStateChangeListener(this)
+                    }
             })
 
         } catch (e: Exception) {
@@ -106,12 +106,11 @@ object WindowBlurUtils {
         }
     }
 
-    /** Returns true only when the user selected native blur and Android can apply it now. */
     fun isSystemBlurAvailable(context: Context): Boolean {
         if (!shouldUseSystemBlur() || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return false
         return try {
             val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
-                ?: return false
+            ?: return false
             windowManager.isCrossWindowBlurEnabled
         } catch (_: Exception) {
             false
@@ -119,13 +118,8 @@ object WindowBlurUtils {
     }
 
     private fun shouldUseSystemBlur(): Boolean =
-        MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_SYSTEM_BLUR, false)
+    MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_SYSTEM_BLUR, false)
 
-    /**
-     * Uses Android 12+ cross-window blur when the system exposes it. This mirrors the adaptive
-     * strategy used by Smartspacer while retaining the existing BlurView path for older devices
-     * and systems that disable cross-window blur.
-     */
     private fun tryApplyNativeWindowBlur(window: Window, radius: Float): Boolean {
         if (!isSystemBlurAvailable(window.context)) return false
         return try {

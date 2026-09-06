@@ -312,15 +312,15 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     private fun resolveFallbackLoadingBlurMode(): LoadingBlurMode =
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)) {
-            LoadingBlurMode.BLUR_VIEW
-        } else {
-            LoadingBlurMode.DIM
-        }
+    if (MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)) {
+        LoadingBlurMode.BLUR_VIEW
+    } else {
+        LoadingBlurMode.DIM
+    }
 
     private fun addLoadingIndicator(container: FrameLayout) {
         val customLoadingView = LayoutInflater.from(this@BaseActivity)
-            .inflate(R.layout.layout_custom_loading, container, false)
+        .inflate(R.layout.layout_custom_loading, container, false)
         val params = FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT

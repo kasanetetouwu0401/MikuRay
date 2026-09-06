@@ -35,11 +35,10 @@ import java.io.IOException;
 
 @Keep
 public class ParticlesDrawable extends Drawable implements
-        Animatable,
-        SceneConfiguration,
-        SceneController,
-        SceneScheduler {
-
+Animatable,
+SceneConfiguration,
+SceneController,
+SceneScheduler {
 
     private CanvasSceneRenderer canvasRenderer = new CanvasSceneRenderer();
 
@@ -53,10 +52,10 @@ public class ParticlesDrawable extends Drawable implements
 
     @Override
     public void inflate(
-            @NonNull final Resources r,
-            @NonNull final XmlPullParser parser,
-            @NonNull final AttributeSet attrs,
-            @Nullable final Resources.Theme theme) throws XmlPullParserException, IOException {
+        @NonNull final Resources r,
+        @NonNull final XmlPullParser parser,
+        @NonNull final AttributeSet attrs,
+        @Nullable final Resources.Theme theme) throws XmlPullParserException, IOException {
         super.inflate(r, parser, attrs, theme);
 
         final TypedArray a;
@@ -204,8 +203,8 @@ public class ParticlesDrawable extends Drawable implements
 
     @Override
     public void setParticleRadiusRange(
-            @FloatRange(from = 0.5f) final float minRadius,
-            @FloatRange(from = 0.5f) final float maxRadius) {
+        @FloatRange(from = 0.5f) final float minRadius,
+        @FloatRange(from = 0.5f) final float maxRadius) {
         scene.setParticleRadiusRange(minRadius, maxRadius);
     }
 

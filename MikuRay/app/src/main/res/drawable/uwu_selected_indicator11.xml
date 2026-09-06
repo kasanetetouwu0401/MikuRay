@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:top="4.0dip"
-        android:left="4.0dip"
-        android:right="4.0dip"
-        android:bottom="0.0dip">
+        android:bottom="0dp"
+        android:left="4dp"
+        android:right="4dp"
+        android:top="4dp">
         <shape android:shape="rectangle">
-            <solid android:color="?colorPrimary" />
-            <corners android:radius="16.0dip" />
+            <solid android:color="?attr/colorPrimary" />
+            <corners android:radius="16dp" />
         </shape>
     </item>
     <item
-        android:bottom="4.0dip">
+        android:bottom="4dp">
         <shape android:shape="rectangle">
-            <solid android:color="?colorCard" />
+            <solid android:color="?attr/colorCard" />
             <stroke
-                android:width="2.0dip"
-                android:color="?colorPrimary" />
-            <corners android:radius="16.0dip" />
+                android:color="?attr/colorPrimary"
+                android:width="2dp" />
+            <corners android:radius="16dp" />
         </shape>
     </item>
 </layer-list>

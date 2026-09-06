@@ -1,6 +1,5 @@
 package com.miku.ray.ui.preference.activity
 
-
 import com.miku.ray.remixicon.R as RemixR
 import android.content.Intent
 import android.os.Bundle
@@ -72,22 +71,22 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, SettingsFragment())
-                .commit()
+            .replace(R.id.settings_container, SettingsFragment())
+            .commit()
         }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                val searchFragment = supportFragmentManager.fragments.find {
-                    it.javaClass.name.contains("SearchPreferenceFragment")
-                }
+                override fun handleOnBackPressed() {
+                    val searchFragment = supportFragmentManager.fragments.find {
+                        it.javaClass.name.contains("SearchPreferenceFragment")
+                    }
 
-                if (searchFragment != null && searchFragment.isVisible) {
-                    searchActionView.cancelSearch()
-                } else {
-                    finish()
+                    if (searchFragment != null && searchFragment.isVisible) {
+                        searchActionView.cancelSearch()
+                    } else {
+                        finish()
+                    }
                 }
-            }
         })
     }
 
@@ -137,7 +136,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     }
 
     private fun currentSearchFragment(): SearchPreferenceFragment? =
-        supportFragmentManager.fragments.filterIsInstance<SearchPreferenceFragment>().firstOrNull()
+    supportFragmentManager.fragments.filterIsInstance<SearchPreferenceFragment>().firstOrNull()
 
     private fun setupWeatherTrafficChip() {
         layoutWeatherChip = findViewById(R.id.layout_weather_chip)
@@ -167,39 +166,38 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     )
 
     private fun weatherLocationReady(): Boolean =
-        WeatherHelper.hasCustomLocation() || WeatherHelper.hasLocationPermission(this)
+    WeatherHelper.hasCustomLocation() || WeatherHelper.hasLocationPermission(this)
 
     private fun setupSearchBarChipSwipe() {
         val swipeThreshold = 64 * resources.displayMetrics.density
         val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onDown(event: MotionEvent): Boolean = true
+                override fun onDown(event: MotionEvent): Boolean = true
 
-            override fun onSingleTapUp(event: MotionEvent): Boolean {
-                layoutWeatherChip.performClick()
-                return true
-            }
-
-            override fun onFling(
-                firstEvent: MotionEvent?,
-                lastEvent: MotionEvent,
-                velocityX: Float,
-                velocityY: Float
-            ): Boolean {
-                if (firstEvent == null) return false
-                val distanceX = lastEvent.x - firstEvent.x
-                val distanceY = lastEvent.y - firstEvent.y
-                if (abs(distanceY) <= abs(distanceX) || abs(distanceY) < swipeThreshold) return false
-
-                // With two items, both vertical directions advance the carousel with wrap-around.
-                dualSwipeChipSelection = if (dualSwipeChipSelection == SearchBarChipMode.WEATHER) {
-                    SearchBarChipMode.TOTAL_TRAFFIC
-                } else {
-                    SearchBarChipMode.WEATHER
+                override fun onSingleTapUp(event: MotionEvent): Boolean {
+                    layoutWeatherChip.performClick()
+                    return true
                 }
-                SearchBarChipMode.saveDualSelection(dualSwipeChipSelection)
-                refreshSearchBarChip()
-                return true
-            }
+
+                override fun onFling(
+                    firstEvent: MotionEvent?,
+                    lastEvent: MotionEvent,
+                    velocityX: Float,
+                    velocityY: Float
+                ): Boolean {
+                    if (firstEvent == null) return false
+                    val distanceX = lastEvent.x - firstEvent.x
+                    val distanceY = lastEvent.y - firstEvent.y
+                    if (abs(distanceY) <= abs(distanceX) || abs(distanceY) < swipeThreshold) return false
+
+                    dualSwipeChipSelection = if (dualSwipeChipSelection == SearchBarChipMode.WEATHER) {
+                        SearchBarChipMode.TOTAL_TRAFFIC
+                    } else {
+                        SearchBarChipMode.WEATHER
+                    }
+                    SearchBarChipMode.saveDualSelection(dualSwipeChipSelection)
+                    refreshSearchBarChip()
+                    return true
+                }
         })
 
         layoutWeatherChip.setOnTouchListener { view, event ->
@@ -219,13 +217,13 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
     private fun isWeatherChipSelected(): Boolean {
         val mode = SearchBarChipMode.current()
         return mode == SearchBarChipMode.WEATHER ||
-            (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.WEATHER)
+        (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.WEATHER)
     }
 
     private fun isTotalTrafficChipSelected(): Boolean {
         val mode = SearchBarChipMode.current()
         return mode == SearchBarChipMode.TOTAL_TRAFFIC ||
-            (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.TOTAL_TRAFFIC)
+        (mode == SearchBarChipMode.DUAL_SWIPE && dualSwipeChipSelection == SearchBarChipMode.TOTAL_TRAFFIC)
     }
 
     private fun refreshSearchBarChip() {
@@ -436,8 +434,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
             addPreferencesFromResource(R.xml.pref_settings)
 
             bannerSettingsCharacter?.setOnPreferenceChangeListener { _, newValue ->
-                // Persist immediately so the banner reflects the new value on this same bind pass
-                // (onPreferenceChangeListener fires before the ListPreference itself persists).
+
                 MmkvManager.encodeSettings(AppConfig.PREF_BANNER_SETTINGS_CHARACTER, newValue as? String)
                 bannerSettingsCard?.refreshBanner()
                 true
