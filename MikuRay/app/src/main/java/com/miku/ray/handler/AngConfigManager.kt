@@ -192,7 +192,9 @@ object AngConfigManager {
             }
 
             var count = 0
-            servers.lines()
+            servers.lineSequence()
+                .map { it.trim().removePrefix("\uFEFF") }
+                .filter { it.isNotEmpty() }
                 .distinct()
                 .forEach { str ->
                     if (Utils.isValidSubUrl(str)) {
@@ -244,9 +246,12 @@ object AngConfigManager {
             val configs = mutableListOf<ProfileItem>()
             val v2raynLines = mutableListOf<String>()
 
-            servers.lines()
+            servers.lineSequence()
+                .map { it.trim().removePrefix("\uFEFF") }
+                .filter { it.isNotEmpty() }
                 .distinct()
-                .reversed()
+                .toList()
+                .asReversed()
                 .forEach { line ->
                     if (line.startsWith(AppConfig.V2RAYNFMTS, ignoreCase = true)) {
                         v2raynLines.add(line)
@@ -418,12 +423,20 @@ object AngConfigManager {
         subItem: SubscriptionItem?
     ): ProfileItem? {
         try {
-            if (str == null || TextUtils.isEmpty(str)) {
+            val normalized = str?.trim()?.removePrefix("\uFEFF").orEmpty()
+            if (TextUtils.isEmpty(normalized)) {
                 return null
             }
 
             val config = configFmtParsers.firstNotNullOfOrNull { (scheme, parser) ->
-                if (str.startsWith(scheme)) parser(str) else null
+                if (normalized.startsWith(scheme, ignoreCase = true)) {
+                    // Keep the payload untouched but canonicalize only the scheme;
+                    // several format parsers remove a lowercase prefix literally.
+                    val parserInput = scheme + normalized.substring(scheme.length)
+                    parser(parserInput)
+                } else {
+                    null
+                }
             }
 
             if (config == null) {
