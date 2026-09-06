@@ -465,6 +465,12 @@ class MainViewModel(
     }
 
     fun testAllRealPing(onlyTcp: Boolean = false) {
+        // Cancel any in-flight test first, mirroring testAllCountryCodes() and
+        // v2rayNG's cancelAllPing()-before-start pattern, so a leftover test
+        // doesn't keep running server-side after a new one is kicked off.
+        activeTestId?.let { previousTestId ->
+            dataSource.sendMsg2TestService(TestServiceMessage(key = AppConfig.MSG_MEASURE_CONFIG_CANCEL, testId = previousTestId))
+        }
         val groupId = uiState.value.selectedGroupId
         val testId = UUID.randomUUID().toString()
         activeTestId = testId
