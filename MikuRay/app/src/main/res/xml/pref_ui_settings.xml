@@ -17,9 +17,9 @@
 
         <androidx.preference.SwitchPreferenceCompat
             android:icon="@drawable/rmx_speed_line"
-            android:key="pref_speed_disabled"
-            android:summary="@string/summary_pref_speed_disabled"
-            android:title="@string/title_pref_speed_disabled"
+            android:key="pref_speed_enabled"
+            android:summary="@string/summary_pref_speed_enabled"
+            android:title="@string/title_pref_speed_enabled"
             app:layout="@layout/uwu_top_switch"
             app:widgetLayout="@layout/uwu_widget_material_switch" />
 

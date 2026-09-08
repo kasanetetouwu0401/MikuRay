@@ -33,9 +33,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -46,7 +44,6 @@ import com.miku.ray.AppConfig
 import com.miku.ray.util.SearchBarChipMode
 import com.miku.ray.BuildConfig
 import com.miku.ray.R
-import com.miku.ray.core.CoreConnectionTracker
 import com.miku.ray.core.LauncherManager
 import com.miku.ray.databinding.ActivityMainBinding
 import com.miku.ray.databinding.ItemQrcodeBinding
@@ -65,6 +62,7 @@ import com.miku.ray.handler.AngConfigManager
 import com.miku.ray.handler.MikuRayGroupFileManager
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsChangeManager
+import com.miku.ray.handler.SettingsManager
 import com.miku.ray.handler.SubscriptionUpdater
 import com.miku.ray.ui.about.AboutActivity
 import com.miku.ray.ui.backup.BackupActivity
@@ -109,7 +107,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.math.abs
@@ -129,27 +126,18 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
     private var isColdStart = true
     private var dualSwipeChipSelection = SearchBarChipMode.WEATHER
+    private var pendingConnectionTest = false
     private var lastIpStateText: String = ""
     private var lastTrafficSpeedText: String = ""
     private var lastTestResultText: String = ""
     private var fabTimerJob: Job? = null
 
     private val urlTestProgressDialog: TestProgressDialogController by lazy {
-        TestProgressDialogController(
-            context = this,
-            mode = TestProgressDialogController.Mode.URL_TEST,
-            onCancel = { mainViewModel.cancelRealPingTest() },
-            onMinimize = { mainViewModel.markUrlTestMinimized() }
-        )
+        TestProgressDialogController(this, TestProgressDialogController.Mode.URL_TEST) { mainViewModel.cancelRealPingTest() }
     }
 
     private val countryCodeProgressDialog: TestProgressDialogController by lazy {
-        TestProgressDialogController(
-            context = this,
-            mode = TestProgressDialogController.Mode.COUNTRY_CODE,
-            onCancel = { mainViewModel.cancelCountryCodeTest() },
-            onMinimize = { mainViewModel.markCountryCodeTestMinimized() }
-        )
+        TestProgressDialogController(this, TestProgressDialogController.Mode.COUNTRY_CODE) { mainViewModel.cancelCountryCodeTest() }
     }
 
     private val TAG_HOME_BANNER_DEFAULT = "DEFAULT_HOME_BANNER"
@@ -204,11 +192,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         setupSearchBarChipSwipe()
         setupGroupTab()
         setupViewModel()
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainViewModel.uiState.collect { renderMainUiState(it) }
-            }
-        }
         setupBannerHome()
 
         BlurBottomStatusController.applyState(this, binding) { handleLayoutTestClick() }
@@ -285,7 +268,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     override fun onResume() {
         super.onResume()
 
-        mainViewModel.refreshStateFromStorage()
         refreshSearchBarChip()
         refreshIpStateText()
         updateSnowflakesVisibility()
@@ -353,22 +335,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             headerContent?.updatePadding(top = systemBars.top)
 
             insets
-        }
-    }
-
-    private fun renderMainUiState(state: MainUiState) {
-        applyRunningState(isLoading = false, isRunning = state.isRunning)
-        state.testProgress?.let {
-            if (!state.isUrlTestMinimized) {
-                if (!urlTestProgressDialog.isShowing) urlTestProgressDialog.show(it.total)
-                urlTestProgressDialog.update(it)
-            }
-        }
-        state.countryCodeProgress?.let {
-            if (!state.isCountryCodeTestMinimized) {
-                if (!countryCodeProgressDialog.isShowing) countryCodeProgressDialog.show(it.total)
-                countryCodeProgressDialog.update(it)
-            }
         }
     }
 
@@ -779,6 +745,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         binding.viewPager.apply {
             adapter = groupPagerAdapter
             isUserInputEnabled = true
+            offscreenPageLimit = 10
         }
     }
 
@@ -1064,8 +1031,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         mainViewModel.testProgressAction.observe(this) { info ->
             if (info == null) {
                 urlTestProgressDialog.finish()
-            } else if (!mainViewModel.uiState.value.isUrlTestMinimized) {
-                if (!urlTestProgressDialog.isShowing) urlTestProgressDialog.show(info.total)
+            } else {
                 urlTestProgressDialog.update(info)
             }
         }
@@ -1073,8 +1039,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         mainViewModel.countryCodeProgressAction.observe(this) { info ->
             if (info == null) {
                 countryCodeProgressDialog.finish()
-            } else if (!mainViewModel.uiState.value.isCountryCodeTestMinimized) {
-                if (!countryCodeProgressDialog.isShowing) countryCodeProgressDialog.show(info.total)
+            } else {
                 countryCodeProgressDialog.update(info)
             }
         }
@@ -1095,7 +1060,8 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
         mainViewModel.isRunning.observe(this) { isRunning ->
             applyRunningState(isLoading = false, isRunning = isRunning)
-            if (isRunning == true && mainViewModel.consumePendingConnectionTest()) {
+            if (isRunning == true && pendingConnectionTest) {
+                pendingConnectionTest = false
                 setTestState(getString(R.string.connection_test_testing))
                 mainViewModel.testCurrentServerRealPing()
             }
@@ -1103,7 +1069,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
         mainViewModel.serviceRestartAction.observe(this) {
             stopFabTimer()
-            mainViewModel.markConnectionTestPending()
+            pendingConnectionTest = true
             lastTestResultText = ""
             setTestState(getString(R.string.connection_test_testing))
         }
@@ -1117,7 +1083,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             }
         }
 
-        mainViewModel.resyncState()
+        mainViewModel.startListenBroadcast()
         mainViewModel.initAssets(assets)
     }
 
@@ -1245,26 +1211,30 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     }
 
     private fun handleFabAction() {
+        mainViewModel.resyncState()
         applyRunningState(isLoading = true, isRunning = false)
 
-        when (mainViewModel.decideFabAction()) {
-            MainViewModel.FabDecision.Stop -> LauncherManager.stopService(this)
-            MainViewModel.FabDecision.NeedVpnPermission -> {
-                val intent = VpnService.prepare(this)
-                if (intent == null) {
-                    startV2Ray()
-                } else {
-                    requestVpnPermission.launch(intent)
-                }
+        if (mainViewModel.isRunning.value == true) {
+            LauncherManager.stopService(this)
+        } else if (SettingsManager.isVpnMode()) {
+            val intent = VpnService.prepare(this)
+            if (intent == null) {
+                startV2Ray()
+            } else {
+                requestVpnPermission.launch(intent)
             }
-            MainViewModel.FabDecision.StartDirect -> startV2Ray()
+        } else {
+            startV2Ray()
         }
     }
 
     private fun handleLayoutTestClick() {
-        mainViewModel.requestConnectionTest()
         if (mainViewModel.isRunning.value == true) {
             setTestState(getString(R.string.connection_test_testing))
+            mainViewModel.testCurrentServerRealPing()
+        } else {
+            pendingConnectionTest = true
+            mainViewModel.resyncState()
         }
     }
 
@@ -1329,7 +1299,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     }
 
     private fun updateFabTimerText() {
-        val startTime = CoreConnectionTracker.getConnectStartTime()
+        val startTime = MmkvManager.decodeSettingsLong(AppConfig.PREF_VPN_CONNECT_START_TIME, 0L)
         if (startTime == 0L) {
             binding.fab.text = "00:00:00"
             return
@@ -1369,6 +1339,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             lastTrafficSpeedText = ""
             lastIpStateText = getString(R.string.ip_unknown)
             refreshIpStateText()
+            pendingConnectionTest = false
         }
     }
 

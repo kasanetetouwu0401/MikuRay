@@ -21,21 +21,18 @@ import com.miku.ray.handler.MmkvManager
 class TestProgressDialogController(
     private val context: Context,
     private val mode: Mode,
-    private val onCancel: () -> Unit,
-    private val onMinimize: () -> Unit = {}
+    private val onCancel: () -> Unit
 ) {
     enum class Mode { URL_TEST, COUNTRY_CODE }
 
     private var dialog: AlertDialog? = null
     private var binding: DialogUrlTestProgressBinding? = null
     private val adapter = ResultAdapter()
-    private var isFinished = false
 
     val isShowing: Boolean
     get() = dialog?.isShowing == true
 
     fun show(total: Int, @StringRes titleResId: Int = defaultTitleResId()) {
-        isFinished = false
         if (isShowing) {
             val b = binding ?: return
             adapter.clear()
@@ -78,12 +75,7 @@ class TestProgressDialogController(
         d.show()
         dialog = d
 
-        // Single persistent listener: behavior depends on whether the test has
-        // already finished (isFinished), rather than relying on the button's
-        // text/label. This keeps behavior correct even if a UI update happens
-        // to race with the finish() signal.
         d.getButton(DialogInterface.BUTTON_POSITIVE)?.setOnClickListener {
-            if (!isFinished) onMinimize()
             d.dismiss()
         }
     }
@@ -124,20 +116,9 @@ class TestProgressDialogController(
         b.tvCounter.text = context.getString(R.string.test_progress_counter, info.current, info.total)
 
         b.root.postInvalidate()
-
-        // Safety net: some cancel/finish signals can arrive out of order relative
-        // to the last progress update (e.g. the final result and the finish
-        // broadcast racing each other). If the counter has already reached the
-        // total, flip the dialog to its "done" state right away instead of
-        // waiting indefinitely for finish() to be called.
-        if (info.total > 0 && info.current >= info.total) {
-            finish()
-        }
     }
 
     fun finish() {
-        if (isFinished) return
-        isFinished = true
         val b = binding ?: return
         b.progressIndicator.isIndeterminate = false
         b.progressIndicator.setProgressCompat(100, true)

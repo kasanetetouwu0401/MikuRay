@@ -77,7 +77,7 @@ object CoreConfigManager {
 
         val json = JsonUtil.parseString(raw)?.takeIf { it.isJsonObject }?.asJsonObject ?: return result
 
-        val speedEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_DISABLED) != true
+        val speedEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) == true
         val trafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
         val statisticsEnabled = speedEnabled || trafficEnabled
         if (statisticsEnabled) {
@@ -641,7 +641,7 @@ object CoreConfigManager {
     }
 
     private fun applySpeedDisabled(v2rayConfig: V2rayConfig) {
-        val speedEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_DISABLED) != true
+        val speedEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) == true
         val trafficEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_TRAFFIC_ENABLED) == true
 
         if (!speedEnabled && !trafficEnabled) {

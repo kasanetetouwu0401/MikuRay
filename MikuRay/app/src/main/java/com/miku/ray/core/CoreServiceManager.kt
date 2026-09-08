@@ -72,9 +72,6 @@ object CoreServiceManager {
             processFinder = XrayProcessFinder(service)
             coreController.registerProcessFinder(processFinder)
         }
-        if (value != null) {
-            CoreConnectionTracker.reconcileWithRunningState()
-        }
     }
 
     fun clearServiceControl(instance: ServiceControl) {
@@ -167,7 +164,6 @@ object CoreServiceManager {
         if (!isRunning()) {
             error("Core failed to start")
         }
-        CoreConnectionTracker.markConnectStarted()
 
         if (browserDialer != null) {
             browserDialer!!.stop()
@@ -390,9 +386,6 @@ object CoreServiceManager {
 
         override fun shutdown(): Long {
             LogUtil.i(AppConfig.TAG, "StartCore-Manager: CoreCallback shutdown")
-            if (!isReloading) {
-                CoreConnectionTracker.markConnectStopped()
-            }
             return 0
         }
 

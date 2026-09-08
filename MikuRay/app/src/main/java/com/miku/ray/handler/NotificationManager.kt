@@ -15,7 +15,6 @@ import androidx.core.app.NotificationCompat
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.core.CoreServiceManager
-import com.miku.ray.core.CoreConnectionTracker
 import com.miku.ray.dto.entities.ProfileItem
 import com.miku.ray.extension.toSpeedString
 import com.miku.ray.ui.main.MainActivity
@@ -48,7 +47,7 @@ object NotificationManager : TrafficController.Listener {
     @Volatile private var sessionDownlink: Long = 0L
 
     fun startSpeedNotification() {
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_DISABLED) == true) return
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) != true) return
         if (CoreServiceManager.isRunning() == false) return
         if (timerNotificationJob?.isActive == true) return
 
@@ -70,7 +69,7 @@ object NotificationManager : TrafficController.Listener {
         directDownlink: Long,
         intervalMs: Long,
     ) {
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_DISABLED) == true) return
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) != true) return
 
         val sinceLastQueryInSeconds = intervalMs / 1000.0
         val proxyTotal = proxyUplink + proxyDownlink
@@ -104,6 +103,10 @@ object NotificationManager : TrafficController.Listener {
     fun showNotification(currentConfig: ProfileItem?) {
         val service = getService() ?: return
 
+        MmkvManager.encodeSettings(
+            AppConfig.PREF_VPN_CONNECT_START_TIME,
+            System.currentTimeMillis(),
+        )
         lastSpeedText = ""
         lastProxyTraffic = 0L
         lastDirectTraffic = 0L
@@ -166,7 +169,7 @@ object NotificationManager : TrafficController.Listener {
         service.stopForeground(Service.STOP_FOREGROUND_REMOVE)
 
         mBuilder = null
-        CoreConnectionTracker.markConnectStopped()
+        MmkvManager.encodeSettings(AppConfig.PREF_VPN_CONNECT_START_TIME, 0L)
         TrafficController.setListener(null)
         timerNotificationJob?.cancel()
         timerNotificationJob = null
@@ -227,7 +230,7 @@ object NotificationManager : TrafficController.Listener {
     }
 
     private fun updateTimerNotification() {
-        val startTime = CoreConnectionTracker.getConnectStartTime()
+        val startTime = MmkvManager.decodeSettingsLong(AppConfig.PREF_VPN_CONNECT_START_TIME, 0L)
         if (startTime == 0L) return
         val service = getService() ?: return
         val elapsed = ((System.currentTimeMillis() - startTime) / 1000).coerceAtLeast(0L)
