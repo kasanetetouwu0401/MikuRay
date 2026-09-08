@@ -164,6 +164,7 @@ object CoreServiceManager {
         if (!isRunning()) {
             error("Core failed to start")
         }
+        LauncherManager.markConnectStarted()
 
         if (browserDialer != null) {
             browserDialer!!.stop()

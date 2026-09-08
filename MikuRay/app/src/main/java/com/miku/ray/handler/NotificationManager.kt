@@ -104,7 +104,6 @@ object NotificationManager : TrafficController.Listener {
     fun showNotification(currentConfig: ProfileItem?) {
         val service = getService() ?: return
 
-        LauncherManager.markConnectStarted()
         lastSpeedText = ""
         lastProxyTraffic = 0L
         lastDirectTraffic = 0L
