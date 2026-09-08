@@ -1,12 +1,9 @@
 package com.miku.ray.ui.main
 
 import android.app.Application
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.res.AssetManager
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -33,7 +30,6 @@ import com.miku.ray.handler.SettingsManager
 import com.miku.ray.util.LogUtil
 import com.miku.ray.util.JsonUtil
 import com.miku.ray.util.MessageUtil
-import com.miku.ray.util.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -56,7 +52,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var isRestarting = false
     private var pendingServerRestartGuid: String? = null
     private var reloadJob: Job? = null
-    private var receiverRegistered = false
+    private val serviceRepository = MainServiceRepository.get(application as AngApplication)
     @Volatile
     private var serverCacheLoaded = false
     val serversCache = mutableListOf<ServersCache>()
@@ -87,20 +83,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val updateGroupOrderAction by lazy { MutableLiveData<Unit>() }
 
     init {
+        viewModelScope.launch {
+            serviceRepository.events.collect { handleServiceIntent(it) }
+        }
         reloadServerList(notify = false)
     }
 
     fun startListenBroadcast() {
-        if (!receiverRegistered) {
-            val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
-            ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
-            receiverRegistered = true
-        }
-        resyncState()
+        serviceRepository.resync()
     }
 
     fun resyncState() {
-        MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
+        serviceRepository.resync()
     }
 
     fun refreshStateFromStorage() {
@@ -114,15 +108,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         reloadJob?.cancel()
-        if (receiverRegistered) {
-            try {
-                getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
-            } catch (e: IllegalArgumentException) {
-                e.printStackTrace()
-            } finally {
-                receiverRegistered = false
-            }
-        }
         LogUtil.i(AppConfig.TAG, "Main ViewModel is cleared")
         super.onCleared()
     }
@@ -676,8 +661,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         updateListAction.postValue(-1)
     }
 
-    private val mMsgReceiver = object : BroadcastReceiver() {
-        override fun onReceive(ctx: Context?, intent: Intent?) {
+    private fun handleServiceIntent(intent: Intent) {
             val key = intent?.getIntExtra("key", 0)
             when (key) {
                 AppConfig.MSG_STATE_RUNNING -> {
@@ -867,7 +851,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     updateGroupOrderAction.postValue(Unit)
                 }
             }
-        }
     }
 
     private fun acceptsTestEvent(testId: String): Boolean =
