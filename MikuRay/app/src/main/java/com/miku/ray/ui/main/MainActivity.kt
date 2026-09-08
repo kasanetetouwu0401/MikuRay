@@ -33,7 +33,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -107,6 +109,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.math.abs
@@ -192,6 +195,11 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         setupSearchBarChipSwipe()
         setupGroupTab()
         setupViewModel()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.uiState.collect { renderMainUiState(it) }
+            }
+        }
         setupBannerHome()
 
         BlurBottomStatusController.applyState(this, binding) { handleLayoutTestClick() }
@@ -336,6 +344,18 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             headerContent?.updatePadding(top = systemBars.top)
 
             insets
+        }
+    }
+
+    private fun renderMainUiState(state: MainUiState) {
+        applyRunningState(isLoading = false, isRunning = state.isRunning)
+        state.testProgress?.let {
+            if (!urlTestProgressDialog.isShowing) urlTestProgressDialog.show(it.total)
+            urlTestProgressDialog.update(it)
+        }
+        state.countryCodeProgress?.let {
+            if (!countryCodeProgressDialog.isShowing) countryCodeProgressDialog.show(it.total)
+            countryCodeProgressDialog.update(it)
         }
     }
 

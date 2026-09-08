@@ -1,12 +1,9 @@
 package com.miku.ray.ui.main
 
 import android.app.Application
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.res.AssetManager
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -33,7 +30,6 @@ import com.miku.ray.handler.SettingsManager
 import com.miku.ray.util.LogUtil
 import com.miku.ray.util.JsonUtil
 import com.miku.ray.util.MessageUtil
-import com.miku.ray.util.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -41,6 +37,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -56,10 +53,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var isRestarting = false
     private var pendingServerRestartGuid: String? = null
     private var reloadJob: Job? = null
-    private var receiverRegistered = false
+    private val serviceRepository = MainServiceRepository.get(application as AngApplication)
     @Volatile
     private var serverCacheLoaded = false
     val serversCache = mutableListOf<ServersCache>()
+
+    private val _uiState = MutableStateFlow(
+        MainUiState(
+            isRunning = MmkvManager.decodeSettingsLong(AppConfig.PREF_VPN_CONNECT_START_TIME, 0L) > 0L,
+            testResult = MmkvManager.decodeSettingsString(AppConfig.PREF_LAST_TEST_RESULT, "").orEmpty(),
+        )
+    )
+    val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
     private val _serversState = MutableStateFlow<List<ServersCache>>(emptyList())
     val serversState: StateFlow<List<ServersCache>> = _serversState.asStateFlow()
@@ -87,42 +92,40 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val updateGroupOrderAction by lazy { MutableLiveData<Unit>() }
 
     init {
+        viewModelScope.launch {
+            serviceRepository.events.collect { handleServiceIntent(it) }
+        }
         reloadServerList(notify = false)
     }
 
     fun startListenBroadcast() {
-        if (!receiverRegistered) {
-            val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
-            ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
-            receiverRegistered = true
-        }
-        resyncState()
+        serviceRepository.resync()
     }
 
     fun resyncState() {
-        MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
+        serviceRepository.resync()
     }
 
     fun refreshStateFromStorage() {
-        if (MmkvManager.decodeSettingsLong(AppConfig.PREF_VPN_CONNECT_START_TIME, 0L) > 0L) {
-            isRunning.value = true
-        }
+        val running = MmkvManager.decodeSettingsLong(AppConfig.PREF_VPN_CONNECT_START_TIME, 0L) > 0L
+        if (running) isRunning.value = true
         updateListAction.value = -1
-        decodeProgress(AppConfig.PREF_ACTIVE_URL_TEST_PROGRESS)?.let { testProgressAction.value = it }
-        decodeProgress(AppConfig.PREF_ACTIVE_COUNTRY_CODE_PROGRESS)?.let { countryCodeProgressAction.value = it }
+        val urlProgress = decodeProgress(AppConfig.PREF_ACTIVE_URL_TEST_PROGRESS)
+        val countryProgress = decodeProgress(AppConfig.PREF_ACTIVE_COUNTRY_CODE_PROGRESS)
+        _uiState.update {
+            it.copy(
+                isRunning = it.isRunning || running,
+                isTesting = urlProgress != null || countryProgress != null,
+                testProgress = urlProgress,
+                countryCodeProgress = countryProgress,
+            )
+        }
+        urlProgress?.let { testProgressAction.value = it }
+        countryProgress?.let { countryCodeProgressAction.value = it }
     }
 
     override fun onCleared() {
         reloadJob?.cancel()
-        if (receiverRegistered) {
-            try {
-                getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
-            } catch (e: IllegalArgumentException) {
-                e.printStackTrace()
-            } finally {
-                receiverRegistered = false
-            }
-        }
         LogUtil.i(AppConfig.TAG, "Main ViewModel is cleared")
         super.onCleared()
     }
@@ -317,6 +320,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         activeTestTotal = serversCache.size
         MmkvManager.clearAllTestDelayResults(serversCache.map { it.guid }.toList())
         persistProgress(AppConfig.PREF_ACTIVE_URL_TEST_PROGRESS, TestProgressInfo("", -1L, 0, activeTestTotal))
+        _uiState.update { it.copy(isTesting = true) }
         updateListAction.value = -1
 
         viewModelScope.launch(Dispatchers.Default) {
@@ -354,6 +358,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val guids = serversCache.map { it.guid }.toList()
         MmkvManager.clearAllCountryCodes(guids)
         persistProgress(AppConfig.PREF_ACTIVE_COUNTRY_CODE_PROGRESS, TestProgressInfo("", -1L, 0, guids.size))
+        _uiState.update { it.copy(isTesting = true) }
         updateListAction.value = -1
 
         viewModelScope.launch(Dispatchers.Default) {
@@ -676,12 +681,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         updateListAction.postValue(-1)
     }
 
-    private val mMsgReceiver = object : BroadcastReceiver() {
-        override fun onReceive(ctx: Context?, intent: Intent?) {
+    private fun handleServiceIntent(intent: Intent) {
             val key = intent?.getIntExtra("key", 0)
             when (key) {
                 AppConfig.MSG_STATE_RUNNING -> {
                     if (!isRestarting) {
+                        _uiState.update { it.copy(isRunning = true) }
                         if (isRunning.value != true) {
                             isRunning.value = true
                         }
@@ -692,6 +697,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 AppConfig.MSG_STATE_NOT_RUNNING -> {
                     if (!isRestarting) {
+                        _uiState.update { it.copy(isRunning = false, isTesting = false) }
                         markConnectionStopped()
                         if (isRunning.value != false) {
                             isRunning.value = false
@@ -719,6 +725,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         ),
                     )
                     isRunning.value = true
+                    _uiState.update { it.copy(isRunning = true) }
                     updateListAction.postValue(-1)
                 }
 
@@ -736,19 +743,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     alertAction.value = Pair(false, msg)
                     markConnectionStopped()
                     isRunning.value = false
+                    _uiState.update { it.copy(isRunning = false, isTesting = false) }
                     updateListAction.postValue(-1)
                 }
 
                 AppConfig.MSG_STATE_STOP_SUCCESS -> {
                     pendingServerRestartGuid = null
                     isRestarting = false
+                    _uiState.update { it.copy(isRunning = false, isTesting = false) }
                     markConnectionStopped()
                     isRunning.value = false
                     updateListAction.postValue(-1)
                 }
 
                 AppConfig.MSG_MEASURE_DELAY_SUCCESS -> {
-                    updateTestResultAction.value = intent.getStringExtra("content").orEmpty()
+                    val result = intent.getStringExtra("content").orEmpty()
+                    MmkvManager.encodeSettings(AppConfig.PREF_LAST_TEST_RESULT, result)
+                    _uiState.update { it.copy(testResult = result) }
+                    updateTestResultAction.value = result
                 }
 
                 AppConfig.MSG_MEASURE_IP_SUCCESS -> {
@@ -867,7 +879,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     updateGroupOrderAction.postValue(Unit)
                 }
             }
-        }
     }
 
     private fun acceptsTestEvent(testId: String): Boolean =
@@ -882,6 +893,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun persistProgress(key: String, info: TestProgressInfo) {
         MmkvManager.encodeSettings(key, JsonUtil.toJson(info))
+        _uiState.update {
+            if (key == AppConfig.PREF_ACTIVE_URL_TEST_PROGRESS) {
+                it.copy(isTesting = true, testProgress = info)
+            } else {
+                it.copy(isTesting = true, countryCodeProgress = info)
+            }
+        }
     }
 
     private fun decodeProgress(key: String): TestProgressInfo? {
