@@ -24,7 +24,7 @@ import com.miku.ray.dto.TestServiceMessage
 import com.miku.ray.extension.isComplexType
 import com.miku.ray.extension.matchesPattern
 import com.miku.ray.extension.serializable
-import com.miku.ray.core.LauncherManager
+import com.miku.ray.core.CoreConnectionTracker
 import com.miku.ray.handler.AngConfigManager
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsManager
@@ -61,7 +61,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(
         MainUiState(
-            isRunning = LauncherManager.isConnected(),
+            isRunning = CoreConnectionTracker.isConnected(),
             testResult = MmkvManager.decodeSettingsString(AppConfig.PREF_LAST_TEST_RESULT, "").orEmpty(),
         )
     )
@@ -77,7 +77,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val groupStates = ConcurrentHashMap<String, MutableStateFlow<List<ServersCache>>>()
 
     val isRunning by lazy {
-        MutableLiveData(LauncherManager.isConnected())
+        MutableLiveData(CoreConnectionTracker.isConnected())
     }
     val updateListAction by lazy { MutableLiveData<Int>() }
     val updateTestResultAction by lazy { MutableLiveData<String>() }
@@ -154,7 +154,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun refreshStateFromStorage() {
-        val running = LauncherManager.isConnected()
+        val running = CoreConnectionTracker.isConnected()
         if (running) isRunning.value = true
         updateListAction.value = -1
         val urlProgress = decodeProgress(AppConfig.PREF_ACTIVE_URL_TEST_PROGRESS)
@@ -633,7 +633,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun markConnectionStopped() {
-        LauncherManager.markConnectStopped()
+        CoreConnectionTracker.markConnectStopped()
     }
 
     fun findSubscriptionIdBySelect(): String? {

@@ -15,7 +15,7 @@ import androidx.core.app.NotificationCompat
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.core.CoreServiceManager
-import com.miku.ray.core.LauncherManager
+import com.miku.ray.core.CoreConnectionTracker
 import com.miku.ray.dto.entities.ProfileItem
 import com.miku.ray.extension.toSpeedString
 import com.miku.ray.ui.main.MainActivity
@@ -166,7 +166,7 @@ object NotificationManager : TrafficController.Listener {
         service.stopForeground(Service.STOP_FOREGROUND_REMOVE)
 
         mBuilder = null
-        LauncherManager.markConnectStopped()
+        CoreConnectionTracker.markConnectStopped()
         TrafficController.setListener(null)
         timerNotificationJob?.cancel()
         timerNotificationJob = null
@@ -227,7 +227,7 @@ object NotificationManager : TrafficController.Listener {
     }
 
     private fun updateTimerNotification() {
-        val startTime = LauncherManager.getConnectStartTime()
+        val startTime = CoreConnectionTracker.getConnectStartTime()
         if (startTime == 0L) return
         val service = getService() ?: return
         val elapsed = ((System.currentTimeMillis() - startTime) / 1000).coerceAtLeast(0L)

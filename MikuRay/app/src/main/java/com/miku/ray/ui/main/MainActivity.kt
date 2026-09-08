@@ -46,6 +46,7 @@ import com.miku.ray.AppConfig
 import com.miku.ray.util.SearchBarChipMode
 import com.miku.ray.BuildConfig
 import com.miku.ray.R
+import com.miku.ray.core.CoreConnectionTracker
 import com.miku.ray.core.LauncherManager
 import com.miku.ray.databinding.ActivityMainBinding
 import com.miku.ray.databinding.ItemQrcodeBinding
@@ -1329,7 +1330,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     }
 
     private fun updateFabTimerText() {
-        val startTime = LauncherManager.getConnectStartTime()
+        val startTime = CoreConnectionTracker.getConnectStartTime()
         if (startTime == 0L) {
             binding.fab.text = "00:00:00"
             return
