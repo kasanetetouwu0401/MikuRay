@@ -80,6 +80,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         MutableLiveData(CoreConnectionTracker.isConnected())
     }
     val updateListAction by lazy { MutableLiveData<Int>() }
+    val updateTestResultAction by lazy { MutableLiveData<String>() }
     val testProgressAction by lazy { MutableLiveData<TestProgressInfo?>() }
     val countryCodeProgressAction by lazy { MutableLiveData<TestProgressInfo?>() }
     val updateIpResultAction by lazy { MutableLiveData<String>() }
@@ -746,7 +747,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 AppConfig.MSG_STATE_NOT_RUNNING -> {
                     if (!isRestarting) {
-                        _uiState.update { it.copy(isRunning = false, isTesting = false, testResult = "") }
+                        _uiState.update { it.copy(isRunning = false, isTesting = false) }
                         markConnectionStopped()
                         if (isRunning.value != false) {
                             isRunning.value = false
@@ -758,7 +759,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 AppConfig.MSG_STATE_RESTART -> {
                     markConnectionStopped()
                     isRestarting = true
-                    _uiState.update { it.copy(testResult = "") }
                     serviceRestartAction.value = Unit
                 }
 
@@ -793,14 +793,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     alertAction.value = Pair(false, msg)
                     markConnectionStopped()
                     isRunning.value = false
-                    _uiState.update { it.copy(isRunning = false, isTesting = false, pendingConnectionTest = false, testResult = "") }
+                    _uiState.update { it.copy(isRunning = false, isTesting = false, pendingConnectionTest = false) }
                     updateListAction.postValue(-1)
                 }
 
                 AppConfig.MSG_STATE_STOP_SUCCESS -> {
                     pendingServerRestartGuid = null
                     isRestarting = false
-                    _uiState.update { it.copy(isRunning = false, isTesting = false, pendingConnectionTest = false, testResult = "") }
+                    _uiState.update { it.copy(isRunning = false, isTesting = false, pendingConnectionTest = false) }
                     markConnectionStopped()
                     isRunning.value = false
                     updateListAction.postValue(-1)
@@ -810,6 +810,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val result = intent.getStringExtra("content").orEmpty()
                     MmkvManager.encodeSettings(AppConfig.PREF_LAST_TEST_RESULT, result)
                     _uiState.update { it.copy(testResult = result) }
+                    updateTestResultAction.value = result
                 }
 
                 AppConfig.MSG_MEASURE_IP_SUCCESS -> {
