@@ -48,7 +48,7 @@ object NotificationManager : TrafficController.Listener {
     @Volatile private var sessionDownlink: Long = 0L
 
     fun startSpeedNotification() {
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) != true) return
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_DISABLED) == true) return
         if (CoreServiceManager.isRunning() == false) return
         if (timerNotificationJob?.isActive == true) return
 
@@ -70,7 +70,7 @@ object NotificationManager : TrafficController.Listener {
         directDownlink: Long,
         intervalMs: Long,
     ) {
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED) != true) return
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_DISABLED) == true) return
 
         val sinceLastQueryInSeconds = intervalMs / 1000.0
         val proxyTotal = proxyUplink + proxyDownlink
