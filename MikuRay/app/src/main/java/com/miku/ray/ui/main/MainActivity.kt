@@ -779,7 +779,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         binding.viewPager.apply {
             adapter = groupPagerAdapter
             isUserInputEnabled = true
-            offscreenPageLimit = 10
         }
     }
 
