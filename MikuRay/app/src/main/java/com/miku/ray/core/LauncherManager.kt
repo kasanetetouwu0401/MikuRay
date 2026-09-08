@@ -23,6 +23,25 @@ import com.miku.ray.util.Utils
 
 object LauncherManager {
 
+    /**
+     * Single owner of PREF_VPN_CONNECT_START_TIME. Previously this pref was
+     * written directly from NotificationManager (set/clear) and MainViewModel
+     * (clear), which made it easy for those copies to drift. Everything now
+     * goes through these helpers instead of touching MmkvManager directly.
+     */
+    fun markConnectStarted() {
+        MmkvManager.encodeSettings(AppConfig.PREF_VPN_CONNECT_START_TIME, System.currentTimeMillis())
+    }
+
+    fun markConnectStopped() {
+        MmkvManager.encodeSettings(AppConfig.PREF_VPN_CONNECT_START_TIME, 0L)
+    }
+
+    fun getConnectStartTime(): Long =
+    MmkvManager.decodeSettingsLong(AppConfig.PREF_VPN_CONNECT_START_TIME, 0L)
+
+    fun isConnected(): Boolean = getConnectStartTime() > 0L
+
     private fun showFeedback(context: Context, message: String, type: Int = 0) {
         if (context is Activity) {
             when (type) {

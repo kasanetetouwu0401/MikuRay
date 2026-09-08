@@ -64,7 +64,6 @@ import com.miku.ray.handler.AngConfigManager
 import com.miku.ray.handler.MikuRayGroupFileManager
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsChangeManager
-import com.miku.ray.handler.SettingsManager
 import com.miku.ray.handler.SubscriptionUpdater
 import com.miku.ray.ui.about.AboutActivity
 import com.miku.ray.ui.backup.BackupActivity
@@ -1118,7 +1117,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             }
         }
 
-        mainViewModel.startListenBroadcast()
+        mainViewModel.resyncState()
         mainViewModel.initAssets(assets)
     }
 
@@ -1246,20 +1245,19 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     }
 
     private fun handleFabAction() {
-        mainViewModel.resyncState()
         applyRunningState(isLoading = true, isRunning = false)
 
-        if (mainViewModel.isRunning.value == true) {
-            LauncherManager.stopService(this)
-        } else if (SettingsManager.isVpnMode()) {
-            val intent = VpnService.prepare(this)
-            if (intent == null) {
-                startV2Ray()
-            } else {
-                requestVpnPermission.launch(intent)
+        when (mainViewModel.decideFabAction()) {
+            MainViewModel.FabDecision.Stop -> LauncherManager.stopService(this)
+            MainViewModel.FabDecision.NeedVpnPermission -> {
+                val intent = VpnService.prepare(this)
+                if (intent == null) {
+                    startV2Ray()
+                } else {
+                    requestVpnPermission.launch(intent)
+                }
             }
-        } else {
-            startV2Ray()
+            MainViewModel.FabDecision.StartDirect -> startV2Ray()
         }
     }
 
@@ -1331,7 +1329,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     }
 
     private fun updateFabTimerText() {
-        val startTime = MmkvManager.decodeSettingsLong(AppConfig.PREF_VPN_CONNECT_START_TIME, 0L)
+        val startTime = LauncherManager.getConnectStartTime()
         if (startTime == 0L) {
             binding.fab.text = "00:00:00"
             return

@@ -24,6 +24,7 @@ import com.miku.ray.dto.TestServiceMessage
 import com.miku.ray.extension.isComplexType
 import com.miku.ray.extension.matchesPattern
 import com.miku.ray.extension.serializable
+import com.miku.ray.core.LauncherManager
 import com.miku.ray.handler.AngConfigManager
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsManager
@@ -60,7 +61,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(
         MainUiState(
-            isRunning = MmkvManager.decodeSettingsLong(AppConfig.PREF_VPN_CONNECT_START_TIME, 0L) > 0L,
+            isRunning = LauncherManager.isConnected(),
             testResult = MmkvManager.decodeSettingsString(AppConfig.PREF_LAST_TEST_RESULT, "").orEmpty(),
         )
     )
@@ -76,9 +77,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val groupStates = ConcurrentHashMap<String, MutableStateFlow<List<ServersCache>>>()
 
     val isRunning by lazy {
-        MutableLiveData(
-            MmkvManager.decodeSettingsLong(AppConfig.PREF_VPN_CONNECT_START_TIME, 0L) > 0L
-        )
+        MutableLiveData(LauncherManager.isConnected())
     }
     val updateListAction by lazy { MutableLiveData<Int>() }
     val updateTestResultAction by lazy { MutableLiveData<String>() }
@@ -98,12 +97,30 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         reloadServerList(notify = false)
     }
 
-    fun startListenBroadcast() {
+    fun resyncState() {
         serviceRepository.resync()
     }
 
-    fun resyncState() {
-        serviceRepository.resync()
+    /**
+     * What the FAB should do next, decided here so MainActivity stays a thin
+     * dispatcher — same pattern as [requestConnectionTest] for the test tap.
+     * The two truly Activity-bound steps (VpnService.prepare() needs a
+     * Context, and launching the permission request needs an ActivityResult
+     * launcher) still happen in MainActivity; everything else lives here.
+     */
+    sealed class FabDecision {
+        object Stop : FabDecision()
+        object NeedVpnPermission : FabDecision()
+        object StartDirect : FabDecision()
+    }
+
+    fun decideFabAction(): FabDecision {
+        resyncState()
+        return when {
+            isRunning.value == true -> FabDecision.Stop
+            SettingsManager.isVpnMode() -> FabDecision.NeedVpnPermission
+            else -> FabDecision.StartDirect
+        }
     }
 
     /**
@@ -114,7 +131,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun requestConnectionTest() {
         resyncState()
-        if (_uiState.value.isRunning) {
+        if (isRunning.value == true) {
             _uiState.update { it.copy(pendingConnectionTest = false) }
             testCurrentServerRealPing()
         } else {
@@ -137,7 +154,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun refreshStateFromStorage() {
-        val running = MmkvManager.decodeSettingsLong(AppConfig.PREF_VPN_CONNECT_START_TIME, 0L) > 0L
+        val running = LauncherManager.isConnected()
         if (running) isRunning.value = true
         updateListAction.value = -1
         val urlProgress = decodeProgress(AppConfig.PREF_ACTIVE_URL_TEST_PROGRESS)
@@ -612,10 +629,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         isRestarting = false
         markConnectionStopped()
         isRunning.value = false
+        _uiState.update { it.copy(isRunning = false) }
     }
 
     private fun markConnectionStopped() {
-        MmkvManager.encodeSettings(AppConfig.PREF_VPN_CONNECT_START_TIME, 0L)
+        LauncherManager.markConnectStopped()
     }
 
     fun findSubscriptionIdBySelect(): String? {
