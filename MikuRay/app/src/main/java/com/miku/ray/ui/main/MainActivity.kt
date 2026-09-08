@@ -129,18 +129,27 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
     private var isColdStart = true
     private var dualSwipeChipSelection = SearchBarChipMode.WEATHER
-    private var pendingConnectionTest = false
     private var lastIpStateText: String = ""
     private var lastTrafficSpeedText: String = ""
     private var lastTestResultText: String = ""
     private var fabTimerJob: Job? = null
 
     private val urlTestProgressDialog: TestProgressDialogController by lazy {
-        TestProgressDialogController(this, TestProgressDialogController.Mode.URL_TEST) { mainViewModel.cancelRealPingTest() }
+        TestProgressDialogController(
+            context = this,
+            mode = TestProgressDialogController.Mode.URL_TEST,
+            onCancel = { mainViewModel.cancelRealPingTest() },
+            onMinimize = { mainViewModel.markUrlTestMinimized() }
+        )
     }
 
     private val countryCodeProgressDialog: TestProgressDialogController by lazy {
-        TestProgressDialogController(this, TestProgressDialogController.Mode.COUNTRY_CODE) { mainViewModel.cancelCountryCodeTest() }
+        TestProgressDialogController(
+            context = this,
+            mode = TestProgressDialogController.Mode.COUNTRY_CODE,
+            onCancel = { mainViewModel.cancelCountryCodeTest() },
+            onMinimize = { mainViewModel.markCountryCodeTestMinimized() }
+        )
     }
 
     private val TAG_HOME_BANNER_DEFAULT = "DEFAULT_HOME_BANNER"
@@ -350,12 +359,16 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     private fun renderMainUiState(state: MainUiState) {
         applyRunningState(isLoading = false, isRunning = state.isRunning)
         state.testProgress?.let {
-            if (!urlTestProgressDialog.isShowing) urlTestProgressDialog.show(it.total)
-            urlTestProgressDialog.update(it)
+            if (!state.isUrlTestMinimized) {
+                if (!urlTestProgressDialog.isShowing) urlTestProgressDialog.show(it.total)
+                urlTestProgressDialog.update(it)
+            }
         }
         state.countryCodeProgress?.let {
-            if (!countryCodeProgressDialog.isShowing) countryCodeProgressDialog.show(it.total)
-            countryCodeProgressDialog.update(it)
+            if (!state.isCountryCodeTestMinimized) {
+                if (!countryCodeProgressDialog.isShowing) countryCodeProgressDialog.show(it.total)
+                countryCodeProgressDialog.update(it)
+            }
         }
     }
 
@@ -1052,7 +1065,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         mainViewModel.testProgressAction.observe(this) { info ->
             if (info == null) {
                 urlTestProgressDialog.finish()
-            } else {
+            } else if (!mainViewModel.uiState.value.isUrlTestMinimized) {
                 if (!urlTestProgressDialog.isShowing) urlTestProgressDialog.show(info.total)
                 urlTestProgressDialog.update(info)
             }
@@ -1061,7 +1074,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         mainViewModel.countryCodeProgressAction.observe(this) { info ->
             if (info == null) {
                 countryCodeProgressDialog.finish()
-            } else {
+            } else if (!mainViewModel.uiState.value.isCountryCodeTestMinimized) {
                 if (!countryCodeProgressDialog.isShowing) countryCodeProgressDialog.show(info.total)
                 countryCodeProgressDialog.update(info)
             }
@@ -1083,8 +1096,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
         mainViewModel.isRunning.observe(this) { isRunning ->
             applyRunningState(isLoading = false, isRunning = isRunning)
-            if (isRunning == true && pendingConnectionTest) {
-                pendingConnectionTest = false
+            if (isRunning == true && mainViewModel.consumePendingConnectionTest()) {
                 setTestState(getString(R.string.connection_test_testing))
                 mainViewModel.testCurrentServerRealPing()
             }
@@ -1092,7 +1104,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
         mainViewModel.serviceRestartAction.observe(this) {
             stopFabTimer()
-            pendingConnectionTest = true
+            mainViewModel.markConnectionTestPending()
             lastTestResultText = ""
             setTestState(getString(R.string.connection_test_testing))
         }
@@ -1252,12 +1264,9 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     }
 
     private fun handleLayoutTestClick() {
+        mainViewModel.requestConnectionTest()
         if (mainViewModel.isRunning.value == true) {
             setTestState(getString(R.string.connection_test_testing))
-            mainViewModel.testCurrentServerRealPing()
-        } else {
-            pendingConnectionTest = true
-            mainViewModel.resyncState()
         }
     }
 
@@ -1362,7 +1371,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             lastTrafficSpeedText = ""
             lastIpStateText = getString(R.string.ip_unknown)
             refreshIpStateText()
-            pendingConnectionTest = false
         }
     }
 

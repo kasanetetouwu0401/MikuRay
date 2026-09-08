@@ -106,6 +106,36 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         serviceRepository.resync()
     }
 
+    /**
+     * Requests a connection test for the FAB/status pill.
+     * If the service is already running the test starts immediately;
+     * otherwise it's deferred until the service reports it's running
+     * (see [consumePendingConnectionTest]).
+     */
+    fun requestConnectionTest() {
+        resyncState()
+        if (_uiState.value.isRunning) {
+            _uiState.update { it.copy(pendingConnectionTest = false) }
+            testCurrentServerRealPing()
+        } else {
+            markConnectionTestPending()
+        }
+    }
+
+    fun markConnectionTestPending() {
+        _uiState.update { it.copy(pendingConnectionTest = true) }
+    }
+
+    /**
+     * Returns true (and clears the flag) if a connection test was
+     * waiting for the service to come up.
+     */
+    fun consumePendingConnectionTest(): Boolean {
+        val pending = _uiState.value.pendingConnectionTest
+        if (pending) _uiState.update { it.copy(pendingConnectionTest = false) }
+        return pending
+    }
+
     fun refreshStateFromStorage() {
         val running = MmkvManager.decodeSettingsLong(AppConfig.PREF_VPN_CONNECT_START_TIME, 0L) > 0L
         if (running) isRunning.value = true
@@ -320,7 +350,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         activeTestTotal = serversCache.size
         MmkvManager.clearAllTestDelayResults(serversCache.map { it.guid }.toList())
         persistProgress(AppConfig.PREF_ACTIVE_URL_TEST_PROGRESS, TestProgressInfo("", -1L, 0, activeTestTotal))
-        _uiState.update { it.copy(isTesting = true) }
+        _uiState.update { it.copy(isTesting = true, isUrlTestMinimized = false) }
         updateListAction.value = -1
 
         viewModelScope.launch(Dispatchers.Default) {
@@ -334,6 +364,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 activeTestId = null
                 withContext(Dispatchers.Main) {
                     testProgressAction.value = null
+                    clearUrlTestProgressState()
                 }
                 return@launch
             }
@@ -358,7 +389,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val guids = serversCache.map { it.guid }.toList()
         MmkvManager.clearAllCountryCodes(guids)
         persistProgress(AppConfig.PREF_ACTIVE_COUNTRY_CODE_PROGRESS, TestProgressInfo("", -1L, 0, guids.size))
-        _uiState.update { it.copy(isTesting = true) }
+        _uiState.update { it.copy(isTesting = true, isCountryCodeTestMinimized = false) }
         updateListAction.value = -1
 
         viewModelScope.launch(Dispatchers.Default) {
@@ -646,6 +677,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val testId = activeTestId.orEmpty()
         activeTestId = null
         testProgressAction.value = null
+        clearUrlTestProgressState()
         MessageUtil.sendMsg2TestService(
             getApplication(),
             TestServiceMessage(
@@ -743,14 +775,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     alertAction.value = Pair(false, msg)
                     markConnectionStopped()
                     isRunning.value = false
-                    _uiState.update { it.copy(isRunning = false, isTesting = false) }
+                    _uiState.update { it.copy(isRunning = false, isTesting = false, pendingConnectionTest = false) }
                     updateListAction.postValue(-1)
                 }
 
                 AppConfig.MSG_STATE_STOP_SUCCESS -> {
                     pendingServerRestartGuid = null
                     isRestarting = false
-                    _uiState.update { it.copy(isRunning = false, isTesting = false) }
+                    _uiState.update { it.copy(isRunning = false, isTesting = false, pendingConnectionTest = false) }
                     markConnectionStopped()
                     isRunning.value = false
                     updateListAction.postValue(-1)
@@ -835,11 +867,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         if (!acceptsTestEvent(summary.testId)) return
                         activeTestId = null
                         MmkvManager.encodeSettings(AppConfig.PREF_ACTIVE_URL_TEST_PROGRESS, "")
+                        clearUrlTestProgressState()
                         testProgressAction.postValue(null)
                         onTestsFinished(summary.cancelled)
                     } else {
                         activeTestId = null
                         MmkvManager.encodeSettings(AppConfig.PREF_ACTIVE_URL_TEST_PROGRESS, "")
+                        clearUrlTestProgressState()
                         testProgressAction.postValue(null)
                         onTestsFinished()
                     }
@@ -862,6 +896,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 AppConfig.MSG_COUNTRY_CODE_FINISH -> {
                     MmkvManager.encodeSettings(AppConfig.PREF_ACTIVE_COUNTRY_CODE_PROGRESS, "")
+                    clearCountryCodeProgressState()
                     countryCodeProgressAction.postValue(null)
                 }
 
@@ -900,6 +935,26 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 it.copy(isTesting = true, countryCodeProgress = info)
             }
         }
+    }
+
+    private fun clearUrlTestProgressState() {
+        _uiState.update {
+            it.copy(testProgress = null, isTesting = it.countryCodeProgress != null, isUrlTestMinimized = false)
+        }
+    }
+
+    private fun clearCountryCodeProgressState() {
+        _uiState.update {
+            it.copy(countryCodeProgress = null, isTesting = it.testProgress != null, isCountryCodeTestMinimized = false)
+        }
+    }
+
+    fun markUrlTestMinimized() {
+        _uiState.update { it.copy(isUrlTestMinimized = true) }
+    }
+
+    fun markCountryCodeTestMinimized() {
+        _uiState.update { it.copy(isCountryCodeTestMinimized = true) }
     }
 
     private fun decodeProgress(key: String): TestProgressInfo? {

@@ -21,7 +21,8 @@ import com.miku.ray.handler.MmkvManager
 class TestProgressDialogController(
     private val context: Context,
     private val mode: Mode,
-    private val onCancel: () -> Unit
+    private val onCancel: () -> Unit,
+    private val onMinimize: () -> Unit = {}
 ) {
     enum class Mode { URL_TEST, COUNTRY_CODE }
 
@@ -76,6 +77,7 @@ class TestProgressDialogController(
         dialog = d
 
         d.getButton(DialogInterface.BUTTON_POSITIVE)?.setOnClickListener {
+            onMinimize()
             d.dismiss()
         }
     }

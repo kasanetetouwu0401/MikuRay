@@ -10,4 +10,7 @@ data class MainUiState(
     val countryCodeProgress: TestProgressInfo? = null,
     val ipAddress: String? = null,
     val trafficSpeed: String = "",
+    val pendingConnectionTest: Boolean = false,
+    val isUrlTestMinimized: Boolean = false,
+    val isCountryCodeTestMinimized: Boolean = false,
 )
