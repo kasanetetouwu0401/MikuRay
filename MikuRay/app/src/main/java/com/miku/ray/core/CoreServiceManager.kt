@@ -72,6 +72,13 @@ object CoreServiceManager {
             processFinder = XrayProcessFinder(service)
             coreController.registerProcessFinder(processFinder)
         }
+        if (value != null) {
+            // Fresh service instance in the :daemon process, core hasn't started yet here -
+            // this is the one safe place to reconcile a stale connect-start-time pref left
+            // over from a previous process death, since isRunning() is only meaningful inside
+            // this process (see CoreConnectionTracker.reconcileWithRunningState doc).
+            CoreConnectionTracker.reconcileWithRunningState()
+        }
     }
 
     fun clearServiceControl(instance: ServiceControl) {
@@ -387,6 +394,16 @@ object CoreServiceManager {
 
         override fun shutdown(): Long {
             LogUtil.i(AppConfig.TAG, "StartCore-Manager: CoreCallback shutdown")
+            // Real, event-driven signal from the native core itself that the loop has
+            // actually stopped - covers crashes/unexpected termination while this
+            // :daemon process stays alive, which neither the manual markConnectStopped()
+            // calls (explicit user-initiated stop) nor the onCreate reconcile (only
+            // catches stale state after the whole process died) would catch on their own.
+            // Guarded by isReloading so a reload's intentional stop+restart doesn't wipe
+            // out the fresh start time set by the restart that follows it.
+            if (!isReloading) {
+                CoreConnectionTracker.markConnectStopped()
+            }
             return 0
         }
 
