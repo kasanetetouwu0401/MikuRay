@@ -131,7 +131,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     private var dualSwipeChipSelection = SearchBarChipMode.WEATHER
     private var lastIpStateText: String = ""
     private var lastTrafficSpeedText: String = ""
-    private var lastTestResultText: String = ""
+    private var wasRunning: Boolean = false
     private var fabTimerJob: Job? = null
 
     private val urlTestProgressDialog: TestProgressDialogController by lazy {
@@ -357,7 +357,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     }
 
     private fun renderMainUiState(state: MainUiState) {
-        applyRunningState(isLoading = false, isRunning = state.isRunning)
+        applyRunningState(isLoading = false, isRunning = state.isRunning, testResult = state.testResult)
         state.testProgress?.let {
             if (!state.isUrlTestMinimized) {
                 if (!urlTestProgressDialog.isShowing) urlTestProgressDialog.show(it.total)
@@ -370,6 +370,11 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
                 countryCodeProgressDialog.update(it)
             }
         }
+        if (state.isRunning && !wasRunning && mainViewModel.consumePendingConnectionTest()) {
+            setTestState(getString(R.string.connection_test_testing))
+            mainViewModel.testCurrentServerRealPing()
+        }
+        wasRunning = state.isRunning
     }
 
     private fun updateQuickActionsVisibility() {
@@ -1057,11 +1062,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             refreshGroupTabTitles()
         }
 
-        mainViewModel.updateTestResultAction.observe(this) {
-            lastTestResultText = it.orEmpty()
-            setTestState(it)
-        }
-
         mainViewModel.testProgressAction.observe(this) { info ->
             if (info == null) {
                 urlTestProgressDialog.finish()
@@ -1094,18 +1094,9 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             refreshIpStateText()
         }
 
-        mainViewModel.isRunning.observe(this) { isRunning ->
-            applyRunningState(isLoading = false, isRunning = isRunning)
-            if (isRunning == true && mainViewModel.consumePendingConnectionTest()) {
-                setTestState(getString(R.string.connection_test_testing))
-                mainViewModel.testCurrentServerRealPing()
-            }
-        }
-
         mainViewModel.serviceRestartAction.observe(this) {
             stopFabTimer()
             mainViewModel.markConnectionTestPending()
-            lastTestResultText = ""
             setTestState(getString(R.string.connection_test_testing))
         }
 
@@ -1343,7 +1334,11 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         binding.fab.text = "%02d:%02d:%02d".format(h, m, s)
     }
 
-    private fun applyRunningState(isLoading: Boolean, isRunning: Boolean) {
+    private fun applyRunningState(
+        isLoading: Boolean,
+        isRunning: Boolean,
+        testResult: String = mainViewModel.uiState.value.testResult
+    ) {
         binding.fab.isEnabled = true
 
         if (isLoading) {
@@ -1359,14 +1354,13 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             binding.fab.contentDescription = getString(R.string.action_stop_service)
             startFabTimer()
 
-            setTestState(lastTestResultText.ifEmpty { getString(R.string.connection_connected) })
+            setTestState(testResult.ifEmpty { getString(R.string.connection_connected) })
         } else {
             binding.fab.setIconResource(RemixR.drawable.rmx_media_play_line)
             binding.fab.contentDescription = getString(R.string.tasker_start_service)
             stopFabTimer()
 
             setTestState(getString(R.string.connection_not_connected))
-            lastTestResultText = ""
             lastTrafficSpeedText = ""
             lastIpStateText = getString(R.string.ip_unknown)
             refreshIpStateText()
