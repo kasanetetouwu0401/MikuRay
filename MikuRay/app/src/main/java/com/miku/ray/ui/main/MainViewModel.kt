@@ -24,6 +24,7 @@ import com.miku.ray.dto.RealPingSummary
 import com.miku.ray.dto.TestProgressInfo
 import com.miku.ray.ui.bottomsheet.SortSubBottomSheet
 import com.miku.ray.dto.TestServiceMessage
+import com.miku.ray.extension.delay
 import com.miku.ray.extension.isComplexType
 import com.miku.ray.extension.matchesPattern
 import com.miku.ray.extension.serializable
@@ -57,6 +58,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var pendingServerRestartGuid: String? = null
     private var reloadJob: Job? = null
     private var receiverRegistered = false
+    private var stateSyncJob: Job? = null
+    @Volatile
+    private var stateSyncAcknowledged = false
     @Volatile
     private var serverCacheLoaded = false
     val serversCache = mutableListOf<ServersCache>()
@@ -92,16 +96,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
             receiverRegistered = true
         }
-        MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
+        resyncState()
     }
 
     fun resyncState() {
-
-        MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
+        stateSyncAcknowledged = false
+        stateSyncJob?.cancel()
+        stateSyncJob = viewModelScope.launch {
+            val retryDelaysMs = longArrayOf(300L, 600L, 1_200L, 2_000L, 3_000L)
+            MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
+            for (retryDelayMs in retryDelaysMs) {
+                delay(retryDelayMs)
+                if (stateSyncAcknowledged) return@launch
+                LogUtil.w(AppConfig.TAG, "MainViewModel: Retrying service state synchronization")
+                MessageUtil.sendMsg2Service(getApplication(), AppConfig.MSG_REGISTER_CLIENT, "")
+            }
+        }
     }
 
     override fun onCleared() {
         reloadJob?.cancel()
+        stateSyncJob?.cancel()
         if (receiverRegistered) {
             try {
                 getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
@@ -664,10 +679,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val mMsgReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
-            when (intent?.getIntExtra("key", 0)) {
+            val key = intent?.getIntExtra("key", 0)
+            if (key != null && key in SERVICE_STATE_MESSAGE_KEYS) {
+                stateSyncAcknowledged = true
+                stateSyncJob?.cancel()
+            }
+
+            when (key) {
                 AppConfig.MSG_STATE_RUNNING -> {
                     if (!isRestarting) {
-                        isRunning.value = true
+                        if (isRunning.value != true) {
+                            isRunning.value = true
+                        }
 
                         updateListAction.postValue(-1)
                     }
@@ -676,7 +699,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 AppConfig.MSG_STATE_NOT_RUNNING -> {
                     if (!isRestarting) {
                         markConnectionStopped()
-                        isRunning.value = false
+                        if (isRunning.value != false) {
+                            isRunning.value = false
+                        }
                         updateListAction.postValue(-1)
                     }
                 }
@@ -844,5 +869,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val trimmed = raw.trim()
         if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) return null
         return JsonUtil.fromJsonSafe(trimmed, cls)
+    }
+
+    private companion object {
+        val SERVICE_STATE_MESSAGE_KEYS = setOf(
+            AppConfig.MSG_STATE_RUNNING,
+            AppConfig.MSG_STATE_NOT_RUNNING,
+            AppConfig.MSG_STATE_START_SUCCESS,
+            AppConfig.MSG_STATE_START_FAILURE,
+            AppConfig.MSG_STATE_STOP_SUCCESS,
+            AppConfig.MSG_STATE_RESTART,
+        )
     }
 }
