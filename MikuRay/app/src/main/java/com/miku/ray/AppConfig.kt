@@ -54,6 +54,8 @@ object AppConfig {
     const val PREF_HIDE_SCROLL_BUTTONS = "pref_hide_scroll_buttons"
     const val PREF_FAB_EXTENDED = "pref_fab_extended"
     const val PREF_VPN_CONNECT_START_TIME = "pref_vpn_connect_start_time"
+    const val PREF_ACTIVE_URL_TEST_PROGRESS = "pref_active_url_test_progress"
+    const val PREF_ACTIVE_COUNTRY_CODE_PROGRESS = "pref_active_country_code_progress"
     const val PREF_SEND_HWID = "pref_send_hwid"
     const val PREF_HIDE_FROM_RECENT_APPS = "hide_from_recent_apps"
     const val PREF_CONFIRM_REMOVE = "pref_confirm_remove"

@@ -268,6 +268,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     override fun onResume() {
         super.onResume()
 
+        mainViewModel.refreshStateFromStorage()
         refreshSearchBarChip()
         refreshIpStateText()
         updateSnowflakesVisibility()
@@ -1032,6 +1033,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             if (info == null) {
                 urlTestProgressDialog.finish()
             } else {
+                if (!urlTestProgressDialog.isShowing) urlTestProgressDialog.show(info.total)
                 urlTestProgressDialog.update(info)
             }
         }
@@ -1040,6 +1042,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             if (info == null) {
                 countryCodeProgressDialog.finish()
             } else {
+                if (!countryCodeProgressDialog.isShowing) countryCodeProgressDialog.show(info.total)
                 countryCodeProgressDialog.update(info)
             }
         }
