@@ -212,7 +212,7 @@
     </string-array>
 
     <string name="title_pref_speed_disabled">隐藏速度显示</string>
-    <string name="summary_pref_speed_disabled">在通知中隐藏当前速度\n通知图标仍会根据流量变化</string>
+    <string name="summary_pref_speed_disabled">在通知中隐藏当前速度。</string>
 
     <string name="title_pref_show_realtime_traffic_ip">用实时流量替代IP显示</string>
     <string name="summary_pref_show_realtime_traffic_ip">将主页的IP文字替换为实时上传/下载速度，和通知栏一样。</string>

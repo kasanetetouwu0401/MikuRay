@@ -215,7 +215,7 @@
     </string-array>
 
     <string name="title_pref_speed_disabled">Sembunyiin kecepatan</string>
-    <string name="summary_pref_speed_disabled">Biar speed sekarang nggak keliatan di notif.\nIkon notifnya tetap berubah ngikutin pemakaian kamu.</string>
+    <string name="summary_pref_speed_disabled">Sembunyiin kecepatan saat ini di notifikasi.</string>
 
     <string name="title_pref_show_realtime_traffic_ip">Tampilin traffic real-time ganti IP</string>
     <string name="summary_pref_show_realtime_traffic_ip">Ganti teks IP di layar utama jadi kecepatan upload/download real-time, kayak di notifikasi.</string>

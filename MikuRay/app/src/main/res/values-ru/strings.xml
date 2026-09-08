@@ -215,7 +215,7 @@
     </string-array>
 
     <string name="title_pref_speed_disabled">Скрыть отображение скорости</string>
-    <string name="summary_pref_speed_disabled">Скрыть текущую скорость в уведомлении.\nЗначок уведомления по-прежнему изменяется в зависимости от использования.</string>
+    <string name="summary_pref_speed_disabled">Скрывать текущую скорость в уведомлении.</string>
 
     <string name="title_pref_show_realtime_traffic_ip">Показывать трафик вместо IP</string>
     <string name="summary_pref_show_realtime_traffic_ip">Заменить текст IP на главном экране скоростью загрузки/отдачи в реальном времени, как в уведомлении.</string>
