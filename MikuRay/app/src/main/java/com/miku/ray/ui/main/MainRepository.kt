@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import androidx.core.content.ContextCompat
 import com.miku.ray.AngApplication
 import com.miku.ray.AppConfig
+import com.miku.ray.dto.CountryCodeTestMessage
 import com.miku.ray.dto.RealPingResult
 import com.miku.ray.dto.SubscriptionUpdateResult
 import com.miku.ray.dto.TestServiceMessage
@@ -95,6 +96,10 @@ class MainRepository(
 
     override fun sendMsg2TestService(msg: TestServiceMessage) {
         MessageUtil.sendMsg2TestService(app, msg)
+    }
+
+    override fun sendMsg2CountryCodeTestService(msg: CountryCodeTestMessage) {
+        MessageUtil.sendMsg2CountryCodeTestService(app, msg)
     }
 
     override fun testCurrentServerRealPing() {

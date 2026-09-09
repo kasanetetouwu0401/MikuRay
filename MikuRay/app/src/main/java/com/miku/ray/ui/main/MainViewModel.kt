@@ -339,8 +339,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun testAllCountryCodes() {
-        MessageUtil.sendMsg2CountryCodeTestService(
-            getApplication(),
+        mainRepository.sendMsg2CountryCodeTestService(
             CountryCodeTestMessage(key = AppConfig.MSG_COUNTRY_CODE_CANCEL)
         )
         val guids = serversCache.map { it.guid }.toList()
@@ -349,8 +348,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch(Dispatchers.Default) {
             if (guids.isEmpty()) return@launch
-            MessageUtil.sendMsg2CountryCodeTestService(
-                getApplication(),
+            mainRepository.sendMsg2CountryCodeTestService(
                 CountryCodeTestMessage(
                     key = AppConfig.MSG_COUNTRY_CODE_START,
                     subscriptionId = subscriptionId,
@@ -361,8 +359,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun cancelCountryCodeTest() {
-        MessageUtil.sendMsg2CountryCodeTestService(
-            getApplication(),
+        mainRepository.sendMsg2CountryCodeTestService(
             CountryCodeTestMessage(key = AppConfig.MSG_COUNTRY_CODE_CANCEL)
         )
     }
