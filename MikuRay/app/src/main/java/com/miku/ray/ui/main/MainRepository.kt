@@ -57,7 +57,6 @@ class MainRepository(
 
                 AppConfig.MSG_STATE_STOP_SUCCESS -> MainServiceEvent.StateStopSuccess
 
-                // Single "Test" button result: plain, already-formatted text — never JSON.
                 AppConfig.MSG_MEASURE_DELAY_SUCCESS -> MainServiceEvent.MeasureDelayResult(
                     text = safeIntent.getStringExtra("content").orEmpty(),
                 )
@@ -66,7 +65,6 @@ class MainRepository(
                     ip = safeIntent.getStringExtra("content"),
                 )
 
-                // Batch "Test All" results: JSON payload per server, with a raw-guid fallback.
                 AppConfig.MSG_MEASURE_CONFIG_SUCCESS -> {
                     val content = safeIntent.getStringExtra("content")
                     val result = content?.parseJson(RealPingResult::class.java)

@@ -13,11 +13,9 @@ sealed class MainServiceEvent {
     data class StateStartFailure(val message: String?) : MainServiceEvent()
     data object StateStopSuccess : MainServiceEvent()
 
-    /** Hasil test ping server tunggal (tombol Test di toolbar) — teks siap tampil, bukan objek. */
     data class MeasureDelayResult(val text: String) : MainServiceEvent()
     data class MeasureIpResult(val ip: String?) : MainServiceEvent()
 
-    /** Hasil test batch (Test All) — satu event per server yang selesai dites. */
     data class MeasureConfigResult(val result: RealPingResult?, val rawGuid: String?) : MainServiceEvent()
     data class MeasureConfigNotify(val progress: RealPingProgress?) : MainServiceEvent()
     data class MeasureConfigFinish(val summary: RealPingSummary?) : MainServiceEvent()

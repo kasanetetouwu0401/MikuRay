@@ -281,7 +281,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             refreshGroupTabTitles()
         }
 
-        mainViewModel.resyncState()
+        mainViewModel.startListenBroadcast()
     }
 
     override fun onContentChanged() {
@@ -1211,7 +1211,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     }
 
     private fun handleFabAction() {
-        mainViewModel.resyncState()
+        mainViewModel.startListenBroadcast()
         applyRunningState(isLoading = true, isRunning = false)
 
         if (mainViewModel.isRunning.value == true) {
@@ -1234,7 +1234,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             mainViewModel.testCurrentServerRealPing()
         } else {
             pendingConnectionTest = true
-            mainViewModel.resyncState()
+            mainViewModel.startListenBroadcast()
         }
     }
 

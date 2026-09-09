@@ -76,24 +76,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         reloadServerList(notify = false)
-        // Start collecting service events right away, in the same construction sequence as
-        // mainRepository's own init (which registers its receiver and fires MSG_REGISTER_CLIENT
-        // immediately). mainServiceEvent is a replay=0 SharedFlow, so if nothing is collecting
-        // yet when that initial state reply arrives, it's silently dropped — this is what caused
-        // the "state hilang pas app baru dibuka" bug: collection used to only start later, from
-        // startListenBroadcast() called in MainActivity.onContentChanged(), leaving a real gap.
         mainServiceEventJob = viewModelScope.launch {
             mainRepository.mainServiceEvent.collectLatest(::onMainServiceEvent)
         }
     }
 
     fun startListenBroadcast() {
-        // Collection already started in init(); this just asks the service to resend its
-        // current state (e.g. when the Activity is (re)created and wants a fresh sync).
-        mainRepository.sendMsg2Service(AppConfig.MSG_REGISTER_CLIENT, "")
-    }
-
-    fun resyncState() {
         mainRepository.sendMsg2Service(AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
@@ -644,10 +632,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         updateListAction.postValue(-1)
     }
 
-    // Single source of truth for service state. MainRepository owns the one receiver that
-    // listens for BROADCAST_ACTION_ACTIVITY (registered as soon as this ViewModel/repository
-    // is created, and re-synced via MSG_REGISTER_CLIENT on every resyncState() call), so this
-    // is the only place service events are consumed — no more racing with a second receiver.
     private fun onMainServiceEvent(event: MainServiceEvent) {
         when (event) {
             MainServiceEvent.StateRunning -> {
