@@ -58,7 +58,7 @@ class TrafficDetailWidgetProvider : AppWidgetProvider() {
         super.onReceive(context, intent)
         when (intent.action) {
             AppConfig.BROADCAST_ACTION_TRAFFIC_WIDGET_REFRESH -> updateAll(context)
-            AppConfig.ACTION_WIDGET_UPDATE -> updateAll(context)
+            AppConfig.ACTION_WIDGET_STATE_CHANGED -> updateAll(context)
         }
     }
 

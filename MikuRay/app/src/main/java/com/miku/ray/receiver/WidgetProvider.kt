@@ -76,8 +76,8 @@ class WidgetProvider : AppWidgetProvider() {
 
         remoteViews.setViewVisibility(R.id.widget_restart_button, if (isRunning) View.VISIBLE else View.GONE)
         if (isRunning) {
-            val restartIntent = Intent(AppConfig.ACTION_CORE_RESTART).apply {
-                setPackage(AppConfig.ANG_PACKAGE)
+            val restartIntent = Intent(AppConfig.ACTION_RESTART_SERVICE).apply {
+                `package` = AppConfig.ANG_PACKAGE
             }
             val restartPendingIntent = PendingIntent.getBroadcast(
                 context, R.id.widget_restart_button, restartIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
@@ -163,18 +163,9 @@ class WidgetProvider : AppWidgetProvider() {
             } else {
                 LauncherManager.startServiceFromToggle(context)
             }
-        } else if (AppConfig.ACTION_WIDGET_UPDATE == intent.action) {
+        } else if (AppConfig.ACTION_WIDGET_STATE_CHANGED == intent.action) {
             AppWidgetManager.getInstance(context)?.let { manager ->
-                val isRunning = when (intent.getStringExtra("kind")) {
-                    AppConfig.WIDGET_UPDATE_KIND_STATE -> when (intent.getIntExtra("state", 0)) {
-                        AppConfig.MSG_STATE_RUNNING, AppConfig.MSG_STATE_START_SUCCESS -> true
-                        AppConfig.MSG_STATE_NOT_RUNNING, AppConfig.MSG_STATE_START_FAILURE, AppConfig.MSG_STATE_STOP_SUCCESS -> false
-                        else -> return
-                    }
-
-                    AppConfig.WIDGET_UPDATE_KIND_TRAFFIC -> return
-                    else -> return
-                }
+                val isRunning = intent.getBooleanExtra(AppConfig.EXTRA_RUNNING, CoreServiceManager.isRunning())
                 for (appWidgetId in manager.getAppWidgetIds(ComponentName(context, WidgetProvider::class.java))) {
                     updateWidget(context, manager, appWidgetId, isRunning)
                 }

@@ -119,12 +119,12 @@ object NotificationManager : TrafficController.Listener {
         val startMainIntent = Intent(service, MainActivity::class.java)
         val contentPendingIntent = PendingIntent.getActivity(service, NOTIFICATION_PENDING_INTENT_CONTENT, startMainIntent, flags)
 
-        val stopV2RayIntent = Intent(AppConfig.ACTION_CORE_STOP)
-        stopV2RayIntent.setPackage(AppConfig.ANG_PACKAGE)
+        val stopV2RayIntent = Intent(AppConfig.ACTION_STOP_SERVICE)
+        stopV2RayIntent.`package` = AppConfig.ANG_PACKAGE
         val stopV2RayPendingIntent = PendingIntent.getBroadcast(service, NOTIFICATION_PENDING_INTENT_STOP_V2RAY, stopV2RayIntent, flags)
 
-        val restartV2RayIntent = Intent(AppConfig.ACTION_CORE_RESTART)
-        restartV2RayIntent.setPackage(AppConfig.ANG_PACKAGE)
+        val restartV2RayIntent = Intent(AppConfig.ACTION_RESTART_SERVICE)
+        restartV2RayIntent.`package` = AppConfig.ANG_PACKAGE
         val restartV2RayPendingIntent = PendingIntent.getBroadcast(service, NOTIFICATION_PENDING_INTENT_RESTART_V2RAY, restartV2RayIntent, flags)
 
         val channelId =

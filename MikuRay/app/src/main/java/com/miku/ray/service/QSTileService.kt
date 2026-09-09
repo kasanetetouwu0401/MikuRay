@@ -10,8 +10,7 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.aidl.ICoreService
-import com.miku.ray.core.BinderServiceFactory
+import com.miku.ray.aidl.MikuRayConnection
 import com.miku.ray.core.CoreServiceManager
 import com.miku.ray.core.LauncherManager
 import com.miku.ray.handler.SettingsManager
@@ -19,8 +18,6 @@ import com.miku.ray.ui.shortcut.ScStartActivity
 import com.miku.ray.util.LogUtil
 
 class QSTileService : TileService() {
-
-    private var connection: BinderServiceFactory.Connection? = null
 
     fun setState(state: Int) {
         qsTile?.icon = Icon.createWithResource(applicationContext, R.drawable.ic_stat_name)
@@ -38,46 +35,25 @@ class QSTileService : TileService() {
     override fun onStartListening() {
         super.onStartListening()
 
-        connection = BinderServiceFactory.connect(
-            applicationContext,
-            BinderServiceFactory.CONNECTION_ID_TILE,
-            object : BinderServiceFactory.Callback {
-                override fun stateChanged(state: Int, profileName: String, msg: String) {
-                    when (state) {
-                        AppConfig.MSG_STATE_RUNNING,
-                        AppConfig.MSG_STATE_START_SUCCESS
-                        -> setState(Tile.STATE_ACTIVE)
-
-                        AppConfig.MSG_STATE_NOT_RUNNING,
-                        AppConfig.MSG_STATE_START_FAILURE,
-                        AppConfig.MSG_STATE_STOP_SUCCESS
-                        -> setState(Tile.STATE_INACTIVE)
-                    }
-                }
-
-                override fun onServiceConnected(service: ICoreService) {
-                    try {
-                        if (service.state == AppConfig.MSG_STATE_RUNNING) {
-                            setState(Tile.STATE_ACTIVE)
-                        } else {
-                            setState(Tile.STATE_INACTIVE)
-                        }
-                    } catch (e: Exception) {
-                        LogUtil.e(AppConfig.TAG, "QSTileService: Failed to query state", e)
-                    }
-                }
-            },
-            listenForDeath = false,
-        )
+        if (CoreServiceManager.isRunning()) {
+            setState(Tile.STATE_ACTIVE)
+        } else {
+            setState(Tile.STATE_INACTIVE)
+        }
+        connection = MikuRayConnection { key, _ -> onServiceEvent(key) }
+        connection?.connect(applicationContext)
     }
 
     override fun onStopListening() {
         super.onStopListening()
 
-        connection?.let {
-            BinderServiceFactory.disconnect(applicationContext, BinderServiceFactory.CONNECTION_ID_TILE)
+        try {
+            connection?.disconnect(applicationContext)
+            connection = null
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "Failed to disconnect from core service", e)
         }
-        connection = null
+
     }
 
     override fun onClick() {
@@ -121,6 +97,16 @@ class QSTileService : TileService() {
             @Suppress("DEPRECATION")
             @SuppressLint("StartActivityAndCollapseDeprecated")
             startActivityAndCollapse(intent)
+        }
+    }
+
+    private var connection: MikuRayConnection? = null
+
+    private fun onServiceEvent(key: Int) {
+        when (key) {
+            AppConfig.MSG_STATE_RUNNING, AppConfig.MSG_STATE_START_SUCCESS -> setState(Tile.STATE_ACTIVE)
+            AppConfig.MSG_STATE_NOT_RUNNING, AppConfig.MSG_STATE_START_FAILURE, AppConfig.MSG_STATE_STOP_SUCCESS ->
+                setState(Tile.STATE_INACTIVE)
         }
     }
 

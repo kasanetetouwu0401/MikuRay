@@ -43,6 +43,7 @@ import java.util.regex.PatternSyntaxException
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val mainRepository = MainRepository(getApplication())
     private var mainServiceEventJob: Job? = null
+    private var rawServiceEventsJob: Job? = null
     private var serverList = mutableListOf<String>()
     var subscriptionId: String = mainRepository.getSelectedSubscriptionId()
     var keywordFilter = ""
@@ -52,6 +53,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var isRestarting = false
     private var pendingServerRestartGuid: String? = null
     private var reloadJob: Job? = null
+    private var receiverRegistered = false
     @Volatile
     private var serverCacheLoaded = false
     val serversCache = mutableListOf<ServersCache>()
@@ -87,19 +89,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 mainRepository.mainServiceEvent.collectLatest(::onMainServiceEvent)
             }
         }
-        mainRepository.connect()
+        if (!receiverRegistered) {
+            rawServiceEventsJob = viewModelScope.launch {
+                mainRepository.rawServiceEvents.collectLatest(::onRawServiceEvent)
+            }
+            receiverRegistered = true
+        }
         mainRepository.resyncState()
     }
 
     fun resyncState() {
-
         mainRepository.resyncState()
     }
 
     override fun onCleared() {
         reloadJob?.cancel()
         mainServiceEventJob?.cancel()
+        rawServiceEventsJob?.cancel()
         mainRepository.close()
+        receiverRegistered = false
         LogUtil.i(AppConfig.TAG, "Main ViewModel is cleared")
         super.onCleared()
     }
@@ -305,7 +313,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 return@launch
             }
-            mainRepository.startRealPingTest(
+            mainRepository.startCoreTest(
                 TestServiceMessage(
                     key = AppConfig.MSG_MEASURE_CONFIG_START,
                     testId = testId,
@@ -318,12 +326,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun testAllCountryCodes() {
-        mainRepository.cancelCountryCodeTestService()
         val guids = serversCache.map { it.guid }.toList()
         MmkvManager.clearAllCountryCodes(guids)
         updateListAction.value = -1
 
         viewModelScope.launch(Dispatchers.Default) {
+            mainRepository.cancelCountryCodeTest(
+                CountryCodeTestMessage(key = AppConfig.MSG_COUNTRY_CODE_CANCEL)
+            )
             if (guids.isEmpty()) return@launch
             mainRepository.startCountryCodeTest(
                 CountryCodeTestMessage(
@@ -336,7 +346,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun cancelCountryCodeTest() {
-        mainRepository.cancelCountryCodeTestService()
+        viewModelScope.launch(Dispatchers.Default) {
+            mainRepository.cancelCountryCodeTest(
+                CountryCodeTestMessage(key = AppConfig.MSG_COUNTRY_CODE_CANCEL)
+            )
+        }
     }
 
     fun clearCountryCodes() {
@@ -352,11 +366,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun testCurrentServerRealPing() {
-        mainRepository.testCurrentServerRealPing()
+        mainRepository.requestMeasureDelay()
     }
 
     fun fetchCurrentIp() {
-        mainRepository.fetchCurrentIp()
+        mainRepository.requestMeasureIp()
     }
 
     fun subscriptionIdChanged(id: String) {
@@ -604,18 +618,39 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val testId = activeTestId.orEmpty()
         activeTestId = null
         testProgressAction.value = null
-        mainRepository.cancelRealPingTestService(testId)
+        viewModelScope.launch(Dispatchers.Default) {
+            mainRepository.cancelCoreTest(
+                TestServiceMessage(
+                    key = AppConfig.MSG_MEASURE_CONFIG_CANCEL,
+                    testId = testId,
+                )
+            )
+        }
     }
 
     fun clearTestResults() {
-        mainRepository.cancelRealPingTestService(activeTestId.orEmpty())
+        viewModelScope.launch(Dispatchers.Default) {
+            mainRepository.cancelCoreTest(
+                TestServiceMessage(
+                    key = AppConfig.MSG_MEASURE_CONFIG_CANCEL,
+                    testId = activeTestId.orEmpty(),
+                )
+            )
+        }
         MmkvManager.clearAllTestDelayResults(MmkvManager.decodeAllServerList())
         updateCache()
         updateListAction.postValue(-1)
     }
 
     fun clearTestResultsForGroup() {
-        mainRepository.cancelRealPingTestService(activeTestId.orEmpty())
+        viewModelScope.launch(Dispatchers.Default) {
+            mainRepository.cancelCoreTest(
+                TestServiceMessage(
+                    key = AppConfig.MSG_MEASURE_CONFIG_CANCEL,
+                    testId = activeTestId.orEmpty(),
+                )
+            )
+        }
         MmkvManager.clearAllTestDelayResults(MmkvManager.decodeServerList(subscriptionId))
         updateCache()
         updateListAction.postValue(-1)
@@ -623,14 +658,47 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun onMainServiceEvent(event: MainServiceEvent) {
         when (event) {
-            MainServiceEvent.StateRunning -> {
+            MainServiceEvent.StateRunning,
+            MainServiceEvent.StateStartSuccess -> isRunning.postValue(true)
+            MainServiceEvent.StateNotRunning,
+            MainServiceEvent.StateStopSuccess,
+            MainServiceEvent.StateStartFailure -> isRunning.postValue(false)
+            is MainServiceEvent.MeasureDelayResult -> {
+                updateTestResultAction.postValue(event.result.delayMillis.toString())
+                updateListAction.postValue(getPosition(event.result.guid))
+            }
+            MainServiceEvent.MeasureConfigSuccess -> updateListAction.postValue(-1)
+            is MainServiceEvent.MeasureConfigNotify -> {
+                if (event.progress.isNotEmpty()) {
+                    testProgressAction.postValue(
+                        TestProgressInfo(
+                            guid = "",
+                            delayMillis = -1L,
+                            current = activeTestCompleted,
+                            total = activeTestTotal,
+                        )
+                    )
+                }
+            }
+            is MainServiceEvent.MeasureConfigFinish -> {
+                activeTestId = null
+                testProgressAction.postValue(null)
+            }
+        }
+    }
+
+    private fun onRawServiceEvent(event: RawServiceEvent) {
+        val content = event.content
+        when (event.key) {
+            AppConfig.MSG_STATE_RUNNING -> {
                 if (!isRestarting) {
                     isRunning.value = true
+
                     updateListAction.postValue(-1)
                 }
             }
 
-            MainServiceEvent.StateNotRunning -> {
+            AppConfig.MSG_STATE_NOT_RUNNING -> {
                 if (!isRestarting) {
                     markConnectionStopped()
                     isRunning.value = false
@@ -638,15 +706,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
 
-            MainServiceEvent.StateRestart -> {
+            AppConfig.MSG_STATE_RESTART -> {
                 markConnectionStopped()
                 isRestarting = true
                 serviceRestartAction.value = Unit
             }
 
-            is MainServiceEvent.StateStartSuccess -> {
+            AppConfig.MSG_STATE_START_SUCCESS -> {
                 val app = getApplication<AngApplication>()
-                val restarted = event.msg.toBooleanStrictOrNull() == true
+                val restarted = content?.toBooleanStrictOrNull() == true
                 pendingServerRestartGuid = null
                 isRestarting = false
                 alertAction.value = Pair(
@@ -660,9 +728,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 updateListAction.postValue(-1)
             }
 
-            is MainServiceEvent.StateStartFailure -> {
+            AppConfig.MSG_STATE_START_FAILURE -> {
                 val app = getApplication<AngApplication>()
-                val msg = event.msg.ifBlank {
+                val msg = if (!content.isNullOrBlank()) {
+                    content
+                } else {
                     app.getString(R.string.toast_services_failure)
                 }
 
@@ -674,7 +744,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 updateListAction.postValue(-1)
             }
 
-            MainServiceEvent.StateStopSuccess -> {
+            AppConfig.MSG_STATE_STOP_SUCCESS -> {
                 pendingServerRestartGuid = null
                 isRestarting = false
                 markConnectionStopped()
@@ -682,16 +752,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 updateListAction.postValue(-1)
             }
 
-            is MainServiceEvent.MeasureDelayResult -> {
-                updateTestResultAction.value = event.result
+            AppConfig.MSG_MEASURE_DELAY_SUCCESS -> {
+                updateTestResultAction.value = content.orEmpty()
             }
 
-            is MainServiceEvent.MeasureIpResult -> {
-                updateIpResultAction.value = event.ip
+            AppConfig.MSG_MEASURE_IP_SUCCESS -> {
+                updateIpResultAction.value = content
             }
 
-            is MainServiceEvent.MeasureConfigSuccess -> {
-                val result = event.json.fromJsonSafe<RealPingResult>()
+            AppConfig.MSG_MEASURE_CONFIG_SUCCESS -> {
+                val result = parseJson(content, RealPingResult::class.java)
                 if (result != null) {
                     if (acceptsTestEvent(result.testId)) {
                         updateListAction.postValue(getPosition(result.guid))
@@ -707,12 +777,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         )
                     }
                 } else {
-                    updateListAction.postValue(-1)
+                    val guid = content?.takeIf { !it.trimStart().startsWith("{") }.orEmpty()
+                    updateListAction.postValue(getPosition(guid))
                 }
             }
 
-            is MainServiceEvent.MeasureConfigNotify -> {
-                val progress = event.json.fromJsonSafe<RealPingProgress>()
+            AppConfig.MSG_MEASURE_CONFIG_NOTIFY -> {
+                val progress = parseJson(content, RealPingProgress::class.java)
                 if (progress != null) {
                     if (acceptsTestEvent(progress.testId)) {
                         activeTestCompleted = maxOf(activeTestCompleted, progress.completed)
@@ -727,13 +798,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         )
                     }
                 } else {
-                    val info = event.json.fromJsonSafe<TestProgressInfo>()
+                    val info = parseJson(content, TestProgressInfo::class.java)
                     if (info != null) testProgressAction.postValue(info)
                 }
             }
 
-            is MainServiceEvent.MeasureConfigFinish -> {
-                val summary = event.json?.fromJsonSafe<RealPingSummary>()
+            AppConfig.MSG_MEASURE_CONFIG_FINISH -> {
+                val summary = parseJson(content, RealPingSummary::class.java)
                 if (summary != null) {
                     if (!acceptsTestEvent(summary.testId)) return
                     activeTestId = null
@@ -746,30 +817,32 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
 
-            is MainServiceEvent.CountryCodeSuccess -> {
-                updateListAction.postValue(getPosition(event.guid))
+            AppConfig.MSG_COUNTRY_CODE_SUCCESS -> {
+                updateListAction.postValue(getPosition(content ?: ""))
             }
 
-            is MainServiceEvent.CountryCodeNotify -> {
-                val info = event.json.fromJsonSafe<TestProgressInfo>()
+            AppConfig.MSG_COUNTRY_CODE_NOTIFY -> {
+                val info = parseJson(content, TestProgressInfo::class.java)
                 if (info != null) {
                     countryCodeProgressAction.postValue(info)
                 }
             }
 
-            MainServiceEvent.CountryCodeFinish -> {
+            AppConfig.MSG_COUNTRY_CODE_FINISH -> {
                 countryCodeProgressAction.postValue(null)
             }
 
-            is MainServiceEvent.TrafficUpdated -> {
-                updateListAction.postValue(getPosition(event.guid))
+            AppConfig.MSG_TRAFFIC_UPDATED -> {
+                val guid = content ?: return
+                updateListAction.postValue(getPosition(guid))
             }
 
-            is MainServiceEvent.TrafficSpeedUpdated -> {
-                updateTrafficSpeedAction.postValue(event.speedText)
+            AppConfig.MSG_TRAFFIC_SPEED_UPDATED -> {
+                val speedText = content ?: return
+                updateTrafficSpeedAction.postValue(speedText)
             }
 
-            MainServiceEvent.SubUpdateFinish -> {
+            AppConfig.MSG_SUB_UPDATE_FINISH -> {
                 updateGroupOrderAction.postValue(Unit)
             }
         }
@@ -778,9 +851,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun acceptsTestEvent(testId: String): Boolean =
     testId.isEmpty() || testId == activeTestId
 
-    private inline fun <reified T> String.fromJsonSafe(): T? {
-        val trimmed = trim()
+    private fun <T> parseJson(content: String?, cls: Class<T>): T? {
+        val raw = content ?: return null
+        val trimmed = raw.trim()
         if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) return null
-        return JsonUtil.fromJsonSafe(trimmed, T::class.java)
+        return JsonUtil.fromJsonSafe(trimmed, cls)
     }
 }

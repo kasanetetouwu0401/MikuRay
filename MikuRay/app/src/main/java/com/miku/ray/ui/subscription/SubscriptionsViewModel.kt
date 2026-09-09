@@ -12,7 +12,7 @@ import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.handler.SettingsManager
 import com.miku.ray.ui.bottomsheet.SortSubBottomSheet
-import com.miku.ray.util.ServiceCommands
+import com.miku.ray.core.ServiceCommands
 
 class SubscriptionsViewModel : ViewModel() {
     private val subscriptions: MutableList<SubscriptionCache> =
@@ -76,7 +76,7 @@ class SubscriptionsViewModel : ViewModel() {
         .map { it.guid }
         if (subIds.isEmpty()) return
 
-        ServiceCommands.startSubscriptionService(
+        ServiceCommands.startSubscriptionUpdate(
             AngApplication.application,
             SubscriptionUpdateMessage(AppConfig.MSG_SUB_UPDATE_START, false, subIds)
         )

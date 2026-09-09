@@ -98,9 +98,8 @@ class CoreRootService : Service(), ServiceControl {
 
     override fun vpnProtect(socket: Int): Boolean = true
 
-    override fun onBind(intent: Intent?): IBinder {
-        return CoreServiceManager.coreBinder
-    }
+    override fun onBind(intent: Intent?): IBinder? =
+        if (intent?.action == AppConfig.ACTION_BIND_SERVICE) CoreServiceManager.binder else null
 
     override fun attachBaseContext(newBase: Context?) {
         val context = newBase?.let {

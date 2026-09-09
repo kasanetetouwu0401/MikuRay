@@ -2,14 +2,15 @@ package com.miku.ray.service
 
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.os.Handler
 import android.os.IBinder
-import android.os.RemoteCallbackList
+import android.os.Looper
+import android.os.Process
 import androidx.core.app.NotificationCompat
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.aidl.ICoreTestService
-import com.miku.ray.aidl.ICoreTestServiceCallback
 import com.miku.ray.core.CoreNativeManager
 import com.miku.ray.dto.RealPingEvent
 import com.miku.ray.dto.RealPingProgress
@@ -20,8 +21,9 @@ import com.miku.ray.enums.NotificationChannelType
 import com.miku.ray.extension.serializable
 import com.miku.ray.handler.AngConfigManager
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.util.JsonUtil
 import com.miku.ray.util.LogUtil
+import com.miku.ray.util.JsonUtil
+import com.miku.ray.aidl.JobServiceBinder
 import com.miku.ray.helper.NotificationHelper
 import com.miku.ray.remixicon.R as RemixR
 
@@ -38,26 +40,8 @@ class CoreTestService : Service() {
     private val terminalLock = Any()
     private var batchStarted = false
 
-    private val callbacks = RemoteCallbackList<ICoreTestServiceCallback>()
-
-    private val binder = object : ICoreTestService.Stub() {
-        override fun registerCallback(cb: ICoreTestServiceCallback?) {
-            cb?.let { callbacks.register(it) }
-        }
-
-        override fun unregisterCallback(cb: ICoreTestServiceCallback?) {
-            cb?.let { callbacks.unregister(it) }
-        }
-
-        override fun cancelTest(testId: String?) {
-            this@CoreTestService.cancelActiveBatch()
-        }
-    }
-
     private val cancelAction by lazy {
-        val intent = Intent(this, CoreTestService::class.java)
-        .setAction(AppConfig.ACTION_TEST_CANCEL)
-        .putExtra(
+        val intent = Intent(this, CoreTestService::class.java).putExtra(
             "content",
             TestServiceMessage(AppConfig.MSG_MEASURE_CONFIG_CANCEL),
         )
@@ -79,7 +63,10 @@ class CoreTestService : Service() {
         CoreNativeManager.initCoreEnv(this)
     }
 
-    override fun onBind(intent: Intent?): IBinder = binder
+    /** Replaces MessageUtil.sendMsg2UI(...) for this service's progress/result/finish events. */
+    private val binder = JobServiceBinder()
+
+    override fun onBind(intent: Intent?): IBinder? = binder
 
     override fun onDestroy() {
         LogUtil.i(AppConfig.TAG, "CoreTestService is being destroyed")
@@ -87,9 +74,12 @@ class CoreTestService : Service() {
         activeWorker?.cancel()
         activeWorker = null
         activeMessage = null
-        callbacks.kill()
         NotificationHelper.stopForeground(this)
         super.onDestroy()
+
+        Handler(Looper.getMainLooper()).postDelayed({
+                disposeProcess()
+            }, FINISH_BROADCAST_GRACE_MS)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -109,7 +99,7 @@ class CoreTestService : Service() {
 
         return when (message.key) {
             AppConfig.MSG_MEASURE_CONFIG_START -> handleMeasureStart(message, startId)
-            AppConfig.MSG_MEASURE_CONFIG_CANCEL -> cancelActiveBatch()
+            AppConfig.MSG_MEASURE_CONFIG_CANCEL -> handleMeasureCancel(startId)
             else -> {
                 NotificationHelper.stopForeground(this)
                 stopSelf(startId)
@@ -120,14 +110,16 @@ class CoreTestService : Service() {
 
     private fun handleMeasureStart(message: TestServiceMessage, startId: Int): Int {
         if (batchStarted) {
+
             synchronized(terminalLock) {
                 suppressWorkerEvents = true
                 activeWorker?.cancel()
             }
-            LogUtil.i(AppConfig.TAG, "CoreTestService replacing the active batch with a new one")
+            LogUtil.i(AppConfig.TAG, "CoreTestService handing replacement batch to a fresh process")
+            disposeProcess()
+            return START_REDELIVER_INTENT
         }
         batchStarted = true
-        suppressWorkerEvents = false
         activeMessage = message
 
         val guids = when {
@@ -160,7 +152,7 @@ class CoreTestService : Service() {
         return START_NOT_STICKY
     }
 
-    private fun cancelActiveBatch(): Int {
+    private fun handleMeasureCancel(startId: Int): Int {
         LogUtil.i(AppConfig.TAG, "CoreTestService cancelling the active batch")
         synchronized(terminalLock) {
             suppressWorkerEvents = true
@@ -180,7 +172,7 @@ class CoreTestService : Service() {
             }
         }
         NotificationHelper.stopForeground(this)
-        stopSelf()
+        stopSelf(startId)
         return START_NOT_STICKY
     }
 
@@ -202,14 +194,16 @@ class CoreTestService : Service() {
                     content = getString(progressTextRes, progressText),
                 )
 
-                notifyProgress(
+                binder.broadcastEvent(
+                    AppConfig.MSG_MEASURE_CONFIG_NOTIFY,
                     JsonUtil.toJson(RealPingProgress(message.testId, event.completed, event.total)),
                 )
             }
 
             is RealPingEvent.Result -> {
                 MmkvManager.encodeServerTestDelayMillis(event.guid, event.delayMillis)
-                notifyResult(
+                binder.broadcastEvent(
+                    AppConfig.MSG_MEASURE_CONFIG_SUCCESS,
                     JsonUtil.toJson(RealPingResult(message.testId, event.guid, event.delayMillis)),
                 )
             }
@@ -257,37 +251,15 @@ class CoreTestService : Service() {
         stopSelf()
     }
 
-    private fun notifyProgress(json: String) {
-        val count = callbacks.beginBroadcast()
-        for (i in 0 until count) {
-            try {
-                callbacks.getBroadcastItem(i).onTestProgress(json)
-            } catch (_: Exception) {
-            }
-        }
-        callbacks.finishBroadcast()
-    }
-
-    private fun notifyResult(json: String) {
-        val count = callbacks.beginBroadcast()
-        for (i in 0 until count) {
-            try {
-                callbacks.getBroadcastItem(i).onTestResult(json)
-            } catch (_: Exception) {
-            }
-        }
-        callbacks.finishBroadcast()
-    }
-
     private fun sendSummary(summary: RealPingSummary) {
-        val json = JsonUtil.toJson(summary)
-        val count = callbacks.beginBroadcast()
-        for (i in 0 until count) {
-            try {
-                callbacks.getBroadcastItem(i).onTestFinish(json)
-            } catch (_: Exception) {
-            }
-        }
-        callbacks.finishBroadcast()
+        binder.broadcastEvent(AppConfig.MSG_MEASURE_CONFIG_FINISH, JsonUtil.toJson(summary))
+    }
+
+    private fun disposeProcess() {
+        Handler(Looper.getMainLooper()).post { Process.killProcess(Process.myPid()) }
+    }
+
+    private companion object {
+        const val FINISH_BROADCAST_GRACE_MS = 500L
     }
 }

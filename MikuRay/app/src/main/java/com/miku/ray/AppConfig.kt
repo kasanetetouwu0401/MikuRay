@@ -344,32 +344,18 @@ object AppConfig {
 
     const val PROTOCOL_FREEDOM = "freedom"
 
-    /** @deprecated Legacy message transport retained only for source compatibility. */
-    @Deprecated("Use AIDL/service actions instead")
-    const val BROADCAST_ACTION_SERVICE = "$ANG_PACKAGE.action.service"
-    /** @deprecated Legacy message transport retained only for source compatibility. */
-    @Deprecated("Use AIDL callbacks instead")
-    const val BROADCAST_ACTION_ACTIVITY = "$ANG_PACKAGE.action.activity"
+    /** Action used on the intent passed to bindService() to obtain the AIDL binder (mirrors NekoBox's Action.SERVICE). */
+    const val ACTION_BIND_SERVICE = "$ANG_PACKAGE.action.bind_service"
 
+    /** Internal, self-registered control-plane actions (same idea as NekoBox's Action.RELOAD/CLOSE). Not part of the AIDL surface. */
+    const val ACTION_STOP_SERVICE = "$ANG_PACKAGE.action.stop_service"
+    const val ACTION_RESTART_SERVICE = "$ANG_PACKAGE.action.restart_service"
+
+    /** Explicit, typed broadcast used only to nudge home-screen widgets (AppWidgetProvider can't hold a live AIDL binding). */
+    const val ACTION_WIDGET_STATE_CHANGED = "$ANG_PACKAGE.action.widget_state_changed"
+    const val EXTRA_RUNNING = "running"
     const val BROADCAST_ACTION_WIDGET_CLICK = "$ANG_PACKAGE.action.widget.click"
     const val BROADCAST_ACTION_TRAFFIC_WIDGET_REFRESH = "$ANG_PACKAGE.action.traffic_widget_refresh"
-
-    // Explicit service commands (replaces the old msg2 broadcast protocol).
-    // Used where a live AIDL binding is not available (notification actions, widgets).
-    const val ACTION_CORE_STOP = "$ANG_PACKAGE.action.core.stop"
-    const val ACTION_CORE_RESTART = "$ANG_PACKAGE.action.core.restart"
-    const val ACTION_TEST_START = "$ANG_PACKAGE.action.test.start"
-    const val ACTION_TEST_CANCEL = "$ANG_PACKAGE.action.test.cancel"
-    const val ACTION_COUNTRY_START = "$ANG_PACKAGE.action.country.start"
-    const val ACTION_COUNTRY_CANCEL = "$ANG_PACKAGE.action.country.cancel"
-    const val ACTION_SUB_START = "$ANG_PACKAGE.action.sub.start"
-    const val ACTION_SUB_CANCEL = "$ANG_PACKAGE.action.sub.cancel"
-
-    // Minimal package-scoped broadcast used only by home-screen widgets,
-    // which cannot hold an AIDL binding. Everything else uses AIDL callbacks.
-    const val ACTION_WIDGET_UPDATE = "$ANG_PACKAGE.action.widget.update"
-    const val WIDGET_UPDATE_KIND_STATE = "state"
-    const val WIDGET_UPDATE_KIND_TRAFFIC = "traffic"
     const val EXTRA_SHOW_TOTAL_TRAFFIC_DETAIL = "extra_show_total_traffic_detail"
     const val BROADCAST_ACTION_ICON_SHAPE_CHANGED = "$ANG_PACKAGE.action.icon_shape_changed"
     const val BROADCAST_ACTION_ARROW_SHAPE_CHANGED = "$ANG_PACKAGE.action.arrow_shape_changed"
@@ -409,7 +395,6 @@ object AppConfig {
     const val APP_PRIVACY_POLICY = "$GITHUB_RAW_URL/HatsuneMikuUwU/MikuRay/master/CR.md"
     const val APP_PROMOTION_URL = "aHR0cHM6Ly85LjIzNDQ1Ni54eXovYWJjLmh0bWw="
     const val TG_CHANNEL_URL = "https://t.me/uwuowoumuchannel"
-    const val TG_CRASH_REPORT_URL = "https://t.me/HatsuneMikuUwU"
     const val DELAY_TEST_URL = "https://www.gstatic.com/generate_204"
     const val DELAY_TEST_URL2 = "https://www.google.com/generate_204"
     const val OBSERVATORY_LEAST_PING_INTERVAL = "3m"
@@ -443,8 +428,10 @@ object AppConfig {
     const val WIREGUARD_LOCAL_MTU = "1420"
     const val LOOPBACK = "127.0.0.1"
 
+    const val MSG_REGISTER_CLIENT = 1
     const val MSG_STATE_RUNNING = 11
     const val MSG_STATE_NOT_RUNNING = 12
+    const val MSG_UNREGISTER_CLIENT = 2
     const val MSG_STATE_START = 3
     const val MSG_STATE_START_SUCCESS = 31
     const val MSG_STATE_START_FAILURE = 32

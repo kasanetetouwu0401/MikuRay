@@ -1,38 +1,38 @@
 package com.miku.ray.ui.main
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
-import android.os.IBinder
 import com.miku.ray.AngApplication
 import com.miku.ray.AppConfig
-import com.miku.ray.aidl.ICoreServiceCallback
-import com.miku.ray.aidl.ICoreTestService
-import com.miku.ray.aidl.ICoreTestServiceCallback
-import com.miku.ray.aidl.ICountryCodeTestService
-import com.miku.ray.aidl.ICountryCodeTestServiceCallback
-import com.miku.ray.core.BinderServiceFactory
+import com.miku.ray.aidl.JobServiceConnection
+import com.miku.ray.aidl.MikuRayConnection
+import com.miku.ray.core.PreStartFailureNotifier
+import com.miku.ray.core.ServiceCommands
 import com.miku.ray.dto.CountryCodeTestMessage
+import com.miku.ray.dto.RealPingResult
 import com.miku.ray.dto.SubscriptionUpdateResult
 import com.miku.ray.dto.TestServiceMessage
 import com.miku.ray.dto.entities.SubscriptionCache
 import com.miku.ray.handler.AngConfigManager
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.service.CoreTestService
 import com.miku.ray.service.CountryCodeTestService
+import com.miku.ray.service.CoreTestService
+import com.miku.ray.util.JsonUtil
 import com.miku.ray.util.LogUtil
-import com.miku.ray.util.ServiceCommands
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.util.concurrent.atomic.AtomicBoolean
 
+/**
+ * AIDL-backed implementation of [MainDataSource]. Replaces the old BROADCAST_ACTION_ACTIVITY
+ * BroadcastReceiver + MessageUtil.sendMsg2Service/sendMsg2TestService/sendMsg2CountryCodeTestService
+ * plumbing with three live service connections, modeled after NekoBox's SagerConnection.
+ */
 class MainRepository(
     private val app: AngApplication,
 ) : MainDataSource {
     private val closed = AtomicBoolean(false)
+
     private val _mainServiceEvent = MutableSharedFlow<MainServiceEvent>(
         replay = 0,
         extraBufferCapacity = 64,
@@ -40,252 +40,55 @@ class MainRepository(
     )
     override val mainServiceEvent: SharedFlow<MainServiceEvent> = _mainServiceEvent.asSharedFlow()
 
-    private var coreService: ICoreService? = null
-    private var testService: ICoreTestService? = null
-    private var countryService: ICountryCodeTestService? = null
-    private var coreBoundClass: Class<*>? = null
-    private var coreBound = false
-    private var testBound = false
-    private var countryBound = false
+    private val _rawServiceEvents = MutableSharedFlow<RawServiceEvent>(
+        replay = 0,
+        extraBufferCapacity = 64,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+    override val rawServiceEvents: SharedFlow<RawServiceEvent> = _rawServiceEvents.asSharedFlow()
 
-    private fun emit(event: MainServiceEvent) {
-        _mainServiceEvent.tryEmit(event)
+    private val mainConnection = MikuRayConnection { key, content -> onEvent(key, content) }
+    private val testConnection = JobServiceConnection(CoreTestService::class.java) { key, content -> onEvent(key, content) }
+    private val countryCodeConnection = JobServiceConnection(CountryCodeTestService::class.java) { key, content -> onEvent(key, content) }
+
+    init {
+        PreStartFailureNotifier.listener = { message ->
+            onEvent(AppConfig.MSG_STATE_START_FAILURE, message)
+        }
+        mainConnection.connect(app)
+        testConnection.connect(app)
+        countryCodeConnection.connect(app)
     }
 
-    // ------------------------------------------------------------------
-    // AIDL callback stubs (service -> UI)
-    // ------------------------------------------------------------------
+    private fun onEvent(key: Int, content: String?) {
+        _rawServiceEvents.tryEmit(RawServiceEvent(key, content))
 
-    private val coreCallback = object : ICoreServiceCallback.Stub() {
-        override fun stateChanged(state: Int, profileName: String?, msg: String?) {
-            val event = when (state) {
-                AppConfig.MSG_STATE_RUNNING -> MainServiceEvent.StateRunning
-                AppConfig.MSG_STATE_NOT_RUNNING -> MainServiceEvent.StateNotRunning
-                AppConfig.MSG_STATE_START_SUCCESS -> MainServiceEvent.StateStartSuccess(msg.orEmpty())
-                AppConfig.MSG_STATE_START_FAILURE -> MainServiceEvent.StateStartFailure(msg.orEmpty())
-                AppConfig.MSG_STATE_STOP_SUCCESS -> MainServiceEvent.StateStopSuccess
-                AppConfig.MSG_STATE_RESTART -> MainServiceEvent.StateRestart
-                else -> return
-            }
-            emit(event)
+        val event = when (key) {
+            AppConfig.MSG_STATE_RUNNING -> MainServiceEvent.StateRunning
+            AppConfig.MSG_STATE_NOT_RUNNING -> MainServiceEvent.StateNotRunning
+            AppConfig.MSG_STATE_START_SUCCESS -> MainServiceEvent.StateStartSuccess
+            AppConfig.MSG_STATE_START_FAILURE -> MainServiceEvent.StateStartFailure
+            AppConfig.MSG_STATE_STOP_SUCCESS -> MainServiceEvent.StateStopSuccess
+            AppConfig.MSG_MEASURE_DELAY_SUCCESS -> content
+                ?.let { JsonUtil.fromJsonSafe(it, RealPingResult::class.java) }
+                ?.let(MainServiceEvent::MeasureDelayResult)
+            AppConfig.MSG_MEASURE_CONFIG_SUCCESS -> MainServiceEvent.MeasureConfigSuccess
+            AppConfig.MSG_MEASURE_CONFIG_NOTIFY -> MainServiceEvent.MeasureConfigNotify(content.orEmpty())
+            AppConfig.MSG_MEASURE_CONFIG_FINISH -> MainServiceEvent.MeasureConfigFinish(content)
+            else -> null
         }
-
-        override fun cbSpeedUpdate(speedText: String?) {
-            emit(MainServiceEvent.TrafficSpeedUpdated(speedText.orEmpty()))
-        }
-
-        override fun cbTrafficUpdate(guid: String?) {
-            emit(MainServiceEvent.TrafficUpdated(guid.orEmpty()))
-        }
-
-        override fun cbMeasureDelayResult(result: String?) {
-            emit(MainServiceEvent.MeasureDelayResult(result.orEmpty()))
-        }
-
-        override fun cbMeasureIpResult(ip: String?) {
-            emit(MainServiceEvent.MeasureIpResult(ip.orEmpty()))
-        }
-    }
-
-    private val testCallback = object : ICoreTestServiceCallback.Stub() {
-        override fun onTestProgress(json: String?) {
-            emit(MainServiceEvent.MeasureConfigNotify(json.orEmpty()))
-        }
-
-        override fun onTestResult(json: String?) {
-            emit(MainServiceEvent.MeasureConfigSuccess(json.orEmpty()))
-        }
-
-        override fun onTestFinish(json: String?) {
-            emit(MainServiceEvent.MeasureConfigFinish(json))
-        }
-    }
-
-    private val countryCallback = object : ICountryCodeTestServiceCallback.Stub() {
-        override fun onCountryCodeSuccess(guid: String?) {
-            emit(MainServiceEvent.CountryCodeSuccess(guid.orEmpty()))
-        }
-
-        override fun onCountryCodeProgress(json: String?) {
-            emit(MainServiceEvent.CountryCodeNotify(json.orEmpty()))
-        }
-
-        override fun onCountryCodeFinish() {
-            emit(MainServiceEvent.CountryCodeFinish)
-        }
-    }
-
-    // ------------------------------------------------------------------
-    // ServiceConnections (UI -> service binders)
-    // ------------------------------------------------------------------
-
-    private val coreConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-            val service = ICoreService.Stub.asInterface(binder ?: return) ?: return
-            coreService = service
-            try {
-                service.registerCallback(coreCallback)
-            } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "Failed to register core service callback", e)
-            }
-            resyncState()
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            coreService = null
-        }
-    }
-
-    private val testConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-            val service = ICoreTestService.Stub.asInterface(binder ?: return) ?: return
-            testService = service
-            try {
-                service.registerCallback(testCallback)
-            } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "Failed to register test service callback", e)
-            }
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            testService = null
-        }
-    }
-
-    private val countryConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-            val service = ICountryCodeTestService.Stub.asInterface(binder ?: return) ?: return
-            countryService = service
-            try {
-                service.registerCallback(countryCallback)
-            } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "Failed to register country code service callback", e)
-            }
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            countryService = null
-        }
-    }
-
-    // ------------------------------------------------------------------
-
-    fun connect() {
-        if (closed.get()) return
-        val wantedClass = BinderServiceFactory.coreServiceClass()
-        if (coreBound && coreBoundClass != wantedClass) {
-            // Connection mode changed (VPN / Root / ProxyOnly) while listening.
-            runCatching { app.unbindService(coreConnection) }
-            coreBound = false
-            coreService = null
-        }
-        if (!coreBound) {
-            try {
-                app.bindService(
-                    Intent(app, wantedClass),
-                    coreConnection,
-                    Context.BIND_AUTO_CREATE,
-                )
-                coreBound = true
-                coreBoundClass = wantedClass
-            } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "Failed to bind core service", e)
-            }
-        }
+        event?.let { _mainServiceEvent.tryEmit(it) }
     }
 
     override fun close() {
         if (!closed.compareAndSet(false, true)) return
-        if (coreBound) runCatching { app.unbindService(coreConnection) }
-        if (testBound) runCatching { app.unbindService(testConnection) }
-        if (countryBound) runCatching { app.unbindService(countryConnection) }
-        coreBound = false
-        testBound = false
-        countryBound = false
-        coreService = null
-        testService = null
-        countryService = null
-    }
-
-    override fun resyncState() {
-        val service = coreService
-        if (service == null) {
-            connect()
-            return
-        }
-        try {
-            emit(
-                if (service.state == AppConfig.MSG_STATE_RUNNING) {
-                    MainServiceEvent.StateRunning
-                } else {
-                    MainServiceEvent.StateNotRunning
-                }
-            )
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to query core service state", e)
-        }
-    }
-
-    override fun startRealPingTest(msg: TestServiceMessage) {
-        ensureTestBound()
-        ServiceCommands.startTestService(app, msg)
-    }
-
-    override fun cancelRealPingTestService(testId: String) {
-        val service = testService
-        if (service != null) {
-            try {
-                service.cancelTest(testId)
-                return
-            } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "AIDL test cancel failed, falling back to service command", e)
-            }
-        }
-        ServiceCommands.cancelTestService(app, testId)
-    }
-
-    override fun startCountryCodeTest(msg: CountryCodeTestMessage) {
-        ensureCountryBound()
-        ServiceCommands.startCountryCodeService(app, msg)
-    }
-
-    override fun cancelCountryCodeTestService() {
-        val service = countryService
-        if (service != null) {
-            try {
-                service.cancelTest()
-                return
-            } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "AIDL country cancel failed, falling back to service command", e)
-            }
-        }
-        ServiceCommands.cancelCountryCodeService(app)
-    }
-
-    override fun testCurrentServerRealPing() {
-        val service = coreService
-        if (service != null) {
-            try {
-                service.measureDelay()
-                return
-            } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "Failed to request delay measurement", e)
-            }
-        }
-        connect()
-    }
-
-    override fun fetchCurrentIp() {
-        val service = coreService
-        if (service != null) {
-            try {
-                service.measureIpOnly()
-                return
-            } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "Failed to request ip check", e)
-            }
-        }
-        connect()
+        PreStartFailureNotifier.listener = null
+        runCatching { mainConnection.disconnect(app) }
+            .onFailure { LogUtil.e(AppConfig.TAG, "Failed to disconnect main core connection", it) }
+        runCatching { testConnection.disconnect(app) }
+            .onFailure { LogUtil.e(AppConfig.TAG, "Failed to disconnect test service connection", it) }
+        runCatching { countryCodeConnection.disconnect(app) }
+            .onFailure { LogUtil.e(AppConfig.TAG, "Failed to disconnect country code service connection", it) }
     }
 
     override fun getSelectedSubscriptionId(): String =
@@ -300,31 +103,37 @@ class MainRepository(
     override fun shareNonCustomConfigsToClipboard(guids: List<String>): Int =
         AngConfigManager.shareNonCustomConfigsToClipboard(app, guids)
 
-    private fun ensureTestBound() {
-        if (testBound || closed.get()) return
-        try {
-            app.bindService(
-                Intent(app, CoreTestService::class.java),
-                testConnection,
-                Context.BIND_AUTO_CREATE,
-            )
-            testBound = true
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to bind test service", e)
-        }
+    override fun resyncState() {
+        mainConnection.connect(app)
+        val running = mainConnection.getState() == 1
+        onEvent(if (running) AppConfig.MSG_STATE_RUNNING else AppConfig.MSG_STATE_NOT_RUNNING, "")
     }
 
-    private fun ensureCountryBound() {
-        if (countryBound || closed.get()) return
-        try {
-            app.bindService(
-                Intent(app, CountryCodeTestService::class.java),
-                countryConnection,
-                Context.BIND_AUTO_CREATE,
-            )
-            countryBound = true
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to bind country code service", e)
-        }
+    override fun requestMeasureDelay() {
+        mainConnection.requestMeasureDelay()
+    }
+
+    override fun requestMeasureIp() {
+        mainConnection.requestMeasureIp()
+    }
+
+    override suspend fun startCoreTest(msg: TestServiceMessage) {
+        testConnection.reconnectIfNeeded(app)
+        ServiceCommands.startCoreTest(app, msg)
+    }
+
+    override suspend fun cancelCoreTest(msg: TestServiceMessage) {
+        testConnection.reconnectIfNeeded(app)
+        ServiceCommands.cancelCoreTest(app, msg)
+    }
+
+    override suspend fun startCountryCodeTest(msg: CountryCodeTestMessage) {
+        countryCodeConnection.reconnectIfNeeded(app)
+        ServiceCommands.startCountryCodeTest(app, msg)
+    }
+
+    override suspend fun cancelCountryCodeTest(msg: CountryCodeTestMessage) {
+        countryCodeConnection.reconnectIfNeeded(app)
+        ServiceCommands.cancelCountryCodeTest(app, msg)
     }
 }

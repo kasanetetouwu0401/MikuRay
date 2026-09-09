@@ -46,7 +46,11 @@ class SubscriptionUpdateService : Service() {
         CoreNativeManager.initCoreEnv(this)
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    /** No events are currently reported back from this service, but it exposes the same AIDL
+     *  contract as the other job services for consistency and future use. */
+    private val binder = com.miku.ray.aidl.JobServiceBinder()
+
+    override fun onBind(intent: Intent?): IBinder? = binder
 
     override fun onDestroy() {
         LogUtil.i(AppConfig.TAG, "SubscriptionUpdateService is being destroyed")

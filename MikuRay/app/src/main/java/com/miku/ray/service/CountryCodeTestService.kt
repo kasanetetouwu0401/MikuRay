@@ -4,15 +4,12 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.os.RemoteCallbackList
 import androidx.core.app.NotificationCompat
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.miku.ray.remixicon.R as RemixR
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.aidl.ICountryCodeTestService
-import com.miku.ray.aidl.ICountryCodeTestServiceCallback
 import com.miku.ray.core.CoreConfigManager
 import com.miku.ray.core.CoreNativeManager
 import com.miku.ray.dto.CountryCodeTestMessage
@@ -25,6 +22,7 @@ import com.miku.ray.handler.SpeedtestManager
 import com.miku.ray.helper.NotificationHelper
 import com.miku.ray.util.JsonUtil
 import com.miku.ray.util.LogUtil
+import com.miku.ray.aidl.JobServiceBinder
 import com.miku.ray.util.Utils
 import libv2ray.CoreCallbackHandler
 import java.net.InetSocketAddress
@@ -37,26 +35,8 @@ class CountryCodeTestService : Service() {
     private val cancelled = AtomicBoolean(false)
     private var worker: Thread? = null
 
-    private val callbacks = RemoteCallbackList<ICountryCodeTestServiceCallback>()
-
-    private val binder = object : ICountryCodeTestService.Stub() {
-        override fun registerCallback(cb: ICountryCodeTestServiceCallback?) {
-            cb?.let { callbacks.register(it) }
-        }
-
-        override fun unregisterCallback(cb: ICountryCodeTestServiceCallback?) {
-            cb?.let { callbacks.unregister(it) }
-        }
-
-        override fun cancelTest() {
-            this@CountryCodeTestService.handleCancel()
-        }
-    }
-
     private val cancelAction by lazy {
-        val intent = Intent(this, CountryCodeTestService::class.java)
-        .setAction(AppConfig.ACTION_COUNTRY_CANCEL)
-        .putExtra(
+        val intent = Intent(this, CountryCodeTestService::class.java).putExtra(
             "content",
             CountryCodeTestMessage(AppConfig.MSG_COUNTRY_CODE_CANCEL)
         )
@@ -73,13 +53,14 @@ class CountryCodeTestService : Service() {
         ).build()
     }
 
-    override fun onBind(intent: Intent?): IBinder = binder
+    private val binder = JobServiceBinder()
+
+    override fun onBind(intent: Intent?): IBinder? = binder
 
     override fun onDestroy() {
         cancelled.set(true)
         worker?.interrupt()
         worker = null
-        callbacks.kill()
         NotificationHelper.stopForeground(this)
         super.onDestroy()
     }
@@ -131,9 +112,10 @@ class CountryCodeTestService : Service() {
 
                     val countryCode = lookupThroughProfile(guid)
                     MmkvManager.encodeServerCountryCode(guid, countryCode)
-                    notifySuccess(guid)
+                    binder.broadcastEvent(AppConfig.MSG_COUNTRY_CODE_SUCCESS, guid)
 
-                    notifyProgress(
+                    binder.broadcastEvent(
+                        AppConfig.MSG_COUNTRY_CODE_NOTIFY,
                         JsonUtil.toJson(TestProgressInfo(guid, 0L, index + 1, guids.size))
                     )
                 }
@@ -230,37 +212,8 @@ class CountryCodeTestService : Service() {
         stopSelf()
     }
 
-    private fun notifySuccess(guid: String) {
-        val count = callbacks.beginBroadcast()
-        for (i in 0 until count) {
-            try {
-                callbacks.getBroadcastItem(i).onCountryCodeSuccess(guid)
-            } catch (_: Exception) {
-            }
-        }
-        callbacks.finishBroadcast()
-    }
-
-    private fun notifyProgress(json: String) {
-        val count = callbacks.beginBroadcast()
-        for (i in 0 until count) {
-            try {
-                callbacks.getBroadcastItem(i).onCountryCodeProgress(json)
-            } catch (_: Exception) {
-            }
-        }
-        callbacks.finishBroadcast()
-    }
-
     private fun sendFinish() {
-        val count = callbacks.beginBroadcast()
-        for (i in 0 until count) {
-            try {
-                callbacks.getBroadcastItem(i).onCountryCodeFinish()
-            } catch (_: Exception) {
-            }
-        }
-        callbacks.finishBroadcast()
+        binder.broadcastEvent(AppConfig.MSG_COUNTRY_CODE_FINISH, "0")
     }
 
     private class CountryCallback : CoreCallbackHandler {
