@@ -34,6 +34,7 @@ import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -745,8 +746,13 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         binding.viewPager.apply {
             adapter = groupPagerAdapter
             isUserInputEnabled = true
-            offscreenPageLimit = 10
         }
+        val pagerRecyclerView = binding.viewPager.getChildAt(0) as RecyclerView
+        groupPagerAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onChanged() {
+                pagerRecyclerView.setItemViewCacheSize(groupPagerAdapter.itemCount)
+            }
+        })
     }
 
     private fun setupListeners() {
