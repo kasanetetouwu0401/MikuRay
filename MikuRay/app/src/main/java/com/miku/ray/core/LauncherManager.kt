@@ -4,9 +4,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import androidx.core.content.ContextCompat
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.aidl.ICoreService
 import com.miku.ray.extension.isComplexType
 import com.miku.ray.extension.snackbarDefault
 import com.miku.ray.extension.snackbarError
@@ -18,10 +21,13 @@ import com.miku.ray.service.CoreProxyOnlyService
 import com.miku.ray.service.CoreRootService
 import com.miku.ray.service.CoreVpnService
 import com.miku.ray.util.LogUtil
-import com.miku.ray.util.MessageUtil
 import com.miku.ray.util.Utils
+import java.util.concurrent.atomic.AtomicBoolean
 
 object LauncherManager {
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private const val COMMAND_TIMEOUT_MS = 3_000L
 
     private fun showFeedback(context: Context, message: String, type: Int = 0) {
         if (context is Activity) {
@@ -73,27 +79,81 @@ object LauncherManager {
             val message = e.message ?: e.javaClass.simpleName
             if (showLifecycleFeedback) {
                 showFeedback(context, message, 2)
-                MessageUtil.sendMsg2UI(context, AppConfig.MSG_STATE_START_FAILURE, message)
             }
             return false
         }
     }
 
+    /**
+     * Stops the running core service over its AIDL binder. A no-op when the
+     * core is not running.
+     */
     fun stopService(context: Context) {
-        MessageUtil.sendMsg2Service(context, AppConfig.MSG_STATE_STOP, "")
+        val appContext = context.applicationContext
+        val id = BinderServiceFactory.CONNECTION_ID_STOP
+        val done = AtomicBoolean(false)
+        fun finish() {
+            if (done.compareAndSet(false, true)) {
+                mainHandler.post {
+                    BinderServiceFactory.disconnect(appContext, id)
+                }
+            }
+        }
+
+        BinderServiceFactory.connect(appContext, id, object : BinderServiceFactory.Callback {
+            override fun onServiceConnected(service: ICoreService) {
+                try {
+                    if (service.state == AppConfig.MSG_STATE_RUNNING) {
+                        service.stopCore()
+                    }
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "LauncherManager: Failed to stop core service", e)
+                }
+                finish()
+            }
+
+            override fun onServiceDisconnected() {
+                // Core service went away on its own; nothing left to stop.
+                finish()
+            }
+        })
+        mainHandler.postDelayed({ finish() }, COMMAND_TIMEOUT_MS)
     }
 
     fun restartService(context: Context) {
         restartService(context) { }
     }
 
+    /**
+     * Asks the running core service (via AIDL) to restart itself. The result is
+     * `true` when a running service accepted the request; `false` means nothing
+     * is running (or the request failed) and the caller may start it instead.
+     */
     fun restartService(context: Context, onResult: (handled: Boolean) -> Unit) {
-        MessageUtil.sendMsg2ServiceForResult(
-            context,
-            AppConfig.MSG_STATE_RESTART,
-            "",
-            onResult,
-        )
+        val appContext = context.applicationContext
+        val id = BinderServiceFactory.CONNECTION_ID_RESTART
+        val done = AtomicBoolean(false)
+        fun deliver(handled: Boolean) {
+            if (done.compareAndSet(false, true)) {
+                mainHandler.post {
+                    onResult(handled)
+                    BinderServiceFactory.disconnect(appContext, id)
+                }
+            }
+        }
+
+        BinderServiceFactory.connect(appContext, id, object : BinderServiceFactory.Callback {
+            override fun onServiceConnected(service: ICoreService) {
+                val handled = try {
+                    service.requestRestart()
+                } catch (e: Exception) {
+                    LogUtil.e(AppConfig.TAG, "LauncherManager: Failed to request restart", e)
+                    false
+                }
+                deliver(handled)
+            }
+        })
+        mainHandler.postDelayed({ deliver(false) }, COMMAND_TIMEOUT_MS)
     }
 
     fun restartServiceOrStart(context: Context, startIfStopped: () -> Unit) {

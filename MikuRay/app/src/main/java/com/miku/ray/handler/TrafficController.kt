@@ -1,13 +1,11 @@
 package com.miku.ray.handler
 
-import android.app.Service
 import com.miku.ray.AppConfig
 import com.miku.ray.util.SearchBarChipMode
 import com.miku.ray.core.CoreServiceManager
 import com.miku.ray.extension.delay
 import com.miku.ray.extension.toSpeedString
 import com.miku.ray.util.LogUtil
-import com.miku.ray.util.MessageUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -104,9 +102,7 @@ object TrafficController {
             val upSpeed = ((proxyUplink + directUplink) / sinceLastQueryInSeconds).toLong()
             val downSpeed = ((proxyDownlink + directDownlink) / sinceLastQueryInSeconds).toLong()
             val speedText = "↑ ${upSpeed.toSpeedString()}  ↓ ${downSpeed.toSpeedString()}"
-            getService()?.let { svc ->
-                MessageUtil.sendMsg2UI(svc, AppConfig.MSG_TRAFFIC_SPEED_UPDATED, speedText)
-            }
+            CoreServiceManager.notifySpeedUpdate(speedText)
         }
 
         if (proxyUplink + proxyDownlink <= 0L) return
@@ -123,11 +119,6 @@ object TrafficController {
         val guid = MmkvManager.getSelectServer() ?: return
         MmkvManager.addProfileTraffic(guid, proxyUplink, proxyDownlink)
 
-        getService()?.let { svc ->
-            MessageUtil.sendMsg2UI(svc, AppConfig.MSG_TRAFFIC_UPDATED, guid)
-        }
+        CoreServiceManager.notifyTrafficUpdate(guid)
     }
-
-    private fun getService(): Service? =
-    CoreServiceManager.serviceControl?.getService()
 }

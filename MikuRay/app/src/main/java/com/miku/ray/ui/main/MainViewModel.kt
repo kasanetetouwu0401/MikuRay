@@ -1,12 +1,8 @@
 package com.miku.ray.ui.main
 
 import android.app.Application
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.res.AssetManager
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -26,14 +22,11 @@ import com.miku.ray.ui.bottomsheet.SortSubBottomSheet
 import com.miku.ray.dto.TestServiceMessage
 import com.miku.ray.extension.isComplexType
 import com.miku.ray.extension.matchesPattern
-import com.miku.ray.extension.serializable
 import com.miku.ray.handler.AngConfigManager
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsManager
 import com.miku.ray.util.LogUtil
 import com.miku.ray.util.JsonUtil
-import com.miku.ray.util.MessageUtil
-import com.miku.ray.util.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
@@ -59,7 +52,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var isRestarting = false
     private var pendingServerRestartGuid: String? = null
     private var reloadJob: Job? = null
-    private var receiverRegistered = false
     @Volatile
     private var serverCacheLoaded = false
     val serversCache = mutableListOf<ServersCache>()
@@ -95,32 +87,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 mainRepository.mainServiceEvent.collectLatest(::onMainServiceEvent)
             }
         }
-        if (!receiverRegistered) {
-            val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
-            ContextCompat.registerReceiver(getApplication(), mMsgReceiver, mFilter, Utils.receiverFlags())
-            receiverRegistered = true
-        }
-        mainRepository.sendMsg2Service(AppConfig.MSG_REGISTER_CLIENT, "")
+        mainRepository.connect()
+        mainRepository.resyncState()
     }
 
     fun resyncState() {
 
-        mainRepository.sendMsg2Service(AppConfig.MSG_REGISTER_CLIENT, "")
+        mainRepository.resyncState()
     }
 
     override fun onCleared() {
         reloadJob?.cancel()
         mainServiceEventJob?.cancel()
         mainRepository.close()
-        if (receiverRegistered) {
-            try {
-                getApplication<AngApplication>().unregisterReceiver(mMsgReceiver)
-            } catch (e: IllegalArgumentException) {
-                e.printStackTrace()
-            } finally {
-                receiverRegistered = false
-            }
-        }
         LogUtil.i(AppConfig.TAG, "Main ViewModel is cleared")
         super.onCleared()
     }
@@ -326,7 +305,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 return@launch
             }
-            mainRepository.sendMsg2TestService(
+            mainRepository.startRealPingTest(
                 TestServiceMessage(
                     key = AppConfig.MSG_MEASURE_CONFIG_START,
                     testId = testId,
@@ -339,16 +318,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun testAllCountryCodes() {
-        mainRepository.sendMsg2CountryCodeTestService(
-            CountryCodeTestMessage(key = AppConfig.MSG_COUNTRY_CODE_CANCEL)
-        )
+        mainRepository.cancelCountryCodeTestService()
         val guids = serversCache.map { it.guid }.toList()
         MmkvManager.clearAllCountryCodes(guids)
         updateListAction.value = -1
 
         viewModelScope.launch(Dispatchers.Default) {
             if (guids.isEmpty()) return@launch
-            mainRepository.sendMsg2CountryCodeTestService(
+            mainRepository.startCountryCodeTest(
                 CountryCodeTestMessage(
                     key = AppConfig.MSG_COUNTRY_CODE_START,
                     subscriptionId = subscriptionId,
@@ -359,9 +336,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun cancelCountryCodeTest() {
-        mainRepository.sendMsg2CountryCodeTestService(
-            CountryCodeTestMessage(key = AppConfig.MSG_COUNTRY_CODE_CANCEL)
-        )
+        mainRepository.cancelCountryCodeTestService()
     }
 
     fun clearCountryCodes() {
@@ -381,7 +356,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun fetchCurrentIp() {
-        mainRepository.sendMsg2Service(AppConfig.MSG_MEASURE_IP, "")
+        mainRepository.fetchCurrentIp()
     }
 
     fun subscriptionIdChanged(id: String) {
@@ -629,36 +604,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val testId = activeTestId.orEmpty()
         activeTestId = null
         testProgressAction.value = null
-        MessageUtil.sendMsg2TestService(
-            getApplication(),
-            TestServiceMessage(
-                key = AppConfig.MSG_MEASURE_CONFIG_CANCEL,
-                testId = testId,
-            )
-        )
+        mainRepository.cancelRealPingTestService(testId)
     }
 
     fun clearTestResults() {
-        MessageUtil.sendMsg2TestService(
-            getApplication(),
-            TestServiceMessage(
-                key = AppConfig.MSG_MEASURE_CONFIG_CANCEL,
-                testId = activeTestId.orEmpty(),
-            )
-        )
+        mainRepository.cancelRealPingTestService(activeTestId.orEmpty())
         MmkvManager.clearAllTestDelayResults(MmkvManager.decodeAllServerList())
         updateCache()
         updateListAction.postValue(-1)
     }
 
     fun clearTestResultsForGroup() {
-        MessageUtil.sendMsg2TestService(
-            getApplication(),
-            TestServiceMessage(
-                key = AppConfig.MSG_MEASURE_CONFIG_CANCEL,
-                testId = activeTestId.orEmpty(),
-            )
-        )
+        mainRepository.cancelRealPingTestService(activeTestId.orEmpty())
         MmkvManager.clearAllTestDelayResults(MmkvManager.decodeServerList(subscriptionId))
         updateCache()
         updateListAction.postValue(-1)
@@ -666,205 +623,154 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun onMainServiceEvent(event: MainServiceEvent) {
         when (event) {
-            MainServiceEvent.StateRunning,
-            MainServiceEvent.StateStartSuccess -> isRunning.postValue(true)
-            MainServiceEvent.StateNotRunning,
-            MainServiceEvent.StateStopSuccess,
-            MainServiceEvent.StateStartFailure -> isRunning.postValue(false)
-            is MainServiceEvent.MeasureDelayResult -> {
-                updateTestResultAction.postValue(event.result.delayMillis.toString())
-                updateListAction.postValue(getPosition(event.result.guid))
-            }
-            MainServiceEvent.MeasureConfigSuccess -> updateListAction.postValue(-1)
-            is MainServiceEvent.MeasureConfigNotify -> {
-                if (event.progress.isNotEmpty()) {
-                    testProgressAction.postValue(
-                        TestProgressInfo(
-                            guid = "",
-                            delayMillis = -1L,
-                            current = activeTestCompleted,
-                            total = activeTestTotal,
-                        )
-                    )
-                }
-            }
-            is MainServiceEvent.MeasureConfigFinish -> {
-                activeTestId = null
-                testProgressAction.postValue(null)
-            }
-        }
-    }
-
-    private val mMsgReceiver = object : BroadcastReceiver() {
-        override fun onReceive(ctx: Context?, intent: Intent?) {
-            when (intent?.getIntExtra("key", 0)) {
-                AppConfig.MSG_STATE_RUNNING -> {
-                    if (!isRestarting) {
-                        isRunning.value = true
-
-                        updateListAction.postValue(-1)
-                    }
-                }
-
-                AppConfig.MSG_STATE_NOT_RUNNING -> {
-                    if (!isRestarting) {
-                        markConnectionStopped()
-                        isRunning.value = false
-                        updateListAction.postValue(-1)
-                    }
-                }
-
-                AppConfig.MSG_STATE_RESTART -> {
-                    markConnectionStopped()
-                    isRestarting = true
-                    serviceRestartAction.value = Unit
-                }
-
-                AppConfig.MSG_STATE_START_SUCCESS -> {
-                    val app = getApplication<AngApplication>()
-                    val restarted = intent.serializable<Boolean>("content") == true
-                    pendingServerRestartGuid = null
-                    isRestarting = false
-                    alertAction.value = Pair(
-                        true,
-                        app.getString(
-                            if (restarted) R.string.toast_services_restart_success
-                            else R.string.toast_services_success,
-                        ),
-                    )
+            MainServiceEvent.StateRunning -> {
+                if (!isRestarting) {
                     isRunning.value = true
                     updateListAction.postValue(-1)
                 }
+            }
 
-                AppConfig.MSG_STATE_START_FAILURE -> {
-                    val app = getApplication<AngApplication>()
-                    val errorMessage = intent.getStringExtra("content")
-                    val msg = if (!errorMessage.isNullOrBlank()) {
-                        errorMessage
-                    } else {
-                        app.getString(R.string.toast_services_failure)
-                    }
-
-                    pendingServerRestartGuid = null
-                    isRestarting = false
-                    alertAction.value = Pair(false, msg)
+            MainServiceEvent.StateNotRunning -> {
+                if (!isRestarting) {
                     markConnectionStopped()
                     isRunning.value = false
                     updateListAction.postValue(-1)
                 }
+            }
 
-                AppConfig.MSG_STATE_STOP_SUCCESS -> {
-                    pendingServerRestartGuid = null
-                    isRestarting = false
-                    markConnectionStopped()
-                    isRunning.value = false
+            MainServiceEvent.StateRestart -> {
+                markConnectionStopped()
+                isRestarting = true
+                serviceRestartAction.value = Unit
+            }
+
+            is MainServiceEvent.StateStartSuccess -> {
+                val app = getApplication<AngApplication>()
+                val restarted = event.msg.toBooleanStrictOrNull() == true
+                pendingServerRestartGuid = null
+                isRestarting = false
+                alertAction.value = Pair(
+                    true,
+                    app.getString(
+                        if (restarted) R.string.toast_services_restart_success
+                        else R.string.toast_services_success,
+                    ),
+                )
+                isRunning.value = true
+                updateListAction.postValue(-1)
+            }
+
+            is MainServiceEvent.StateStartFailure -> {
+                val app = getApplication<AngApplication>()
+                val msg = event.msg.ifBlank {
+                    app.getString(R.string.toast_services_failure)
+                }
+
+                pendingServerRestartGuid = null
+                isRestarting = false
+                alertAction.value = Pair(false, msg)
+                markConnectionStopped()
+                isRunning.value = false
+                updateListAction.postValue(-1)
+            }
+
+            MainServiceEvent.StateStopSuccess -> {
+                pendingServerRestartGuid = null
+                isRestarting = false
+                markConnectionStopped()
+                isRunning.value = false
+                updateListAction.postValue(-1)
+            }
+
+            is MainServiceEvent.MeasureDelayResult -> {
+                updateTestResultAction.value = event.result
+            }
+
+            is MainServiceEvent.MeasureIpResult -> {
+                updateIpResultAction.value = event.ip
+            }
+
+            is MainServiceEvent.MeasureConfigSuccess -> {
+                val result = event.json.fromJsonSafe<RealPingResult>()
+                if (result != null) {
+                    if (acceptsTestEvent(result.testId)) {
+                        updateListAction.postValue(getPosition(result.guid))
+                        activeTestCompleted += 1
+                        activeTestTotal = maxOf(activeTestTotal, activeTestCompleted)
+                        testProgressAction.postValue(
+                            TestProgressInfo(
+                                guid = result.guid,
+                                delayMillis = result.delayMillis,
+                                current = activeTestCompleted,
+                                total = activeTestTotal,
+                            )
+                        )
+                    }
+                } else {
                     updateListAction.postValue(-1)
                 }
+            }
 
-                AppConfig.MSG_MEASURE_DELAY_SUCCESS -> {
-                    updateTestResultAction.value = intent.getStringExtra("content").orEmpty()
-                }
-
-                AppConfig.MSG_MEASURE_IP_SUCCESS -> {
-                    val ip = intent.getStringExtra("content")
-                    updateIpResultAction.value = ip
-                }
-
-                AppConfig.MSG_MEASURE_CONFIG_SUCCESS -> {
-
-                    val result = parseExtra(intent, RealPingResult::class.java)
-                    ?: intent.serializable<RealPingResult>("content")
-                    if (result != null) {
-                        if (acceptsTestEvent(result.testId)) {
-                            updateListAction.postValue(getPosition(result.guid))
-                            activeTestCompleted += 1
-                            activeTestTotal = maxOf(activeTestTotal, activeTestCompleted)
-                            testProgressAction.postValue(
-                                TestProgressInfo(
-                                    guid = result.guid,
-                                    delayMillis = result.delayMillis,
-                                    current = activeTestCompleted,
-                                    total = activeTestTotal,
-                                )
+            is MainServiceEvent.MeasureConfigNotify -> {
+                val progress = event.json.fromJsonSafe<RealPingProgress>()
+                if (progress != null) {
+                    if (acceptsTestEvent(progress.testId)) {
+                        activeTestCompleted = maxOf(activeTestCompleted, progress.completed)
+                        activeTestTotal = maxOf(activeTestTotal, progress.total)
+                        testProgressAction.postValue(
+                            TestProgressInfo(
+                                guid = "",
+                                delayMillis = -1L,
+                                current = activeTestCompleted,
+                                total = activeTestTotal,
                             )
-                        }
-                    } else {
-                        val content = intent.getStringExtra("content")
-
-                        val guid = content?.takeIf { !it.trimStart().startsWith("{") }.orEmpty()
-                        updateListAction.postValue(getPosition(guid))
+                        )
                     }
+                } else {
+                    val info = event.json.fromJsonSafe<TestProgressInfo>()
+                    if (info != null) testProgressAction.postValue(info)
                 }
+            }
 
-                AppConfig.MSG_MEASURE_CONFIG_NOTIFY -> {
-                    val progress = parseExtra(intent, RealPingProgress::class.java)
-                    ?: intent.serializable<RealPingProgress>("content")
-                    if (progress != null) {
-                        if (acceptsTestEvent(progress.testId)) {
-                            activeTestCompleted = maxOf(activeTestCompleted, progress.completed)
-                            activeTestTotal = maxOf(activeTestTotal, progress.total)
-                            testProgressAction.postValue(
-                                TestProgressInfo(
-                                    guid = "",
-                                    delayMillis = -1L,
-                                    current = activeTestCompleted,
-                                    total = activeTestTotal,
-                                )
-                            )
-                        }
-                    } else {
-                        val info = parseExtra(intent, TestProgressInfo::class.java)
-                        ?: intent.serializable<TestProgressInfo>("content")
-                        if (info != null) testProgressAction.postValue(info)
-                    }
+            is MainServiceEvent.MeasureConfigFinish -> {
+                val summary = event.json?.fromJsonSafe<RealPingSummary>()
+                if (summary != null) {
+                    if (!acceptsTestEvent(summary.testId)) return
+                    activeTestId = null
+                    testProgressAction.postValue(null)
+                    onTestsFinished(summary.cancelled)
+                } else {
+                    activeTestId = null
+                    testProgressAction.postValue(null)
+                    onTestsFinished()
                 }
+            }
 
-                AppConfig.MSG_MEASURE_CONFIG_FINISH -> {
-                    val summary = parseExtra(intent, RealPingSummary::class.java)
-                    ?: intent.serializable<RealPingSummary>("content")
-                    if (summary != null) {
-                        if (!acceptsTestEvent(summary.testId)) return
-                        activeTestId = null
-                        testProgressAction.postValue(null)
-                        onTestsFinished(summary.cancelled)
-                    } else {
-                        activeTestId = null
-                        testProgressAction.postValue(null)
-                        onTestsFinished()
-                    }
+            is MainServiceEvent.CountryCodeSuccess -> {
+                updateListAction.postValue(getPosition(event.guid))
+            }
+
+            is MainServiceEvent.CountryCodeNotify -> {
+                val info = event.json.fromJsonSafe<TestProgressInfo>()
+                if (info != null) {
+                    countryCodeProgressAction.postValue(info)
                 }
+            }
 
-                AppConfig.MSG_COUNTRY_CODE_SUCCESS -> {
-                    val content = intent.getStringExtra("content")
-                    updateListAction.postValue(getPosition(content ?: ""))
-                }
+            MainServiceEvent.CountryCodeFinish -> {
+                countryCodeProgressAction.postValue(null)
+            }
 
-                AppConfig.MSG_COUNTRY_CODE_NOTIFY -> {
+            is MainServiceEvent.TrafficUpdated -> {
+                updateListAction.postValue(getPosition(event.guid))
+            }
 
-                    val info = parseExtra(intent, TestProgressInfo::class.java)
-                    ?: intent.serializable<TestProgressInfo>("content")
-                    if (info != null) {
-                        countryCodeProgressAction.postValue(info)
-                    }
-                }
+            is MainServiceEvent.TrafficSpeedUpdated -> {
+                updateTrafficSpeedAction.postValue(event.speedText)
+            }
 
-                AppConfig.MSG_COUNTRY_CODE_FINISH -> {
-                    countryCodeProgressAction.postValue(null)
-                }
-
-                AppConfig.MSG_TRAFFIC_UPDATED -> {
-                    val guid = intent.getStringExtra("content") ?: return
-                    updateListAction.postValue(getPosition(guid))
-                }
-
-                AppConfig.MSG_TRAFFIC_SPEED_UPDATED -> {
-                    val speedText = intent.getStringExtra("content") ?: return
-                    updateTrafficSpeedAction.postValue(speedText)
-                }
-
-                AppConfig.MSG_SUB_UPDATE_FINISH -> {
-                    updateGroupOrderAction.postValue(Unit)
-                }
+            MainServiceEvent.SubUpdateFinish -> {
+                updateGroupOrderAction.postValue(Unit)
             }
         }
     }
@@ -872,10 +778,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun acceptsTestEvent(testId: String): Boolean =
     testId.isEmpty() || testId == activeTestId
 
-    private fun <T> parseExtra(intent: Intent, cls: Class<T>): T? {
-        val raw = intent.getStringExtra("content") ?: return null
-        val trimmed = raw.trim()
+    private inline fun <reified T> String.fromJsonSafe(): T? {
+        val trimmed = trim()
         if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) return null
-        return JsonUtil.fromJsonSafe(trimmed, cls)
+        return JsonUtil.fromJsonSafe(trimmed, T::class.java)
     }
 }

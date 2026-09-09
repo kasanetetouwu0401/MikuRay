@@ -17,7 +17,7 @@ import com.miku.ray.dto.SubscriptionUpdateMessage
 import com.miku.ray.enums.NotificationChannelType
 import com.miku.ray.helper.NotificationHelper
 import com.miku.ray.util.LogUtil
-import com.miku.ray.util.MessageUtil
+import com.miku.ray.util.ServiceCommands
 import java.util.concurrent.TimeUnit
 
 object SubscriptionUpdater {
@@ -157,7 +157,7 @@ object SubscriptionUpdater {
 
             updateLastUpdatedAndReschedule(applicationContext, subId)
 
-            MessageUtil.sendMsg2SubscriptionService(
+            ServiceCommands.startSubscriptionService(
                 applicationContext,
                 SubscriptionUpdateMessage(AppConfig.MSG_SUB_UPDATE_START, true, listOf(subId))
             )

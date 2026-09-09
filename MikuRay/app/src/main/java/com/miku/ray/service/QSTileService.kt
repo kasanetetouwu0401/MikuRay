@@ -2,28 +2,25 @@ package com.miku.ray.service
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.drawable.Icon
 import android.net.VpnService
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
-import androidx.core.content.ContextCompat
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.aidl.ICoreService
+import com.miku.ray.core.BinderServiceFactory
 import com.miku.ray.core.CoreServiceManager
 import com.miku.ray.core.LauncherManager
 import com.miku.ray.handler.SettingsManager
 import com.miku.ray.ui.shortcut.ScStartActivity
 import com.miku.ray.util.LogUtil
-import com.miku.ray.util.MessageUtil
-import com.miku.ray.util.Utils
-import java.lang.ref.SoftReference
 
 class QSTileService : TileService() {
+
+    private var connection: BinderServiceFactory.Connection? = null
 
     fun setState(state: Int) {
         qsTile?.icon = Icon.createWithResource(applicationContext, R.drawable.ic_stat_name)
@@ -41,27 +38,46 @@ class QSTileService : TileService() {
     override fun onStartListening() {
         super.onStartListening()
 
-        if (CoreServiceManager.isRunning()) {
-            setState(Tile.STATE_ACTIVE)
-        } else {
-            setState(Tile.STATE_INACTIVE)
-        }
-        mMsgReceive = ReceiveMessageHandler(this)
-        val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
-        ContextCompat.registerReceiver(applicationContext, mMsgReceive, mFilter, Utils.receiverFlags())
-        MessageUtil.sendMsg2Service(this, AppConfig.MSG_REGISTER_CLIENT, "")
+        connection = BinderServiceFactory.connect(
+            applicationContext,
+            BinderServiceFactory.CONNECTION_ID_TILE,
+            object : BinderServiceFactory.Callback {
+                override fun stateChanged(state: Int, profileName: String, msg: String) {
+                    when (state) {
+                        AppConfig.MSG_STATE_RUNNING,
+                        AppConfig.MSG_STATE_START_SUCCESS
+                        -> setState(Tile.STATE_ACTIVE)
+
+                        AppConfig.MSG_STATE_NOT_RUNNING,
+                        AppConfig.MSG_STATE_START_FAILURE,
+                        AppConfig.MSG_STATE_STOP_SUCCESS
+                        -> setState(Tile.STATE_INACTIVE)
+                    }
+                }
+
+                override fun onServiceConnected(service: ICoreService) {
+                    try {
+                        if (service.state == AppConfig.MSG_STATE_RUNNING) {
+                            setState(Tile.STATE_ACTIVE)
+                        } else {
+                            setState(Tile.STATE_INACTIVE)
+                        }
+                    } catch (e: Exception) {
+                        LogUtil.e(AppConfig.TAG, "QSTileService: Failed to query state", e)
+                    }
+                }
+            },
+            listenForDeath = false,
+        )
     }
 
     override fun onStopListening() {
         super.onStopListening()
 
-        try {
-            applicationContext.unregisterReceiver(mMsgReceive)
-            mMsgReceive = null
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to unregister receiver", e)
+        connection?.let {
+            BinderServiceFactory.disconnect(applicationContext, BinderServiceFactory.CONNECTION_ID_TILE)
         }
-
+        connection = null
     }
 
     override fun onClick() {
@@ -105,36 +121,6 @@ class QSTileService : TileService() {
             @Suppress("DEPRECATION")
             @SuppressLint("StartActivityAndCollapseDeprecated")
             startActivityAndCollapse(intent)
-        }
-    }
-
-    private var mMsgReceive: BroadcastReceiver? = null
-
-    private class ReceiveMessageHandler(context: QSTileService) : BroadcastReceiver() {
-        var mReference: SoftReference<QSTileService> = SoftReference(context)
-        override fun onReceive(ctx: Context?, intent: Intent?) {
-            val context = mReference.get()
-            when (intent?.getIntExtra("key", 0)) {
-                AppConfig.MSG_STATE_RUNNING -> {
-                    context?.setState(Tile.STATE_ACTIVE)
-                }
-
-                AppConfig.MSG_STATE_NOT_RUNNING -> {
-                    context?.setState(Tile.STATE_INACTIVE)
-                }
-
-                AppConfig.MSG_STATE_START_SUCCESS -> {
-                    context?.setState(Tile.STATE_ACTIVE)
-                }
-
-                AppConfig.MSG_STATE_START_FAILURE -> {
-                    context?.setState(Tile.STATE_INACTIVE)
-                }
-
-                AppConfig.MSG_STATE_STOP_SUCCESS -> {
-                    context?.setState(Tile.STATE_INACTIVE)
-                }
-            }
         }
     }
 

@@ -58,8 +58,8 @@ class CoreProxyOnlyService : Service(), ServiceControl {
         return true
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
+    override fun onBind(intent: Intent?): IBinder {
+        return CoreServiceManager.coreBinder
     }
 
     override fun attachBaseContext(newBase: Context?) {

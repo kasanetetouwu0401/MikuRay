@@ -2995,6 +2995,11 @@
 
         <activity
             android:exported="false"
+            android:name=".ui.crashlog.CrashLogActivity"
+            android:theme="@style/AppThemeBase" />
+
+        <activity
+            android:exported="false"
             android:name=".ui.server.ServerVmessActivity"
             android:windowSoftInputMode="stateUnchanged|adjustResize" />
         <activity
@@ -3233,7 +3238,7 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="${applicationId}.action.widget.click" />
-                <action android:name="${applicationId}.action.activity" />
+                <action android:name="${applicationId}.action.widget.update" />
             </intent-filter>
         </receiver>
         <receiver
@@ -3245,7 +3250,7 @@
                 android:resource="@xml/app_widget_traffic_detail_provider" />
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="${applicationId}.action.activity" />
+                <action android:name="${applicationId}.action.widget.update" />
                 <action android:name="${applicationId}.action.traffic_widget_refresh" />
             </intent-filter>
         </receiver>

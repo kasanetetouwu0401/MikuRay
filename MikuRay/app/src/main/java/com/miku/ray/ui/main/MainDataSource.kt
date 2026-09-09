@@ -13,8 +13,13 @@ interface MainDataSource : AutoCloseable {
     fun updateConfigViaSubAll(): SubscriptionUpdateResult
     fun updateConfigViaSub(subscriptionCache: SubscriptionCache): SubscriptionUpdateResult
     fun shareNonCustomConfigsToClipboard(guids: List<String>): Int
-    fun sendMsg2Service(msgId: Int, content: String)
-    fun sendMsg2TestService(msg: TestServiceMessage)
-    fun sendMsg2CountryCodeTestService(msg: CountryCodeTestMessage)
+
+    fun connect()
+    fun resyncState()
+    fun startRealPingTest(msg: TestServiceMessage)
+    fun cancelRealPingTestService(testId: String)
+    fun startCountryCodeTest(msg: CountryCodeTestMessage)
+    fun cancelCountryCodeTestService()
     fun testCurrentServerRealPing()
+    fun fetchCurrentIp()
 }
