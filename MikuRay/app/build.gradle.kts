@@ -137,7 +137,6 @@ android {
     }
 
     buildFeatures {
-        aidl = true
         viewBinding = true
         buildConfig = true
         resValues = true
@@ -210,7 +209,6 @@ dependencies {
 
     // Data and Storage Libraries
     implementation(libs.mmkv.static)
-    implementation(libs.timber)
     implementation(libs.gson)
     implementation(libs.snakeyaml)
     implementation(libs.okhttp)

@@ -58,6 +58,12 @@ class TrafficDetailWidgetProvider : AppWidgetProvider() {
         super.onReceive(context, intent)
         when (intent.action) {
             AppConfig.BROADCAST_ACTION_TRAFFIC_WIDGET_REFRESH -> updateAll(context)
+            AppConfig.BROADCAST_ACTION_ACTIVITY -> {
+                val key = intent.getIntExtra("key", 0)
+                if (key == AppConfig.MSG_TRAFFIC_UPDATED || key in SERVICE_STATE_MESSAGES) {
+                    updateAll(context)
+                }
+            }
         }
     }
 
@@ -249,6 +255,13 @@ class TrafficDetailWidgetProvider : AppWidgetProvider() {
 
     companion object {
         private const val HISTORY_DAYS = 7
+        private val SERVICE_STATE_MESSAGES = setOf(
+            AppConfig.MSG_STATE_RUNNING,
+            AppConfig.MSG_STATE_NOT_RUNNING,
+            AppConfig.MSG_STATE_START_SUCCESS,
+            AppConfig.MSG_STATE_START_FAILURE,
+            AppConfig.MSG_STATE_STOP_SUCCESS,
+        )
 
         private fun widgetSizePx(
             context: Context,

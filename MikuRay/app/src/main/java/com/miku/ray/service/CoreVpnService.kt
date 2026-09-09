@@ -9,7 +9,6 @@ import android.net.Network
 import android.net.ProxyInfo
 import android.net.VpnService
 import android.os.Build
-import android.content.ComponentCallbacks2
 import android.os.ParcelFileDescriptor
 import android.os.PowerManager
 import android.os.Process
@@ -18,10 +17,6 @@ import com.miku.ray.AppConfig
 import com.miku.ray.AppConfig.LOOPBACK
 import com.miku.ray.BuildConfig
 import com.miku.ray.contracts.ServiceControl
-import com.miku.ray.aidl.AidlProtocol
-import com.miku.ray.aidl.MikuRayServiceBinder
-import com.miku.ray.core.CoreAidlBinder
-import android.os.IBinder
 import com.miku.ray.contracts.Tun2SocksControl
 import com.miku.ray.core.CoreServiceManager
 import com.miku.ray.handler.MmkvManager
@@ -29,8 +24,8 @@ import com.miku.ray.handler.NotificationManager
 import com.miku.ray.handler.TrafficController
 import com.miku.ray.handler.SettingsManager
 import com.miku.ray.root.RootLanSharing
-import com.miku.ray.util.InProcessLogBuffer
 import com.miku.ray.util.LogUtil
+import com.miku.ray.util.MessageUtil
 import com.miku.ray.util.MyContextWrapper
 import com.miku.ray.util.SoundPlayer
 import com.miku.ray.util.Utils
@@ -44,7 +39,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 @SuppressLint("VpnServicePolicy")
 class CoreVpnService : VpnService(), ServiceControl {
-    private val aidlBinder = CoreAidlBinder()
     private lateinit var mInterface: ParcelFileDescriptor
     private var isRunning = false
     private var tun2SocksService: Tun2SocksControl? = null
@@ -63,34 +57,6 @@ class CoreVpnService : VpnService(), ServiceControl {
             Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND)
         } catch (e: Exception) {
             LogUtil.w(AppConfig.TAG, "StartCore-VPN: Failed to raise thread priority", e)
-        }
-    }
-
-    @Suppress("DEPRECATION")
-    override fun onTrimMemory(level: Int) {
-        super.onTrimMemory(level)
-        LogUtil.w(AppConfig.TAG, "StartCore-VPN: onTrimMemory level=$level")
-        when {
-            level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE -> {
-                LogUtil.w(AppConfig.TAG, "StartCore-VPN: Memory is COMPLETE (critically low), trimming buffers to prevent kill")
-                InProcessLogBuffer.trim()
-                if (isRunning) {
-                    NotificationManager.ensureForeground()
-                }
-            }
-            level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND -> {
-                LogUtil.w(AppConfig.TAG, "StartCore-VPN: App in BACKGROUND with low memory, trimming buffers")
-                InProcessLogBuffer.trim()
-            }
-        }
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        LogUtil.w(AppConfig.TAG, "StartCore-VPN: onLowMemory - system is critically low on memory")
-        InProcessLogBuffer.trim()
-        if (isRunning) {
-            NotificationManager.ensureForeground()
         }
     }
 
@@ -123,14 +89,8 @@ class CoreVpnService : VpnService(), ServiceControl {
         TrafficController.stop()
         serviceScope.cancel()
 
-        aidlBinder.emit(AidlProtocol.EVENT_STATE_NOT_RUNNING)
-        aidlBinder.close()
+        MessageUtil.sendMsg2UI(this, AppConfig.MSG_STATE_NOT_RUNNING, "")
     }
-
-    override fun onBind(intent: Intent?): IBinder? =
-        if (intent?.action == AidlProtocol.SERVICE_ACTION) aidlBinder else super.onBind(intent)
-
-    override fun getAidlBinder(): MikuRayServiceBinder = aidlBinder
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         NotificationManager.ensureForeground()

@@ -17,9 +17,7 @@ import com.miku.ray.dto.SubscriptionUpdateMessage
 import com.miku.ray.enums.NotificationChannelType
 import com.miku.ray.helper.NotificationHelper
 import com.miku.ray.util.LogUtil
-import com.miku.ray.aidl.AidlProtocol
-import com.miku.ray.aidl.AidlServiceClient
-import com.miku.ray.service.SubscriptionUpdateService
+import com.miku.ray.util.MessageUtil
 import java.util.concurrent.TimeUnit
 
 object SubscriptionUpdater {
@@ -159,11 +157,9 @@ object SubscriptionUpdater {
 
             updateLastUpdatedAndReschedule(applicationContext, subId)
 
-            AidlServiceClient.startAndCommand(
+            MessageUtil.sendMsg2SubscriptionService(
                 applicationContext,
-                SubscriptionUpdateService::class.java,
-                AidlProtocol.SUBSCRIPTION_START,
-                com.miku.ray.util.JsonUtil.toJson(SubscriptionUpdateMessage(AidlProtocol.SUBSCRIPTION_START, true, listOf(subId))),
+                SubscriptionUpdateMessage(AppConfig.MSG_SUB_UPDATE_START, true, listOf(subId))
             )
 
             return Result.success()

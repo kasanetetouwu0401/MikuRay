@@ -4,8 +4,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.miku.ray.aidl.AidlProtocol
-import com.miku.ray.aidl.MikuRayServiceBinder
 import androidx.core.app.NotificationCompat
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -17,13 +15,14 @@ import com.miku.ray.core.CoreNativeManager
 import com.miku.ray.dto.CountryCodeTestMessage
 import com.miku.ray.dto.TestProgressInfo
 import com.miku.ray.enums.NotificationChannelType
+import com.miku.ray.extension.serializable
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsManager
 import com.miku.ray.handler.SpeedtestManager
 import com.miku.ray.helper.NotificationHelper
 import com.miku.ray.util.JsonUtil
-import com.miku.ray.receiver.BackgroundServiceCommandReceiver
 import com.miku.ray.util.LogUtil
+import com.miku.ray.util.MessageUtil
 import com.miku.ray.util.Utils
 import libv2ray.CoreCallbackHandler
 import java.net.InetSocketAddress
@@ -33,57 +32,50 @@ import kotlin.concurrent.thread
 
 class CountryCodeTestService : Service() {
 
-    private val aidlBinder = MikuRayServiceBinder(
-        commandHandler = { command, content -> handleAidlCommand(command, content) }
-    )
-
     private val cancelled = AtomicBoolean(false)
     private var worker: Thread? = null
 
     private val cancelAction by lazy {
-        val intent = Intent(this, BackgroundServiceCommandReceiver::class.java).apply {
-            action = BackgroundServiceCommandReceiver.ACTION_COUNTRY_CANCEL
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
+        val intent = Intent(this, CountryCodeTestService::class.java).putExtra(
+            "content",
+            CountryCodeTestMessage(AppConfig.MSG_COUNTRY_CODE_CANCEL)
+        )
+        val pendingIntent = PendingIntent.getService(
             this,
             NotificationChannelType.CORE_TEST.notificationId + 1,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         NotificationCompat.Action.Builder(
             RemixR.drawable.rmx_media_stop_line,
             getString(android.R.string.cancel),
-            pendingIntent,
+            pendingIntent
         ).build()
     }
-    override fun onBind(intent: Intent?): IBinder? =
-        if (intent?.action == AidlProtocol.SERVICE_ACTION) aidlBinder else null
+
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
         cancelled.set(true)
         worker?.interrupt()
         worker = null
         NotificationHelper.stopForeground(this)
-        aidlBinder.close()
         super.onDestroy()
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_NOT_STICKY
-
-    private fun handleAidlCommand(command: Int, content: String): Boolean {
-        return when (command) {
-            AidlProtocol.COUNTRY_START -> {
-                val message = JsonUtil.fromJsonSafe(content, CountryCodeTestMessage::class.java)
-                    ?: return false
-                handleStart(message, 0)
-                true
-            }
-            AidlProtocol.COUNTRY_CANCEL -> {
-                handleCancel()
-                true
-            }
-            else -> false
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val message = intent?.serializable<CountryCodeTestMessage>("content")
+        if (message == null) {
+            stopSelf(startId)
+            return START_NOT_STICKY
         }
+
+        when (message.key) {
+            AppConfig.MSG_COUNTRY_CODE_START -> handleStart(message, startId)
+            AppConfig.MSG_COUNTRY_CODE_CANCEL -> handleCancel()
+            else -> stopSelf(startId)
+        }
+        return START_NOT_STICKY
     }
 
     private fun handleStart(message: CountryCodeTestMessage, startId: Int) {
@@ -118,10 +110,11 @@ class CountryCodeTestService : Service() {
 
                     val countryCode = lookupThroughProfile(guid)
                     MmkvManager.encodeServerCountryCode(guid, countryCode)
-                    aidlBinder.emit(AidlProtocol.EVENT_COUNTRY_SUCCESS, guid)
+                    MessageUtil.sendMsg2UI(this, AppConfig.MSG_COUNTRY_CODE_SUCCESS, guid)
 
-                    aidlBinder.emit(
-                        AidlProtocol.EVENT_COUNTRY_NOTIFY,
+                    MessageUtil.sendMsg2UI(
+                        this,
+                        AppConfig.MSG_COUNTRY_CODE_NOTIFY,
                         JsonUtil.toJson(TestProgressInfo(guid, 0L, index + 1, guids.size))
                     )
                 }
@@ -219,7 +212,7 @@ class CountryCodeTestService : Service() {
     }
 
     private fun sendFinish() {
-        aidlBinder.emit(AidlProtocol.EVENT_COUNTRY_FINISH, "0")
+        MessageUtil.sendMsg2UI(this, AppConfig.MSG_COUNTRY_CODE_FINISH, "0")
     }
 
     private class CountryCallback : CoreCallbackHandler {

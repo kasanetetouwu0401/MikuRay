@@ -18,9 +18,7 @@ import com.miku.ray.service.CoreProxyOnlyService
 import com.miku.ray.service.CoreRootService
 import com.miku.ray.service.CoreVpnService
 import com.miku.ray.util.LogUtil
-import com.miku.ray.aidl.AidlProtocol
-import com.miku.ray.aidl.AidlServiceClient
-import com.miku.ray.aidl.ServiceClassResolver
+import com.miku.ray.util.MessageUtil
 import com.miku.ray.util.Utils
 
 object LauncherManager {
@@ -75,20 +73,14 @@ object LauncherManager {
             val message = e.message ?: e.javaClass.simpleName
             if (showLifecycleFeedback) {
                 showFeedback(context, message, 2)
-                // UI receives the same failure through the bound AIDL service when available.
-                // If the service failed before binding, the caller already has the exception.
-
+                MessageUtil.sendMsg2UI(context, AppConfig.MSG_STATE_START_FAILURE, message)
             }
             return false
         }
     }
 
     fun stopService(context: Context) {
-        AidlServiceClient.commandIfRunning(
-            context,
-            ServiceClassResolver.coreServiceClass(),
-            AidlProtocol.CORE_STOP,
-        )
+        MessageUtil.sendMsg2Service(context, AppConfig.MSG_STATE_STOP, "")
     }
 
     fun restartService(context: Context) {
@@ -96,11 +88,11 @@ object LauncherManager {
     }
 
     fun restartService(context: Context, onResult: (handled: Boolean) -> Unit) {
-        AidlServiceClient.commandIfRunning(
+        MessageUtil.sendMsg2ServiceForResult(
             context,
-            ServiceClassResolver.coreServiceClass(),
-            AidlProtocol.CORE_RESTART,
-            onResult = onResult,
+            AppConfig.MSG_STATE_RESTART,
+            "",
+            onResult,
         )
     }
 

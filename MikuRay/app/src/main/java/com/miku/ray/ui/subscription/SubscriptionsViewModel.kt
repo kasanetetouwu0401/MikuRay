@@ -12,9 +12,7 @@ import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.handler.SettingsManager
 import com.miku.ray.ui.bottomsheet.SortSubBottomSheet
-import com.miku.ray.aidl.AidlProtocol
-import com.miku.ray.aidl.AidlServiceClient
-import com.miku.ray.service.SubscriptionUpdateService
+import com.miku.ray.util.MessageUtil
 
 class SubscriptionsViewModel : ViewModel() {
     private val subscriptions: MutableList<SubscriptionCache> =
@@ -78,11 +76,9 @@ class SubscriptionsViewModel : ViewModel() {
         .map { it.guid }
         if (subIds.isEmpty()) return
 
-        AidlServiceClient.startAndCommand(
+        MessageUtil.sendMsg2SubscriptionService(
             AngApplication.application,
-            SubscriptionUpdateService::class.java,
-            AidlProtocol.SUBSCRIPTION_START,
-            com.miku.ray.util.JsonUtil.toJson(SubscriptionUpdateMessage(AidlProtocol.SUBSCRIPTION_START, false, subIds)),
+            SubscriptionUpdateMessage(AppConfig.MSG_SUB_UPDATE_START, false, subIds)
         )
     }
 
