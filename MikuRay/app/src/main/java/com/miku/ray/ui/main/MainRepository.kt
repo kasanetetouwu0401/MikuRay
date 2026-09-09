@@ -40,25 +40,13 @@ class MainRepository(
     private var pendingTestCommand: Pair<Int, String>? = null
     private var pendingCountryCommand: Pair<Int, String>? = null
 
-    private val coreConnection = MikuRayServiceConnection(
-        context = app,
-        serviceClass = ServiceClassResolver.coreServiceClass(),
-        autoCreate = false,
-        onEvent = ::handleCoreEvent,
-        onConnected = { service ->
-            pendingCoreCommand?.let { (command, content) ->
-                pendingCoreCommand = null
-                runCatching { service.command(command, content) }
-            }
-        },
-        onDisconnected = {
-            if (!closed.get()) {
-                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                    if (!closed.get()) coreConnection.connect()
-                }, 1000L)
-            }
-        },
-    )
+    private lateinit var coreConnection: MikuRayServiceConnection
+
+    private fun reconnectCoreLater() {
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            if (!closed.get()) coreConnection.connect()
+        }, 1000L)
+    }
 
     private val testConnection = MikuRayServiceConnection(
         context = app,
@@ -87,6 +75,19 @@ class MainRepository(
     )
 
     init {
+        coreConnection = MikuRayServiceConnection(
+            context = app,
+            serviceClass = ServiceClassResolver.coreServiceClass(),
+            autoCreate = false,
+            onEvent = ::handleCoreEvent,
+            onConnected = { service ->
+                pendingCoreCommand?.let { (command, content) ->
+                    pendingCoreCommand = null
+                    runCatching { service.command(command, content) }
+                }
+            },
+            onDisconnected = ::reconnectCoreLater,
+        )
         coreConnection.connect()
     }
 

@@ -1,9 +1,7 @@
 package com.miku.ray.ui.main
 
 import android.content.Context
-
 import com.miku.ray.aidl.AidlProtocol
-
 import android.app.Application
 import android.content.res.AssetManager
 import androidx.lifecycle.AndroidViewModel
