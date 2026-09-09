@@ -118,7 +118,7 @@ class MainRepository(
 
     override fun sendTestService(message: TestServiceMessage) {
         if (closed.get()) return
-        if (message.key == com.miku.ray.AidlProtocol.TEST_CANCEL) {
+        if (message.key == com.miku.ray.aidl.AidlProtocol.TEST_CANCEL) {
             testConnection.command(AidlProtocol.TEST_CANCEL, JsonUtil.toJson(message))
             return
         }
@@ -135,7 +135,7 @@ class MainRepository(
 
     override fun sendCountryCodeTestService(message: CountryCodeTestMessage) {
         if (closed.get()) return
-        if (message.key == com.miku.ray.AidlProtocol.COUNTRY_CANCEL) {
+        if (message.key == com.miku.ray.aidl.AidlProtocol.COUNTRY_CANCEL) {
             countryConnection.command(AidlProtocol.COUNTRY_CANCEL, JsonUtil.toJson(message))
             return
         }

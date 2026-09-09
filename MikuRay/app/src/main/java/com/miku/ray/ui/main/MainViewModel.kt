@@ -1,5 +1,7 @@
 package com.miku.ray.ui.main
 
+import android.content.Context
+
 import com.miku.ray.aidl.AidlProtocol
 
 import android.app.Application
