@@ -211,7 +211,7 @@ class UiSettingsActivity : BaseActivity() {
                         SettingsChangeManager.makeSetupGroupTab()
                         SettingsChangeManager.makeRefreshDisplayPrefs()
                         SettingsManager.setNightMode()
-                        restartApplication()
+                        closeApplication()
                     }
                     is ThemeShareManager.ImportResult.Error -> {
                         toastError(getString(R.string.ui_theme_import_failed, result.message))
@@ -222,15 +222,9 @@ class UiSettingsActivity : BaseActivity() {
         .showBlur()
     }
 
-    private fun restartApplication() {
-        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-        if (launchIntent == null) {
-            recreate()
-            return
-        }
-        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        startActivity(launchIntent)
+    private fun closeApplication() {
         finishAffinity()
+        android.os.Process.killProcess(android.os.Process.myPid())
     }
 
     class UiSettingsFragment : PreferenceFragmentCompat() {
