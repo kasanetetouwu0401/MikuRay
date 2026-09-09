@@ -17,7 +17,7 @@ import kotlinx.coroutines.withTimeoutOrNull
  * Client side of the AIDL channel to a background job service (CoreTestService,
  * CountryCodeTestService or SubscriptionUpdateService). Replaces the BroadcastReceiver that
  * MainViewModel used to register for BROADCAST_ACTION_ACTIVITY to receive
- * MSG_MEASURE_CONFIG_*/MSG_COUNTRY_CODE_* progress events.
+ * MSG_MEASURE_CONFIG_* / MSG_COUNTRY_CODE_* progress events.
  *
  * These services intentionally kill their own process once a batch finishes, which naturally
  * tears the binding down (onServiceDisconnected) - call [reconnectIfNeeded] before starting a
