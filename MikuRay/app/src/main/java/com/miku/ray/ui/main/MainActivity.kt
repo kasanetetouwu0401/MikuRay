@@ -34,7 +34,6 @@ import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -747,12 +746,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             adapter = groupPagerAdapter
             isUserInputEnabled = true
         }
-        val pagerRecyclerView = binding.viewPager.getChildAt(0) as RecyclerView
-        groupPagerAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-            override fun onChanged() {
-                pagerRecyclerView.setItemViewCacheSize(groupPagerAdapter.itemCount)
-            }
-        })
     }
 
     private fun setupListeners() {
@@ -1139,6 +1132,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
                 groupPagerAdapter.groups.map { it.remarks } == groups.map { it.remarks }
 
                 groupPagerAdapter.update(groups)
+                binding.viewPager.offscreenPageLimit = groups.size.coerceAtLeast(1)
 
                 if (structureUnchanged && binding.tabGroup.tabCount == groups.size) {
                     refreshTabBadges()
