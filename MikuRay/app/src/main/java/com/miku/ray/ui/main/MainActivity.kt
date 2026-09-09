@@ -156,7 +156,9 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     }
 
     private val requestVpnPermission = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) startV2Ray()
+        if (it.resultCode == RESULT_OK) {
+            startV2Ray()
+        }
     }
 
     private val requestActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -1209,30 +1211,30 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     }
 
     private fun handleFabAction() {
-    	mainViewModel.startListenBroadcast()
-    
+        mainViewModel.startListenBroadcast()
+        applyRunningState(isLoading = true, isRunning = false)
+
         if (mainViewModel.isRunning.value == true) {
             LauncherManager.stopService(this)
+        } else if (SettingsManager.isVpnMode()) {
+            val intent = VpnService.prepare(this)
+            if (intent == null) {
+                startV2Ray()
+            } else {
+                requestVpnPermission.launch(intent)
+            }
         } else {
-            requestServiceStart()
-        }
-    }
-
-    private fun requestServiceStart() {
-        if (!SettingsManager.isVpnMode()) {
             startV2Ray()
-            return
         }
-        val intent = VpnService.prepare(this)
-        if (intent == null) startV2Ray() else requestVpnPermission.launch(intent)
     }
 
     private fun handleLayoutTestClick() {
-    	mainViewModel.startListenBroadcast()
-    
         if (mainViewModel.isRunning.value == true) {
             setTestState(getString(R.string.connection_test_testing))
             mainViewModel.testCurrentServerRealPing()
+        } else {
+            pendingConnectionTest = true
+            mainViewModel.startListenBroadcast()
         }
     }
 
