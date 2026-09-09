@@ -158,6 +158,8 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     private val requestVpnPermission = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_OK) {
             startV2Ray()
+        } else {
+            applyRunningState(isLoading = false, isRunning = mainViewModel.isRunning.value == true)
         }
     }
 
