@@ -86,8 +86,9 @@ class MainRepository(
     override fun getSelectedSubscriptionId(): String =
         MmkvManager.decodeSettingsString(AppConfig.CACHE_SUBSCRIPTION_ID, "").orEmpty()
 
-    override fun setSelectedSubscriptionId(id: String) =
+    override fun setSelectedSubscriptionId(id: String) {
         MmkvManager.encodeSettings(AppConfig.CACHE_SUBSCRIPTION_ID, id)
+    }
 
     override fun getSelectServer(): String? = MmkvManager.getSelectServer()
     override fun setSelectServer(guid: String) = MmkvManager.setSelectServer(guid)
