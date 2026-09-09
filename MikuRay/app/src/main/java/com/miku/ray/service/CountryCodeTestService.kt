@@ -22,7 +22,7 @@ import com.miku.ray.handler.SpeedtestManager
 import com.miku.ray.helper.NotificationHelper
 import com.miku.ray.util.JsonUtil
 import com.miku.ray.util.LogUtil
-import com.miku.ray.aidl.JobServiceBinder
+import com.miku.ray.util.MessageUtil
 import com.miku.ray.util.Utils
 import libv2ray.CoreCallbackHandler
 import java.net.InetSocketAddress
@@ -53,9 +53,7 @@ class CountryCodeTestService : Service() {
         ).build()
     }
 
-    private val binder = JobServiceBinder()
-
-    override fun onBind(intent: Intent?): IBinder? = binder
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
         cancelled.set(true)
@@ -112,9 +110,10 @@ class CountryCodeTestService : Service() {
 
                     val countryCode = lookupThroughProfile(guid)
                     MmkvManager.encodeServerCountryCode(guid, countryCode)
-                    binder.broadcastEvent(AppConfig.MSG_COUNTRY_CODE_SUCCESS, guid)
+                    MessageUtil.sendMsg2UI(this, AppConfig.MSG_COUNTRY_CODE_SUCCESS, guid)
 
-                    binder.broadcastEvent(
+                    MessageUtil.sendMsg2UI(
+                        this,
                         AppConfig.MSG_COUNTRY_CODE_NOTIFY,
                         JsonUtil.toJson(TestProgressInfo(guid, 0L, index + 1, guids.size))
                     )
@@ -213,7 +212,7 @@ class CountryCodeTestService : Service() {
     }
 
     private fun sendFinish() {
-        binder.broadcastEvent(AppConfig.MSG_COUNTRY_CODE_FINISH, "0")
+        MessageUtil.sendMsg2UI(this, AppConfig.MSG_COUNTRY_CODE_FINISH, "0")
     }
 
     private class CountryCallback : CoreCallbackHandler {

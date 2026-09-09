@@ -3233,7 +3233,7 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="${applicationId}.action.widget.click" />
-                <action android:name="${applicationId}.action.widget_state_changed" />
+                <action android:name="${applicationId}.action.activity" />
             </intent-filter>
         </receiver>
         <receiver
@@ -3245,7 +3245,7 @@
                 android:resource="@xml/app_widget_traffic_detail_provider" />
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="${applicationId}.action.widget_state_changed" />
+                <action android:name="${applicationId}.action.activity" />
                 <action android:name="${applicationId}.action.traffic_widget_refresh" />
             </intent-filter>
         </receiver>

@@ -2,20 +2,26 @@ package com.miku.ray.service
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.drawable.Icon
 import android.net.VpnService
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import androidx.core.content.ContextCompat
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.aidl.MikuRayConnection
 import com.miku.ray.core.CoreServiceManager
 import com.miku.ray.core.LauncherManager
 import com.miku.ray.handler.SettingsManager
 import com.miku.ray.ui.shortcut.ScStartActivity
 import com.miku.ray.util.LogUtil
+import com.miku.ray.util.MessageUtil
+import com.miku.ray.util.Utils
+import java.lang.ref.SoftReference
 
 class QSTileService : TileService() {
 
@@ -40,18 +46,20 @@ class QSTileService : TileService() {
         } else {
             setState(Tile.STATE_INACTIVE)
         }
-        connection = MikuRayConnection { key, _ -> onServiceEvent(key) }
-        connection?.connect(applicationContext)
+        mMsgReceive = ReceiveMessageHandler(this)
+        val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_ACTIVITY)
+        ContextCompat.registerReceiver(applicationContext, mMsgReceive, mFilter, Utils.receiverFlags())
+        MessageUtil.sendMsg2Service(this, AppConfig.MSG_REGISTER_CLIENT, "")
     }
 
     override fun onStopListening() {
         super.onStopListening()
 
         try {
-            connection?.disconnect(applicationContext)
-            connection = null
+            applicationContext.unregisterReceiver(mMsgReceive)
+            mMsgReceive = null
         } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to disconnect from core service", e)
+            LogUtil.e(AppConfig.TAG, "Failed to unregister receiver", e)
         }
 
     }
@@ -100,13 +108,33 @@ class QSTileService : TileService() {
         }
     }
 
-    private var connection: MikuRayConnection? = null
+    private var mMsgReceive: BroadcastReceiver? = null
 
-    private fun onServiceEvent(key: Int) {
-        when (key) {
-            AppConfig.MSG_STATE_RUNNING, AppConfig.MSG_STATE_START_SUCCESS -> setState(Tile.STATE_ACTIVE)
-            AppConfig.MSG_STATE_NOT_RUNNING, AppConfig.MSG_STATE_START_FAILURE, AppConfig.MSG_STATE_STOP_SUCCESS ->
-                setState(Tile.STATE_INACTIVE)
+    private class ReceiveMessageHandler(context: QSTileService) : BroadcastReceiver() {
+        var mReference: SoftReference<QSTileService> = SoftReference(context)
+        override fun onReceive(ctx: Context?, intent: Intent?) {
+            val context = mReference.get()
+            when (intent?.getIntExtra("key", 0)) {
+                AppConfig.MSG_STATE_RUNNING -> {
+                    context?.setState(Tile.STATE_ACTIVE)
+                }
+
+                AppConfig.MSG_STATE_NOT_RUNNING -> {
+                    context?.setState(Tile.STATE_INACTIVE)
+                }
+
+                AppConfig.MSG_STATE_START_SUCCESS -> {
+                    context?.setState(Tile.STATE_ACTIVE)
+                }
+
+                AppConfig.MSG_STATE_START_FAILURE -> {
+                    context?.setState(Tile.STATE_INACTIVE)
+                }
+
+                AppConfig.MSG_STATE_STOP_SUCCESS -> {
+                    context?.setState(Tile.STATE_INACTIVE)
+                }
+            }
         }
     }
 

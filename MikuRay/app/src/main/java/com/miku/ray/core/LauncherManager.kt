@@ -18,6 +18,7 @@ import com.miku.ray.service.CoreProxyOnlyService
 import com.miku.ray.service.CoreRootService
 import com.miku.ray.service.CoreVpnService
 import com.miku.ray.util.LogUtil
+import com.miku.ray.util.MessageUtil
 import com.miku.ray.util.Utils
 
 object LauncherManager {
@@ -72,14 +73,14 @@ object LauncherManager {
             val message = e.message ?: e.javaClass.simpleName
             if (showLifecycleFeedback) {
                 showFeedback(context, message, 2)
-                PreStartFailureNotifier.notify(message)
+                MessageUtil.sendMsg2UI(context, AppConfig.MSG_STATE_START_FAILURE, message)
             }
             return false
         }
     }
 
     fun stopService(context: Context) {
-        ServiceCommands.stopCoreService(context)
+        MessageUtil.sendMsg2Service(context, AppConfig.MSG_STATE_STOP, "")
     }
 
     fun restartService(context: Context) {
@@ -87,7 +88,12 @@ object LauncherManager {
     }
 
     fun restartService(context: Context, onResult: (handled: Boolean) -> Unit) {
-        ServiceCommands.restartCoreService(context, onResult)
+        MessageUtil.sendMsg2ServiceForResult(
+            context,
+            AppConfig.MSG_STATE_RESTART,
+            "",
+            onResult,
+        )
     }
 
     fun restartServiceOrStart(context: Context, startIfStopped: () -> Unit) {

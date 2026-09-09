@@ -140,7 +140,6 @@ android {
         viewBinding = true
         buildConfig = true
         resValues = true
-        aidl = true
     }
 
     packaging {

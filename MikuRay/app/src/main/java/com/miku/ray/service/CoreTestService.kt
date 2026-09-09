@@ -23,7 +23,7 @@ import com.miku.ray.handler.AngConfigManager
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.LogUtil
 import com.miku.ray.util.JsonUtil
-import com.miku.ray.aidl.JobServiceBinder
+import com.miku.ray.util.MessageUtil
 import com.miku.ray.helper.NotificationHelper
 import com.miku.ray.remixicon.R as RemixR
 
@@ -63,10 +63,7 @@ class CoreTestService : Service() {
         CoreNativeManager.initCoreEnv(this)
     }
 
-    /** Replaces MessageUtil.sendMsg2UI(...) for this service's progress/result/finish events. */
-    private val binder = JobServiceBinder()
-
-    override fun onBind(intent: Intent?): IBinder? = binder
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
         LogUtil.i(AppConfig.TAG, "CoreTestService is being destroyed")
@@ -194,7 +191,8 @@ class CoreTestService : Service() {
                     content = getString(progressTextRes, progressText),
                 )
 
-                binder.broadcastEvent(
+                MessageUtil.sendMsg2UI(
+                    this,
                     AppConfig.MSG_MEASURE_CONFIG_NOTIFY,
                     JsonUtil.toJson(RealPingProgress(message.testId, event.completed, event.total)),
                 )
@@ -202,7 +200,8 @@ class CoreTestService : Service() {
 
             is RealPingEvent.Result -> {
                 MmkvManager.encodeServerTestDelayMillis(event.guid, event.delayMillis)
-                binder.broadcastEvent(
+                MessageUtil.sendMsg2UI(
+                    this,
                     AppConfig.MSG_MEASURE_CONFIG_SUCCESS,
                     JsonUtil.toJson(RealPingResult(message.testId, event.guid, event.delayMillis)),
                 )
@@ -252,7 +251,7 @@ class CoreTestService : Service() {
     }
 
     private fun sendSummary(summary: RealPingSummary) {
-        binder.broadcastEvent(AppConfig.MSG_MEASURE_CONFIG_FINISH, JsonUtil.toJson(summary))
+        MessageUtil.sendMsg2UI(this, AppConfig.MSG_MEASURE_CONFIG_FINISH, JsonUtil.toJson(summary))
     }
 
     private fun disposeProcess() {

@@ -344,16 +344,8 @@ object AppConfig {
 
     const val PROTOCOL_FREEDOM = "freedom"
 
-    /** Action used on the intent passed to bindService() to obtain the AIDL binder (mirrors NekoBox's Action.SERVICE). */
-    const val ACTION_BIND_SERVICE = "$ANG_PACKAGE.action.bind_service"
-
-    /** Internal, self-registered control-plane actions (same idea as NekoBox's Action.RELOAD/CLOSE). Not part of the AIDL surface. */
-    const val ACTION_STOP_SERVICE = "$ANG_PACKAGE.action.stop_service"
-    const val ACTION_RESTART_SERVICE = "$ANG_PACKAGE.action.restart_service"
-
-    /** Explicit, typed broadcast used only to nudge home-screen widgets (AppWidgetProvider can't hold a live AIDL binding). */
-    const val ACTION_WIDGET_STATE_CHANGED = "$ANG_PACKAGE.action.widget_state_changed"
-    const val EXTRA_RUNNING = "running"
+    const val BROADCAST_ACTION_SERVICE = "$ANG_PACKAGE.action.service"
+    const val BROADCAST_ACTION_ACTIVITY = "$ANG_PACKAGE.action.activity"
     const val BROADCAST_ACTION_WIDGET_CLICK = "$ANG_PACKAGE.action.widget.click"
     const val BROADCAST_ACTION_TRAFFIC_WIDGET_REFRESH = "$ANG_PACKAGE.action.traffic_widget_refresh"
     const val EXTRA_SHOW_TOTAL_TRAFFIC_DETAIL = "extra_show_total_traffic_detail"

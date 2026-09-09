@@ -13,9 +13,6 @@ import android.system.OsConstants
 import androidx.core.content.ContextCompat
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.aidl.EventCallbackDispatcher
-import com.miku.ray.aidl.IMikuRayCallback
-import com.miku.ray.aidl.IMikuRayService
 import com.miku.ray.contracts.ServiceControl
 import com.miku.ray.dto.OutboundTrafficStat
 import com.miku.ray.dto.entities.ProfileItem
@@ -31,8 +28,8 @@ import com.miku.ray.service.DialerWebviewService
 import com.miku.ray.contracts.IDialerService
 import com.miku.ray.service.NetworkMonitor
 import com.miku.ray.util.LogUtil
+import com.miku.ray.util.MessageUtil
 import com.miku.ray.util.Utils
-import com.miku.ray.util.WidgetNotifier
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,47 +49,6 @@ object CoreServiceManager {
 
     private val coreController: CoreController = CoreNativeManager.newCoreController(CoreCallback())
     private val mMsgReceive = ReceiveMessageHandler()
-
-    /**
-     * AIDL binder replacing the old BROADCAST_ACTION_SERVICE / BROADCAST_ACTION_ACTIVITY bus for
-     * the state+query channel. Returned from CoreVpnService / CoreProxyOnlyService /
-     * CoreRootService's onBind() (see [AppConfig.ACTION_BIND_SERVICE]).
-     */
-    val binder = Binder()
-
-    class Binder : IMikuRayService.Stub() {
-        private val dispatcher = EventCallbackDispatcher()
-
-        override fun getState(): Int = if (isRunning()) 1 else 0
-
-        override fun registerCallback(cb: IMikuRayCallback) {
-            dispatcher.register(cb)
-            // Immediately replay current state, replacing the old MSG_REGISTER_CLIENT reply.
-            try {
-                cb.onEvent(
-                    if (isRunning()) AppConfig.MSG_STATE_RUNNING else AppConfig.MSG_STATE_NOT_RUNNING,
-                    "",
-                )
-            } catch (_: Exception) {
-            }
-        }
-
-        override fun unregisterCallback(cb: IMikuRayCallback) {
-            dispatcher.unregister(cb)
-        }
-
-        override fun requestMeasureDelay() {
-            measureV2rayDelay()
-        }
-
-        override fun requestMeasureIp() {
-            measureIpOnly()
-        }
-
-        fun broadcastEvent(key: Int, content: String? = "") {
-            dispatcher.broadcastEvent(key, content)
-        }
-    }
     private var currentConfig: ProfileItem? = null
     private var processFinder: XrayProcessFinder? = null
     private var browserDialer: IDialerService? = null
@@ -155,8 +111,7 @@ object CoreServiceManager {
 
     @Throws(Exception::class)
     private fun doStartCoreLoop(service: Service, vpnInterface: ParcelFileDescriptor?) {
-        val mFilter = IntentFilter(AppConfig.ACTION_STOP_SERVICE)
-        mFilter.addAction(AppConfig.ACTION_RESTART_SERVICE)
+        val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_SERVICE)
         mFilter.addAction(Intent.ACTION_SCREEN_ON)
         mFilter.addAction(Intent.ACTION_SCREEN_OFF)
         mFilter.addAction(Intent.ACTION_USER_PRESENT)
@@ -230,8 +185,7 @@ object CoreServiceManager {
 
         if (!isReload) {
             val restarted = serviceRestartLifecycle.completeCurrent()
-            binder.broadcastEvent(AppConfig.MSG_STATE_START_SUCCESS, restarted.toString())
-            WidgetNotifier.refresh(service, true)
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, restarted)
         }
         NotificationManager.startSpeedNotification()
         LogUtil.i(AppConfig.TAG, "StartCore-Manager: Core started successfully")
@@ -261,8 +215,7 @@ object CoreServiceManager {
         }
 
         if (!serviceRestartLifecycle.isActive()) {
-            binder.broadcastEvent(AppConfig.MSG_STATE_STOP_SUCCESS, "")
-            WidgetNotifier.refresh(service, false)
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_STOP_SUCCESS, "")
         }
         NotificationManager.cancelNotification()
 
@@ -313,8 +266,7 @@ object CoreServiceManager {
         } catch (e: Exception) {
             val message = e.message?.takeUnless { it.isBlank() } ?: e.javaClass.simpleName
             LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to reload core: $message", e)
-            binder.broadcastEvent(AppConfig.MSG_STATE_START_FAILURE, message)
-            WidgetNotifier.refresh(service, false)
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
             false
         } finally {
             isReloading = false
@@ -378,10 +330,10 @@ object CoreServiceManager {
             } else {
                 service.getString(R.string.connection_test_error, errorStr)
             }
-            binder.broadcastEvent(AppConfig.MSG_MEASURE_DELAY_SUCCESS, result)
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_DELAY_SUCCESS, result)
 
             if (time >= 0) {
-                binder.broadcastEvent(AppConfig.MSG_MEASURE_IP_SUCCESS, ip.orEmpty())
+                MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_IP_SUCCESS, ip.orEmpty())
             }
         }
     }
@@ -394,7 +346,7 @@ object CoreServiceManager {
         backgroundScope.launch {
             val service = getService() ?: return@launch
             val ip = SpeedtestManager.getRemoteIPInfo()
-            binder.broadcastEvent(AppConfig.MSG_MEASURE_IP_SUCCESS, ip.orEmpty())
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_MEASURE_IP_SUCCESS, ip.orEmpty())
         }
     }
 
@@ -404,8 +356,7 @@ object CoreServiceManager {
 
     internal fun reportStartFailure(service: Service, message: String) {
         serviceRestartLifecycle.completeCurrent()
-        binder.broadcastEvent(AppConfig.MSG_STATE_START_FAILURE, message)
-        WidgetNotifier.refresh(service, false)
+        MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
     }
 
     private fun reportRestartFailure(
@@ -414,8 +365,7 @@ object CoreServiceManager {
         message: String,
     ) {
         if (serviceRestartLifecycle.complete(token)) {
-            binder.broadcastEvent(AppConfig.MSG_STATE_START_FAILURE, message)
-            WidgetNotifier.refresh(service, false)
+            MessageUtil.sendMsg2UI(service, AppConfig.MSG_STATE_START_FAILURE, message)
         }
     }
 
@@ -482,18 +432,32 @@ object CoreServiceManager {
             val serviceControl = serviceControl ?: run {
                 LogUtil.w(
                     AppConfig.TAG,
-                    "StartCore-Manager: Dropped action=${intent?.action}, serviceControl is null"
+                    "StartCore-Manager: Dropped msg key=${intent?.getIntExtra("key", 0)}, serviceControl is null"
                 )
                 return
             }
-            when (intent?.action) {
-                AppConfig.ACTION_STOP_SERVICE -> {
+            when (intent?.getIntExtra("key", 0)) {
+                AppConfig.MSG_REGISTER_CLIENT -> {
+                    if (isRunning()) {
+                        MessageUtil.sendMsg2UI(serviceControl.getService(), AppConfig.MSG_STATE_RUNNING, "")
+                    } else {
+                        MessageUtil.sendMsg2UI(serviceControl.getService(), AppConfig.MSG_STATE_NOT_RUNNING, "")
+                    }
+                }
+
+                AppConfig.MSG_UNREGISTER_CLIENT -> {
+                }
+
+                AppConfig.MSG_STATE_START -> {
+                }
+
+                AppConfig.MSG_STATE_STOP -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Stop service")
                     serviceRestartLifecycle.cancel()
                     serviceControl.stopService()
                 }
 
-                AppConfig.ACTION_RESTART_SERVICE -> {
+                AppConfig.MSG_STATE_RESTART -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Restart service")
 
                     if (isOrderedBroadcast) resultCode = Activity.RESULT_OK
@@ -502,7 +466,11 @@ object CoreServiceManager {
                     val launched = try {
                         serviceRestartLifecycle.launch(
                             onStarting = {
-                                binder.broadcastEvent(AppConfig.MSG_STATE_RESTART, "")
+                                MessageUtil.sendMsg2UI(
+                                    serviceControl.getService(),
+                                    AppConfig.MSG_STATE_RESTART,
+                                    "",
+                                )
                             },
                         ) { token ->
                             try {
@@ -546,6 +514,16 @@ object CoreServiceManager {
                     }
                 }
 
+                AppConfig.MSG_MEASURE_DELAY -> {
+                    measureV2rayDelay()
+                }
+
+                AppConfig.MSG_MEASURE_IP -> {
+                    measureIpOnly()
+                }
+            }
+
+            when (intent?.action) {
                 Intent.ACTION_SCREEN_OFF -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Screen off")
                     NotificationManager.stopSpeedNotification()

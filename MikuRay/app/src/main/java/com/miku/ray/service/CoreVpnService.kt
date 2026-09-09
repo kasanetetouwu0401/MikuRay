@@ -9,7 +9,6 @@ import android.net.Network
 import android.net.ProxyInfo
 import android.net.VpnService
 import android.os.Build
-import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.os.PowerManager
 import android.os.Process
@@ -26,6 +25,7 @@ import com.miku.ray.handler.TrafficController
 import com.miku.ray.handler.SettingsManager
 import com.miku.ray.root.RootLanSharing
 import com.miku.ray.util.LogUtil
+import com.miku.ray.util.MessageUtil
 import com.miku.ray.util.MyContextWrapper
 import com.miku.ray.util.SoundPlayer
 import com.miku.ray.util.Utils
@@ -89,15 +89,7 @@ class CoreVpnService : VpnService(), ServiceControl {
         TrafficController.stop()
         serviceScope.cancel()
 
-        CoreServiceManager.binder.broadcastEvent(AppConfig.MSG_STATE_NOT_RUNNING, "")
-    }
-
-    override fun onBind(intent: Intent?): IBinder? {
-        // The system uses this action internally to bind for always-on VPN / lockdown mode.
-        if (intent?.action == SERVICE_INTERFACE) {
-            return super.onBind(intent)
-        }
-        return if (intent?.action == AppConfig.ACTION_BIND_SERVICE) CoreServiceManager.binder else null
+        MessageUtil.sendMsg2UI(this, AppConfig.MSG_STATE_NOT_RUNNING, "")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
