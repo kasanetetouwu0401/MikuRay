@@ -24,6 +24,7 @@ import androidx.annotation.DrawableRes
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import com.miku.ray.AppConfig
+import com.miku.ray.receiver.ServiceCommandReceiver
 import com.miku.ray.R
 import com.miku.ray.core.CoreServiceManager
 import com.miku.ray.core.LauncherManager
@@ -76,9 +77,8 @@ class WidgetProvider : AppWidgetProvider() {
 
         remoteViews.setViewVisibility(R.id.widget_restart_button, if (isRunning) View.VISIBLE else View.GONE)
         if (isRunning) {
-            val restartIntent = Intent(AppConfig.BROADCAST_ACTION_SERVICE).apply {
-                `package` = AppConfig.ANG_PACKAGE
-                putExtra("key", AppConfig.MSG_STATE_RESTART)
+            val restartIntent = Intent(context, ServiceCommandReceiver::class.java).apply {
+                action = ServiceCommandReceiver.ACTION_RESTART
             }
             val restartPendingIntent = PendingIntent.getBroadcast(
                 context, R.id.widget_restart_button, restartIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
@@ -163,17 +163,6 @@ class WidgetProvider : AppWidgetProvider() {
                 LauncherManager.stopService(context)
             } else {
                 LauncherManager.startServiceFromToggle(context)
-            }
-        } else if (AppConfig.BROADCAST_ACTION_ACTIVITY == intent.action) {
-            AppWidgetManager.getInstance(context)?.let { manager ->
-                val isRunning = when (intent.getIntExtra("key", 0)) {
-                    AppConfig.MSG_STATE_RUNNING, AppConfig.MSG_STATE_START_SUCCESS -> true
-                    AppConfig.MSG_STATE_NOT_RUNNING, AppConfig.MSG_STATE_START_FAILURE, AppConfig.MSG_STATE_STOP_SUCCESS -> false
-                    else -> return
-                }
-                for (appWidgetId in manager.getAppWidgetIds(ComponentName(context, WidgetProvider::class.java))) {
-                    updateWidget(context, manager, appWidgetId, isRunning)
-                }
             }
         }
     }

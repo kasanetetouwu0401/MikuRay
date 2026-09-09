@@ -13,6 +13,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.miku.ray.AppConfig
+import com.miku.ray.receiver.ServiceCommandReceiver
 import com.miku.ray.R
 import com.miku.ray.core.CoreServiceManager
 import com.miku.ray.dto.entities.ProfileItem
@@ -119,14 +120,14 @@ object NotificationManager : TrafficController.Listener {
         val startMainIntent = Intent(service, MainActivity::class.java)
         val contentPendingIntent = PendingIntent.getActivity(service, NOTIFICATION_PENDING_INTENT_CONTENT, startMainIntent, flags)
 
-        val stopV2RayIntent = Intent(AppConfig.BROADCAST_ACTION_SERVICE)
-        stopV2RayIntent.`package` = AppConfig.ANG_PACKAGE
-        stopV2RayIntent.putExtra("key", AppConfig.MSG_STATE_STOP)
+        val stopV2RayIntent = Intent(service, ServiceCommandReceiver::class.java).apply {
+            action = ServiceCommandReceiver.ACTION_STOP
+        }
         val stopV2RayPendingIntent = PendingIntent.getBroadcast(service, NOTIFICATION_PENDING_INTENT_STOP_V2RAY, stopV2RayIntent, flags)
 
-        val restartV2RayIntent = Intent(AppConfig.BROADCAST_ACTION_SERVICE)
-        restartV2RayIntent.`package` = AppConfig.ANG_PACKAGE
-        restartV2RayIntent.putExtra("key", AppConfig.MSG_STATE_RESTART)
+        val restartV2RayIntent = Intent(service, ServiceCommandReceiver::class.java).apply {
+            action = ServiceCommandReceiver.ACTION_RESTART
+        }
         val restartV2RayPendingIntent = PendingIntent.getBroadcast(service, NOTIFICATION_PENDING_INTENT_RESTART_V2RAY, restartV2RayIntent, flags)
 
         val channelId =

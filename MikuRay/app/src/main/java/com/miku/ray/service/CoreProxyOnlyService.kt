@@ -4,6 +4,9 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import com.miku.ray.aidl.AidlProtocol
+import com.miku.ray.aidl.MikuRayServiceBinder
+import com.miku.ray.core.CoreAidlBinder
 import com.miku.ray.AppConfig
 import com.miku.ray.contracts.ServiceControl
 import com.miku.ray.core.CoreServiceManager
@@ -13,6 +16,7 @@ import com.miku.ray.util.LogUtil
 import com.miku.ray.util.MyContextWrapper
 
 class CoreProxyOnlyService : Service(), ServiceControl {
+    private val aidlBinder = CoreAidlBinder()
     override fun onCreate() {
         super.onCreate()
         LogUtil.i(AppConfig.TAG, "StartCore-Proxy: Service created")
@@ -41,6 +45,8 @@ class CoreProxyOnlyService : Service(), ServiceControl {
         super.onDestroy()
         CoreServiceManager.stopCoreLoop()
         CoreServiceManager.clearServiceControl(this)
+        aidlBinder.emit(AidlProtocol.EVENT_STATE_NOT_RUNNING)
+        aidlBinder.close()
     }
 
     override fun getService(): Service {
@@ -54,13 +60,14 @@ class CoreProxyOnlyService : Service(), ServiceControl {
         stopSelf()
     }
 
+    override fun getAidlBinder(): MikuRayServiceBinder = aidlBinder
+
     override fun vpnProtect(socket: Int): Boolean {
         return true
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
+    override fun onBind(intent: Intent?): IBinder? =
+        if (intent?.action == AidlProtocol.SERVICE_ACTION) aidlBinder else null
 
     override fun attachBaseContext(newBase: Context?) {
         val context = newBase?.let {

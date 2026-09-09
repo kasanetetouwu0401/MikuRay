@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
+import com.miku.ray.aidl.AidlProtocol
+import com.miku.ray.aidl.MikuRayServiceBinder
 import android.os.Looper
 import android.os.Process
 import androidx.core.app.NotificationCompat
@@ -18,16 +20,19 @@ import com.miku.ray.dto.RealPingResult
 import com.miku.ray.dto.RealPingSummary
 import com.miku.ray.dto.TestServiceMessage
 import com.miku.ray.enums.NotificationChannelType
-import com.miku.ray.extension.serializable
 import com.miku.ray.handler.AngConfigManager
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.LogUtil
 import com.miku.ray.util.JsonUtil
-import com.miku.ray.util.MessageUtil
 import com.miku.ray.helper.NotificationHelper
 import com.miku.ray.remixicon.R as RemixR
+import com.miku.ray.receiver.BackgroundServiceCommandReceiver
 
 class CoreTestService : Service() {
+
+    private val aidlBinder = MikuRayServiceBinder(
+        commandHandler = { command, content -> handleAidlCommand(command, content) }
+    )
     @Volatile
     private var activeWorker: RealPingWorkerService? = null
 
@@ -41,11 +46,10 @@ class CoreTestService : Service() {
     private var batchStarted = false
 
     private val cancelAction by lazy {
-        val intent = Intent(this, CoreTestService::class.java).putExtra(
-            "content",
-            TestServiceMessage(AppConfig.MSG_MEASURE_CONFIG_CANCEL),
-        )
-        val pendingIntent = PendingIntent.getService(
+        val intent = Intent(this, BackgroundServiceCommandReceiver::class.java).apply {
+            action = BackgroundServiceCommandReceiver.ACTION_TEST_CANCEL
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
             this,
             NotificationChannelType.CORE_TEST.notificationId,
             intent,
@@ -57,13 +61,13 @@ class CoreTestService : Service() {
             pendingIntent,
         ).build()
     }
-
     override fun onCreate() {
         super.onCreate()
         CoreNativeManager.initCoreEnv(this)
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    override fun onBind(intent: Intent?): IBinder? =
+        if (intent?.action == AidlProtocol.SERVICE_ACTION) aidlBinder else null
 
     override fun onDestroy() {
         LogUtil.i(AppConfig.TAG, "CoreTestService is being destroyed")
@@ -72,6 +76,7 @@ class CoreTestService : Service() {
         activeWorker = null
         activeMessage = null
         NotificationHelper.stopForeground(this)
+        aidlBinder.close()
         super.onDestroy()
 
         Handler(Looper.getMainLooper()).postDelayed({
@@ -80,28 +85,30 @@ class CoreTestService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val message = intent?.serializable<TestServiceMessage>("content")
-        val isTcping = message?.onlyTcp == true
-        NotificationHelper.startForeground(
-            this,
-            NotificationChannelType.CORE_TEST,
-            getString(R.string.app_name),
-            getString(if (isTcping) R.string.title_ping_all_server else R.string.title_real_ping_all_server),
-            cancelAction,
-        )
-        if (message == null) {
-            stopSelf(startId)
-            return START_NOT_STICKY
-        }
+        return START_NOT_STICKY
+    }
 
-        return when (message.key) {
-            AppConfig.MSG_MEASURE_CONFIG_START -> handleMeasureStart(message, startId)
-            AppConfig.MSG_MEASURE_CONFIG_CANCEL -> handleMeasureCancel(startId)
-            else -> {
-                NotificationHelper.stopForeground(this)
-                stopSelf(startId)
-                START_NOT_STICKY
+    private fun handleAidlCommand(command: Int, content: String): Boolean {
+        return when (command) {
+            AidlProtocol.TEST_START -> {
+                val message = com.miku.ray.util.JsonUtil.fromJsonSafe(content, com.miku.ray.dto.TestServiceMessage::class.java)
+                    ?: return false
+                val isTcping = message.onlyTcp
+                NotificationHelper.startForeground(
+                    this,
+                    NotificationChannelType.CORE_TEST,
+                    getString(R.string.app_name),
+                    getString(if (isTcping) R.string.title_ping_all_server else R.string.title_real_ping_all_server),
+                    cancelAction,
+                )
+                handleMeasureStart(message, 0)
+                true
             }
+            AidlProtocol.TEST_CANCEL -> {
+                handleMeasureCancel(0)
+                true
+            }
+            else -> false
         }
     }
 
@@ -191,18 +198,16 @@ class CoreTestService : Service() {
                     content = getString(progressTextRes, progressText),
                 )
 
-                MessageUtil.sendMsg2UI(
-                    this,
-                    AppConfig.MSG_MEASURE_CONFIG_NOTIFY,
+                aidlBinder.emit(
+                    AidlProtocol.EVENT_TEST_NOTIFY,
                     JsonUtil.toJson(RealPingProgress(message.testId, event.completed, event.total)),
                 )
             }
 
             is RealPingEvent.Result -> {
                 MmkvManager.encodeServerTestDelayMillis(event.guid, event.delayMillis)
-                MessageUtil.sendMsg2UI(
-                    this,
-                    AppConfig.MSG_MEASURE_CONFIG_SUCCESS,
+                aidlBinder.emit(
+                    AidlProtocol.EVENT_TEST_SUCCESS,
                     JsonUtil.toJson(RealPingResult(message.testId, event.guid, event.delayMillis)),
                 )
             }
@@ -251,7 +256,7 @@ class CoreTestService : Service() {
     }
 
     private fun sendSummary(summary: RealPingSummary) {
-        MessageUtil.sendMsg2UI(this, AppConfig.MSG_MEASURE_CONFIG_FINISH, JsonUtil.toJson(summary))
+        aidlBinder.emit(AidlProtocol.EVENT_TEST_FINISH, JsonUtil.toJson(summary))
     }
 
     private fun disposeProcess() {

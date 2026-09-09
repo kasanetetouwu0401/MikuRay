@@ -344,8 +344,6 @@ object AppConfig {
 
     const val PROTOCOL_FREEDOM = "freedom"
 
-    const val BROADCAST_ACTION_SERVICE = "$ANG_PACKAGE.action.service"
-    const val BROADCAST_ACTION_ACTIVITY = "$ANG_PACKAGE.action.activity"
     const val BROADCAST_ACTION_WIDGET_CLICK = "$ANG_PACKAGE.action.widget.click"
     const val BROADCAST_ACTION_TRAFFIC_WIDGET_REFRESH = "$ANG_PACKAGE.action.traffic_widget_refresh"
     const val EXTRA_SHOW_TOTAL_TRAFFIC_DETAIL = "extra_show_total_traffic_detail"
@@ -420,37 +418,6 @@ object AppConfig {
     const val WIREGUARD_LOCAL_ADDRESS_V6 = "2606:4700:110:8f81:d551:a0:532e:a2b3/128"
     const val WIREGUARD_LOCAL_MTU = "1420"
     const val LOOPBACK = "127.0.0.1"
-
-    const val MSG_REGISTER_CLIENT = 1
-    const val MSG_STATE_RUNNING = 11
-    const val MSG_STATE_NOT_RUNNING = 12
-    const val MSG_UNREGISTER_CLIENT = 2
-    const val MSG_STATE_START = 3
-    const val MSG_STATE_START_SUCCESS = 31
-    const val MSG_STATE_START_FAILURE = 32
-    const val MSG_STATE_STOP = 4
-    const val MSG_STATE_STOP_SUCCESS = 41
-    const val MSG_STATE_RESTART = 5
-    const val MSG_MEASURE_DELAY = 6
-    const val MSG_MEASURE_DELAY_SUCCESS = 61
-    const val MSG_MEASURE_IP = 62
-    const val MSG_MEASURE_IP_SUCCESS = 63
-    const val MSG_MEASURE_CONFIG_START = 7
-    const val MSG_MEASURE_CONFIG_CANCEL = 71
-    const val MSG_MEASURE_CONFIG_SUCCESS = 72
-    const val MSG_MEASURE_CONFIG_NOTIFY = 73
-    const val MSG_MEASURE_CONFIG_FINISH = 74
-    const val MSG_COUNTRY_CODE_START = 90
-    const val MSG_COUNTRY_CODE_CANCEL = 91
-    const val MSG_COUNTRY_CODE_SUCCESS = 92
-    const val MSG_COUNTRY_CODE_NOTIFY = 93
-    const val MSG_COUNTRY_CODE_FINISH = 94
-
-    const val MSG_SUB_UPDATE_START = 8
-    const val MSG_SUB_UPDATE_CANCEL = 81
-    const val MSG_TRAFFIC_UPDATED = 84
-    const val MSG_TRAFFIC_SPEED_UPDATED = 82
-    const val MSG_SUB_UPDATE_FINISH = 83
 
     const val RAY_NG_CHANNEL_ID = "CORE_M_CH_ID_V2"
     const val RAY_NG_CHANNEL_NAME = "Core Background Service"

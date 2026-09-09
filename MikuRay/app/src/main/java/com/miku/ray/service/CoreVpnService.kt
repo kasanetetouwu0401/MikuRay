@@ -27,7 +27,6 @@ import com.miku.ray.handler.SettingsManager
 import com.miku.ray.root.RootLanSharing
 import com.miku.ray.util.InProcessLogBuffer
 import com.miku.ray.util.LogUtil
-import com.miku.ray.util.MessageUtil
 import com.miku.ray.util.MyContextWrapper
 import com.miku.ray.util.SoundPlayer
 import com.miku.ray.util.Utils
@@ -41,6 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 @SuppressLint("VpnServicePolicy")
 class CoreVpnService : VpnService(), ServiceControl {
+    private val aidlBinder = CoreAidlBinder()
     private lateinit var mInterface: ParcelFileDescriptor
     private var isRunning = false
     private var tun2SocksService: Tun2SocksControl? = null
@@ -119,8 +119,14 @@ class CoreVpnService : VpnService(), ServiceControl {
         TrafficController.stop()
         serviceScope.cancel()
 
-        MessageUtil.sendMsg2UI(this, AppConfig.MSG_STATE_NOT_RUNNING, "")
+        aidlBinder.emit(AidlProtocol.EVENT_STATE_NOT_RUNNING)
+        aidlBinder.close()
     }
+
+    override fun onBind(intent: Intent?): IBinder? =
+        if (intent?.action == AidlProtocol.SERVICE_ACTION) aidlBinder else super.onBind(intent)
+
+    override fun getAidlBinder(): MikuRayServiceBinder = aidlBinder
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         NotificationManager.ensureForeground()

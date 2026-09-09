@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
+import com.miku.ray.aidl.AidlProtocol
+import com.miku.ray.aidl.MikuRayServiceBinder
 import android.os.Looper
 import android.os.Process
 import com.miku.ray.AppConfig
@@ -14,7 +16,6 @@ import com.miku.ray.dto.RealPingEvent
 import com.miku.ray.dto.SubscriptionUpdateMessage
 import com.miku.ray.dto.entities.SubscriptionCache
 import com.miku.ray.enums.NotificationChannelType
-import com.miku.ray.extension.serializable
 import com.miku.ray.handler.AngConfigManager
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.LogUtil
@@ -29,6 +30,10 @@ import kotlinx.coroutines.sync.withPermit
 import java.util.concurrent.atomic.AtomicInteger
 
 class SubscriptionUpdateService : Service() {
+
+    private val aidlBinder = MikuRayServiceBinder(
+        commandHandler = { command, content -> handleAidlCommand(command, content) }
+    )
 
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
@@ -46,7 +51,8 @@ class SubscriptionUpdateService : Service() {
         CoreNativeManager.initCoreEnv(this)
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    override fun onBind(intent: Intent?): IBinder? =
+        if (intent?.action == AidlProtocol.SERVICE_ACTION) aidlBinder else null
 
     override fun onDestroy() {
         LogUtil.i(AppConfig.TAG, "SubscriptionUpdateService is being destroyed")
@@ -55,37 +61,35 @@ class SubscriptionUpdateService : Service() {
         serviceJob.cancel()
         NotificationHelper.stopForeground(this)
         NotificationHelper.cancel(NotificationChannelType.SUBSCRIPTION_UPDATE, this)
+        aidlBinder.close()
         super.onDestroy()
 
         Handler(Looper.getMainLooper()).post { Process.killProcess(Process.myPid()) }
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        NotificationHelper.startForeground(
-            this,
-            NotificationChannelType.SUBSCRIPTION_UPDATE,
-            getString(R.string.title_pref_auto_update_subscription),
-            getString(R.string.subscription_update_background_start)
-        )
-        val message = intent?.serializable<SubscriptionUpdateMessage>("content")
-        if (message == null) {
-            stopSelf(startId)
-            return START_NOT_STICKY
-        }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_NOT_STICKY
 
-        when (message.key) {
-            AppConfig.MSG_SUB_UPDATE_START -> handleUpdateStart(message)
-            AppConfig.MSG_SUB_UPDATE_CANCEL -> {
-                NotificationHelper.stopForeground(this)
-                stopSelf(startId)
+    private fun handleAidlCommand(command: Int, content: String): Boolean {
+        return when (command) {
+            AidlProtocol.SUBSCRIPTION_START -> {
+                val message = com.miku.ray.util.JsonUtil.fromJsonSafe(content, com.miku.ray.dto.SubscriptionUpdateMessage::class.java)
+                    ?: return false
+                NotificationHelper.startForeground(
+                    this,
+                    NotificationChannelType.SUBSCRIPTION_UPDATE,
+                    getString(R.string.title_pref_auto_update_subscription),
+                    getString(R.string.subscription_update_background_start)
+                )
+                handleUpdateStart(message)
+                true
             }
-
-            else -> {
+            AidlProtocol.SUBSCRIPTION_CANCEL -> {
                 NotificationHelper.stopForeground(this)
-                stopSelf(startId)
+                stopSelf()
+                true
             }
+            else -> false
         }
-        return START_NOT_STICKY
     }
 
     private fun handleUpdateStart(message: SubscriptionUpdateMessage) {

@@ -3154,6 +3154,14 @@
             android:exported="false"
             android:name=".ui.weather.WeatherForecastActivity" />
 
+        <receiver
+            android:exported="false"
+            android:name=".receiver.ServiceCommandReceiver" />
+
+        <receiver
+            android:exported="false"
+            android:name=".receiver.BackgroundServiceCommandReceiver" />
+
         <service
             android:enabled="true"
             android:exported="false"

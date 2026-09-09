@@ -4,6 +4,9 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import com.miku.ray.aidl.AidlProtocol
+import com.miku.ray.aidl.MikuRayServiceBinder
+import com.miku.ray.core.CoreAidlBinder
 import com.miku.ray.AppConfig
 import com.miku.ray.contracts.ServiceControl
 import com.miku.ray.core.CoreServiceManager
@@ -25,6 +28,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class CoreRootService : Service(), ServiceControl {
+
+    private val aidlBinder = CoreAidlBinder()
 
     private var isRunning = false
     private var setupJob: Job? = null
@@ -84,6 +89,8 @@ class CoreRootService : Service(), ServiceControl {
         RootProxyManager.stopFull(applicationContext)
         CoreServiceManager.stopCoreLoop()
         CoreServiceManager.clearServiceControl(this)
+        aidlBinder.emit(AidlProtocol.EVENT_STATE_NOT_RUNNING)
+        aidlBinder.close()
         serviceScope.cancel()
     }
 
@@ -98,7 +105,10 @@ class CoreRootService : Service(), ServiceControl {
 
     override fun vpnProtect(socket: Int): Boolean = true
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    override fun getAidlBinder(): MikuRayServiceBinder = aidlBinder
+
+    override fun onBind(intent: Intent?): IBinder? =
+        if (intent?.action == AidlProtocol.SERVICE_ACTION) aidlBinder else null
 
     override fun attachBaseContext(newBase: Context?) {
         val context = newBase?.let {
