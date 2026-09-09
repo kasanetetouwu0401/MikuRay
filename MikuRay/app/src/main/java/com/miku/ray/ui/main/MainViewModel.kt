@@ -666,49 +666,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun onMainServiceEvent(event: MainServiceEvent) {
         when (event) {
-            MainServiceEvent.StateRunning -> {
-                if (!isRestarting) {
-                    isRunning.postValue(true)
-                    updateListAction.postValue(-1)
-                }
-            }
-            MainServiceEvent.StateRestart -> {
-                markConnectionStopped()
-                isRestarting = true
-                serviceRestartAction.postValue(Unit)
-            }
-            is MainServiceEvent.StateStartSuccess -> {
-                val app = getApplication<AngApplication>()
-                pendingServerRestartGuid = null
-                isRestarting = false
-                alertAction.postValue(
-                    true to app.getString(
-                        if (event.restarted) R.string.toast_services_restart_success
-                        else R.string.toast_services_success,
-                    )
-                )
-                isRunning.postValue(true)
-                updateListAction.postValue(-1)
-            }
+            MainServiceEvent.StateRunning,
+            MainServiceEvent.StateStartSuccess -> isRunning.postValue(true)
             MainServiceEvent.StateNotRunning,
-            MainServiceEvent.StateStopSuccess -> {
-                if (!isRestarting) {
-                    markConnectionStopped()
-                    isRunning.postValue(false)
-                    updateListAction.postValue(-1)
-                }
-            }
-            is MainServiceEvent.StateStartFailure -> {
-                val app = getApplication<AngApplication>()
-                pendingServerRestartGuid = null
-                isRestarting = false
-                alertAction.postValue(
-                    false to (event.message?.takeUnless { it.isBlank() }
-                        ?: app.getString(R.string.toast_services_failure))
-                )
-                markConnectionStopped()
-                isRunning.postValue(false)
-            }
+            MainServiceEvent.StateStopSuccess,
+            MainServiceEvent.StateStartFailure -> isRunning.postValue(false)
             is MainServiceEvent.MeasureDelayResult -> {
                 updateTestResultAction.postValue(event.result.delayMillis.toString())
                 updateListAction.postValue(getPosition(event.result.guid))
@@ -735,15 +697,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val mMsgReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
-            val key = intent?.getIntExtra("key", 0) ?: return
-            if (key == AppConfig.MSG_STATE_RUNNING
-                || key == AppConfig.MSG_STATE_NOT_RUNNING
-                || key == AppConfig.MSG_STATE_RESTART
-                || key == AppConfig.MSG_STATE_START_SUCCESS
-                || key == AppConfig.MSG_STATE_START_FAILURE
-                || key == AppConfig.MSG_STATE_STOP_SUCCESS
-            ) return
-            when (key) {
+            when (intent?.getIntExtra("key", 0)) {
                 AppConfig.MSG_STATE_RUNNING -> {
                     if (!isRestarting) {
                         isRunning.value = true

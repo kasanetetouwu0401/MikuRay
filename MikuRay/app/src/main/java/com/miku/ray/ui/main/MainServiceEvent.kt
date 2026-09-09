@@ -5,9 +5,8 @@ import com.miku.ray.dto.RealPingResult
 sealed class MainServiceEvent {
     data object StateRunning : MainServiceEvent()
     data object StateNotRunning : MainServiceEvent()
-    data object StateRestart : MainServiceEvent()
-    data class StateStartSuccess(val restarted: Boolean) : MainServiceEvent()
-    data class StateStartFailure(val message: String?) : MainServiceEvent()
+    data object StateStartSuccess : MainServiceEvent()
+    data object StateStartFailure : MainServiceEvent()
     data object StateStopSuccess : MainServiceEvent()
     data class MeasureDelayResult(val result: RealPingResult) : MainServiceEvent()
     data object MeasureConfigSuccess : MainServiceEvent()
