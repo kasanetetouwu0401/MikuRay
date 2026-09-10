@@ -1055,7 +1055,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         }
 
         mainViewModel.isRunning.observe(this) { isRunning ->
-            applyRunningState(isLoading = false, isRunning = isRunning)
+            applyRunningState(isRunning = isRunning)
             if (isRunning == true && pendingConnectionTest) {
                 pendingConnectionTest = false
                 setTestState(getString(R.string.connection_test_testing))
@@ -1234,7 +1234,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     private fun startV2Ray() {
         if (MmkvManager.getSelectServer().isNullOrEmpty()) {
             snackbarError(getString(R.string.title_file_chooser), title = getString(R.string.title_alerter_error))
-            applyRunningState(isLoading = false, isRunning = false)
+            applyRunningState(isRunning = false)
             return
         }
 
@@ -1305,14 +1305,8 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         binding.fab.text = "%02d:%02d:%02d".format(h, m, s)
     }
 
-    private fun applyRunningState(isLoading: Boolean, isRunning: Boolean) {
+    private fun applyRunningState(isRunning: Boolean) {
         binding.fab.isEnabled = true
-
-        if (isLoading) {
-            binding.fab.setIconResource(RemixR.drawable.rmx_system_check_line)
-            return
-        }
-
         binding.blurBottomStatus.isClickable = true
         binding.blurBottomStatus.isFocusable = true
 
