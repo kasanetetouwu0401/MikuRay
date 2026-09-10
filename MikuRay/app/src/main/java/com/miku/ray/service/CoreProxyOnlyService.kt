@@ -66,7 +66,7 @@ class CoreProxyOnlyService : Service(), ServiceControl {
         return if (intent?.action == ACTION_QUERY_STATE) {
             CoreStateQuery.binder()
         } else {
-            super.onBind(intent)
+            null
         }
     }
 
