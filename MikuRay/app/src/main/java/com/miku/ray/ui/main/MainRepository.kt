@@ -54,7 +54,13 @@ class MainRepository(
     private val stateReplyMessenger = Messenger(
         Handler(Looper.getMainLooper()) { msg ->
             when (msg.what) {
-                AppConfig.MSG_STATE_RUNNING -> _mainServiceEvent.tryEmit(MainServiceEvent.StateRunning)
+                AppConfig.MSG_STATE_RUNNING -> {
+                    val startTime = msg.data.getLong(CoreStateQuery.EXTRA_CONNECT_START_TIME, 0L)
+                    if (startTime > 0L) {
+                        MmkvManager.encodeSettings(AppConfig.PREF_VPN_CONNECT_START_TIME, startTime)
+                    }
+                    _mainServiceEvent.tryEmit(MainServiceEvent.StateRunning)
+                }
                 AppConfig.MSG_STATE_NOT_RUNNING -> _mainServiceEvent.tryEmit(MainServiceEvent.StateNotRunning)
             }
             true
