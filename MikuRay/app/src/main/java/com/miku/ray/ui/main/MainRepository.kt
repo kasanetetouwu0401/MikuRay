@@ -1,9 +1,16 @@
 package com.miku.ray.ui.main
 
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.ServiceConnection
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
+import android.os.Message
+import android.os.Messenger
 import androidx.core.content.ContextCompat
 import com.miku.ray.AngApplication
 import com.miku.ray.AppConfig
@@ -22,6 +29,11 @@ import com.miku.ray.util.JsonUtil
 import com.miku.ray.util.LogUtil
 import com.miku.ray.util.MessageUtil
 import com.miku.ray.util.Utils
+import com.miku.ray.handler.SettingsManager
+import com.miku.ray.service.CoreProxyOnlyService
+import com.miku.ray.service.CoreRootService
+import com.miku.ray.service.CoreStateQuery
+import com.miku.ray.service.CoreVpnService
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -38,6 +50,33 @@ class MainRepository(
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
     override val mainServiceEvent: SharedFlow<MainServiceEvent> = _mainServiceEvent.asSharedFlow()
+
+    private val stateReplyMessenger = Messenger(
+        Handler(Looper.getMainLooper()) { msg ->
+            when (msg.what) {
+                AppConfig.MSG_STATE_RUNNING -> _mainServiceEvent.tryEmit(MainServiceEvent.StateRunning)
+                AppConfig.MSG_STATE_NOT_RUNNING -> _mainServiceEvent.tryEmit(MainServiceEvent.StateNotRunning)
+            }
+            true
+        },
+    )
+    private var stateServiceBound = false
+    private val stateServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service ?: return
+            runCatching {
+                Messenger(binder).send(Message.obtain(null, AppConfig.MSG_REGISTER_CLIENT).apply {
+                    replyTo = stateReplyMessenger
+                })
+            }.onFailure {
+                LogUtil.e(AppConfig.TAG, "Failed to query core state", it)
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            stateServiceBound = false
+        }
+    }
 
     private val serviceReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -115,12 +154,37 @@ class MainRepository(
             Utils.receiverFlags(),
         )
         sendMsg2Service(AppConfig.MSG_REGISTER_CLIENT, "")
+        queryCoreState()
+    }
+
+    fun queryCoreState() {
+        if (closed.get()) return
+        if (stateServiceBound) {
+            runCatching {
+                stateServiceBound = false
+                app.unbindService(stateServiceConnection)
+            }
+        }
+
+        val serviceClass = when {
+            SettingsManager.isRootMode() -> CoreRootService::class.java
+            SettingsManager.isVpnMode() -> CoreVpnService::class.java
+            else -> CoreProxyOnlyService::class.java
+        }
+        val intent = Intent(app, serviceClass).setAction(CoreStateQuery.ACTION_QUERY_STATE)
+        stateServiceBound = runCatching {
+            app.bindService(intent, stateServiceConnection, 0)
+        }.getOrDefault(false)
     }
 
     override fun close() {
         if (!closed.compareAndSet(false, true)) return
         runCatching { sendMsg2Service(AppConfig.MSG_UNREGISTER_CLIENT, "") }
             .onFailure { LogUtil.e(AppConfig.TAG, "Failed to unregister service client", it) }
+        if (stateServiceBound) {
+            runCatching { app.unbindService(stateServiceConnection) }
+            stateServiceBound = false
+        }
         runCatching { app.unregisterReceiver(serviceReceiver) }
             .onFailure { LogUtil.e(AppConfig.TAG, "Failed to unregister main service receiver", it) }
     }

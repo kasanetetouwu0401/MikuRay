@@ -9,6 +9,7 @@ import android.net.Network
 import android.net.ProxyInfo
 import android.net.VpnService
 import android.os.Build
+import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.os.PowerManager
 import android.os.Process
@@ -39,6 +40,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 @SuppressLint("VpnServicePolicy")
 class CoreVpnService : VpnService(), ServiceControl {
+    companion object {
+        const val ACTION_QUERY_STATE = CoreStateQuery.ACTION_QUERY_STATE
+    }
+
     private lateinit var mInterface: ParcelFileDescriptor
     private var isRunning = false
     private var tun2SocksService: Tun2SocksControl? = null
@@ -130,6 +135,14 @@ class CoreVpnService : VpnService(), ServiceControl {
 
     override fun getService(): Service {
         return this
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        return if (intent?.action == ACTION_QUERY_STATE) {
+            CoreStateQuery.binder()
+        } else {
+            super.onBind(intent)
+        }
     }
 
     override fun startService() {
