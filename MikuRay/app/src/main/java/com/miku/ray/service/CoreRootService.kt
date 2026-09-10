@@ -25,10 +25,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class CoreRootService : Service(), ServiceControl {
-    companion object {
-        const val ACTION_QUERY_STATE = CoreStateQuery.ACTION_QUERY_STATE
-    }
-
 
     private var isRunning = false
     private var setupJob: Job? = null
@@ -102,13 +98,7 @@ class CoreRootService : Service(), ServiceControl {
 
     override fun vpnProtect(socket: Int): Boolean = true
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return if (intent?.action == ACTION_QUERY_STATE) {
-            CoreStateQuery.binder()
-        } else {
-            null
-        }
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun attachBaseContext(newBase: Context?) {
         val context = newBase?.let {

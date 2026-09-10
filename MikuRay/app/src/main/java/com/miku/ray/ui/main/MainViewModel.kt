@@ -83,7 +83,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun startListenBroadcast() {
         mainRepository.sendMsg2Service(AppConfig.MSG_REGISTER_CLIENT, "")
-        mainRepository.queryCoreState()
     }
 
     override fun onCleared() {

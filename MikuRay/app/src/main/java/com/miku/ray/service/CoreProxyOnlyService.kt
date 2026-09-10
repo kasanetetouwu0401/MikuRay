@@ -13,10 +13,6 @@ import com.miku.ray.util.LogUtil
 import com.miku.ray.util.MyContextWrapper
 
 class CoreProxyOnlyService : Service(), ServiceControl {
-    companion object {
-        const val ACTION_QUERY_STATE = CoreStateQuery.ACTION_QUERY_STATE
-    }
-
     override fun onCreate() {
         super.onCreate()
         LogUtil.i(AppConfig.TAG, "StartCore-Proxy: Service created")
@@ -63,11 +59,7 @@ class CoreProxyOnlyService : Service(), ServiceControl {
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        return if (intent?.action == ACTION_QUERY_STATE) {
-            CoreStateQuery.binder()
-        } else {
-            null
-        }
+        return null
     }
 
     override fun attachBaseContext(newBase: Context?) {
