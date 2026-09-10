@@ -28,6 +28,7 @@ import com.miku.ray.util.SelectedProfileBannerController
 import com.miku.ray.util.SensorTextController
 import com.miku.ray.util.getColorAttr
 import com.miku.ray.util.Utils
+import com.google.android.material.loadingindicator.LoadingIndicator
 import com.miku.ray.AppConfig
 
 class MainRecyclerAdapter(
@@ -130,10 +131,6 @@ FastScrollRecyclerView.SectionedAdapter {
 
     override fun onViewRecycled(holder: BaseViewHolder) {
         if (holder is MainViewHolder) {
-            val statusDrawable = holder.views.vStatusDot.background
-            if (statusDrawable is android.graphics.drawable.AnimationDrawable) {
-                statusDrawable.stop()
-            }
             holder.views.layoutIndicator?.let { selectedBannerController?.clear(it) }
             holder.views.infoContainer.setOnTouchListener(null)
             holder.views.layoutMore?.setOnClickListener(null)
@@ -198,32 +195,8 @@ FastScrollRecyclerView.SectionedAdapter {
             val isSelectedServer = (guid == MmkvManager.getSelectServer())
             val isVpnConnected = mainViewModel.isRunning.value == true
 
-            if (isSelectedServer && isVpnConnected) {
-
-                holder.views.vStatusDot.setBackgroundResource(R.drawable.blink_color)
-                val blinkAnimDrawable = holder.views.vStatusDot.background
-
-                if (blinkAnimDrawable is android.graphics.drawable.AnimationDrawable) {
-                    holder.views.vStatusDot.visibility = View.VISIBLE
-
-                    if (blinkAnimDrawable.isRunning) {
-                        blinkAnimDrawable.stop()
-                    }
-                    holder.views.vStatusDot.post {
-                        val d = holder.views.vStatusDot.background
-                        if (d is android.graphics.drawable.AnimationDrawable && !d.isRunning) {
-                            d.start()
-                        }
-                    }
-                }
-            } else {
-                val blinkAnimDrawable = holder.views.vStatusDot.background
-                if (blinkAnimDrawable is android.graphics.drawable.AnimationDrawable) {
-                    blinkAnimDrawable.stop()
-                }
-                holder.views.vStatusDot.visibility = View.GONE
-                holder.views.vStatusDot.background = null
-            }
+            holder.views.liStatusIndicator.visibility =
+                if (isSelectedServer && isVpnConnected) View.VISIBLE else View.GONE
 
             if (isGridMode) {
                 holder.views.layoutIndicator?.let { indicator ->
@@ -510,7 +483,7 @@ FastScrollRecyclerView.SectionedAdapter {
         val layoutIndicator: View?
         val infoContainer: View
         val tvName: android.widget.TextView
-        val vStatusDot: View
+        val liStatusIndicator: LoadingIndicator
         val ivPinIndicator: android.widget.ImageView
         val tvType: com.google.android.material.chip.Chip
         val layoutSubscription: View
@@ -536,7 +509,7 @@ FastScrollRecyclerView.SectionedAdapter {
         override val layoutIndicator get() = b.layoutIndicator
         override val infoContainer get() = b.infoContainer
         override val tvName get() = b.tvName
-        override val vStatusDot get() = b.vStatusDot
+        override val liStatusIndicator get() = b.liStatusIndicator
         override val ivPinIndicator get() = b.ivPinIndicator
         override val tvType get() = b.tvType
         override val layoutSubscription get() = b.layoutSubscription
@@ -562,7 +535,7 @@ FastScrollRecyclerView.SectionedAdapter {
         override val layoutIndicator: View? = null
         override val infoContainer get() = b.infoContainer
         override val tvName get() = b.tvName
-        override val vStatusDot get() = b.vStatusDot
+        override val liStatusIndicator get() = b.liStatusIndicator
         override val ivPinIndicator get() = b.ivPinIndicator
         override val tvType get() = b.tvType
         override val layoutSubscription get() = b.layoutSubscription

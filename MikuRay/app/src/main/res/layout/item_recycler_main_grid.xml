@@ -246,11 +246,13 @@
                         android:visibility="gone" />
                 </LinearLayout>
 
-                <View
-                    android:id="@+id/v_status_dot"
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
+                <com.google.android.material.loadingindicator.LoadingIndicator
+                    android:id="@+id/li_status_indicator"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
                     android:visibility="gone"
+                    app:indicatorColor="?attr/colorPrimary"
+                    app:indicatorSize="16dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
 
