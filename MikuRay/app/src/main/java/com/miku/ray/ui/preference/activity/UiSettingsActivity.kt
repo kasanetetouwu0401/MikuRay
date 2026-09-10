@@ -2,6 +2,8 @@ package com.miku.ray.ui.preference.activity
 
 import com.miku.ray.remixicon.R as RemixR
 import android.app.Activity
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.Manifest
 import android.content.Intent
 import android.content.res.Resources
@@ -11,6 +13,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
 import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
@@ -211,7 +214,7 @@ class UiSettingsActivity : BaseActivity() {
                         SettingsChangeManager.makeSetupGroupTab()
                         SettingsChangeManager.makeRefreshDisplayPrefs()
                         SettingsManager.setNightMode()
-                        restartApplication()
+                        closeAndRelaunchApplication()
                     }
                     is ThemeShareManager.ImportResult.Error -> {
                         toastError(getString(R.string.ui_theme_import_failed, result.message))
@@ -222,15 +225,24 @@ class UiSettingsActivity : BaseActivity() {
         .showBlur()
     }
 
-    private fun restartApplication() {
+    private fun closeAndRelaunchApplication() {
         val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-        if (launchIntent == null) {
-            recreate()
-            return
+        if (launchIntent != null) {
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            val relaunchIntent = PendingIntent.getActivity(
+                this,
+                1001,
+                launchIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            getSystemService(AlarmManager::class.java).set(
+                AlarmManager.ELAPSED_REALTIME,
+                SystemClock.elapsedRealtime() + 300L,
+                relaunchIntent
+            )
         }
-        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        startActivity(launchIntent)
         finishAffinity()
+        android.os.Process.killProcess(android.os.Process.myPid())
     }
 
     class UiSettingsFragment : PreferenceFragmentCompat() {

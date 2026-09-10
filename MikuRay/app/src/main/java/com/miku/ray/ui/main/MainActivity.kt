@@ -156,9 +156,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     }
 
     private val requestVpnPermission = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            startV2Ray()
-        }
+        if (it.resultCode == RESULT_OK) startV2Ray()
     }
 
     private val requestActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -180,6 +178,8 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        pendingConnectionTest = MmkvManager.decodeSettingsBool(AppConfig.PREF_PENDING_CONNECTION_TEST, false)
+        lastTestResultText = MmkvManager.decodeSettingsString(AppConfig.PREF_LAST_TEST_RESULT, "").orEmpty()
         setContentView(binding.root)
         showTestBuildInfoIfNeeded()
 
@@ -870,7 +870,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
                 mainViewModel.testAllRealPing(true)
             }
             R.id.service_restart -> LauncherManager.restartServiceOrStart(this, ::startV2Ray)
-            R.id.activity_restart -> restartApplication()
             R.id.action_scroll_to_selected -> locateSelectedServer()
             R.id.del_all_config -> delAllConfig()
             R.id.del_duplicate_config -> delDuplicateConfig()
@@ -1024,6 +1023,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
         mainViewModel.updateTestResultAction.observe(this) {
             lastTestResultText = it.orEmpty()
+            MmkvManager.encodeSettings(AppConfig.PREF_LAST_TEST_RESULT, lastTestResultText)
             setTestState(it)
         }
 
@@ -1061,6 +1061,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             applyRunningState(isLoading = false, isRunning = isRunning)
             if (isRunning == true && pendingConnectionTest) {
                 pendingConnectionTest = false
+                MmkvManager.encodeSettings(AppConfig.PREF_PENDING_CONNECTION_TEST, false)
                 setTestState(getString(R.string.connection_test_testing))
                 mainViewModel.testCurrentServerRealPing()
             }
@@ -1069,7 +1070,9 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         mainViewModel.serviceRestartAction.observe(this) {
             stopFabTimer()
             pendingConnectionTest = true
+            MmkvManager.encodeSettings(AppConfig.PREF_PENDING_CONNECTION_TEST, true)
             lastTestResultText = ""
+            MmkvManager.encodeSettings(AppConfig.PREF_LAST_TEST_RESULT, "")
             setTestState(getString(R.string.connection_test_testing))
         }
 
@@ -1211,30 +1214,28 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     }
 
     private fun handleFabAction() {
-        mainViewModel.startListenBroadcast()
-        applyRunningState(isLoading = true, isRunning = false)
-
         if (mainViewModel.isRunning.value == true) {
             LauncherManager.stopService(this)
-        } else if (SettingsManager.isVpnMode()) {
-            val intent = VpnService.prepare(this)
-            if (intent == null) {
-                startV2Ray()
-            } else {
-                requestVpnPermission.launch(intent)
-            }
         } else {
-            startV2Ray()
+            requestServiceStart()
         }
+    }
+
+    private fun requestServiceStart() {
+        if (!SettingsManager.isVpnMode()) {
+            startV2Ray()
+            return
+        }
+        val intent = VpnService.prepare(this)
+        if (intent == null) startV2Ray() else requestVpnPermission.launch(intent)
     }
 
     private fun handleLayoutTestClick() {
         if (mainViewModel.isRunning.value == true) {
+            pendingConnectionTest = false
+            MmkvManager.encodeSettings(AppConfig.PREF_PENDING_CONNECTION_TEST, false)
             setTestState(getString(R.string.connection_test_testing))
             mainViewModel.testCurrentServerRealPing()
-        } else {
-            pendingConnectionTest = true
-            mainViewModel.startListenBroadcast()
         }
     }
 
@@ -1254,6 +1255,10 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
     private fun setTestState(content: String?) {
         binding.tvTestState.text = content
+        if (content != getString(R.string.connection_test_testing)) {
+            lastTestResultText = content.orEmpty()
+            MmkvManager.encodeSettings(AppConfig.PREF_LAST_TEST_RESULT, lastTestResultText)
+        }
     }
 
     private fun isFabExtended(): Boolean =
@@ -1696,17 +1701,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
                 }
             }
         }
-    }
-
-    private fun restartApplication() {
-        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-        if (launchIntent == null) {
-            recreate()
-            return
-        }
-        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        startActivity(launchIntent)
-        finishAffinity()
     }
 
     private fun delAllConfig() {
