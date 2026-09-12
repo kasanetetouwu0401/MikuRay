@@ -22,7 +22,7 @@ import java.io.File
 
 internal data class AssetFileMetadata(val length: Long, val lastModified: Long)
 
-internal data class UserAssetUiState(
+data class UserAssetUiState(
     val assets: List<AssetUrlCache> = emptyList(),
     val fileMetadata: Map<String, AssetFileMetadata> = emptyMap()
 )

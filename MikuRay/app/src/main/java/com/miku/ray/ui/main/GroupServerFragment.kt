@@ -1,5 +1,4 @@
 package com.miku.ray.ui.main
-import com.miku.ray.ui.base.BaseFragment
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater

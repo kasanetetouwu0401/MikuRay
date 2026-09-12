@@ -111,6 +111,23 @@ class MmkvPreferenceDataStore(private val triggersServiceRestart: Boolean = true
     }
 
     companion object {
+        /** Theme / font / DPI — require Activity.recreate(). */
+        private val HEAVY_THEME_KEYS = setOf(
+            AppConfig.PREF_APP_THEME,
+            AppConfig.PREF_DYNAMIC_COLOR,
+            AppConfig.PREF_DYNAMIC_COLOR_BANNER,
+            AppConfig.PREF_TRUE_BLACK,
+            AppConfig.PREF_USE_CUSTOM_COLOR,
+            AppConfig.PREF_CUSTOM_COLOR,
+            AppConfig.PREF_BANNER_COLOR,
+            AppConfig.PREF_CUSTOM_DPI,
+            AppConfig.PREF_APP_FONT_SIZE,
+            AppConfig.PREF_APP_FONT,
+            AppConfig.PREF_APP_FONT_USE_CUSTOM,
+            AppConfig.PREF_APP_FONT_CUSTOM_NAME,
+            AppConfig.PREF_UI_MODE_NIGHT,
+        )
+
         /** Keys that only need server-list / chip rebind. */
         private val DISPLAY_REFRESH_KEYS = setOf(
             AppConfig.PREF_TRAFFIC_ENABLED,

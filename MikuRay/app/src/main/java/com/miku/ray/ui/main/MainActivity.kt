@@ -1018,6 +1018,9 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
                                 SettingsChangeManager.consumeLightUiRefresh()
                                 applyLightUiCustomization()
                             }
+                            SettingsChangeManager.Event.HeavyThemeRecreate -> {
+                                // BaseActivity.onResume / applyHeavyThemeIfNeeded handles recreate
+                            }
                         }
                     }
                 }
