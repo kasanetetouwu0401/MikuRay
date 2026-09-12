@@ -15,6 +15,9 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -32,6 +35,7 @@ import com.miku.ray.AngApplication
 import com.miku.ray.R
 import com.miku.ray.AppConfig
 import com.miku.ray.handler.MmkvManager
+import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.helper.CustomDividerItemDecoration
 import com.miku.ray.util.DPIController
 import com.miku.ray.util.FontSizeController
@@ -39,7 +43,6 @@ import com.miku.ray.util.CustomFontManager
 import com.miku.ray.util.GoogleSansFlexManager
 import com.miku.ray.util.WindowBlurUtils
 import com.qmdeve.blurview.widget.BlurView
-import com.miku.ray.util.ThemeStateManager
 import java.lang.ref.WeakReference
 
 abstract class BaseActivity : AppCompatActivity() {
@@ -48,16 +51,10 @@ abstract class BaseActivity : AppCompatActivity() {
         private val activeActivities = mutableListOf<WeakReference<BaseActivity>>()
 
         fun recreateOthersInBackground(except: android.app.Activity? = null) {
-            val iterator = activeActivities.iterator()
-            while (iterator.hasNext()) {
-                val activity = iterator.next().get()
-                if (activity == null) {
-                    iterator.remove()
-                    continue
-                }
-                if (activity === except || activity.isFinishing || activity.isDestroyed) continue
-                activity.refreshIfSettingsChanged()
-            }
+            // Signal via SharedFlow so every active BaseActivity can recreate itself.
+            // Callers that already recreate() themselves should pass themselves as [except]
+            // and still emit; each activity ignores the event if it is finishing.
+            SettingsChangeManager.notifyNeedsRecreate()
         }
     }
 
@@ -66,8 +63,6 @@ abstract class BaseActivity : AppCompatActivity() {
     private var systemLoadingDialog: Dialog? = null
 
     private enum class LoadingBlurMode { BLUR_VIEW, DIM }
-
-    private lateinit var themeStateManager: ThemeStateManager
 
     private var toolbarSubtitle: CharSequence? = null
     private var collapsingToolbarRef: CollapsingToolbarLayout? = null
@@ -80,8 +75,18 @@ abstract class BaseActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        themeStateManager = ThemeStateManager(this)
         activeActivities.add(WeakReference(this))
+
+        lifecycleScope.launch {
+            SettingsChangeManager.needsRecreate.collectLatest {
+                if (!isFinishing && !isDestroyed) recreate()
+            }
+        }
+        lifecycleScope.launch {
+            SettingsChangeManager.uiCustomisation.collectLatest {
+                if (!isFinishing && !isDestroyed) onUiCustomisationChanged()
+            }
+        }
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
@@ -95,10 +100,19 @@ abstract class BaseActivity : AppCompatActivity() {
         )
     }
 
+    /**
+     * Called when UI customisation changed without requiring a full recreate.
+     * Override in subclasses (e.g. MainActivity) to refresh banners, padding, etc.
+     */
+    protected open fun onUiCustomisationChanged() {
+        if (collapsingToolbarRef != null) {
+            applyToolbarStyle()
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         com.miku.ray.handler.SettingsManager.refreshAutoNightModeIfNeeded()
-        themeStateManager.checkThemeChangedAndRecreate()
         if (collapsingToolbarRef != null) {
             applyToolbarStyle()
         }
@@ -211,7 +225,8 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     fun refreshIfSettingsChanged() {
-        themeStateManager.checkThemeChangedAndRecreate()
+        // Prefer flow-driven updates; only recreate when explicitly signalled.
+        recreate()
     }
 
     private fun applyToolbarStyle() {

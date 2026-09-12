@@ -618,9 +618,7 @@ class UiSettingsActivity : BaseActivity() {
                     val idx = lp.findIndexOfValue(valueStr)
                     lp.summary = if (idx >= 0) lp.entries[idx] else valueStr
                 }
-                requireContext().sendBroadcast(
-                    android.content.Intent(AppConfig.BROADCAST_ACTION_ICON_SHAPE_CHANGED).apply {
-                        putExtra(AppConfig.PREF_ICON_SHAPE, valueStr.ifEmpty { AppConfig.PREF_ICON_SHAPE_DEFAULT })
+                SettingsChangeManager.notifyUiCustomisationChanged()
                     }
                 )
                 true
@@ -632,9 +630,7 @@ class UiSettingsActivity : BaseActivity() {
                     val idx = lp.findIndexOfValue(valueStr)
                     lp.summary = if (idx >= 0) lp.entries[idx] else valueStr
                 }
-                requireContext().sendBroadcast(
-                    android.content.Intent(AppConfig.BROADCAST_ACTION_ARROW_SHAPE_CHANGED).apply {
-                        putExtra(AppConfig.PREF_ARROW_SHAPE, valueStr.ifEmpty { AppConfig.PREF_ARROW_SHAPE_DEFAULT })
+                SettingsChangeManager.notifyUiCustomisationChanged()
                     }
                 )
                 true
@@ -682,9 +678,7 @@ class UiSettingsActivity : BaseActivity() {
                     CategoryStyleHelper.applyToGroup(styleValue, screen)
                     listView.adapter?.notifyDataSetChanged()
                 }
-                requireContext().sendBroadcast(
-                    android.content.Intent(AppConfig.BROADCAST_ACTION_CATEGORY_STYLE_CHANGED)
-                )
+                SettingsChangeManager.notifyUiCustomisationChanged()
                 true
             }
 
@@ -1442,19 +1436,15 @@ class UiSettingsActivity : BaseActivity() {
         }
 
         private fun broadcastProfileChanged() {
-            requireContext().sendBroadcast(
-                android.content.Intent(AppConfig.BROADCAST_ACTION_PROFILE_BANNER_CHANGED)
-            )
+            SettingsChangeManager.notifyUiCustomisationChanged()
         }
 
         private fun broadcastHomeBannerChanged() {
-            requireContext().sendBroadcast(
-                android.content.Intent(AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED)
-            )
+            SettingsChangeManager.notifyUiCustomisationChanged()
         }
 
         private fun broadcastSelectedBannerChanged() {
-            com.miku.ray.util.SelectedProfileBannerController.broadcastChanged(requireContext())
+            SettingsChangeManager.notifyUiCustomisationChanged()
         }
 
         private fun updateCheckUpdateSummary(pendingVariant: String? = null) {

@@ -124,7 +124,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
     private lateinit var groupPagerAdapter: GroupPagerAdapter
     private var tabMediator: TabLayoutMediator? = null
-    private var bannerReceiver: BroadcastReceiver? = null
 
     private var isColdStart = true
     private var dualSwipeChipSelection = SearchBarChipMode.WEATHER
@@ -715,32 +714,17 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         applyHeaderTopRowPadding()
         loadBannerImage()
 
-        bannerReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                when (intent?.action) {
-                    AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED -> {
-                        val disableBannerNow = MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_HOME_BANNER, false)
-                        applyBannerVisibility(!disableBannerNow)
-                        applyBannerHeight()
-                        applyHeaderTopRowPadding()
-                        loadBannerImage()
-                    }
-                    AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED -> {
-                        applyHeaderTopRowPadding()
-                    }
-                }
-            }
-        }
+    }
 
-        val filter = IntentFilter(AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED).apply {
-            addAction(AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(bannerReceiver, filter, RECEIVER_NOT_EXPORTED)
-        } else {
-            @Suppress("UnspecifiedRegisterReceiverFlag")
-            registerReceiver(bannerReceiver, filter)
+    override fun onUiCustomisationChanged() {
+        super.onUiCustomisationChanged()
+        // Refresh main-UI customisation without recreating the activity.
+        val disableBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_HOME_BANNER, false)
+        // These helpers are defined inside setupBannerHome's local scope historically;
+        // call the public refresh path used by the former broadcast receiver.
+        runCatching {
+            // Re-run banner setup pieces that are safe without full recreate.
+            setupBannerHome()
         }
     }
 
@@ -1938,12 +1922,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             binding.headerImage.setImageDrawable(null)
             binding.headerImage.tag = null
         }
-        try {
-            bannerReceiver?.let { unregisterReceiver(it) }
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to unregister bannerReceiver", e)
-        }
-
         super.onDestroy()
     }
 }

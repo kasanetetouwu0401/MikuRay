@@ -1,9 +1,6 @@
 package com.miku.ray.util
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -19,6 +16,13 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.miku.ray.AppConfig
+import com.miku.ray.handler.SettingsChangeManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
 
@@ -26,7 +30,8 @@ class SelectedProfileBannerController(context: Context) {
 
     private val context: Context = context.applicationContext
 
-    private var changeReceiver: BroadcastReceiver? = null
+    private var changeJob: Job? = null
+    private val listenerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     fun isEnabled(): Boolean =
     MmkvManager.decodeSettingsBool(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED, false)
@@ -234,27 +239,15 @@ class SelectedProfileBannerController(context: Context) {
     }
 
     fun registerChangeListener(onChanged: () -> Unit) {
-        if (changeReceiver != null) return
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(ctx: Context?, intent: Intent?) {
-                if (intent?.action == AppConfig.BROADCAST_ACTION_SELECTED_BANNER_CHANGED) {
-                    onChanged()
-                }
-            }
+        if (changeJob != null) return
+        changeJob = listenerScope.launch {
+            SettingsChangeManager.uiCustomisation.collectLatest { onChanged() }
         }
-        changeReceiver = receiver
-        ContextCompat.registerReceiver(
-            context, receiver,
-            IntentFilter(AppConfig.BROADCAST_ACTION_SELECTED_BANNER_CHANGED),
-            ContextCompat.RECEIVER_NOT_EXPORTED
-        )
     }
 
     fun unregisterChangeListener() {
-        changeReceiver?.let {
-            try { context.unregisterReceiver(it) } catch (_: Exception) {}
-        }
-        changeReceiver = null
+        changeJob?.cancel()
+        changeJob = null
     }
 
     companion object {
@@ -270,7 +263,7 @@ class SelectedProfileBannerController(context: Context) {
 
         fun broadcastChanged(context: Context) {
             bitmapCache.evictAll()
-            context.sendBroadcast(Intent(AppConfig.BROADCAST_ACTION_SELECTED_BANNER_CHANGED))
+            SettingsChangeManager.notifyUiCustomisationChanged()
         }
     }
 }
