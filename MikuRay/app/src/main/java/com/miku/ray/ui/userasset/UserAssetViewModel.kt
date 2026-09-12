@@ -20,9 +20,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 
-data class AssetFileMetadata(val length: Long, val lastModified: Long)
+internal data class AssetFileMetadata(val length: Long, val lastModified: Long)
 
-data class UserAssetUiState(
+internal data class UserAssetUiState(
     val assets: List<AssetUrlCache> = emptyList(),
     val fileMetadata: Map<String, AssetFileMetadata> = emptyMap()
 )

@@ -14,7 +14,6 @@ import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.ui.preference.BannerSettingsPreference
 import com.miku.ray.util.WindowBlurUtils
 import java.util.Locale
@@ -148,7 +147,6 @@ class BannerCharacterLayoutDialog @JvmOverloads constructor(
                 MmkvManager.encodeSettings(param.prefKey, slider.value)
             }
             refreshBannerPreview()
-            SettingsChangeManager.makeLightUiRefresh()
         }
         .setNeutralButton(R.string.reset, null)
         .setNegativeButton(android.R.string.cancel, null)
@@ -165,7 +163,6 @@ class BannerCharacterLayoutDialog @JvmOverloads constructor(
                 MmkvManager.encodeSettings(param.prefKey, param.default)
             }
             refreshBannerPreview()
-            SettingsChangeManager.makeLightUiRefresh()
 
             dialog.dismiss()
         }

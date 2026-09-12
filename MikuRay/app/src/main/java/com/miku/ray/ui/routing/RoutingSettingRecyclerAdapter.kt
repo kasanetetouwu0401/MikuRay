@@ -28,18 +28,8 @@ ItemTouchHelperAdapter {
     }
 
     fun submitData(newData: List<com.miku.ray.dto.entities.RulesetItem>) {
-        val oldList = data
-        val incoming = newData.toMutableList()
-        val diffResult = androidx.recyclerview.widget.DiffUtil.calculateDiff(object : androidx.recyclerview.widget.DiffUtil.Callback() {
-            override fun getOldListSize(): Int = oldList.size
-            override fun getNewListSize(): Int = incoming.size
-            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                oldList[oldItemPosition].id == incoming[newItemPosition].id
-            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                oldList[oldItemPosition] == incoming[newItemPosition]
-        })
-        data = incoming
-        diffResult.dispatchUpdatesTo(this)
+        data = newData.toMutableList()
+        notifyDataSetChanged()
     }
 
     override fun getItemCount() = data.size

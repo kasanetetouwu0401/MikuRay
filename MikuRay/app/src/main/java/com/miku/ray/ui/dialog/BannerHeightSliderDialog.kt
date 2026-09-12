@@ -13,7 +13,6 @@ import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.util.WindowBlurUtils
 
 class BannerHeightSliderDialog @JvmOverloads constructor(
@@ -57,7 +56,10 @@ class BannerHeightSliderDialog @JvmOverloads constructor(
             summary = context.getString(
                 R.string.pref_home_banner_height_summary_value, newHeight
             )
-            SettingsChangeManager.notifyHomeBannerChanged()
+            val intent = android.content.Intent(
+                AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED
+            )
+            activity.sendBroadcast(intent)
         }
         .setNeutralButton(R.string.reset, null)
         .setNegativeButton(android.R.string.cancel, null)
@@ -72,7 +74,10 @@ class BannerHeightSliderDialog @JvmOverloads constructor(
 
             MmkvManager.encodeSettings(AppConfig.PREF_HOME_BANNER_HEIGHT, default)
             summary = context.getString(R.string.pref_home_banner_height_summary_value, default)
-            SettingsChangeManager.notifyHomeBannerChanged()
+            val intent = android.content.Intent(
+                AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED
+            )
+            activity.sendBroadcast(intent)
 
             dialog.dismiss()
         }

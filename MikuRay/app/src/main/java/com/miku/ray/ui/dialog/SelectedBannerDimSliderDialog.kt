@@ -13,7 +13,6 @@ import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.util.SelectedProfileBannerController
 import com.miku.ray.util.WindowBlurUtils
 
@@ -57,7 +56,6 @@ class SelectedBannerDimSliderDialog @JvmOverloads constructor(
             MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_DIM, newDim)
             summary = context.getString(R.string.selected_banner_dim_summary_value, newDim)
             SelectedProfileBannerController.broadcastChanged(activity)
-            SettingsChangeManager.makeLightUiRefresh()
         }
         .setNeutralButton(R.string.reset, null)
         .setNegativeButton(android.R.string.cancel, null)
@@ -73,7 +71,6 @@ class SelectedBannerDimSliderDialog @JvmOverloads constructor(
             MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_DIM, default)
             summary = context.getString(R.string.selected_banner_dim_summary_value, default)
             SelectedProfileBannerController.broadcastChanged(activity)
-            SettingsChangeManager.makeLightUiRefresh()
 
             dialog.dismiss()
         }

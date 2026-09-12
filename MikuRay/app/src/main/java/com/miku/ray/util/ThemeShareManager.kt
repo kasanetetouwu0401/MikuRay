@@ -435,6 +435,9 @@ object ThemeShareManager {
             LauncherAliasSwitcher.currentIconVariant(),
             LauncherAliasSwitcher.currentNameVariant()
         )
-        SelectedProfileBannerController.broadcastChanged(context) // clears banner cache + SettingsChangeManager.makeLightUiRefresh()
+        context.sendBroadcast(android.content.Intent(AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED))
+        context.sendBroadcast(android.content.Intent(AppConfig.BROADCAST_ACTION_PROFILE_BANNER_CHANGED))
+        SelectedProfileBannerController.broadcastChanged(context)
+        context.sendBroadcast(android.content.Intent(AppConfig.BROADCAST_ACTION_PARTICLES_CHANGED))
     }
 }

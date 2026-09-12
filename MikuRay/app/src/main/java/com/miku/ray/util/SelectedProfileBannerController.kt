@@ -21,7 +21,6 @@ import com.bumptech.glide.request.transition.Transition
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.handler.SettingsChangeManager
 
 class SelectedProfileBannerController(context: Context) {
 
@@ -234,23 +233,24 @@ class SelectedProfileBannerController(context: Context) {
         override fun getIntrinsicHeight(): Int = -1
     }
 
-    private var lightUiListener: SettingsChangeManager.LightUiListener? = null
-
-    /**
-     * Lifecycle-friendly: listens to [SettingsChangeManager] SharedFlow callbacks
-     * via weak registry — no BroadcastReceiver.
-     */
     fun registerChangeListener(onChanged: () -> Unit) {
-        if (lightUiListener != null) return
-        val listener = SettingsChangeManager.LightUiListener { onChanged() }
-        lightUiListener = listener
-        SettingsChangeManager.registerLightUiListener(listener)
+        if (changeReceiver != null) return
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context?, intent: Intent?) {
+                if (intent?.action == AppConfig.BROADCAST_ACTION_SELECTED_BANNER_CHANGED) {
+                    onChanged()
+                }
+            }
+        }
+        changeReceiver = receiver
+        ContextCompat.registerReceiver(
+            context, receiver,
+            IntentFilter(AppConfig.BROADCAST_ACTION_SELECTED_BANNER_CHANGED),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
     }
 
     fun unregisterChangeListener() {
-        lightUiListener?.let { SettingsChangeManager.unregisterLightUiListener(it) }
-        lightUiListener = null
-        // Legacy cleanup if any old receiver still held
         changeReceiver?.let {
             try { context.unregisterReceiver(it) } catch (_: Exception) {}
         }
@@ -270,8 +270,7 @@ class SelectedProfileBannerController(context: Context) {
 
         fun broadcastChanged(context: Context) {
             bitmapCache.evictAll()
-            // Single path: SettingsChangeManager only (no duplicate broadcast)
-            SettingsChangeManager.notifySelectedBannerChanged()
+            context.sendBroadcast(Intent(AppConfig.BROADCAST_ACTION_SELECTED_BANNER_CHANGED))
         }
     }
 }

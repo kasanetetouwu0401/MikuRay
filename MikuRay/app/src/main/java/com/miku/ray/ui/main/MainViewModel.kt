@@ -86,9 +86,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _countryCodeProgress = MutableStateFlow<TestProgressInfo?>(null)
     val countryCodeProgress: StateFlow<TestProgressInfo?> = _countryCodeProgress.asStateFlow()
-
-    // Kept as LiveData for reliable drag-and-drop (ItemTouchHelper) list updates.
-    // SharedFlow is also emitted so other collectors remain modern/coroutine-based.
+    
     val updateListAction by lazy { MutableLiveData<Int>() }
 
     private val _updateListItemEvent = MutableSharedFlow<Int>(extraBufferCapacity = 64)
@@ -130,10 +128,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun notifyListChanged(index: Int = -1, refreshBadge: Boolean = true) {
-        // LiveData for drag-handle / ItemTouchHelper reliability
         updateListAction.postValue(index)
-        // SharedFlow for modern coroutine collectors
-        _updateListItemEvent.tryEmit(index)
         if (refreshBadge) {
             _updateGroupBadgeEvent.tryEmit(Unit)
         }

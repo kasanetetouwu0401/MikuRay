@@ -8,14 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
 import kotlinx.coroutines.launch
 import com.miku.ray.R
-import com.miku.ray.AppConfig
 import com.miku.ray.contracts.MainAdapterListener
 import com.miku.ray.databinding.ItemRecyclerFooterBinding
 import com.miku.ray.databinding.ItemRecyclerMainBinding
@@ -27,31 +26,23 @@ import com.miku.ray.extension.isComplexType
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.helper.ItemTouchHelperAdapter
 import com.miku.ray.helper.ItemTouchHelperViewHolder
+import java.util.Collections
 import com.miku.ray.util.IndicatorStyle
 import com.miku.ray.util.SelectedProfileBannerController
 import com.miku.ray.util.SensorTextController
-import com.miku.ray.util.Utils
 import com.miku.ray.util.getColorAttr
-import java.util.Collections
+import com.miku.ray.util.Utils
+import com.miku.ray.AppConfig
 
 class MainRecyclerAdapter(
     private val mainViewModel: MainViewModel,
     private val adapterListener: MainAdapterListener?
 ) : RecyclerView.Adapter<MainRecyclerAdapter.BaseViewHolder>(), ItemTouchHelperAdapter,
-    FastScrollRecyclerView.SectionedAdapter {
-
+FastScrollRecyclerView.SectionedAdapter {
     companion object {
         private const val VIEW_TYPE_ITEM_LIST = 1
         private const val VIEW_TYPE_FOOTER = 2
         private const val VIEW_TYPE_ITEM_GRID = 3
-    }
-
-    private val diffCallback = object : DiffUtil.ItemCallback<ServersCache>() {
-        override fun areItemsTheSame(oldItem: ServersCache, newItem: ServersCache): Boolean =
-            oldItem.guid == newItem.guid
-
-        override fun areContentsTheSame(oldItem: ServersCache, newItem: ServersCache): Boolean =
-            oldItem == newItem
     }
 
     override fun getSectionName(position: Int): String {
@@ -63,7 +54,7 @@ class MainRecyclerAdapter(
     private var isGridMode: Boolean = false
 
     val isServerListEmpty: Boolean
-        get() = data.isEmpty()
+    get() = data.isEmpty()
 
     @SuppressLint("NotifyDataSetChanged")
     fun setGridMode(gridMode: Boolean) {
@@ -81,53 +72,21 @@ class MainRecyclerAdapter(
     private var isRunningCollectJob: kotlinx.coroutines.Job? = null
     private var selectedBannerController: SelectedProfileBannerController? = null
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setData(newData: MutableList<ServersCache>?, position: Int = -1) {
-        val incoming = newData?.toMutableList() ?: mutableListOf()
+        data = newData?.toMutableList() ?: mutableListOf()
 
-        if (position >= 0 && position in incoming.indices && data.size == incoming.size) {
-            // Fast path for single-item updates (test result, running state, etc.)
-            data = incoming
+        if (position >= 0 && position in data.indices) {
             notifyServerItemChanged(position)
-            return
+        } else {
+            notifyDataSetChanged()
         }
-
-        val oldList = data
-        val diffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-            override fun getOldListSize(): Int = oldList.size
-            override fun getNewListSize(): Int = incoming.size
-
-            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                oldList[oldItemPosition].guid == incoming[newItemPosition].guid
-
-            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                oldList[oldItemPosition] == incoming[newItemPosition]
-        })
-
-        data = incoming
-        // +1 because of the footer view
-        diffResult.dispatchUpdatesTo(object : androidx.recyclerview.widget.ListUpdateCallback {
-            override fun onInserted(position: Int, count: Int) {
-                notifyItemRangeInserted(position, count)
-            }
-
-            override fun onRemoved(position: Int, count: Int) {
-                notifyItemRangeRemoved(position, count)
-            }
-
-            override fun onMoved(fromPosition: Int, toPosition: Int) {
-                notifyItemMoved(fromPosition, toPosition)
-            }
-
-            override fun onChanged(position: Int, count: Int, payload: Any?) {
-                notifyItemRangeChanged(position, count, payload)
-            }
-        })
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun notifyServerItemChanged(position: Int) {
-        if (position !in data.indices) return
-        if (isGridMode) {
-            notifyItemChanged(position)
+        if (isGridMode || position !in data.indices) {
+            notifyDataSetChanged()
         } else {
             notifyItemChanged(position)
         }
@@ -145,6 +104,8 @@ class MainRecyclerAdapter(
                         val position = data.indexOfFirst { it.guid == selectedGuid }
                         if (position >= 0) {
                             notifyServerItemChanged(position)
+                        } else if (data.isNotEmpty()) {
+                            notifyDataSetChanged()
                         }
                     }
                 }
@@ -541,21 +502,28 @@ class MainRecyclerAdapter(
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun removeServerSub(guid: String, position: Int) {
         val idx = data.indexOfFirst { it.guid == guid }
         if (idx >= 0) {
             data.removeAt(idx)
-            notifyItemRemoved(idx)
-            // Rebind remaining items so positions/footer stay correct
-            if (idx < data.size) {
+            if (isGridMode) {
+                notifyDataSetChanged()
+            } else {
+                notifyItemRemoved(idx)
                 notifyItemRangeChanged(idx, data.size - idx)
             }
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setSelectServer(fromPosition: Int, toPosition: Int) {
-        if (fromPosition in data.indices) notifyItemChanged(fromPosition)
-        if (toPosition in data.indices) notifyItemChanged(toPosition)
+        if (isGridMode) {
+            notifyDataSetChanged()
+        } else {
+            if (fromPosition in data.indices) notifyItemChanged(fromPosition)
+            if (toPosition in data.indices) notifyItemChanged(toPosition)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
@@ -684,8 +652,11 @@ class MainRecyclerAdapter(
         if (fromPosition < data.size && toPosition < data.size) {
             Collections.swap(data, fromPosition, toPosition)
         }
-        // notifyItemMoved works for both list and grid modes
-        notifyItemMoved(fromPosition, toPosition)
+        if (isGridMode) {
+            notifyDataSetChanged()
+        } else {
+            notifyItemMoved(fromPosition, toPosition)
+        }
         return true
     }
 

@@ -2,64 +2,13 @@ package com.miku.ray.util
 
 import android.content.Context
 import android.content.Intent
+import com.miku.ray.particlesdrawable.ParticlesView
 import com.miku.ray.AppConfig
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.handler.SettingsChangeManager
-import com.miku.ray.particlesdrawable.ParticlesView
-import java.lang.ref.WeakReference
-import java.util.concurrent.CopyOnWriteArrayList
 
-/**
- * Applies particle prefs to [ParticlesView] instances.
- * Views are tracked weakly and re-applied on [SettingsChangeManager] light UI events
- * (lifecycle-friendly, no BroadcastReceiver required for in-app sheets).
- */
 object ParticlesController {
 
-    private val attachedViews = CopyOnWriteArrayList<WeakReference<ParticlesView>>()
-    private var lightListenerRegistered = false
-
-    private val lightListener = SettingsChangeManager.LightUiListener {
-        reapplyAll()
-    }
-
-    private fun ensureLightListener() {
-        if (!lightListenerRegistered) {
-            SettingsChangeManager.registerLightUiListener(lightListener)
-            lightListenerRegistered = true
-        }
-    }
-
-    /** Attach + apply. Safe to call multiple times for the same view. */
     fun applyTo(view: ParticlesView) {
-        ensureLightListener()
-        if (attachedViews.none { it.get() === view }) {
-            attachedViews.add(WeakReference(view))
-        }
-        applyPrefsTo(view)
-    }
-
-    fun detach(view: ParticlesView) {
-        attachedViews.removeAll { ref ->
-            val v = ref.get()
-            v == null || v === view
-        }
-    }
-
-    private fun reapplyAll() {
-        val dead = mutableListOf<WeakReference<ParticlesView>>()
-        for (ref in attachedViews) {
-            val view = ref.get()
-            if (view == null) {
-                dead.add(ref)
-            } else {
-                runCatching { applyPrefsTo(view) }
-            }
-        }
-        if (dead.isNotEmpty()) attachedViews.removeAll(dead.toSet())
-    }
-
-    private fun applyPrefsTo(view: ParticlesView) {
         val density = view.resources.displayMetrics.density
 
         val frameDelay = MmkvManager.decodeSettingsFloat(
@@ -110,6 +59,6 @@ object ParticlesController {
     }
 
     fun broadcastChanged(context: Context) {
-        SettingsChangeManager.notifyParticlesChanged()
+        context.sendBroadcast(Intent(AppConfig.BROADCAST_ACTION_PARTICLES_CHANGED))
     }
 }
