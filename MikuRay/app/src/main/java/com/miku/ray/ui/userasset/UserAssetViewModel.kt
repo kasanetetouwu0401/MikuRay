@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 
-internal data class AssetFileMetadata(val length: Long, val lastModified: Long)
+data class AssetFileMetadata(val length: Long, val lastModified: Long)
 
 data class UserAssetUiState(
     val assets: List<AssetUrlCache> = emptyList(),
