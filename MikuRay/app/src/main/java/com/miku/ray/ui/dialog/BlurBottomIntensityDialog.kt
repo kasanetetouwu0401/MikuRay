@@ -11,6 +11,7 @@ import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
+import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.util.BlurBottomStatusController
 import com.miku.ray.util.WindowBlurUtils
 
@@ -61,6 +62,7 @@ class BlurBottomIntensityDialog @JvmOverloads constructor(
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_RADIUS, radius)
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_ALPHA, alpha)
             updateSummary(radius, alpha)
+            SettingsChangeManager.makeLightUiRefresh()
             dialog.dismiss()
         }
 
@@ -85,6 +87,7 @@ class BlurBottomIntensityDialog @JvmOverloads constructor(
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_RADIUS, defaultRadius)
             MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_ALPHA, defaultAlpha)
             updateSummary(defaultRadius, defaultAlpha)
+            SettingsChangeManager.makeLightUiRefresh()
 
             dialog.dismiss()
         }

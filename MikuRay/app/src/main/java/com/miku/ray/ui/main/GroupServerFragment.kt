@@ -2,23 +2,20 @@ package com.miku.ray.ui.main
 import com.miku.ray.ui.base.BaseFragment
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
-import kotlinx.coroutines.launch
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.core.view.isVisible
-import com.miku.ray.util.showDeleteConfirmDialog
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.contracts.MainAdapterListener
@@ -26,6 +23,12 @@ import com.miku.ray.core.LauncherManager
 import com.miku.ray.databinding.FragmentGroupServerBinding
 import com.miku.ray.dto.entities.ProfileItem
 import com.miku.ray.enums.EConfigType
+import com.miku.ray.extension.snackbarDefault
+import com.miku.ray.extension.snackbarSuccess
+import com.miku.ray.handler.MmkvManager
+import com.miku.ray.helper.SimpleItemTouchHelperCallback
+import com.miku.ray.remixicon.R as RemixR
+import com.miku.ray.ui.base.BaseFragment
 import com.miku.ray.ui.server.ServerCustomConfigActivity
 import com.miku.ray.ui.server.ServerGroupActivity
 import com.miku.ray.ui.server.ServerHysteria2Activity
@@ -36,27 +39,24 @@ import com.miku.ray.ui.server.ServerTrojanActivity
 import com.miku.ray.ui.server.ServerVlessActivity
 import com.miku.ray.ui.server.ServerVmessActivity
 import com.miku.ray.ui.server.ServerWireguardActivity
-import com.miku.ray.extension.snackbarDefault
-import com.miku.ray.extension.snackbarSuccess
-import com.miku.ray.handler.MmkvManager
-import com.miku.ray.helper.SimpleItemTouchHelperCallback
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.miku.ray.util.showBlur
-import com.miku.ray.remixicon.R as RemixR
+import com.miku.ray.util.showDeleteConfirmDialog
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
     private val ownerActivity: MainActivity
-    get() = requireActivity() as MainActivity
+        get() = requireActivity() as MainActivity
     private val mainViewModel: MainViewModel by activityViewModels()
     private lateinit var adapter: MainRecyclerAdapter
     private var itemTouchHelper: ItemTouchHelper? = null
     private val subId: String by lazy { arguments?.getString(ARG_SUB_ID).orEmpty() }
-    private val scrollButtonHideHandler = Handler(Looper.getMainLooper())
     private var scrollButtonVisible = false
-    private val hideScrollButtonRunnable = Runnable { setScrollButtonsVisible(false) }
+    private var hideScrollButtonsJob: Job? = null
     private var bottomStatusCard: View? = null
     private val bottomStatusLayoutListener =
-    View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> syncButtonMarginWithBottomStatus() }
+        View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> syncButtonMarginWithBottomStatus() }
     private var hasLoadedData = false
 
     companion object {
@@ -103,15 +103,15 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
         itemTouchHelper = ItemTouchHelper(SimpleItemTouchHelperCallback(adapter, allowSwipe = false))
         itemTouchHelper?.attachToRecyclerView(binding.recyclerView)
 
+        // LiveData kept for reliable drag-and-drop (ItemTouchHelper) list updates.
         mainViewModel.updateListAction.observe(viewLifecycleOwner) { index ->
-            if (mainViewModel.subscriptionId != subId) {
-                return@observe
-            }
+            if (mainViewModel.subscriptionId != subId) return@observe
             adapter.setData(mainViewModel.serversCache, index)
             hasLoadedData = true
             updateEmptyState()
         }
 
+        // SharedFlow still collected for other modern coroutine-driven updates.
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mainViewModel.updateListItemEvent.collect { index ->
@@ -125,13 +125,13 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
 
         binding.btnScrollToSelected.setOnClickListener {
             ownerActivity.locateSelectedServer()
-            scrollButtonHideHandler.removeCallbacks(hideScrollButtonRunnable)
+            cancelHideScrollButtons()
             setScrollButtonsVisible(false)
         }
 
         binding.btnScrollToTop.setOnClickListener {
             binding.recyclerView.smoothScrollToPosition(0)
-            scrollButtonHideHandler.removeCallbacks(hideScrollButtonRunnable)
+            cancelHideScrollButtons()
             setScrollButtonsVisible(false)
         }
 
@@ -140,7 +140,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
             if (lastPosition >= 0) {
                 binding.recyclerView.smoothScrollToPosition(lastPosition)
             }
-            scrollButtonHideHandler.removeCallbacks(hideScrollButtonRunnable)
+            cancelHideScrollButtons()
             setScrollButtonsVisible(false)
         }
 
@@ -150,8 +150,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
                     if (isHideScrollButtonsEnabled()) return
                     binding.btnScrollToSelected.isVisible = !MmkvManager.getSelectServer().isNullOrEmpty()
                     setScrollButtonsVisible(true)
-                    scrollButtonHideHandler.removeCallbacks(hideScrollButtonRunnable)
-                    scrollButtonHideHandler.postDelayed(hideScrollButtonRunnable, SCROLL_BUTTON_AUTO_HIDE_DELAY_MS)
+                    scheduleHideScrollButtons()
                 }
         })
 
@@ -210,7 +209,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
     }
 
     override fun onDestroyView() {
-        scrollButtonHideHandler.removeCallbacks(hideScrollButtonRunnable)
+        cancelHideScrollButtons()
         scrollButtonVisible = false
         bottomStatusCard?.removeOnLayoutChangeListener(bottomStatusLayoutListener)
         bottomStatusCard = null
@@ -224,9 +223,22 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
         applyGridModeState()
 
         if (isHideScrollButtonsEnabled()) {
-            scrollButtonHideHandler.removeCallbacks(hideScrollButtonRunnable)
+            cancelHideScrollButtons()
             setScrollButtonsVisible(false)
         }
+    }
+
+    private fun scheduleHideScrollButtons() {
+        cancelHideScrollButtons()
+        hideScrollButtonsJob = viewLifecycleOwner.lifecycleScope.launch {
+            delay(SCROLL_BUTTON_AUTO_HIDE_DELAY_MS)
+            setScrollButtonsVisible(false)
+        }
+    }
+
+    private fun cancelHideScrollButtons() {
+        hideScrollButtonsJob?.cancel()
+        hideScrollButtonsJob = null
     }
 
     private fun applyGridModeState() {

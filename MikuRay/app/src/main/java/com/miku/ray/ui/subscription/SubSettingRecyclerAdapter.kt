@@ -34,8 +34,18 @@ class SubSettingRecyclerAdapter(
     }
 
     fun submitData(newData: List<SubscriptionCache>) {
-        data = newData.toMutableList()
-        notifyDataSetChanged()
+        val oldList = data
+        val incoming = newData.toMutableList()
+        val diffResult = androidx.recyclerview.widget.DiffUtil.calculateDiff(object : androidx.recyclerview.widget.DiffUtil.Callback() {
+            override fun getOldListSize(): Int = oldList.size
+            override fun getNewListSize(): Int = incoming.size
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
+                oldList[oldItemPosition].guid == incoming[newItemPosition].guid
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
+                oldList[oldItemPosition] == incoming[newItemPosition]
+        })
+        data = incoming
+        diffResult.dispatchUpdatesTo(this)
     }
 
     override fun getItemCount() = data.size

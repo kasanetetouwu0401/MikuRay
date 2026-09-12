@@ -86,6 +86,9 @@ abstract class BaseBottomSheetFragment : BottomSheetDialogFragment() {
     }
 
     override fun onDestroyView() {
+        view?.findViewById<ParticlesView>(R.id.ParticlesView)?.let { particlesView ->
+            ParticlesController.detach(particlesView)
+        }
         view?.findViewById<ImageView>(R.id.img_banner_sheet)?.let { bannerImageView ->
             val context = bannerImageView.context.applicationContext
             Glide.with(context).clear(bannerImageView)

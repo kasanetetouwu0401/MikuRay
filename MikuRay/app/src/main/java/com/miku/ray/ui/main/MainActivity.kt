@@ -124,7 +124,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
     private lateinit var groupPagerAdapter: GroupPagerAdapter
     private var tabMediator: TabLayoutMediator? = null
-    private var bannerReceiver: BroadcastReceiver? = null
 
     private var isColdStart = true
     private var dualSwipeChipSelection = SearchBarChipMode.WEATHER
@@ -273,10 +272,13 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         updateSnowflakesVisibility()
         updateQuickActionsVisibility()
 
+        // Fallback if events were emitted while collector was stopped
         if (SettingsChangeManager.consumeRefreshDisplayPrefs()) {
             refreshAllGroupListDisplays()
         }
-
+        if (SettingsChangeManager.consumeLightUiRefresh()) {
+            applyLightUiCustomization()
+        }
         if (SettingsChangeManager.consumeSetupGroupTab()) {
             refreshGroupTabTitles()
         }
@@ -615,133 +617,117 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         }
     }
 
-    private fun setupBannerHome() {
+
+    /** Apply all light UI customisation in one place (SharedFlow-driven). */
+    private fun applyLightUiCustomization() {
+        if (isDestroyed || isFinishing) return
+        refreshAllGroupListDisplays()
+        refreshHomeBannerUi()
+        BlurBottomStatusController.applyState(this, binding) { mainViewModel.onLayoutTestClicked() }
+        updateQuickActionsVisibility()
+        updateSnowflakesVisibility()
+        refreshSearchBarChip()
+        // FAB extended / shrink state
+        val fabExtended = MmkvManager.decodeSettingsBool(AppConfig.PREF_FAB_EXTENDED, false)
+        if (fabExtended) binding.fab.extend() else binding.fab.shrink()
+    }
+
+    private fun refreshHomeBannerUi() {
+        if (isDestroyed || isFinishing) return
+        val disableBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_HOME_BANNER, false)
+        applyHomeBannerVisibility(!disableBanner)
+        applyHomeBannerHeight()
+        applyHeaderTopRowPadding()
+        loadHomeBannerImage()
+    }
+
+    private fun applyHomeBannerHeight() {
         val bannerHome = binding.bannerHome
         val headerImage = binding.headerImage
+        val heightDp = MmkvManager.decodeSettingsInt(
+            AppConfig.PREF_HOME_BANNER_HEIGHT,
+            AppConfig.HOME_BANNER_HEIGHT_DEFAULT
+        )
+        val heightPx = (heightDp * resources.displayMetrics.density).toInt()
+        val lp = bannerHome.layoutParams
+        lp.height = heightPx
+        bannerHome.layoutParams = lp
+        headerImage.scaleType = ImageView.ScaleType.CENTER_CROP
+    }
+
+    private fun applyHomeBannerVisibility(show: Boolean) {
+        val bannerHome = binding.bannerHome
         val headerTopRow = binding.headerTopRow
-
-        headerImage.setLayerType(View.LAYER_TYPE_NONE, null)
-
         val paddingTopWithBanner = (16 * resources.displayMetrics.density).toInt()
         val paddingTopNoBanner = 0
+        bannerHome.visibility = if (show) View.VISIBLE else View.GONE
+        val topPad = if (show) paddingTopWithBanner else paddingTopNoBanner
+        headerTopRow.setPadding(
+            headerTopRow.paddingLeft,
+            topPad,
+            headerTopRow.paddingRight,
+            headerTopRow.paddingBottom
+        )
+    }
 
-        fun applyBannerHeight() {
-            val heightDp = MmkvManager.decodeSettingsInt(
-                AppConfig.PREF_HOME_BANNER_HEIGHT,
-                AppConfig.HOME_BANNER_HEIGHT_DEFAULT
+    private fun applyHeaderTopRowPadding() {
+        val headerTopRow = binding.headerTopRow
+        val disableBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_HOME_BANNER, false)
+        val paddingDp = if (!disableBanner) {
+            MmkvManager.decodeSettingsInt(
+                AppConfig.PREF_HEADER_TOP_ROW_PADDING,
+                AppConfig.HEADER_TOP_ROW_PADDING_DEFAULT
             )
-            val heightPx = (heightDp * resources.displayMetrics.density).toInt()
+        } else 0
+        val paddingPx = (paddingDp * resources.displayMetrics.density).toInt()
+        headerTopRow.setPadding(
+            headerTopRow.paddingLeft,
+            paddingPx,
+            headerTopRow.paddingRight,
+            headerTopRow.paddingBottom
+        )
+    }
 
-            val lp = bannerHome.layoutParams
-            lp.height = heightPx
-            bannerHome.layoutParams = lp
-            headerImage.scaleType = ImageView.ScaleType.CENTER_CROP
+    private fun loadHomeBannerImage() {
+        if (isDestroyed || isFinishing) return
+        val headerImage = binding.headerImage
+        val disableBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_HOME_BANNER, false)
+        if (disableBanner) {
+            Glide.with(headerImage).clear(headerImage)
+            headerImage.setImageDrawable(null)
+            headerImage.tag = TAG_HOME_BANNER_HIDDEN
+            return
         }
-
-        fun applyBannerVisibility(show: Boolean) {
-            bannerHome.visibility = if (show) View.VISIBLE else View.GONE
-            val topPad = if (show) paddingTopWithBanner else paddingTopNoBanner
-
-            headerTopRow.setPadding(
-                headerTopRow.paddingLeft,
-                topPad,
-                headerTopRow.paddingRight,
-                headerTopRow.paddingBottom
-            )
-        }
-
-        fun applyHeaderTopRowPadding() {
-            val disableBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_HOME_BANNER, false)
-            val paddingDp = if (!disableBanner) {
-                MmkvManager.decodeSettingsInt(
-                    AppConfig.PREF_HEADER_TOP_ROW_PADDING,
-                    AppConfig.HEADER_TOP_ROW_PADDING_DEFAULT
-                )
-            } else 0
-
-            val paddingPx = (paddingDp * resources.displayMetrics.density).toInt()
-
-            headerTopRow.setPadding(
-                headerTopRow.paddingLeft,
-                paddingPx,
-                headerTopRow.paddingRight,
-                headerTopRow.paddingBottom
-            )
-        }
-
-        fun loadBannerImage() {
-            if (isDestroyed || isFinishing) return
-
-            val disableBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_HOME_BANNER, false)
-            if (disableBanner) {
-                Glide.with(headerImage).clear(headerImage)
-                headerImage.setImageDrawable(null)
-                headerImage.tag = TAG_HOME_BANNER_HIDDEN
-                return
-            }
-
-            val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_HOME_BANNER_URI)
-            val targetTag = if (uriString.isNullOrBlank()) TAG_HOME_BANNER_DEFAULT else uriString
-
-            if (headerImage.tag == targetTag) return
-
-            if (!uriString.isNullOrBlank()) {
-                val isGif = uriString.lowercase().endsWith(".gif")
-                if (isGif) {
-                    Glide.with(this@MainActivity)
+        val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_HOME_BANNER_URI)
+        val targetTag = if (uriString.isNullOrBlank()) TAG_HOME_BANNER_DEFAULT else uriString
+        if (headerImage.tag == targetTag) return
+        if (!uriString.isNullOrBlank()) {
+            val isGif = uriString.lowercase().endsWith(".gif")
+            if (isGif) {
+                Glide.with(this@MainActivity)
                     .asGif()
                     .load(Uri.parse(uriString))
                     .diskCacheStrategy(DiskCacheStrategy.DATA)
                     .error(R.drawable.uwu_banner_home)
                     .into(headerImage)
-                } else {
-                    Glide.with(this@MainActivity)
+            } else {
+                Glide.with(this@MainActivity)
                     .load(Uri.parse(uriString))
                     .diskCacheStrategy(DiskCacheStrategy.DATA)
                     .error(R.drawable.uwu_banner_home)
                     .into(headerImage)
-                }
-            } else {
-                Glide.with(this@MainActivity).clear(headerImage)
-                headerImage.setImageResource(R.drawable.uwu_banner_home)
             }
-
-            headerImage.tag = targetTag
-        }
-
-        val disableBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_HOME_BANNER, false)
-        applyBannerVisibility(!disableBanner)
-        applyBannerHeight()
-        applyHeaderTopRowPadding()
-        loadBannerImage()
-
-        bannerReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                when (intent?.action) {
-                    AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED -> {
-                        val disableBannerNow = MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_HOME_BANNER, false)
-                        applyBannerVisibility(!disableBannerNow)
-                        applyBannerHeight()
-                        applyHeaderTopRowPadding()
-                        loadBannerImage()
-                    }
-                    AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED -> {
-                        applyHeaderTopRowPadding()
-                    }
-                }
-            }
-        }
-
-        val filter = IntentFilter(AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED).apply {
-            addAction(AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(bannerReceiver, filter, RECEIVER_NOT_EXPORTED)
         } else {
-            @Suppress("UnspecifiedRegisterReceiverFlag")
-            registerReceiver(bannerReceiver, filter)
+            Glide.with(this@MainActivity).clear(headerImage)
+            headerImage.setImageResource(R.drawable.uwu_banner_home)
         }
+        headerImage.tag = targetTag
+    }
+
+    private fun setupBannerHome() {
+        binding.headerImage.setLayerType(View.LAYER_TYPE_NONE, null)
+        // Updates only via SettingsChangeManager.events (LightUiRefresh)
+        refreshHomeBannerUi()
     }
 
     private fun setupViewPager() {
@@ -1010,6 +996,32 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Instant reaction to UI customisation / settings events (SharedFlow).
+                // Avoids waiting for onResume consume* — faster, less heavy.
+                launch {
+                    SettingsChangeManager.events.collect { event ->
+                        when (event) {
+                            SettingsChangeManager.Event.RestartService -> {
+                                SettingsChangeManager.consumeRestartService()
+                                LauncherManager.restartService(this@MainActivity)
+                            }
+                            SettingsChangeManager.Event.SetupGroupTab -> {
+                                SettingsChangeManager.consumeSetupGroupTab()
+                                setupGroupTab()
+                                refreshGroupTabTitles()
+                            }
+                            SettingsChangeManager.Event.RefreshDisplayPrefs -> {
+                                SettingsChangeManager.consumeRefreshDisplayPrefs()
+                                refreshAllGroupListDisplays()
+                            }
+                            SettingsChangeManager.Event.LightUiRefresh -> {
+                                SettingsChangeManager.consumeLightUiRefresh()
+                                applyLightUiCustomization()
+                            }
+                        }
+                    }
+                }
+
                 launch {
                     mainViewModel.updateGroupBadgeEvent.collect { refreshTabBadges() }
                 }
@@ -1938,12 +1950,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             binding.headerImage.setImageDrawable(null)
             binding.headerImage.tag = null
         }
-        try {
-            bannerReceiver?.let { unregisterReceiver(it) }
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to unregister bannerReceiver", e)
-        }
-
         super.onDestroy()
     }
 }

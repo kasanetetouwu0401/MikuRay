@@ -13,6 +13,7 @@ import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
+import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.util.WindowBlurUtils
 
 class HeaderTopRowPaddingDialog @JvmOverloads constructor(
@@ -56,10 +57,7 @@ class HeaderTopRowPaddingDialog @JvmOverloads constructor(
             summary = context.getString(
                 R.string.pref_header_top_row_padding_summary_value, newPadding
             )
-            val intent = android.content.Intent(
-                AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED
-            )
-            activity.sendBroadcast(intent)
+            SettingsChangeManager.notifyHeaderPaddingChanged()
         }
         .setNeutralButton(R.string.reset, null)
         .setNegativeButton(android.R.string.cancel, null)
@@ -74,10 +72,7 @@ class HeaderTopRowPaddingDialog @JvmOverloads constructor(
 
             MmkvManager.encodeSettings(AppConfig.PREF_HEADER_TOP_ROW_PADDING, default)
             summary = context.getString(R.string.pref_header_top_row_padding_summary_value, default)
-            val intent = android.content.Intent(
-                AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED
-            )
-            activity.sendBroadcast(intent)
+            SettingsChangeManager.notifyHeaderPaddingChanged()
 
             dialog.dismiss()
         }

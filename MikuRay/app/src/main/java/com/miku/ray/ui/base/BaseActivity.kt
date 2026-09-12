@@ -39,7 +39,7 @@ import com.miku.ray.util.CustomFontManager
 import com.miku.ray.util.GoogleSansFlexManager
 import com.miku.ray.util.WindowBlurUtils
 import com.qmdeve.blurview.widget.BlurView
-import com.miku.ray.util.ThemeStateManager
+import com.miku.ray.handler.SettingsChangeManager
 import java.lang.ref.WeakReference
 
 abstract class BaseActivity : AppCompatActivity() {
@@ -48,6 +48,8 @@ abstract class BaseActivity : AppCompatActivity() {
         private val activeActivities = mutableListOf<WeakReference<BaseActivity>>()
 
         fun recreateOthersInBackground(except: android.app.Activity? = null) {
+            // Single bus: bump heavy version so all activities recreate consistently
+            SettingsChangeManager.makeHeavyThemeRecreate()
             val iterator = activeActivities.iterator()
             while (iterator.hasNext()) {
                 val activity = iterator.next().get()
@@ -56,7 +58,7 @@ abstract class BaseActivity : AppCompatActivity() {
                     continue
                 }
                 if (activity === except || activity.isFinishing || activity.isDestroyed) continue
-                activity.refreshIfSettingsChanged()
+                activity.applyHeavyThemeIfNeeded(force = true)
             }
         }
     }
@@ -67,7 +69,8 @@ abstract class BaseActivity : AppCompatActivity() {
 
     private enum class LoadingBlurMode { BLUR_VIEW, DIM }
 
-    private lateinit var themeStateManager: ThemeStateManager
+    /** Last applied [SettingsChangeManager.heavyThemeVersion]. */
+    private var appliedHeavyThemeVersion: Long = 0L
 
     private var toolbarSubtitle: CharSequence? = null
     private var collapsingToolbarRef: CollapsingToolbarLayout? = null
@@ -80,7 +83,7 @@ abstract class BaseActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        themeStateManager = ThemeStateManager(this)
+        appliedHeavyThemeVersion = SettingsChangeManager.heavyThemeVersion.value
         activeActivities.add(WeakReference(this))
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(
@@ -98,7 +101,7 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         com.miku.ray.handler.SettingsManager.refreshAutoNightModeIfNeeded()
-        themeStateManager.checkThemeChangedAndRecreate()
+        applyHeavyThemeIfNeeded()
         if (collapsingToolbarRef != null) {
             applyToolbarStyle()
         }
@@ -211,7 +214,19 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     fun refreshIfSettingsChanged() {
-        themeStateManager.checkThemeChangedAndRecreate()
+        applyHeavyThemeIfNeeded(force = true)
+    }
+
+    /**
+     * Recreate when [SettingsChangeManager.heavyThemeVersion] advanced
+     * (theme / font / DPI / true-black, etc.).
+     */
+    fun applyHeavyThemeIfNeeded(force: Boolean = false) {
+        if (isFinishing || isDestroyed) return
+        val version = SettingsChangeManager.heavyThemeVersion.value
+        if (!force && version == appliedHeavyThemeVersion) return
+        appliedHeavyThemeVersion = version
+        recreate()
     }
 
     private fun applyToolbarStyle() {

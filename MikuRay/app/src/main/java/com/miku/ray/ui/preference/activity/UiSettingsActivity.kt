@@ -377,6 +377,7 @@ class UiSettingsActivity : BaseActivity() {
                         deleteOldFile(oldUri)
                         val savedUri = saveBannerFile(cacheUri, "home_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_HOME_BANNER_URI, savedUri.toString())
+                        SettingsChangeManager.notifyHomeBannerChanged()
                         SettingsManager.preloadBanner(requireContext(), savedUri.toString())
 
                         extractAndSaveBannerColor(savedUri)
@@ -423,6 +424,7 @@ class UiSettingsActivity : BaseActivity() {
                         deleteOldFile(oldUri)
                         val savedUri = saveBannerFile(cacheUri, "profile_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_PROFILE_BANNER_URI, savedUri.toString())
+                        SettingsChangeManager.makeLightUiRefresh()
                         SettingsManager.preloadBanner(requireContext(), savedUri.toString())
                         broadcastProfileChanged()
                         requireContext().toastSuccess(getString(R.string.custom_banner_profile_set))
@@ -445,6 +447,7 @@ class UiSettingsActivity : BaseActivity() {
                         deleteOldFile(oldUri)
                         val savedUri = saveBannerFile(cacheUri, "sheet_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_SHEET_BANNER_URI, savedUri.toString())
+                        SettingsChangeManager.makeLightUiRefresh()
                         SettingsManager.preloadBanner(requireContext(), savedUri.toString())
                         requireContext().toastSuccess(getString(R.string.sheet_banner_updated))
                     } catch (e: Exception) {
@@ -466,6 +469,7 @@ class UiSettingsActivity : BaseActivity() {
                         deleteOldFile(oldUri)
                         val savedUri = saveBannerFile(cacheUri, "selected_banner_")
                         MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_URI, savedUri.toString())
+                        SettingsChangeManager.notifySelectedBannerChanged()
                         SettingsManager.preloadBanner(requireContext(), savedUri.toString())
                         updateIndicatorStyleEnabledState()
                         broadcastSelectedBannerChanged()
@@ -577,13 +581,15 @@ class UiSettingsActivity : BaseActivity() {
 
             toolbarCenterSubtitleMode?.setOnPreferenceChangeListener { _, newValue ->
                 MmkvManager.encodeSettings(AppConfig.PREF_TOOLBAR_CENTER_SUBTITLE_MODE, newValue as Boolean)
-                activity?.recreate()
-                activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
+                // Layout-only: no full recreate
+                SettingsChangeManager.makeLightUiRefresh()
+                (activity as? BaseActivity)?.refreshToolbarStyle()
                 true
             }
 
             enableBlur?.setOnPreferenceChangeListener { _, newValue ->
                 MmkvManager.encodeSettings(AppConfig.PREF_ENABLE_BLUR, newValue as Boolean)
+                SettingsChangeManager.makeLightUiRefresh()
                 true
             }
 
@@ -597,6 +603,7 @@ class UiSettingsActivity : BaseActivity() {
 
             blurBottomStatus?.setOnPreferenceChangeListener { _, newValue ->
                 MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_STATUS, newValue as Boolean)
+                SettingsChangeManager.makeLightUiRefresh()
                 true
             }
 
@@ -623,6 +630,7 @@ class UiSettingsActivity : BaseActivity() {
                         putExtra(AppConfig.PREF_ICON_SHAPE, valueStr.ifEmpty { AppConfig.PREF_ICON_SHAPE_DEFAULT })
                     }
                 )
+                SettingsChangeManager.makeLightUiRefresh()
                 true
             }
 
@@ -637,6 +645,7 @@ class UiSettingsActivity : BaseActivity() {
                         putExtra(AppConfig.PREF_ARROW_SHAPE, valueStr.ifEmpty { AppConfig.PREF_ARROW_SHAPE_DEFAULT })
                     }
                 )
+                SettingsChangeManager.makeLightUiRefresh()
                 true
             }
 
@@ -682,14 +691,13 @@ class UiSettingsActivity : BaseActivity() {
                     CategoryStyleHelper.applyToGroup(styleValue, screen)
                     listView.adapter?.notifyDataSetChanged()
                 }
-                requireContext().sendBroadcast(
-                    android.content.Intent(AppConfig.BROADCAST_ACTION_CATEGORY_STYLE_CHANGED)
-                )
+                SettingsChangeManager.makeLightUiRefresh()
                 true
             }
 
             showSplash?.setOnPreferenceChangeListener { _, newValue ->
                 MmkvManager.encodeSettings(AppConfig.PREF_SHOW_SPLASH, newValue as Boolean)
+                SettingsChangeManager.makeLightUiRefresh()
                 true
             }
 
@@ -715,6 +723,7 @@ class UiSettingsActivity : BaseActivity() {
                         WeatherHelper.cancelBackgroundUpdates(requireContext())
                     }
                     updateChipPreferenceEnabledState()
+                    SettingsChangeManager.makeLightUiRefresh()
                     when (mode) {
                         SearchBarChipMode.WEATHER -> requireContext().snackbarDefault(R.string.pref_search_bar_chip_info_weather, title = getString(R.string.title_alerter_info))
                         SearchBarChipMode.TOTAL_TRAFFIC -> requireContext().snackbarDefault(R.string.pref_search_bar_chip_info_traffic, title = getString(R.string.title_alerter_info))
@@ -731,6 +740,7 @@ class UiSettingsActivity : BaseActivity() {
                     lp.summary = if (idx >= 0) lp.entries[idx] else valueStr
                 }
                 MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_USE_CELSIUS, valueStr)
+                SettingsChangeManager.makeLightUiRefresh()
                 true
             }
 
@@ -738,6 +748,7 @@ class UiSettingsActivity : BaseActivity() {
             weatherCustomLocation?.setOnPreferenceChangeListener { _, newValue ->
                 val raw = (newValue as? String)?.trim().orEmpty()
                 MmkvManager.encodeSettings(AppConfig.PREF_WEATHER_CUSTOM_LOCATION, raw)
+                SettingsChangeManager.makeLightUiRefresh()
                 WeatherHelper.clearCustomLocationCache()
                 updateWeatherCustomLocationSummary(raw)
                 if (SearchBarChipMode.current() in setOf(
@@ -755,6 +766,7 @@ class UiSettingsActivity : BaseActivity() {
             showRealtimeTrafficIp?.setOnPreferenceChangeListener { _, newValue ->
                 val checked = newValue as Boolean
                 MmkvManager.encodeSettings(AppConfig.PREF_SHOW_REALTIME_TRAFFIC_IP, checked)
+                SettingsChangeManager.makeRefreshDisplayPrefs()
                 showIspInfo?.isEnabled = !checked
                 showIspInfo?.summary = if (checked) {
                     getString(
@@ -1037,6 +1049,7 @@ class UiSettingsActivity : BaseActivity() {
                 setOnPreferenceChangeListener { _, newValue ->
                     val checked = newValue as Boolean
                     MmkvManager.encodeSettings(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED, checked)
+                    SettingsChangeManager.notifySelectedBannerChanged()
                     updateIndicatorStyleEnabledState()
                     broadcastSelectedBannerChanged()
                     true
@@ -1448,9 +1461,7 @@ class UiSettingsActivity : BaseActivity() {
         }
 
         private fun broadcastHomeBannerChanged() {
-            requireContext().sendBroadcast(
-                android.content.Intent(AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED)
-            )
+            SettingsChangeManager.notifyHomeBannerChanged()
         }
 
         private fun broadcastSelectedBannerChanged() {

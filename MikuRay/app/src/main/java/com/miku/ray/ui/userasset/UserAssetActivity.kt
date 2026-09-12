@@ -10,7 +10,9 @@ import android.provider.OpenableColumns
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
@@ -54,8 +56,16 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
 
         binding.recyclerView.setHasFixedSize(true)
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = UserAssetAdapter(viewModel, ActivityAdapterListener())
+        adapter = UserAssetAdapter(ActivityAdapterListener())
         binding.recyclerView.adapter = adapter
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    adapter.submitState(state)
+                }
+            }
+        }
     }
 
     override fun onResume() {
@@ -215,12 +225,11 @@ class UserAssetActivity : HelperBaseActivity(), AssetMenuBottomSheet.OnAssetMenu
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private suspend fun reloadDataAndAwait() {
         val geoFilesSource = MmkvManager.decodeSettingsString(AppConfig.PREF_GEO_FILES_SOURCES)
-        ?: AppConfig.GEO_FILES_SOURCES.first()
+            ?: AppConfig.GEO_FILES_SOURCES.first()
         viewModel.reload(geoFilesSource, extDir).join()
-        adapter.notifyDataSetChanged()
+        // UI updates via StateFlow collection in onCreate
     }
 
     private inner class ActivityAdapterListener : BaseAdapterListener {

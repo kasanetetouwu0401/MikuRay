@@ -67,6 +67,15 @@ class MmkvPreferenceDataStore(private val triggersServiceRestart: Boolean = true
         return MmkvManager.decodeSettingsStringSet(key) ?: defaultValues
     }
 
+    private fun isLightUiKey(key: String): Boolean =
+        key in LIGHT_UI_KEYS ||
+            key.startsWith("pref_particles_") ||
+            key.startsWith("pref_banner_character_") ||
+            key.startsWith("pref_snowflakes_") ||
+            key.startsWith("pref_weather_")
+
+    private fun isDisplayRefreshKey(key: String): Boolean = key in DISPLAY_REFRESH_KEYS
+
     private fun notifySettingChanged(key: String) {
         if (key == AppConfig.PREF_LOGLEVEL) {
             LogUtil.refreshLogLevel()
@@ -76,17 +85,137 @@ class MmkvPreferenceDataStore(private val triggersServiceRestart: Boolean = true
             SettingsManager.setNightMode()
         }
 
-        if (key == AppConfig.PREF_TRAFFIC_ENABLED ||
-            key == AppConfig.PREF_DISABLE_SENSOR_TEXT ||
-            key == AppConfig.PREF_NETWORK_SECURITY_ENABLED ||
-            key == AppConfig.PREF_DOUBLE_COLUMN_DISPLAY
-        ) {
+        // List / chip display — refresh lists, no VPN restart
+        if (isDisplayRefreshKey(key)) {
             SettingsChangeManager.makeRefreshDisplayPrefs()
+            return
         }
 
+        // Pure UI chrome — SharedFlow light path
+        if (isLightUiKey(key)) {
+            SettingsChangeManager.makeLightUiRefresh()
+            return
+        }
+
+        // Theme / font / DPI — activities recreate via heavyThemeVersion
+        if (key in HEAVY_THEME_KEYS) {
+            SettingsChangeManager.makeHeavyThemeRecreate()
+            return
+        }
+
+        // Service-related
         if (triggersServiceRestart) {
             SettingsChangeManager.makeRestartService()
         }
         SettingsChangeManager.makeSetupGroupTab()
+    }
+
+    companion object {
+        /** Keys that only need server-list / chip rebind. */
+        private val DISPLAY_REFRESH_KEYS = setOf(
+            AppConfig.PREF_TRAFFIC_ENABLED,
+            AppConfig.PREF_DISABLE_SENSOR_TEXT,
+            AppConfig.PREF_NETWORK_SECURITY_ENABLED,
+            AppConfig.PREF_DOUBLE_COLUMN_DISPLAY,
+            AppConfig.PREF_SHOW_ISP_INFO,
+            AppConfig.PREF_SHOW_REALTIME_TRAFFIC_IP,
+            AppConfig.PREF_COMPACT_LIST_ACTIONS,
+            AppConfig.PREF_HIDE_SCROLL_BUTTONS,
+            AppConfig.PREF_INDICATOR_STYLE,
+            AppConfig.PREF_SEARCH_BAR_CHIP,
+            AppConfig.PREF_SEARCH_CHIP_GRADIENT,
+            AppConfig.PREF_SEARCH_BAR_CHIP_DUAL_SELECTION,
+            AppConfig.PREF_TAB_BADGE_LIMIT,
+            AppConfig.PREF_GROUP_ALL_DISPLAY,
+            AppConfig.PREF_GROUP_ALL_TAB_ICON,
+            AppConfig.PREF_SPEED_ENABLED,
+        )
+
+        /**
+         * UI Settings keys that must NOT restart VPN / rebuild groups.
+         * Heavy theme/font/DPI keys are intentionally excluded.
+         */
+        private val LIGHT_UI_KEYS = setOf(
+            // Blur
+            AppConfig.PREF_BLUR_BOTTOM_STATUS,
+            AppConfig.PREF_BLUR_BOTTOM_RADIUS,
+            AppConfig.PREF_BLUR_BOTTOM_ALPHA,
+            AppConfig.PREF_BLUR_BOTTOM_BLOB_ANIM,
+            AppConfig.PREF_BLUR_BOTTOM_INTENSITY,
+            AppConfig.PREF_BLUR_RADIUS,
+            AppConfig.PREF_BLUR_ROUNDS,
+            AppConfig.PREF_BLUR_INTENSITY,
+            AppConfig.PREF_ENABLE_BLUR,
+            AppConfig.PREF_USE_SYSTEM_BLUR,
+            // Home / header / FAB / toolbar
+            AppConfig.PREF_HOME_BANNER_HEIGHT,
+            AppConfig.PREF_HEADER_TOP_ROW_PADDING,
+            AppConfig.PREF_FAB_EXTENDED,
+            AppConfig.PREF_SHOW_QUICK_ACTIONS,
+            AppConfig.PREF_DISABLE_HOME_BANNER,
+            AppConfig.PREF_TOOLBAR_CENTER_SUBTITLE_MODE,
+            AppConfig.PREF_CUSTOM_HOME_BANNER_URI,
+            // Selected / sheet / profile banner
+            AppConfig.PREF_SELECTED_BANNER_DIM,
+            AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED,
+            AppConfig.PREF_SELECTED_BANNER_URI,
+            AppConfig.PREF_SHEET_BANNER_DIM,
+            AppConfig.PREF_CUSTOM_SHEET_BANNER_URI,
+            AppConfig.PREF_PROFILE_BANNER_URI,
+            AppConfig.PREF_PROFILE_BANNER_SHAPE,
+            AppConfig.PREF_CUSTOM_THEME_BANNER_URI,
+            // Shapes (list chrome)
+            AppConfig.PREF_ICON_SHAPE,
+            AppConfig.PREF_ARROW_SHAPE,
+            // Indicator / category
+            AppConfig.PREF_INDICATOR_STYLE,
+            AppConfig.PREF_CATEGORY_STYLE,
+            // Search chip
+            AppConfig.PREF_SEARCH_BAR_CHIP,
+            AppConfig.PREF_SEARCH_CHIP_GRADIENT,
+            AppConfig.PREF_SEARCH_BAR_CHIP_DUAL_SELECTION,
+            // Group tab chrome
+            AppConfig.PREF_TAB_BADGE_LIMIT,
+            AppConfig.PREF_GROUP_ALL_DISPLAY,
+            AppConfig.PREF_GROUP_ALL_TAB_ICON,
+            // List chrome
+            AppConfig.PREF_HIDE_SCROLL_BUTTONS,
+            AppConfig.PREF_COMPACT_LIST_ACTIONS,
+            AppConfig.PREF_CONFIRM_REMOVE,
+            AppConfig.PREF_START_SCAN_IMMEDIATE,
+            // Notification labels (UI only)
+            AppConfig.PREF_HIDE_DIRECT_TRAFFIC_NOTIFICATION,
+            AppConfig.PREF_SHOW_GROUP_NAME_NOTIFICATION,
+            // Snowflakes
+            AppConfig.PREF_ENABLE_SNOWFLAKES,
+            AppConfig.PREF_SNOWFLAKES_SPEED,
+            AppConfig.PREF_SNOWFLAKES_COUNT,
+            AppConfig.PREF_SNOWFLAKES_SIZE,
+            AppConfig.PREF_SNOWFLAKES_OPACITY,
+            AppConfig.PREF_SNOWFLAKES_WIND,
+            AppConfig.PREF_SNOWFLAKES_LIFE,
+            // Particles
+            AppConfig.PREF_ENABLE_PARTICLES_SHEET,
+            AppConfig.PREF_PARTICLES_SETTINGS,
+            AppConfig.PREF_PARTICLES_FRAME_DELAY,
+            AppConfig.PREF_PARTICLES_LINE_LENGTH,
+            AppConfig.PREF_PARTICLES_LINE_THICKNESS,
+            AppConfig.PREF_PARTICLES_RADIUS_MAX,
+            AppConfig.PREF_PARTICLES_RADIUS_MIN,
+            AppConfig.PREF_PARTICLES_DENSITY,
+            AppConfig.PREF_PARTICLES_SPEED_FACTOR,
+            // Banner character
+            AppConfig.PREF_BANNER_CHARACTER_WIDTH,
+            AppConfig.PREF_BANNER_CHARACTER_HEIGHT,
+            AppConfig.PREF_BANNER_CHARACTER_MARGIN_TOP,
+            AppConfig.PREF_BANNER_CHARACTER_MARGIN_BOTTOM,
+            AppConfig.PREF_BANNER_CHARACTER_MARGIN_END,
+            AppConfig.PREF_BANNER_SETTINGS_CHARACTER,
+            // Weather chip
+            AppConfig.PREF_WEATHER_USE_CELSIUS,
+            AppConfig.PREF_WEATHER_CUSTOM_LOCATION,
+            // Splash next launch
+            AppConfig.PREF_SHOW_SPLASH,
+        )
     }
 }

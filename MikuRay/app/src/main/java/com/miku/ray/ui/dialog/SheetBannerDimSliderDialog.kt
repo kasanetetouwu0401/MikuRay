@@ -11,6 +11,7 @@ import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
+import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.util.WindowBlurUtils
 
 class SheetBannerDimSliderDialog @JvmOverloads constructor(
@@ -41,6 +42,7 @@ class SheetBannerDimSliderDialog @JvmOverloads constructor(
             val newDim = slider.value.toInt()
             MmkvManager.encodeSettings(AppConfig.PREF_SHEET_BANNER_DIM, newDim)
             summary = context.getString(R.string.sheet_banner_dim_summary_value, newDim)
+            SettingsChangeManager.makeLightUiRefresh()
         }
         .setNeutralButton(R.string.reset, null)
         .setNegativeButton(android.R.string.cancel, null)
@@ -55,6 +57,7 @@ class SheetBannerDimSliderDialog @JvmOverloads constructor(
 
             MmkvManager.encodeSettings(AppConfig.PREF_SHEET_BANNER_DIM, default)
             summary = context.getString(R.string.sheet_banner_dim_summary_value, default)
+            SettingsChangeManager.makeLightUiRefresh()
 
             dialog.dismiss()
         }
