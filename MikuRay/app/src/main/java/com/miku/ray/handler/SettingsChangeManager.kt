@@ -8,26 +8,35 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+enum class UiCustomizationChange {
+    LIGHT,
+    HEAVY
+}
+
 object SettingsChangeManager {
     val uiCustomizationState: StateFlow<UiCustomizationState> = UiCustomizationStateStore.state
     val uiCustomizationEvents: SharedFlow<Unit> = UiCustomizationStateStore.events
 
+    private val _uiCustomizationChanges = MutableSharedFlow<UiCustomizationChange>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val uiCustomizationChanges: SharedFlow<UiCustomizationChange> = _uiCustomizationChanges.asSharedFlow()
+
     private val _settingsVersion = MutableStateFlow(0L)
     val settingsVersion: StateFlow<Long> = _settingsVersion.asStateFlow()
-
     private val _settingsChanged = MutableSharedFlow<Unit>(
         extraBufferCapacity = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
     val settingsChanged: SharedFlow<Unit> = _settingsChanged.asSharedFlow()
-
     private val _restartService = MutableStateFlow(false)
-    private val _setupGroupTab = MutableStateFlow(false)
     private val _refreshDisplayPrefs = MutableStateFlow(false)
 
-    fun notifySettingsChanged() {
+    fun notifySettingsChanged(change: UiCustomizationChange = UiCustomizationChange.LIGHT) {
         _settingsVersion.value++
         _settingsChanged.tryEmit(Unit)
+        _uiCustomizationChanges.tryEmit(change)
     }
 
     fun makeRestartService() {
@@ -37,16 +46,6 @@ object SettingsChangeManager {
     fun consumeRestartService(): Boolean {
         val value = _restartService.value
         _restartService.value = false
-        return value
-    }
-
-    fun makeSetupGroupTab() {
-        _setupGroupTab.value = true
-    }
-
-    fun consumeSetupGroupTab(): Boolean {
-        val value = _setupGroupTab.value
-        _setupGroupTab.value = false
         return value
     }
 

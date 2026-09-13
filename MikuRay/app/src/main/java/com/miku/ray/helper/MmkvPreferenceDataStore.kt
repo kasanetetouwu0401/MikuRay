@@ -87,6 +87,6 @@ class MmkvPreferenceDataStore(private val triggersServiceRestart: Boolean = true
         if (triggersServiceRestart) {
             SettingsChangeManager.makeRestartService()
         }
-        SettingsChangeManager.makeSetupGroupTab()
+        SettingsChangeManager.makeRefreshDisplayPrefs()
     }
 }

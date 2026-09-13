@@ -52,7 +52,7 @@ class SubscriptionsViewModel : ViewModel() {
         val changed = subscriptions.removeAll { it.guid == subId }
         if (changed) {
             SettingsManager.removeSubscriptionWithDefault(subId)
-            SettingsChangeManager.makeSetupGroupTab()
+            SettingsChangeManager.makeRefreshDisplayPrefs()
             _subscriptionsState.value = subscriptions.toList()
         }
         return changed
@@ -76,7 +76,7 @@ class SubscriptionsViewModel : ViewModel() {
 
     fun commitOrder() {
         MmkvManager.encodeSettings(AppConfig.PREF_SUB_SORT_ORDER, SortSubBottomSheet.ORDER_ORIGIN)
-        SettingsChangeManager.makeSetupGroupTab()
+        SettingsChangeManager.makeRefreshDisplayPrefs()
     }
 
     fun updateSubscriptionsMore() {

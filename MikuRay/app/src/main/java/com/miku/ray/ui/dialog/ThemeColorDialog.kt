@@ -18,9 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsChangeManager
 import kotlinx.coroutines.flow.collect
 import com.miku.ray.util.ThemeManager

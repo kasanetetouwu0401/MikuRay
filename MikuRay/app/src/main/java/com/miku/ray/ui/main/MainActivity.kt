@@ -168,8 +168,10 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             LauncherManager.restartService(this)
         }
 
-        if (SettingsChangeManager.consumeSetupGroupTab()) {
+        if (SettingsChangeManager.consumeRefreshDisplayPrefs()) {
             setupGroupTab()
+            refreshAllGroupListDisplays()
+            refreshGroupTabTitles()
         }
     }
 
@@ -276,10 +278,8 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         updateQuickActionsVisibility()
 
         if (SettingsChangeManager.consumeRefreshDisplayPrefs()) {
+            setupGroupTab()
             refreshAllGroupListDisplays()
-        }
-
-        if (SettingsChangeManager.consumeSetupGroupTab()) {
             refreshGroupTabTitles()
         }
 

@@ -16,7 +16,6 @@ import com.google.android.material.color.utilities.SchemeTonalSpot
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.ui.base.BaseActivity
 
 object ThemeManager {
 
@@ -119,23 +118,17 @@ object ThemeManager {
         MmkvManager.encodeSettings(AppConfig.PREF_DYNAMIC_COLOR, false)
         MmkvManager.encodeSettings(AppConfig.PREF_USE_CUSTOM_COLOR, false)
         MmkvManager.encodeSettings(AppConfig.PREF_APP_THEME, key)
-        activity.recreate()
-        BaseActivity.recreateOthersInBackground(except = activity)
     }
 
     fun saveCustomColor(activity: Activity, @ColorInt color: Int) {
         MmkvManager.encodeSettings(AppConfig.PREF_DYNAMIC_COLOR, false)
         MmkvManager.encodeSettings(AppConfig.PREF_USE_CUSTOM_COLOR, true)
         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_COLOR, color)
-        activity.recreate()
-        BaseActivity.recreateOthersInBackground(except = activity)
     }
 
     fun clearCustomColor(activity: Activity) {
         MmkvManager.encodeSettings(AppConfig.PREF_USE_CUSTOM_COLOR, false)
         MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_COLOR, 0)
-        activity.recreate()
-        BaseActivity.recreateOthersInBackground(except = activity)
     }
 }
 

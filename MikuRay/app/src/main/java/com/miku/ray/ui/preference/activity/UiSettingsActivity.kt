@@ -212,7 +212,6 @@ class UiSettingsActivity : BaseActivity() {
                 when (result) {
                     is ThemeShareManager.ImportResult.Success -> {
                         SettingsChangeManager.makeRestartService()
-                        SettingsChangeManager.makeSetupGroupTab()
                         SettingsChangeManager.makeRefreshDisplayPrefs()
                         SettingsManager.setNightMode()
                         restartApplication()
@@ -353,8 +352,6 @@ class UiSettingsActivity : BaseActivity() {
                     customFontSwitch?.isChecked = true
                     appFont?.isEnabled = false
                     updateCustomFontSummary()
-                    activity?.recreate()
-                    activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                 } else {
                     requireContext().toastError(getString(R.string.custom_font_invalid))
                 }
@@ -545,8 +542,6 @@ class UiSettingsActivity : BaseActivity() {
                 dynamicColorBanner?.isEnabled = !enabled && disableHomeBanner?.isChecked == false
                 appTheme?.isEnabled = !enabled
 
-                activity?.recreate()
-                activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                 true
             }
 
@@ -562,8 +557,6 @@ class UiSettingsActivity : BaseActivity() {
                 dynamicColor?.isEnabled = !enabled
                 appTheme?.isEnabled = !enabled
 
-                activity?.recreate()
-                activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                 true
             }
 
@@ -573,8 +566,6 @@ class UiSettingsActivity : BaseActivity() {
                 summary = if (!isNightModeActive) getString(R.string.pref_true_black_only_in_night_mode)
                 else getString(R.string.summary_pref_true_black)
                 setOnPreferenceChangeListener { _, _ ->
-                    activity?.recreate()
-                    activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                     true
                 }
             }
@@ -663,8 +654,6 @@ class UiSettingsActivity : BaseActivity() {
                 com.miku.ray.ui.bottomsheet.FontPickerBottomSheet(requireContext(), currentValue) { value, label ->
                     MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT, value)
                     appFont?.summary = label
-                    activity?.recreate()
-                    activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                 }.show()
                 true
             }
@@ -777,7 +766,7 @@ class UiSettingsActivity : BaseActivity() {
                     currentIcon  = currentIcon,
                     onSelected   = { iconName ->
                         MmkvManager.encodeSettings(AppConfig.PREF_GROUP_ALL_TAB_ICON, iconName)
-                        SettingsChangeManager.makeSetupGroupTab()
+                        SettingsChangeManager.makeRefreshDisplayPrefs()
                         updateGroupAllTabIconSummary()
                     }
                 ).show()
@@ -791,7 +780,7 @@ class UiSettingsActivity : BaseActivity() {
                         lp.summary = lp.entries?.getOrNull(index)
                     }
                 }
-                SettingsChangeManager.makeSetupGroupTab()
+                SettingsChangeManager.makeRefreshDisplayPrefs()
                 true
             }
 
@@ -877,8 +866,6 @@ class UiSettingsActivity : BaseActivity() {
             lifecycleScope.launch {
                 BannerColorExtractor.extractAndSave(requireContext(), uri) { colorChanged ->
                     if (colorChanged && MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)) {
-                        activity?.recreate()
-                        activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                     }
                 }
             }
@@ -928,8 +915,6 @@ class UiSettingsActivity : BaseActivity() {
                 } else {
                     MmkvManager.encodeSettings(AppConfig.PREF_APP_FONT_USE_CUSTOM, checked)
                     appFont?.isEnabled = !checked
-                    activity?.recreate()
-                    activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                     true
                 }
             }
@@ -954,8 +939,6 @@ class UiSettingsActivity : BaseActivity() {
                     customFontSwitch?.isChecked = false
                     appFont?.isEnabled = true
                     updateCustomFontSummary()
-                    activity?.recreate()
-                    activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .showBlur()
@@ -1237,8 +1220,6 @@ class UiSettingsActivity : BaseActivity() {
                             MmkvManager.encodeSettings(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)
                             dynamicColorBanner?.isChecked = false
                             appTheme?.isEnabled = !isDynamicColor
-                            activity?.recreate()
-                            activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                         }
                     }
 
@@ -1268,8 +1249,6 @@ class UiSettingsActivity : BaseActivity() {
                             MmkvManager.encodeSettings(AppConfig.PREF_BANNER_COLOR, 0)
 
                             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR_BANNER, false)) {
-                                activity?.recreate()
-                                activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                             }
                             broadcastHomeBannerChanged()
                             requireContext().snackbarSuccess(getString(R.string.home_banner_delete_summary), title = getString(R.string.title_alerter_success))

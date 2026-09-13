@@ -38,6 +38,7 @@ import com.miku.ray.R
 import com.miku.ray.AppConfig
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsChangeManager
+import com.miku.ray.handler.UiCustomizationChange
 import com.miku.ray.handler.UiCustomizationState
 import com.miku.ray.helper.CustomDividerItemDecoration
 import com.miku.ray.util.DPIController
@@ -88,8 +89,18 @@ abstract class BaseActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                SettingsChangeManager.uiCustomizationState.collect { state ->
-                    onSettingsChanged(state)
+                launch {
+                    SettingsChangeManager.uiCustomizationState.collect { state ->
+                        onSettingsChanged(state)
+                    }
+                }
+                launch {
+                    SettingsChangeManager.uiCustomizationChanges.collect { change ->
+                        if (change == UiCustomizationChange.HEAVY && !isFinishing) {
+                            recreate()
+                            recreateOthersInBackground(except = this@BaseActivity)
+                        }
+                    }
                 }
             }
         }
