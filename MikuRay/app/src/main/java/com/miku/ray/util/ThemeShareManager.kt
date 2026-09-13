@@ -437,8 +437,6 @@ object ThemeShareManager {
             LauncherAliasSwitcher.currentNameVariant()
         )
         SettingsChangeManager.notifyUiCustomizationChanged()
-        context.sendBroadcast(android.content.Intent(AppConfig.BROADCAST_ACTION_PROFILE_BANNER_CHANGED))
-        SelectedProfileBannerController.broadcastChanged(context)
-        context.sendBroadcast(android.content.Intent(AppConfig.BROADCAST_ACTION_PARTICLES_CHANGED))
+        SelectedProfileBannerController.notifyChanged(context)
     }
 }
