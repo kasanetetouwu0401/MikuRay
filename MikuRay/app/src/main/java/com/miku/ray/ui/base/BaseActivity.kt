@@ -56,8 +56,6 @@ abstract class BaseActivity : AppCompatActivity() {
     private var toolbarSubtitle: CharSequence? = null
     private var collapsingToolbarRef: CollapsingToolbarLayout? = null
 
-    // Seeded with the current value so a freshly created (or recreated) instance
-    // never treats the version it was just built with as "new".
     private var lastSeenRecreateVersion = SettingsChangeManager.recreateVersion.value
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,7 +78,7 @@ abstract class BaseActivity : AppCompatActivity() {
         )
 
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 SettingsChangeManager.recreateVersion.collect { version ->
                     if (version != lastSeenRecreateVersion) {
                         lastSeenRecreateVersion = version
