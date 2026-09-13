@@ -19,7 +19,7 @@ import com.miku.ray.util.WindowBlurUtils
 class BlurIntensityDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : UiCustomizationPreference(context, attrs) {
+) : Preference(context, attrs) {
 
     private fun Context.findActivity(): Activity? {
         var ctx = this
@@ -31,8 +31,8 @@ class BlurIntensityDialog @JvmOverloads constructor(
     }
 
     override fun onClick() {
-        val originalRadius = customizationState.blurRadius
-        val originalRounds = customizationState.blurRounds
+        val originalRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS)
+        val originalRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
 
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_blur_intensity, null)
         val sliderRadius = dialogView.findViewById<Slider>(R.id.slider_blur_radius)
@@ -113,9 +113,5 @@ class BlurIntensityDialog @JvmOverloads constructor(
         } else {
             context.getString(R.string.summary_blur_intensity_value, radius, rounds)
         }
-    }
-
-    override fun onCustomizationStateChanged(state: com.miku.ray.handler.UiCustomizationState) {
-        updateSummary(state.blurRadius, state.blurRounds)
     }
 }

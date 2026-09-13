@@ -13,10 +13,11 @@ import android.view.ViewOutlineProvider
 import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.miku.ray.AppConfig
 import com.miku.ray.blurview.BlurView
 import com.miku.ray.widget.BlobView
 import com.miku.ray.databinding.ActivityMainBinding
-import com.miku.ray.handler.UiCustomizationStateStore
+import com.miku.ray.handler.MmkvManager
 import java.lang.ref.WeakReference
 import kotlin.math.abs
 
@@ -35,10 +36,10 @@ object BlurBottomStatusController {
         userRadius.coerceIn(MIN_BLUR_RADIUS, MAX_BLUR_RADIUS)
 
     fun isEnabled(): Boolean =
-        UiCustomizationStateStore.state.value.blurBottomStatus
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_BLUR_BOTTOM_STATUS, false)
 
     private fun isBlobAnimEnabled(): Boolean =
-        UiCustomizationStateStore.state.value.blurBottomBlobAnimation
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_BLUR_BOTTOM_BLOB_ANIM, false)
 
     fun applyState(activity: AppCompatActivity, binding: ActivityMainBinding, onTestClick: () -> Unit) {
         val density = activity.resources.displayMetrics.density
@@ -60,22 +61,6 @@ object BlurBottomStatusController {
         } else {
             applyBlurOff(activity, binding, radiusPx, onTestClick)
         }
-    }
-
-    fun updateRadius(radius: Float) {
-        val blurView = blurViewReference?.get() ?: return
-        val blurRadius = toBlurViewRadius(radius)
-        if (blurRadius > MIN_BLUR_RADIUS) {
-            blurView.setBlurRadius(blurRadius)
-        }
-        blurView.setBlurEnabled(blurRadius > MIN_BLUR_RADIUS)
-    }
-
-    fun updateAlpha(alphaPercent: Float) {
-        glassFillColor = withAlpha(glassFillBaseColor, alphaPercentToInt(alphaPercent))
-        glassDrawableReference?.get()?.setColor(glassFillColor)
-        blurViewReference?.get()?.setOverlayColor(glassFillColor)
-        blurViewReference?.get()?.invalidate()
     }
 
     private fun alphaPercentToInt(percent: Float): Int =
@@ -141,9 +126,14 @@ object BlurBottomStatusController {
         density: Float,
         onTestClick: () -> Unit
     ) {
-        val state = UiCustomizationStateStore.state.value
-        val blurRadius = toBlurViewRadius(state.blurBottomRadius)
-        val alphaPercent = state.blurBottomAlpha.toFloat().coerceIn(0f, 100f)
+        val blurRadius = toBlurViewRadius(
+            MmkvManager.decodeSettingsFloat(
+                AppConfig.PREF_BLUR_BOTTOM_RADIUS, AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS
+            )
+        )
+        val alphaPercent = MmkvManager.decodeSettingsInt(
+            AppConfig.PREF_BLUR_BOTTOM_ALPHA, AppConfig.DEFAULT_BLUR_BOTTOM_ALPHA
+        ).toFloat().coerceIn(0f, 100f)
 
         val isDark = ThemeManager.isDarkMode(activity)
         glassFillBaseColor = activity.getColorAttr("colorSurfaceContainer")

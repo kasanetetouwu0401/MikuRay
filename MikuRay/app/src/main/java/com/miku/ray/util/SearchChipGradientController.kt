@@ -9,9 +9,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.ImageViewCompat
+import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.databinding.ActivityMainBinding
-import com.miku.ray.handler.UiCustomizationStateStore
+import com.miku.ray.handler.MmkvManager
 
 object SearchChipGradientController {
 
@@ -24,9 +25,8 @@ object SearchChipGradientController {
     )
 
     fun isEnabled(): Boolean {
-        val state = UiCustomizationStateStore.state.value
-        val gradientSwitchOn = state.searchChipGradient
-        val chipMode = state.searchBarChip
+        val gradientSwitchOn = MmkvManager.decodeSettingsBool(AppConfig.PREF_SEARCH_CHIP_GRADIENT, false)
+        val chipMode = SearchBarChipMode.current()
         return gradientSwitchOn && chipMode != SearchBarChipMode.DISABLED
     }
 

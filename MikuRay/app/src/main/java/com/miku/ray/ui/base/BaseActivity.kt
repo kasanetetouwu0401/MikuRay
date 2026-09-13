@@ -24,11 +24,6 @@ import androidx.core.view.updatePadding
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.collect
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -38,8 +33,6 @@ import com.miku.ray.R
 import com.miku.ray.AppConfig
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsChangeManager
-import com.miku.ray.handler.UiCustomizationChange
-import com.miku.ray.handler.UiCustomizationState
 import com.miku.ray.helper.CustomDividerItemDecoration
 import com.miku.ray.util.DPIController
 import com.miku.ray.util.FontSizeController
@@ -47,26 +40,12 @@ import com.miku.ray.util.CustomFontManager
 import com.miku.ray.util.GoogleSansFlexManager
 import com.miku.ray.util.WindowBlurUtils
 import com.qmdeve.blurview.widget.BlurView
-import java.lang.ref.WeakReference
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 
 abstract class BaseActivity : AppCompatActivity() {
-
-    companion object {
-        private val activeActivities = mutableListOf<WeakReference<BaseActivity>>()
-
-        fun recreateOthersInBackground(except: android.app.Activity? = null) {
-            val iterator = activeActivities.iterator()
-            while (iterator.hasNext()) {
-                val activity = iterator.next().get()
-                if (activity == null) {
-                    iterator.remove()
-                    continue
-                }
-                if (activity === except || activity.isFinishing || activity.isDestroyed) continue
-                activity.recreate()
-            }
-        }
-    }
 
     private var loadingOverlay: FrameLayout? = null
     private var loadingBlurMode: LoadingBlurMode? = null
@@ -77,6 +56,10 @@ abstract class BaseActivity : AppCompatActivity() {
     private var toolbarSubtitle: CharSequence? = null
     private var collapsingToolbarRef: CollapsingToolbarLayout? = null
 
+    // Seeded with the current value so a freshly created (or recreated) instance
+    // never treats the version it was just built with as "new".
+    private var lastSeenRecreateVersion = SettingsChangeManager.recreateVersion.value
+
     override fun onCreate(savedInstanceState: Bundle?) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
             AngApplication.application.applyActivityTheme(this)
@@ -84,26 +67,6 @@ abstract class BaseActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        activeActivities.add(WeakReference(this))
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    SettingsChangeManager.uiCustomizationState.collect { state ->
-                        onSettingsChanged(state)
-                    }
-                }
-                launch {
-                    SettingsChangeManager.uiCustomizationChanges.collect { change ->
-                        if (change == UiCustomizationChange.HEAVY && !isFinishing) {
-                            recreate()
-                            recreateOthersInBackground(except = this@BaseActivity)
-                        }
-                    }
-                }
-            }
-        }
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
@@ -115,6 +78,27 @@ abstract class BaseActivity : AppCompatActivity() {
             },
             true
         )
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                SettingsChangeManager.recreateVersion.collect { version ->
+                    if (version != lastSeenRecreateVersion) {
+                        lastSeenRecreateVersion = version
+                        recreate()
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                SettingsChangeManager.uiCustomizationChanged.collect {
+                    if (collapsingToolbarRef != null) {
+                        applyToolbarStyle()
+                    }
+                }
+            }
+        }
     }
 
     override fun onResume() {
@@ -231,11 +215,9 @@ abstract class BaseActivity : AppCompatActivity() {
         applyToolbarStyle()
     }
 
-    protected open fun onSettingsChanged(state: UiCustomizationState) = Unit
-
     private fun applyToolbarStyle() {
         val collapsingToolbar = collapsingToolbarRef ?: return
-        val centerSubtitle = SettingsChangeManager.uiCustomizationState.value.toolbarCenterSubtitle
+        val centerSubtitle = MmkvManager.decodeSettingsBool(AppConfig.PREF_TOOLBAR_CENTER_SUBTITLE_MODE, false)
         val subtitleText = if (centerSubtitle) toolbarSubtitle else null
 
         supportActionBar?.subtitle = null
@@ -452,7 +434,6 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        activeActivities.removeAll { it.get() == null || it.get() === this }
         dismissSystemLoadingDialog()
         dismissFallbackLoadingOverlay()
         super.onDestroy()

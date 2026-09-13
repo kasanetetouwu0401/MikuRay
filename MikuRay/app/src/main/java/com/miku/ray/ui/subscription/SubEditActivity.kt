@@ -57,7 +57,7 @@ class SubEditActivity : BaseActivity() {
         setupProfileRemarkInputs()
         setupTabIconField()
 
-        SettingsChangeManager.makeRefreshDisplayPrefs()
+        SettingsChangeManager.makeSetupGroupTab()
         val subItem = MmkvManager.decodeSubscription(editSubId)
         if (subItem != null) {
             bindingServer(subItem)

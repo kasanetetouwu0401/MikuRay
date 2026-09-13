@@ -24,7 +24,6 @@ import com.miku.ray.dto.entities.ServersCache
 import com.miku.ray.enums.EConfigType
 import com.miku.ray.extension.isComplexType
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.handler.UiCustomizationStateStore
 import com.miku.ray.helper.ItemTouchHelperAdapter
 import com.miku.ray.helper.ItemTouchHelperViewHolder
 import java.util.Collections
@@ -264,7 +263,10 @@ FastScrollRecyclerView.SectionedAdapter {
                     holder.views.layoutCard.strokeWidth = 0
                 }
             } else if (isSelectedServer) {
-                val styleName = UiCustomizationStateStore.state.value.indicatorStyle
+                val styleName = MmkvManager.decodeSettingsString(
+                    AppConfig.PREF_INDICATOR_STYLE,
+                    IndicatorStyle.STYLE_0.name
+                ) ?: IndicatorStyle.STYLE_0.name
                 val indicatorStyle = runCatching {
                     IndicatorStyle.valueOf(styleName)
                 }.getOrDefault(IndicatorStyle.STYLE_0)
@@ -304,7 +306,8 @@ FastScrollRecyclerView.SectionedAdapter {
                     }
                 }
             } else {
-                val isCompactListActions = UiCustomizationStateStore.state.value.compactListActions
+                val isCompactListActions =
+                    MmkvManager.decodeSettingsBool(AppConfig.PREF_COMPACT_LIST_ACTIONS) == true
 
                 if (isCompactListActions) {
                     holder.views.layoutShare?.apply {

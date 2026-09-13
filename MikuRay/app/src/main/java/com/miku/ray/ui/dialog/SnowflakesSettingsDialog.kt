@@ -18,23 +18,23 @@ import java.util.Locale
 class SnowflakesSettingsDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : UiCustomizationPreference(context, attrs) {
+) : Preference(context, attrs) {
 
     private fun format(value: Float): String = String.format(Locale.US, "%.2f", value)
     private fun formatPercent(value: Float): String = "${(value * 100f).toInt()}%"
 
     private fun values(): FloatArray = floatArrayOf(
-        customizationState.snowflakesSpeed
+        MmkvManager.decodeSettingsFloat(AppConfig.PREF_SNOWFLAKES_SPEED, AppConfig.SNOWFLAKES_SPEED_DEFAULT)
         .coerceIn(AppConfig.SNOWFLAKES_SPEED_MIN, AppConfig.SNOWFLAKES_SPEED_MAX),
-        customizationState.snowflakesCount
+        MmkvManager.decodeSettingsInt(AppConfig.PREF_SNOWFLAKES_COUNT, AppConfig.SNOWFLAKES_COUNT_DEFAULT)
         .coerceIn(AppConfig.SNOWFLAKES_COUNT_MIN, AppConfig.SNOWFLAKES_COUNT_MAX).toFloat(),
-        customizationState.snowflakesSize
+        MmkvManager.decodeSettingsFloat(AppConfig.PREF_SNOWFLAKES_SIZE, AppConfig.SNOWFLAKES_SIZE_DEFAULT)
         .coerceIn(AppConfig.SNOWFLAKES_SIZE_MIN, AppConfig.SNOWFLAKES_SIZE_MAX),
-        customizationState.snowflakesOpacity
+        MmkvManager.decodeSettingsFloat(AppConfig.PREF_SNOWFLAKES_OPACITY, AppConfig.SNOWFLAKES_OPACITY_DEFAULT)
         .coerceIn(AppConfig.SNOWFLAKES_OPACITY_MIN, AppConfig.SNOWFLAKES_OPACITY_MAX),
-        customizationState.snowflakesWind
+        MmkvManager.decodeSettingsFloat(AppConfig.PREF_SNOWFLAKES_WIND, AppConfig.SNOWFLAKES_WIND_DEFAULT)
         .coerceIn(AppConfig.SNOWFLAKES_WIND_MIN, AppConfig.SNOWFLAKES_WIND_MAX),
-        customizationState.snowflakesLife
+        MmkvManager.decodeSettingsFloat(AppConfig.PREF_SNOWFLAKES_LIFE, AppConfig.SNOWFLAKES_LIFE_DEFAULT)
         .coerceIn(AppConfig.SNOWFLAKES_LIFE_MIN, AppConfig.SNOWFLAKES_LIFE_MAX)
     )
 
@@ -115,10 +115,6 @@ class SnowflakesSettingsDialog @JvmOverloads constructor(
 
     override fun onAttached() {
         super.onAttached()
-        updateSummary()
-    }
-
-    override fun onCustomizationStateChanged(state: com.miku.ray.handler.UiCustomizationState) {
         updateSummary()
     }
 }

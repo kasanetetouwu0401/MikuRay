@@ -14,13 +14,14 @@ import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
+import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.util.WindowBlurUtils
 import kotlin.math.roundToInt
 
 class DpiSliderDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : UiCustomizationPreference(context, attrs) {
+) : Preference(context, attrs) {
 
     private fun Context.findActivity(): Activity? {
         var ctx = this
@@ -32,11 +33,11 @@ class DpiSliderDialog @JvmOverloads constructor(
     }
 
     override fun onClick() {
-        val activity = context.findActivity() ?: return
+        context.findActivity() ?: return
 
         val systemDpi = Resources.getSystem().displayMetrics.densityDpi
 
-        val savedDpi = customizationState.customDpi
+        val savedDpi = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_DPI, 0)
         val currentDpi = if (savedDpi > 0) savedDpi else systemDpi
         val currentPercent = (currentDpi * 100f / systemDpi / 5f).roundToInt() * 5
 
@@ -57,6 +58,8 @@ class DpiSliderDialog @JvmOverloads constructor(
 
             MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_DPI, valueToSave)
             summary = "$percent%"
+
+            SettingsChangeManager.requestRecreate()
         }
         .setNeutralButton(R.string.reset, null)
         .setNegativeButton(android.R.string.cancel, null)
@@ -72,12 +75,7 @@ class DpiSliderDialog @JvmOverloads constructor(
             summary = "100%"
 
             dialog.dismiss()
+            SettingsChangeManager.requestRecreate()
         }
-    }
-
-    override fun onCustomizationStateChanged(state: com.miku.ray.handler.UiCustomizationState) {
-        val systemDpi = Resources.getSystem().displayMetrics.densityDpi
-        val currentDpi = if (state.customDpi > 0) state.customDpi else systemDpi
-        summary = "${(currentDpi * 100f / systemDpi / 5f).roundToInt() * 5}%"
     }
 }

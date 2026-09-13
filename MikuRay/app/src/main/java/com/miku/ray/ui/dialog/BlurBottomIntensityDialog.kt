@@ -11,17 +11,29 @@ import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.util.BlurBottomStatusController
+import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.util.WindowBlurUtils
 
 class BlurBottomIntensityDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : UiCustomizationPreference(context, attrs) {
+) : Preference(context, attrs) {
+
+    private fun save(radius: Float, alpha: Int) {
+        MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_RADIUS, radius)
+        MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_ALPHA, alpha)
+        SettingsChangeManager.notifyUiCustomizationChanged()
+    }
 
     override fun onClick() {
-        val originalRadius = customizationState.blurBottomRadius
-        val originalAlpha = customizationState.blurBottomAlpha
+        val originalRadius = MmkvManager.decodeSettingsFloat(
+            AppConfig.PREF_BLUR_BOTTOM_RADIUS,
+            AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS
+        )
+        val originalAlpha = MmkvManager.decodeSettingsInt(
+            AppConfig.PREF_BLUR_BOTTOM_ALPHA,
+            AppConfig.DEFAULT_BLUR_BOTTOM_ALPHA
+        )
 
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_blur_bottom_intensity, null)
         val sliderRadius = dialogView.findViewById<Slider>(R.id.slider_blur_bottom_radius)
@@ -43,26 +55,22 @@ class BlurBottomIntensityDialog @JvmOverloads constructor(
         dialog.show()
 
         sliderRadius.addOnChangeListener { _, value, fromUser ->
-            if (fromUser) BlurBottomStatusController.updateRadius(value)
+            if (fromUser) save(value, sliderAlpha.value.toInt())
         }
         sliderAlpha.addOnChangeListener { _, value, fromUser ->
-            if (fromUser) BlurBottomStatusController.updateAlpha(value)
+            if (fromUser) save(sliderRadius.value, value.toInt())
         }
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val radius = sliderRadius.value
             val alpha = sliderAlpha.value.toInt()
-            MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_RADIUS, radius)
-            MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_ALPHA, alpha)
+            save(radius, alpha)
             updateSummary(radius, alpha)
             dialog.dismiss()
         }
 
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
-            MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_RADIUS, originalRadius)
-            MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_ALPHA, originalAlpha)
-            BlurBottomStatusController.updateRadius(originalRadius)
-            BlurBottomStatusController.updateAlpha(originalAlpha.toFloat())
+            save(originalRadius, originalAlpha)
             updateSummary(originalRadius, originalAlpha)
             dialog.dismiss()
         }
@@ -73,11 +81,7 @@ class BlurBottomIntensityDialog @JvmOverloads constructor(
 
             sliderRadius.value = defaultRadius.toFloat()
             sliderAlpha.value = defaultAlpha.toFloat()
-            BlurBottomStatusController.updateRadius(defaultRadius.toFloat())
-            BlurBottomStatusController.updateAlpha(defaultAlpha.toFloat())
-
-            MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_RADIUS, defaultRadius)
-            MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_ALPHA, defaultAlpha)
+            save(defaultRadius, defaultAlpha)
             updateSummary(defaultRadius, defaultAlpha)
 
             dialog.dismiss()
@@ -86,9 +90,5 @@ class BlurBottomIntensityDialog @JvmOverloads constructor(
 
     fun updateSummary(radius: Float, alpha: Int) {
         summary = context.getString(R.string.summary_blur_bottom_intensity_value, radius, alpha)
-    }
-
-    override fun onCustomizationStateChanged(state: com.miku.ray.handler.UiCustomizationState) {
-        updateSummary(state.blurBottomRadius, state.blurBottomAlpha)
     }
 }

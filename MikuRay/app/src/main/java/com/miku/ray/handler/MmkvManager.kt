@@ -2,7 +2,6 @@ package com.miku.ray.handler
 
 import android.content.Context
 import android.util.Log
-import com.miku.ray.AppConfig
 import com.tencent.mmkv.MMKV
 import com.tencent.mmkv.MMKVHandler
 import com.tencent.mmkv.MMKVLogLevel
@@ -847,52 +846,29 @@ object MmkvManager {
         return rulesetList to changed
     }
 
-    private fun isHeavyUiCustomizationKey(key: String): Boolean = key in setOf(
-        AppConfig.PREF_APP_THEME,
-        AppConfig.PREF_DYNAMIC_COLOR,
-        AppConfig.PREF_DYNAMIC_COLOR_BANNER,
-        AppConfig.PREF_TRUE_BLACK,
-        AppConfig.PREF_UI_MODE_NIGHT,
-        AppConfig.PREF_APP_FONT,
-        AppConfig.PREF_APP_FONT_USE_CUSTOM,
-        AppConfig.PREF_CUSTOM_DPI,
-        AppConfig.PREF_APP_FONT_SIZE,
-        AppConfig.PREF_USE_CUSTOM_COLOR,
-        AppConfig.PREF_CUSTOM_COLOR,
-        AppConfig.PREF_LANGUAGE
-    )
-
-    private fun settingsChanged(key: String, success: Boolean): Boolean {
-        if (success) {
-            SettingsChangeManager.notifySettingsChanged(
-                if (isHeavyUiCustomizationKey(key)) {
-                    UiCustomizationChange.HEAVY
-                } else {
-                    UiCustomizationChange.LIGHT
-                }
-            )
-            UiCustomizationStateStore.refresh()
-        }
-        return success
+    fun encodeSettings(key: String, value: String?): Boolean {
+        return settingsStorage.encode(key, value)
     }
 
-    fun encodeSettings(key: String, value: String?): Boolean =
-        settingsChanged(key, settingsStorage.encode(key, value))
+    fun encodeSettings(key: String, value: Int): Boolean {
+        return settingsStorage.encode(key, value)
+    }
 
-    fun encodeSettings(key: String, value: Int): Boolean =
-        settingsChanged(key, settingsStorage.encode(key, value))
+    fun encodeSettings(key: String, value: Long): Boolean {
+        return settingsStorage.encode(key, value)
+    }
 
-    fun encodeSettings(key: String, value: Long): Boolean =
-        settingsChanged(key, settingsStorage.encode(key, value))
+    fun encodeSettings(key: String, value: Float): Boolean {
+        return settingsStorage.encode(key, value)
+    }
 
-    fun encodeSettings(key: String, value: Float): Boolean =
-        settingsChanged(key, settingsStorage.encode(key, value))
+    fun encodeSettings(key: String, value: Boolean): Boolean {
+        return settingsStorage.encode(key, value)
+    }
 
-    fun encodeSettings(key: String, value: Boolean): Boolean =
-        settingsChanged(key, settingsStorage.encode(key, value))
-
-    fun encodeSettings(key: String, value: MutableSet<String>): Boolean =
-        settingsChanged(key, settingsStorage.encode(key, value))
+    fun encodeSettings(key: String, value: MutableSet<String>): Boolean {
+        return settingsStorage.encode(key, value)
+    }
 
     fun decodeSettingsString(key: String): String? {
         return settingsStorage.decodeString(key)

@@ -21,7 +21,7 @@ import java.util.Locale
 class BannerCharacterLayoutDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : UiCustomizationPreference(context, attrs) {
+) : Preference(context, attrs) {
 
     private data class SliderParam(
         val prefKey: String,
@@ -105,14 +105,7 @@ class BannerCharacterLayoutDialog @JvmOverloads constructor(
     }
 
     private fun currentValue(param: SliderParam): Float {
-        return when (param.prefKey) {
-            AppConfig.PREF_BANNER_CHARACTER_WIDTH -> customizationState.bannerCharacterWidth
-            AppConfig.PREF_BANNER_CHARACTER_HEIGHT -> customizationState.bannerCharacterHeight
-            AppConfig.PREF_BANNER_CHARACTER_MARGIN_TOP -> customizationState.bannerCharacterMarginTop
-            AppConfig.PREF_BANNER_CHARACTER_MARGIN_BOTTOM -> customizationState.bannerCharacterMarginBottom
-            AppConfig.PREF_BANNER_CHARACTER_MARGIN_END -> customizationState.bannerCharacterMarginEnd
-            else -> param.default
-        }
+        return MmkvManager.decodeSettingsFloat(param.prefKey, param.default)
         .coerceIn(param.min, param.max)
     }
 

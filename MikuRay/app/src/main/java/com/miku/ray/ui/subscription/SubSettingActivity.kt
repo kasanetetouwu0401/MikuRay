@@ -197,7 +197,7 @@ SortSubBottomSheet.OnSortSubOptionClickListener {
                                     showSubUpdateDiffDialog(this@SubSettingActivity, result)
                                 }
                                 refreshData()
-                                com.miku.ray.handler.SettingsChangeManager.makeRefreshDisplayPrefs()
+                                com.miku.ray.handler.SettingsChangeManager.makeSetupGroupTab()
                                 hideLoading()
                             }
                         } catch (e: Exception) {
@@ -236,7 +236,7 @@ SortSubBottomSheet.OnSortSubOptionClickListener {
 
     override fun onSortSubOptionClicked(order: Int) {
         viewModel.applySortOrder()
-        com.miku.ray.handler.SettingsChangeManager.makeRefreshDisplayPrefs()
+        com.miku.ray.handler.SettingsChangeManager.makeSetupGroupTab()
     }
 
     override fun onShareSubOptionClicked(optionId: Int, url: String) {

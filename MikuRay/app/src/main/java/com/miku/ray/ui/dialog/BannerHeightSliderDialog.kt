@@ -1,9 +1,7 @@
 package com.miku.ray.ui.dialog
 
 import com.miku.ray.remixicon.R as RemixR
-import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
@@ -13,26 +11,19 @@ import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
+import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.util.WindowBlurUtils
 
 class BannerHeightSliderDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : UiCustomizationPreference(context, attrs) {
-
-    private fun Context.findActivity(): Activity? {
-        var ctx = this
-        while (ctx is ContextWrapper) {
-            if (ctx is Activity) return ctx
-            ctx = ctx.baseContext
-        }
-        return null
-    }
+) : Preference(context, attrs) {
 
     override fun onClick() {
-        val activity = context.findActivity() ?: return
-
-        val saved = customizationState.homeBannerHeight
+        val saved = MmkvManager.decodeSettingsInt(
+            AppConfig.PREF_HOME_BANNER_HEIGHT,
+            AppConfig.HOME_BANNER_HEIGHT_DEFAULT
+        )
         val current = saved.coerceIn(
             AppConfig.HOME_BANNER_HEIGHT_MIN,
             AppConfig.HOME_BANNER_HEIGHT_MAX
@@ -53,10 +44,7 @@ class BannerHeightSliderDialog @JvmOverloads constructor(
             summary = context.getString(
                 R.string.pref_home_banner_height_summary_value, newHeight
             )
-            val intent = android.content.Intent(
-                AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED
-            )
-            activity.sendBroadcast(intent)
+            SettingsChangeManager.notifyUiCustomizationChanged()
         }
         .setNeutralButton(R.string.reset, null)
         .setNegativeButton(android.R.string.cancel, null)
@@ -71,10 +59,7 @@ class BannerHeightSliderDialog @JvmOverloads constructor(
 
             MmkvManager.encodeSettings(AppConfig.PREF_HOME_BANNER_HEIGHT, default)
             summary = context.getString(R.string.pref_home_banner_height_summary_value, default)
-            val intent = android.content.Intent(
-                AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED
-            )
-            activity.sendBroadcast(intent)
+            SettingsChangeManager.notifyUiCustomizationChanged()
 
             dialog.dismiss()
         }
@@ -83,16 +68,15 @@ class BannerHeightSliderDialog @JvmOverloads constructor(
     }
 
     private fun updateSummary() {
-        val h = customizationState.homeBannerHeight
+        val h = MmkvManager.decodeSettingsInt(
+            AppConfig.PREF_HOME_BANNER_HEIGHT,
+            AppConfig.HOME_BANNER_HEIGHT_DEFAULT
+        )
         summary = context.getString(R.string.pref_home_banner_height_summary_value, h)
     }
 
     override fun onAttached() {
         super.onAttached()
         updateSummary()
-    }
-
-    override fun onCustomizationStateChanged(state: com.miku.ray.handler.UiCustomizationState) {
-        summary = context.getString(R.string.pref_home_banner_height_summary_value, state.homeBannerHeight)
     }
 }

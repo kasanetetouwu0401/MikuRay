@@ -254,7 +254,7 @@ class BackupActivity : HelperBaseActivity() {
             }
 
             val count = MMKV.restoreAllFromDirectory(backupDir.absolutePath)
-            SettingsChangeManager.makeRefreshDisplayPrefs()
+            SettingsChangeManager.makeSetupGroupTab()
             SettingsChangeManager.makeRestartService()
 
             restoreBannerImages(backupDir.absolutePath)

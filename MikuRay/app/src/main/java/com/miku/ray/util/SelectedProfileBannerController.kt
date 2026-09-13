@@ -20,7 +20,7 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.handler.UiCustomizationStateStore
+import com.miku.ray.handler.MmkvManager
 
 class SelectedProfileBannerController(context: Context) {
 
@@ -29,24 +29,25 @@ class SelectedProfileBannerController(context: Context) {
     private var changeReceiver: BroadcastReceiver? = null
 
     fun isEnabled(): Boolean =
-    UiCustomizationStateStore.state.value.selectedBannerEnabled
+    MmkvManager.decodeSettingsBool(AppConfig.PREF_SELECTED_BANNER_STYLE_ENABLED, false)
 
     fun hasCustomBanner(): Boolean =
-    UiCustomizationStateStore.state.value.selectedBannerUri.isNotEmpty()
+    !MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI).isNullOrEmpty()
 
     fun hasBanner(): Boolean = true
 
     fun applyTo(target: View, cornerRadiusDp: Float = 16f) {
-        val state = UiCustomizationStateStore.state.value
-        val uriString = state.selectedBannerUri
-        if (uriString.isEmpty()) {
+        val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_SELECTED_BANNER_URI)
+        if (uriString.isNullOrEmpty()) {
             clearPendingRequest(target)
             applyDefaultBanner(target, cornerRadiusDp)
             return
         }
 
-        val dimPercent = state.selectedBannerDim
-            .coerceIn(AppConfig.SELECTED_BANNER_DIM_MIN, AppConfig.SELECTED_BANNER_DIM_MAX)
+        val dimPercent = MmkvManager.decodeSettingsInt(
+            AppConfig.PREF_SELECTED_BANNER_DIM,
+            AppConfig.SELECTED_BANNER_DIM_DEFAULT
+        ).coerceIn(AppConfig.SELECTED_BANNER_DIM_MIN, AppConfig.SELECTED_BANNER_DIM_MAX)
         val cornerRadiusPx = cornerRadiusDp * target.context.resources.displayMetrics.density
         val dimColor = dimColorFor(target.context, dimPercent)
         val bitmapKey = "selected_banner::$uriString"
@@ -112,8 +113,10 @@ class SelectedProfileBannerController(context: Context) {
     }
 
     private fun applyDefaultBanner(target: View, cornerRadiusDp: Float = 16f) {
-        val dimPercent = UiCustomizationStateStore.state.value.selectedBannerDim
-            .coerceIn(AppConfig.SELECTED_BANNER_DIM_MIN, AppConfig.SELECTED_BANNER_DIM_MAX)
+        val dimPercent = MmkvManager.decodeSettingsInt(
+            AppConfig.PREF_SELECTED_BANNER_DIM,
+            AppConfig.SELECTED_BANNER_DIM_DEFAULT
+        ).coerceIn(AppConfig.SELECTED_BANNER_DIM_MIN, AppConfig.SELECTED_BANNER_DIM_MAX)
         val cornerRadiusPx = cornerRadiusDp * target.context.resources.displayMetrics.density
         val dimColor = dimColorFor(target.context, dimPercent)
         val tagKey = "selected_banner::default::dim=$dimPercent::color=$dimColor::r=$cornerRadiusPx"

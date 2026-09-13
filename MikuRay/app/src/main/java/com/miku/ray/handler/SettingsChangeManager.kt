@@ -1,52 +1,33 @@
 package com.miku.ray.handler
 
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-
-enum class UiCustomizationChange {
-    LIGHT,
-    HEAVY
-}
 
 object SettingsChangeManager {
-    val uiCustomizationState: StateFlow<UiCustomizationState> = UiCustomizationStateStore.state
-    val uiCustomizationEvents: SharedFlow<Unit> = UiCustomizationStateStore.events
-
-    private val _uiCustomizationChanges = MutableSharedFlow<UiCustomizationChange>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    val uiCustomizationChanges: SharedFlow<UiCustomizationChange> = _uiCustomizationChanges.asSharedFlow()
-
-    private val _settingsVersion = MutableStateFlow(0L)
-    val settingsVersion: StateFlow<Long> = _settingsVersion.asStateFlow()
-    private val _settingsChanged = MutableSharedFlow<Unit>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    val settingsChanged: SharedFlow<Unit> = _settingsChanged.asSharedFlow()
     private val _restartService = MutableStateFlow(false)
+    private val _setupGroupTab = MutableStateFlow(false)
     private val _refreshDisplayPrefs = MutableStateFlow(false)
-
-    fun notifySettingsChanged(change: UiCustomizationChange = UiCustomizationChange.LIGHT) {
-        _settingsVersion.value++
-        _settingsChanged.tryEmit(Unit)
-        _uiCustomizationChanges.tryEmit(change)
-    }
 
     fun makeRestartService() {
         _restartService.value = true
     }
 
     fun consumeRestartService(): Boolean {
-        val value = _restartService.value
+        val v = _restartService.value
         _restartService.value = false
-        return value
+        return v
+    }
+
+    fun makeSetupGroupTab() {
+        _setupGroupTab.value = true
+    }
+
+    fun consumeSetupGroupTab(): Boolean {
+        val v = _setupGroupTab.value
+        _setupGroupTab.value = false
+        return v
     }
 
     fun makeRefreshDisplayPrefs() {
@@ -54,8 +35,22 @@ object SettingsChangeManager {
     }
 
     fun consumeRefreshDisplayPrefs(): Boolean {
-        val value = _refreshDisplayPrefs.value
+        val v = _refreshDisplayPrefs.value
         _refreshDisplayPrefs.value = false
-        return value
+        return v
+    }
+
+    private val _uiCustomizationChanged = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val uiCustomizationChanged: SharedFlow<Unit> = _uiCustomizationChanged
+
+    fun notifyUiCustomizationChanged() {
+        _uiCustomizationChanged.tryEmit(Unit)
+    }
+
+    private val _recreateVersion = MutableStateFlow(0L)
+    val recreateVersion: StateFlow<Long> = _recreateVersion
+
+    fun requestRecreate() {
+        _recreateVersion.value += 1
     }
 }

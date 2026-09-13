@@ -16,7 +16,7 @@ import com.miku.ray.util.WindowBlurUtils
 class AppIconPickerDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : UiCustomizationPreference(context, attrs) {
+) : Preference(context, attrs) {
 
     fun refreshSummary() {
         val current = LauncherAliasSwitcher.currentIconVariant()
