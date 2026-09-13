@@ -51,7 +51,7 @@ class SubSettingRecyclerAdapter(
             R.plurals.sub_setting_server_count, serverCount, serverCount
         )
         holder.itemSubSettingBinding.tvLastUpdated.text = Utils.formatTimestamp(subItem.lastUpdated)
-        val usageText = formatSubscriptionUsage(holder.itemView.context, subItem)
+        val usageText = formatSubscriptionUsage(holder.itemView.context, subId, subItem)
         val expiryText = formatSubscriptionExpiry(holder.itemView.context, subItem)
         holder.itemSubSettingBinding.tvSubscriptionUsage.text = usageText
         holder.itemSubSettingBinding.tvSubscriptionExpire.text = expiryText
@@ -99,7 +99,7 @@ class SubSettingRecyclerAdapter(
         }
     }
 
-    private fun formatSubscriptionUsage(context: Context, subscription: SubscriptionItem): String? {
+    private fun formatSubscriptionUsage(context: Context, subId: String, subscription: SubscriptionItem): String? {
         return when {
             subscription.bytesUsed >= 0L && subscription.bytesRemaining >= 0L -> {
                 context.getString(
@@ -114,7 +114,11 @@ class SubSettingRecyclerAdapter(
                     MmkvManager.formatTrafficBytesPublic(subscription.bytesUsed),
                 )
             }
-            else -> null
+            else -> {
+                MmkvManager.getGroupTrafficString(subId)?.let { groupTraffic ->
+                    context.getString(R.string.sub_setting_usage_used, groupTraffic)
+                }
+            }
         }
     }
 
