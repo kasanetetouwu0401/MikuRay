@@ -202,7 +202,7 @@ object UiCustomizationStateStore {
         blurBottomAlpha = int(AppConfig.PREF_BLUR_BOTTOM_ALPHA, AppConfig.DEFAULT_BLUR_BOTTOM_ALPHA)
     )
 
-    private fun bool(key: String) = MmkvManager.decodeSettingsBool(key, false)
+    private fun bool(key: String, default: Boolean = false) = MmkvManager.decodeSettingsBool(key, default)
     private fun int(key: String, default: Int) = MmkvManager.decodeSettingsInt(key, default)
     private fun float(key: String, default: Float) = MmkvManager.decodeSettingsFloat(key, default)
     private fun string(key: String, default: String = "") = MmkvManager.decodeSettingsString(key, default) ?: default

@@ -2,6 +2,7 @@ package com.miku.ray.handler
 
 import android.content.Context
 import android.util.Log
+import com.miku.ray.AppConfig
 import com.tencent.mmkv.MMKV
 import com.tencent.mmkv.MMKVHandler
 import com.tencent.mmkv.MMKVLogLevel
