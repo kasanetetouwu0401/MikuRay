@@ -624,15 +624,16 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         refreshBannerAndHeader()
     }
 
-    /**
-     * Re-applies every UI-customization setting that can be changed live, without
-     * recreating the activity. Called once up front and again whenever
-     * [SettingsChangeManager.uiCustomizationChanged] fires.
-     */
     private fun refreshUiCustomizations() {
         refreshBannerAndHeader()
         BlurBottomStatusController.applyState(this, binding) { mainViewModel.onLayoutTestClicked() }
         updateQuickActionsVisibility()
+        refreshFabExtendedState()
+    }
+
+    private fun refreshFabExtendedState() {
+        if (!mainViewModel.isRunning.value) return
+        if (isFabExtended()) startFabTimer() else stopFabTimer()
     }
 
     private fun refreshBannerAndHeader() {

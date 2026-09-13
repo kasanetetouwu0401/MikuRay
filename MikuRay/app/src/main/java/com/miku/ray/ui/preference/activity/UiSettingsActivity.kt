@@ -253,6 +253,7 @@ class UiSettingsActivity : BaseActivity() {
         private val enableBlur by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_ENABLE_BLUR) }
         private val useSystemBlur by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_USE_SYSTEM_BLUR) }
         private val blurBottomStatus by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_BLUR_BOTTOM_STATUS) }
+        private val fabExtended by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_FAB_EXTENDED) }
         private val appLanguage by lazy { findPreference<ListPreference>(AppConfig.PREF_LANGUAGE) }
         private val nightTheme by lazy { findPreference<ListPreference>(AppConfig.PREF_UI_MODE_NIGHT) }
         private val iconShape by lazy { findPreference<ListPreference>(AppConfig.PREF_ICON_SHAPE) }
@@ -592,6 +593,12 @@ class UiSettingsActivity : BaseActivity() {
 
             blurBottomStatus?.setOnPreferenceChangeListener { _, newValue ->
                 MmkvManager.encodeSettings(AppConfig.PREF_BLUR_BOTTOM_STATUS, newValue as Boolean)
+                SettingsChangeManager.notifyUiCustomizationChanged()
+                true
+            }
+
+            fabExtended?.setOnPreferenceChangeListener { _, newValue ->
+                MmkvManager.encodeSettings(AppConfig.PREF_FAB_EXTENDED, newValue as Boolean)
                 SettingsChangeManager.notifyUiCustomizationChanged()
                 true
             }
