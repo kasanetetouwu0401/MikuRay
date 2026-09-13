@@ -846,29 +846,31 @@ object MmkvManager {
         return rulesetList to changed
     }
 
-    fun encodeSettings(key: String, value: String?): Boolean {
-        return settingsStorage.encode(key, value)
+    private fun settingsChanged(success: Boolean): Boolean {
+        if (success) {
+            SettingsChangeManager.notifySettingsChanged()
+            UiCustomizationStateStore.refresh()
+        }
+        return success
     }
 
-    fun encodeSettings(key: String, value: Int): Boolean {
-        return settingsStorage.encode(key, value)
-    }
+    fun encodeSettings(key: String, value: String?): Boolean =
+        settingsChanged(settingsStorage.encode(key, value))
 
-    fun encodeSettings(key: String, value: Long): Boolean {
-        return settingsStorage.encode(key, value)
-    }
+    fun encodeSettings(key: String, value: Int): Boolean =
+        settingsChanged(settingsStorage.encode(key, value))
 
-    fun encodeSettings(key: String, value: Float): Boolean {
-        return settingsStorage.encode(key, value)
-    }
+    fun encodeSettings(key: String, value: Long): Boolean =
+        settingsChanged(settingsStorage.encode(key, value))
 
-    fun encodeSettings(key: String, value: Boolean): Boolean {
-        return settingsStorage.encode(key, value)
-    }
+    fun encodeSettings(key: String, value: Float): Boolean =
+        settingsChanged(settingsStorage.encode(key, value))
 
-    fun encodeSettings(key: String, value: MutableSet<String>): Boolean {
-        return settingsStorage.encode(key, value)
-    }
+    fun encodeSettings(key: String, value: Boolean): Boolean =
+        settingsChanged(settingsStorage.encode(key, value))
+
+    fun encodeSettings(key: String, value: MutableSet<String>): Boolean =
+        settingsChanged(settingsStorage.encode(key, value))
 
     fun decodeSettingsString(key: String): String? {
         return settingsStorage.decodeString(key)

@@ -19,7 +19,7 @@ import com.miku.ray.util.WindowBlurUtils
 class SelectedBannerDimSliderDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : Preference(context, attrs) {
+) : UiCustomizationPreference(context, attrs) {
 
     private fun Context.findActivity(): Activity? {
         var ctx = this
@@ -33,10 +33,7 @@ class SelectedBannerDimSliderDialog @JvmOverloads constructor(
     override fun onClick() {
         val activity = context.findActivity() ?: return
 
-        val saved = MmkvManager.decodeSettingsInt(
-            AppConfig.PREF_SELECTED_BANNER_DIM,
-            AppConfig.SELECTED_BANNER_DIM_DEFAULT
-        )
+        val saved = customizationState.selectedBannerDim
         val current = saved.coerceIn(
             AppConfig.SELECTED_BANNER_DIM_MIN,
             AppConfig.SELECTED_BANNER_DIM_MAX
@@ -79,15 +76,16 @@ class SelectedBannerDimSliderDialog @JvmOverloads constructor(
     }
 
     private fun updateSummary() {
-        val d = MmkvManager.decodeSettingsInt(
-            AppConfig.PREF_SELECTED_BANNER_DIM,
-            AppConfig.SELECTED_BANNER_DIM_DEFAULT
-        )
+        val d = customizationState.selectedBannerDim
         summary = context.getString(R.string.selected_banner_dim_summary_value, d)
     }
 
     override fun onAttached() {
         super.onAttached()
         updateSummary()
+    }
+
+    override fun onCustomizationStateChanged(state: com.miku.ray.handler.UiCustomizationState) {
+        summary = context.getString(R.string.selected_banner_dim_summary_value, state.selectedBannerDim)
     }
 }

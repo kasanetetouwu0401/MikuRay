@@ -21,7 +21,7 @@ import java.util.Locale
 class ParticlesSettingsDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : Preference(context, attrs) {
+) : UiCustomizationPreference(context, attrs) {
 
     private data class SliderParam(
         val prefKey: String,
@@ -145,7 +145,16 @@ class ParticlesSettingsDialog @JvmOverloads constructor(
     }
 
     private fun currentValue(param: SliderParam): Float {
-        return MmkvManager.decodeSettingsFloat(param.prefKey, param.default)
+        return when (param.prefKey) {
+            AppConfig.PREF_PARTICLES_FRAME_DELAY -> customizationState.particlesFrameDelay
+            AppConfig.PREF_PARTICLES_LINE_LENGTH -> customizationState.particlesLineLength
+            AppConfig.PREF_PARTICLES_LINE_THICKNESS -> customizationState.particlesLineThickness
+            AppConfig.PREF_PARTICLES_RADIUS_MAX -> customizationState.particlesRadiusMax
+            AppConfig.PREF_PARTICLES_RADIUS_MIN -> customizationState.particlesRadiusMin
+            AppConfig.PREF_PARTICLES_DENSITY -> customizationState.particlesDensity
+            AppConfig.PREF_PARTICLES_SPEED_FACTOR -> customizationState.particlesSpeedFactor
+            else -> param.default
+        }
         .coerceIn(param.min, param.max)
     }
 

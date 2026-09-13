@@ -18,7 +18,7 @@ import com.miku.ray.util.WindowBlurUtils
 class BannerHeightSliderDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : Preference(context, attrs) {
+) : UiCustomizationPreference(context, attrs) {
 
     private fun Context.findActivity(): Activity? {
         var ctx = this
@@ -32,10 +32,7 @@ class BannerHeightSliderDialog @JvmOverloads constructor(
     override fun onClick() {
         val activity = context.findActivity() ?: return
 
-        val saved = MmkvManager.decodeSettingsInt(
-            AppConfig.PREF_HOME_BANNER_HEIGHT,
-            AppConfig.HOME_BANNER_HEIGHT_DEFAULT
-        )
+        val saved = customizationState.homeBannerHeight
         val current = saved.coerceIn(
             AppConfig.HOME_BANNER_HEIGHT_MIN,
             AppConfig.HOME_BANNER_HEIGHT_MAX
@@ -86,15 +83,16 @@ class BannerHeightSliderDialog @JvmOverloads constructor(
     }
 
     private fun updateSummary() {
-        val h = MmkvManager.decodeSettingsInt(
-            AppConfig.PREF_HOME_BANNER_HEIGHT,
-            AppConfig.HOME_BANNER_HEIGHT_DEFAULT
-        )
+        val h = customizationState.homeBannerHeight
         summary = context.getString(R.string.pref_home_banner_height_summary_value, h)
     }
 
     override fun onAttached() {
         super.onAttached()
         updateSummary()
+    }
+
+    override fun onCustomizationStateChanged(state: com.miku.ray.handler.UiCustomizationState) {
+        summary = context.getString(R.string.pref_home_banner_height_summary_value, state.homeBannerHeight)
     }
 }

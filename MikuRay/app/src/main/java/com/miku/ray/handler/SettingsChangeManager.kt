@@ -1,45 +1,43 @@
 package com.miku.ray.handler
 
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-/**
- * Central hub for settings / UI-customisation change signals.
- * Uses StateFlow + SharedFlow only — no preference keys live here.
- *
- * - StateFlow flags are consumed once (edge-triggered).
- * - SharedFlow events are observed continuously by UI that can refresh in-place.
- */
 object SettingsChangeManager {
+    val uiCustomizationState: StateFlow<UiCustomizationState> = UiCustomizationStateStore.state
+    val uiCustomizationEvents: SharedFlow<Unit> = UiCustomizationStateStore.events
 
-    // ── one-shot flags (consumed by MainActivity / hosts) ──────────────────
+    private val _settingsVersion = MutableStateFlow(0L)
+    val settingsVersion: StateFlow<Long> = _settingsVersion.asStateFlow()
+
+    private val _settingsChanged = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val settingsChanged: SharedFlow<Unit> = _settingsChanged.asSharedFlow()
 
     private val _restartService = MutableStateFlow(false)
     private val _setupGroupTab = MutableStateFlow(false)
     private val _refreshDisplayPrefs = MutableStateFlow(false)
 
-    // ── continuous UI signals ──────────────────────────────────────────────
-
-    /** Emitted when any UI customisation that does NOT require Activity.recreate() changed. */
-    private val _uiCustomisation = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val uiCustomisation: SharedFlow<Unit> = _uiCustomisation.asSharedFlow()
-
-    /** Emitted when a change requires Activity.recreate() (theme / dpi / font scale / language …). */
-    private val _needsRecreate = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val needsRecreate: SharedFlow<Unit> = _needsRecreate.asSharedFlow()
-
-    // ── producers ──────────────────────────────────────────────────────────
+    fun notifySettingsChanged() {
+        _settingsVersion.value++
+        _settingsChanged.tryEmit(Unit)
+    }
 
     fun makeRestartService() {
         _restartService.value = true
     }
 
     fun consumeRestartService(): Boolean {
-        val v = _restartService.value
+        val value = _restartService.value
         _restartService.value = false
-        return v
+        return value
     }
 
     fun makeSetupGroupTab() {
@@ -47,9 +45,9 @@ object SettingsChangeManager {
     }
 
     fun consumeSetupGroupTab(): Boolean {
-        val v = _setupGroupTab.value
+        val value = _setupGroupTab.value
         _setupGroupTab.value = false
-        return v
+        return value
     }
 
     fun makeRefreshDisplayPrefs() {
@@ -57,18 +55,8 @@ object SettingsChangeManager {
     }
 
     fun consumeRefreshDisplayPrefs(): Boolean {
-        val v = _refreshDisplayPrefs.value
+        val value = _refreshDisplayPrefs.value
         _refreshDisplayPrefs.value = false
-        return v
-    }
-
-    /** Notify listeners that UI customisation changed — no recreate needed. */
-    fun notifyUiCustomisationChanged() {
-        _uiCustomisation.tryEmit(Unit)
-    }
-
-    /** Notify that a full Activity.recreate() is required. */
-    fun notifyNeedsRecreate() {
-        _needsRecreate.tryEmit(Unit)
+        return value
     }
 }

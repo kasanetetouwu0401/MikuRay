@@ -23,7 +23,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -45,6 +47,7 @@ import com.miku.ray.extension.toastSuccess
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.handler.SettingsManager
+import com.miku.ray.handler.UiCustomizationState
 import com.miku.ray.helper.MmkvPreferenceDataStore
 import com.miku.ray.ui.base.BaseActivity
 import com.miku.ray.ui.preference.SearchPreferenceHighlighter
@@ -71,6 +74,7 @@ import com.miku.ray.ui.weather.WeatherHelper
 import com.miku.ray.util.showBlur
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -577,8 +581,6 @@ class UiSettingsActivity : BaseActivity() {
 
             toolbarCenterSubtitleMode?.setOnPreferenceChangeListener { _, newValue ->
                 MmkvManager.encodeSettings(AppConfig.PREF_TOOLBAR_CENTER_SUBTITLE_MODE, newValue as Boolean)
-                activity?.recreate()
-                activity?.let { BaseActivity.recreateOthersInBackground(except = it) }
                 true
             }
 
@@ -618,7 +620,9 @@ class UiSettingsActivity : BaseActivity() {
                     val idx = lp.findIndexOfValue(valueStr)
                     lp.summary = if (idx >= 0) lp.entries[idx] else valueStr
                 }
-                SettingsChangeManager.notifyUiCustomisationChanged()
+                requireContext().sendBroadcast(
+                    android.content.Intent(AppConfig.BROADCAST_ACTION_ICON_SHAPE_CHANGED).apply {
+                        putExtra(AppConfig.PREF_ICON_SHAPE, valueStr.ifEmpty { AppConfig.PREF_ICON_SHAPE_DEFAULT })
                     }
                 )
                 true
@@ -630,7 +634,9 @@ class UiSettingsActivity : BaseActivity() {
                     val idx = lp.findIndexOfValue(valueStr)
                     lp.summary = if (idx >= 0) lp.entries[idx] else valueStr
                 }
-                SettingsChangeManager.notifyUiCustomisationChanged()
+                requireContext().sendBroadcast(
+                    android.content.Intent(AppConfig.BROADCAST_ACTION_ARROW_SHAPE_CHANGED).apply {
+                        putExtra(AppConfig.PREF_ARROW_SHAPE, valueStr.ifEmpty { AppConfig.PREF_ARROW_SHAPE_DEFAULT })
                     }
                 )
                 true
@@ -678,7 +684,9 @@ class UiSettingsActivity : BaseActivity() {
                     CategoryStyleHelper.applyToGroup(styleValue, screen)
                     listView.adapter?.notifyDataSetChanged()
                 }
-                SettingsChangeManager.notifyUiCustomisationChanged()
+                requireContext().sendBroadcast(
+                    android.content.Intent(AppConfig.BROADCAST_ACTION_CATEGORY_STYLE_CHANGED)
+                )
                 true
             }
 
@@ -799,6 +807,70 @@ class UiSettingsActivity : BaseActivity() {
             super.onViewCreated(view, savedInstanceState)
             SearchPreferenceHighlighter.applyFromIntent(this)
             applyEdgeToEdgeListInsets()
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    launch {
+                        SettingsChangeManager.uiCustomizationState.collect { state ->
+                            renderState(state)
+                        }
+                    }
+                    launch {
+                        SettingsChangeManager.uiCustomizationEvents.collect {
+                            refreshPreferenceState(SettingsChangeManager.uiCustomizationState.value)
+                        }
+                    }
+                }
+            }
+        }
+
+        private fun renderState(state: UiCustomizationState) {
+            dynamicColor?.isChecked = state.dynamicColor
+            dynamicColorBanner?.isChecked = state.dynamicColorBanner
+            disableHomeBanner?.isChecked = state.disableHomeBanner
+            trueBlack?.isChecked = state.trueBlack
+            enableBlur?.isChecked = state.enableBlur
+            useSystemBlur?.isChecked = state.useSystemBlur
+            blurBottomStatus?.isChecked = state.blurBottomStatus
+            nightTheme?.value = state.nightTheme
+            iconShape?.value = state.iconShape
+            arrowShape?.value = state.arrowShape
+            customFontSwitch?.isChecked = state.useCustomFont
+            categoryStyle?.value = state.categoryStyle
+            showSplash?.isChecked = state.showSplash
+            val systemDpi = Resources.getSystem().displayMetrics.densityDpi
+            val currentDpi = if (state.customDpi > 0) state.customDpi else systemDpi
+            customDpi?.summary = "${(currentDpi * 100f / systemDpi / 5f).roundToInt() * 5}%"
+            fontSizeSlider?.summary = "${(state.appFontSize * 100f).roundToInt()}%"
+            blurIntensity?.updateSummary(state.blurRadius, state.blurRounds)
+            blurBottomIntensity?.updateSummary(state.blurBottomRadius, state.blurBottomAlpha)
+            groupAllTabIcon?.summary = state.groupAllTabIcon
+            tabBadgeLimit?.value = state.tabBadgeLimit
+            searchBarChip?.value = state.searchBarChip
+            selectedBannerStyleEnabled?.isChecked = state.selectedBannerStyleEnabled
+            weatherUnit?.value = state.weatherUnit
+            weatherCustomLocation?.text = state.weatherLocation
+            searchChipGradient?.isChecked = state.searchChipGradient
+            toolbarCenterSubtitleMode?.isChecked = state.toolbarCenterSubtitleMode
+            showRealtimeTrafficIp?.isChecked = state.showRealtimeTrafficIp
+            showIspInfo?.isChecked = state.showIspInfo
+            refreshPreferenceState(state)
+        }
+
+        private fun refreshPreferenceState(state: UiCustomizationState) {
+            updateAppFontSummary()
+            updateCustomFontSummary()
+            updateCustomSoundSummaries()
+            selectedBannerCategory?.isVisible = !state.doubleColumnDisplay
+            searchChipGradient?.isEnabled = state.searchBarChip != SearchBarChipMode.DISABLED
+            updateWeatherSubPrefsEnabled(
+                state.searchBarChip == SearchBarChipMode.WEATHER ||
+                    state.searchBarChip == SearchBarChipMode.DUAL_SWIPE
+            )
+            showIspInfo?.isEnabled = !state.showRealtimeTrafficIp
+            updateGroupAllTabIconSummary()
+            updateWeatherCustomLocationSummary(state.weatherLocation)
+            updateCheckUpdateSummary()
         }
 
         private fun extractAndSaveBannerColor(uri: Uri) {
@@ -1436,15 +1508,19 @@ class UiSettingsActivity : BaseActivity() {
         }
 
         private fun broadcastProfileChanged() {
-            SettingsChangeManager.notifyUiCustomisationChanged()
+            requireContext().sendBroadcast(
+                android.content.Intent(AppConfig.BROADCAST_ACTION_PROFILE_BANNER_CHANGED)
+            )
         }
 
         private fun broadcastHomeBannerChanged() {
-            SettingsChangeManager.notifyUiCustomisationChanged()
+            requireContext().sendBroadcast(
+                android.content.Intent(AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED)
+            )
         }
 
         private fun broadcastSelectedBannerChanged() {
-            SettingsChangeManager.notifyUiCustomisationChanged()
+            com.miku.ray.util.SelectedProfileBannerController.broadcastChanged(requireContext())
         }
 
         private fun updateCheckUpdateSummary(pendingVariant: String? = null) {

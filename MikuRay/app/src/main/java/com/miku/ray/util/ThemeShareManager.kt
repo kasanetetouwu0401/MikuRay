@@ -435,8 +435,9 @@ object ThemeShareManager {
             LauncherAliasSwitcher.currentIconVariant(),
             LauncherAliasSwitcher.currentNameVariant()
         )
-        // UI customisation is driven by SharedFlow — no broadcasts needed.
-        com.miku.ray.handler.SettingsChangeManager.notifyUiCustomisationChanged()
-        com.miku.ray.handler.SettingsChangeManager.notifyNeedsRecreate()
+        context.sendBroadcast(android.content.Intent(AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED))
+        context.sendBroadcast(android.content.Intent(AppConfig.BROADCAST_ACTION_PROFILE_BANNER_CHANGED))
+        SelectedProfileBannerController.broadcastChanged(context)
+        context.sendBroadcast(android.content.Intent(AppConfig.BROADCAST_ACTION_PARTICLES_CHANGED))
     }
 }

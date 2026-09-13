@@ -17,17 +17,11 @@ import com.miku.ray.util.WindowBlurUtils
 class BlurBottomIntensityDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : Preference(context, attrs) {
+) : UiCustomizationPreference(context, attrs) {
 
     override fun onClick() {
-        val originalRadius = MmkvManager.decodeSettingsFloat(
-            AppConfig.PREF_BLUR_BOTTOM_RADIUS,
-            AppConfig.DEFAULT_BLUR_BOTTOM_RADIUS
-        )
-        val originalAlpha = MmkvManager.decodeSettingsInt(
-            AppConfig.PREF_BLUR_BOTTOM_ALPHA,
-            AppConfig.DEFAULT_BLUR_BOTTOM_ALPHA
-        )
+        val originalRadius = customizationState.blurBottomRadius
+        val originalAlpha = customizationState.blurBottomAlpha
 
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_blur_bottom_intensity, null)
         val sliderRadius = dialogView.findViewById<Slider>(R.id.slider_blur_bottom_radius)
@@ -92,5 +86,9 @@ class BlurBottomIntensityDialog @JvmOverloads constructor(
 
     fun updateSummary(radius: Float, alpha: Int) {
         summary = context.getString(R.string.summary_blur_bottom_intensity_value, radius, alpha)
+    }
+
+    override fun onCustomizationStateChanged(state: com.miku.ray.handler.UiCustomizationState) {
+        updateSummary(state.blurBottomRadius, state.blurBottomAlpha)
     }
 }

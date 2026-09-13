@@ -21,7 +21,7 @@ import kotlin.math.roundToInt
 class FontSizeSliderDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : Preference(context, attrs) {
+) : UiCustomizationPreference(context, attrs) {
 
     private fun Context.findActivity(): Activity? {
         var ctx = this
@@ -37,7 +37,7 @@ class FontSizeSliderDialog @JvmOverloads constructor(
     override fun onClick() {
         val activity = context.findActivity() ?: return
 
-        val savedScale = MmkvManager.decodeSettingsFloat(AppConfig.PREF_APP_FONT_SIZE, AppConfig.FONT_SIZE_DEFAULT)
+        val savedScale = customizationState.appFontSize
         val currentScale = if (savedScale > 0f) savedScale else AppConfig.FONT_SIZE_DEFAULT
 
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_font_size_slider, null)
@@ -87,5 +87,9 @@ class FontSizeSliderDialog @JvmOverloads constructor(
             activity.recreate()
             BaseActivity.recreateOthersInBackground(except = activity)
         }
+    }
+
+    override fun onCustomizationStateChanged(state: com.miku.ray.handler.UiCustomizationState) {
+        summary = formatPercent(state.appFontSize)
     }
 }

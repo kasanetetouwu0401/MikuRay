@@ -13,17 +13,23 @@ import androidx.annotation.ColorInt
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
+import androidx.core.view.children
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
+import com.miku.ray.handler.SettingsChangeManager
+import kotlinx.coroutines.flow.collect
 import com.miku.ray.util.ThemeManager
 import com.miku.ray.util.WindowBlurUtils
 import com.miku.ray.util.getColorAttr
 
 class ThemeColorDialog : DialogFragment() {
+
+    private var stateJob: kotlinx.coroutines.Job? = null
 
     companion object {
         const val TAG = "ThemeColorDialog"
@@ -45,6 +51,27 @@ class ThemeColorDialog : DialogFragment() {
     override fun onStart() {
         super.onStart()
         WindowBlurUtils.applyWindowBlur(dialog?.window)
+        stateJob?.cancel()
+        stateJob = lifecycleScope.launchWhenStarted {
+            SettingsChangeManager.uiCustomizationState.collect { state ->
+                dialog?.findViewById<android.widget.GridLayout>(R.id.grid_theme_colors)?.let { grid ->
+                    grid.children.forEach { item ->
+                        val selected = when (item.tag) {
+                            "custom" -> state.useCustomColor
+                            else -> item.tag == state.appTheme
+                        }
+                        item.findViewById<ImageView>(R.id.iv_check).visibility =
+                            if (selected) View.VISIBLE else View.GONE
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onStop() {
+        stateJob?.cancel()
+        stateJob = null
+        super.onStop()
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -53,13 +80,15 @@ class ThemeColorDialog : DialogFragment() {
 
         val grid = view.findViewById<android.widget.GridLayout>(R.id.grid_theme_colors)
 
-        val useCustom   = MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_CUSTOM_COLOR, false)
-        val savedColor  = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_COLOR, 0)
-        val currentKey  = MmkvManager.decodeSettingsString(AppConfig.PREF_APP_THEME) ?: "8"
+        val state = SettingsChangeManager.uiCustomizationState.value
+        val useCustom   = state.useCustomColor
+        val savedColor  = state.customColor
+        val currentKey  = state.appTheme
 
         THEME_KEYS.forEach { key ->
             val itemView = LayoutInflater.from(requireContext())
             .inflate(R.layout.item_theme_color, grid, false)
+            itemView.tag = key
 
             val circle = itemView.findViewById<ImageView>(R.id.iv_color_circle)
             val check  = itemView.findViewById<ImageView>(R.id.iv_check)
@@ -86,6 +115,7 @@ class ThemeColorDialog : DialogFragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val customItemView = LayoutInflater.from(requireContext())
             .inflate(R.layout.item_theme_color, grid, false)
+            customItemView.tag = "custom"
 
             val customCircle = customItemView.findViewById<ImageView>(R.id.iv_color_circle)
             val customIcon   = customItemView.findViewById<ImageView>(R.id.iv_check)

@@ -21,7 +21,7 @@ import kotlin.math.roundToInt
 class DpiSliderDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : Preference(context, attrs) {
+) : UiCustomizationPreference(context, attrs) {
 
     private fun Context.findActivity(): Activity? {
         var ctx = this
@@ -37,7 +37,7 @@ class DpiSliderDialog @JvmOverloads constructor(
 
         val systemDpi = Resources.getSystem().displayMetrics.densityDpi
 
-        val savedDpi = MmkvManager.decodeSettingsInt(AppConfig.PREF_CUSTOM_DPI, 0)
+        val savedDpi = customizationState.customDpi
         val currentDpi = if (savedDpi > 0) savedDpi else systemDpi
         val currentPercent = (currentDpi * 100f / systemDpi / 5f).roundToInt() * 5
 
@@ -79,5 +79,11 @@ class DpiSliderDialog @JvmOverloads constructor(
             activity.recreate()
             BaseActivity.recreateOthersInBackground(except = activity)
         }
+    }
+
+    override fun onCustomizationStateChanged(state: com.miku.ray.handler.UiCustomizationState) {
+        val systemDpi = Resources.getSystem().displayMetrics.densityDpi
+        val currentDpi = if (state.customDpi > 0) state.customDpi else systemDpi
+        summary = "${(currentDpi * 100f / systemDpi / 5f).roundToInt() * 5}%"
     }
 }

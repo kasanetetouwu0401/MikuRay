@@ -13,13 +13,12 @@ import com.google.android.material.slider.Slider
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.util.WindowBlurUtils
 
 class HeaderTopRowPaddingDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : Preference(context, attrs) {
+) : UiCustomizationPreference(context, attrs) {
 
     private fun Context.findActivity(): Activity? {
         var ctx = this
@@ -33,10 +32,7 @@ class HeaderTopRowPaddingDialog @JvmOverloads constructor(
     override fun onClick() {
         val activity = context.findActivity() ?: return
 
-        val saved = MmkvManager.decodeSettingsInt(
-            AppConfig.PREF_HEADER_TOP_ROW_PADDING,
-            AppConfig.HEADER_TOP_ROW_PADDING_DEFAULT
-        )
+        val saved = customizationState.headerTopRowPadding
         val current = saved.coerceIn(
             AppConfig.HEADER_TOP_ROW_PADDING_MIN,
             AppConfig.HEADER_TOP_ROW_PADDING_MAX
@@ -57,7 +53,10 @@ class HeaderTopRowPaddingDialog @JvmOverloads constructor(
             summary = context.getString(
                 R.string.pref_header_top_row_padding_summary_value, newPadding
             )
-            SettingsChangeManager.notifyUiCustomisationChanged()
+            val intent = android.content.Intent(
+                AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED
+            )
+            activity.sendBroadcast(intent)
         }
         .setNeutralButton(R.string.reset, null)
         .setNegativeButton(android.R.string.cancel, null)
@@ -72,7 +71,10 @@ class HeaderTopRowPaddingDialog @JvmOverloads constructor(
 
             MmkvManager.encodeSettings(AppConfig.PREF_HEADER_TOP_ROW_PADDING, default)
             summary = context.getString(R.string.pref_header_top_row_padding_summary_value, default)
-            SettingsChangeManager.notifyUiCustomisationChanged()
+            val intent = android.content.Intent(
+                AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED
+            )
+            activity.sendBroadcast(intent)
 
             dialog.dismiss()
         }
@@ -81,15 +83,16 @@ class HeaderTopRowPaddingDialog @JvmOverloads constructor(
     }
 
     private fun updateSummary() {
-        val p = MmkvManager.decodeSettingsInt(
-            AppConfig.PREF_HEADER_TOP_ROW_PADDING,
-            AppConfig.HEADER_TOP_ROW_PADDING_DEFAULT
-        )
+        val p = customizationState.headerTopRowPadding
         summary = context.getString(R.string.pref_header_top_row_padding_summary_value, p)
     }
 
     override fun onAttached() {
         super.onAttached()
         updateSummary()
+    }
+
+    override fun onCustomizationStateChanged(state: com.miku.ray.handler.UiCustomizationState) {
+        summary = context.getString(R.string.pref_header_top_row_padding_summary_value, state.headerTopRowPadding)
     }
 }

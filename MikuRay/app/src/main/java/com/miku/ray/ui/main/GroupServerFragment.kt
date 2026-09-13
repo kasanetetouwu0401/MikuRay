@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.handler.UiCustomizationStateStore
 import com.miku.ray.contracts.MainAdapterListener
 import com.miku.ray.core.LauncherManager
 import com.miku.ray.databinding.FragmentGroupServerBinding
@@ -258,11 +259,11 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>() {
     }
 
     private fun isDoubleColumnEnabled(): Boolean {
-        return MmkvManager.decodeSettingsBool(AppConfig.PREF_DOUBLE_COLUMN_DISPLAY, false)
+        return UiCustomizationStateStore.state.value.doubleColumnDisplay
     }
 
     private fun isHideScrollButtonsEnabled(): Boolean {
-        return MmkvManager.decodeSettingsBool(AppConfig.PREF_HIDE_SCROLL_BUTTONS, false)
+        return UiCustomizationStateStore.state.value.hideScrollButtons
     }
 
     private fun updateEmptyState() {

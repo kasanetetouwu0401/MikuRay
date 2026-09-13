@@ -16,13 +16,10 @@ import com.miku.ray.util.WindowBlurUtils
 class SheetBannerDimSliderDialog @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : Preference(context, attrs) {
+) : UiCustomizationPreference(context, attrs) {
 
     override fun onClick() {
-        val saved = MmkvManager.decodeSettingsInt(
-            AppConfig.PREF_SHEET_BANNER_DIM,
-            AppConfig.SHEET_BANNER_DIM_DEFAULT
-        )
+        val saved = customizationState.sheetBannerDim
         val current = saved.coerceIn(
             AppConfig.SHEET_BANNER_DIM_MIN,
             AppConfig.SHEET_BANNER_DIM_MAX
@@ -63,15 +60,16 @@ class SheetBannerDimSliderDialog @JvmOverloads constructor(
     }
 
     private fun updateSummary() {
-        val d = MmkvManager.decodeSettingsInt(
-            AppConfig.PREF_SHEET_BANNER_DIM,
-            AppConfig.SHEET_BANNER_DIM_DEFAULT
-        )
+        val d = customizationState.sheetBannerDim
         summary = context.getString(R.string.sheet_banner_dim_summary_value, d)
     }
 
     override fun onAttached() {
         super.onAttached()
         updateSummary()
+    }
+
+    override fun onCustomizationStateChanged(state: com.miku.ray.handler.UiCustomizationState) {
+        summary = context.getString(R.string.sheet_banner_dim_summary_value, state.sheetBannerDim)
     }
 }

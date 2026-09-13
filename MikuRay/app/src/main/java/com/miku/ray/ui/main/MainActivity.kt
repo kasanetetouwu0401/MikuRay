@@ -66,6 +66,8 @@ import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.handler.SettingsManager
 import com.miku.ray.handler.SubscriptionUpdater
+import com.miku.ray.handler.UiCustomizationState
+import com.miku.ray.handler.UiCustomizationStateStore
 import com.miku.ray.ui.about.AboutActivity
 import com.miku.ray.ui.backup.BackupActivity
 import com.miku.ray.ui.base.HelperBaseActivity
@@ -124,6 +126,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
     private lateinit var groupPagerAdapter: GroupPagerAdapter
     private var tabMediator: TabLayoutMediator? = null
+    private var bannerReceiver: BroadcastReceiver? = null
 
     private var isColdStart = true
     private var dualSwipeChipSelection = SearchBarChipMode.WEATHER
@@ -283,6 +286,18 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         mainViewModel.startListenBroadcast()
     }
 
+    override fun onSettingsChanged(state: UiCustomizationState) {
+        refreshSearchBarChip()
+        updateSnowflakesVisibility()
+        updateQuickActionsVisibility()
+        if (::groupPagerAdapter.isInitialized) {
+            refreshAllGroupListDisplays()
+        }
+        BlurBottomStatusController.applyState(this, binding) { mainViewModel.onLayoutTestClicked() }
+        refreshToolbarStyle()
+        syncWeatherBackgroundUpdates()
+    }
+
     override fun onContentChanged() {
         super.onContentChanged()
 
@@ -299,7 +314,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
                 bottom = 0
             )
 
-            val quickActionsEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_QUICK_ACTIONS, false)
+            val quickActionsEnabled = UiCustomizationStateStore.state.value.quickActions
 
             val bottomStatus = view.findViewById<View>(R.id.blur_bottom_status)
             val quickActions = view.findViewById<View>(R.id.layout_quick_actions)
@@ -339,7 +354,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
     private fun updateQuickActionsVisibility() {
         binding.layoutQuickActions.visibility = if (
-            MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_QUICK_ACTIONS, false)
+            UiCustomizationStateStore.state.value.quickActions
         ) View.VISIBLE else View.GONE
 
         binding.mainContent.requestApplyInsets()
@@ -347,33 +362,15 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
     private fun updateSnowflakesVisibility() {
         binding.snowflakesView.configure(
-            speed = MmkvManager.decodeSettingsFloat(
-                AppConfig.PREF_SNOWFLAKES_SPEED,
-                AppConfig.SNOWFLAKES_SPEED_DEFAULT
-            ),
-            count = MmkvManager.decodeSettingsInt(
-                AppConfig.PREF_SNOWFLAKES_COUNT,
-                AppConfig.SNOWFLAKES_COUNT_DEFAULT
-            ),
-            size = MmkvManager.decodeSettingsFloat(
-                AppConfig.PREF_SNOWFLAKES_SIZE,
-                AppConfig.SNOWFLAKES_SIZE_DEFAULT
-            ),
-            opacity = MmkvManager.decodeSettingsFloat(
-                AppConfig.PREF_SNOWFLAKES_OPACITY,
-                AppConfig.SNOWFLAKES_OPACITY_DEFAULT
-            ),
-            wind = MmkvManager.decodeSettingsFloat(
-                AppConfig.PREF_SNOWFLAKES_WIND,
-                AppConfig.SNOWFLAKES_WIND_DEFAULT
-            ),
-            life = MmkvManager.decodeSettingsFloat(
-                AppConfig.PREF_SNOWFLAKES_LIFE,
-                AppConfig.SNOWFLAKES_LIFE_DEFAULT
-            )
+            speed = UiCustomizationStateStore.state.value.snowflakesSpeed,
+            count = UiCustomizationStateStore.state.value.snowflakesCount,
+            size = UiCustomizationStateStore.state.value.snowflakesSize,
+            opacity = UiCustomizationStateStore.state.value.snowflakesOpacity,
+            wind = UiCustomizationStateStore.state.value.snowflakesWind,
+            life = UiCustomizationStateStore.state.value.snowflakesLife
         )
         binding.snowflakesView.visibility = if (
-            MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_SNOWFLAKES, false)
+            UiCustomizationStateStore.state.value.snowflakesEnabled
         ) View.VISIBLE else View.GONE
     }
 
@@ -395,7 +392,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     }
 
     private fun refreshIpStateText() {
-        val showRealtimeTraffic = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_REALTIME_TRAFFIC_IP, false)
+        val showRealtimeTraffic = UiCustomizationStateStore.state.value.showRealtimeTrafficIp
 
         binding.tvIpState.text = if (showRealtimeTraffic) {
             if (mainViewModel.isRunning.value && lastTrafficSpeedText.isNotEmpty()) {
@@ -625,10 +622,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         val paddingTopNoBanner = 0
 
         fun applyBannerHeight() {
-            val heightDp = MmkvManager.decodeSettingsInt(
-                AppConfig.PREF_HOME_BANNER_HEIGHT,
-                AppConfig.HOME_BANNER_HEIGHT_DEFAULT
-            )
+            val heightDp = UiCustomizationStateStore.state.value.homeBannerHeight
             val heightPx = (heightDp * resources.displayMetrics.density).toInt()
 
             val lp = bannerHome.layoutParams
@@ -650,12 +644,9 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         }
 
         fun applyHeaderTopRowPadding() {
-            val disableBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_HOME_BANNER, false)
+            val disableBanner = UiCustomizationStateStore.state.value.homeBannerDisabled
             val paddingDp = if (!disableBanner) {
-                MmkvManager.decodeSettingsInt(
-                    AppConfig.PREF_HEADER_TOP_ROW_PADDING,
-                    AppConfig.HEADER_TOP_ROW_PADDING_DEFAULT
-                )
+                UiCustomizationStateStore.state.value.headerTopRowPadding
             } else 0
 
             val paddingPx = (paddingDp * resources.displayMetrics.density).toInt()
@@ -671,7 +662,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         fun loadBannerImage() {
             if (isDestroyed || isFinishing) return
 
-            val disableBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_HOME_BANNER, false)
+            val disableBanner = UiCustomizationStateStore.state.value.homeBannerDisabled
             if (disableBanner) {
                 Glide.with(headerImage).clear(headerImage)
                 headerImage.setImageDrawable(null)
@@ -679,7 +670,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
                 return
             }
 
-            val uriString = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_HOME_BANNER_URI)
+            val uriString = UiCustomizationStateStore.state.value.homeBannerUri
             val targetTag = if (uriString.isNullOrBlank()) TAG_HOME_BANNER_DEFAULT else uriString
 
             if (headerImage.tag == targetTag) return
@@ -708,23 +699,38 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             headerImage.tag = targetTag
         }
 
-        val disableBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_HOME_BANNER, false)
+        val disableBanner = UiCustomizationStateStore.state.value.homeBannerDisabled
         applyBannerVisibility(!disableBanner)
         applyBannerHeight()
         applyHeaderTopRowPadding()
         loadBannerImage()
 
-    }
+        bannerReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                when (intent?.action) {
+                    AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED -> {
+                        val disableBannerNow = UiCustomizationStateStore.state.value.homeBannerDisabled
+                        applyBannerVisibility(!disableBannerNow)
+                        applyBannerHeight()
+                        applyHeaderTopRowPadding()
+                        loadBannerImage()
+                    }
+                    AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED -> {
+                        applyHeaderTopRowPadding()
+                    }
+                }
+            }
+        }
 
-    override fun onUiCustomisationChanged() {
-        super.onUiCustomisationChanged()
-        // Refresh main-UI customisation without recreating the activity.
-        val disableBanner = MmkvManager.decodeSettingsBool(AppConfig.PREF_DISABLE_HOME_BANNER, false)
-        // These helpers are defined inside setupBannerHome's local scope historically;
-        // call the public refresh path used by the former broadcast receiver.
-        runCatching {
-            // Re-run banner setup pieces that are safe without full recreate.
-            setupBannerHome()
+        val filter = IntentFilter(AppConfig.BROADCAST_ACTION_HOME_BANNER_CHANGED).apply {
+            addAction(AppConfig.BROADCAST_ACTION_HEADER_TOP_ROW_PADDING_CHANGED)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(bannerReceiver, filter, RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
+            registerReceiver(bannerReceiver, filter)
         }
     }
 
@@ -1125,7 +1131,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
     private fun setBadgeVisibility(badge: TextView, label: TextView, count: Int) {
         if (count > 0) {
-            val limit = MmkvManager.decodeSettingsString(AppConfig.PREF_TAB_BADGE_LIMIT, "0")
+            val limit = UiCustomizationStateStore.state.value.tabBadgeLimit
                 ?.toIntOrNull()
                 ?: 0
             badge.text = if (limit > 0 && count > limit) "${limit}+" else count.toString()
@@ -1278,7 +1284,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     }
 
     private fun isFabExtended(): Boolean =
-    MmkvManager.decodeSettingsBool(AppConfig.PREF_FAB_EXTENDED, false)
+        UiCustomizationStateStore.state.value.fabExtended
 
     private fun startFabTimer() {
         if (!isFabExtended()) return
@@ -1922,6 +1928,12 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             binding.headerImage.setImageDrawable(null)
             binding.headerImage.tag = null
         }
+        try {
+            bannerReceiver?.let { unregisterReceiver(it) }
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "Failed to unregister bannerReceiver", e)
+        }
+
         super.onDestroy()
     }
 }

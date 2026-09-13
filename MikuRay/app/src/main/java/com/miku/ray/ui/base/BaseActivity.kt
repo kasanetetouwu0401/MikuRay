@@ -15,9 +15,6 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -27,6 +24,11 @@ import androidx.core.view.updatePadding
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -36,6 +38,7 @@ import com.miku.ray.R
 import com.miku.ray.AppConfig
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsChangeManager
+import com.miku.ray.handler.UiCustomizationState
 import com.miku.ray.helper.CustomDividerItemDecoration
 import com.miku.ray.util.DPIController
 import com.miku.ray.util.FontSizeController
@@ -51,10 +54,16 @@ abstract class BaseActivity : AppCompatActivity() {
         private val activeActivities = mutableListOf<WeakReference<BaseActivity>>()
 
         fun recreateOthersInBackground(except: android.app.Activity? = null) {
-            // Signal via SharedFlow so every active BaseActivity can recreate itself.
-            // Callers that already recreate() themselves should pass themselves as [except]
-            // and still emit; each activity ignores the event if it is finishing.
-            SettingsChangeManager.notifyNeedsRecreate()
+            val iterator = activeActivities.iterator()
+            while (iterator.hasNext()) {
+                val activity = iterator.next().get()
+                if (activity == null) {
+                    iterator.remove()
+                    continue
+                }
+                if (activity === except || activity.isFinishing || activity.isDestroyed) continue
+                activity.recreate()
+            }
         }
     }
 
@@ -78,13 +87,10 @@ abstract class BaseActivity : AppCompatActivity() {
         activeActivities.add(WeakReference(this))
 
         lifecycleScope.launch {
-            SettingsChangeManager.needsRecreate.collectLatest {
-                if (!isFinishing && !isDestroyed) recreate()
-            }
-        }
-        lifecycleScope.launch {
-            SettingsChangeManager.uiCustomisation.collectLatest {
-                if (!isFinishing && !isDestroyed) onUiCustomisationChanged()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                SettingsChangeManager.uiCustomizationState.collect { state ->
+                    onSettingsChanged(state)
+                }
             }
         }
 
@@ -98,16 +104,6 @@ abstract class BaseActivity : AppCompatActivity() {
             },
             true
         )
-    }
-
-    /**
-     * Called when UI customisation changed without requiring a full recreate.
-     * Override in subclasses (e.g. MainActivity) to refresh banners, padding, etc.
-     */
-    protected open fun onUiCustomisationChanged() {
-        if (collapsingToolbarRef != null) {
-            applyToolbarStyle()
-        }
     }
 
     override fun onResume() {
@@ -224,14 +220,11 @@ abstract class BaseActivity : AppCompatActivity() {
         applyToolbarStyle()
     }
 
-    fun refreshIfSettingsChanged() {
-        // Prefer flow-driven updates; only recreate when explicitly signalled.
-        recreate()
-    }
+    protected open fun onSettingsChanged(state: UiCustomizationState) = Unit
 
     private fun applyToolbarStyle() {
         val collapsingToolbar = collapsingToolbarRef ?: return
-        val centerSubtitle = MmkvManager.decodeSettingsBool(AppConfig.PREF_TOOLBAR_CENTER_SUBTITLE_MODE, false)
+        val centerSubtitle = SettingsChangeManager.uiCustomizationState.value.toolbarCenterSubtitle
         val subtitleText = if (centerSubtitle) toolbarSubtitle else null
 
         supportActionBar?.subtitle = null

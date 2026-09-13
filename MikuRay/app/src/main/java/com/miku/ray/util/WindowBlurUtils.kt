@@ -12,8 +12,7 @@ import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmdeve.blurview.widget.BlurView
-import com.miku.ray.AppConfig
-import com.miku.ray.handler.MmkvManager
+import com.miku.ray.handler.UiCustomizationStateStore
 
 object WindowBlurUtils {
 
@@ -23,7 +22,7 @@ object WindowBlurUtils {
     fun applyWindowBlur(window: Window?) {
         if (window == null) return
 
-        val isBlurEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
+        val isBlurEnabled = UiCustomizationStateStore.state.value.blurEnabled
         if (!isBlurEnabled) {
             window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             window.attributes?.dimAmount = 0.6f
@@ -32,10 +31,7 @@ object WindowBlurUtils {
 
         try {
             val context = window.context
-            val blurRadius = MmkvManager.decodeSettingsInt(
-                AppConfig.PREF_BLUR_RADIUS,
-                AppConfig.DEFAULT_BLUR_RADIUS
-            ).toFloat()
+            val blurRadius = UiCustomizationStateStore.state.value.blurRadius.toFloat()
             if (shouldUseSystemBlur() && tryApplyNativeWindowBlur(window, blurRadius)) {
                 removeFallbackBlurOverlay(window)
                 return
@@ -55,7 +51,7 @@ object WindowBlurUtils {
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
 
-                val blurRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
+                val blurRounds = UiCustomizationStateStore.state.value.blurRounds
                 setBlurRadius(blurRadius)
                 setBlurRounds(blurRounds)
                 setOverlayColor(Color.argb(120, 0, 0, 0))
@@ -118,7 +114,7 @@ object WindowBlurUtils {
     }
 
     private fun shouldUseSystemBlur(): Boolean =
-    MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_SYSTEM_BLUR, false)
+    UiCustomizationStateStore.state.value.useSystemBlur
 
     private fun tryApplyNativeWindowBlur(window: Window, radius: Float): Boolean {
         if (!isSystemBlurAvailable(window.context)) return false
