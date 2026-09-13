@@ -852,15 +852,12 @@ object MmkvManager {
         AppConfig.PREF_DYNAMIC_COLOR_BANNER,
         AppConfig.PREF_TRUE_BLACK,
         AppConfig.PREF_UI_MODE_NIGHT,
-        AppConfig.PREF_ICON_SHAPE,
-        AppConfig.PREF_ARROW_SHAPE,
         AppConfig.PREF_APP_FONT,
         AppConfig.PREF_APP_FONT_USE_CUSTOM,
         AppConfig.PREF_CUSTOM_DPI,
         AppConfig.PREF_APP_FONT_SIZE,
         AppConfig.PREF_USE_CUSTOM_COLOR,
         AppConfig.PREF_CUSTOM_COLOR,
-        AppConfig.PREF_BANNER_COLOR,
         AppConfig.PREF_LANGUAGE
     )
 
