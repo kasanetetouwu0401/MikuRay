@@ -144,11 +144,11 @@ class DynamicShapeImageView @JvmOverloads constructor(
         "uwu_shape_circle"         -> R.raw.uwu_shape_circle
         "uwu_shape_clover_4"       -> R.raw.uwu_shape_clover_4
         "uwu_shape_clover_8"       -> R.raw.uwu_shape_clover_8
-        "uwu_shape_cookie_12"      -> R.raw.uwu_shape_cookie_12
         "uwu_shape_cookie_4"       -> R.raw.uwu_shape_cookie_4
         "uwu_shape_cookie_6"       -> R.raw.uwu_shape_cookie_6
         "uwu_shape_cookie_7"       -> R.raw.uwu_shape_cookie_7
         "uwu_shape_cookie_9"       -> R.raw.uwu_shape_cookie_9
+        "uwu_shape_cookie_12"      -> R.raw.uwu_shape_cookie_12
         "uwu_shape_diamond"        -> R.raw.uwu_shape_diamond
         "uwu_shape_fan"            -> R.raw.uwu_shape_fan
         "uwu_shape_flower"         -> R.raw.uwu_shape_flower
