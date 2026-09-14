@@ -4,6 +4,7 @@ import com.miku.ray.dto.RealPingProgress
 import com.miku.ray.dto.RealPingResult
 import com.miku.ray.dto.RealPingSummary
 import com.miku.ray.dto.TestProgressInfo
+import com.miku.ray.dto.SpeedTestProgress
 
 sealed class MainServiceEvent {
     data object StateRunning : MainServiceEvent()
@@ -24,6 +25,8 @@ sealed class MainServiceEvent {
     data class CountryCodeSuccess(val guid: String, val requestId: String = "") : MainServiceEvent()
     data class CountryCodeNotify(val info: TestProgressInfo?, val requestId: String = "") : MainServiceEvent()
     data class CountryCodeFinish(val requestId: String = "") : MainServiceEvent()
+    data class SpeedTestNotify(val info: SpeedTestProgress?, val requestId: String = "") : MainServiceEvent()
+    data class SpeedTestFinish(val requestId: String = "") : MainServiceEvent()
 
     data class TrafficUpdated(val guid: String) : MainServiceEvent()
     data class TrafficSpeedUpdated(val speedText: String) : MainServiceEvent()

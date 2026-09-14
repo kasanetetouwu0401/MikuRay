@@ -138,6 +138,10 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         TestProgressDialogController(this, TestProgressDialogController.Mode.COUNTRY_CODE) { mainViewModel.cancelCountryCodeTest() }
     }
 
+    private val speedTestProgressDialog: TestProgressDialogController by lazy {
+        TestProgressDialogController(this, TestProgressDialogController.Mode.SPEED_TEST) { mainViewModel.cancelSpeedTest() }
+    }
+
     private val TAG_HOME_BANNER_DEFAULT = "DEFAULT_HOME_BANNER"
     private val TAG_HOME_BANNER_HIDDEN = "HIDDEN_HOME_BANNER"
 
@@ -841,6 +845,27 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
     override fun onMoreOptionClicked(viewId: Int) {
         when (viewId) {
+            R.id.speed_test_profile -> {
+                mainViewModel.ensureServerCacheReady()
+                val selectedGuid = MmkvManager.getSelectServer().orEmpty()
+                val selectedProfile = selectedGuid.isNotBlank() && MmkvManager.decodeServerConfig(selectedGuid) != null
+                val options = if (selectedProfile) {
+                    arrayOf(getString(R.string.speed_test_selected_profile), getString(R.string.speed_test_active_group))
+                } else {
+                    arrayOf(getString(R.string.speed_test_active_group))
+                }
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.title_speed_test)
+                    .setIcon(RemixR.drawable.rmx_media_speed_line)
+                    .setItems(options) { _, which ->
+                        val selectedOnly = selectedProfile && which == 0
+                        val total = if (selectedOnly) 1 else mainViewModel.serversCache.count()
+                        speedTestProgressDialog.show(total, R.string.title_speed_test)
+                        if (selectedOnly) mainViewModel.testSelectedSpeed() else mainViewModel.testAllSpeed()
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .showBlur()
+            }
             R.id.export_all -> exportAll()
             R.id.export_group_file -> exportGroupAsFile()
             R.id.real_ping_all -> {
@@ -1045,6 +1070,16 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
                             countryCodeProgressDialog.finish()
                         } else {
                             countryCodeProgressDialog.update(info)
+                        }
+                    }
+                }
+
+                launch {
+                    mainViewModel.speedTestProgress.collect { info ->
+                        if (info == null) {
+                            if (speedTestProgressDialog.isShowing) speedTestProgressDialog.finish()
+                        } else {
+                            speedTestProgressDialog.update(info)
                         }
                     }
                 }
@@ -1917,6 +1952,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     override fun onDestroy() {
         hideLoading()
         urlTestProgressDialog.dismiss()
+        speedTestProgressDialog.dismiss()
         tabMediator?.detach()
         runCatching {
             Glide.with(applicationContext).clear(binding.headerImage)

@@ -1090,4 +1090,13 @@ yang kamu butuhin."</string>
     <string name="ui_theme_import_failed">Yah, temanya gagal diimpor: %1$s</string>
     <string name="title_pref_use_system_blur">Pake blur sistem</string>
     <string name="summary_pref_use_system_blur">Pake blur jendela bawaan Android kalo ada</string>
+    <string name="title_speed_test">Tes kecepatan</string>
+    <string name="speed_test_selected_profile">Profil yang dipilih</string>
+    <string name="speed_test_running">Lagi ngetes %1$s…</string>
+    <string name="speed_test_result">%1$s\nDownload: %2$.2f Mbps\nUpload: %3$.2f Mbps</string>
+    <string name="speed_test_failed">Tes kecepatan gagal: %1$s</string>
+    <string name="speed_test_no_profile">Pilih profil dulu</string>
+    <string name="speed_test_row_result">↓ %1$.2f Mbps  ↑ %2$.2f Mbps</string>
+    <string name="speed_test_row_failed">Tes kecepatan gagal</string>
+    <string name="speed_test_active_group">Semua profil di grup aktif</string>
 </resources>

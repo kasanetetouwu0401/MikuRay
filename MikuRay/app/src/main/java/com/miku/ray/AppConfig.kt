@@ -447,6 +447,10 @@ object AppConfig {
     const val MSG_COUNTRY_CODE_SUCCESS = 92
     const val MSG_COUNTRY_CODE_NOTIFY = 93
     const val MSG_COUNTRY_CODE_FINISH = 94
+    const val MSG_SPEED_TEST_START = 95
+    const val MSG_SPEED_TEST_CANCEL = 96
+    const val MSG_SPEED_TEST_NOTIFY = 97
+    const val MSG_SPEED_TEST_FINISH = 98
 
     const val MSG_SUB_UPDATE_START = 8
     const val MSG_SUB_UPDATE_CANCEL = 81

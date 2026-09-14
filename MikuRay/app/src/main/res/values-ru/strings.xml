@@ -1100,4 +1100,13 @@
     <string name="ui_theme_import_failed">Не удалось импортировать тему: %1$s</string>
     <string name="title_pref_use_system_blur">Использовать системное размытие</string>
     <string name="summary_pref_use_system_blur">Использовать нативное размытие окон Android, если оно доступно</string>
+    <string name="title_speed_test">Тест скорости</string>
+    <string name="speed_test_selected_profile">Выбранный профиль</string>
+    <string name="speed_test_running">Проверка %1$s…</string>
+    <string name="speed_test_result">%1$s\nСкачивание: %2$.2f Мбит/с\nЗагрузка: %3$.2f Мбит/с</string>
+    <string name="speed_test_failed">Ошибка теста скорости: %1$s</string>
+    <string name="speed_test_no_profile">Сначала выберите профиль</string>
+    <string name="speed_test_row_result">↓ %1$.2f Мбит/с  ↑ %2$.2f Мбит/с</string>
+    <string name="speed_test_row_failed">Ошибка теста скорости</string>
+    <string name="speed_test_active_group">Все профили в активной группе</string>
 </resources>

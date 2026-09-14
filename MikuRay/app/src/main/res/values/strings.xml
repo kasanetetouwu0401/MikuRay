@@ -1130,4 +1130,13 @@ you need."</string>
     <string name="ui_theme_import_failed">Unable to import the theme: %1$s</string>
     <string name="title_pref_use_system_blur">Use system blur</string>
     <string name="summary_pref_use_system_blur">Use native Android window blur when available</string>
+    <string name="title_speed_test">Speed test</string>
+    <string name="speed_test_selected_profile">Selected profile</string>
+    <string name="speed_test_running">Testing %1$s…</string>
+    <string name="speed_test_result">%1$s\nDownload: %2$.2f Mbps\nUpload: %3$.2f Mbps</string>
+    <string name="speed_test_failed">Speed test failed: %1$s</string>
+    <string name="speed_test_no_profile">Select a profile first</string>
+    <string name="speed_test_row_result">↓ %1$.2f Mbps  ↑ %2$.2f Mbps</string>
+    <string name="speed_test_row_failed">Speed test failed</string>
+    <string name="speed_test_active_group">All profiles in active group</string>
 </resources>
