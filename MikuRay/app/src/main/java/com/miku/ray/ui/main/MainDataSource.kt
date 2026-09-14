@@ -2,7 +2,6 @@ package com.miku.ray.ui.main
 
 import com.miku.ray.dto.SubscriptionUpdateResult
 import com.miku.ray.dto.CountryCodeTestMessage
-import com.miku.ray.dto.SpeedTestMessage
 import com.miku.ray.dto.TestServiceMessage
 import com.miku.ray.dto.entities.SubscriptionCache
 import kotlinx.coroutines.flow.SharedFlow
@@ -18,6 +17,5 @@ interface MainDataSource : AutoCloseable {
     fun queryRunningState(onResult: (isRunning: Boolean) -> Unit)
     fun sendMsg2TestService(msg: TestServiceMessage, requestId: String? = null)
     fun sendMsg2CountryCodeTestService(msg: CountryCodeTestMessage)
-    fun sendMsg2SpeedTestService(msg: SpeedTestMessage)
     fun testCurrentServerRealPing(requestId: String)
 }

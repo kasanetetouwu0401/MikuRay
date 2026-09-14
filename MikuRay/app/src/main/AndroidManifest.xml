@@ -3056,9 +3056,6 @@
             android:name=".ui.preference.activity.AdvancedSettingsActivity" />
         <activity
             android:exported="false"
-            android:name=".ui.preference.activity.ObservatorySettingsActivity" />
-        <activity
-            android:exported="false"
             android:name="com.yalantis.ucrop.UCropActivity" />
         <activity
             android:exported="false"
@@ -3211,16 +3208,6 @@
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="country_code_test" />
-        </service>
-
-        <service
-            android:exported="false"
-            android:foregroundServiceType="specialUse"
-            android:name=".service.SpeedTestService"
-            android:process=":daemon">
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="speed_test" />
         </service>
 
         <service

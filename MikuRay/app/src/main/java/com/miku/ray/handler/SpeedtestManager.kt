@@ -8,87 +8,11 @@ import com.miku.ray.util.JsonUtil
 import com.miku.ray.util.LogUtil
 import com.miku.ray.util.Utils
 import java.io.IOException
-import java.net.HttpURLConnection
 import java.net.InetSocketAddress
-import java.net.Proxy
 import java.net.Socket
 import java.net.UnknownHostException
-import java.net.URL
-import kotlin.math.roundToLong
 
 object SpeedtestManager {
-
-    data class SpeedTestResult(
-        val downloadMbps: Double? = null,
-        val uploadMbps: Double? = null,
-        val error: String? = null,
-    )
-
-    /** Measures the currently selected profile through MikuRay's local HTTP proxy. */
-    fun runProfileSpeedTest(timeoutMs: Int = 15_000): SpeedTestResult {
-        val httpPort = SettingsManager.getHttpPort()
-        if (httpPort <= 0) return SpeedTestResult(error = "HTTP proxy is not available")
-        return runSpeedTestThroughProxy(httpPort, timeoutMs)
-    }
-
-    fun runSpeedTestThroughProxy(httpPort: Int, timeoutMs: Int = 15_000): SpeedTestResult {
-        if (httpPort <= 0) return SpeedTestResult(error = "HTTP proxy is not available")
-        val proxy = Proxy(Proxy.Type.HTTP, InetSocketAddress(AppConfig.LOOPBACK, httpPort))
-        return try {
-            SpeedTestResult(
-                downloadMbps = measureDownload(proxy, timeoutMs),
-                uploadMbps = measureUpload(proxy, timeoutMs),
-            )
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Profile speed test failed", e)
-            SpeedTestResult(error = e.message ?: e.javaClass.simpleName)
-        }
-    }
-
-    private fun measureDownload(proxy: Proxy, timeoutMs: Int): Double {
-        val connection = URL("https://speed.cloudflare.com/__down?bytes=5000000").openConnection(proxy) as HttpURLConnection
-        return try {
-            connection.connectTimeout = timeoutMs
-            connection.readTimeout = timeoutMs
-            val start = System.nanoTime()
-            var bytes = 0L
-            connection.inputStream.use { input ->
-                val buffer = ByteArray(32 * 1024)
-                while (true) {
-                    val count = input.read(buffer)
-                    if (count < 0) break
-                    bytes += count
-                }
-            }
-            speedMbps(bytes, System.nanoTime() - start)
-        } finally {
-            connection.disconnect()
-        }
-    }
-
-    private fun measureUpload(proxy: Proxy, timeoutMs: Int): Double {
-        val payload = ByteArray(1_000_000) { (it * 31).toByte() }
-        val connection = URL("https://speed.cloudflare.com/__up").openConnection(proxy) as HttpURLConnection
-        return try {
-            connection.connectTimeout = timeoutMs
-            connection.readTimeout = timeoutMs
-            connection.requestMethod = "POST"
-            connection.doOutput = true
-            connection.setFixedLengthStreamingMode(payload.size)
-            connection.setRequestProperty("Content-Type", "application/octet-stream")
-            val start = System.nanoTime()
-            connection.outputStream.use { it.write(payload) }
-            connection.inputStream.use { it.readBytes() }
-            speedMbps(payload.size.toLong(), System.nanoTime() - start)
-        } finally {
-            connection.disconnect()
-        }
-    }
-
-    private fun speedMbps(bytes: Long, elapsedNanos: Long): Double {
-        if (bytes <= 0L || elapsedNanos <= 0L) return 0.0
-        return ((bytes * 8.0 / (elapsedNanos / 1_000_000_000.0)) / 1_000_000.0 * 100.0).roundToLong() / 100.0
-    }
 
     fun socketConnectTime(url: String, port: Int, timeoutMs: Int = 1500): Long {
         var socket: Socket? = null

@@ -47,11 +47,6 @@ object AppConfig {
     const val PREF_FRAGMENT_LENGTH = "pref_fragment_length"
     const val PREF_FRAGMENT_INTERVAL = "pref_fragment_interval"
     const val PREF_FRAGMENT_MAXSPLIT = "pref_fragment_maxsplit"
-    const val PREF_OBSERVATORY_LEAST_PING_INTERVAL = "pref_observatory_least_ping_interval"
-    const val PREF_OBSERVATORY_LEAST_LOAD_INTERVAL = "pref_observatory_least_load_interval"
-    const val PREF_OBSERVATORY_LEAST_LOAD_METHOD = "pref_observatory_least_load_method"
-    const val PREF_OBSERVATORY_LEAST_LOAD_SAMPLING = "pref_observatory_least_load_sampling"
-    const val PREF_OBSERVATORY_LEAST_LOAD_TIMEOUT = "pref_observatory_least_load_timeout"
     const val SUBSCRIPTION_UPDATE_TASK_NAME = "subscription_updater"
     const val SUBSCRIPTION_MIN_INTERVAL_MINUTES = 15L
     const val PREF_SPEED_ENABLED = "pref_speed_enabled"
@@ -119,7 +114,6 @@ object AppConfig {
     const val PREF_NAVIGATE_MUX_SETTINGS = "pref_navigate_mux_settings"
     const val PREF_NAVIGATE_FRAGMENT_SETTINGS = "pref_navigate_fragment_settings"
     const val PREF_NAVIGATE_ADVANCED_SETTINGS = "pref_navigate_advanced_settings"
-    const val PREF_NAVIGATE_OBSERVATORY_SETTINGS = "pref_navigate_observatory_settings"
     const val PREF_NAVIGATE_PER_APP_PROXY_SETTINGS = "pref_navigate_per_app_proxy_settings"
     const val PREF_SERVER_ORDER = "pref_server_order"
     const val PREF_SUB_SORT_ORDER = "pref_sub_sort_order"
@@ -447,10 +441,6 @@ object AppConfig {
     const val MSG_COUNTRY_CODE_SUCCESS = 92
     const val MSG_COUNTRY_CODE_NOTIFY = 93
     const val MSG_COUNTRY_CODE_FINISH = 94
-    const val MSG_SPEED_TEST_START = 95
-    const val MSG_SPEED_TEST_CANCEL = 96
-    const val MSG_SPEED_TEST_NOTIFY = 97
-    const val MSG_SPEED_TEST_FINISH = 98
 
     const val MSG_SUB_UPDATE_START = 8
     const val MSG_SUB_UPDATE_CANCEL = 81

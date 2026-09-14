@@ -127,7 +127,6 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
         }
 
         listOf(
-            R.id.speed_test_profile,
             R.id.service_restart,
             R.id.del_all_config,
             R.id.del_duplicate_config,

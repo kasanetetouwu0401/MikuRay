@@ -10,8 +10,6 @@ import com.miku.ray.AngApplication
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.dto.CountryCodeTestMessage
-import com.miku.ray.dto.SpeedTestMessage
-import com.miku.ray.dto.SpeedTestProgress
 import com.miku.ray.dto.GroupMapItem
 import com.miku.ray.dto.entities.ServersCache
 import com.miku.ray.dto.entities.SubscriptionCache
@@ -53,7 +51,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var activeCurrentTestId: String? = null
     private var lastCurrentTestId: String? = null
     private var activeCountryCodeTestId: String? = null
-    private var activeSpeedTestId: String? = null
     private var activeTestCompleted = 0
     private var activeTestTotal = 0
     private var isRestarting = false
@@ -86,9 +83,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _testProgress = MutableStateFlow<TestProgressInfo?>(null)
     val testProgress: StateFlow<TestProgressInfo?> = _testProgress.asStateFlow()
-
-    private val _speedTestProgress = MutableStateFlow<SpeedTestProgress?>(null)
-    val speedTestProgress: StateFlow<SpeedTestProgress?> = _speedTestProgress.asStateFlow()
 
     private val _countryCodeProgress = MutableStateFlow<TestProgressInfo?>(null)
     val countryCodeProgress: StateFlow<TestProgressInfo?> = _countryCodeProgress.asStateFlow()
@@ -159,9 +153,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             mainRepository.sendMsg2CountryCodeTestService(
                 CountryCodeTestMessage(AppConfig.MSG_COUNTRY_CODE_CANCEL, requestId = it),
             )
-        }
-        activeSpeedTestId?.let {
-            mainRepository.sendMsg2SpeedTestService(SpeedTestMessage(AppConfig.MSG_SPEED_TEST_CANCEL, requestId = it))
         }
         mainServiceEventJob?.cancel()
         mainRepository.close()
@@ -419,36 +410,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             CountryCodeTestMessage(key = AppConfig.MSG_COUNTRY_CODE_CANCEL, requestId = requestId.orEmpty())
         )
         _countryCodeProgress.value = null
-    }
-
-    fun testAllSpeed() = testSpeed(serversCache.map { it.guid }.toList())
-
-    fun testSelectedSpeed() {
-        MmkvManager.getSelectServer()?.takeIf { it.isNotBlank() }?.let { testSpeed(listOf(it)) }
-    }
-
-    private fun testSpeed(targetGuids: List<String>) {
-        val requestId = UUID.randomUUID().toString()
-        activeSpeedTestId?.let { mainRepository.sendMsg2SpeedTestService(SpeedTestMessage(AppConfig.MSG_SPEED_TEST_CANCEL, requestId = it)) }
-        activeSpeedTestId = requestId
-        _speedTestProgress.value = null
-        viewModelScope.launch(Dispatchers.Default) {
-            if (targetGuids.isEmpty()) {
-                activeSpeedTestId = null
-                _speedTestProgress.value = null
-                return@launch
-            }
-            mainRepository.sendMsg2SpeedTestService(
-                SpeedTestMessage(AppConfig.MSG_SPEED_TEST_START, requestId, subscriptionId, targetGuids)
-            )
-        }
-    }
-
-    fun cancelSpeedTest() {
-        val requestId = activeSpeedTestId.orEmpty()
-        activeSpeedTestId = null
-        mainRepository.sendMsg2SpeedTestService(SpeedTestMessage(AppConfig.MSG_SPEED_TEST_CANCEL, requestId = requestId))
-        _speedTestProgress.value = null
     }
 
     fun clearCountryCodes() {
@@ -872,18 +833,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 if (event.requestId == activeCountryCodeTestId) {
                     activeCountryCodeTestId = null
                     _countryCodeProgress.value = null
-                }
-            }
-
-            is MainServiceEvent.SpeedTestNotify -> {
-                if (event.requestId == activeSpeedTestId) {
-                    event.info?.let { _speedTestProgress.value = it }
-                }
-            }
-
-            is MainServiceEvent.SpeedTestFinish -> {
-                if (event.requestId == activeSpeedTestId) {
-                    activeSpeedTestId = null
                 }
             }
 

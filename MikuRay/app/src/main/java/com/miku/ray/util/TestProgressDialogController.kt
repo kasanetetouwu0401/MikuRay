@@ -15,7 +15,6 @@ import com.miku.ray.R
 import com.miku.ray.databinding.DialogUrlTestProgressBinding
 import com.miku.ray.databinding.ItemUrlTestResultBinding
 import com.miku.ray.dto.TestProgressInfo
-import com.miku.ray.dto.SpeedTestProgress
 import com.miku.ray.extension.vibrateOnError
 import com.miku.ray.handler.MmkvManager
 
@@ -24,7 +23,7 @@ class TestProgressDialogController(
     private val mode: Mode,
     private val onCancel: () -> Unit
 ) {
-    enum class Mode { URL_TEST, COUNTRY_CODE, SPEED_TEST }
+    enum class Mode { URL_TEST, COUNTRY_CODE }
 
     private var dialog: AlertDialog? = null
     private var binding: DialogUrlTestProgressBinding? = null
@@ -119,23 +118,6 @@ class TestProgressDialogController(
         b.root.postInvalidate()
     }
 
-    fun update(info: SpeedTestProgress) {
-        val b = binding ?: return
-        val d = dialog ?: return
-        if (!d.isShowing) return
-        val profile = MmkvManager.decodeServerConfig(info.guid)
-        val resultText = if (info.error.isNullOrBlank()) {
-            context.getString(R.string.speed_test_row_result, info.downloadMbps, info.uploadMbps)
-        } else {
-            context.getString(R.string.speed_test_row_failed)
-        }
-        adapter.append(ResultRow(profile?.remarks.orEmpty(), profile?.configType?.name.orEmpty(), resultText, R.color.colorPing))
-        b.progressIndicator.isIndeterminate = false
-        if (info.total > 0) b.progressIndicator.setProgressCompat((info.current * 100 / info.total).coerceIn(0, 100), true)
-        b.tvCounter.text = context.getString(R.string.test_progress_counter, info.current, info.total)
-        b.listView.post { if (adapter.itemCount > 0) b.listView.smoothScrollToPosition(adapter.itemCount - 1) }
-    }
-
     fun finish() {
         val b = binding ?: return
         b.progressIndicator.isIndeterminate = false
@@ -156,7 +138,6 @@ class TestProgressDialogController(
     private fun defaultTitleResId() = when (mode) {
         Mode.URL_TEST -> R.string.title_real_ping_all_server
         Mode.COUNTRY_CODE -> R.string.title_country_code_all_server
-        Mode.SPEED_TEST -> R.string.title_speed_test
     }
 
     private data class RowContent(val text: String, @androidx.annotation.ColorRes val colorRes: Int)
@@ -185,7 +166,6 @@ class TestProgressDialogController(
                 RowContent(text, R.color.colorPing)
             }
         }
-        Mode.SPEED_TEST -> RowContent("", R.color.colorPing)
     }
 
     private data class ResultRow(

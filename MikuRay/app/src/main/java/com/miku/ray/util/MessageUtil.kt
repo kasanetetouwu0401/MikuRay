@@ -9,12 +9,10 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import com.miku.ray.AppConfig
 import com.miku.ray.dto.CountryCodeTestMessage
-import com.miku.ray.dto.SpeedTestMessage
 import com.miku.ray.dto.SubscriptionUpdateMessage
 import com.miku.ray.dto.TestServiceMessage
 import com.miku.ray.service.CoreTestService
 import com.miku.ray.service.CountryCodeTestService
-import com.miku.ray.service.SpeedTestService
 import com.miku.ray.service.SubscriptionUpdateService
 import java.io.Serializable
 
@@ -120,22 +118,6 @@ object MessageUtil {
             }
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to send message to country code service", e)
-        }
-    }
-
-    fun sendMsg2SpeedTestService(ctx: Context, message: SpeedTestMessage) {
-        try {
-            val intent = Intent(ctx, SpeedTestService::class.java).putExtra("content", message)
-            when (message.key) {
-                AppConfig.MSG_SPEED_TEST_START -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) ContextCompat.startForegroundService(ctx, intent)
-                    else ctx.startService(intent)
-                }
-                AppConfig.MSG_SPEED_TEST_CANCEL -> ctx.stopService(intent)
-                else -> ctx.startService(intent)
-            }
-        } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to send message to speed test service", e)
         }
     }
 
