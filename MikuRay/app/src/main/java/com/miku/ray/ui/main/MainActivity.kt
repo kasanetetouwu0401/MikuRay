@@ -63,6 +63,7 @@ import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.handler.SettingsManager
 import com.miku.ray.handler.SubscriptionUpdater
+import com.miku.ray.handler.SpeedtestManager
 import com.miku.ray.ui.about.AboutActivity
 import com.miku.ray.ui.backup.BackupActivity
 import com.miku.ray.ui.base.HelperBaseActivity
@@ -841,6 +842,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
     override fun onMoreOptionClicked(viewId: Int) {
         when (viewId) {
+            R.id.speed_test_profile -> runProfileSpeedTest()
             R.id.export_all -> exportAll()
             R.id.export_group_file -> exportGroupAsFile()
             R.id.real_ping_all -> {
@@ -987,6 +989,35 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
             R.id.action_order_by_name,
             R.id.action_order_by_delay -> {
                 mainViewModel.reloadServerList()
+            }
+        }
+    }
+
+    private fun runProfileSpeedTest() {
+        val guid = MmkvManager.getSelectServer().orEmpty()
+        if (guid.isBlank()) {
+            snackbarDefault(getString(R.string.speed_test_no_profile), title = getString(R.string.title_alerter_info))
+            return
+        }
+        val profileName = MmkvManager.decodeServerConfig(guid)?.remarks.orEmpty()
+            .ifBlank { getString(R.string.speed_test_selected_profile) }
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.title_speed_test)
+            .setIcon(RemixR.drawable.rmx_media_speed_line)
+            .setMessage(getString(R.string.speed_test_running, profileName))
+            .setPositiveButton(android.R.string.ok, null)
+            .showBlur()
+        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)?.isEnabled = false
+        lifecycleScope.launch(Dispatchers.IO) {
+            val result = SpeedtestManager.runProfileSpeedTest()
+            withContext(Dispatchers.Main) {
+                val message = if (result.error == null) {
+                    getString(R.string.speed_test_result, profileName, result.downloadMbps ?: 0.0, result.uploadMbps ?: 0.0)
+                } else {
+                    getString(R.string.speed_test_failed, result.error)
+                }
+                dialog.setMessage(message)
+                dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)?.isEnabled = true
             }
         }
     }

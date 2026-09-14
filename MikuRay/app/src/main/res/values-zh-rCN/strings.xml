@@ -1079,4 +1079,10 @@
     <string name="ui_theme_import_failed">无法导入主题：%1$s</string>
     <string name="title_pref_use_system_blur">使用系统模糊</string>
     <string name="summary_pref_use_system_blur">可用时使用原生 Android 窗口模糊</string>
+    <string name="title_speed_test">测速</string>
+    <string name="speed_test_selected_profile">当前配置</string>
+    <string name="speed_test_running">正在测试 %1$s…</string>
+    <string name="speed_test_result">%1$s\n下载：%2$.2f Mbps\n上传：%3$.2f Mbps</string>
+    <string name="speed_test_failed">测速失败：%1$s</string>
+    <string name="speed_test_no_profile">请先选择配置</string>
 </resources>
