@@ -28,11 +28,20 @@ class LogcatViewModel : ViewModel() {
 
     fun loadLogcat() {
         val bufferLines = InProcessLogBuffer.getAll()
+        val myPid = Process.myPid().toString()
 
         val systemLines = (tryLogcatProcessBuilder() ?: tryLogcatPidOnly())
         ?.filter { line ->
-            val tag = LogEntry.parse(line).tag
-            tag.isEmpty() || tag !in ownTags
+            val entry = LogEntry.parse(line)
+            val tag = entry.tag
+            // Only drop lines that are true duplicates of what's already in
+            // InProcessLogBuffer: same own-tag AND same process (pid). Logs
+            // tagged with our own tag but coming from a different process
+            // (e.g. CoreVpnService/CoreServiceManager running in ":daemon")
+            // are NOT in InProcessLogBuffer (it's per-process), so they must
+            // be kept here or they'd be lost entirely.
+            val pid = entry.meta.substringBefore('/').trim()
+            tag.isEmpty() || tag !in ownTags || pid != myPid
         }
         .orEmpty()
 
