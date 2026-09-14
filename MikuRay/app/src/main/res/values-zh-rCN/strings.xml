@@ -1087,4 +1087,5 @@
     <string name="speed_test_no_profile">请先选择配置</string>
     <string name="speed_test_row_result">↓ %1$.2f Mbps  ↑ %2$.2f Mbps</string>
     <string name="speed_test_row_failed">测速失败</string>
+    <string name="speed_test_active_group">当前分组中的所有配置</string>
 </resources>

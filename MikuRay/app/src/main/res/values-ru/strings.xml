@@ -1108,4 +1108,5 @@
     <string name="speed_test_no_profile">Сначала выберите профиль</string>
     <string name="speed_test_row_result">↓ %1$.2f Мбит/с  ↑ %2$.2f Мбит/с</string>
     <string name="speed_test_row_failed">Ошибка теста скорости</string>
+    <string name="speed_test_active_group">Все профили в активной группе</string>
 </resources>

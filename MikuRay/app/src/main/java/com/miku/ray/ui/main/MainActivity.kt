@@ -847,8 +847,24 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         when (viewId) {
             R.id.speed_test_profile -> {
                 mainViewModel.ensureServerCacheReady()
-                speedTestProgressDialog.show(mainViewModel.serversCache.count(), R.string.title_speed_test)
-                mainViewModel.testAllSpeed()
+                val selectedGuid = MmkvManager.getSelectServer().orEmpty()
+                val selectedProfile = selectedGuid.isNotBlank() && MmkvManager.decodeServerConfig(selectedGuid) != null
+                val options = if (selectedProfile) {
+                    arrayOf(getString(R.string.speed_test_selected_profile), getString(R.string.speed_test_active_group))
+                } else {
+                    arrayOf(getString(R.string.speed_test_active_group))
+                }
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.title_speed_test)
+                    .setIcon(RemixR.drawable.rmx_media_speed_line)
+                    .setItems(options) { _, which ->
+                        val selectedOnly = selectedProfile && which == 0
+                        val total = if (selectedOnly) 1 else mainViewModel.serversCache.count()
+                        speedTestProgressDialog.show(total, R.string.title_speed_test)
+                        if (selectedOnly) mainViewModel.testSelectedSpeed() else mainViewModel.testAllSpeed()
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .showBlur()
             }
             R.id.export_all -> exportAll()
             R.id.export_group_file -> exportGroupAsFile()

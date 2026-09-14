@@ -1138,4 +1138,5 @@ you need."</string>
     <string name="speed_test_no_profile">Select a profile first</string>
     <string name="speed_test_row_result">↓ %1$.2f Mbps  ↑ %2$.2f Mbps</string>
     <string name="speed_test_row_failed">Speed test failed</string>
+    <string name="speed_test_active_group">All profiles in active group</string>
 </resources>

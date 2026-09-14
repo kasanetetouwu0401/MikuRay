@@ -421,11 +421,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _countryCodeProgress.value = null
     }
 
-    fun testAllSpeed() {
+    fun testAllSpeed() = testSpeed(serversCache.map { it.guid }.toList())
+
+    fun testSelectedSpeed() {
+        MmkvManager.getSelectServer()?.takeIf { it.isNotBlank() }?.let { testSpeed(listOf(it)) }
+    }
+
+    private fun testSpeed(targetGuids: List<String>) {
         val requestId = UUID.randomUUID().toString()
         activeSpeedTestId?.let { mainRepository.sendMsg2SpeedTestService(SpeedTestMessage(AppConfig.MSG_SPEED_TEST_CANCEL, requestId = it)) }
         activeSpeedTestId = requestId
-        val targetGuids = serversCache.map { it.guid }.toList()
         _speedTestProgress.value = null
         viewModelScope.launch(Dispatchers.Default) {
             if (targetGuids.isEmpty()) {
