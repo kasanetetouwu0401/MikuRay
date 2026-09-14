@@ -28,6 +28,11 @@ object SpeedtestManager {
     fun runProfileSpeedTest(timeoutMs: Int = 15_000): SpeedTestResult {
         val httpPort = SettingsManager.getHttpPort()
         if (httpPort <= 0) return SpeedTestResult(error = "HTTP proxy is not available")
+        return runSpeedTestThroughProxy(httpPort, timeoutMs)
+    }
+
+    fun runSpeedTestThroughProxy(httpPort: Int, timeoutMs: Int = 15_000): SpeedTestResult {
+        if (httpPort <= 0) return SpeedTestResult(error = "HTTP proxy is not available")
         val proxy = Proxy(Proxy.Type.HTTP, InetSocketAddress(AppConfig.LOOPBACK, httpPort))
         return try {
             SpeedTestResult(

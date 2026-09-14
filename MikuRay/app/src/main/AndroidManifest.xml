@@ -3216,6 +3216,16 @@
         <service
             android:exported="false"
             android:foregroundServiceType="specialUse"
+            android:name=".service.SpeedTestService"
+            android:process=":daemon">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="speed_test" />
+        </service>
+
+        <service
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
             android:name=".service.SubscriptionUpdateService"
             android:process=":tasks">
             <property

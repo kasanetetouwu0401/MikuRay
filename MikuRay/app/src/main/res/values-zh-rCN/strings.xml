@@ -1085,4 +1085,6 @@
     <string name="speed_test_result">%1$s\n下载：%2$.2f Mbps\n上传：%3$.2f Mbps</string>
     <string name="speed_test_failed">测速失败：%1$s</string>
     <string name="speed_test_no_profile">请先选择配置</string>
+    <string name="speed_test_row_result">↓ %1$.2f Mbps  ↑ %2$.2f Mbps</string>
+    <string name="speed_test_row_failed">测速失败</string>
 </resources>

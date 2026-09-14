@@ -11,6 +11,7 @@ import com.miku.ray.dto.CountryCodeTestMessage
 import com.miku.ray.dto.RealPingProgress
 import com.miku.ray.dto.RealPingResult
 import com.miku.ray.dto.RealPingSummary
+import com.miku.ray.dto.SpeedTestMessage
 import com.miku.ray.dto.SubscriptionUpdateResult
 import com.miku.ray.dto.TestProgressInfo
 import com.miku.ray.dto.TestServiceMessage
@@ -97,6 +98,11 @@ class MainRepository(
                 )
 
                 AppConfig.MSG_COUNTRY_CODE_FINISH -> MainServiceEvent.CountryCodeFinish(requestId)
+                AppConfig.MSG_SPEED_TEST_NOTIFY -> MainServiceEvent.SpeedTestNotify(
+                    info = safeIntent.getStringExtra("content")?.parseJson(com.miku.ray.dto.SpeedTestProgress::class.java),
+                    requestId = requestId,
+                )
+                AppConfig.MSG_SPEED_TEST_FINISH -> MainServiceEvent.SpeedTestFinish(requestId)
 
                 AppConfig.MSG_TRAFFIC_UPDATED -> safeIntent.getStringExtra("content")
                     ?.let(MainServiceEvent::TrafficUpdated)
@@ -157,6 +163,9 @@ class MainRepository(
 
     override fun sendMsg2CountryCodeTestService(msg: CountryCodeTestMessage) {
         MessageUtil.sendMsg2CountryCodeTestService(app, msg)
+    }
+    override fun sendMsg2SpeedTestService(msg: SpeedTestMessage) {
+        MessageUtil.sendMsg2SpeedTestService(app, msg)
     }
 
     override fun testCurrentServerRealPing(requestId: String) {

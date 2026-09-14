@@ -63,7 +63,6 @@ import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.SettingsChangeManager
 import com.miku.ray.handler.SettingsManager
 import com.miku.ray.handler.SubscriptionUpdater
-import com.miku.ray.handler.SpeedtestManager
 import com.miku.ray.ui.about.AboutActivity
 import com.miku.ray.ui.backup.BackupActivity
 import com.miku.ray.ui.base.HelperBaseActivity
@@ -137,6 +136,10 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
     private val countryCodeProgressDialog: TestProgressDialogController by lazy {
         TestProgressDialogController(this, TestProgressDialogController.Mode.COUNTRY_CODE) { mainViewModel.cancelCountryCodeTest() }
+    }
+
+    private val speedTestProgressDialog: TestProgressDialogController by lazy {
+        TestProgressDialogController(this, TestProgressDialogController.Mode.SPEED_TEST) { mainViewModel.cancelSpeedTest() }
     }
 
     private val TAG_HOME_BANNER_DEFAULT = "DEFAULT_HOME_BANNER"
@@ -842,7 +845,11 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
 
     override fun onMoreOptionClicked(viewId: Int) {
         when (viewId) {
-            R.id.speed_test_profile -> runProfileSpeedTest()
+            R.id.speed_test_profile -> {
+                mainViewModel.ensureServerCacheReady()
+                speedTestProgressDialog.show(mainViewModel.serversCache.count(), R.string.title_speed_test)
+                mainViewModel.testAllSpeed()
+            }
             R.id.export_all -> exportAll()
             R.id.export_group_file -> exportGroupAsFile()
             R.id.real_ping_all -> {
@@ -993,35 +1000,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         }
     }
 
-    private fun runProfileSpeedTest() {
-        val guid = MmkvManager.getSelectServer().orEmpty()
-        if (guid.isBlank()) {
-            snackbarDefault(getString(R.string.speed_test_no_profile), title = getString(R.string.title_alerter_info))
-            return
-        }
-        val profileName = MmkvManager.decodeServerConfig(guid)?.remarks.orEmpty()
-            .ifBlank { getString(R.string.speed_test_selected_profile) }
-        val dialog = MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.title_speed_test)
-            .setIcon(RemixR.drawable.rmx_media_speed_line)
-            .setMessage(getString(R.string.speed_test_running, profileName))
-            .setPositiveButton(android.R.string.ok, null)
-            .showBlur()
-        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)?.isEnabled = false
-        lifecycleScope.launch(Dispatchers.IO) {
-            val result = SpeedtestManager.runProfileSpeedTest()
-            withContext(Dispatchers.Main) {
-                val message = if (result.error == null) {
-                    getString(R.string.speed_test_result, profileName, result.downloadMbps ?: 0.0, result.uploadMbps ?: 0.0)
-                } else {
-                    getString(R.string.speed_test_failed, result.error)
-                }
-                dialog.setMessage(message)
-                dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)?.isEnabled = true
-            }
-        }
-    }
-
     private fun setupViewModel() {
         
         lifecycleScope.launch {
@@ -1076,6 +1054,16 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
                             countryCodeProgressDialog.finish()
                         } else {
                             countryCodeProgressDialog.update(info)
+                        }
+                    }
+                }
+
+                launch {
+                    mainViewModel.speedTestProgress.collect { info ->
+                        if (info == null) {
+                            if (speedTestProgressDialog.isShowing) speedTestProgressDialog.finish()
+                        } else {
+                            speedTestProgressDialog.update(info)
                         }
                     }
                 }
@@ -1948,6 +1936,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     override fun onDestroy() {
         hideLoading()
         urlTestProgressDialog.dismiss()
+        speedTestProgressDialog.dismiss()
         tabMediator?.detach()
         runCatching {
             Glide.with(applicationContext).clear(binding.headerImage)

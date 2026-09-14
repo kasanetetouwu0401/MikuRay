@@ -1106,4 +1106,6 @@
     <string name="speed_test_result">%1$s\nСкачивание: %2$.2f Мбит/с\nЗагрузка: %3$.2f Мбит/с</string>
     <string name="speed_test_failed">Ошибка теста скорости: %1$s</string>
     <string name="speed_test_no_profile">Сначала выберите профиль</string>
+    <string name="speed_test_row_result">↓ %1$.2f Мбит/с  ↑ %2$.2f Мбит/с</string>
+    <string name="speed_test_row_failed">Ошибка теста скорости</string>
 </resources>

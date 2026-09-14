@@ -1096,4 +1096,6 @@ yang kamu butuhin."</string>
     <string name="speed_test_result">%1$s\nDownload: %2$.2f Mbps\nUpload: %3$.2f Mbps</string>
     <string name="speed_test_failed">Tes kecepatan gagal: %1$s</string>
     <string name="speed_test_no_profile">Pilih profil dulu</string>
+    <string name="speed_test_row_result">↓ %1$.2f Mbps  ↑ %2$.2f Mbps</string>
+    <string name="speed_test_row_failed">Tes kecepatan gagal</string>
 </resources>
