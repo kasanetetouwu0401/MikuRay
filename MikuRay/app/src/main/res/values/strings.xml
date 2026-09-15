@@ -972,8 +972,6 @@ you need."</string>
     <string name="title_pref_enable_blur">Enable Blur</string>
     <string name="summary_pref_enable_blur">Enable background blur effect on windows</string>
     <string name="title_pref_blur_bottom_status">Blur Status Bottom Card</string>
-    <string name="title_pref_minimal_idle_footer">Minimal idle footer</string>
-    <string name="summary_pref_minimal_idle_footer">Hide status and IP details while disconnected; keep only the connect button</string>
     <string name="summary_pref_blur_bottom_status">Enable blur effect on the status  bottom card</string>
     <string name="title_pref_blur_bottom_blob_anim">Liquid Blob Animation</string>
     <string name="summary_pref_blur_bottom_blob_anim">Show a floating liquid blob animation on the bottom status blur</string>
