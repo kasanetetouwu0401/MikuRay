@@ -494,7 +494,7 @@
     <string name="routing_settings_import_rulesets_from_qrcode">Import ruleset from QRcode</string>
     <string name="routing_settings_export_rulesets_to_clipboard">Export ruleset to clipboard</string>
     <string name="routing_settings_locked">Locked</string>
-    <string name="routing_settings_locked">Locked, keep this rule when import presets</string>
+    <string name="routing_settings_locked_tip">Locked, keep this rule when import presets</string>
     <string name="routing_settings_domain">domain</string>
     <string name="routing_settings_ip">ip</string>
     <string name="routing_settings_process">process</string>

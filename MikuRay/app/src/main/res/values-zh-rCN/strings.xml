@@ -447,7 +447,7 @@
     <string name="routing_settings_import_rulesets_from_qrcode">从 QRcode 导入规则集</string>
     <string name="routing_settings_export_rulesets_to_clipboard">导出规则集至剪贴板</string>
     <string name="routing_settings_locked">已锁定</string>
-    <string name="routing_settings_locked">已锁定，导入预设时保留此规则</string>
+    <string name="routing_settings_locked_tip">已锁定，导入预设时保留此规则</string>
     <string name="routing_settings_domain">domain</string>
     <string name="routing_settings_ip">ip</string>
     <string name="routing_settings_process">process</string>
