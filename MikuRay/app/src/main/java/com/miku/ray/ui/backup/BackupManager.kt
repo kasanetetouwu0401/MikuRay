@@ -19,12 +19,6 @@ import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 
-/**
- * Full configuration backup/restore using a single custom JSON file
- * (same style as [ThemeShareManager]), instead of a zip archive.
- *
- * Format: application/vnd.mikuray.backup+json  (.mikubackup)
- */
 object BackupManager {
     const val MIME_TYPE = "application/vnd.mikuray.backup+json"
     const val FILE_EXTENSION = ".mikubackup"
@@ -40,11 +34,6 @@ object BackupManager {
         data class Error(val message: String) : ImportResult()
     }
 
-    /**
-     * Creates a full backup into [destination] (content Uri from CreateDocument / share).
-     * Internally still uses MMKV.backupAllToDirectory + asset copies, then serializes
-     * every file as base64 into a single JSON document (no zip).
-     */
     @Throws(IOException::class)
     fun exportTo(context: Context, destination: Uri) {
         val tempRoot = File(context.cacheDir, "mikubackup_export_${System.nanoTime()}").also { it.mkdirs() }
@@ -78,10 +67,6 @@ object BackupManager {
         }
     }
 
-    /**
-     * Creates a temporary .mikubackup file on disk (for share / WebDAV upload).
-     * Caller is responsible for deleting the returned file.
-     */
     fun exportToCacheFile(context: Context): Pair<Boolean, File?> {
         return try {
             val dateFormatted = java.text.SimpleDateFormat(
@@ -202,13 +187,12 @@ object BackupManager {
             if (count <= 0) {
                 return ImportResult.Error("MMKV restore produced no data.")
             }
-            ImportResult.Success(count)
+            return ImportResult.Success(count.toInt())
         } finally {
             restoreDir.deleteRecursively()
         }
     }
 
-    /** One-cycle compatibility with the old zip format. */
     private fun importLegacyZip(context: Context, zipFile: File): ImportResult {
         val backupDir = File(context.cacheDir, "restore_legacy_${System.nanoTime()}")
         return try {
@@ -225,7 +209,7 @@ object BackupManager {
             applyRestoredUi(context)
             SettingsManager.initApp(context)
             if (count <= 0) ImportResult.Error("MMKV restore produced no data.")
-            else ImportResult.Success(count)
+            else ImportResult.Success(count.toInt())
         } catch (e: Exception) {
             ImportResult.Error(e.message ?: "Legacy zip restore failed.")
         } finally {
@@ -263,12 +247,6 @@ object BackupManager {
     }
 
 
-    /**
-     * Apply launcher icon/name aliases, custom font, and UI notifications after MMKV
-     * settings have been restored — same idea as ThemeShareManager.applyImportedTheme.
-     * Without this, PREF_APP_ICON / PREF_CUSTOM_APP_NAME only live in MMKV and the
-     * home-screen alias stays on the previous variant until the next manual toggle.
-     */
     private fun applyRestoredUi(context: Context) {
         try {
             if (MmkvManager.decodeSettingsBool(AppConfig.PREF_APP_FONT_USE_CUSTOM, false)) {
@@ -302,8 +280,6 @@ object BackupManager {
             LogUtil.e(AppConfig.TAG, "Failed to notify selected profile banner after restore", e)
         }
     }
-
-    // --- Asset helpers (mirrors previous BackupActivity logic) ---
 
     private fun backupBannerImages(context: Context, backupDir: File) {
         val bannerKeys = listOf(

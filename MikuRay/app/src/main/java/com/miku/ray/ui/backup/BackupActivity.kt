@@ -197,17 +197,12 @@ class BackupActivity : HelperBaseActivity() {
     }
 
     private fun restoreViaLocal() {
-        // Accept both the new format and legacy zip (chooser still * /* so user can pick either)
         launchFileChooser { uri ->
             if (uri == null) return@launchFileChooser
             showLoading()
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
-                    // Prefer streaming from Uri; if the system gave a zip content type we still
-                    // copy to a temp file so the legacy path can inspect the magic bytes.
                     val result = BackupManager.importFrom(this@BackupActivity, uri)
-                    // If the URI was a legacy zip, importFrom only understands JSON.
-                    // Fall back by copying to a temp file and letting importFromFile decide.
                     val finalResult = if (result is BackupManager.ImportResult.Error) {
                         val targetFile = File(cacheDir, "restore_${System.nanoTime()}")
                         try {
@@ -335,7 +330,6 @@ class BackupActivity : HelperBaseActivity() {
                 target = File(cacheDir, "download_${System.currentTimeMillis()}${BackupManager.FILE_EXTENSION}")
                 val ok = WebDavManager.downloadFile(WEBDAV_BACKUP_FILE_NAME, target)
                 if (!ok) {
-                    // Also try the legacy zip name once, for migration
                     val legacy = File(cacheDir, "download_legacy_${System.currentTimeMillis()}.zip")
                     val legacyOk = WebDavManager.downloadFile("backup_ng.zip", legacy)
                     if (legacyOk) {

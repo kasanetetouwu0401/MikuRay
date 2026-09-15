@@ -27,7 +27,6 @@ class FileChooserHelper(private val activity: AppCompatActivity) {
             fileChooserCallback = null
         }
 
-    // Default to the new backup MIME; callers that need zip can still pass it explicitly.
     private val documentCreateLauncher: ActivityResultLauncher<String> =
         activity.registerForActivityResult(
             ActivityResultContracts.CreateDocument(BackupManager.MIME_TYPE)
