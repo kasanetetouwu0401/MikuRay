@@ -12,7 +12,6 @@ import com.miku.ray.util.CustomFontManager
 import com.miku.ray.util.LauncherAliasSwitcher
 import com.miku.ray.util.LogUtil
 import com.miku.ray.util.SelectedProfileBannerController
-import com.miku.ray.util.ZipUtil
 import com.tencent.mmkv.MMKV
 import org.json.JSONArray
 import org.json.JSONObject
@@ -22,8 +21,6 @@ import java.io.IOException
 object BackupManager {
     const val MIME_TYPE = "application/vnd.mikuray.backup+json"
     const val FILE_EXTENSION = ".mikubackup"
-    const val LEGACY_ZIP_EXTENSION = ".zip"
-
     private const val FORMAT = "mikuray-backup"
     private const val FORMAT_VERSION = 1
     private const val MAX_BACKUP_FILE_BYTES = 256L * 1024L * 1024L
@@ -132,10 +129,6 @@ object BackupManager {
             if (file.length() > MAX_BACKUP_FILE_BYTES) {
                 return ImportResult.Error("The backup file exceeds the size limit.")
             }
-            // Support legacy zip for one release cycle
-            if (file.name.endsWith(LEGACY_ZIP_EXTENSION, ignoreCase = true) || isZipFile(file)) {
-                return importLegacyZip(context, file)
-            }
             val rawJson = file.readText(Charsets.UTF_8)
             importFromJson(context, rawJson)
         } catch (e: Exception) {
@@ -193,42 +186,6 @@ object BackupManager {
         }
     }
 
-    private fun importLegacyZip(context: Context, zipFile: File): ImportResult {
-        val backupDir = File(context.cacheDir, "restore_legacy_${System.nanoTime()}")
-        return try {
-            if (!ZipUtil.unzipToFolder(zipFile, backupDir.absolutePath)) {
-                return ImportResult.Error("Failed to extract legacy zip backup.")
-            }
-            val count = MMKV.restoreAllFromDirectory(backupDir.absolutePath)
-            SettingsChangeManager.makeSetupGroupTab()
-            SettingsChangeManager.makeRestartService()
-            restoreBannerImages(context, backupDir)
-            SettingsManager.preloadAllBanners(context)
-            restoreCustomFont(context, backupDir)
-            restoreCustomSounds(context, backupDir)
-            applyRestoredUi(context)
-            SettingsManager.initApp(context)
-            if (count <= 0) ImportResult.Error("MMKV restore produced no data.")
-            else ImportResult.Success(count.toInt())
-        } catch (e: Exception) {
-            ImportResult.Error(e.message ?: "Legacy zip restore failed.")
-        } finally {
-            backupDir.deleteRecursively()
-        }
-    }
-
-    private fun isZipFile(file: File): Boolean {
-        return try {
-            file.inputStream().use { ins ->
-                val sig = ByteArray(4)
-                if (ins.read(sig) != 4) return false
-                // PK\x03\x04
-                sig[0] == 0x50.toByte() && sig[1] == 0x4B.toByte() && sig[2] == 0x03.toByte() && sig[3] == 0x04.toByte()
-            }
-        } catch (_: Exception) {
-            false
-        }
-    }
 
     private fun collectFilesAsBase64(dir: File, prefix: String, out: JSONArray) {
         dir.listFiles()?.forEach { file ->

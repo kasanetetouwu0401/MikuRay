@@ -21,6 +21,8 @@ import com.miku.ray.extension.applyEdgeToEdgeListInsets
 import com.miku.ray.extension.snackbarError
 import com.miku.ray.extension.snackbarSuccess
 import com.miku.ray.handler.MmkvManager
+import com.miku.ray.handler.SettingsChangeManager
+import com.miku.ray.handler.SettingsManager
 import com.miku.ray.handler.WebDavManager
 import com.miku.ray.util.AppNameHelper
 import com.miku.ray.util.LogUtil
@@ -197,37 +199,28 @@ class BackupActivity : HelperBaseActivity() {
     }
 
     private fun restoreViaLocal() {
-        launchFileChooser { uri ->
+        launchFileChooser("*/*") { uri ->
             if (uri == null) return@launchFileChooser
             showLoading()
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
                     val result = BackupManager.importFrom(this@BackupActivity, uri)
-                    val finalResult = if (result is BackupManager.ImportResult.Error) {
-                        val targetFile = File(cacheDir, "restore_${System.nanoTime()}")
-                        try {
-                            contentResolver.openInputStream(uri)?.use { input ->
-                                targetFile.outputStream().use { input.copyTo(it) }
-                            }
-                            BackupManager.importFromFile(this@BackupActivity, targetFile)
-                        } finally {
-                            targetFile.delete()
-                        }
-                    } else {
-                        result
-                    }
-
                     withContext(Dispatchers.Main) {
-                        when (finalResult) {
+                        when (result) {
                             is BackupManager.ImportResult.Success -> {
+                                SettingsChangeManager.makeRestartService()
+                                SettingsChangeManager.makeSetupGroupTab()
+                                SettingsChangeManager.makeRefreshDisplayPrefs()
+                                SettingsManager.setNightMode()
                                 snackbarSuccess(
                                     getString(R.string.title_configuration_restore),
                                     title = getString(R.string.title_alerter_success)
                                 )
+                                restartApplication()
                             }
                             is BackupManager.ImportResult.Error -> {
                                 snackbarError(
-                                    finalResult.message.ifBlank {
+                                    result.message.ifBlank {
                                         getString(R.string.title_configuration_restore)
                                     },
                                     title = getString(R.string.title_alerter_error)
@@ -330,29 +323,28 @@ class BackupActivity : HelperBaseActivity() {
                 target = File(cacheDir, "download_${System.currentTimeMillis()}${BackupManager.FILE_EXTENSION}")
                 val ok = WebDavManager.downloadFile(WEBDAV_BACKUP_FILE_NAME, target)
                 if (!ok) {
-                    val legacy = File(cacheDir, "download_legacy_${System.currentTimeMillis()}.zip")
-                    val legacyOk = WebDavManager.downloadFile("backup_ng.zip", legacy)
-                    if (legacyOk) {
-                        target = legacy
-                    } else {
-                        withContext(Dispatchers.Main) {
-                            snackbarError(
-                                getString(R.string.title_configuration_restore),
-                                title = getString(R.string.title_alerter_error)
-                            )
-                        }
-                        return@launch
+                    withContext(Dispatchers.Main) {
+                        snackbarError(
+                            getString(R.string.title_configuration_restore),
+                            title = getString(R.string.title_alerter_error)
+                        )
                     }
+                    return@launch
                 }
 
                 val result = BackupManager.importFromFile(this@BackupActivity, target!!)
                 withContext(Dispatchers.Main) {
                     when (result) {
                         is BackupManager.ImportResult.Success -> {
+                            SettingsChangeManager.makeRestartService()
+                            SettingsChangeManager.makeSetupGroupTab()
+                            SettingsChangeManager.makeRefreshDisplayPrefs()
+                            SettingsManager.setNightMode()
                             snackbarSuccess(
                                 getString(R.string.title_configuration_restore),
                                 title = getString(R.string.title_alerter_success)
                             )
+                            restartApplication()
                         }
                         is BackupManager.ImportResult.Error -> {
                             snackbarError(
@@ -382,6 +374,17 @@ class BackupActivity : HelperBaseActivity() {
                 }
             }
         }
+    }
+
+    private fun restartApplication() {
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        if (launchIntent == null) {
+            recreate()
+            return
+        }
+        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(launchIntent)
+        finishAffinity()
     }
 
     private fun showWebDavSettingsDialog() {

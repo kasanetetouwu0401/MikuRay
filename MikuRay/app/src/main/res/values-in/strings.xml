@@ -608,11 +608,11 @@ Nama Paket — cuma bisa kalo kamu pake Xray TUN, routeOnly aktif, dan Android 1
         <item>Ping Paling Kecil</item>
         <item>Beban Paling Dikit</item>
         <item>Random Aja</item>
-        <item>Gantian (Round Robin)</item>
+        <item>Round Robin</item>
     </string-array>
 
     <string-array name="config_backup_options">
-        <item>Simpen di HP</item>
+        <item>Lokal</item>
         <item>WebDAV</item>
     </string-array>
 
