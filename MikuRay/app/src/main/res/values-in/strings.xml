@@ -453,6 +453,7 @@
     <string name="routing_settings_import_rulesets_from_clipboard">Impor ruleset dari clipboard</string>
     <string name="routing_settings_import_rulesets_from_qrcode">Impor ruleset dari QR Code</string>
     <string name="routing_settings_export_rulesets_to_clipboard">Salin ruleset ke clipboard</string>
+    <string name="routing_settings_locked">Kunci</string>
     <string name="routing_settings_locked">Kunci ah, biar aturan ini tetep ada pas kamu ngimpor preset</string>
     <string name="routing_settings_domain">domain</string>
     <string name="routing_settings_ip">ip</string>
@@ -528,7 +529,7 @@ Nama Paket — cuma bisa kalo kamu pake Xray TUN, routeOnly aktif, dan Android 1
 
     <string name="title_configuration_backup_restore">Backup &amp; Restore</string>
     <string name="title_configuration_backup">Backup Konfig</string>
-    <string name="title_configuration_restore">Balikin Konfig (Restore)</string>
+    <string name="title_configuration_restore">Balikin Konfig</string>
     <string name="title_configuration_share">Bagi-bagi Konfig</string>
     <string name="title_pin_server">Pin Server</string>
     <string name="action_pin_server">Pin ke atas</string>
@@ -995,6 +996,8 @@ yang kamu butuhin."</string>
 
     <string name="title_alerter_info">Info</string>
     <string name="title_alerter_success">Mantap Berhasil</string>
+    <string name="label_enable">Aktifin</string>
+    <string name="label_disable">Matiin</string>
     <string name="title_alerter_error">Yah Gagal</string>
 
     <string name="title_pref_enable_blur">Aktifin Blur</string>
