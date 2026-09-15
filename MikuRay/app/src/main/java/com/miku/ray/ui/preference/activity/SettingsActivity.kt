@@ -2,6 +2,7 @@ package com.miku.ray.ui.preference.activity
 
 import com.miku.ray.remixicon.R as RemixR
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.Menu
@@ -12,6 +13,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.isVisible
@@ -44,6 +46,9 @@ import com.miku.ray.ui.weather.WeatherHelper
 import com.miku.ray.util.showDeleteConfirmDialog
 import com.miku.ray.util.showTotalTrafficDetailDialog
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
 import kotlin.math.abs
 
 class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
@@ -416,6 +421,7 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
 
         private val bannerSettingsCard by lazy { findPreference<BannerSettingsPreference>("pref_banner_settings_card") }
         private val bannerSettingsCharacter by lazy { findPreference<ListPreference>(AppConfig.PREF_BANNER_SETTINGS_CHARACTER) }
+        private val customBannerSettingsCharacter by lazy { findPreference<Preference>("pref_custom_banner_settings_character") }
         private val bannerCharacterLayout by lazy { findPreference<BannerCharacterLayoutDialog>("pref_banner_character_layout") }
         private val navigateUiSettings by lazy { findPreference<Preference>(AppConfig.PREF_NAVIGATE_UI_SETTINGS) }
         private val navigateVpnSettings by lazy { findPreference<Preference>(AppConfig.PREF_NAVIGATE_VPN_SETTINGS) }
@@ -423,14 +429,40 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
         private val navigateFragmentSettings by lazy { findPreference<Preference>(AppConfig.PREF_NAVIGATE_FRAGMENT_SETTINGS) }
         private val navigateAdvancedSettings by lazy { findPreference<Preference>(AppConfig.PREF_NAVIGATE_ADVANCED_SETTINGS) }
 
+        private val pickCustomBannerSettingsCharacter =
+            registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                if (uri == null) return@registerForActivityResult
+                lifecycleScope.launch {
+                    val savedUri = withContext(Dispatchers.IO) { saveCustomBannerCharacter(uri) }
+                    if (savedUri != null) {
+                        MmkvManager.encodeSettings(AppConfig.PREF_CUSTOM_BANNER_SETTINGS_CHARACTER_URI, savedUri)
+                        customBannerSettingsCharacter?.summary = getString(R.string.summary_banner_settings_character_custom_selected)
+                        bannerSettingsCard?.refreshBanner()
+                    }
+                }
+            }
+
         override fun onCreatePreferences(bundle: Bundle?, s: String?) {
             preferenceManager.preferenceDataStore = MmkvPreferenceDataStore()
             addPreferencesFromResource(R.xml.pref_settings)
 
             bannerSettingsCharacter?.setOnPreferenceChangeListener { _, newValue ->
-
-                MmkvManager.encodeSettings(AppConfig.PREF_BANNER_SETTINGS_CHARACTER, newValue as? String)
+                val value = newValue as? String ?: return@setOnPreferenceChangeListener false
+                MmkvManager.encodeSettings(AppConfig.PREF_BANNER_SETTINGS_CHARACTER, value)
+                customBannerSettingsCharacter?.isVisible = value == com.miku.ray.ui.preference.BannerSettingsPreference.CUSTOM_VALUE
                 bannerSettingsCard?.refreshBanner()
+                true
+            }
+
+            val currentCharacter = MmkvManager.decodeSettingsString(
+                AppConfig.PREF_BANNER_SETTINGS_CHARACTER,
+                AppConfig.PREF_BANNER_SETTINGS_CHARACTER_DEFAULT
+            )
+            customBannerSettingsCharacter?.isVisible = currentCharacter == com.miku.ray.ui.preference.BannerSettingsPreference.CUSTOM_VALUE
+            customBannerSettingsCharacter?.setOnPreferenceClickListener {
+                pickCustomBannerSettingsCharacter.launch(
+                    androidx.activity.result.PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
                 true
             }
 
@@ -464,6 +496,24 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
             navigateAdvancedSettings?.setOnPreferenceClickListener {
                 startActivity(android.content.Intent(requireContext(), AdvancedSettingsActivity::class.java))
                 true
+            }
+        }
+
+        private fun saveCustomBannerCharacter(uri: Uri): String? {
+            return try {
+                val directory = File(requireContext().filesDir, "banners").apply { mkdirs() }
+                val oldUri = MmkvManager.decodeSettingsString(AppConfig.PREF_CUSTOM_BANNER_SETTINGS_CHARACTER_URI)
+                oldUri?.let { old ->
+                    val oldParsed = Uri.parse(old)
+                    if (oldParsed.scheme == "file") File(oldParsed.path.orEmpty()).delete()
+                }
+                val destination = File(directory, "settings_character_${System.currentTimeMillis()}.image")
+                requireContext().contentResolver.openInputStream(uri)?.use { input ->
+                    destination.outputStream().use { output -> input.copyTo(output) }
+                } ?: return null
+                Uri.fromFile(destination).toString()
+            } catch (_: Exception) {
+                null
             }
         }
     }
