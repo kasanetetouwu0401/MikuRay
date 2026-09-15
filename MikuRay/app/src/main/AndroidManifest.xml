@@ -2988,24 +2988,6 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
             </intent-filter>
 
-            <!--
-                Lets other apps (Telegram, file managers, etc.) open .mikutheme / .mikubackup
-                files directly into MikuRay. Split into two filters so the match can be as
-                precise as each source allows:
-
-                1) file:// - file managers that keep the real filename in the Uri path.
-                   No mimeType is declared here, so this only matches when the path itself
-                   ends in one of our extensions (nothing else lights up MikuRay).
-
-                2) content:// - apps like Telegram hand off an opaque content Uri with no
-                   visible extension in the path, so pathPattern can't help there. They
-                   instead tag unknown extensions with a generic MIME type, almost always
-                   application/octet-stream (or our own declared vnd.mikuray type if the
-                   file was shared by another MikuRay install). This filter is unavoidably
-                   broader - it can also match other unrecognized-extension files - so the
-                   real extension is still verified in code before anything is imported
-                   (see MainActivity.handleIncomingFileIntent).
-            -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 

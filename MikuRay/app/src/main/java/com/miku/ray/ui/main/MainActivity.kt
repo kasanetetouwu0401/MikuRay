@@ -222,21 +222,11 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         handleIncomingFileIntent(intent)
     }
 
-    /**
-     * Handles a .mikutheme / .mikubackup file opened from outside the app (e.g. tapping the
-     * file inside Telegram, a file manager, etc.). The manifest intent-filter for MainActivity
-     * matches broadly on VIEW (content/file scheme + application/octet-stream, since apps like
-     * Telegram usually can't resolve our custom extensions to a real MIME type), so we verify
-     * the actual file name here before doing anything - anything that isn't one of our two
-     * extensions is silently ignored.
-     */
     private fun handleIncomingFileIntent(intent: Intent?) {
         val launchIntent = intent ?: return
         if (launchIntent.action != Intent.ACTION_VIEW) return
         val uri = launchIntent.data ?: return
 
-        // Prevent the same VIEW intent from re-triggering the dialog again on a config change
-        // (rotation) recreating the activity, since getIntent() keeps returning the last intent.
         launchIntent.action = Intent.ACTION_MAIN
         launchIntent.data = null
 

@@ -42,11 +42,6 @@ class FileChooserHelper(private val activity: AppCompatActivity) {
     ) {
         fileChooserCallback = onResult
 
-        // Custom extensions (.mikutheme / .mikubackup) don't have a real entry in
-        // MimeTypeMap, so most document providers report them with a generic fallback
-        // type (usually application/octet-stream) rather than our declared vnd.mikuray
-        // type. Passing several candidate types via EXTRA_MIME_TYPES narrows the picker
-        // to those as closely as Android's GET_CONTENT filtering allows.
         val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
             if (extraMimeTypes.isNullOrEmpty()) {
                 type = mimeType
