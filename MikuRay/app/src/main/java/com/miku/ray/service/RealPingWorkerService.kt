@@ -233,10 +233,6 @@ class RealPingWorkerService(
 
     private fun startUdpProbe(guid: String): Long {
         val config = MmkvManager.decodeServerConfig(guid) ?: return -1L
-        val supportsUdp = config.configType == EConfigType.HYSTERIA
-            || config.configType == EConfigType.HYSTERIA2
-            || config.configType == EConfigType.WIREGUARD
-        if (!supportsUdp) return -1L
         val configResult = CoreConfigManager.getV2rayConfig4Speedtest(context, guid)
         if (!configResult.status) return -1L
         return RealPingExecutionLimiter.run(config.configType) {

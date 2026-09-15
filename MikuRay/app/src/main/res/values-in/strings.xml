@@ -408,7 +408,7 @@
     <string name="title_ping_all_server">Tcping semua konfig</string>
     <string name="title_udp_probe_all_server">Tes endpoint UDP</string>
     <string name="connection_runing_udp_probe_task_left">Probe UDP: %s</string>
-    <string name="summary_udp_probe_all_server">Tes endpoint VPN yang mendukung UDP (Hysteria, Hysteria2, WireGuard)</string>
+    <string name="summary_udp_probe_all_server">Tes semua konfigurasi VPN menggunakan transport yang diatur melalui VPN core</string>
     <string name="title_real_ping_all_server">Tes ping semua konfig</string>
     <string name="title_user_asset_setting">File Aset</string>
     <string name="title_filter_config">Saring / Filter Konfig</string>
