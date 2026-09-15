@@ -33,7 +33,7 @@
         android:summary="@string/summary_banner_settings_character_delete"
         android:title="@string/title_banner_settings_character_delete"
         app:isPreferenceVisible="false"
-        app:layout="@layout/uwu_bot" />
+        app:layout="@layout/uwu_mid" />
 
     <com.miku.ray.ui.dialog.BannerCharacterLayoutDialog
         android:icon="@drawable/rmx_arrows_expand_diagonal_line"
