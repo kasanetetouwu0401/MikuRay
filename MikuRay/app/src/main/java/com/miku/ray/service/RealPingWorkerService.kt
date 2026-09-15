@@ -120,6 +120,7 @@ class RealPingWorkerService(
     private val context: Context,
     guids: List<String>,
     private val onlyTcp: Boolean = false,
+    private val onlyUdp: Boolean = false,
     private val onEvent: (RealPingEvent) -> Unit = {},
 ) {
     private val guids = guids.distinct()
@@ -192,7 +193,11 @@ class RealPingWorkerService(
     }
 
     private suspend fun safelyProbe(guid: String): Long = try {
-        if (onlyTcp) startTcping(guid) else startRealPing(guid)
+        when {
+            onlyTcp -> startTcping(guid)
+            onlyUdp -> startUdpProbe(guid)
+            else -> startRealPing(guid)
+        }
     } catch (cancelled: CancellationException) {
         throw cancelled
     } catch (_: Exception) {
@@ -216,6 +221,22 @@ class RealPingWorkerService(
             if (tcpTime <= -1L) return -1L
         }
 
+        val configResult = CoreConfigManager.getV2rayConfig4Speedtest(context, guid)
+        if (!configResult.status) return -1L
+        return RealPingExecutionLimiter.run(config.configType) {
+            CoreNativeManager.measureOutboundDelay(
+                configResult.content,
+                SettingsManager.getDelayTestUrl(),
+            )
+        }
+    }
+
+    private fun startUdpProbe(guid: String): Long {
+        val config = MmkvManager.decodeServerConfig(guid) ?: return -1L
+        val supportsUdp = config.configType == EConfigType.HYSTERIA
+            || config.configType == EConfigType.HYSTERIA2
+            || config.configType == EConfigType.WIREGUARD
+        if (!supportsUdp) return -1L
         val configResult = CoreConfigManager.getV2rayConfig4Speedtest(context, guid)
         if (!configResult.status) return -1L
         return RealPingExecutionLimiter.run(config.configType) {

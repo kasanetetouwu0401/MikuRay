@@ -400,6 +400,9 @@
     <string name="group_order_by_added">最近添加</string>
     <string name="group_order_by_updated">最近更新</string>
     <string name="title_ping_all_server">Tcping所有配置</string>
+    <string name="title_udp_probe_all_server">UDP 端点测试</string>
+    <string name="connection_runing_udp_probe_task_left">UDP 测试：%s</string>
+    <string name="summary_udp_probe_all_server">测试支持 UDP 的 VPN 端点（Hysteria、Hysteria2、WireGuard）</string>
     <string name="title_real_ping_all_server">测试配置真连接</string>
     <string name="title_user_asset_setting">资源文件</string>
     <string name="title_filter_config">过滤配置</string>

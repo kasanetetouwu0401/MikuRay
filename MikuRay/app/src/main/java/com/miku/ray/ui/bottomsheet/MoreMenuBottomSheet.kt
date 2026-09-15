@@ -84,6 +84,7 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
             R.id.sub_update,
             R.id.country_code_all,
             R.id.tcping_all,
+            R.id.udp_probe_all,
             R.id.real_ping_all
         ).forEach { id ->
             view.findViewById<View>(id)?.visibility = if (isQuickActionsEnabled) View.GONE else View.VISIBLE
@@ -136,6 +137,7 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
             R.id.real_ping_all,
             R.id.country_code_all,
             R.id.tcping_all,
+            R.id.udp_probe_all,
             R.id.clear_test_results,
             R.id.clear_country_codes,
             R.id.sub_update,

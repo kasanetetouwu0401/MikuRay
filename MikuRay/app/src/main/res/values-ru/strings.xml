@@ -406,6 +406,9 @@
     <string name="group_order_by_added">Недавно добавленные</string>
     <string name="group_order_by_updated">Недавно обновлённые</string>
     <string name="title_ping_all_server">Tcping всех конфигураций</string>
+    <string name="title_udp_probe_all_server">Проверка UDP-конечных точек</string>
+    <string name="connection_runing_udp_probe_task_left">UDP-проверка: %s</string>
+    <string name="summary_udp_probe_all_server">Проверяет VPN-конечные точки с поддержкой UDP (Hysteria, Hysteria2, WireGuard)</string>
     <string name="title_real_ping_all_server">Реальная задержка конфигурации</string>
     <string name="title_user_asset_setting">Файлы ресурсов</string>
     <string name="title_filter_config">Фильтр конфигураций</string>
