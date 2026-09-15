@@ -475,8 +475,9 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
             val hasCustomImage = !MmkvManager.decodeSettingsString(
                 AppConfig.PREF_CUSTOM_BANNER_SETTINGS_CHARACTER_URI
             ).isNullOrBlank()
-            customBannerSettingsCharacter?.isVisible = isCustom
-            deleteCustomBannerSettingsCharacter?.isVisible = isCustom && hasCustomImage
+            val isBannerCharacterOptionsVisible = bannerSettingsCharacter?.isVisible == true
+            customBannerSettingsCharacter?.isVisible = isBannerCharacterOptionsVisible && isCustom
+            deleteCustomBannerSettingsCharacter?.isVisible = isBannerCharacterOptionsVisible && isCustom && hasCustomImage
             if (hasCustomImage) {
                 customBannerSettingsCharacter?.summary = getString(R.string.summary_banner_settings_character_custom_selected)
             }
@@ -519,6 +520,16 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
             bannerSettingsCard?.setOnPreferenceClickListener {
                 val expand = bannerSettingsCharacter?.isVisible != true
                 bannerSettingsCharacter?.isVisible = expand
+                val selectedCharacter = MmkvManager.decodeSettingsString(
+                    AppConfig.PREF_BANNER_SETTINGS_CHARACTER,
+                    AppConfig.PREF_BANNER_SETTINGS_CHARACTER_DEFAULT
+                )
+                val customSelected = selectedCharacter == com.miku.ray.ui.preference.BannerSettingsPreference.CUSTOM_VALUE
+                val customImageAvailable = !MmkvManager.decodeSettingsString(
+                    AppConfig.PREF_CUSTOM_BANNER_SETTINGS_CHARACTER_URI
+                ).isNullOrBlank()
+                customBannerSettingsCharacter?.isVisible = expand && customSelected
+                deleteCustomBannerSettingsCharacter?.isVisible = expand && customSelected && customImageAvailable
                 bannerCharacterLayout?.isVisible = expand
                 true
             }
