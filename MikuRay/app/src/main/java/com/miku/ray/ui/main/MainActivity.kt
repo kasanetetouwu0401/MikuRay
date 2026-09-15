@@ -1460,6 +1460,20 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         binding.blurBottomStatus.isClickable = true
         binding.blurBottomStatus.isFocusable = true
 
+        val minimalIdleFooter = MmkvManager.decodeSettingsBool(
+            AppConfig.PREF_MINIMAL_IDLE_FOOTER,
+            true
+        )
+        binding.statusTextContainer.visibility = if (!isRunning && minimalIdleFooter) {
+            View.GONE
+        } else {
+            View.VISIBLE
+        }
+        binding.blurBottomStatus.contentDescription = if (!isRunning && minimalIdleFooter) {
+            getString(R.string.connection_not_connected)
+        } else {
+            null
+        }
         if (isRunning) {
             binding.fab.setIconResource(RemixR.drawable.rmx_media_stop_line)
             binding.fab.contentDescription = getString(R.string.action_stop_service)

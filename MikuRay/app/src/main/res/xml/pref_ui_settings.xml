@@ -442,6 +442,14 @@
             app:widgetLayout="@layout/uwu_widget_material_switch" />
 
         <androidx.preference.SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:icon="@drawable/rmx_eye_off_line"
+            android:key="pref_minimal_idle_footer"
+            android:summary="@string/summary_pref_minimal_idle_footer"
+            android:title="@string/title_pref_minimal_idle_footer"
+            app:layout="@layout/uwu_mid_switch"
+            app:widgetLayout="@layout/uwu_widget_material_switch" />
+        <androidx.preference.SwitchPreferenceCompat
             android:defaultValue="false"
             android:dependency="pref_blur_bottom_status"
             android:icon="@drawable/rmx_blur_line"

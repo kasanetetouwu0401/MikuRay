@@ -935,6 +935,8 @@ yang kamu butuhin."</string>
     <string name="title_pref_enable_blur">Aktifin Blur</string>
     <string name="summary_pref_enable_blur">Nyalain efek blur di background window</string>
     <string name="title_pref_blur_bottom_status">Blur Card Status Bawah</string>
+    <string name="title_pref_minimal_idle_footer">Minimal idle footer</string>
+    <string name="summary_pref_minimal_idle_footer">Hide status and IP details while disconnected; keep only the connect button</string>
     <string name="summary_pref_blur_bottom_status">Aktifin efek blur di card status bagian bawah</string>
     <string name="title_pref_blur_bottom_blob_anim">Animasi Blob Cair</string>
     <string name="summary_pref_blur_bottom_blob_anim">Tampilin animasi blob cair yang mengambang di blur card status bagian bawah</string>
