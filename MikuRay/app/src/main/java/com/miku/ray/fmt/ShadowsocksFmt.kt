@@ -38,12 +38,17 @@ object ShadowsocksFmt : FmtBase() {
 
         if (!uri.rawQuery.isNullOrEmpty()) {
             val queryParam = getQueryParam(uri)
+            // Preserve the transport and TLS settings used by subscription links.
+            // Without this call, ss:// query parameters such as type=ws, host,
+            // path, security=tls, and sni are silently discarded on import.
+            getItemFormQuery(config, queryParam)
+
             if (queryParam["plugin"]?.contains("obfs=http") == true) {
                 val queryPairs = HashMap<String, String>()
                 for (pair in queryParam["plugin"]?.split(";") ?: listOf()) {
-                    val idx = pair.split("=")
-                    if (idx.count() == 2) {
-                        queryPairs.put(idx.first(), idx.last())
+                    val idx = pair.split("=", limit = 2)
+                    if (idx.size == 2) {
+                        queryPairs[idx.first()] = idx.last()
                     }
                 }
                 config.network = NetworkType.TCP.type
