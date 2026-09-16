@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.miku.ray.R
-import com.miku.ray.ui.preference.MaterialSectionHelper
 
 class SubGroupOptionsBottomSheet : BaseBottomSheetFragment() {
 
@@ -52,8 +51,6 @@ class SubGroupOptionsBottomSheet : BaseBottomSheetFragment() {
 
         view.findViewById<View>(R.id.clear_group_traffic)?.setOnClickListener(clickListener)
         view.findViewById<View>(R.id.remove_group)?.setOnClickListener(clickListener)
-
-        MaterialSectionHelper.applyToCards(view, listOf(R.id.clear_group_traffic, R.id.remove_group))
     }
 
     override fun onDetach() {

@@ -21,7 +21,6 @@ import com.miku.ray.extension.toastError
 import com.miku.ray.ui.base.BaseActivity
 import com.miku.ray.ui.preference.SearchPreferenceHighlighter
 import com.miku.ray.ui.preference.CategoryStyleHelper
-import com.miku.ray.ui.preference.MaterialSectionHelper
 
 class AdvancedSettingsActivity : BaseActivity() {
 
@@ -55,7 +54,6 @@ class AdvancedSettingsActivity : BaseActivity() {
             }
             initPreferenceSummaries()
             CategoryStyleHelper.applyToFragment(this)
-            MaterialSectionHelper.applyToFragment(this)
 
             realPingConcurrency?.summary =
             MmkvManager.decodeSettingsString(AppConfig.PREF_REAL_PING_CONCURRENCY, "16")

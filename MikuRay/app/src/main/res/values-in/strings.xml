@@ -736,13 +736,6 @@ Nama Paket — cuma bisa kalo kamu pake Xray TUN, routeOnly aktif, dan Android 1
     <string name="routing_settings_import_rulesets_from_clipboard_title">Clipboard</string>
     <string name="routing_settings_import_rulesets_from_qrcode_title">QR Code</string>
     <string name="title_pref_category_style">Gaya Judul Kategori</string>
-    <string name="title_category_material_containers">Material Containers</string>
-    <string name="title_pref_material_sections">Material Sections</string>
-    <string name="summary_pref_material_sections">Gabungkan preferensi dalam satu bagian menjadi satu kartu membulat</string>
-    <string name="title_pref_card_spacing">Jarak</string>
-    <string name="card_spacing_normal">Normal</string>
-    <string name="card_spacing_big">Besar</string>
-    <string name="card_spacing_huge">Sangat besar</string>
     <string name="scan_code">Scan Kode QR</string>
     <string name="select_photo">Pilih Foto</string>
     <string name="pref_show_splash_title">Tampilin splash screen</string>

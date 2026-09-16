@@ -734,13 +734,6 @@
     <string name="routing_settings_import_rulesets_from_clipboard_title">剪贴板</string>
     <string name="routing_settings_import_rulesets_from_qrcode_title">QRcode</string>
     <string name="title_pref_category_style">类别标题样式</string>
-    <string name="title_category_material_containers">Material 容器</string>
-    <string name="title_pref_material_sections">Material 分组</string>
-    <string name="summary_pref_material_sections">将同一分组内的设置项合并为一张圆角卡片</string>
-    <string name="title_pref_card_spacing">间距</string>
-    <string name="card_spacing_normal">正常</string>
-    <string name="card_spacing_big">大</string>
-    <string name="card_spacing_huge">超大</string>
     <string name="scan_code">扫描二维码</string>
     <string name="select_photo">选择照片</string>
     <string name="pref_show_splash_title">显示启动画面</string>

@@ -9,7 +9,6 @@ import android.widget.CheckedTextView
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.ui.preference.MaterialSectionHelper
 
 class SortSubBottomSheet : BaseBottomSheetFragment() {
 
@@ -90,11 +89,6 @@ class SortSubBottomSheet : BaseBottomSheetFragment() {
         ).forEach { id ->
             view.findViewById<View>(id)?.setOnClickListener(orderClickListener)
         }
-
-        MaterialSectionHelper.applyToCards(
-            view,
-            listOf(R.id.card_sort_sub_origin, R.id.card_sort_sub_added, R.id.card_sort_sub_updated)
-        )
     }
 
     override fun onDetach() {

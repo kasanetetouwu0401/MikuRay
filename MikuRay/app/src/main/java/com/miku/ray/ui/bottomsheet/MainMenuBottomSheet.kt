@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.ui.preference.MaterialSectionHelper
 
 class MainMenuBottomSheet : BaseBottomSheetFragment() {
 
@@ -58,14 +57,6 @@ class MainMenuBottomSheet : BaseBottomSheetFragment() {
         actionIds.forEach { id ->
             view.findViewById<View>(id)?.setOnClickListener(clickListener)
         }
-
-        // menu_sub_setting/menu_routing_setting/menu_settings form the vertical top/mid/bottom
-        // section; menu_logcat/menu_backup_restore/menu_about are a separate horizontal row of
-        // standalone icon buttons and are intentionally excluded here.
-        MaterialSectionHelper.applyToCards(
-            view,
-            listOf(R.id.menu_sub_setting, R.id.menu_routing_setting, R.id.menu_settings)
-        )
     }
 
     override fun onDetach() {

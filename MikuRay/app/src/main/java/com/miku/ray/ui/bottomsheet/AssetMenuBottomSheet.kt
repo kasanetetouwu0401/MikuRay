@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.ui.preference.MaterialSectionHelper
 
 class AssetMenuBottomSheet : BaseBottomSheetFragment() {
 
@@ -55,8 +54,6 @@ class AssetMenuBottomSheet : BaseBottomSheetFragment() {
         actionIds.forEach { id ->
             view.findViewById<View>(id)?.setOnClickListener(clickListener)
         }
-
-        MaterialSectionHelper.applyToCards(view, actionIds)
     }
 
     override fun onDetach() {

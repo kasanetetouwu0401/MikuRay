@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.ui.preference.MaterialSectionHelper
 
 class ShareSubBottomSheet : BaseBottomSheetFragment() {
 
@@ -54,8 +53,6 @@ class ShareSubBottomSheet : BaseBottomSheetFragment() {
 
         view.findViewById<View>(R.id.share_qrcode)?.setOnClickListener(clickListener)
         view.findViewById<View>(R.id.share_clipboard)?.setOnClickListener(clickListener)
-
-        MaterialSectionHelper.applyToCards(view, listOf(R.id.share_qrcode, R.id.share_clipboard))
     }
 
     override fun onDetach() {

@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.ui.preference.MaterialSectionHelper
 
 class RoutingMenuBottomSheet : BaseBottomSheetFragment() {
 
@@ -57,14 +56,6 @@ class RoutingMenuBottomSheet : BaseBottomSheetFragment() {
         actionIds.forEach { id ->
             view.findViewById<View>(id)?.setOnClickListener(clickListener)
         }
-
-        // menu_user_asset_setting / export_rulesets_to_clipboard are the only two cards that
-        // form a top/bottom section here - the three import_* rows above them are plain rows,
-        // not part of the uwu card chain.
-        MaterialSectionHelper.applyToCards(
-            view,
-            listOf(R.id.menu_user_asset_setting, R.id.export_rulesets_to_clipboard)
-        )
     }
 
     override fun onDetach() {

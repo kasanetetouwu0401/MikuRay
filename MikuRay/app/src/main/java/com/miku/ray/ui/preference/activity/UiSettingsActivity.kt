@@ -62,7 +62,6 @@ import com.miku.ray.ui.dialog.BannerHeightSliderDialog
 import com.miku.ray.ui.dialog.HeaderTopRowPaddingDialog
 import com.miku.ray.ui.preference.CustomBannerPreference
 import com.miku.ray.ui.preference.CategoryStyleHelper
-import com.miku.ray.ui.preference.MaterialSectionHelper
 import com.miku.ray.util.AppNameHelper
 import com.miku.ray.util.BannerColorExtractor
 import com.miku.ray.util.CustomFontManager
@@ -272,8 +271,6 @@ class UiSettingsActivity : BaseActivity() {
         private val customFontPick by lazy { findPreference<Preference>(AppConfig.PREF_ACTION_PICK_CUSTOM_FONT) }
         private val customFontDelete by lazy { findPreference<Preference>(AppConfig.PREF_ACTION_DELETE_CUSTOM_FONT) }
         private val categoryStyle by lazy { findPreference<ListPreference>(AppConfig.PREF_CATEGORY_STYLE) }
-        private val materialSections by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_MATERIAL_SECTIONS) }
-        private val cardSpacing by lazy { findPreference<ListPreference>(AppConfig.PREF_CARD_SPACING) }
         private val showSplash by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_SHOW_SPLASH) }
         private val bannerHeightSlider by lazy { findPreference<BannerHeightSliderDialog>(AppConfig.PREF_HOME_BANNER_HEIGHT) }
         private val headerTopRowPaddingSlider by lazy { findPreference<HeaderTopRowPaddingDialog>(AppConfig.PREF_HEADER_TOP_ROW_PADDING) }
@@ -668,36 +665,6 @@ class UiSettingsActivity : BaseActivity() {
             setupCustomSoundPreferences()
 
             CategoryStyleHelper.applyToFragment(this)
-            MaterialSectionHelper.applyToFragment(this)
-
-            materialSections?.setOnPreferenceChangeListener { _, newValue ->
-                val enabled = newValue as Boolean
-                MmkvManager.encodeSettings(AppConfig.PREF_MATERIAL_SECTIONS, enabled)
-                cardSpacing?.isEnabled = enabled
-                preferenceScreen?.let { screen ->
-                    MaterialSectionHelper.applyToGroup(screen)
-                    listView.adapter?.notifyDataSetChanged()
-                }
-                SettingsChangeManager.requestRecreate()
-                true
-            }
-            cardSpacing?.isEnabled = materialSections?.isChecked != false
-
-            cardSpacing?.setOnPreferenceChangeListener { pref, newValue ->
-                val spacingValue = newValue as String
-                (pref as? ListPreference)?.let { lp ->
-                    val idx = lp.findIndexOfValue(spacingValue)
-                    lp.summary = if (idx >= 0) lp.entries[idx] else spacingValue
-                }
-                MmkvManager.encodeSettings(AppConfig.PREF_CARD_SPACING, spacingValue)
-                preferenceScreen?.let { screen ->
-                    MaterialSectionHelper.applyToGroup(screen)
-                    listView.adapter?.notifyDataSetChanged()
-                }
-                SettingsChangeManager.requestRecreate()
-                true
-            }
-
             categoryStyle?.setOnPreferenceChangeListener { pref, newValue ->
                 val styleValue = newValue as String
                 (pref as? ListPreference)?.let { lp ->

@@ -10,7 +10,6 @@ import com.miku.ray.R
 import com.miku.ray.enums.EConfigType
 import com.miku.ray.extension.isComplexType
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.ui.preference.MaterialSectionHelper
 
 class ShareConfigBottomSheet : BaseBottomSheetFragment() {
 
@@ -71,11 +70,6 @@ class ShareConfigBottomSheet : BaseBottomSheetFragment() {
         if (isCustomConfig) {
             shareClipboardView?.visibility = View.GONE
         }
-
-        MaterialSectionHelper.applyToCards(
-            view,
-            listOf(R.id.share_qrcode, R.id.share_clipboard, R.id.share_full_clipboard, R.id.share_file)
-        )
     }
 
     override fun onDetach() {

@@ -768,13 +768,6 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="routing_settings_import_rulesets_from_clipboard_title">Clipboard</string>
     <string name="routing_settings_import_rulesets_from_qrcode_title">QRcode</string>
     <string name="title_pref_category_style">Category Title Style</string>
-    <string name="title_category_material_containers">Material Containers</string>
-    <string name="title_pref_material_sections">Material Sections</string>
-    <string name="summary_pref_material_sections">Merge preferences in the same section into one rounded card</string>
-    <string name="title_pref_card_spacing">Spacing</string>
-    <string name="card_spacing_normal">Normal</string>
-    <string name="card_spacing_big">Big</string>
-    <string name="card_spacing_huge">Huge</string>
     <string name="scan_code">Scan QR Code</string>
     <string name="select_photo">Select Photo</string>
     <string name="pref_show_splash_title">Show splash screen</string>

@@ -15,7 +15,6 @@ import com.miku.ray.helper.MmkvPreferenceDataStore
 import com.miku.ray.ui.base.BaseActivity
 import com.miku.ray.ui.preference.SearchPreferenceHighlighter
 import com.miku.ray.ui.preference.CategoryStyleHelper
-import com.miku.ray.ui.preference.MaterialSectionHelper
 
 class CoreSettingsActivity : BaseActivity() {
 
@@ -48,7 +47,6 @@ class CoreSettingsActivity : BaseActivity() {
             addPreferencesFromResource(R.xml.pref_core_settings)
             initPreferenceSummaries()
             CategoryStyleHelper.applyToFragment(this)
-            MaterialSectionHelper.applyToFragment(this)
 
             enableLocalProxy?.setOnPreferenceChangeListener { _, newValue ->
                 updateEnableLocalProxy(newValue as Boolean)
