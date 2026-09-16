@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
+import com.miku.ray.ui.preference.MaterialSectionHelper
 
 class AddConfigBottomSheet : BaseBottomSheetFragment() {
 
@@ -64,6 +65,14 @@ class AddConfigBottomSheet : BaseBottomSheetFragment() {
         actionIds.forEach { id ->
             view.findViewById<View>(id)?.setOnClickListener(clickListener)
         }
+
+        // import_qrcode/import_clipboard/import_local form the vertical top/mid/bottom section;
+        // the import_manually_* rows are a separate horizontal row of standalone protocol
+        // icons and are intentionally excluded here.
+        MaterialSectionHelper.applyToCards(
+            view,
+            listOf(R.id.import_qrcode, R.id.import_clipboard, R.id.import_local)
+        )
     }
 
     override fun onDetach() {

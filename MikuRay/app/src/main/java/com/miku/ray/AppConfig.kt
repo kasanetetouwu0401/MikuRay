@@ -119,6 +119,8 @@ object AppConfig {
     const val PREF_BANNER_COLOR = "pref_banner_color"
     const val PREF_TRUE_BLACK = "pref_true_black"
     const val PREF_CATEGORY_STYLE = "pref_category_style"
+    const val PREF_MATERIAL_SECTIONS = "pref_material_sections"
+    const val PREF_CARD_SPACING = "pref_card_spacing"
     const val PREF_APP_FONT = "pref_app_font"
     const val PREF_APP_FONT_USE_CUSTOM = "pref_app_font_use_custom"
     const val PREF_APP_FONT_CUSTOM_NAME = "pref_app_font_custom_name"

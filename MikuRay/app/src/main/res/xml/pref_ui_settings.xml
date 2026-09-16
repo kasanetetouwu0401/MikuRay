@@ -11,6 +11,33 @@
         app:icon="@drawable/rmx_download_cloud_line" />
 
     <com.miku.ray.widget.UwuPreferenceCategory
+        android:key="pref_category_material_containers"
+        android:title="@string/title_category_material_containers"
+        app:sectionIcon="@drawable/rmx_design_layout_top_2_line">
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:icon="@drawable/rmx_stack_line"
+            android:key="pref_material_sections"
+            android:summary="@string/summary_pref_material_sections"
+            android:title="@string/title_pref_material_sections"
+            app:layout="@layout/uwu_top_switch"
+            app:widgetLayout="@layout/uwu_widget_material_switch" />
+
+        <ListPreference
+            android:defaultValue="normal"
+            android:entries="@array/card_spacing_entries"
+            android:entryValues="@array/card_spacing_values"
+            android:icon="@drawable/rmx_arrows_expand_vertical_line"
+            android:key="pref_card_spacing"
+            android:summary="%s"
+            android:title="@string/title_pref_card_spacing"
+            app:dialogIcon="@drawable/rmx_arrows_expand_vertical_line"
+            app:layout="@layout/uwu_bot" />
+
+    </com.miku.ray.widget.UwuPreferenceCategory>
+
+    <com.miku.ray.widget.UwuPreferenceCategory
         android:key="pref_category_ui_general"
         android:title="@string/title_ui_general"
         app:sectionIcon="@drawable/rmx_speed_line">

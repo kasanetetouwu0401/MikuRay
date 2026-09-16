@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.appbar.MaterialToolbar
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.ui.preference.MaterialSectionHelper
 import com.miku.ray.contracts.BaseAdapterListener
 import com.miku.ray.databinding.ActivitySubSettingBinding
 import com.miku.ray.databinding.DialogSubUpdateOptionsBinding
@@ -151,6 +152,16 @@ SubGroupOptionsBottomSheet.OnSubGroupOptionClickListener {
         dialogBinding.rowSendHwid.setOnClickListener {
             dialogBinding.switchSendHwid.toggle()
         }
+
+        MaterialSectionHelper.applyToCards(
+            dialogBinding.root,
+            listOf(
+                R.id.card_update_subscription,
+                R.id.card_auto_test,
+                R.id.card_auto_remove_invalid,
+                R.id.card_send_hwid
+            )
+        )
 
         val sideSheetDialog = SideSheetDialog(this)
         sideSheetDialog.setContentView(dialogBinding.root)

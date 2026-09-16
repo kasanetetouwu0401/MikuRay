@@ -18,6 +18,7 @@ import com.miku.ray.extension.snackbarSuccess
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.handler.UpdateCheckerManager
 import com.miku.ray.core.CoreNativeManager
+import com.miku.ray.ui.preference.MaterialSectionHelper
 import com.miku.ray.util.LogUtil
 import com.miku.ray.util.Utils
 import kotlinx.coroutines.launch
@@ -44,6 +45,11 @@ class CheckUpdateActivity : BaseActivity() {
             MmkvManager.encodeSettings(AppConfig.PREF_CHECK_UPDATE_PRE_RELEASE, isChecked)
         }
         binding.checkPreRelease.isChecked = MmkvManager.decodeSettingsBool(AppConfig.PREF_CHECK_UPDATE_PRE_RELEASE, false)
+
+        MaterialSectionHelper.applyToCards(
+            binding.root,
+            listOf(R.id.layout_check_pre_release, R.id.layout_check_update)
+        )
 
         "v${BuildConfig.VERSION_NAME} (${CoreNativeManager.getLibVersion()})".also {
             binding.tvVersion.text = it

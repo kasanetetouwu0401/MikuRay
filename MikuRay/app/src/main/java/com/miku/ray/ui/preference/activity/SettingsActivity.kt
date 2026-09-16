@@ -27,6 +27,7 @@ import com.miku.ray.ui.preference.preferencesearch.SearchPreferenceActionView
 import com.miku.ray.ui.preference.preferencesearch.SearchPreferenceFragment
 import com.miku.ray.ui.preference.preferencesearch.SearchPreferenceResult
 import com.miku.ray.ui.preference.preferencesearch.SearchPreferenceResultListener
+import com.miku.ray.ui.preference.MaterialSectionHelper
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.miku.ray.AppConfig
@@ -464,6 +465,10 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
                     AppConfig.PREF_CUSTOM_BANNER_SETTINGS_CHARACTER_URI
                 ).isNullOrBlank()
                 bannerSettingsCard?.refreshBanner()
+                preferenceScreen?.let {
+                    MaterialSectionHelper.applyToGroup(it)
+                    listView.adapter?.notifyDataSetChanged()
+                }
                 true
             }
 
@@ -481,6 +486,9 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
             if (hasCustomImage) {
                 customBannerSettingsCharacter?.summary = getString(R.string.summary_banner_settings_character_custom_selected)
             }
+
+            MaterialSectionHelper.applyToFragment(this)
+
             customBannerSettingsCharacter?.setOnPreferenceClickListener {
                 pickCustomBannerSettingsCharacter.launch(
                     androidx.activity.result.PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -505,6 +513,10 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
                                 deleteCustomBannerSettingsCharacter?.isVisible = false
                                 customBannerSettingsCharacter?.summary = getString(R.string.summary_banner_settings_character_custom)
                                 bannerSettingsCard?.refreshBanner()
+                                preferenceScreen?.let {
+                                    MaterialSectionHelper.applyToGroup(it)
+                                    listView.adapter?.notifyDataSetChanged()
+                                }
                                 requireContext().snackbarSuccess(
                                     getString(R.string.summary_banner_settings_character_delete),
                                     title = getString(R.string.title_alerter_success)
@@ -531,6 +543,10 @@ class SettingsActivity : HelperBaseActivity(), SearchPreferenceResultListener {
                 customBannerSettingsCharacter?.isVisible = expand && customSelected
                 deleteCustomBannerSettingsCharacter?.isVisible = expand && customSelected && customImageAvailable
                 bannerCharacterLayout?.isVisible = expand
+                preferenceScreen?.let {
+                    MaterialSectionHelper.applyToGroup(it)
+                    listView.adapter?.notifyDataSetChanged()
+                }
                 true
             }
 

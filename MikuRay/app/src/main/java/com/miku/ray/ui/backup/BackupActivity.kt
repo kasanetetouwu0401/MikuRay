@@ -14,6 +14,7 @@ import com.miku.ray.AppConfig
 import com.miku.ray.AppConfig.WEBDAV_BACKUP_FILE_NAME
 import com.miku.ray.BuildConfig
 import com.miku.ray.R
+import com.miku.ray.ui.preference.MaterialSectionHelper
 import com.miku.ray.databinding.ActivityBackupBinding
 import com.miku.ray.databinding.DialogWebdavBinding
 import com.miku.ray.dto.entities.WebDavConfig
@@ -128,6 +129,17 @@ class BackupActivity : HelperBaseActivity() {
         binding.layoutWebdavConfigSetting.setOnClickListener {
             showWebDavSettingsDialog()
         }
+
+        MaterialSectionHelper.applyToCards(
+            binding.root,
+            listOf(
+                R.id.layout_backup,
+                R.id.layout_share,
+                R.id.layout_restore,
+                R.id.layout_profile_storage_cleanup,
+                R.id.layout_webdav_config_setting
+            )
+        )
     }
 
     private fun cleanupProfileStorage() {

@@ -501,6 +501,18 @@
         <item>retry_now</item>
     </string-array>
 
+    <string-array name="card_spacing_entries">
+        <item>@string/card_spacing_normal</item>
+        <item>@string/card_spacing_big</item>
+        <item>@string/card_spacing_huge</item>
+    </string-array>
+
+    <string-array name="card_spacing_values" translatable="false">
+        <item>normal</item>
+        <item>big</item>
+        <item>huge</item>
+    </string-array>
+
     <string-array name="search_bar_chip_entries">
         <item>@string/pref_search_bar_chip_disabled</item>
         <item>@string/pref_search_bar_chip_weather</item>

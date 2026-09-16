@@ -400,9 +400,6 @@
     <string name="group_order_by_added">最近添加</string>
     <string name="group_order_by_updated">最近更新</string>
     <string name="title_ping_all_server">Tcping所有配置</string>
-    <string name="title_udp_probe_all_server">UDP 端点测试</string>
-    <string name="connection_runing_udp_probe_task_left">UDP 测试：%s</string>
-    <string name="summary_udp_probe_all_server">通过 VPN 核心使用各配置的传输方式测试所有 VPN 配置</string>
     <string name="title_real_ping_all_server">测试配置真连接</string>
     <string name="title_user_asset_setting">资源文件</string>
     <string name="title_filter_config">过滤配置</string>
@@ -737,6 +734,13 @@
     <string name="routing_settings_import_rulesets_from_clipboard_title">剪贴板</string>
     <string name="routing_settings_import_rulesets_from_qrcode_title">QRcode</string>
     <string name="title_pref_category_style">类别标题样式</string>
+    <string name="title_category_material_containers">Material 容器</string>
+    <string name="title_pref_material_sections">Material 分组</string>
+    <string name="summary_pref_material_sections">将同一分组内的设置项合并为一张圆角卡片</string>
+    <string name="title_pref_card_spacing">间距</string>
+    <string name="card_spacing_normal">正常</string>
+    <string name="card_spacing_big">大</string>
+    <string name="card_spacing_huge">超大</string>
     <string name="scan_code">扫描二维码</string>
     <string name="select_photo">选择照片</string>
     <string name="pref_show_splash_title">显示启动画面</string>

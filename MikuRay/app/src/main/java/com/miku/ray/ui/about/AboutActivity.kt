@@ -10,6 +10,7 @@ import com.miku.ray.R
 import com.miku.ray.databinding.ActivityAboutBinding
 import com.miku.ray.core.CoreNativeManager
 import com.miku.ray.extension.applyEdgeToEdgeListInsets
+import com.miku.ray.ui.preference.MaterialSectionHelper
 import com.miku.ray.util.Utils
 
 class AboutActivity : BaseActivity() {
@@ -44,6 +45,17 @@ class AboutActivity : BaseActivity() {
         binding.layoutPrivacyPolicy.setOnClickListener {
             Utils.openUri(this, AppConfig.APP_PRIVACY_POLICY)
         }
+
+        MaterialSectionHelper.applyToCards(
+            binding.root,
+            listOf(
+                R.id.layout_soure_ccode,
+                R.id.layout_oss_licenses,
+                R.id.layout_feedback,
+                R.id.layout_tg_channel,
+                R.id.layout_privacy_policy
+            )
+        )
 
         "v${BuildConfig.VERSION_NAME} (${CoreNativeManager.getLibVersion()})".also {
             binding.tvVersion.text = it

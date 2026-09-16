@@ -9,6 +9,7 @@ import android.widget.CheckedTextView
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.handler.MmkvManager
+import com.miku.ray.ui.preference.MaterialSectionHelper
 
 class MoreMenuBottomSheet : BaseBottomSheetFragment() {
 
@@ -136,7 +137,6 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
             R.id.real_ping_all,
             R.id.country_code_all,
             R.id.tcping_all,
-            R.id.udp_probe_all,
             R.id.clear_test_results,
             R.id.clear_country_codes,
             R.id.sub_update,
@@ -145,6 +145,32 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
         ).forEach { id ->
             view.findViewById<View>(id)?.setOnClickListener(clickListener)
         }
+
+        MaterialSectionHelper.applyToCards(
+            view,
+            listOf(
+                R.id.quick_actions_header,
+                R.id.action_scroll_to_selected,
+                R.id.service_restart,
+                R.id.sub_update,
+                R.id.country_code_all,
+                R.id.tcping_all,
+                R.id.real_ping_all,
+                R.id.management_header,
+                R.id.export_all,
+                R.id.export_group_file,
+                R.id.reset_traffic,
+                R.id.clear_test_results,
+                R.id.clear_country_codes,
+                R.id.del_duplicate_config,
+                R.id.del_invalid_config,
+                R.id.del_all_config
+            )
+        )
+        MaterialSectionHelper.applyToCards(
+            view,
+            listOf(R.id.card_order_origin, R.id.card_order_by_name, R.id.card_order_by_delay)
+        )
     }
 
     override fun onDetach() {

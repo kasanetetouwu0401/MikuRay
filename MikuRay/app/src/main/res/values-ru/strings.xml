@@ -406,9 +406,6 @@
     <string name="group_order_by_added">Недавно добавленные</string>
     <string name="group_order_by_updated">Недавно обновлённые</string>
     <string name="title_ping_all_server">Tcping всех конфигураций</string>
-    <string name="title_udp_probe_all_server">Проверка UDP-конечных точек</string>
-    <string name="connection_runing_udp_probe_task_left">UDP-проверка: %s</string>
-    <string name="summary_udp_probe_all_server">Проверяет все VPN-конфигурации через настроенный транспорт VPN-ядра</string>
     <string name="title_real_ping_all_server">Реальная задержка конфигурации</string>
     <string name="title_user_asset_setting">Файлы ресурсов</string>
     <string name="title_filter_config">Фильтр конфигураций</string>
@@ -751,6 +748,13 @@
     <string name="routing_settings_import_rulesets_from_clipboard_title">Буфер обмена</string>
     <string name="routing_settings_import_rulesets_from_qrcode_title">QR-код</string>
     <string name="title_pref_category_style">Стиль заголовка категории</string>
+    <string name="title_category_material_containers">Material-контейнеры</string>
+    <string name="title_pref_material_sections">Материальные секции</string>
+    <string name="summary_pref_material_sections">Объединять настройки одного раздела в одну скруглённую карточку</string>
+    <string name="title_pref_card_spacing">Отступы</string>
+    <string name="card_spacing_normal">Обычные</string>
+    <string name="card_spacing_big">Большие</string>
+    <string name="card_spacing_huge">Огромные</string>
     <string name="scan_code">Сканировать QR-код</string>
     <string name="select_photo">Выбрать фото</string>
     <string name="pref_show_splash_title">Показывать заставку</string>

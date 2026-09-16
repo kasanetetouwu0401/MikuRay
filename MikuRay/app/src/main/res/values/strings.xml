@@ -425,9 +425,6 @@
     <string name="group_order_by_added">Recently Added</string>
     <string name="group_order_by_updated">Recently Updated</string>
     <string name="title_ping_all_server">Tcping all configs</string>
-    <string name="title_udp_probe_all_server">UDP endpoint test</string>
-    <string name="connection_runing_udp_probe_task_left">UDP probe: %s</string>
-    <string name="summary_udp_probe_all_server">Test every VPN configuration using its configured transport through the VPN core</string>
     <string name="title_real_ping_all_server">Real delay config</string>
     <string name="title_country_code_all_server">Test country code</string>
     <string name="title_user_asset_setting">Asset files</string>
@@ -771,6 +768,13 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="routing_settings_import_rulesets_from_clipboard_title">Clipboard</string>
     <string name="routing_settings_import_rulesets_from_qrcode_title">QRcode</string>
     <string name="title_pref_category_style">Category Title Style</string>
+    <string name="title_category_material_containers">Material Containers</string>
+    <string name="title_pref_material_sections">Material Sections</string>
+    <string name="summary_pref_material_sections">Merge preferences in the same section into one rounded card</string>
+    <string name="title_pref_card_spacing">Spacing</string>
+    <string name="card_spacing_normal">Normal</string>
+    <string name="card_spacing_big">Big</string>
+    <string name="card_spacing_huge">Huge</string>
     <string name="scan_code">Scan QR Code</string>
     <string name="select_photo">Select Photo</string>
     <string name="pref_show_splash_title">Show splash screen</string>

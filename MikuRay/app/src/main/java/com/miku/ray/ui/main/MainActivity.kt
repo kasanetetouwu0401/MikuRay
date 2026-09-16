@@ -979,11 +979,6 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
                 urlTestProgressDialog.show(mainViewModel.serversCache.count(), R.string.title_ping_all_server)
                 mainViewModel.testAllRealPing(true)
             }
-            R.id.udp_probe_all -> {
-                mainViewModel.ensureServerCacheReady()
-                urlTestProgressDialog.show(mainViewModel.serversCache.count(), R.string.title_udp_probe_all_server)
-                mainViewModel.testAllRealPing(onlyUdp = true)
-            }
             R.id.service_restart -> LauncherManager.restartServiceOrStart(this, ::startV2Ray)
             R.id.action_scroll_to_selected -> locateSelectedServer()
             R.id.del_all_config -> delAllConfig()

@@ -15,6 +15,7 @@ import com.miku.ray.helper.MmkvPreferenceDataStore
 import com.miku.ray.ui.base.BaseActivity
 import com.miku.ray.ui.preference.SearchPreferenceHighlighter
 import com.miku.ray.ui.preference.CategoryStyleHelper
+import com.miku.ray.ui.preference.MaterialSectionHelper
 
 class FragmentSettingsActivity : BaseActivity() {
 
@@ -44,6 +45,7 @@ class FragmentSettingsActivity : BaseActivity() {
             addPreferencesFromResource(R.xml.pref_fragment_settings)
             initPreferenceSummaries()
             CategoryStyleHelper.applyToFragment(this)
+            MaterialSectionHelper.applyToFragment(this)
 
             fragment?.setOnPreferenceChangeListener { _, newValue ->
                 updateFragment(newValue as Boolean)

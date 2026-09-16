@@ -83,16 +83,11 @@ class CoreTestService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val message = intent?.serializable<TestServiceMessage>("content")
         val isTcping = message?.onlyTcp == true
-        val isUdpProbe = message?.onlyUdp == true
         NotificationHelper.startForeground(
             this,
             NotificationChannelType.CORE_TEST,
             AppNameHelper.getDisplayName(this),
-            getString(when {
-                isUdpProbe -> R.string.title_udp_probe_all_server
-                isTcping -> R.string.title_ping_all_server
-                else -> R.string.title_real_ping_all_server
-            }),
+            getString(if (isTcping) R.string.title_ping_all_server else R.string.title_real_ping_all_server),
             cancelAction,
         )
         if (message == null) {
@@ -150,7 +145,6 @@ class CoreTestService : Service() {
             context = this,
             guids = guids,
             onlyTcp = message.onlyTcp,
-            onlyUdp = message.onlyUdp,
             onEvent = ::handleWorkerEvent,
         ).also { it.start() }
         return START_NOT_STICKY
@@ -186,19 +180,15 @@ class CoreTestService : Service() {
         when (event) {
             is RealPingEvent.Progress -> {
                 val progressText = "${event.completed} / ${event.total}"
-                val progressTextRes = when {
-                    message.onlyUdp -> R.string.connection_runing_udp_probe_task_left
-                    message.onlyTcp -> R.string.connection_runing_tcping_task_left
-                    else -> R.string.connection_runing_real_delay_task_left
+                val progressTextRes = if (message.onlyTcp) {
+                    R.string.connection_runing_tcping_task_left
+                } else {
+                    R.string.connection_runing_real_delay_task_left
                 }
                 NotificationHelper.updateNotification(
                     channelType = NotificationChannelType.CORE_TEST,
                     context = this,
-                    title = getString(when {
-                        message.onlyUdp -> R.string.title_udp_probe_all_server
-                        message.onlyTcp -> R.string.title_ping_all_server
-                        else -> R.string.title_real_ping_all_server
-                    }),
+                    title = getString(if (message.onlyTcp) R.string.title_ping_all_server else R.string.title_real_ping_all_server),
                     content = getString(progressTextRes, progressText),
                 )
 

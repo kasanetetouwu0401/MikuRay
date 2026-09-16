@@ -76,5 +76,7 @@ class CustomBannerPreference @JvmOverloads constructor(
         clickTarget?.setOnClickListener {
             this.performClick()
         }
+
+        MaterialSectionHelper.applyToBannerTheme(holder.itemView)
     }
 }

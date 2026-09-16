@@ -22,6 +22,7 @@ import com.miku.ray.ui.base.BaseActivity
 import com.miku.ray.ui.preference.SearchPreferenceHighlighter
 import com.miku.ray.ui.perappproxy.PerAppProxyActivity
 import com.miku.ray.ui.preference.CategoryStyleHelper
+import com.miku.ray.ui.preference.MaterialSectionHelper
 import com.miku.ray.util.FakeDnsIpPool
 import kotlinx.coroutines.launch
 
@@ -70,6 +71,7 @@ class VpnSettingsActivity : BaseActivity() {
             addPreferencesFromResource(R.xml.pref_vpn_settings)
             initPreferenceSummaries()
             CategoryStyleHelper.applyToFragment(this)
+            MaterialSectionHelper.applyToFragment(this)
 
             localDns?.setOnPreferenceChangeListener { _, any ->
                 updateLocalDns(any as Boolean)
