@@ -136,6 +136,7 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
             R.id.real_ping_all,
             R.id.country_code_all,
             R.id.tcping_all,
+            R.id.udp_probe_all,
             R.id.clear_test_results,
             R.id.clear_country_codes,
             R.id.sub_update,

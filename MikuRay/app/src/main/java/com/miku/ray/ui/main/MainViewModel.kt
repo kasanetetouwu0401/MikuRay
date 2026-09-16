@@ -333,7 +333,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return mainRepository.shareNonCustomConfigsToClipboard(serverListCopy)
     }
 
-    fun testAllRealPing(onlyTcp: Boolean = false) {
+    fun testAllRealPing(onlyTcp: Boolean = false, onlyUdp: Boolean = false) {
         val testId = UUID.randomUUID().toString()
         val targetGuids = serversCache.map { it.guid }.toList()
         activeTestId = testId
@@ -364,7 +364,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     testId = testId,
                     subscriptionId = subscriptionId,
                     serverGuids = if (keywordFilter.isNotEmpty() || targetGuids.isNotEmpty()) preparedGuids else emptyList(),
-                    onlyTcp = onlyTcp
+                    onlyTcp = onlyTcp,
+                    onlyUdp = onlyUdp
                 ), requestId = testId
             )
         }
