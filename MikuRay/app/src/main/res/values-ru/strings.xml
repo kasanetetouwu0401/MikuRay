@@ -611,9 +611,9 @@
     <string name="pref_indicator_style_summary">Выберите отображение индикатора активного сервера</string>
     <string name="summary_navigate_ui_settings">Общий интерфейс, темы, внешний вид, плашки поиска, размытие, баннеры, звук и т.д.</string>
     <string name="summary_navigate_vpn_settings">IPv6, бодрствование (keep awake), DNS, HTTP-прокси, обход LAN, интерфейс, MTU, Hev TUN, таймеры TCP/WS, прокси для приложений, Root-режим и т.д.</string>
-    <string name="summary_navigate_core_settings">Сниффинг, только маршрутизация, локальный прокси/общий доступ, SOCKS, DNS, уровень логов, разрешение доменов, Geo-файлы и т.д.</string>
+    <string name="summary_navigate_core_settings">Сниффинг, только маршрутизация, локальный прокси/общий доступ, SOCKS, DNS, уровень логов, разрешение доменов и т.д.</string>
     <string name="summary_navigate_fragment_settings">Статус фрагментации, длина, интервал, maxsplit, пакеты и т.д.</string>
-    <string name="summary_navigate_advanced_settings">Автозапуск, URL API задержки/IP, стратегия маршрутизации, режим, скрыть из недавних приложений и т.д.</string>
+    <string name="summary_navigate_advanced_settings">Автозапуск, URL API задержки/IP, режим, скрыть из недавних приложений и т.д.</string>
     <string name="summary_navigate_per_app_proxy_settings">Выберите, какие приложения будут использовать прокси</string>
     <string name="title_ui_general">Общие</string>
     <string name="title_category_notification">Уведомления</string>
@@ -743,7 +743,7 @@
     <string name="group_order_by_name">По имени</string>
     <string name="group_order_by_delay">По задержке</string>
     <string name="title_more_menu">Дополнительное меню</string>
-    <string name="title_import_menu">Меню импорта</string>
+    <string name="title_import_menu">Импорт и настройки</string>
     <string name="routing_settings_import_predefined_rulesets_title">Предустановленные</string>
     <string name="routing_settings_import_rulesets_from_clipboard_title">Буфер обмена</string>
     <string name="routing_settings_import_rulesets_from_qrcode_title">QR-код</string>
