@@ -14,13 +14,18 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmdeve.blurview.widget.BlurView
 import com.miku.ray.AppConfig
 import com.miku.ray.handler.MmkvManager
+import java.lang.ref.WeakReference
+import java.util.WeakHashMap
 
 object WindowBlurUtils {
 
     private const val BLUR_OVERLAY_ID = 2100000000
     const val SYSTEM_BLUR_DIM_AMOUNT = 0.24f
 
-    fun applyWindowBlur(window: Window?) {
+    private val activeWindows = mutableListOf<WeakReference<Window>>()
+    private val backgroundWindowOf = WeakHashMap<Window, WeakReference<Window>>()
+
+    fun applyWindowBlur(window: Window?, backgroundWindow: Window? = null) {
         if (window == null) return
 
         val isBlurEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
@@ -38,11 +43,15 @@ object WindowBlurUtils {
             ).toFloat()
             if (shouldUseSystemBlur() && tryApplyNativeWindowBlur(window, blurRadius)) {
                 removeFallbackBlurOverlay(window)
+                registerActiveWindow(window)
                 return
             }
 
-            val activity = context.getActivity() ?: return
-            val decorView = activity.window?.decorView as? ViewGroup ?: return
+            val resolvedBackground = backgroundWindow
+                ?: topActiveWindow(excluding = window)
+                ?: context.getActivity()?.window
+
+            val decorView = resolvedBackground?.decorView as? ViewGroup ?: return
 
             decorView.findViewById<View>(BLUR_OVERLAY_ID)?.let {
                 decorView.removeView(it)
@@ -69,10 +78,15 @@ object WindowBlurUtils {
             decorView.addView(blurView)
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
+            backgroundWindowOf[window] = WeakReference(resolvedBackground)
+            registerActiveWindow(window)
+
             window.decorView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
                     override fun onViewAttachedToWindow(v: View) {}
                     override fun onViewDetachedFromWindow(v: View) {
                         decorView.removeView(blurView)
+                        unregisterActiveWindow(window)
+                        backgroundWindowOf.remove(window)
                         window.decorView.removeOnAttachStateChangeListener(this)
                     }
             })
@@ -91,8 +105,8 @@ object WindowBlurUtils {
             return
         }
         try {
-            val activity = window.context.getActivity() ?: return
-            val decorView = activity.window?.decorView as? ViewGroup ?: return
+            val background = backgroundWindowOf[window]?.get() ?: window.context.getActivity()?.window
+            val decorView = background?.decorView as? ViewGroup ?: return
             val blurView = decorView.findViewById<BlurView>(BLUR_OVERLAY_ID) ?: return
 
             blurView.setBlurRadius(radius)
@@ -136,10 +150,29 @@ object WindowBlurUtils {
 
     private fun removeFallbackBlurOverlay(window: Window) {
         try {
-            val decorView = window.context.getActivity()?.window?.decorView as? ViewGroup ?: return
+            val background = backgroundWindowOf[window]?.get() ?: window.context.getActivity()?.window
+            val decorView = background?.decorView as? ViewGroup ?: return
             decorView.findViewById<View>(BLUR_OVERLAY_ID)?.let(decorView::removeView)
+            backgroundWindowOf.remove(window)
         } catch (_: Exception) {
         }
+    }
+
+    private fun registerActiveWindow(window: Window) {
+        activeWindows.removeAll { it.get() == null || it.get() === window }
+        activeWindows.add(WeakReference(window))
+    }
+
+    private fun unregisterActiveWindow(window: Window) {
+        activeWindows.removeAll { it.get() == null || it.get() === window }
+    }
+
+    private fun topActiveWindow(excluding: Window): Window? {
+        for (i in activeWindows.indices.reversed()) {
+            val candidate = activeWindows[i].get()
+            if (candidate != null && candidate !== excluding) return candidate
+        }
+        return null
     }
 }
 
@@ -149,16 +182,16 @@ tailrec fun Context.getActivity(): Activity? = when (this) {
     else -> null
 }
 
-fun MaterialAlertDialogBuilder.showBlur(): androidx.appcompat.app.AlertDialog {
+fun MaterialAlertDialogBuilder.showBlur(backgroundWindow: Window? = null): androidx.appcompat.app.AlertDialog {
     val dialog = this.create()
-    WindowBlurUtils.applyWindowBlur(dialog.window)
+    WindowBlurUtils.applyWindowBlur(dialog.window, backgroundWindow)
     dialog.show()
     return dialog
 }
 
-fun AlertDialog.Builder.showBlur(): AlertDialog {
+fun AlertDialog.Builder.showBlur(backgroundWindow: Window? = null): AlertDialog {
     val dialog = this.create()
-    WindowBlurUtils.applyWindowBlur(dialog.window)
+    WindowBlurUtils.applyWindowBlur(dialog.window, backgroundWindow)
     dialog.show()
     return dialog
 }

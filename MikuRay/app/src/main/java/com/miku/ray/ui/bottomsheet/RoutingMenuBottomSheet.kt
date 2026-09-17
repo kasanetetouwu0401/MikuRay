@@ -11,7 +11,7 @@ import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.remixicon.R as RemixR
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.util.WindowBlurUtils
+import com.miku.ray.util.showBlur
 
 class RoutingMenuBottomSheet : BaseBottomSheetFragment() {
 
@@ -109,9 +109,7 @@ class RoutingMenuBottomSheet : BaseBottomSheetFragment() {
                 dialog.dismiss()
             }
             .setNegativeButton(android.R.string.cancel, null)
-            
-             WindowBlurUtils.applyWindowBlur(dialog.window)
-            .show()
+            .showBlur()
     }
 
     private fun showRoutingDomainStrategyDialog() {
@@ -132,9 +130,7 @@ class RoutingMenuBottomSheet : BaseBottomSheetFragment() {
                 dialog.dismiss()
             }
             .setNegativeButton(android.R.string.cancel, null)
-            
-             WindowBlurUtils.applyWindowBlur(dialog.window)
-            .show()
+            .showBlur()
     }
 
     override fun onDetach() {
