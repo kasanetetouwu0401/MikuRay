@@ -38,6 +38,7 @@ import com.miku.ray.util.DPIController
 import com.miku.ray.util.FontSizeController
 import com.miku.ray.util.CustomFontManager
 import com.miku.ray.util.GoogleSansFlexManager
+import com.miku.ray.util.RefreshRateController
 import com.miku.ray.util.WindowBlurUtils
 import com.qmdeve.blurview.widget.BlurView
 import androidx.lifecycle.Lifecycle
@@ -64,6 +65,7 @@ abstract class BaseActivity : AppCompatActivity() {
         }
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        RefreshRateController.applyToWindow(window)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(
@@ -101,6 +103,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        RefreshRateController.applyToWindow(window)
         com.miku.ray.handler.SettingsManager.refreshAutoNightModeIfNeeded()
         if (collapsingToolbarRef != null) {
             applyToolbarStyle()

@@ -120,6 +120,7 @@ object ThemeShareManager {
         AppConfig.PREF_LANGUAGE,
         AppConfig.PREF_APP_THEME,
         AppConfig.PREF_UI_MODE_NIGHT,
+        AppConfig.PREF_REFRESH_RATE,
         AppConfig.PREF_BANNER_SETTINGS_CHARACTER,
         AppConfig.PREF_WEATHER_CUSTOM_LOCATION_NAME,
         AppConfig.PREF_ICON_SHAPE,

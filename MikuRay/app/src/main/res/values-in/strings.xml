@@ -346,6 +346,9 @@
     <string name="title_language">Bahasa</string>
     <string name="title_ui_settings">Settingan Tampilan</string>
     <string name="title_pref_ui_mode_night">Settingan Mode Gelap</string>
+    <string name="title_pref_refresh_rate">Refresh rate aplikasi</string>
+    <string name="summary_pref_refresh_rate">Paksa refresh rate layar tertentu pas lagi make aplikasi ini</string>
+    <string name="refresh_rate_default">Default</string>
     <string name="title_pref_use_hev_tunnel">Aktifin Fitur Hev TUN</string>
     <string name="summary_pref_use_hev_tunnel">Kalo nyala, TUN bakal pake hev-socks5-tunnel; kalo nggak, tetep pake xray-core.</string>
     <string name="title_category_hev_tunnel">Hev Tunnel</string>

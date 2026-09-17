@@ -38,9 +38,6 @@ object ShadowsocksFmt : FmtBase() {
 
         if (!uri.rawQuery.isNullOrEmpty()) {
             val queryParam = getQueryParam(uri)
-            // Preserve the transport and TLS settings used by subscription links.
-            // Without this call, ss:// query parameters such as type=ws, host,
-            // path, security=tls, and sni are silently discarded on import.
             getItemFormQuery(config, queryParam)
 
             if (queryParam["plugin"]?.contains("obfs=http") == true) {

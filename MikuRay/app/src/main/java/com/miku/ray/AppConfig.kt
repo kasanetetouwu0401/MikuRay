@@ -181,6 +181,7 @@ object AppConfig {
     const val PREF_TAB_BADGE_LIMIT = "pref_tab_badge_limit"
     const val PREF_LANGUAGE = "pref_language"
     const val PREF_UI_MODE_NIGHT = "pref_ui_mode_night"
+    const val PREF_REFRESH_RATE = "pref_refresh_rate"
     const val PREF_CUSTOM_DPI = "pref_custom_dpi"
     const val PREF_APP_FONT_SIZE = "pref_app_font_size"
     const val PREF_SOUND_ON_CONNECT = "pref_sound_on_connect"

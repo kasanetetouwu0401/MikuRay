@@ -541,6 +541,20 @@
         <item>9999</item>
     </string-array>
 
+    <string-array name="refresh_rate_entries">
+        <item>@string/refresh_rate_default</item>
+        <item>60 Hz</item>
+        <item>90 Hz</item>
+        <item>120 Hz</item>
+    </string-array>
+
+    <string-array name="refresh_rate_values" translatable="false">
+        <item>0</item>
+        <item>60</item>
+        <item>90</item>
+        <item>120</item>
+    </string-array>
+
     <string-array name="mux_xudp_quic_entries">
         <item>@string/mux_xudp_quic_reject</item>
         <item>@string/mux_xudp_quic_allow</item>

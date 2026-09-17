@@ -54,6 +54,7 @@ import com.miku.ray.ui.bottomsheet.IndicatorStyleBottomSheet
 import com.miku.ray.ui.dialog.DpiSliderDialog
 import com.miku.ray.ui.dialog.FontSizeSliderDialog
 import kotlin.math.roundToInt
+import kotlin.math.abs
 import com.miku.ray.ui.dialog.BlurIntensityDialog
 import com.miku.ray.ui.dialog.BlurBottomIntensityDialog
 import com.miku.ray.ui.dialog.ThemeColorDialog
@@ -256,6 +257,7 @@ class UiSettingsActivity : BaseActivity() {
         private val fabExtended by lazy { findPreference<SwitchPreferenceCompat>(AppConfig.PREF_FAB_EXTENDED) }
         private val appLanguage by lazy { findPreference<ListPreference>(AppConfig.PREF_LANGUAGE) }
         private val nightTheme by lazy { findPreference<ListPreference>(AppConfig.PREF_UI_MODE_NIGHT) }
+        private val refreshRate by lazy { findPreference<ListPreference>(AppConfig.PREF_REFRESH_RATE) }
         private val iconShape by lazy { findPreference<ListPreference>(AppConfig.PREF_ICON_SHAPE) }
         private val arrowShape by lazy { findPreference<ListPreference>(AppConfig.PREF_ARROW_SHAPE) }
         private val appIcon by lazy { findPreference<com.miku.ray.ui.dialog.AppIconPickerDialog>(AppConfig.PREF_APP_ICON) }
@@ -785,6 +787,18 @@ class UiSettingsActivity : BaseActivity() {
                 true
             }
 
+            setupRefreshRatePreference()
+            refreshRate?.setOnPreferenceChangeListener { pref, newValue ->
+                val valueStr = newValue.toString()
+                (pref as? ListPreference)?.let { lp ->
+                    val idx = lp.findIndexOfValue(valueStr)
+                    lp.summary = if (idx >= 0) lp.entries[idx] else valueStr
+                }
+                MmkvManager.encodeSettings(AppConfig.PREF_REFRESH_RATE, valueStr)
+                com.miku.ray.util.RefreshRateController.applyToWindow(requireActivity().window)
+                true
+            }
+
             setupProfilePreferences()
             setupHomeBannerPreferences()
             setupSheetBannerPreferences()
@@ -1201,6 +1215,45 @@ class UiSettingsActivity : BaseActivity() {
                 }
                 true
             }
+        }
+
+        private fun setupRefreshRatePreference() {
+            val pref = refreshRate ?: return
+            val supportedHz = com.miku.ray.util.RefreshRateController.supportedRefreshRates(requireContext())
+
+            val allValues = resources.getStringArray(R.array.refresh_rate_values)
+            val allEntries = resources.getTextArray(R.array.refresh_rate_entries)
+
+            val filteredEntries = mutableListOf<CharSequence>()
+            val filteredValues = mutableListOf<String>()
+            allValues.forEachIndexed { idx, value ->
+                val hz = value.toIntOrNull() ?: 0
+                // Always keep "Default"; keep a Hz option only if the device actually has
+                // a display mode close to it. If we couldn't read supported modes at all
+                // (older API, odd device), fall back to showing every option.
+                if (hz == 0 || supportedHz.isEmpty() || supportedHz.any { abs(it - hz) <= 1 }) {
+                    filteredEntries.add(allEntries[idx])
+                    filteredValues.add(value)
+                }
+            }
+
+            if (filteredValues.size > 1) {
+                pref.entries = filteredEntries.toTypedArray()
+                pref.entryValues = filteredValues.toTypedArray()
+            } else {
+                // Device only supports one refresh rate: nothing meaningful to choose.
+                pref.isVisible = false
+                return
+            }
+
+            val current = pref.value ?: com.miku.ray.util.RefreshRateController.VALUE_DEFAULT
+            if (current !in filteredValues) {
+                pref.value = com.miku.ray.util.RefreshRateController.VALUE_DEFAULT
+                MmkvManager.encodeSettings(AppConfig.PREF_REFRESH_RATE, com.miku.ray.util.RefreshRateController.VALUE_DEFAULT)
+            }
+
+            val idx = pref.findIndexOfValue(pref.value)
+            pref.summary = if (idx >= 0) pref.entries?.getOrNull(idx) else pref.value
         }
 
         private fun setupLanguagePreference() {
