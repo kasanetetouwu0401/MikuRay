@@ -1228,9 +1228,6 @@ class UiSettingsActivity : BaseActivity() {
             val filteredValues = mutableListOf<String>()
             allValues.forEachIndexed { idx, value ->
                 val hz = value.toIntOrNull() ?: 0
-                // Always keep "Default"; keep a Hz option only if the device actually has
-                // a display mode close to it. If we couldn't read supported modes at all
-                // (older API, odd device), fall back to showing every option.
                 if (hz == 0 || supportedHz.isEmpty() || supportedHz.any { abs(it - hz) <= 1 }) {
                     filteredEntries.add(allEntries[idx])
                     filteredValues.add(value)
@@ -1241,7 +1238,6 @@ class UiSettingsActivity : BaseActivity() {
                 pref.entries = filteredEntries.toTypedArray()
                 pref.entryValues = filteredValues.toTypedArray()
             } else {
-                // Device only supports one refresh rate: nothing meaningful to choose.
                 pref.isVisible = false
                 return
             }
