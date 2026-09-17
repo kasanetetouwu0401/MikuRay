@@ -335,7 +335,7 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     private fun resolveFallbackLoadingBlurMode(): LoadingBlurMode =
-    if (MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)) {
+    if (WindowBlurUtils.blurEnabled.value) {
         LoadingBlurMode.BLUR_VIEW
     } else {
         LoadingBlurMode.DIM

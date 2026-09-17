@@ -67,6 +67,7 @@ import com.miku.ray.util.BannerColorExtractor
 import com.miku.ray.util.CustomFontManager
 import com.miku.ray.util.ThemeManager
 import com.miku.ray.util.ThemeShareManager
+import com.miku.ray.util.WindowBlurUtils
 import com.miku.ray.ui.weather.WeatherHelper
 import com.miku.ray.util.showBlur
 import com.yalantis.ucrop.UCrop
@@ -579,12 +580,12 @@ class UiSettingsActivity : BaseActivity() {
             }
 
             enableBlur?.setOnPreferenceChangeListener { _, newValue ->
-                MmkvManager.encodeSettings(AppConfig.PREF_ENABLE_BLUR, newValue as Boolean)
+                WindowBlurUtils.setBlurEnabled(newValue as Boolean)
                 true
             }
 
             useSystemBlur?.setOnPreferenceChangeListener { _, newValue ->
-                MmkvManager.encodeSettings(AppConfig.PREF_USE_SYSTEM_BLUR, newValue as Boolean)
+                WindowBlurUtils.setUseSystemBlur(newValue as Boolean)
                 val savedRadius = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_RADIUS, AppConfig.DEFAULT_BLUR_RADIUS)
                 val savedRounds = MmkvManager.decodeSettingsInt(AppConfig.PREF_BLUR_ROUNDS, AppConfig.DEFAULT_BLUR_ROUNDS)
                 blurIntensity?.updateSummary(savedRadius, savedRounds)

@@ -15,6 +15,7 @@ import com.qmdeve.blurview.widget.BlurView
 import com.miku.ray.AppConfig
 import com.miku.ray.handler.MmkvManager
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 object WindowBlurUtils {
 
@@ -24,10 +25,30 @@ object WindowBlurUtils {
     private val _activeWindows = MutableStateFlow<List<Window>>(emptyList())
     private val _backgroundWindowOf = MutableStateFlow<Map<Window, Window>>(emptyMap())
 
+    private val _blurEnabled = MutableStateFlow(
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
+    )
+    val blurEnabled: StateFlow<Boolean> = _blurEnabled
+
+    private val _useSystemBlur = MutableStateFlow(
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_SYSTEM_BLUR, false)
+    )
+    val useSystemBlur: StateFlow<Boolean> = _useSystemBlur
+
+    fun setBlurEnabled(enabled: Boolean) {
+        MmkvManager.encodeSettings(AppConfig.PREF_ENABLE_BLUR, enabled)
+        _blurEnabled.value = enabled
+    }
+
+    fun setUseSystemBlur(enabled: Boolean) {
+        MmkvManager.encodeSettings(AppConfig.PREF_USE_SYSTEM_BLUR, enabled)
+        _useSystemBlur.value = enabled
+    }
+
     fun applyWindowBlur(window: Window?, backgroundWindow: Window? = null) {
         if (window == null) return
 
-        val isBlurEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
+        val isBlurEnabled = _blurEnabled.value
         if (!isBlurEnabled) {
             window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             window.attributes?.dimAmount = 0.6f
@@ -130,8 +151,7 @@ object WindowBlurUtils {
         }
     }
 
-    private fun shouldUseSystemBlur(): Boolean =
-    MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_SYSTEM_BLUR, false)
+    private fun shouldUseSystemBlur(): Boolean = _useSystemBlur.value
 
     private fun tryApplyNativeWindowBlur(window: Window, radius: Float): Boolean {
         if (!isSystemBlurAvailable(window.context)) return false
