@@ -140,17 +140,6 @@
             app:widgetLayout="@layout/uwu_widget_material_switch" />
 
         <ListPreference
-            android:defaultValue="0"
-            android:entries="@array/refresh_rate_entries"
-            android:entryValues="@array/refresh_rate_values"
-            android:icon="@drawable/rmx_refresh_line"
-            android:key="pref_refresh_rate"
-            android:summary="%s"
-            android:title="@string/title_pref_refresh_rate"
-            app:dialogIcon="@drawable/rmx_refresh_line"
-            app:layout="@layout/uwu_mid" />
-
-        <ListPreference
             android:defaultValue=""
             android:entries="@array/language_select"
             android:entryValues="@array/language_select_value"

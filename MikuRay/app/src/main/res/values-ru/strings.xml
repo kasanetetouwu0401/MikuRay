@@ -346,8 +346,6 @@
     <string name="title_language">Язык</string>
     <string name="title_ui_settings">Настройки интерфейса</string>
     <string name="title_pref_ui_mode_night">Настройки режима интерфейса</string>
-    <string name="title_pref_refresh_rate">Частота обновления приложения</string>
-    <string name="refresh_rate_default">По умолчанию</string>
     <string name="title_pref_use_hev_tunnel">Включить функцию Hev TUN</string>
     <string name="summary_pref_use_hev_tunnel">При включении TUN использует hev-socks5-tunnel; иначе — xray-core.</string>
     <string name="title_category_hev_tunnel">Hev-туннель</string>
