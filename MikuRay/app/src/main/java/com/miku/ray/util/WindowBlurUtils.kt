@@ -14,16 +14,15 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmdeve.blurview.widget.BlurView
 import com.miku.ray.AppConfig
 import com.miku.ray.handler.MmkvManager
-import java.lang.ref.WeakReference
-import java.util.WeakHashMap
+import kotlinx.coroutines.flow.MutableStateFlow
 
 object WindowBlurUtils {
 
     private const val BLUR_OVERLAY_ID = 2100000000
     const val SYSTEM_BLUR_DIM_AMOUNT = 0.24f
 
-    private val activeWindows = mutableListOf<WeakReference<Window>>()
-    private val backgroundWindowOf = WeakHashMap<Window, WeakReference<Window>>()
+    private val _activeWindows = MutableStateFlow<List<Window>>(emptyList())
+    private val _backgroundWindowOf = MutableStateFlow<Map<Window, Window>>(emptyMap())
 
     fun applyWindowBlur(window: Window?, backgroundWindow: Window? = null) {
         if (window == null) return
@@ -78,7 +77,7 @@ object WindowBlurUtils {
             decorView.addView(blurView)
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
-            backgroundWindowOf[window] = WeakReference(resolvedBackground)
+            _backgroundWindowOf.value = _backgroundWindowOf.value + (window to resolvedBackground)
             registerActiveWindow(window)
 
             window.decorView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
@@ -86,7 +85,7 @@ object WindowBlurUtils {
                     override fun onViewDetachedFromWindow(v: View) {
                         decorView.removeView(blurView)
                         unregisterActiveWindow(window)
-                        backgroundWindowOf.remove(window)
+                        _backgroundWindowOf.value = _backgroundWindowOf.value - window
                         window.decorView.removeOnAttachStateChangeListener(this)
                     }
             })
@@ -105,7 +104,7 @@ object WindowBlurUtils {
             return
         }
         try {
-            val background = backgroundWindowOf[window]?.get() ?: window.context.getActivity()?.window
+            val background = _backgroundWindowOf.value[window] ?: window.context.getActivity()?.window
             val decorView = background?.decorView as? ViewGroup ?: return
             val blurView = decorView.findViewById<BlurView>(BLUR_OVERLAY_ID) ?: return
 
@@ -150,30 +149,24 @@ object WindowBlurUtils {
 
     private fun removeFallbackBlurOverlay(window: Window) {
         try {
-            val background = backgroundWindowOf[window]?.get() ?: window.context.getActivity()?.window
+            val background = _backgroundWindowOf.value[window] ?: window.context.getActivity()?.window
             val decorView = background?.decorView as? ViewGroup ?: return
             decorView.findViewById<View>(BLUR_OVERLAY_ID)?.let(decorView::removeView)
-            backgroundWindowOf.remove(window)
+            _backgroundWindowOf.value = _backgroundWindowOf.value - window
         } catch (_: Exception) {
         }
     }
 
     private fun registerActiveWindow(window: Window) {
-        activeWindows.removeAll { it.get() == null || it.get() === window }
-        activeWindows.add(WeakReference(window))
+        _activeWindows.value = _activeWindows.value.filterNot { it === window } + window
     }
 
     private fun unregisterActiveWindow(window: Window) {
-        activeWindows.removeAll { it.get() == null || it.get() === window }
+        _activeWindows.value = _activeWindows.value.filterNot { it === window }
     }
 
-    private fun topActiveWindow(excluding: Window): Window? {
-        for (i in activeWindows.indices.reversed()) {
-            val candidate = activeWindows[i].get()
-            if (candidate != null && candidate !== excluding) return candidate
-        }
-        return null
-    }
+    private fun topActiveWindow(excluding: Window): Window? =
+        _activeWindows.value.lastOrNull { it !== excluding }
 }
 
 tailrec fun Context.getActivity(): Activity? = when (this) {
