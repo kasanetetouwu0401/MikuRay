@@ -9,6 +9,7 @@ import android.widget.TextView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.miku.ray.AppConfig
 import com.miku.ray.R
+import com.miku.ray.remixicon.R as RemixR
 import com.miku.ray.handler.MmkvManager
 import com.miku.ray.util.showBlur
 
@@ -100,6 +101,7 @@ class RoutingMenuBottomSheet : BaseBottomSheetFragment() {
         val checkedItem = values.indexOf(current).coerceAtLeast(0)
 
         MaterialAlertDialogBuilder(context)
+            .setIcon(RemixR.drawable.rmx_download_cloud_2_line)
             .setTitle(R.string.asset_geo_files_sources)
             .setSingleChoiceItems(entries, checkedItem) { dialog, which ->
                 MmkvManager.encodeSettings(AppConfig.PREF_GEO_FILES_SOURCES, values[which])
@@ -120,6 +122,7 @@ class RoutingMenuBottomSheet : BaseBottomSheetFragment() {
         val checkedItem = entries.indexOf(current).coerceAtLeast(0)
 
         MaterialAlertDialogBuilder(context)
+            .setIcon(RemixR.drawable.rmx_git_branch_line)
             .setTitle(R.string.routing_settings_domain_strategy)
             .setSingleChoiceItems(entries, checkedItem) { dialog, which ->
                 MmkvManager.encodeSettings(AppConfig.PREF_ROUTING_DOMAIN_STRATEGY, entries[which])
