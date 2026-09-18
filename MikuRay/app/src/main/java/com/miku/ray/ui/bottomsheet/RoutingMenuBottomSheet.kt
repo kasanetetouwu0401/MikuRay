@@ -5,13 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.miku.ray.AppConfig
 import com.miku.ray.R
-import com.miku.ray.remixicon.R as RemixR
 import com.miku.ray.handler.MmkvManager
-import com.miku.ray.util.showBlur
 
 class RoutingMenuBottomSheet : BaseBottomSheetFragment() {
 
@@ -20,8 +16,6 @@ class RoutingMenuBottomSheet : BaseBottomSheetFragment() {
     }
 
     private var mListener: OnRoutingMenuOptionClickListener? = null
-    private var tvGeoFilesSourcesSummary: TextView? = null
-    private var tvRoutingDomainStrategySummary: TextView? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -62,86 +56,14 @@ class RoutingMenuBottomSheet : BaseBottomSheetFragment() {
         actionIds.forEach { id ->
             view.findViewById<View>(id)?.setOnClickListener(clickListener)
         }
-
-        tvGeoFilesSourcesSummary = view.findViewById(R.id.tv_geo_files_sources_summary)
-        tvRoutingDomainStrategySummary = view.findViewById(R.id.tv_routing_domain_strategy_summary)
-        refreshGeoFilesSourcesSummary()
-        refreshRoutingDomainStrategySummary()
-
-        view.findViewById<View>(R.id.pref_geo_files_sources)?.setOnClickListener {
-            showGeoFilesSourcesDialog()
-        }
-        view.findViewById<View>(R.id.pref_routing_domain_strategy)?.setOnClickListener {
-            showRoutingDomainStrategyDialog()
-        }
-    }
-
-    private fun refreshGeoFilesSourcesSummary() {
-        tvGeoFilesSourcesSummary?.text = MmkvManager.decodeSettingsString(
-            AppConfig.PREF_GEO_FILES_SOURCES,
-            AppConfig.GEO_FILES_SOURCES.first()
-        )
-    }
-
-    private fun refreshRoutingDomainStrategySummary() {
-        tvRoutingDomainStrategySummary?.text = MmkvManager.decodeSettingsString(
-            AppConfig.PREF_ROUTING_DOMAIN_STRATEGY,
-            ROUTING_DOMAIN_STRATEGY_DEFAULT
-        )
-    }
-
-    private fun showGeoFilesSourcesDialog() {
-        val context = context ?: return
-        val entries = resources.getStringArray(R.array.geo_files_sources_entries)
-        val values = resources.getStringArray(R.array.geo_files_sources_values)
-        val current = MmkvManager.decodeSettingsString(
-            AppConfig.PREF_GEO_FILES_SOURCES,
-            AppConfig.GEO_FILES_SOURCES.first()
-        )
-        val checkedItem = values.indexOf(current).coerceAtLeast(0)
-
-        MaterialAlertDialogBuilder(context)
-            .setIcon(RemixR.drawable.rmx_download_cloud_2_line)
-            .setTitle(R.string.asset_geo_files_sources)
-            .setSingleChoiceItems(entries, checkedItem) { dialog, which ->
-                MmkvManager.encodeSettings(AppConfig.PREF_GEO_FILES_SOURCES, values[which])
-                refreshGeoFilesSourcesSummary()
-                dialog.dismiss()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .showBlur()
-    }
-
-    private fun showRoutingDomainStrategyDialog() {
-        val context = context ?: return
-        val entries = resources.getStringArray(R.array.routing_domain_strategy)
-        val current = MmkvManager.decodeSettingsString(
-            AppConfig.PREF_ROUTING_DOMAIN_STRATEGY,
-            ROUTING_DOMAIN_STRATEGY_DEFAULT
-        )
-        val checkedItem = entries.indexOf(current).coerceAtLeast(0)
-
-        MaterialAlertDialogBuilder(context)
-            .setIcon(RemixR.drawable.rmx_git_branch_line)
-            .setTitle(R.string.routing_settings_domain_strategy)
-            .setSingleChoiceItems(entries, checkedItem) { dialog, which ->
-                MmkvManager.encodeSettings(AppConfig.PREF_ROUTING_DOMAIN_STRATEGY, entries[which])
-                refreshRoutingDomainStrategySummary()
-                dialog.dismiss()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .showBlur()
     }
 
     override fun onDetach() {
         super.onDetach()
         mListener = null
-        tvGeoFilesSourcesSummary = null
-        tvRoutingDomainStrategySummary = null
     }
 
     companion object {
         const val TAG = "RoutingMenuBottomSheet"
-        private const val ROUTING_DOMAIN_STRATEGY_DEFAULT = "AsIs"
     }
 }

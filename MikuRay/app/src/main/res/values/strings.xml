@@ -630,9 +630,9 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="pref_indicator_style_summary">Select the active server indicator display</string>
     <string name="summary_navigate_ui_settings">General UI, themes, appearance, search chips, blur, banners, sound, etc.</string>
     <string name="summary_navigate_vpn_settings">IPv6, keep awake, DNS, HTTP proxy, bypass LAN, interface, MTU, Hev TUN, TCP/WS timers, per-app proxy, Root mode, etc.</string>
-    <string name="summary_navigate_core_settings">Sniffing, route only, local proxy/sharing, SOCKS, DNS, log level, domain resolve, etc.</string>
+    <string name="summary_navigate_core_settings">Sniffing, route only, local proxy/sharing, SOCKS, DNS, log level, domain resolve, geo files, etc.</string>
     <string name="summary_navigate_fragment_settings">Fragment status, length, interval, maxsplit, packets, etc.</string>
-    <string name="summary_navigate_advanced_settings">Auto-start, delay/IP API URLs, mode, hide from recent apps, etc.</string>
+    <string name="summary_navigate_advanced_settings">Auto-start, delay/IP API URLs, routing strategy, mode, hide from recent apps, etc.</string>
     <string name="summary_navigate_per_app_proxy_settings">Choose which apps go through the proxy</string>
     <string name="title_ui_general">General</string>
     <string name="title_category_notification">Notification</string>
@@ -763,7 +763,7 @@ Package Name — only supported when using Xray TUN, routeOnly enabled, and Andr
     <string name="group_order_by_name">By Name</string>
     <string name="group_order_by_delay">By Delay</string>
     <string name="title_more_menu">More Menu</string>
-    <string name="title_import_menu">Import &amp; Options</string>
+    <string name="title_import_menu">Import Menu</string>
     <string name="routing_settings_import_predefined_rulesets_title">Predefined</string>
     <string name="routing_settings_import_rulesets_from_clipboard_title">Clipboard</string>
     <string name="routing_settings_import_rulesets_from_qrcode_title">QRcode</string>

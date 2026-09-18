@@ -600,9 +600,9 @@ Nama Paket — cuma bisa kalo kamu pake Xray TUN, routeOnly aktif, dan Android 1
     <string name="pref_indicator_style_summary">Pilih tampilan indikator buat server yang lagi aktif</string>
     <string name="summary_navigate_ui_settings">UI umum, tema, tampilan, chip pencarian, blur, banner, suara, dll.</string>
     <string name="summary_navigate_vpn_settings">IPv6, keep awake, DNS, HTTP proxy, bypass LAN, interface, MTU, Hev TUN, timer TCP/WS, proxy per aplikasi, mode Root, dll.</string>
-    <string name="summary_navigate_core_settings">Sniffing, route only, proxy lokal/sharing, SOCKS, DNS, level log, resolusi domain, dll.</string>
+    <string name="summary_navigate_core_settings">Sniffing, route only, proxy lokal/sharing, SOCKS, DNS, level log, resolusi domain, file geo, dll.</string>
     <string name="summary_navigate_fragment_settings">Status fragment, panjang, interval, maxsplit, paket, dll.</string>
-    <string name="summary_navigate_advanced_settings">Auto-start, URL API delay/IP, mode, sembunyiin dari recent apps, dll.</string>
+    <string name="summary_navigate_advanced_settings">Auto-start, URL API delay/IP, strategi routing, mode, sembunyiin dari recent apps, dll.</string>
     <string name="summary_navigate_per_app_proxy_settings">Pilih aplikasi mana aja yang mau pakai proxy</string>
     <string name="title_ui_general">Umum</string>
     <string name="title_category_notification">Notifikasi</string>
@@ -731,7 +731,7 @@ Nama Paket — cuma bisa kalo kamu pake Xray TUN, routeOnly aktif, dan Android 1
     <string name="group_order_by_name">Sesuai Nama</string>
     <string name="group_order_by_delay">Sesuai Delay</string>
     <string name="title_more_menu">Menu Lainnya</string>
-    <string name="title_import_menu">Impor &amp; Opsi</string>
+    <string name="title_import_menu">Menu Impor</string>
     <string name="routing_settings_import_predefined_rulesets_title">Preset</string>
     <string name="routing_settings_import_rulesets_from_clipboard_title">Clipboard</string>
     <string name="routing_settings_import_rulesets_from_qrcode_title">QR Code</string>

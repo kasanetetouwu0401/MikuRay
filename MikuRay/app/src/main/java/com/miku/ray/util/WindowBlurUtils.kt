@@ -14,41 +14,16 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.qmdeve.blurview.widget.BlurView
 import com.miku.ray.AppConfig
 import com.miku.ray.handler.MmkvManager
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 object WindowBlurUtils {
 
     private const val BLUR_OVERLAY_ID = 2100000000
     const val SYSTEM_BLUR_DIM_AMOUNT = 0.24f
 
-    private val _activeWindows = MutableStateFlow<List<Window>>(emptyList())
-    private val _backgroundWindowOf = MutableStateFlow<Map<Window, Window>>(emptyMap())
-
-    private val _blurEnabled = MutableStateFlow(
-        MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
-    )
-    val blurEnabled: StateFlow<Boolean> = _blurEnabled
-
-    private val _useSystemBlur = MutableStateFlow(
-        MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_SYSTEM_BLUR, false)
-    )
-    val useSystemBlur: StateFlow<Boolean> = _useSystemBlur
-
-    fun setBlurEnabled(enabled: Boolean) {
-        MmkvManager.encodeSettings(AppConfig.PREF_ENABLE_BLUR, enabled)
-        _blurEnabled.value = enabled
-    }
-
-    fun setUseSystemBlur(enabled: Boolean) {
-        MmkvManager.encodeSettings(AppConfig.PREF_USE_SYSTEM_BLUR, enabled)
-        _useSystemBlur.value = enabled
-    }
-
-    fun applyWindowBlur(window: Window?, backgroundWindow: Window? = null) {
+    fun applyWindowBlur(window: Window?) {
         if (window == null) return
 
-        val isBlurEnabled = _blurEnabled.value
+        val isBlurEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_ENABLE_BLUR, false)
         if (!isBlurEnabled) {
             window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             window.attributes?.dimAmount = 0.6f
@@ -63,15 +38,11 @@ object WindowBlurUtils {
             ).toFloat()
             if (shouldUseSystemBlur() && tryApplyNativeWindowBlur(window, blurRadius)) {
                 removeFallbackBlurOverlay(window)
-                registerActiveWindow(window)
                 return
             }
 
-            val resolvedBackground = backgroundWindow
-                ?: topActiveWindow(excluding = window)
-                ?: context.getActivity()?.window
-
-            val decorView = resolvedBackground?.decorView as? ViewGroup ?: return
+            val activity = context.getActivity() ?: return
+            val decorView = activity.window?.decorView as? ViewGroup ?: return
 
             decorView.findViewById<View>(BLUR_OVERLAY_ID)?.let {
                 decorView.removeView(it)
@@ -98,15 +69,10 @@ object WindowBlurUtils {
             decorView.addView(blurView)
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
-            _backgroundWindowOf.value = _backgroundWindowOf.value + (window to resolvedBackground)
-            registerActiveWindow(window)
-
             window.decorView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
                     override fun onViewAttachedToWindow(v: View) {}
                     override fun onViewDetachedFromWindow(v: View) {
                         decorView.removeView(blurView)
-                        unregisterActiveWindow(window)
-                        _backgroundWindowOf.value = _backgroundWindowOf.value - window
                         window.decorView.removeOnAttachStateChangeListener(this)
                     }
             })
@@ -125,8 +91,8 @@ object WindowBlurUtils {
             return
         }
         try {
-            val background = _backgroundWindowOf.value[window] ?: window.context.getActivity()?.window
-            val decorView = background?.decorView as? ViewGroup ?: return
+            val activity = window.context.getActivity() ?: return
+            val decorView = activity.window?.decorView as? ViewGroup ?: return
             val blurView = decorView.findViewById<BlurView>(BLUR_OVERLAY_ID) ?: return
 
             blurView.setBlurRadius(radius)
@@ -151,7 +117,8 @@ object WindowBlurUtils {
         }
     }
 
-    private fun shouldUseSystemBlur(): Boolean = _useSystemBlur.value
+    private fun shouldUseSystemBlur(): Boolean =
+    MmkvManager.decodeSettingsBool(AppConfig.PREF_USE_SYSTEM_BLUR, false)
 
     private fun tryApplyNativeWindowBlur(window: Window, radius: Float): Boolean {
         if (!isSystemBlurAvailable(window.context)) return false
@@ -169,24 +136,11 @@ object WindowBlurUtils {
 
     private fun removeFallbackBlurOverlay(window: Window) {
         try {
-            val background = _backgroundWindowOf.value[window] ?: window.context.getActivity()?.window
-            val decorView = background?.decorView as? ViewGroup ?: return
+            val decorView = window.context.getActivity()?.window?.decorView as? ViewGroup ?: return
             decorView.findViewById<View>(BLUR_OVERLAY_ID)?.let(decorView::removeView)
-            _backgroundWindowOf.value = _backgroundWindowOf.value - window
         } catch (_: Exception) {
         }
     }
-
-    private fun registerActiveWindow(window: Window) {
-        _activeWindows.value = _activeWindows.value.filterNot { it === window } + window
-    }
-
-    private fun unregisterActiveWindow(window: Window) {
-        _activeWindows.value = _activeWindows.value.filterNot { it === window }
-    }
-
-    private fun topActiveWindow(excluding: Window): Window? =
-        _activeWindows.value.lastOrNull { it !== excluding }
 }
 
 tailrec fun Context.getActivity(): Activity? = when (this) {
@@ -195,16 +149,16 @@ tailrec fun Context.getActivity(): Activity? = when (this) {
     else -> null
 }
 
-fun MaterialAlertDialogBuilder.showBlur(backgroundWindow: Window? = null): androidx.appcompat.app.AlertDialog {
+fun MaterialAlertDialogBuilder.showBlur(): androidx.appcompat.app.AlertDialog {
     val dialog = this.create()
-    WindowBlurUtils.applyWindowBlur(dialog.window, backgroundWindow)
+    WindowBlurUtils.applyWindowBlur(dialog.window)
     dialog.show()
     return dialog
 }
 
-fun AlertDialog.Builder.showBlur(backgroundWindow: Window? = null): AlertDialog {
+fun AlertDialog.Builder.showBlur(): AlertDialog {
     val dialog = this.create()
-    WindowBlurUtils.applyWindowBlur(dialog.window, backgroundWindow)
+    WindowBlurUtils.applyWindowBlur(dialog.window)
     dialog.show()
     return dialog
 }

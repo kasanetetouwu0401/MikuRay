@@ -137,6 +137,17 @@
             android:summary="%s"
             android:title="@string/title_outbound_domain_resolve_method"
             app:dialogIcon="@drawable/rmx_global_line"
+            app:layout="@layout/uwu_mid" />
+
+        <ListPreference
+            android:defaultValue="Loyalsoldier/v2ray-rules-dat"
+            android:entries="@array/geo_files_sources_entries"
+            android:entryValues="@array/geo_files_sources_values"
+            android:icon="@drawable/rmx_download_cloud_2_line"
+            android:key="pref_geo_files_sources"
+            android:summary="%s"
+            android:title="@string/asset_geo_files_sources"
+            app:dialogIcon="@drawable/rmx_download_cloud_2_line"
             app:layout="@layout/uwu_bot" />
 
     </com.miku.ray.widget.UwuPreferenceCategory>

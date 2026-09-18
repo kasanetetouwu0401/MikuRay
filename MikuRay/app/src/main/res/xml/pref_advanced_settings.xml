@@ -58,6 +58,17 @@
             app:layout="@layout/uwu_mid" />
 
         <ListPreference
+            android:defaultValue="AsIs"
+            android:entries="@array/routing_domain_strategy"
+            android:entryValues="@array/routing_domain_strategy"
+            android:icon="@drawable/rmx_git_branch_line"
+            android:key="pref_routing_domain_strategy"
+            android:summary="%s"
+            android:title="@string/routing_settings_domain_strategy"
+            app:dialogIcon="@drawable/rmx_git_branch_line"
+            app:layout="@layout/uwu_mid" />
+
+        <ListPreference
             android:defaultValue="VPN"
             android:entries="@array/mode_entries"
             android:entryValues="@array/mode_value"
