@@ -137,6 +137,10 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
         TestProgressDialogController(this, TestProgressDialogController.Mode.URL_TEST) { mainViewModel.cancelRealPingTest() }
     }
 
+    private val speedTestProgressDialog: TestProgressDialogController by lazy {
+        TestProgressDialogController(this, TestProgressDialogController.Mode.SPEED_TEST) { mainViewModel.cancelSpeedTest() }
+    }
+
     private val countryCodeProgressDialog: TestProgressDialogController by lazy {
         TestProgressDialogController(this, TestProgressDialogController.Mode.COUNTRY_CODE) { mainViewModel.cancelCountryCodeTest() }
     }
@@ -974,6 +978,11 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
                 countryCodeProgressDialog.show(mainViewModel.serversCache.count())
                 mainViewModel.testAllCountryCodes()
             }
+            R.id.speed_test_all -> {
+                mainViewModel.ensureServerCacheReady()
+                speedTestProgressDialog.show(mainViewModel.serversCache.count(), R.string.title_speed_test_all_server)
+                mainViewModel.testAllSpeedTest()
+            }
             R.id.tcping_all -> {
                 mainViewModel.ensureServerCacheReady()
                 urlTestProgressDialog.show(mainViewModel.serversCache.count(), R.string.title_ping_all_server)
@@ -1057,6 +1066,45 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
                     showDeleteConfirmDialog(
                         context = this,
                         titleRes = R.string.title_clear_country_codes,
+                        messageRes = msgRes
+                    ) { action() }
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .showBlur()
+            }
+            R.id.clear_speed_results -> {
+                val options = arrayOf(
+                    getString(R.string.reset_traffic_scope_group, currentGroupDisplayName()),
+                    getString(R.string.reset_traffic_scope_all)
+                )
+
+                MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.title_clear_speed_results)
+                .setIcon(RemixR.drawable.rmx_refresh_line)
+                .setItems(options) { _, which ->
+                    val msgRes: Int
+                    val action: () -> Unit
+
+                    when (which) {
+                        0 -> {
+                            msgRes = R.string.confirm_clear_speed_results_group
+                            action = {
+                                mainViewModel.clearSpeedResultsForGroup()
+                                refreshAllGroupListDisplays()
+                            }
+                        }
+                        else -> {
+                            msgRes = R.string.confirm_clear_speed_results_all
+                            action = {
+                                mainViewModel.clearSpeedResults()
+                                refreshAllGroupListDisplays()
+                            }
+                        }
+                    }
+
+                    showDeleteConfirmDialog(
+                        context = this,
+                        titleRes = R.string.title_clear_speed_results,
                         messageRes = msgRes
                     ) { action() }
                 }
@@ -1166,6 +1214,15 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
                             countryCodeProgressDialog.finish()
                         } else {
                             countryCodeProgressDialog.update(info)
+                        }
+                    }
+                }
+                launch {
+                    mainViewModel.speedTestProgress.collect { info ->
+                        if (info == null) {
+                            speedTestProgressDialog.finish()
+                        } else {
+                            speedTestProgressDialog.update(info)
                         }
                     }
                 }
@@ -2038,6 +2095,7 @@ ShareConfigBottomSheet.OnShareOptionClickListener {
     override fun onDestroy() {
         hideLoading()
         urlTestProgressDialog.dismiss()
+        speedTestProgressDialog.dismiss()
         tabMediator?.detach()
         runCatching {
             Glide.with(applicationContext).clear(binding.headerImage)

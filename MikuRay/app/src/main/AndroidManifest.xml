@@ -3225,10 +3225,20 @@
             android:exported="false"
             android:foregroundServiceType="specialUse"
             android:name=".service.CountryCodeTestService"
-            android:process=":daemon">
+            android:process=":tasks">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="country_code_test" />
+                android:value="test" />
+        </service>
+
+        <service
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
+            android:name=".service.SpeedTestService"
+            android:process=":tasks">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="test" />
         </service>
 
         <service

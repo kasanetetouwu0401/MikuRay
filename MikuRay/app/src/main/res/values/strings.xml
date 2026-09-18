@@ -427,6 +427,10 @@
     <string name="title_ping_all_server">Tcping all configs</string>
     <string name="title_real_ping_all_server">Real delay config</string>
     <string name="title_country_code_all_server">Test country code</string>
+    <string name="title_speed_test_all_server">Speed test all configs</string>
+    <string name="title_clear_speed_results">Clear speed test results</string>
+    <string name="confirm_clear_speed_results_group">Clear speed test results for all servers in this group?</string>
+    <string name="confirm_clear_speed_results_all">Clear speed test results for all groups?</string>
     <string name="title_user_asset_setting">Asset files</string>
     <string name="title_filter_config">Filter config</string>
     <string name="filter_config_all">All</string>

@@ -428,6 +428,10 @@
     <string name="toast_fragment_not_available">Waduh, ga nemu nih tampilan yang lagi kamu buka</string>
     <string name="title_clear_test_results">Hapus hasil tes</string>
     <string name="title_country_code_all_server">Uji kode negara semua server</string>
+    <string name="title_speed_test_all_server">Tes kecepatan semua konfig</string>
+    <string name="title_clear_speed_results">Hapus hasil speed test</string>
+    <string name="confirm_clear_speed_results_group">Hapus hasil speed test buat grup ini?</string>
+    <string name="confirm_clear_speed_results_all">Hapus hasil speed test buat semua grup?</string>
     <string name="title_clear_country_codes">Hapus semua kode negara</string>
     <string name="country_code_unknown">—</string>
 

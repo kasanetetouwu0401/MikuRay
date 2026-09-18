@@ -172,11 +172,13 @@ FastScrollRecyclerView.SectionedAdapter {
 
             val aff = MmkvManager.decodeServerAffiliationInfo(guid)
             val testDelayMillis = aff?.testDelayMillis ?: 0L
-            val testResult = when {
+            val speedStr = aff?.getSpeedString().orEmpty()
+            val delayStr = when {
                 testDelayMillis > 0L -> aff?.getTestDelayString().orEmpty()
                 testDelayMillis < 0L -> context.getString(R.string.connection_test_fail)
                 else -> ""
             }
+            val testResult = listOf(delayStr, speedStr).filter { it.isNotEmpty() }.joinToString(" · ")
             holder.views.tvTestResult.text = testResult
             val rawCountryCode = aff?.countryCode?.trim()?.uppercase()
             val countryTestFailed = rawCountryCode == AppConfig.COUNTRY_CODE_TEST_FAILED
@@ -200,7 +202,7 @@ FastScrollRecyclerView.SectionedAdapter {
             holder.views.tvCountryCode.visibility =
             if (countryCode != null || countryTestFailed) View.VISIBLE else View.GONE
             holder.views.layoutTestMetadata?.visibility =
-            if (testResult.isNotEmpty() || countryCode != null || countryTestFailed) View.VISIBLE else View.GONE
+            if (testResult.isNotEmpty() || speedStr.isNotEmpty() || countryCode != null || countryTestFailed) View.VISIBLE else View.GONE
             if (testDelayMillis < 0L) {
                 holder.views.tvTestResult.setTextColor(ContextCompat.getColor(context, R.color.colorPingRed))
             } else {

@@ -10,6 +10,7 @@ import com.miku.ray.AngApplication
 import com.miku.ray.AppConfig
 import com.miku.ray.R
 import com.miku.ray.dto.CountryCodeTestMessage
+import com.miku.ray.dto.SpeedTestMessage
 import com.miku.ray.dto.GroupMapItem
 import com.miku.ray.dto.entities.ServersCache
 import com.miku.ray.dto.entities.SubscriptionCache
@@ -51,6 +52,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var activeCurrentTestId: String? = null
     private var lastCurrentTestId: String? = null
     private var activeCountryCodeTestId: String? = null
+    private var activeSpeedTestId: String? = null
     private var activeTestCompleted = 0
     private var activeTestTotal = 0
     private var isRestarting = false
@@ -86,6 +88,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _countryCodeProgress = MutableStateFlow<TestProgressInfo?>(null)
     val countryCodeProgress: StateFlow<TestProgressInfo?> = _countryCodeProgress.asStateFlow()
+    private val _speedTestProgress = MutableStateFlow<TestProgressInfo?>(null)
+    val speedTestProgress = _speedTestProgress.asStateFlow()
     
     val updateListAction by lazy { MutableLiveData<Int>() }
 
@@ -403,6 +407,50 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+
+
+    fun testAllSpeedTest() {
+        val requestId = UUID.randomUUID().toString()
+        activeSpeedTestId?.let {
+            mainRepository.sendMsg2SpeedTestService(
+                SpeedTestMessage(AppConfig.MSG_SPEED_TEST_CANCEL, requestId = it),
+            )
+        }
+        activeSpeedTestId = requestId
+        val targetGuids = serversCache.map { it.guid }.toList()
+        MmkvManager.clearAllSpeedResults(targetGuids)
+        notifyListChanged(-1)
+
+        viewModelScope.launch(Dispatchers.Default) {
+            if (targetGuids.isEmpty()) {
+                withContext(Dispatchers.Main) {
+                    if (activeSpeedTestId == requestId) {
+                        activeSpeedTestId = null
+                        _speedTestProgress.value = null
+                    }
+                }
+                return@launch
+            }
+            mainRepository.sendMsg2SpeedTestService(
+                SpeedTestMessage(
+                    key = AppConfig.MSG_SPEED_TEST_START,
+                    requestId = requestId,
+                    subscriptionId = subscriptionId,
+                    serverGuids = targetGuids,
+                )
+            )
+        }
+    }
+
+    fun cancelSpeedTest() {
+        val requestId = activeSpeedTestId
+        activeSpeedTestId = null
+        mainRepository.sendMsg2SpeedTestService(
+            SpeedTestMessage(key = AppConfig.MSG_SPEED_TEST_CANCEL, requestId = requestId.orEmpty())
+        )
+        _speedTestProgress.value = null
+    }
+
     fun cancelCountryCodeTest() {
         val requestId = activeCountryCodeTestId
         activeCountryCodeTestId = null
@@ -421,6 +469,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun clearCountryCodesForGroup() {
         cancelCountryCodeTest()
         MmkvManager.clearAllCountryCodes(MmkvManager.decodeServerList(subscriptionId))
+        notifyListChanged(-1)
+    }
+
+    fun clearSpeedResults() {
+        cancelSpeedTest()
+        MmkvManager.clearAllSpeedResults(MmkvManager.decodeAllServerList())
+        notifyListChanged(-1)
+    }
+
+    fun clearSpeedResultsForGroup() {
+        cancelSpeedTest()
+        MmkvManager.clearAllSpeedResults(MmkvManager.decodeServerList(subscriptionId))
         notifyListChanged(-1)
     }
 
@@ -833,6 +893,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 if (event.requestId == activeCountryCodeTestId) {
                     activeCountryCodeTestId = null
                     _countryCodeProgress.value = null
+                }
+            }
+
+            is MainServiceEvent.SpeedTestSuccess -> {
+                if (event.requestId == activeSpeedTestId) {
+                    _updateListItemEvent.tryEmit(getPosition(event.guid))
+                }
+            }
+
+            is MainServiceEvent.SpeedTestNotify -> {
+                if (event.requestId == activeSpeedTestId) {
+                    event.info?.let { _speedTestProgress.value = it }
+                }
+            }
+
+            is MainServiceEvent.SpeedTestFinish -> {
+                if (event.requestId == activeSpeedTestId) {
+                    activeSpeedTestId = null
+                    _speedTestProgress.value = null
                 }
             }
 

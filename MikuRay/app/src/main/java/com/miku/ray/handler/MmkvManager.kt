@@ -429,6 +429,44 @@ object MmkvManager {
         serverAffStorage.encode(downKey, serverAffStorage.decodeLong(downKey, 0L) + aff.downlinkTotal)
     }
 
+
+    fun encodeServerSpeedResult(guid: String, downloadBps: Long, uploadBps: Long) {
+        if (guid.isBlank()) return
+        val aff = decodeServerAffiliationInfo(guid) ?: ServerAffiliationInfo()
+        aff.downloadSpeedBps = downloadBps
+        aff.uploadSpeedBps = uploadBps
+        serverAffStorage.encode(guid, JsonUtil.toJson(aff))
+    }
+
+    fun clearServerSpeedResult(guid: String) {
+        if (guid.isBlank()) return
+        val aff = decodeServerAffiliationInfo(guid) ?: return
+        aff.downloadSpeedBps = 0L
+        aff.uploadSpeedBps = 0L
+        serverAffStorage.encode(guid, JsonUtil.toJson(aff))
+    }
+
+    fun clearAllSpeedResults(guids: List<String>? = null) {
+        val targets = guids ?: decodeAllServerList()
+        targets.forEach { guid ->
+            decodeServerAffiliationInfo(guid)?.let { aff ->
+                if (aff.downloadSpeedBps != 0L || aff.uploadSpeedBps != 0L) {
+                    aff.downloadSpeedBps = 0L
+                    aff.uploadSpeedBps = 0L
+                    serverAffStorage.encode(guid, JsonUtil.toJson(aff))
+                }
+            }
+        }
+    }
+
+    fun hasAnySpeedResults(): Boolean {
+        return decodeAllServerList().any { guid ->
+            decodeServerAffiliationInfo(guid)?.let {
+                it.downloadSpeedBps != 0L || it.uploadSpeedBps != 0L
+            } ?: false
+        }
+    }
+
     fun addProfileTraffic(guid: String, uplink: Long, downlink: Long) {
         if (guid.isBlank() || (uplink == 0L && downlink == 0L)) return
         val aff = decodeServerAffiliationInfo(guid) ?: ServerAffiliationInfo()

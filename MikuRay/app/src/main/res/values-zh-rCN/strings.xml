@@ -423,6 +423,10 @@
     <string name="toast_fragment_not_available">无法定位当前视图</string>
     <string name="title_clear_test_results">清除测试结果</string>
     <string name="title_country_code_all_server">测试所有服务器的国家代码</string>
+    <string name="title_speed_test_all_server">测速所有配置</string>
+    <string name="title_clear_speed_results">清除测速结果</string>
+    <string name="confirm_clear_speed_results_group">清除此分组的测速结果？</string>
+    <string name="confirm_clear_speed_results_all">清除所有测速结果？</string>
     <string name="title_clear_country_codes">清除国家代码</string>
     <string name="country_code_unknown">—</string>
 

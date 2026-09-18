@@ -11,6 +11,12 @@ import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.UnknownHostException
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.net.Proxy
+import java.util.concurrent.TimeUnit
 
 object SpeedtestManager {
 
@@ -120,4 +126,94 @@ object SpeedtestManager {
         val ispSuffix = if (!isp.isNullOrBlank()) " · $isp" else ""
         return "${flagPrefix}(${country ?: "unknown"}) ${ip ?: "unknown"}$ispSuffix"
     }
+
+
+    /**
+     * Measure download throughput (bytes/sec) via local HTTP proxy on [httpPort].
+     * Returns -1 on failure.
+     */
+    fun measureDownloadSpeed(
+        httpPort: Int,
+        url: String = AppConfig.SPEED_TEST_DOWNLOAD_URL,
+        timeoutMs: Int = 20000,
+    ): Long {
+        if (httpPort <= 0) return -1L
+        return try {
+            val client = OkHttpClient.Builder()
+                .proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(AppConfig.LOOPBACK, httpPort)))
+                .connectTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
+                .readTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
+                .writeTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
+                .followRedirects(true)
+                .build()
+            val request = Request.Builder()
+                .url(url)
+                .get()
+                .header("Connection", "close")
+                .build()
+            val start = System.nanoTime()
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return -1L
+                val body = response.body ?: return -1L
+                var total = 0L
+                body.byteStream().use { input ->
+                    val buf = ByteArray(8192)
+                    while (true) {
+                        val n = input.read(buf)
+                        if (n < 0) break
+                        total += n
+                    }
+                }
+                val elapsedNs = System.nanoTime() - start
+                if (elapsedNs <= 0L || total <= 0L) return -1L
+                (total * 1_000_000_000L) / elapsedNs
+            }
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "measureDownloadSpeed failed: ${e.message}")
+            -1L
+        }
+    }
+
+    /**
+     * Measure upload throughput (bytes/sec) via local HTTP proxy on [httpPort].
+     * Returns -1 on failure.
+     */
+    fun measureUploadSpeed(
+        httpPort: Int,
+        url: String = AppConfig.SPEED_TEST_UPLOAD_URL,
+        uploadBytes: Long = AppConfig.SPEED_TEST_UPLOAD_BYTES,
+        timeoutMs: Int = 20000,
+    ): Long {
+        if (httpPort <= 0) return -1L
+        return try {
+            val size = uploadBytes.coerceAtLeast(64 * 1024L).toInt().coerceAtMost(8 * 1024 * 1024)
+            val payload = ByteArray(size) { (it % 256).toByte() }
+            val client = OkHttpClient.Builder()
+                .proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(AppConfig.LOOPBACK, httpPort)))
+                .connectTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
+                .readTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
+                .writeTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
+                .followRedirects(true)
+                .build()
+            val body = payload.toRequestBody("application/octet-stream".toMediaType())
+            val request = Request.Builder()
+                .url(url)
+                .post(body)
+                .header("Connection", "close")
+                .build()
+            val start = System.nanoTime()
+            client.newCall(request).execute().use { response ->
+                // Cloudflare __up returns 200 even if body discarded
+                if (!response.isSuccessful && response.code !in 200..399) return -1L
+                response.body?.close()
+                val elapsedNs = System.nanoTime() - start
+                if (elapsedNs <= 0L) return -1L
+                (size.toLong() * 1_000_000_000L) / elapsedNs
+            }
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "measureUploadSpeed failed: ${e.message}")
+            -1L
+        }
+    }
+
 }

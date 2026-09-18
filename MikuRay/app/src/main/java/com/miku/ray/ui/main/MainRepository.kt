@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import com.miku.ray.AngApplication
 import com.miku.ray.AppConfig
 import com.miku.ray.dto.CountryCodeTestMessage
+import com.miku.ray.dto.SpeedTestMessage
 import com.miku.ray.dto.RealPingProgress
 import com.miku.ray.dto.RealPingResult
 import com.miku.ray.dto.RealPingSummary
@@ -98,6 +99,16 @@ class MainRepository(
 
                 AppConfig.MSG_COUNTRY_CODE_FINISH -> MainServiceEvent.CountryCodeFinish(requestId)
 
+                AppConfig.MSG_SPEED_TEST_SUCCESS -> safeIntent.getStringExtra("content")
+                    ?.let { MainServiceEvent.SpeedTestSuccess(it, requestId) }
+
+                AppConfig.MSG_SPEED_TEST_NOTIFY -> MainServiceEvent.SpeedTestNotify(
+                    info = safeIntent.getStringExtra("content")?.parseJson(TestProgressInfo::class.java),
+                    requestId = requestId,
+                )
+
+                AppConfig.MSG_SPEED_TEST_FINISH -> MainServiceEvent.SpeedTestFinish(requestId)
+
                 AppConfig.MSG_TRAFFIC_UPDATED -> safeIntent.getStringExtra("content")
                     ?.let(MainServiceEvent::TrafficUpdated)
 
@@ -157,6 +168,10 @@ class MainRepository(
 
     override fun sendMsg2CountryCodeTestService(msg: CountryCodeTestMessage) {
         MessageUtil.sendMsg2CountryCodeTestService(app, msg)
+    }
+
+    override fun sendMsg2SpeedTestService(msg: SpeedTestMessage) {
+        MessageUtil.sendMsg2SpeedTestService(app, msg)
     }
 
     override fun testCurrentServerRealPing(requestId: String) {

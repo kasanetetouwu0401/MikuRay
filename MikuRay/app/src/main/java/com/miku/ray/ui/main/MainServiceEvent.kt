@@ -25,6 +25,10 @@ sealed class MainServiceEvent {
     data class CountryCodeNotify(val info: TestProgressInfo?, val requestId: String = "") : MainServiceEvent()
     data class CountryCodeFinish(val requestId: String = "") : MainServiceEvent()
 
+    data class SpeedTestSuccess(val guid: String, val requestId: String = "") : MainServiceEvent()
+    data class SpeedTestNotify(val info: TestProgressInfo?, val requestId: String = "") : MainServiceEvent()
+    data class SpeedTestFinish(val requestId: String = "") : MainServiceEvent()
+
     data class TrafficUpdated(val guid: String) : MainServiceEvent()
     data class TrafficSpeedUpdated(val speedText: String) : MainServiceEvent()
 

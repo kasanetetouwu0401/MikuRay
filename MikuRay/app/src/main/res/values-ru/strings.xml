@@ -428,6 +428,10 @@
     <string name="toast_fragment_not_available">Не удалось найти текущий вид</string>
     <string name="title_clear_test_results">Очистить результаты тестов</string>
     <string name="title_country_code_all_server">Проверить коды стран всех серверов</string>
+    <string name="title_speed_test_all_server">Тест скорости всех конфигураций</string>
+    <string name="title_clear_speed_results">Очистить результаты теста скорости</string>
+    <string name="confirm_clear_speed_results_group">Очистить результаты теста скорости для этой группы?</string>
+    <string name="confirm_clear_speed_results_all">Очистить результаты теста скорости для всех групп?</string>
     <string name="title_clear_country_codes">Очистить коды стран</string>
     <string name="country_code_unknown">—</string>
 

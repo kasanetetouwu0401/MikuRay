@@ -23,7 +23,7 @@ class TestProgressDialogController(
     private val mode: Mode,
     private val onCancel: () -> Unit
 ) {
-    enum class Mode { URL_TEST, COUNTRY_CODE }
+    enum class Mode { URL_TEST, COUNTRY_CODE, SPEED_TEST }
 
     private var dialog: AlertDialog? = null
     private var binding: DialogUrlTestProgressBinding? = null
@@ -138,6 +138,7 @@ class TestProgressDialogController(
     private fun defaultTitleResId() = when (mode) {
         Mode.URL_TEST -> R.string.title_real_ping_all_server
         Mode.COUNTRY_CODE -> R.string.title_country_code_all_server
+        Mode.SPEED_TEST -> R.string.title_speed_test_all_server
     }
 
     private data class RowContent(val text: String, @androidx.annotation.ColorRes val colorRes: Int)
@@ -164,6 +165,16 @@ class TestProgressDialogController(
                 .joinToString(" ")
                 .ifBlank { context.getString(R.string.connection_test_fail) }
                 RowContent(text, R.color.colorPing)
+            }
+        }
+        Mode.SPEED_TEST -> {
+            val aff = MmkvManager.decodeServerAffiliationInfo(info.guid)
+            val speed = aff?.getSpeedString().orEmpty()
+            if (speed.isEmpty() || speed == "fail") {
+                context.vibrateOnError()
+                RowContent(context.getString(R.string.connection_test_fail), R.color.colorPingRed)
+            } else {
+                RowContent(speed, R.color.colorPing)
             }
         }
     }

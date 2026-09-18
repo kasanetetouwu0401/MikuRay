@@ -12,6 +12,10 @@ object AppConfig {
     // tested" (null). Deliberately not a valid 2-letter ISO code so it never collides with a
     // real result.
     const val COUNTRY_CODE_TEST_FAILED = "FAILED"
+    const val SPEED_TEST_DOWNLOAD_URL = "https://speed.cloudflare.com/__down?bytes=10000000"
+    const val SPEED_TEST_UPLOAD_URL = "https://speed.cloudflare.com/__up"
+    const val SPEED_TEST_DOWNLOAD_BYTES = 10_000_000L
+    const val SPEED_TEST_UPLOAD_BYTES = 2_000_000L
 
     const val WEBDAV_BACKUP_DIR = "backups"
     const val WEBDAV_BACKUP_FILE_NAME = "backup_ng.mikubackup"
@@ -438,6 +442,11 @@ object AppConfig {
     const val MSG_COUNTRY_CODE_SUCCESS = 92
     const val MSG_COUNTRY_CODE_NOTIFY = 93
     const val MSG_COUNTRY_CODE_FINISH = 94
+    const val MSG_SPEED_TEST_START = 95
+    const val MSG_SPEED_TEST_CANCEL = 96
+    const val MSG_SPEED_TEST_SUCCESS = 97
+    const val MSG_SPEED_TEST_NOTIFY = 98
+    const val MSG_SPEED_TEST_FINISH = 99
 
     const val MSG_SUB_UPDATE_START = 8
     const val MSG_SUB_UPDATE_CANCEL = 81
