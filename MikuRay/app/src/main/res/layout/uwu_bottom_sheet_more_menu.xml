@@ -965,6 +965,7 @@
                                         </FrameLayout>
                                     </LinearLayout>
                                 </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
 
                             <com.google.android.material.card.MaterialCardView
                                 android:id="@+id/speed_test_all"
@@ -1073,8 +1074,6 @@
                                         </FrameLayout>
                                     </LinearLayout>
                                 </LinearLayout>
-                            </com.google.android.material.card.MaterialCardView>
-
                             </com.google.android.material.card.MaterialCardView>
 
                         </LinearLayout>

@@ -82,15 +82,17 @@ class MoreMenuBottomSheet : BaseBottomSheetFragment() {
         if (isScrollButtonsHidden && hasSelectedServer) View.VISIBLE else View.GONE
 
         val isQuickActionsEnabled = MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_QUICK_ACTIONS, false)
+        // Hide items that already appear on the quick-actions bar when that pref is on.
+        // Speed test is More-menu only (no quick-action control yet), so keep it visible.
         listOf(
             R.id.sub_update,
             R.id.country_code_all,
             R.id.tcping_all,
             R.id.real_ping_all,
-            R.id.speed_test_all
         ).forEach { id ->
             view.findViewById<View>(id)?.visibility = if (isQuickActionsEnabled) View.GONE else View.VISIBLE
         }
+        view.findViewById<View>(R.id.speed_test_all)?.visibility = View.VISIBLE
 
         view.findViewById<View>(R.id.card_order_origin)?.setOnClickListener {
             view.findViewById<View>(R.id.action_order_origin)?.performClick()

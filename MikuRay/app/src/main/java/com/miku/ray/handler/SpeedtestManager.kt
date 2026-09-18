@@ -128,36 +128,51 @@ object SpeedtestManager {
     }
 
 
+
     /**
      * Measure download throughput (bytes/sec) via local HTTP proxy on [httpPort].
-     * Returns -1 on failure.
+     * Tries primary URL then fallbacks. Returns -1 on failure.
      */
     fun measureDownloadSpeed(
         httpPort: Int,
         url: String = AppConfig.SPEED_TEST_DOWNLOAD_URL,
-        timeoutMs: Int = 20000,
+        timeoutMs: Int = 60000,
     ): Long {
         if (httpPort <= 0) return -1L
+        val urls = listOf(
+            url,
+            // Smaller Cloudflare payload — faster for weak nodes
+            "https://speed.cloudflare.com/__down?bytes=2000000",
+            // Cachefly 1MB — common alternate endpoint
+            "https://cachefly.cachefly.net/1mb.test",
+        ).distinct()
+        for (candidate in urls) {
+            val result = measureDownloadOnce(httpPort, candidate, timeoutMs)
+            if (result > 0L) return result
+        }
+        return -1L
+    }
+
+    private fun measureDownloadOnce(httpPort: Int, url: String, timeoutMs: Int): Long {
         return try {
-            val client = OkHttpClient.Builder()
-                .proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(AppConfig.LOOPBACK, httpPort)))
-                .connectTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
-                .readTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
-                .writeTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
-                .followRedirects(true)
-                .build()
+            val client = buildProxyClient(httpPort, timeoutMs)
             val request = Request.Builder()
                 .url(url)
                 .get()
+                .header("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36")
+                .header("Accept", "*/*")
                 .header("Connection", "close")
                 .build()
             val start = System.nanoTime()
             client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) return -1L
+                if (!response.isSuccessful) {
+                    LogUtil.w(AppConfig.TAG, "measureDownloadOnce HTTP ${response.code} for $url")
+                    return -1L
+                }
                 val body = response.body ?: return -1L
                 var total = 0L
                 body.byteStream().use { input ->
-                    val buf = ByteArray(8192)
+                    val buf = ByteArray(16 * 1024)
                     while (true) {
                         val n = input.read(buf)
                         if (n < 0) break
@@ -165,11 +180,15 @@ object SpeedtestManager {
                     }
                 }
                 val elapsedNs = System.nanoTime() - start
-                if (elapsedNs <= 0L || total <= 0L) return -1L
+                // Need at least ~50KB and 100ms so numbers aren't noise
+                if (elapsedNs < 100_000_000L || total < 50 * 1024L) {
+                    LogUtil.w(AppConfig.TAG, "measureDownloadOnce too little data: $total bytes in ${elapsedNs / 1_000_000}ms")
+                    return -1L
+                }
                 (total * 1_000_000_000L) / elapsedNs
             }
         } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "measureDownloadSpeed failed: ${e.message}")
+            LogUtil.e(AppConfig.TAG, "measureDownloadOnce failed ($url): ${e.message}")
             -1L
         }
     }
@@ -182,38 +201,68 @@ object SpeedtestManager {
         httpPort: Int,
         url: String = AppConfig.SPEED_TEST_UPLOAD_URL,
         uploadBytes: Long = AppConfig.SPEED_TEST_UPLOAD_BYTES,
-        timeoutMs: Int = 20000,
+        timeoutMs: Int = 60000,
     ): Long {
         if (httpPort <= 0) return -1L
+        val urls = listOf(
+            url,
+            "https://speed.cloudflare.com/__up",
+            "http://httpbin.org/post",
+        ).distinct()
+        for (candidate in urls) {
+            val result = measureUploadOnce(httpPort, candidate, uploadBytes, timeoutMs)
+            if (result > 0L) return result
+        }
+        return -1L
+    }
+
+    private fun measureUploadOnce(
+        httpPort: Int,
+        url: String,
+        uploadBytes: Long,
+        timeoutMs: Int,
+    ): Long {
         return try {
-            val size = uploadBytes.coerceAtLeast(64 * 1024L).toInt().coerceAtMost(8 * 1024 * 1024)
-            val payload = ByteArray(size) { (it % 256).toByte() }
-            val client = OkHttpClient.Builder()
-                .proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(AppConfig.LOOPBACK, httpPort)))
-                .connectTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
-                .readTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
-                .writeTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
-                .followRedirects(true)
-                .build()
+            // Keep payload modest so weak links still finish within timeout
+            val size = uploadBytes.coerceIn(256 * 1024L, 10 * 1024 * 1024L).toInt()
+            val payload = ByteArray(size) { (it % 251).toByte() }
+            val client = buildProxyClient(httpPort, timeoutMs)
             val body = payload.toRequestBody("application/octet-stream".toMediaType())
             val request = Request.Builder()
                 .url(url)
                 .post(body)
+                .header("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36")
                 .header("Connection", "close")
                 .build()
             val start = System.nanoTime()
             client.newCall(request).execute().use { response ->
-                // Cloudflare __up returns 200 even if body discarded
-                if (!response.isSuccessful && response.code !in 200..399) return -1L
+                // Accept 2xx/3xx; some endpoints return 405/404 for POST — treat as fail
+                if (response.code !in 200..399) {
+                    LogUtil.w(AppConfig.TAG, "measureUploadOnce HTTP ${response.code} for $url")
+                    return -1L
+                }
                 response.body?.close()
                 val elapsedNs = System.nanoTime() - start
-                if (elapsedNs <= 0L) return -1L
+                if (elapsedNs < 50_000_000L) return -1L
                 (size.toLong() * 1_000_000_000L) / elapsedNs
             }
         } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "measureUploadSpeed failed: ${e.message}")
+            LogUtil.e(AppConfig.TAG, "measureUploadOnce failed ($url): ${e.message}")
             -1L
         }
+    }
+
+    private fun buildProxyClient(httpPort: Int, timeoutMs: Int): OkHttpClient {
+        return OkHttpClient.Builder()
+            .proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(AppConfig.LOOPBACK, httpPort)))
+            .connectTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
+            .readTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
+            .writeTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
+            .callTimeout((timeoutMs + 5000).toLong(), TimeUnit.MILLISECONDS)
+            .retryOnConnectionFailure(true)
+            .followRedirects(true)
+            .followSslRedirects(true)
+            .build()
     }
 
 }

@@ -15,7 +15,7 @@ object AppConfig {
     const val SPEED_TEST_DOWNLOAD_URL = "https://speed.cloudflare.com/__down?bytes=10000000"
     const val SPEED_TEST_UPLOAD_URL = "https://speed.cloudflare.com/__up"
     const val SPEED_TEST_DOWNLOAD_BYTES = 10_000_000L
-    const val SPEED_TEST_UPLOAD_BYTES = 2_000_000L
+    const val SPEED_TEST_UPLOAD_BYTES = 10_000_000L
 
     const val WEBDAV_BACKUP_DIR = "backups"
     const val WEBDAV_BACKUP_FILE_NAME = "backup_ng.mikubackup"
