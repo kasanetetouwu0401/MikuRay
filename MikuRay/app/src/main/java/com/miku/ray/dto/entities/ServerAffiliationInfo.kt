@@ -19,18 +19,9 @@ data class ServerAffiliationInfo(
 
     fun getSpeedString(): String {
         if (downloadSpeedBps == 0L && uploadSpeedBps == 0L) return ""
-        // Both failed
         if (downloadSpeedBps < 0L && uploadSpeedBps < 0L) return "fail"
-        val down = when {
-            downloadSpeedBps > 0L -> formatSpeed(downloadSpeedBps)
-            downloadSpeedBps < 0L -> "fail"
-            else -> "-"
-        }
-        val up = when {
-            uploadSpeedBps > 0L -> formatSpeed(uploadSpeedBps)
-            uploadSpeedBps < 0L -> "fail"
-            else -> "-"
-        }
+        val down = if (downloadSpeedBps > 0L) formatSpeed(downloadSpeedBps) else "-"
+        val up = if (uploadSpeedBps > 0L) formatSpeed(uploadSpeedBps) else "-"
         // Match traffic chip style: ↑ upload  ↓ download
         return "↑ $up  ↓ $down"
     }

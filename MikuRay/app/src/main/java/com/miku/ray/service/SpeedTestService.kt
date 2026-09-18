@@ -197,10 +197,7 @@ class SpeedTestService : Service() {
      */
     private fun measureThroughProfile(guid: String): Pair<Long, Long> {
         val result = CoreConfigManager.getV2rayConfig4Speedtest(this, guid)
-        if (!result.status || result.content.isBlank()) {
-            LogUtil.w(AppConfig.TAG, "Speed test: no config for $guid (${result.errorMessage})")
-            return -1L to -1L
-        }
+        if (!result.status || result.content.isBlank()) return -1L to -1L
 
         val config = JsonUtil.parseString(result.content) ?: return -1L to -1L
         val inbounds = JsonArray()
@@ -217,26 +214,13 @@ class SpeedTestService : Service() {
         val controller = CoreNativeManager.newCoreController(SpeedCallback())
         return try {
             controller.startLoop(JsonUtil.toJson(config), 0)
-            if (!waitForProxy(httpPort)) {
-                LogUtil.w(AppConfig.TAG, "Speed test: proxy not ready on $httpPort for $guid")
-                return -1L to -1L
-            }
-            // Let outbound handshake settle (same idea as country-code probe)
-            Thread.sleep(200)
+            if (!waitForProxy(httpPort)) return -1L to -1L
 
             if (cancelled.get()) return -1L to -1L
-            var downloadBps = SpeedtestManager.measureDownloadSpeed(httpPort)
-            if (downloadBps <= 0L && !cancelled.get()) {
-                Thread.sleep(150)
-                downloadBps = SpeedtestManager.measureDownloadSpeed(httpPort)
-            }
+            val downloadBps = SpeedtestManager.measureDownloadSpeed(httpPort)
 
             if (cancelled.get()) return downloadBps to -1L
-            var uploadBps = SpeedtestManager.measureUploadSpeed(httpPort)
-            if (uploadBps <= 0L && !cancelled.get()) {
-                Thread.sleep(150)
-                uploadBps = SpeedtestManager.measureUploadSpeed(httpPort)
-            }
+            val uploadBps = SpeedtestManager.measureUploadSpeed(httpPort)
 
             downloadBps to uploadBps
         } finally {
@@ -244,16 +228,16 @@ class SpeedTestService : Service() {
         }
     }
 
-    private fun waitForProxy(port: Int, timeoutMs: Int = 4000): Boolean {
+    private fun waitForProxy(port: Int, timeoutMs: Int = 2500): Boolean {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (!cancelled.get() && System.currentTimeMillis() < deadline) {
             try {
                 Socket().use { socket ->
-                    socket.connect(InetSocketAddress(AppConfig.LOOPBACK, port), 200)
+                    socket.connect(InetSocketAddress(AppConfig.LOOPBACK, port), 150)
                 }
                 return true
             } catch (_: Exception) {
-                Thread.sleep(100)
+                Thread.sleep(80)
             }
         }
         return false
